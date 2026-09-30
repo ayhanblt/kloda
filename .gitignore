@@ -1,0 +1,12 @@
+# Playwright CLI output (may contain credentials)
+.playwright-cli/
+
+# Node.js dependencies and build output
+node_modules/
+**/dist/
+
+#stitch-design
+**/*stitch_private_photo_cloud
+
+# .DS_STORE
+.DS_STORE

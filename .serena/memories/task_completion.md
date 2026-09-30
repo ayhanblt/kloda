@@ -1,0 +1,3 @@
+- Run focused behavior smoke first, then `npm run lint`, `npm test`, `npm run build` from root.
+- Significant UI changes need real app-surface verification; mobile background work needs physical-device verification.
+- Review implementation separately against AGENTS protocol, architecture, FSD, and max-lines constraints.

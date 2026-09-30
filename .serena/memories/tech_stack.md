@@ -1,0 +1,3 @@
+- TypeScript workspace (`apps/*`); Node 24 CI; npm lockfile.
+- Mobile: Expo development build + React Native; desktop: Electron + Vite + React; API: NestJS.
+- Client code uses FSD; API uses Clean Architecture. Read `mem:conventions` for dependency direction.

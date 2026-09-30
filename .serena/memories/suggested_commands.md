@@ -1,0 +1,3 @@
+- Root quality gate: `npm run lint && npm test && npm run build`.
+- Mobile dev: `npm run dev:mobile`; desktop dev: `npm run dev:desktop`.
+- Workspace scripts are defined in each `apps/*/package.json`.

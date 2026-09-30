@@ -1,0 +1,3 @@
+- Monorepo: `apps/mobile` Expo RN, `apps/desktop` Electron renderer/main, `apps/api` NestJS.
+- Product invariant: user media goes directly to user storage; no developer data server. Backend role remains undecided.
+- Read `mem:conventions` for architecture rules and `mem:tech_stack` for scripts/dependencies.

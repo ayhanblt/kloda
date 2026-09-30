@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "name": "Kloda: Secure Photos & Sync",
+    "slug": "kloda",
+    "version": "0.0.0",
+    "orientation": "default",
+    "userInterfaceStyle": "automatic",
+    "plugins": [
+      "expo-dev-client"
+    ],
+    "android": {
+      "package": "com.kloda.app"
+    },
+    "ios": {
+      "bundleIdentifier": "com.kloda.app"
+    }
+  }
+}

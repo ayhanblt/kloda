@@ -1,0 +1,6 @@
+- User-facing name: Kloda: Secure Photos & Sync; never use Private Photo Cloud except design-reference paths.
+- UI follows `stitch_private_photo_cloud/`; do not modify reference files or invent design system.
+- Client FSD direction: app→pages/widgets/features/entities/shared; dependencies only inward.
+- API direction: interface→application→domain; infrastructure implements domain ports; one use-case per file.
+- ESLint max-lines 300 is enforced. Never commit hostnames, ports, or credentials.
+- Migration detection, media E2EE/key management, relay tech, premium scope and backend role require explicit decisions.

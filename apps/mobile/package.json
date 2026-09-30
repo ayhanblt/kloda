@@ -1,0 +1,31 @@
+{
+  "name": "@kloda/mobile",
+  "private": true,
+  "version": "0.0.0",
+  "main": "expo/AppEntry",
+  "scripts": {
+    "dev": "expo start --dev-client",
+    "native:generate": "expo prebuild",
+    "build": "expo export --platform ios && expo export --platform android",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" App.tsx",
+    "test": "jest --runInBand --no-watchman"
+  },
+  "dependencies": {
+    "expo": "~57.0.26",
+    "expo-dev-client": "~57.0.0",
+    "react": "19.3.0",
+    "react-native": "0.86.3"
+  },
+  "devDependencies": {
+    "@testing-library/react-native": "^14.0.1",
+    "@types/jest": "^29.5.14",
+    "@types/react": "~19.2.3",
+    "jest": "^29.7.0",
+    "jest-expo": "~57.0.0",
+    "react-test-renderer": "19.3.0",
+    "typescript": "~5.9.3"
+  },
+  "jest": {
+    "preset": "jest-expo"
+  }
+}
