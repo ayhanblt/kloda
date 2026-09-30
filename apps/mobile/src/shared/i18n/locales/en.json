@@ -1,0 +1,15 @@
+{
+  "onboarding": {
+    "step": "Step {{current}} of {{total}}",
+    "title": "Select folders to back up",
+    "description": "Choose your sources, then set a local automatic sync time.",
+    "chooseFolder": "Choose folder",
+    "folderSelected": "Folder selected",
+    "everyHours": "Every {{hours}} hours",
+    "localStartTime": "Local start time",
+    "saveSchedule": "Save automatic sync",
+    "invalidTime": "Use HH:mm for the local start time.",
+    "runtimeUnavailable": "Kloda native runtime is unavailable. Rebuild the development app.",
+    "scheduleSaved": "Automatic sync schedule saved."
+  }
+}

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
+import '../shared/i18n';
 import { getDesktopBridge, type BackupDraft, type SyncProgress } from '../shared/api/desktop';
 
 const emptyDraft: BackupDraft = {
@@ -11,6 +13,7 @@ const emptyDraft: BackupDraft = {
 };
 
 export function App() {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState(emptyDraft);
   const [step, setStep] = useState<'sources' | 'storage' | 'activity'>('sources');
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +24,7 @@ export function App() {
     void getDesktopBridge().getDraft().then((nextDraft) => {
       setDraft(nextDraft);
       if (nextDraft.storage) setStorage((current) => ({ ...current, ...nextDraft.storage }));
-    }).catch((reason: unknown) => setError(reason instanceof Error ? reason.message : 'Unable to load setup.'));
+    }).catch((reason: unknown) => setError(reason instanceof Error ? reason.message : t('onboarding.loadError')));
   }, []);
 
   const selectSources = async () => {
@@ -29,16 +32,16 @@ export function App() {
       const sources = await getDesktopBridge().pickSources();
       setDraft((current) => ({ ...current, sources }));
       setError(null);
-    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Unable to select folders.'); }
+    } catch (reason) { setError(reason instanceof Error ? reason.message : t('onboarding.selectError')); }
   };
 
   const continueToStorage = async () => {
-    if (draft.sources.length === 0) return setError('Select at least one folder.');
+    if (draft.sources.length === 0) return setError(t('onboarding.sourceRequired'));
     try {
       await getDesktopBridge().saveSchedule(draft.intervalHours, draft.localTime);
       setStep('storage');
       setError(null);
-    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Unable to save schedule.'); }
+    } catch (reason) { setError(reason instanceof Error ? reason.message : t('onboarding.scheduleError')); }
   };
 
   const testStorage = async () => {
@@ -47,7 +50,7 @@ export function App() {
       await getDesktopBridge().testStorage();
       setDraft((current) => ({ ...current, storageTested: true }));
       setError(null);
-    } catch (reason) { setError(reason instanceof Error ? reason.message : 'WebDAV test failed.'); }
+    } catch (reason) { setError(reason instanceof Error ? reason.message : t('onboarding.testError')); }
   };
 
   const startSync = async () => {
@@ -55,42 +58,43 @@ export function App() {
       setProgress(await getDesktopBridge().startSync());
       setStep('activity');
       setError(null);
-    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Backup could not start.'); }
+    } catch (reason) { setError(reason instanceof Error ? reason.message : t('onboarding.startError')); }
   };
 
   if (step === 'activity') return <BackupActivity onSync={startSync} progress={progress} />;
 
   return (
-    <main className="onboarding">
-      <p className="step">Step {step === 'sources' ? '1' : '2'} of 2</p>
+    <main className="min-h-screen bg-surface p-6 text-ink">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted">{t('onboarding.step', { current: step === 'sources' ? 1 : 2, total: 2 })}</p>
       {step === 'sources' ? (
         <>
-          <h1>Select folders to back up</h1>
-          <p>Kloda transfers directly to your personal storage.</p>
-          <button onClick={() => void selectSources()} type="button">Choose folders</button>
-          <ul>{draft.sources.map((source) => <li key={source.id}>{source.displayName}</li>)}</ul>
-          <fieldset><legend>Auto-Sync Frequency</legend>
-            {[12, 24].map((hours) => <label key={hours}><input checked={draft.intervalHours === hours} name="interval" onChange={() => setDraft((current) => ({ ...current, intervalHours: hours as 12 | 24 }))} type="radio" />Every {hours} hours</label>)}
+          <h1 className="mt-4 text-3xl font-bold">{t('onboarding.sourceTitle')}</h1>
+          <p className="mt-2 text-muted">{t('onboarding.sourceDescription')}</p>
+          <button className="mt-6 rounded-xl bg-ink px-4 py-3 font-semibold text-white" onClick={() => void selectSources()} type="button">{t('onboarding.chooseFolders')}</button>
+          <ul className="mt-4 list-inside list-disc">{draft.sources.map((source) => <li key={source.id}>{source.displayName}</li>)}</ul>
+          <fieldset className="mt-6 grid gap-2"><legend className="font-semibold">{t('onboarding.frequency')}</legend>
+            {[12, 24].map((hours) => <label key={hours}><input checked={draft.intervalHours === hours} name="interval" onChange={() => setDraft((current) => ({ ...current, intervalHours: hours as 12 | 24 }))} type="radio" /> {t('onboarding.everyHours', { hours })}</label>)}
           </fieldset>
-          <label>Local start time <input aria-label="Local start time" onChange={(event) => setDraft((current) => ({ ...current, localTime: event.target.value }))} type="time" value={draft.localTime} /></label>
-          <button onClick={() => void continueToStorage()} type="button">Continue to Storage Setup</button>
+          <label className="mt-4 grid gap-1">{t('onboarding.localStartTime')} <input aria-label={t('onboarding.localStartTime')} className="rounded-lg border border-border bg-white p-3" onChange={(event) => setDraft((current) => ({ ...current, localTime: event.target.value }))} type="time" value={draft.localTime} /></label>
+          <button className="mt-6 rounded-xl bg-ink px-4 py-3 font-semibold text-white" onClick={() => void continueToStorage()} type="button">{t('onboarding.continue')}</button>
         </>
       ) : (
         <>
-          <h1>Connect your personal storage</h1>
-          <p>WebDAV access and write permission are verified before backup starts.</p>
-          {(['endpoint', 'targetPath', 'username', 'password'] as const).map((field) => <label key={field}>{field}<input aria-label={field} onChange={(event) => setStorage((current) => ({ ...current, [field]: event.target.value }))} type={field === 'password' ? 'password' : 'text'} value={storage[field]} /></label>)}
-          <button onClick={() => void testStorage()} type="button">Test WebDAV connection</button>
-          {draft.storageTested && <p role="status">WebDAV access and writing verified.</p>}
-          <button disabled={!draft.storageTested} onClick={() => void startSync()} type="button">Start Backup</button>
-          <button onClick={() => setStep('sources')} type="button">Back</button>
+          <h1 className="mt-4 text-3xl font-bold">{t('onboarding.storageTitle')}</h1>
+          <p className="mt-2 text-muted">{t('onboarding.storageDescription')}</p>
+          <div className="mt-6 grid gap-3">{(['endpoint', 'targetPath', 'username', 'password'] as const).map((field) => <label className="grid gap-1 capitalize" key={field}>{t(`onboarding.${field}`)}<input aria-label={t(`onboarding.${field}`)} className="rounded-lg border border-border bg-white p-3" onChange={(event) => setStorage((current) => ({ ...current, [field]: event.target.value }))} type={field === 'password' ? 'password' : 'text'} value={storage[field]} /></label>)}</div>
+          <button className="mt-6 rounded-xl border border-border bg-white px-4 py-3 font-semibold" onClick={() => void testStorage()} type="button">{t('onboarding.testConnection')}</button>
+          {draft.storageTested && <p className="mt-3 text-emerald-700" role="status">{t('onboarding.verified')}</p>}
+          <button className="mt-3 rounded-xl bg-ink px-4 py-3 font-semibold text-white disabled:opacity-40" disabled={!draft.storageTested} onClick={() => void startSync()} type="button">{t('onboarding.startBackup')}</button>
+          <button className="mt-3 text-muted underline" onClick={() => setStep('sources')} type="button">{t('onboarding.back')}</button>
         </>
       )}
-      {error && <p role="alert">{error}</p>}
+      {error && <p className="mt-4 text-red-600" role="alert">{error}</p>}
     </main>
   );
 }
 
 function BackupActivity({ onSync, progress }: { onSync: () => Promise<void>; progress: SyncProgress | null }) {
-  return <main className="onboarding"><h1>Backup Activity</h1><p>{progress ? `${progress.completedFiles} of ${progress.totalFiles} files synced` : 'Ready to sync.'}</p><button onClick={() => void onSync()} type="button">Sync Now</button></main>;
+  const { t } = useTranslation();
+  return <main className="min-h-screen bg-surface p-6 text-ink"><h1 className="text-3xl font-bold">{t('onboarding.activityTitle')}</h1><p className="mt-2 text-muted">{progress ? t('onboarding.filesSynced', { completed: progress.completedFiles, total: progress.totalFiles }) : t('onboarding.ready')}</p><button className="mt-6 rounded-xl bg-ink px-4 py-3 font-semibold text-white" onClick={() => void onSync()} type="button">{t('onboarding.syncNow')}</button></main>;
 }

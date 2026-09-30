@@ -1,0 +1,32 @@
+{
+    "onboarding": {
+        "step": "Adım {{current}} / {{total}}",
+        "sourceTitle": "Yedeklenecek klasörleri seçin",
+        "sourceDescription": "Kloda doğrudan kişisel depolamanıza aktarır.",
+        "chooseFolders": "Klasörleri seç",
+        "frequency": "Otomatik senkronizasyon sıklığı",
+        "everyHours": "Her {{hours}} saatte",
+        "localStartTime": "Yerel başlangıç saati",
+        "continue": "Depolama kurulumuna devam et",
+        "storageTitle": "Kişisel depolamanıza bağlanın",
+        "storageDescription": "Yedekleme başlamadan önce WebDAV erişimi ve yazma izni doğrulanır.",
+        "endpoint": "Uç nokta",
+        "targetPath": "Hedef yol",
+        "username": "Kullanıcı adı",
+        "password": "Parola",
+        "testConnection": "WebDAV bağlantısını test et",
+        "verified": "WebDAV erişimi ve yazma doğrulandı.",
+        "startBackup": "Yedeklemeyi başlat",
+        "back": "Geri",
+        "activityTitle": "Yedekleme etkinliği",
+        "ready": "Senkronizasyona hazır.",
+        "filesSynced": "{{completed}} / {{total}} dosya senkronize edildi",
+        "syncNow": "Şimdi senkronize et",
+        "loadError": "Kurulum yüklenemedi.",
+        "selectError": "Klasörler seçilemedi.",
+        "sourceRequired": "En az bir klasör seçin.",
+        "scheduleError": "Program kaydedilemedi.",
+        "testError": "WebDAV testi başarısız.",
+        "startError": "Yedekleme başlatılamadı."
+    }
+}

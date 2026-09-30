@@ -1,17 +1,14 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface: #fff8f5;
+  --color-ink: #1c1917;
+  --color-muted: #57534e;
+  --color-border: #e7e5e4;
+}
+
 html,
 body,
 #root {
-  height: 100%;
-  margin: 0;
-}
-
-body {
-  font-family: system-ui, sans-serif;
-}
-
-main {
-  align-items: center;
-  display: flex;
-  height: 100%;
-  justify-content: center;
+  min-height: 100%;
 }

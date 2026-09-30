@@ -7,6 +7,7 @@ export interface NativeSchedule {
 
 declare class KlodaSyncRuntimeModule extends NativeModule<{}> {
   loadSchedule(): Promise<NativeSchedule>;
+  pickDirectory(request: string): Promise<string | null>;
   saveSchedule(intervalHours: 12 | 24, localTime: string): Promise<void>;
 }
 

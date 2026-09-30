@@ -8,11 +8,18 @@
     "plugins": [
       "expo-dev-client"
     ],
-    "android": {
-      "package": "com.kloda.app"
-    },
     "ios": {
-      "bundleIdentifier": "com.kloda.app"
+      "bundleIdentifier": "com.kloda.app",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Kloda needs access to selected photos and albums so it can back them up to your personal storage."
+      }
+    },
+    "android": {
+      "package": "com.kloda.app",
+      "permissions": [
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO"
+      ]
     }
   }
 }

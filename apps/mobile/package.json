@@ -13,8 +13,12 @@
   "dependencies": {
     "expo": "~57.0.26",
     "expo-dev-client": "~57.0.0",
+    "i18next": "^26.4.2",
+    "nativewind": "^4.2.0",
     "react": "19.3.0",
-    "react-native": "0.86.3"
+    "react-i18next": "^17.0.15",
+    "react-native": "0.86.3",
+    "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
     "@testing-library/react-native": "^14.0.1",

@@ -1,0 +1,15 @@
+{
+  "onboarding": {
+    "step": "Adım {{current}} / {{total}}",
+    "title": "Yedeklenecek klasörleri seçin",
+    "description": "Kaynaklarınızı seçin, ardından yerel otomatik senkronizasyon saatini belirleyin.",
+    "chooseFolder": "Klasör seç",
+    "folderSelected": "Klasör seçildi",
+    "everyHours": "Her {{hours}} saatte",
+    "localStartTime": "Yerel başlangıç saati",
+    "saveSchedule": "Otomatik senkronizasyonu kaydet",
+    "invalidTime": "Yerel başlangıç saati için SS:dd kullanın.",
+    "runtimeUnavailable": "Kloda yerel çalışma zamanı kullanılamıyor. Geliştirme uygulamasını yeniden derleyin.",
+    "scheduleSaved": "Otomatik senkronizasyon programı kaydedildi."
+  }
+}

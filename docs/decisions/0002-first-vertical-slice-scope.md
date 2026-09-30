@@ -13,6 +13,8 @@
 - Program cihazın yerel saatini korur.
 - Bağlantı testi WebDAV authentication, dizin erişimi ve yazma yeteneğini doğrular. WAN/public-IP karşılaştırması bu dilimin kabul kriteri değildir; başarılı test CGNAT veya dış ağ erişimi garantisi değildir.
 - Uygulama kimlikleri Android ve iOS için `com.kloda.app` olarak seçildi.
+- Mobile UI NativeWind v4 ile, Electron renderer Tailwind CSS ile stillenecek. JSX/TSX içinde `StyleSheet.create`, inline `style` veya style object kullanılmayacak; ortak token, reset ve az sayıdaki global kural yalnız global stylesheet/config içinde tanımlanacak. Bileşenler yalnız utility class'ları kullanacak.
+- Mobile ve desktop için `i18next` + `react-i18next` i18n modülü kullanılır. Desteklenen diller Türkçe (`tr`), İngilizce (`en`) ve Almanca (`de`)dır. Kullanıcıya gösterilen her JSX/TSX metni, hata metni, label, placeholder, aria metni ve button başlığı `t(id)` ile çözülür; statik metin tanımlı locale JSON dosyaları dışında bulunmaz.
 
 ## Sınır
 

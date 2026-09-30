@@ -1,0 +1,15 @@
+{
+  "onboarding": {
+    "step": "Schritt {{current}} von {{total}}",
+    "title": "Zu sichernde Ordner auswählen",
+    "description": "Wähle deine Quellen und lege dann eine lokale Zeit für die automatische Synchronisierung fest.",
+    "chooseFolder": "Ordner auswählen",
+    "folderSelected": "Ordner ausgewählt",
+    "everyHours": "Alle {{hours}} Stunden",
+    "localStartTime": "Lokale Startzeit",
+    "saveSchedule": "Automatische Synchronisierung speichern",
+    "invalidTime": "Verwende HH:mm für die lokale Startzeit.",
+    "runtimeUnavailable": "Die native Kloda-Laufzeit ist nicht verfügbar. Erstelle die Entwicklungs-App neu.",
+    "scheduleSaved": "Zeitplan für die automatische Synchronisierung gespeichert."
+  }
+}

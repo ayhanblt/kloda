@@ -1,11 +1,22 @@
 package com.kloda.sync
 
+import expo.modules.kotlin.activityresult.AppContextActivityResultLauncher
+import expo.modules.kotlin.functions.Coroutine
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
 class KlodaSyncRuntimeModule : Module() {
   override fun definition() = ModuleDefinition {
+    lateinit var directoryPicker: AppContextActivityResultLauncher<DirectoryPickerInput, String?>
+
+    RegisterActivityContracts {
+      directoryPicker = registerForActivityResult(DirectoryPickerContract(this@KlodaSyncRuntimeModule))
+    }
+
     Name("KlodaSyncRuntime")
+    AsyncFunction("pickDirectory") Coroutine { request: String ->
+      directoryPicker.launch(DirectoryPickerInput(request))
+    }
 
     AsyncFunction("loadSchedule") {
       val preferences = appContext.reactContext?.getSharedPreferences("kloda-sync", 0)

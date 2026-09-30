@@ -1,11 +1,56 @@
 import ExpoModulesCore
+import UIKit
+import UniformTypeIdentifiers
+
+private final class DirectoryPickerDelegate: NSObject, UIDocumentPickerDelegate, UIAdaptivePresentationControllerDelegate {
+  private var continuation: CheckedContinuation<String?, Never>?
+
+  func pick(from viewController: UIViewController) async -> String? {
+    await withCheckedContinuation { continuation in
+      self.continuation = continuation
+      let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.folder], asCopy: false)
+      picker.delegate = self
+      picker.presentationController?.delegate = self
+      viewController.present(picker, animated: true)
+    }
+  }
+
+  func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+    guard let url = urls.first, url.startAccessingSecurityScopedResource() else {
+      finish(with: nil)
+      return
+    }
+    defer { url.stopAccessingSecurityScopedResource() }
+    let bookmark = try? url.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
+    finish(with: bookmark?.base64EncodedString())
+  }
+
+  func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) { finish(with: nil) }
+  func presentationControllerDidDismiss(_ presentationController: UIPresentationController) { finish(with: nil) }
+
+  private func finish(with value: String?) {
+    continuation?.resume(returning: value)
+    continuation = nil
+  }
+}
 
 public class KlodaSyncRuntimeModule: Module {
   private let intervalKey = "kloda.sync.intervalHours"
   private let timeKey = "kloda.sync.localTime"
+  private let directoryBookmarkKey = "kloda.sync.directoryBookmark"
+  private let directoryPicker = DirectoryPickerDelegate()
 
   public func definition() -> ModuleDefinition {
     Name("KlodaSyncRuntime")
+
+    AsyncFunction("pickDirectory") { (_: String) async -> String? in
+      guard let viewController = self.appContext?.utilities?.currentViewController() else {
+        throw NSError(domain: "KlodaSyncRuntime", code: 3, userInfo: [NSLocalizedDescriptionKey: "No active view controller."])
+      }
+      let bookmark = await self.directoryPicker.pick(from: viewController)
+      if let bookmark { UserDefaults.standard.set(bookmark, forKey: self.directoryBookmarkKey) }
+      return bookmark
+    }
 
     AsyncFunction("loadSchedule") { () -> [String: Any] in
       let defaults = UserDefaults.standard

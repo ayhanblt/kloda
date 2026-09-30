@@ -8,5 +8,57 @@ node_modules/
 #stitch-design
 **/*stitch_private_photo_cloud
 
+# Environment
+.env
+.env.*
+!.env.example
+
+
+
 # .DS_STORE
 .DS_STORE
+
+# IDE / personal
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# OMP runtime / personal state
+.omp/sessions/
+.omp/history/
+.omp/cache/
+.omp/tmp/
+
+# Serena generated/runtime data
+.serena/cache/
+
+# Expo
+apps/mobile/.expo/
+apps/mobile/.expo-shared/
+
+# Expo generated native projects
+apps/mobile/ios/
+apps/mobile/android/
+
+# Expo builds
+apps/mobile/dist/
+apps/mobile/web-build/
+
+# Electron builds
+apps/desktop/dist/
+apps/desktop/out/
+apps/desktop/release/
+
+# Electron packaging
+apps/desktop/.webpack/
+
+# Native module generated builds
+apps/mobile/modules/**/android/build/
+apps/mobile/modules/**/ios/build/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
