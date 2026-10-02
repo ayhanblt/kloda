@@ -81,3 +81,4 @@ Uzun ve dağınık ("AI slop") dosyalar istenmiyor.
 2. Lint/CI kuralları (max-lines, FSD boundaries) — kod yazmadan önce.
 3. İlk dikey dilim: onboarding akışı → WebDAV bağlantısı → tek klasör sync.
 4. Migrasyon ve relay: bu dilimden sonra, her biri için ayrı tasarım turu (Ayhan onayıyla).
+

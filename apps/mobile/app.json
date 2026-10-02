@@ -6,7 +6,8 @@
     "orientation": "default",
     "userInterfaceStyle": "automatic",
     "plugins": [
-      "expo-dev-client"
+      "expo-dev-client",
+      "expo-secure-store"
     ],
     "ios": {
       "bundleIdentifier": "com.kloda.app",

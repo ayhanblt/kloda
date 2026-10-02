@@ -7,27 +7,73 @@ export class NodeWebDavClient {
 
   async verifyWriteAccess(): Promise<void> {
     const baseUrl = this.getBaseUrl();
-    const probePath = `.kloda-probe-${randomUUID()}`;
-    const probeUrl = new URL(probePath, baseUrl);
+    const probeDirectoryUrl = new URL(`.kloda-probe-${randomUUID()}/`, baseUrl);
+    const uploadUrl = new URL('upload', probeDirectoryUrl);
+    const finalUrl = new URL('final', probeDirectoryUrl);
     const probePayload = 'kloda-webdav-probe';
+    let uploaded = false;
+    let finalized = false;
+    let operationFailure: unknown;
 
     const directory = await this.request(baseUrl, 'PROPFIND', { Depth: '0' });
     if (!directory.ok && directory.status !== 207) throw new Error(`WebDAV directory access failed (${directory.status}).`);
 
-    const upload = await this.request(probeUrl, 'PUT', { 'Content-Type': 'text/plain' }, probePayload);
-    if (!upload.ok) throw new Error(`WebDAV write failed (${upload.status}).`);
+    const createProbeDirectory = await this.request(probeDirectoryUrl, 'MKCOL');
+    if (!createProbeDirectory.ok) throw new Error(`WebDAV probe directory creation failed (${createProbeDirectory.status}).`);
+    try {
+      const upload = await this.request(uploadUrl, 'PUT', { 'Content-Type': 'text/plain' }, probePayload);
+      if (!upload.ok) throw new Error(`WebDAV write failed (${upload.status}).`);
+      uploaded = true;
 
-    const read = await this.request(probeUrl, 'GET');
-    if (!read.ok || await read.text() !== probePayload) throw new Error('WebDAV read-back verification failed.');
+      const move = await this.request(uploadUrl, 'MOVE', { Destination: finalUrl.toString(), Overwrite: 'F' });
+      if (!move.ok) throw new Error(`WebDAV finalize failed (${move.status}).`);
+      finalized = true;
 
-    const cleanup = await this.request(probeUrl, 'DELETE');
-    if (!cleanup.ok && cleanup.status !== 404) throw new Error(`WebDAV probe cleanup failed (${cleanup.status}).`);
+      const read = await this.request(finalUrl, 'GET');
+      if (!read.ok || await read.text() !== probePayload) throw new Error('WebDAV read-back verification failed.');
+    } catch (reason) {
+      operationFailure = reason;
+    }
+
+    const cleanupFailure = await this.cleanupProbe(finalized ? finalUrl : uploaded ? uploadUrl : undefined, probeDirectoryUrl);
+    if (cleanupFailure) throw cleanupFailure;
+    if (operationFailure) throw operationFailure;
   }
 
-  async uploadFile(remotePath: string, file: Blob): Promise<void> {
+  async uploadFile(remotePath: string, temporaryRemotePath: string, file: Blob): Promise<void> {
     const target = new URL(remotePath.split('/').map(encodeURIComponent).join('/'), this.getBaseUrl());
-    const response = await this.request(target, 'PUT', { 'If-None-Match': '*' }, file);
-    if (!response.ok) throw new Error(`WebDAV upload failed (${response.status}).`);
+    const temporary = new URL(temporaryRemotePath.split('/').map(encodeURIComponent).join('/'), this.getBaseUrl());
+    const upload = await this.request(temporary, 'PUT', { 'If-None-Match': '*' }, file);
+    if (!upload.ok) throw new Error(`WebDAV upload failed (${upload.status}).`);
+    const finalize = await this.request(temporary, 'MOVE', { Destination: target.toString(), Overwrite: 'F' });
+    if (!finalize.ok) {
+      await this.cleanupTemporaryUpload(temporary);
+      throw new Error(`WebDAV finalize failed (${finalize.status}).`);
+    }
+  }
+
+  async removeTemporaryUpload(temporaryRemotePath: string): Promise<void> {
+    const temporary = new URL(temporaryRemotePath.split('/').map(encodeURIComponent).join('/'), this.getBaseUrl());
+    await this.cleanupTemporaryUpload(temporary);
+  }
+
+  private async cleanupProbe(fileUrl: URL | undefined, directoryUrl: URL): Promise<Error | undefined> {
+    try {
+      if (fileUrl) {
+        const cleanupFile = await this.request(fileUrl, 'DELETE');
+        if (!cleanupFile.ok && cleanupFile.status !== 404) return new Error(`WebDAV probe file cleanup failed (${cleanupFile.status}).`);
+      }
+      const cleanupDirectory = await this.request(directoryUrl, 'DELETE');
+      if (!cleanupDirectory.ok && cleanupDirectory.status !== 404) return new Error(`WebDAV probe directory cleanup failed (${cleanupDirectory.status}).`);
+    } catch (reason) {
+      return reason instanceof Error ? reason : new Error('WebDAV probe cleanup failed.');
+    }
+    return undefined;
+  }
+
+  private async cleanupTemporaryUpload(url: URL): Promise<void> {
+    const response = await this.request(url, 'DELETE');
+    if (!response.ok && response.status !== 404) throw new Error(`WebDAV temporary upload cleanup failed (${response.status}).`);
   }
 
   private getBaseUrl(): URL {

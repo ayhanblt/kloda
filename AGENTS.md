@@ -17,3 +17,41 @@ For version-specific docs, use `/org/project/version` from the `library` output 
 If a command fails with a quota error, inform the user and suggest `npx ctx7@latest login` or setting `CONTEXT7_API_KEY` env var for higher limits. Do not silently fall back to training data.
 Run Context7 CLI requests outside Codex's default sandbox. If a Context7 CLI command fails with DNS or network errors such as ENOTFOUND, host resolution failures, or fetch failed, rerun it outside the sandbox instead of retrying inside the sandbox.
 <!-- context7 -->
+
+
+## Subagent model routing
+
+When delegating work:
+
+- Use `fast` for mechanical, well-specified, low-risk work:
+  simple edits, configuration, boilerplate, data/evidence collection,
+  straightforward tests, repetitive implementation.
+
+- Use `good` for work requiring judgment:
+  non-trivial debugging, native integration, multi-file refactors,
+  protocol/state logic, concurrency, persistence, recovery, or security-sensitive implementation.
+
+Start with `fast` when the task is clearly mechanical.
+Escalate to `good` if the fast worker stalls, discovers ambiguity, or requires design judgment.
+
+Choose by the specific subtask's complexity, not by the subagent/session name.
+
+## Usage-budget policy
+
+Optimize for limited model usage and context budget.
+
+Before spawning subagents or starting PoCs:
+- Prefer the smallest experiment that can falsify or validate the current assumption.
+- Do not build production-grade abstractions for a PoC unless the acceptance criteria explicitly require them.
+- Avoid duplicating implementation in temporary PoC environments.
+- Reuse existing code, fixtures, and agents whenever possible.
+- Prefer one focused subagent over several parallel agents when parallelism does not materially shorten the critical path.
+- Use cheaper models for mechanical, deterministic, low-risk subtasks.
+- Use GPT-6.1 Sol Medium for normal implementation.
+- Escalate to Sol High or Astra only when the task materially requires deeper reasoning.
+- Do not run exhaustive build/test matrices before the minimal path works.
+- Stop expanding scope once the PoC acceptance criteria are satisfied.
+- If a task is likely to consume substantial usage, first state the minimal validation path and avoid speculative extra work.
+
+The goal is not maximum implementation breadth per task; it is maximum validated progress per unit of model usage.
+

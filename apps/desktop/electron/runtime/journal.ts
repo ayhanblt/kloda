@@ -18,6 +18,14 @@ export class DesktopSyncJournal {
         id TEXT PRIMARY KEY, status TEXT NOT NULL, bytes_transferred INTEGER NOT NULL,
         bytes_total INTEGER NOT NULL, completed_files INTEGER NOT NULL, total_files INTEGER NOT NULL
       );
+      CREATE TABLE IF NOT EXISTS upload_receipt (
+        source_id TEXT NOT NULL, relative_path TEXT NOT NULL, revision TEXT NOT NULL,
+        PRIMARY KEY (source_id, relative_path, revision)
+      );
+      CREATE TABLE IF NOT EXISTS pending_upload (
+        source_id TEXT NOT NULL, relative_path TEXT NOT NULL, revision TEXT NOT NULL,
+        temporary_path TEXT NOT NULL, PRIMARY KEY (source_id, relative_path, revision)
+      );
     `);
   }
 
@@ -66,6 +74,37 @@ export class DesktopSyncJournal {
     this.database.prepare(`INSERT OR REPLACE INTO sync_progress
       (id, status, bytes_transferred, bytes_total, completed_files, total_files) VALUES (?, ?, ?, ?, ?, ?)`)
       .run(progress.id, progress.status, progress.bytesTransferred, progress.bytesTotal, progress.completedFiles, progress.totalFiles);
+  }
+
+  hasUploadReceipt(sourceId: string, relativePath: string, revision: string): boolean {
+    return this.database.prepare(
+      'SELECT 1 FROM upload_receipt WHERE source_id = ? AND relative_path = ? AND revision = ?',
+    ).get(sourceId, relativePath, revision) !== undefined;
+  }
+
+  saveUploadReceipt(sourceId: string, relativePath: string, revision: string): void {
+    this.database.prepare(
+      'INSERT OR IGNORE INTO upload_receipt (source_id, relative_path, revision) VALUES (?, ?, ?)',
+    ).run(sourceId, relativePath, revision);
+  }
+
+  savePendingUpload(sourceId: string, relativePath: string, revision: string, temporaryPath: string): void {
+    this.database.prepare(`
+      INSERT OR REPLACE INTO pending_upload (source_id, relative_path, revision, temporary_path) VALUES (?, ?, ?, ?)
+    `).run(sourceId, relativePath, revision, temporaryPath);
+  }
+
+  clearPendingUpload(sourceId: string, relativePath: string, revision: string): void {
+    this.database.prepare(`
+      DELETE FROM pending_upload WHERE source_id = ? AND relative_path = ? AND revision = ?
+    `).run(sourceId, relativePath, revision);
+  }
+
+  getPendingUploads(): readonly { sourceId: string; relativePath: string; revision: string; temporaryPath: string }[] {
+    return this.database.prepare(`
+      SELECT source_id AS sourceId, relative_path AS relativePath, revision, temporary_path AS temporaryPath
+      FROM pending_upload
+    `).all() as { sourceId: string; relativePath: string; revision: string; temporaryPath: string }[];
   }
 
   private getSetting(key: string): string | undefined {

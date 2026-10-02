@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, powerMonitor } from 'electron';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -62,6 +62,7 @@ await app.whenReady();
 const runtime = new DesktopSyncRuntime(new DesktopSyncJournal(join(app.getPath('userData'), 'sync.sqlite')), () => mainWindow);
 const scheduler = new ElectronScheduleAdapter(async () => { await runtime.startSync(); });
 scheduler.schedule(await runtime.getSchedule());
+powerMonitor.on('resume', () => scheduler.resume());
 registerHandlers();
 createWindow();
 

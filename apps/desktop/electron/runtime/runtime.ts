@@ -11,6 +11,7 @@ import { NodeWebDavClient } from './webdav.js';
 
 export class DesktopSyncRuntime implements DesktopBridge {
   private readonly vault: ElectronCredentialVault;
+  private activeSync: Promise<SyncProgress> | undefined;
 
   constructor(
     private readonly journal: DesktopSyncJournal,
@@ -59,18 +60,43 @@ export class DesktopSyncRuntime implements DesktopBridge {
     this.journal.setStorageTested();
   }
 
-  async startSync(): Promise<SyncProgress> {
+  startSync(): Promise<SyncProgress> {
+    if (this.activeSync) return this.activeSync;
+    const sync = this.runSync();
+    this.activeSync = sync;
+    void sync.then(
+      () => { if (this.activeSync === sync) this.activeSync = undefined; },
+      () => { if (this.activeSync === sync) this.activeSync = undefined; },
+    );
+    return sync;
+  }
+
+  private async runSync(): Promise<SyncProgress> {
     const storage = this.getStorage();
     const draft = this.journal.getDraft();
     if (!draft.storageTested) throw new Error('Test WebDAV access before starting backup.');
-    const source = this.journal.getSourcePaths()[0];
-    if (!source) throw new Error('Select at least one source folder.');
-    const files = await this.listFiles(source.path);
-    const progress: SyncProgress = { bytesTransferred: 0, bytesTotal: files.reduce((total, file) => total + file.size, 0), completedFiles: 0, id: randomUUID(), status: 'running', totalFiles: files.length };
-    this.journal.saveProgress(progress);
+    const sources = this.journal.getSourcePaths();
+    if (sources.length === 0) throw new Error('Select at least one source folder.');
     const client = new NodeWebDavClient(storage);
-    for (const file of files) {
-      await client.uploadFile(`${encodeURIComponent(source.id)}/${relative(source.path, file.path)}`, await openAsBlob(file.path));
+    await this.reconcilePendingUploads(client);
+    const sourceFiles = await Promise.all(sources.map(async (source) => ({ source, files: await this.listFiles(source.path) })));
+    const files = sourceFiles
+      .flatMap(({ source, files }) => files.map((file) => ({
+        file,
+        relativePath: relative(source.path, file.path),
+        revision: `${file.size}:${file.modifiedAt}`,
+        source,
+      })))
+      .filter(({ relativePath, revision, source }) => !this.journal.hasUploadReceipt(source.id, relativePath, revision));
+    const progress: SyncProgress = { bytesTransferred: 0, bytesTotal: files.reduce((total, { file }) => total + file.size, 0), completedFiles: 0, id: randomUUID(), status: 'running', totalFiles: files.length };
+    this.journal.saveProgress(progress);
+    for (const { file, relativePath, revision, source } of files) {
+      const remotePath = `${source.id}/${relativePath}`;
+      const temporaryPath = `${remotePath}.kloda-upload-${randomUUID()}`;
+      this.journal.savePendingUpload(source.id, relativePath, revision, temporaryPath);
+      await client.uploadFile(remotePath, temporaryPath, await openAsBlob(file.path));
+      this.journal.saveUploadReceipt(source.id, relativePath, revision);
+      this.journal.clearPendingUpload(source.id, relativePath, revision);
       progress.bytesTransferred += file.size;
       progress.completedFiles += 1;
       this.journal.saveProgress(progress);
@@ -80,6 +106,13 @@ export class DesktopSyncRuntime implements DesktopBridge {
     return progress;
   }
 
+  private async reconcilePendingUploads(client: NodeWebDavClient): Promise<void> {
+    for (const pending of this.journal.getPendingUploads()) {
+      await client.removeTemporaryUpload(pending.temporaryPath);
+      this.journal.clearPendingUpload(pending.sourceId, pending.relativePath, pending.revision);
+    }
+  }
+
   private getStorage(): StorageForm {
     const draft = this.journal.getDraft();
     const password = this.vault.load();
@@ -87,13 +120,16 @@ export class DesktopSyncRuntime implements DesktopBridge {
     return { ...draft.storage, password };
   }
 
-  private async listFiles(rootPath: string): Promise<{ path: string; size: number }[]> {
-    const files: { path: string; size: number }[] = [];
+  private async listFiles(rootPath: string): Promise<{ path: string; size: number; modifiedAt: number }[]> {
+    const files: { path: string; size: number; modifiedAt: number }[] = [];
     for (const entry of await readdir(rootPath, { withFileTypes: true })) {
       const path = `${rootPath}/${entry.name}`;
       if (entry.isSymbolicLink()) continue;
       if (entry.isDirectory()) files.push(...await this.listFiles(path));
-      if (entry.isFile()) files.push({ path, size: (await stat(path)).size });
+      if (entry.isFile()) {
+        const details = await stat(path);
+        files.push({ path, size: details.size, modifiedAt: details.mtimeMs });
+      }
     }
     return files;
   }

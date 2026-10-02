@@ -127,6 +127,12 @@ No unresolved design conflict remains. Approved sync, relay, storage, and naming
 - When rendering storage choices, show that WebDAV supports direct remote access or HTTP(S) relay when needed, while SMB is available only on the local LAN.
 - Replace legacy product strings in future application UI with the approved Kloda display name; do not modify the Stitch source assets themselves.
 
+## Current implementation status
+
+- The existing mobile UI implements only the first setup controls: one Files folder selection and 12/24-hour schedule preference. It is not yet a visual implementation of the reference's folder inventory, selected-count summary, storage connection, queue, or tab shells.
+- The existing Electron renderer implements a functional source → storage → activity sequence, but has not yet received a visual review against this reference's responsive shells, typography, Material Symbols, and supplied logo.
+- No actual-device or visual screenshot comparison has been recorded. Do not represent the current UI as Stitch-complete until that review has happened.
+
 ## Open questions
 
 1. Should folder and schedule selection remain combined in one visual step, or should they be separate screens while preserving the mandated order?
