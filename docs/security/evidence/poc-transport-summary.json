@@ -1,0 +1,749 @@
+{
+  "recordKind": "sanitized historical public-evidence extract; not a rerun or independent attestation",
+  "documentedOn": "2026-10-04",
+  "complete": false,
+  "productionReady": false,
+  "counts": {
+    "pass": 14,
+    "inconclusive": 1
+  },
+  "physicalAndroid": {
+    "api": 36,
+    "abi": "arm64-v8a",
+    "cases": [
+      {
+        "case": "native-link",
+        "status": "pass",
+        "sdk": 36,
+        "abi": "arm64-v8a",
+        "engineLockSha256": "645166578b30525e06bf54f13927acdd03af305023e8c307437de8dc53708b2c",
+        "startedAt": "2026-10-02T01:20:07.817Z",
+        "finishedAt": "2026-10-02T01:20:11.141Z",
+        "subcases": []
+      },
+      {
+        "case": "lan-8m",
+        "status": "pass",
+        "sdk": 36,
+        "abi": "arm64-v8a",
+        "engineLockSha256": "645166578b30525e06bf54f13927acdd03af305023e8c307437de8dc53708b2c",
+        "startedAt": "2026-10-02T13:19:03.088Z",
+        "finishedAt": "2026-10-02T13:19:15.967Z",
+        "subcases": [
+          {
+            "state": "completed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 8388608,
+            "sentBytes": 8390657,
+            "authenticatedFinal": true,
+            "peakPssBytes": 90378240,
+            "peakRssBytes": 12140544
+          }
+        ]
+      },
+      {
+        "case": "lan-bounds",
+        "status": "pass",
+        "sdk": 36,
+        "abi": "arm64-v8a",
+        "engineLockSha256": "645166578b30525e06bf54f13927acdd03af305023e8c307437de8dc53708b2c",
+        "startedAt": "2026-10-02T02:06:02.552Z",
+        "finishedAt": "2026-10-02T02:06:59.533Z",
+        "subcases": [
+          {
+            "state": "completed",
+            "size": 268435456,
+            "sha256": "b2399bed92750eca6f74923e06d8c9343e58f1718802ce3d3e21cc245a9b20e2",
+            "durableBytes": 268435456,
+            "sentBytes": 268488462,
+            "authenticatedFinal": true,
+            "peakPssBytes": 86401024,
+            "peakRssBytes": 15056896,
+            "peakStageBytes": 97536707,
+            "appBufferBoundBytes": 16777216,
+            "maxSubmitted": 2,
+            "maxPreparing": 1
+          },
+          {
+            "state": "completed",
+            "size": 1073741824,
+            "sha256": "925e1d8e34e7645f0516b1cd9c61b9eb47c03f98bf396a7ae5ad999d9d9ba4c9",
+            "durableBytes": 1073741824,
+            "sentBytes": 1073953184,
+            "authenticatedFinal": true,
+            "peakPssBytes": 83871744,
+            "peakRssBytes": 16056320,
+            "peakStageBytes": 97536788,
+            "appBufferBoundBytes": 16777216,
+            "maxSubmitted": 2,
+            "maxPreparing": 1
+          }
+        ]
+      },
+      {
+        "case": "tls-reject",
+        "status": "pass",
+        "sdk": 36,
+        "abi": "arm64-v8a",
+        "engineLockSha256": "645166578b30525e06bf54f13927acdd03af305023e8c307437de8dc53708b2c",
+        "startedAt": "2026-10-02T02:07:37.491Z",
+        "finishedAt": "2026-10-02T02:08:03.276Z",
+        "subcases": [
+          {
+            "scenario": "wrong-ca",
+            "state": "failed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 0,
+            "sentBytes": 0,
+            "peakPssBytes": 83294208,
+            "peakRssBytes": 12779520
+          },
+          {
+            "scenario": "wrong-san",
+            "state": "failed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 0,
+            "sentBytes": 0,
+            "peakPssBytes": 83004416,
+            "peakRssBytes": 10158080
+          },
+          {
+            "scenario": "expired-leaf",
+            "state": "failed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 0,
+            "sentBytes": 0,
+            "peakPssBytes": 83082240,
+            "peakRssBytes": 9273344
+          },
+          {
+            "scenario": "http-url",
+            "state": "failed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 0,
+            "sentBytes": 0,
+            "peakPssBytes": 82884608,
+            "peakRssBytes": 10321920
+          },
+          {
+            "scenario": "redirect",
+            "state": "failed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 0,
+            "sentBytes": 0,
+            "peakPssBytes": 83141632,
+            "peakRssBytes": 0
+          }
+        ]
+      },
+      {
+        "case": "integrity-reject",
+        "status": "pass",
+        "sdk": 36,
+        "abi": "arm64-v8a",
+        "engineLockSha256": "645166578b30525e06bf54f13927acdd03af305023e8c307437de8dc53708b2c",
+        "startedAt": "2026-10-02T02:08:44.276Z",
+        "finishedAt": "2026-10-02T02:09:03.804Z",
+        "subcases": [
+          {
+            "scenario": "manifest",
+            "committedParts": 0,
+            "conflictRejected": false,
+            "duplicateCount": 0,
+            "status": 400
+          },
+          {
+            "scenario": "tag",
+            "committedParts": 0,
+            "conflictRejected": false,
+            "duplicateCount": 0,
+            "status": 400
+          },
+          {
+            "scenario": "frame",
+            "committedParts": 0,
+            "conflictRejected": false,
+            "duplicateCount": 0,
+            "status": 400
+          },
+          {
+            "scenario": "body-digest",
+            "committedParts": 0,
+            "conflictRejected": false,
+            "duplicateCount": 0,
+            "status": 400
+          },
+          {
+            "scenario": "truncated",
+            "committedParts": 0,
+            "conflictRejected": false,
+            "duplicateCount": 0,
+            "status": 400
+          },
+          {
+            "scenario": "trailing",
+            "committedParts": 0,
+            "conflictRejected": false,
+            "duplicateCount": 0,
+            "status": 400
+          },
+          {
+            "scenario": "wrong-offset",
+            "committedParts": 0,
+            "conflictRejected": false,
+            "duplicateCount": 0,
+            "status": 400
+          },
+          {
+            "scenario": "duplicate",
+            "committedParts": 1,
+            "conflictRejected": false,
+            "duplicateCount": 1,
+            "status": 200
+          },
+          {
+            "scenario": "conflict",
+            "committedParts": 1,
+            "conflictRejected": true,
+            "duplicateCount": 0,
+            "status": 409
+          },
+          {
+            "state": "failed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 0,
+            "sentBytes": 8390657,
+            "peakPssBytes": 83022848,
+            "peakRssBytes": 12894208
+          },
+          {
+            "state": "failed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 8388608,
+            "sentBytes": 8390657,
+            "peakPssBytes": 82993152,
+            "peakRssBytes": 12943360
+          },
+          {
+            "state": "failed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 0,
+            "sentBytes": 8390657,
+            "peakPssBytes": 83049472,
+            "peakRssBytes": 12894208
+          }
+        ]
+      },
+      {
+        "case": "ack-loss",
+        "status": "pass",
+        "sdk": 36,
+        "abi": "arm64-v8a",
+        "engineLockSha256": "645166578b30525e06bf54f13927acdd03af305023e8c307437de8dc53708b2c",
+        "startedAt": "2026-10-02T02:09:40.634Z",
+        "finishedAt": "2026-10-02T02:09:52.635Z",
+        "subcases": [
+          {
+            "state": "completed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 8388608,
+            "sentBytes": 8390657,
+            "authenticatedFinal": true,
+            "peakPssBytes": 83421184,
+            "peakRssBytes": 14024704
+          },
+          {
+            "state": "completed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 8388608,
+            "sentBytes": 8390657,
+            "authenticatedFinal": true,
+            "peakPssBytes": 83301376,
+            "peakRssBytes": 13910016
+          }
+        ]
+      },
+      {
+        "case": "crash-resume",
+        "status": "pass",
+        "sdk": 36,
+        "abi": "arm64-v8a",
+        "engineLockSha256": "645166578b30525e06bf54f13927acdd03af305023e8c307437de8dc53708b2c",
+        "startedAt": "2026-10-02T02:10:38.293Z",
+        "finishedAt": "2026-10-02T02:12:11.042Z",
+        "subcases": [
+          {
+            "scenario": "intent-before-stage",
+            "state": "completed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 8388608,
+            "sentBytes": 8390655,
+            "authenticatedFinal": true,
+            "peakPssBytes": 94269440,
+            "peakRssBytes": 13041664
+          },
+          {
+            "scenario": "stage-ready-before-send",
+            "state": "completed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 8388608,
+            "sentBytes": 8390657,
+            "authenticatedFinal": true,
+            "peakPssBytes": 97244160,
+            "peakRssBytes": 13090816
+          },
+          {
+            "scenario": "send-before-receipt",
+            "state": "completed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 8388608,
+            "sentBytes": 0,
+            "authenticatedFinal": true,
+            "peakPssBytes": 96754688,
+            "peakRssBytes": 13172736
+          },
+          {
+            "scenario": "part-durable-before-ACK",
+            "state": "completed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 8388608,
+            "sentBytes": 8390657,
+            "authenticatedFinal": true,
+            "peakPssBytes": 96705536,
+            "peakRssBytes": 13615104
+          },
+          {
+            "scenario": "final-rename-before-journal",
+            "state": "completed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 8388608,
+            "sentBytes": 8390655,
+            "authenticatedFinal": true,
+            "peakPssBytes": 96534528,
+            "peakRssBytes": 13533184
+          },
+          {
+            "state": "cancelled",
+            "size": 268435456,
+            "sha256": "b2399bed92750eca6f74923e06d8c9343e58f1718802ce3d3e21cc245a9b20e2",
+            "durableBytes": 65011712,
+            "sentBytes": 80425351,
+            "peakPssBytes": 97864704,
+            "peakRssBytes": 13926400
+          },
+          {
+            "state": "completed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 8388608,
+            "sentBytes": 8390655,
+            "peakPssBytes": 97896448,
+            "peakRssBytes": 13238272
+          }
+        ]
+      },
+      {
+        "case": "lifecycle",
+        "status": "pass",
+        "sdk": 36,
+        "abi": "arm64-v8a",
+        "engineLockSha256": "645166578b30525e06bf54f13927acdd03af305023e8c307437de8dc53708b2c",
+        "startedAt": "2026-10-02T02:28:06.514Z",
+        "finishedAt": "2026-10-02T02:37:05.919Z",
+        "subcases": [
+          {
+            "state": "completed",
+            "size": 268435456,
+            "sha256": "b2399bed92750eca6f74923e06d8c9343e58f1718802ce3d3e21cc245a9b20e2",
+            "durableBytes": 268435456,
+            "sentBytes": 268488480,
+            "authenticatedFinal": true,
+            "peakPssBytes": 98917376,
+            "peakRssBytes": 14483456
+          },
+          {
+            "state": "completed",
+            "size": 268435456,
+            "sha256": "b2399bed92750eca6f74923e06d8c9343e58f1718802ce3d3e21cc245a9b20e2",
+            "durableBytes": 268435456,
+            "sentBytes": 203464082,
+            "authenticatedFinal": true,
+            "peakPssBytes": 97235968,
+            "peakRssBytes": 14172160
+          },
+          {
+            "scenario": "api35-timeout",
+            "state": "paused"
+          },
+          {
+            "state": "cancelled",
+            "size": 268435456,
+            "sha256": "b2399bed92750eca6f74923e06d8c9343e58f1718802ce3d3e21cc245a9b20e2",
+            "durableBytes": 0,
+            "sentBytes": 4653056,
+            "peakPssBytes": 94466048,
+            "peakRssBytes": 14188544
+          }
+        ]
+      },
+      {
+        "case": "pause-cancel",
+        "status": "pass",
+        "sdk": 36,
+        "abi": "arm64-v8a",
+        "engineLockSha256": "645166578b30525e06bf54f13927acdd03af305023e8c307437de8dc53708b2c",
+        "startedAt": "2026-10-02T02:49:13.505Z",
+        "finishedAt": "2026-10-02T02:53:06.031Z",
+        "subcases": [
+          {
+            "state": "completed",
+            "size": 268435456,
+            "sha256": "b2399bed92750eca6f74923e06d8c9343e58f1718802ce3d3e21cc245a9b20e2",
+            "durableBytes": 268435456,
+            "sentBytes": 277270304,
+            "authenticatedFinal": true,
+            "peakPssBytes": 88096768,
+            "peakRssBytes": 14548992
+          },
+          {
+            "state": "completed",
+            "size": 268435456,
+            "sha256": "b2399bed92750eca6f74923e06d8c9343e58f1718802ce3d3e21cc245a9b20e2",
+            "durableBytes": 268435456,
+            "sentBytes": 277270304,
+            "authenticatedFinal": true,
+            "peakPssBytes": 88096768,
+            "peakRssBytes": 14548992
+          },
+          {
+            "state": "cancelled",
+            "size": 268435456,
+            "sha256": "b2399bed92750eca6f74923e06d8c9343e58f1718802ce3d3e21cc245a9b20e2",
+            "durableBytes": 65011712,
+            "sentBytes": 76951943,
+            "peakPssBytes": 87965696,
+            "peakRssBytes": 14680064
+          },
+          {
+            "state": "cancelled",
+            "size": 268435456,
+            "sha256": "b2399bed92750eca6f74923e06d8c9343e58f1718802ce3d3e21cc245a9b20e2",
+            "durableBytes": 0,
+            "sentBytes": 65024391,
+            "peakPssBytes": 88466432,
+            "peakRssBytes": 14729216
+          },
+          {
+            "state": "cancelled",
+            "size": 268435456,
+            "sha256": "b2399bed92750eca6f74923e06d8c9343e58f1718802ce3d3e21cc245a9b20e2",
+            "durableBytes": 0,
+            "sentBytes": 65024391,
+            "peakPssBytes": 88466432,
+            "peakRssBytes": 14729216
+          }
+        ]
+      },
+      {
+        "case": "wifi-loss",
+        "status": "pass",
+        "sdk": 36,
+        "abi": "arm64-v8a",
+        "engineLockSha256": "645166578b30525e06bf54f13927acdd03af305023e8c307437de8dc53708b2c",
+        "startedAt": "2026-10-02T11:05:03.530Z",
+        "finishedAt": "2026-10-02T11:17:43.457Z",
+        "subcases": [
+          {
+            "state": "completed",
+            "size": 1073741824,
+            "sha256": "925e1d8e34e7645f0516b1cd9c61b9eb47c03f98bf396a7ae5ad999d9d9ba4c9",
+            "durableBytes": 1073741824,
+            "sentBytes": 1120746024,
+            "authenticatedFinal": true,
+            "committedParts": 20
+          }
+        ]
+      },
+      {
+        "case": "remote-direct",
+        "status": "inconclusive",
+        "reason": "direct-connectivity-failed",
+        "sdk": 36,
+        "abi": "arm64-v8a",
+        "engineLockSha256": "645166578b30525e06bf54f13927acdd03af305023e8c307437de8dc53708b2c",
+        "startedAt": "2026-10-02T13:01:07.419Z",
+        "finishedAt": "2026-10-02T13:02:34.284Z",
+        "subcases": []
+      },
+      {
+        "case": "turn-udp",
+        "status": "pass",
+        "sdk": 36,
+        "abi": "arm64-v8a",
+        "engineLockSha256": "645166578b30525e06bf54f13927acdd03af305023e8c307437de8dc53708b2c",
+        "startedAt": "2026-10-02T12:44:18.818Z",
+        "finishedAt": "2026-10-02T12:50:00.321Z",
+        "subcases": [
+          {
+            "state": "completed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 8388608,
+            "sentBytes": 8390657,
+            "authenticatedFinal": true,
+            "peakPssBytes": 99377152,
+            "peakRssBytes": 16400384
+          },
+          {
+            "state": "completed",
+            "size": 268435456,
+            "sha256": "b2399bed92750eca6f74923e06d8c9343e58f1718802ce3d3e21cc245a9b20e2",
+            "durableBytes": 268435456,
+            "sentBytes": 268488480,
+            "authenticatedFinal": true,
+            "peakPssBytes": 91488256,
+            "peakRssBytes": 17350656
+          }
+        ]
+      },
+      {
+        "case": "turn-tls443",
+        "status": "pass",
+        "sdk": 36,
+        "abi": "arm64-v8a",
+        "engineLockSha256": "645166578b30525e06bf54f13927acdd03af305023e8c307437de8dc53708b2c",
+        "startedAt": "2026-10-02T12:50:28.196Z",
+        "finishedAt": "2026-10-02T13:00:27.016Z",
+        "subcases": [
+          {
+            "state": "completed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 8388608,
+            "sentBytes": 8390656,
+            "authenticatedFinal": true,
+            "peakPssBytes": 83999744,
+            "peakRssBytes": 18071552
+          },
+          {
+            "state": "completed",
+            "size": 268435456,
+            "sha256": "b2399bed92750eca6f74923e06d8c9343e58f1718802ce3d3e21cc245a9b20e2",
+            "durableBytes": 268435456,
+            "sentBytes": 268488480,
+            "authenticatedFinal": true,
+            "peakPssBytes": 84733952,
+            "peakRssBytes": 18317312
+          }
+        ]
+      },
+      {
+        "case": "transport-resume",
+        "status": "pass",
+        "sdk": 36,
+        "abi": "arm64-v8a",
+        "engineLockSha256": "645166578b30525e06bf54f13927acdd03af305023e8c307437de8dc53708b2c",
+        "startedAt": "2026-10-02T13:20:59.853Z",
+        "finishedAt": "2026-10-02T14:23:02.207Z",
+        "subcases": [
+          {
+            "state": "completed",
+            "size": 268435456,
+            "sha256": "b2399bed92750eca6f74923e06d8c9343e58f1718802ce3d3e21cc245a9b20e2",
+            "durableBytes": 268435456,
+            "sentBytes": 291950368,
+            "authenticatedFinal": true
+          },
+          {
+            "state": "completed",
+            "size": 268435456,
+            "sha256": "b2399bed92750eca6f74923e06d8c9343e58f1718802ce3d3e21cc245a9b20e2",
+            "durableBytes": 268435456,
+            "sentBytes": 268963252,
+            "authenticatedFinal": true
+          }
+        ]
+      },
+      {
+        "case": "backpressure-storage",
+        "status": "pass",
+        "sdk": 36,
+        "abi": "arm64-v8a",
+        "engineLockSha256": "645166578b30525e06bf54f13927acdd03af305023e8c307437de8dc53708b2c",
+        "startedAt": "2026-10-02T03:04:56.456Z",
+        "finishedAt": "2026-10-02T03:07:34.266Z",
+        "subcases": [
+          {
+            "state": "completed",
+            "size": 268435456,
+            "sha256": "b2399bed92750eca6f74923e06d8c9343e58f1718802ce3d3e21cc245a9b20e2",
+            "durableBytes": 268435456,
+            "sentBytes": 268488480,
+            "authenticatedFinal": true,
+            "peakPssBytes": 85128192,
+            "peakRssBytes": 14467072,
+            "peakStageBytes": 97536717,
+            "appBufferBoundBytes": 16777216,
+            "maxSubmitted": 2,
+            "maxPreparing": 1
+          },
+          {
+            "state": "completed",
+            "size": 8388608,
+            "sha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+            "durableBytes": 8388608,
+            "sentBytes": 16781314,
+            "authenticatedFinal": true,
+            "peakPssBytes": 82403328,
+            "peakRssBytes": 12697600
+          }
+        ]
+      }
+    ]
+  },
+  "hostOnly": {
+    "scope": "same desktop Wi-Fi; no physical or distinct-uplink proof",
+    "transfers": [
+      {
+        "transport": "LanHttps",
+        "size": 8388608,
+        "state": "completed",
+        "sourceSha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+        "finalSha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+        "durableBytes": 8388608,
+        "finalReceiptKind": "transfer_committed",
+        "partCount": 1,
+        "stageClean": true,
+        "appBufferBoundBytes": 16777216,
+        "maxSubmitted": 1,
+        "maxPreparing": 1
+      },
+      {
+        "transport": "LanHttps",
+        "size": 268435456,
+        "state": "completed",
+        "sourceSha256": "b2399bed92750eca6f74923e06d8c9343e58f1718802ce3d3e21cc245a9b20e2",
+        "finalSha256": "b2399bed92750eca6f74923e06d8c9343e58f1718802ce3d3e21cc245a9b20e2",
+        "durableBytes": 268435456,
+        "finalReceiptKind": "transfer_committed",
+        "partCount": 9,
+        "stageClean": true,
+        "appBufferBoundBytes": 16777216,
+        "maxSubmitted": 2,
+        "maxPreparing": 1
+      },
+      {
+        "transport": "LanHttps",
+        "size": 1073741824,
+        "state": "completed",
+        "sourceSha256": "925e1d8e34e7645f0516b1cd9c61b9eb47c03f98bf396a7ae5ad999d9d9ba4c9",
+        "finalSha256": "925e1d8e34e7645f0516b1cd9c61b9eb47c03f98bf396a7ae5ad999d9d9ba4c9",
+        "durableBytes": 1073741824,
+        "finalReceiptKind": "transfer_committed",
+        "partCount": 34,
+        "stageClean": true,
+        "appBufferBoundBytes": 16777216,
+        "maxSubmitted": 2,
+        "maxPreparing": 1
+      },
+      {
+        "transport": "native WebRTC DataChannel",
+        "size": 67108864,
+        "state": "completed",
+        "sourceSha256": "722c2188a70938cd1b300a2cc6adc5e485d247cca0900f0e1c02886cf6894977",
+        "finalSha256": "722c2188a70938cd1b300a2cc6adc5e485d247cca0900f0e1c02886cf6894977",
+        "durableBytes": 67108864,
+        "finalReceiptKind": "transfer_committed",
+        "partCount": 3,
+        "stageClean": true,
+        "appBufferBoundBytes": 16777216,
+        "maxSubmitted": 2,
+        "maxPreparing": 1
+      },
+      {
+        "transport": "native WebRTC DataChannel, final evidence-contract smoke",
+        "size": 8388608,
+        "state": "completed",
+        "sourceSha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+        "finalSha256": "cfea75527526299d2a185e41f98cc71829f98366e23998350068904eb9571182",
+        "durableBytes": 8388608,
+        "partCount": 1
+      }
+    ]
+  },
+  "iosHistoricalTransport": {
+    "pathScope": "simulator-loopback",
+    "runtime": "iOS26.5 simulator",
+    "cases": [
+      {
+        "name": "native-build-and-ui-driver",
+        "status": "pass",
+        "observed": "Standalone app and XCUITest runner built and executed; driver launched, pressed Home, and reactivated the app."
+      },
+      {
+        "name": "background-file-upload",
+        "status": "unsupported",
+        "observed": "Simulator log records NSCocoaErrorDomain 4097 for com.apple.nsurlsessiond; background URLSessionUploadTask creation failed and then completed with NSURLErrorDomain -1. Receiver received no final file."
+      },
+      {
+        "name": "trust-leaf-and-device-ca",
+        "status": "unsupported",
+        "observed": "No TLS handshake reached receiver because background session setup failed before transport. Neither trust candidate is validated."
+      },
+      {
+        "name": "cold-background-lifecycle",
+        "status": "unsupported",
+        "observed": "No task could be admitted by simulator background daemon; this UI Home event is not a cold-background transfer result."
+      },
+      {
+        "name": "crypto-wire-and-receiver",
+        "status": "unsupported",
+        "observed": "Native app produced source.bin but no upload reached receiver; encrypted frame acceptance/final SHA256 was not observed."
+      },
+      {
+        "name": "storage-scale-and-fault-matrix",
+        "status": "unsupported",
+        "observed": "Not run after prerequisite background session failure; no 256MiB/1GiB workload or destructive disk pressure attempted."
+      }
+    ],
+    "storage": {
+      "sourceBytesObserved": 8388608,
+      "osCopyAttribution": "not-observable",
+      "stagingScale": "not-run"
+    },
+    "integrity": {
+      "finalSha256Verified": false,
+      "plaintextTransportObserved": false
+    },
+    "certificateRecommendation": "undetermined"
+  },
+  "sourceSha256": {
+    "/tmp/kloda-android-physical-poc.RORp1P/evidence/report.json": "6c1f9921f76e3986e30b0198410e42bd5610718a42d3f82832f44882118cba7f",
+    "/tmp/kloda-android-physical-poc.RORp1P/evidence/checkpoint.json": "b31de67667696aa45485494a574f1a6e13176b5587128d45529d387c0684595e",
+    "/tmp/kloda-android-physical-poc.RORp1P/evidence/host-proof.json": "565890567435037c5be32291de141bd586f421af0df5e9f633e3b3945c46dc57",
+    "/tmp/kloda-android-physical-poc.RORp1P/evidence/kloda-android-poc.tar.gz": "d6a228100c2909f89f95d962bf5a224997efdfe151a7fba620f20bfe60f7c5c7",
+    "/tmp/kloda-lan-urlsession-poc.u1orxl/Evidence/report.json": "649bdb59663e7d9575e1b8367f4a7e1ce10a5fa20f8ce63359ce54135fb9d0c2",
+    "/tmp/kloda-lan-urlsession-poc.u1orxl/Artifacts/kloda-lan-urlsession-poc-source.tgz": "345cafe91aa88c576bd4df3126a084ae163bf4aa24b85fd19db807082d99753d"
+  },
+  "limits": [
+    "No runtime or devices exercised by this documentation consolidation.",
+    "No packet capture, zero-cellular packet proof, real six-hour quota, or direct NAT root-cause proof.",
+    "Archive hashes identify historical artifacts, not durable retention of their complete bytes."
+  ]
+}

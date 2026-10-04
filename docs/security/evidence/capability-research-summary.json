@@ -1,0 +1,448 @@
+{
+  "recordKind": "Historical capability research and public evidence inspection; not current production status",
+  "recordedAt": "2026-10-04T10:31:36.080Z",
+  "historicalArchitectureStatus": "proposal-pending-separate-Ayhan-approval",
+  "currentApprovalRecord": "../../decisions/0004-certificate-bound-capability-and-authority-responsibilities.md",
+  "qualification": "Four architecture directions now accepted; ES256 remains provisional and platform/TLS/device-key production gate open",
+  "decisionPackageComplete": true,
+  "bindingEvidenceInspection": "pass",
+  "signatureProfileReady": true,
+  "signatureProfileReadinessMeaning": "Only shared exact-ES256 source-level algorithm support in two versioned candidates; not installed, interoperable, KMS-ready, authority/time-profile-ready or adopted",
+  "candidateVersions": {
+    "typescript": "panva/jose 6.2.12",
+    "rust": "Keats/jsonwebtoken 10.1.0"
+  },
+  "authorityImplemented": false,
+  "productionReady": false,
+  "physicalDevicesValidated": false,
+  "realPeerNetworkValidated": false,
+  "sdkPatchRequired": true,
+  "jwtInteroperabilityValidated": false,
+  "capabilityAdmissionValidated": false,
+  "certificateRenewalValidated": false,
+  "verification": {
+    "publicInspection": {
+      "command": "node /tmp/kloda-authority-capability.XanvUI/inspect-tls-evidence.mjs /tmp/kloda-same-key-tls.hjUS9L",
+      "node": "v22.23.1",
+      "exitCode": 0,
+      "assertionCount": 88,
+      "assertionCountMeaning": "Throwaway public historical-record inspection including shape checks; not 88 authority/runtime tests",
+      "inspectionScriptSha256": "321a3836c12ae291396769405cbdfae532d361336ac70830dcfff13f61fe137b",
+      "scriptRemoved": true,
+      "exactStdout": "binding-stdout.json",
+      "limits": [
+        "Public historical native evidence inspection only",
+        "No JWT signing or verification, issuance, admission, offline time or publication execution",
+        "Different-key donor certificates do not prove same-key certificate renewal",
+        "No private keys read or exported"
+      ]
+    },
+    "acceptance": {
+      "targets": 36,
+      "originalIDsPreserved": 32,
+      "addedIDs": [
+        "18a",
+        "27a",
+        "31a",
+        "31b"
+      ],
+      "allStatuses": "not-executed"
+    },
+    "documentReview": {
+      "separatePass": true,
+      "profileReviewer": "history://CapabilityProfileReview",
+      "policyReviewer": "agent://AcceptancePolicyReview",
+      "actionableFindings": 0,
+      "meaning": "Document consistency only, not security/runtime certification",
+      "finalKeyFormatFollowup": "agent://CapabilityProfileReview"
+    },
+    "artifactValidation": {
+      "coverage": "pass",
+      "localScratchCopiesEqual": true,
+      "frozenSourceHashes": [
+        {
+          "source": "/Users/ayhanblt/Desktop/projects/kloda/docs/decisions/0003-secure-pairing-and-offline-authorization.md",
+          "expected": "e0b9b2cd7980c802be6b2ec8d1027753ad41ee32567023a0f6849e33d957500c",
+          "actual": "e0b9b2cd7980c802be6b2ec8d1027753ad41ee32567023a0f6849e33d957500c",
+          "unchanged": true
+        },
+        {
+          "source": "/Users/ayhanblt/Desktop/projects/kloda/docs/security/secure-pairing-design.md",
+          "expected": "2c51092c86f096b39b1af61978a9ba40c64abe4af295aee0fb5332c355222ed9",
+          "actual": "2c51092c86f096b39b1af61978a9ba40c64abe4af295aee0fb5332c355222ed9",
+          "unchanged": true
+        },
+        {
+          "source": "/Users/ayhanblt/.omp/agent/sessions/-Desktop-projects-kloda/2026-09-29T16-03-20-430Z_01a0ede8-02ee-774c-a272-9c739b055b8b/local/kloda-verification-authority-decision.md",
+          "expected": "705f425e31faf20367b5c85ec0662c7b49208505ad385afb648b9bf8e91fcf75",
+          "actual": "705f425e31faf20367b5c85ec0662c7b49208505ad385afb648b9bf8e91fcf75",
+          "unchanged": true
+        },
+        {
+          "source": "/Users/ayhanblt/.omp/agent/sessions/-Desktop-projects-kloda/2026-09-29T16-03-20-430Z_01a0ede8-02ee-774c-a272-9c739b055b8b/local/kloda-authority-session-contract.md",
+          "expected": "8f8fbb4a18d2ee78553cd40a6f88cf035c681bc810b82e4616a46bda857ff3d6",
+          "actual": "8f8fbb4a18d2ee78553cd40a6f88cf035c681bc810b82e4616a46bda857ff3d6",
+          "unchanged": true
+        },
+        {
+          "source": "/Users/ayhanblt/.omp/agent/sessions/-Desktop-projects-kloda/2026-09-29T16-03-20-430Z_01a0ede8-02ee-774c-a272-9c739b055b8b/local/kloda-authority-session-acceptance.md",
+          "expected": "2be7cc726940c5e308bcb454744a49b3c5445e43b5a195c5b270cb24a69672de",
+          "actual": "2be7cc726940c5e308bcb454744a49b3c5445e43b5a195c5b270cb24a69672de",
+          "unchanged": true
+        },
+        {
+          "source": "/Users/ayhanblt/Desktop/projects/kloda/apps/api/src/interface/http/app.module.ts",
+          "expected": "0472c27a52a21ebecbf6b339b052adcd4bc5e8ef02ffe8860f8782687d0ebe32",
+          "actual": "0472c27a52a21ebecbf6b339b052adcd4bc5e8ef02ffe8860f8782687d0ebe32",
+          "unchanged": true
+        },
+        {
+          "source": "/Users/ayhanblt/Desktop/projects/kloda/apps/api/package.json",
+          "expected": "3a89b17f81c69d75d7063da16a01a98e2b07a23d4af8b62b5ec1ebd16a2e06d2",
+          "actual": "3a89b17f81c69d75d7063da16a01a98e2b07a23d4af8b62b5ec1ebd16a2e06d2",
+          "unchanged": true
+        },
+        {
+          "source": "/Users/ayhanblt/Desktop/projects/kloda/apps/desktop/electron/runtime/runtime.ts",
+          "expected": "6a4111045f5d0f657070a2f18a22349a174c99025609048c74dc4bf8916a3f8c",
+          "actual": "6a4111045f5d0f657070a2f18a22349a174c99025609048c74dc4bf8916a3f8c",
+          "unchanged": true
+        },
+        {
+          "source": "/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/src/shared/api/webdav.ts",
+          "expected": "2b267deaa55874b1a10bf6cd7e177fbd4ac3b61ed5b9272aebabc4914ad214f3",
+          "actual": "2b267deaa55874b1a10bf6cd7e177fbd4ac3b61ed5b9272aebabc4914ad214f3",
+          "unchanged": true
+        },
+        {
+          "source": "/tmp/kloda-same-key-tls.hjUS9L/RESULT.md",
+          "expected": "849a2302bddb9d08394e8bad57fb75603dfb5c2dab5ab95b1763abdac4119476",
+          "actual": "849a2302bddb9d08394e8bad57fb75603dfb5c2dab5ab95b1763abdac4119476",
+          "unchanged": true
+        },
+        {
+          "source": "/tmp/kloda-same-key-tls.hjUS9L/report.json",
+          "expected": "c4729b6cdf1a4a70015fed16936bd2079fffcb8344ae4c425b985db4579c50d7",
+          "actual": "c4729b6cdf1a4a70015fed16936bd2079fffcb8344ae4c425b985db4579c50d7",
+          "unchanged": true
+        },
+        {
+          "source": "/tmp/kloda-same-key-tls.hjUS9L/core/src/tls_commands.rs",
+          "expected": "f74924c5fa054457aef016d633c5aa0f80c01f60ae7e7d6dae8e8cfd780732ba",
+          "actual": "f74924c5fa054457aef016d633c5aa0f80c01f60ae7e7d6dae8e8cfd780732ba",
+          "unchanged": true
+        }
+      ]
+    }
+  },
+  "historicalNativeResults": {
+    "rerunThisTask": false,
+    "host": 8,
+    "tlsPerPair": 25,
+    "verificationPerPair": 26,
+    "meaning": "Historical subgate only; not capability/authority acceptance"
+  },
+  "sourceMap": [
+    {
+      "id": "policy-adr",
+      "classification": "accepted-policy",
+      "claim": "24h strict LAN boundary, request-start t0, deny/revoke/fence and recovery",
+      "source": "/Users/ayhanblt/Desktop/projects/kloda/docs/decisions/0003-secure-pairing-and-offline-authorization.md",
+      "section": "Eşleştirme /24 saat /İptal",
+      "evidenceLimit": "Policy, not runtime",
+      "sha256": "e0b9b2cd7980c802be6b2ec8d1027753ad41ee32567023a0f6849e33d957500c"
+    },
+    {
+      "id": "policy-security",
+      "classification": "accepted-policy",
+      "claim": "Supabase direction; control metadata only; peer and file authority separate",
+      "source": "/Users/ayhanblt/Desktop/projects/kloda/docs/security/secure-pairing-design.md",
+      "section": "Güven sınırları /Offline LAN",
+      "evidenceLimit": "No running auth integration",
+      "sha256": "2c51092c86f096b39b1af61978a9ba40c64abe4af295aee0fb5332c355222ed9"
+    },
+    {
+      "id": "policy-matrix",
+      "classification": "accepted-policy",
+      "claim": "Matrix verification; Kloda authority; same device key and continuity",
+      "source": "/Users/ayhanblt/.omp/agent/sessions/-Desktop-projects-kloda/2026-09-29T16-03-20-430Z_01a0ede8-02ee-774c-a272-9c739b055b8b/local/kloda-verification-authority-decision.md",
+      "section": "§§1–11",
+      "evidenceLimit": "Session decision; no SDK production adoption",
+      "sha256": "705f425e31faf20367b5c85ec0662c7b49208505ad385afb648b9bf8e91fcf75"
+    },
+    {
+      "id": "prior-profile",
+      "classification": "proposal",
+      "claim": "JWS/mTLS/Nest authority proposed, not selected",
+      "source": "/Users/ayhanblt/.omp/agent/sessions/-Desktop-projects-kloda/2026-09-29T16-03-20-430Z_01a0ede8-02ee-774c-a272-9c739b055b8b/local/kloda-authority-session-contract.md",
+      "section": "§§4–6",
+      "evidenceLimit": "UTF8 blocker historical superseded by patched SDK feasibility",
+      "sha256": "8f8fbb4a18d2ee78553cd40a6f88cf035c681bc810b82e4616a46bda857ff3d6"
+    },
+    {
+      "id": "acceptance-32",
+      "classification": "unverified",
+      "claim": "32 future authority acceptance targets",
+      "source": "/Users/ayhanblt/.omp/agent/sessions/-Desktop-projects-kloda/2026-09-29T16-03-20-430Z_01a0ede8-02ee-774c-a272-9c739b055b8b/local/kloda-authority-session-acceptance.md",
+      "section": "table01–32",
+      "evidenceLimit": "Not executed authority tests",
+      "sha256": "2be7cc726940c5e308bcb454744a49b3c5445e43b5a195c5b270cb24a69672de"
+    },
+    {
+      "id": "api-boundary",
+      "classification": "observed-evidence",
+      "claim": "Empty Nest AppModule; no authority provider in this module",
+      "source": "/Users/ayhanblt/Desktop/projects/kloda/apps/api/src/interface/http/app.module.ts",
+      "section": "AppModule",
+      "evidenceLimit": "Scoped code observation only",
+      "sha256": "0472c27a52a21ebecbf6b339b052adcd4bc5e8ef02ffe8860f8782687d0ebe32"
+    },
+    {
+      "id": "api-deps",
+      "classification": "observed-evidence",
+      "claim": "API manifest lists Nest runtime dependencies, no JOSE dependency",
+      "source": "/Users/ayhanblt/Desktop/projects/kloda/apps/api/package.json",
+      "section": "dependencies",
+      "evidenceLimit": "Does not prove all-repo absence",
+      "sha256": "3a89b17f81c69d75d7063da16a01a98e2b07a23d4af8b62b5ec1ebd16a2e06d2"
+    },
+    {
+      "id": "desktop-storage",
+      "classification": "observed-evidence",
+      "claim": "Direct WebDAV sync client plus local vault/journal",
+      "source": "/Users/ayhanblt/Desktop/projects/kloda/apps/desktop/electron/runtime/runtime.ts",
+      "section": "testStorage/runSync",
+      "evidenceLimit": "Not PC peer authority fence",
+      "sha256": "6a4111045f5d0f657070a2f18a22349a174c99025609048c74dc4bf8916a3f8c"
+    },
+    {
+      "id": "mobile-storage",
+      "classification": "observed-evidence",
+      "claim": "SecureStore password and Basic-auth HTTPS WebDAV",
+      "source": "/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/src/shared/api/webdav.ts",
+      "section": "saveWebDavCredentials/testWebDavWriteAccess",
+      "evidenceLimit": "Not capability/session auth",
+      "sha256": "2b267deaa55874b1a10bf6cd7e177fbd4ac3b61ed5b9272aebabc4914ad214f3"
+    },
+    {
+      "id": "tls-result",
+      "classification": "observed-evidence",
+      "claim": "Native TLS25 per pair, verification26 per pair, host8; SDK patch needed",
+      "source": "/tmp/kloda-same-key-tls.hjUS9L/RESULT.md",
+      "section": "Son doğrulama",
+      "evidenceLimit": "Historical native runs, no authority implementation",
+      "sha256": "849a2302bddb9d08394e8bad57fb75603dfb5c2dab5ab95b1763abdac4119476"
+    },
+    {
+      "id": "tls-report",
+      "classification": "observed-evidence",
+      "claim": "Native evidence passed; authority/network/production false",
+      "source": "/tmp/kloda-same-key-tls.hjUS9L/report.json",
+      "section": "results/limits",
+      "evidenceLimit": "No rerun in this task",
+      "sha256": "c4729b6cdf1a4a70015fed16936bd2079fffcb8344ae4c425b985db4579c50d7"
+    },
+    {
+      "id": "tls-lifetime",
+      "classification": "observed-evidence",
+      "claim": "Certificate cached only for Engine lifetime; verified_snapshot source",
+      "source": "/tmp/kloda-same-key-tls.hjUS9L/core/src/tls_commands.rs",
+      "section": "ensure_tls_identity/tls_open",
+      "evidenceLimit": "No persistent production lifecycle",
+      "sha256": "f74924c5fa054457aef016d633c5aa0f80c01f60ae7e7d6dae8e8cfd780732ba"
+    },
+    {
+      "id": "rfc8705",
+      "classification": "observed-evidence",
+      "source": "https://www.rfc-editor.org/rfc/rfc8705",
+      "section": "1–3.1,6.2,6.5",
+      "claim": "Full leaf DER binding; token binding separate from OAuth client authentication; trusted TLS metadata boundary",
+      "evidenceLimit": "Standard, not Kloda enrollment/admission runtime"
+    },
+    {
+      "id": "rfc7515",
+      "classification": "observed-evidence",
+      "source": "https://www.rfc-editor.org/rfc/rfc7515",
+      "section": "4–6",
+      "claim": "Protected header and exact JWS signing input",
+      "evidenceLimit": "No JWT generated or verified"
+    },
+    {
+      "id": "rfc7519",
+      "classification": "observed-evidence",
+      "source": "https://www.rfc-editor.org/rfc/rfc7519",
+      "section": "4.1",
+      "claim": "Registered claim semantics; exp on/after rejection; jti not mandatory one-shot",
+      "evidenceLimit": "No trusted clock or authorization implementation"
+    },
+    {
+      "id": "rfc8725",
+      "classification": "observed-evidence",
+      "source": "https://www.rfc-editor.org/rfc/rfc8725",
+      "section": "3.1,3.8–3.12",
+      "claim": "Algorithm allowlist, issuer/subject/audience/type and independent key trust",
+      "evidenceLimit": "Source-level validation policy only"
+    },
+    {
+      "id": "rfc7800",
+      "classification": "observed-evidence",
+      "source": "https://www.rfc-editor.org/rfc/rfc7800",
+      "section": "3",
+      "claim": "Confirmation claim possession semantics not a Kloda grant",
+      "evidenceLimit": "No account/device mapping proof"
+    },
+    {
+      "id": "rfc9864",
+      "classification": "observed-evidence",
+      "source": "https://www.rfc-editor.org/rfc/rfc9864",
+      "section": "2.1–2.2",
+      "claim": "Fully-specified JOSE Ed25519 versus deprecated polymorphic EdDSA; JOSE ES256 fully specified",
+      "evidenceLimit": "Not library/runtime/KMS compatibility"
+    },
+    {
+      "id": "rfc8446",
+      "classification": "observed-evidence",
+      "source": "https://www.rfc-editor.org/rfc/rfc8446",
+      "section": "4.4.2–4.4.4",
+      "claim": "CertificateVerify/Finished authentication in full TLS1.3",
+      "evidenceLimit": "No file authority or resumption policy proof"
+    },
+    {
+      "id": "jose-version",
+      "classification": "observed-evidence",
+      "source": "https://raw.githubusercontent.com/panva/jose/v6.2.12/package.json",
+      "section": "version/runtime",
+      "claim": "Candidate version6.2.12",
+      "evidenceLimit": "Read tagged source; not installed"
+    },
+    {
+      "id": "jose-types",
+      "classification": "observed-evidence",
+      "source": "https://raw.githubusercontent.com/panva/jose/v6.2.12/src/types.d.ts",
+      "section": "JWSAlgorithm/keys/validation",
+      "claim": "Exact algorithm identifiers and key types",
+      "evidenceLimit": "Types alone not runtime support"
+    },
+    {
+      "id": "jose-dispatch",
+      "classification": "observed-evidence",
+      "source": "https://raw.githubusercontent.com/panva/jose/v6.2.12/src/lib/jws_algorithms.ts",
+      "section": "JWS table",
+      "claim": "Ed25519 dispatch and ES256 P256/SHA256 backend",
+      "evidenceLimit": "Source-level support only"
+    },
+    {
+      "id": "jose-verifier",
+      "classification": "observed-evidence",
+      "source": "https://raw.githubusercontent.com/panva/jose/v6.2.12/src/lib/jws_verify.ts",
+      "section": "prepareVerify/verifySignature",
+      "claim": "Explicit algorithms validation and signature rejection; resolver sees unverified header",
+      "evidenceLimit": "No interoperability smoke"
+    },
+    {
+      "id": "jose-key-requirements",
+      "classification": "observed-evidence",
+      "source": "https://github.com/panva/jose/issues/210#jws-alg",
+      "section": "JWS key requirements",
+      "claim": "P256 key-family requirements",
+      "evidenceLimit": "Mutable official maintainer docs; source not KMS support"
+    },
+    {
+      "id": "rust-version",
+      "classification": "observed-evidence",
+      "source": "https://raw.githubusercontent.com/Keats/jsonwebtoken/v10.1.0/Cargo.toml",
+      "section": "version/features",
+      "claim": "Candidate10.1.0; crypto backend feature choice required",
+      "evidenceLimit": "Not built or installed"
+    },
+    {
+      "id": "rust-algs",
+      "classification": "observed-evidence",
+      "source": "https://raw.githubusercontent.com/Keats/jsonwebtoken/v10.1.0/src/algorithms.rs",
+      "section": "Algorithm/FromStr",
+      "claim": "ES256 and EdDSA supported identifiers; Ed25519 identifier absent",
+      "evidenceLimit": "No identifier relabeling or legacy downgrade"
+    },
+    {
+      "id": "rust-es256",
+      "classification": "observed-evidence",
+      "source": "https://raw.githubusercontent.com/Keats/jsonwebtoken/v10.1.0/src/crypto/rust_crypto/ecdsa.rs",
+      "section": "Es256Verifier",
+      "claim": "P256 SEC1 key and raw signature parsing verification backend",
+      "evidenceLimit": "No cross-runtime raw-r||s/import execution"
+    },
+    {
+      "id": "rust-validation",
+      "classification": "observed-evidence",
+      "source": "https://raw.githubusercontent.com/Keats/jsonwebtoken/v10.1.0/src/validation.rs",
+      "section": "Validation::new/validate/get_current_timestamp",
+      "claim": "leeway60, nbf false, spec-required helper limited fields, exp<now and SystemTime seconds",
+      "evidenceLimit": "Strict equality/trusted-time conservative gate remains unimplemented"
+    },
+    {
+      "id": "rust-key-docs",
+      "classification": "observed-evidence",
+      "source": "https://docs.rs/jsonwebtoken/10.1.0/jsonwebtoken/struct.DecodingKey.html",
+      "section": "EC import constructors",
+      "claim": "EC PEM/DER/components key representation APIs",
+      "evidenceLimit": "Import interoperability not executed"
+    },
+    {
+      "id": "node-crypto-docs",
+      "classification": "observed-evidence",
+      "source": "https://nodejs.org/docs/latest-v22.x/api/crypto.html",
+      "section": "X509Certificate.raw/publicKey; KeyObject.export",
+      "claim": "DER and public JWK/SPKI export APIs used in public inspection",
+      "observedDocumentationVersion": "22.23.3",
+      "runtimeVersion": "22.23.1",
+      "evidenceLimit": "Latest-v22 URL mutable; actual inspection exit0 on22.23.1"
+    },
+    {
+      "id": "binding-inspection",
+      "classification": "observed-evidence",
+      "source": "/tmp/kloda-authority-capability.XanvUI/binding-evidence.json",
+      "section": "pairs/checks/limits",
+      "claim": "Public certificate DER/JWK32/native peer/SAS key comparisons and DER versus SPKI hashes; recorded TLS metadata",
+      "evidenceLimit": "Not live TLS, peer-DER admission export, JWT, enrollment, renewal or authority proof"
+    },
+    {
+      "id": "capability-review",
+      "classification": "observed-evidence",
+      "source": "history://CapabilityProfileReview",
+      "section": "Initial explanation/findings and follow-up",
+      "claim": "Separate read-only RFC/tagged-source profile review, no actionable findings",
+      "evidenceLimit": "Document review, not runtime/security certification"
+    },
+    {
+      "id": "rust-decoding-format",
+      "classification": "observed-evidence",
+      "source": "https://raw.githubusercontent.com/Keats/jsonwebtoken/v10.1.0/src/decoding.rs",
+      "section": "from_ec_components/from_ec_der/from_jwk",
+      "claim": "JWK x/y becomes SEC1 point; from_ec_der raw pass-through, not ASN.1 SPKI parser; from_jwk not curve/issuer/profile policy",
+      "evidenceLimit": "Public import/signature interoperability not executed"
+    },
+    {
+      "id": "format-review-follow-up",
+      "classification": "observed-evidence",
+      "source": "agent://CapabilityProfileReview",
+      "section": "explanation/findings",
+      "claim": "Independent review of final SEC1/JWK/raw-from_ec_der key-format clarification, no defects",
+      "evidenceLimit": "No runtime import/signature/KMS execution"
+    },
+    {
+      "id": "acceptance-review",
+      "classification": "observed-evidence",
+      "source": "agent://AcceptancePolicyReview",
+      "section": "explanation/findings",
+      "claim": "Separate original32/policy/36-case traceability review, no actionable findings",
+      "evidenceLimit": "Document review; all36 targets not-executed"
+    }
+  ],
+  "originalArtifactSha256": {
+    "report": "310e1894c380dddd309a7dae54a671b324c26de06ab3710cce845c0a19e52879",
+    "sourceMap": "47161cfdf86169d81fa46fd4cff84dbffc38a7c56fafd0d36ab39211c6072545",
+    "bindingEvidence": "97d8512dd3e45a20ae855df04b76d3bc938e245ebe854ae642a7c57b7b0abefc",
+    "exactStdout": "10ee94a4811aef14e5c76c00ed523cdaa310d1b3d3320e564ac8aea2ce391be4"
+  },
+  "historicalLimits": "Local source hashes and temporary paths are point-in-time provenance, not current repo hashes. Exact URL access timestamps were not recorded. Reviewer agent links are historical only; durable docs carry conclusions. Inspector removed; no rerun performed during consolidation."
+}

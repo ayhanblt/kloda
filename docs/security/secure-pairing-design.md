@@ -2,11 +2,11 @@
 
 ## Durum ve kapsam
 
-Bu belge [ADR 0003](../decisions/0003-secure-pairing-and-offline-authorization.md) politikasının tasarım sözleşmesidir. Uygulanmış API, wire şeması, DB migration veya seçilmiş kriptografik protokol değildir. Üretim kodu, PoC kaynakları, cihazlar, bağımlılıklar, cloud hesapları ve hosting bu tasarım çalışmasında değiştirilmez.
+Bu belge [ADR0003](../decisions/0003-secure-pairing-and-offline-authorization.md) politikası, [ADR0004](../decisions/0004-certificate-bound-capability-and-authority-responsibilities.md) capability/mTLS yönleri ve [ADR0007](../decisions/0007-matrix-verification-and-device-continuity.md) Matrix verification-only sınırının hedef sözleşmesidir. Yönler kabul edilmiş; API/wire/DB veya production crypto implementation doğrulanmış değildir. ES256 provisional, platform/TLS/device-key production gate açıktır; dosya key-derivation/manifest ve actual enrollment/time/fence uygulaması ayrı gate'tir.
 
 Hedef, USB test provisioning/signaling yerine geçecek güven sınırlarını tanımlamaktır. Aynı hesap, PC'de bir kez onay ve iki uçta transcript'e bağlı kısa doğrulama seçilmiştir; QR zorunlu değildir. İlk pairing veya recovery sonrası yeniden pairing, normal otomatik/manual sync'ten ayrı kullanıcı etkileşimidir.
 
-Fiziksel Android transport matrisi **14 pass / 1 direct-connectivity inconclusive**; genel `complete: false` ve production-ready false korunur. iOS: simulator inconclusive; physical-device validation pending; architecture retained; not production-ready. Bu sonuçlar production pairing, key management, gerçek signaling servisi veya iOS background doğrulaması değildir.
+[Transport evidence](poc-transport-evidence.md): physical Android **14pass/1direct-connectivity inconclusive**, `complete:false`/production false; eski iOS URLSession simulator **inconclusive**, physical pending, architecture retained. [Native verification/TLS](poc-native-verification-evidence.md) Rust17, native52, later TLS25/pair+host8 başarılarını ayrı evrelerde kaydeder; iOS simulator native pass eski background-transport inconclusive sonucunu kapatmaz. Hiçbiri product authority veya fiziksel SAS/provider/backups proof değildir.
 
 ## Güven sınırları
 
@@ -21,7 +21,7 @@ Fiziksel Android transport matrisi **14 pass / 1 direct-connectivity inconclusiv
 | TURN yetkisi | Payload relay hizmetini kullanabilme | Peer trust, dosya erişimi veya recovery yetkisi |
 | Dosya receipt'i | Yetkili işlem için doğrulanmış durable part/final sonucu | Yeni işlemler veya journal resume için geçerli erişim yetkisi |
 
-Supabase Auth + Postgres hesap/cihaz/eşleşme metadata'sı için seçilmiş ürün yönüdür; çalışan entegrasyon olduğu varsayılmaz. NestJS'in önerilen kontrol rolü hesap/cihaz yetkisini denetlemek ve uçları buluşturmaktır; kesin hosting ve üretim API seçilmemiştir. Backend'e dosya byte'ı, uç private key'i, pair secret, plaintext dosya kataloğu veya medya hash listesi verilmez. Medya ve dosya/album metadata'sı uçlar arası koruma kapsamındadır; merkezi dosya indeksi eklenmez.
+[ADR0006](../decisions/0006-account-mfa-and-recovery-policy.md) Supabase Auth+Postgres ve MFA/operation-step-up/recovery politikasını kabul eder; entegrasyon yoktur. [ADR0004](../decisions/0004-certificate-bound-capability-and-authority-responsibilities.md) Nest control–PC scope/admission/file/fence ayrımı kabul; ES256 provisional/platform-TLS-device-key production gate açık. Hosting/custody ve gerçek API seçilmedi. Backend file bytes/endpoint private key/pair secret/plaintext media catalog/media hash listesi tutmaz; [ADR0005](../decisions/0005-computer-first-files-and-photos-backup.md) PC-first medya/organizasyon metadata'sı E2EE sınırıdır.
 
 Signaling kontrol metadata'sını, TURN payload byte'larını taşır. Relay'in içerik okuyamaması hedefi üretim session/key derivation ve peer kimlik bağlamının ayrıca doğrulanmasını gerektirir. TURN credential dosya anahtarı değildir; Cloudflare Tunnel ve TURN farklı hizmetlerdir. PoC'de USB üzerinden verilen test pair secret üretim provisioning yolu olmaz.
 
@@ -62,7 +62,7 @@ Private key'ler uçlarda OS korumalı storage'da kalır; backend public key kayd
 
 Dosya kanalı açılmadan peer, doğrulanmış kimliğine ait ilgili private key'in sahipliğini kanıtlamalıdır. Hesap oturumu, cihaz adı veya geçmiş journal bu güncel sahiplik ispatının yerine geçmez.
 
-Her yeni session, mevcut doğrulanmış peer kimliğine ve izinli bağlama bağlanmalıdır. Signaling servisinin key/SDP/aday değiştirmesi başka bir peer'e güven veya dosya yetkisi açamaz. Session bağlama, sertifika/fingerprint politikası ve key derivation tam üretim protokolünün ayrıca onaylanacak parçalarıdır; taşıma bağlantısının açılması yetki kabulü değildir.
+Her yeni session verified peer ve izinli bağlama bağlanır; signaling key/SDP/aday değiştirmesi başka peer'e trust/authority açamaz. ADR0004 fresh full same-device-key TLS1.3 + exact leaf-DER-bound capability yönünü seçti; actual leaf SPKI ayrıca SAS snapshot'ıyla eşittir. [Profile](capability-profile.md) byte serialization/enrollment/clock/fence production implementation'ını seçilmiş veya kanıtlanmış saymaz; taşıma bağlantısı tek başına admission değildir.
 
 Normal onaylı cihaz yedeklemesi her çalışmada yeniden TOTP istemez. Yeni cihaz, yeni kapsam veya recovery sonrası pairing bu normal kullanım istisnasından yararlanamaz. Korunmuş transfer UUID, ciphertext, eski receipt ve journal yalnız veri devamlılığı kanıtıdır; yetki kontrolünü atlayamaz.
 
@@ -118,27 +118,27 @@ MFA recovery code hesap/faktör kurtarma ispatıdır; peer kısa doğrulama bilg
 
 ## Doğrulanmış kanıt ve sınırları
 
-Kaynaklar tasarım sırasında okunmuştur. Bu tablo kitaplık seçimi, uygulama audit'i veya production güvenlik kanıtı değildir.
+Aşağıdaki eski primitive/provider source araştırması tarihsel gözlemdir; current Matrix yönü ADR0007, qualified capability yönü ADR0004'tür. Source support product library adoption, audit veya runtime proof değildir. Sonraki kanıtlar [native/TLS](poc-native-verification-evidence.md), [transport](poc-transport-evidence.md) ve [public inspection](evidence/certificate-binding-inspection.json) içinde ayrı kayıtlıdır.
 
 | Kaynak / sürüm | Bulgular | Kanıtlanmayan sınır |
 |---|---|---|
-| [vodozemac SAS rustdoc](https://docs.rs/vodozemac/latest/vodozemac/sas/index.html), okunan sürüm **0.11.1** | DH tabanlı kısa doğrulama primitive'i ve ZRTP hash commitment gerekçesi belgeleniyor | Örnek iki uç DH/SAS çıktısını karşılaştırır; tam uygulama commitment/kimlik bağlama/cancel/key-confirmation state machine'i değildir. Aday kitaplık; seçilmiş protokol veya Kloda audit'i değil |
+| [vodozemac SAS rustdoc](https://docs.rs/vodozemac/latest/vodozemac/sas/index.html), observed **0.11.1** | DH/SAS primitive ve ZRTP commitment gerekçesi kaynakta mevcut | Bare primitive full protocol/key-confirmation/cancel state machine'i değildir; ADR0007 Matrix full verification yönünü seçti, standalone custom-SAS/bare-vodozemac alternatif seçmedi |
 | [Supabase sign-out rehberi](https://supabase.com/docs/guides/auth/signout), sürümlenmemiş çevrimiçi rehber | Global logout refresh token'ları iptal eder; eski access JWT `exp` zamanına kadar geçerli kalabilir | Logout tek başına PC dosya yetkisini anında iptal etmez. Merkezi cihaz/pair/session iptal denetimi ve yerel fence ayrıca gerekir |
 | [API app module](../../apps/api/src/interface/http/app.module.ts), mevcut repository kaynağı | `@Module({})` boş | Hesap kontrolü, signaling, cihaz iptali veya production pairing servisi uygulanmış değil |
 | [Electron credential vault](../../apps/desktop/electron/runtime/vault.ts), mevcut repository kaynağı | Yalnız `webdavPassword`; `safeStorage.isEncryptionAvailable()` ve Linux `basic_text` engeliyle yazma tarafı fail-closed | Pairing key store değil; mobil/desktop non-exportable key, background erişim veya secure clock garantisi kanıtı değil |
-| [ADR 0002, Sınır](../decisions/0002-first-vertical-slice-scope.md#sınır), mevcut karar | Encryption/key yönetimi, relay teknolojisi ve backend'in rolünü belirlemiyor | Bu tasarım bunları uygulanmış/onaylanmış üretim seçimine dönüştürmez |
+| [ADR0002 Sınır](../decisions/0002-first-vertical-slice-scope.md#sınır) | İlk WebDAV slice medya crypto/relay/backend rolü seçmedi | Sonraki ADR0004/0005/0006/0007 yönleri kayıtlı; hosting/runtime/production gate'ler açık, eski slice boundary güncel ürün politikasını veto etmez |
 
 ## İmplementasyon öncesi onay kapıları
 
 | Açık konu | Gerekli karar / doğrulama | Bugünkü sınır |
 |---|---|---|
-| Tam SAS protokolü ve kitaplık | Commitment, transcript/identity/role bağlama, iki onay, mutual key-confirmation, cancel/replay/restart akışlarının tamamı; bağımsız review | Primitive gösterimi yeterli değil; vodozemac seçilmedi |
-| Üretim session ve key derivation | Peer kimliğine bağlı oturum ve dosya koruma protokolü; anahtar yaşam döngüsü | Yeni algoritma, cipher veya sertifika sistemi burada seçilmedi |
+| Tam SAS protokolü ve native SDK | Matrix standart verification-only yönü ADR0007 ile kabul; local confirmation/MAC/done/native key snapshot ve packaging/provider/UX kanıtı gerekir | Isolated Matrix0.19.1 native PoC var; production SDK/version/fork support ve fiziksel insan SAS gate'i açık; custom/bare-SAS alternatif seçilmedi |
+| Üretim session ve key derivation | Peer kimliğine bağlı oturum ve dosya koruma protokolü; anahtar yaşam döngüsü | ADR 0004 capability/mTLS ve certificate lifecycle yönünü kabul eder; ES256 provisional, platform/TLS/device-key ve ürün key-derivation doğrulaması açık |
 | OS key storage adapter'ları | Android/iOS/Electron storage ve yaşam döngüsü; kayıp/erişilemez anahtarda fail-closed davranış | Native API/paket, hardware non-exportability ve background accessibility doğrulanmadı |
 | Güvenilir süre/fence uygulaması | Sleep/restart dahil süre üst sınırı, durable iptal ve commit yarışının gerçek platform ispatı | Güvenilir süre kanıtı yoksa online doğrulama beklenir; yeni offline pencere yaratılmaz |
-| USB'siz signaling ve kontrol servisi | Yetki denetimi, metadata sınırları, hosting ve gerçek uçlarla entegrasyon | NestJS rolü öneri; servis/hosting kurulmadı, hesap/cloud ayarları değiştirilmedi |
-| Minimum OS | Native gereksinimler ve destek kapsamının Ayhan onayı | Minimum sürüm burada seçilmedi |
-| Fiziksel iOS | Gerçek cihazda transport, storage ve background davranışı | Simulator inconclusive; physical-device validation pending; architecture retained; not production-ready |
+| USB'siz signaling ve kontrol servisi | Yetki denetimi, metadata sınırları, hosting ve gerçek uçlarla entegrasyon | NestJS merkezi control–PC yerel enforcement ayrımı ADR 0004 ile kabul edildi; servis/hosting kurulmadı, gerçek hesap/cihaz entegrasyonu ve hosting kararı açık |
+| OS compatibility/release minimum | iOS16.4+/Android7/API24 kullanıcı destek hedefi, toolchain/API/native crypto compatibility ve release minimum approval/validation | Generated deployment target veya experimental APK minSdk product proof değildir; eski/current physical test gerekli |
+| Fiziksel iOS | Gerçek trust/transport/storage/background/SAS/key provider | URLSession simulator inconclusive; sonraki simulator SAS/TLS pass ayrı; physical-device validation required, not production-ready |
 
 Bu kapıların kapatılması ayrı onay ve implementasyon işidir. Storage yok/uygunsuzken plaintext key fallback veya sunucudan private-key recreation yapılmaz. Geçici OS erişim engeli erişimi bekletir; gerçekten kayıp anahtar yeni pairing gerektirir. Bu durumlar normal PC dosyalarını silmez.
 
@@ -163,4 +163,4 @@ Aşağıdakiler implementasyonun sağlaması gereken tasarım kabul sonuçlarıd
 
 Bu dokümanın kabulü, [ADR 0003](../decisions/0003-secure-pairing-and-offline-authorization.md) ile bağımsız bir tutarlılık geçişinde karşılaştırılır: 24 saat başlangıcı ve tam sınırda ret, online ret önceliği, yerel iptalin hemen etkisi, çevrimdışı merkezi recovery gecikmesi ve veri koruma aynı olmalıdır. On senaryonun kararları ve repository çapraz bağlantıları kontrol edilir.
 
-Doküman incelemesi çalışan güvenlik protokolünü doğrulamaz. Bu görevde fiziksel PoC, test/build/lint veya ürün runtime'ı yeniden çalıştırılmaz; cihaz/network/cloud değişikliği yapılmaz. Üretim implementasyonu onay kapıları kapatıldıktan sonra ayrı davranış testleri, gerçek platform smoke'ları ve güvenlik incelemesi gerektirir.
+Historical ve güncel belge review çalışan güvenlik protokolünü doğrulamaz. Bu konsolidasyon fiziksel PoC/test/build/runtime'ı yeniden çalıştırmadı; code/device/network/cloud değiştirmedi. [Production/physical gates](production-gates.md) ve [36 authority target](capability-acceptance.md) ayrı scoped gerçek platform smoke/security review gerektirir; [session coverage index](../implementation/session-documentation-index.md) kritik karar ve kanıtların kalıcı karşılığını tutar.

@@ -93,29 +93,31 @@ The logo specifically uses `#292524` canvas, `#F5F5F4` ring, and `#10B981` cente
 
 ## Onboarding mapping
 
+This table records the historical WebDAV-first visual baseline, not the complete current product contract. [ADR0005](../decisions/0005-computer-first-files-and-photos-backup.md) subsequently selected PC-first/general files and default opportunistic Live; [ADR0006](../decisions/0006-account-mfa-and-recovery-policy.md) records account/MFA. Source assets remain read-only; these policy updates do not approve a redesigned screen or claim implemented UI.
+
 | AGENTS.md section 4 requirement | Stitch reference | Coverage |
 | --- | --- | --- |
 | Open directly to first setup; do not start with “Add storage” | `onboarding_folder_selection` is the initial “Step 1 of 2” screen; Add New Destination exists only under post-onboarding storage management | Covered |
-| Select sync folders | Curated Starter, Camera Roll, Screenshots, WhatsApp & Downloads, and Raw/Lightroom rows with toggles; select-all and selected-count summary | Covered |
-| Select 12 or 24 hour automatic interval | The same screen presents Every 12 hours and Every 24 hours cards, plus an Instant / Live Sync card | Covered: 12/24 hours configure automatic sync; the Instant / Live Sync control maps only to manual Sync Now and does not replace the schedule |
+| Select sync folders | Curated Starter, Camera Roll, Screenshots, WhatsApp & Downloads, and Raw/Lightroom rows with toggles; select-all and selected-count summary | Partial: Files select-all conflicts with ADR0001/0005 and must not be implemented; explicit multiple sources and Photos permissions remain separate |
+| Live default or12/24 schedule, plus manual Sync Now | Every12/24 hours and ambiguous Instant / Live Sync card | Historical first-slice mapping was manual Sync Now; current Live means first OS opportunity, not continuous realtime. Distinct policy now exists; approved visual/interaction adaptation is still missing |
 | Enter storage address and credentials for WebDAV/SMB/other | Storage setup has Home NAS, WebDAV, and Local SMB tabs plus host, path, username, and password fields | Partial: no explicit “other” protocol path; protocol-specific constraints are incomplete |
 | Run connection test | Loading “Testing connection…” card, direct-success result, metric cells, and Test Again action | Covered for loading and direct success only |
 
-The visual order on the first screen is folders, then auto-sync frequency, then Continue to Storage Setup. This preserves AGENTS.md’s required sequence even though the reference groups the first two conceptual steps in one screen. The existing Instant / Live Sync visual must be presented as **Sync Now** manual sync unless a future decision defines a distinct meaning.
+The source layout groups folders then frequency before Storage Setup. This is historical WebDAV visual order, not approval of a PC-first account/approval flow. ADR0005 now defines distinct opportunistic Live and manual Sync Now; a source label must not silently collapse them or promise continuous execution. Current UI design adaptation requires review against that policy without editing source assets.
 
 ## Missing states
 
 - **Onboarding:** no permission request/denial, no empty or unavailable folder pool, no zero-selection continue state, field validation, invalid-address feedback, or explicit “other” storage-protocol path.
 - **Connection test:** no authentication failure, unreachable host, timeout, malformed address, insufficient-space, unsupported protocol, or retry-after-failure result. No visual result confirms the required WAN-IP versus public-IP comparison or a CGNAT decision.
-- **Relay:** no distinct CGNAT / HTTP(S)-relay active state exists. The source's general relay wording is interpreted through AGENTS.md: remote relay use is WebDAV-only; SMB remains LAN-only. The UI still needs an explicit remote-availability explanation for the selected protocol.
+- **Relay:** no distinct CGNAT/HTTP(S) relay state. WebDAV relay/SMB LAN-only rules apply to advanced storage; PC LAN/remote routing is a separate retained research candidate, not adopted Cloudflare/TURN/Tunnel UI. No relay/source success graphic is connectivity or authority proof.
 - **Sync:** pending, active, paused, completed, queued, sleeping destination, Wi‑Fi wait, and per-photo backed-up/uploading/not-backed-up are represented. Failed, canceled, partially completed, conflict, quota/capacity-exhausted, and retryable item states are not.
 - **Gallery:** no empty library, no loading/skeleton, no media-load failure, no search state, no no-filter-results state, and no photo-deletion/error state.
 - **Storage:** no destination-connection failure, unavailable/remotely unreachable destination, credential expiry, add/edit storage form, or confirmation/error flow for destructive local pruning.
-- **Migration:** AGENTS.md requires avoiding duplicate upload of existing FolderSync media. No detection, scan progress, matching result, ambiguity, or review state is shown.
+- **Migration:** SHA256 content+durable record is selected by ADR0005; scan/progress/ambiguity/review/error states and implementation remain missing. Existing FolderSync media was not scanned or modified.
 
 ## Conflicts with AGENTS.md
 
-No unresolved design conflict remains. Approved sync, relay, storage, and naming interpretations are recorded in **Onboarding mapping** and **Implementation notes**; remaining design coverage gaps are listed under **Missing states** and **Open questions**.
+Policy/design coverage remains incomplete: source Files select-all conflicts with approved explicit selection; legacy Live/manual label is no longer a complete mapping; PC-first/account/scope/MFA/restore/conflict states are missing. This document records these gaps, does not resolve them by inventing a new design or treating prototype script behavior as authority.
 
 ## Implementation notes
 
@@ -123,19 +125,19 @@ No unresolved design conflict remains. Approved sync, relay, storage, and naming
 - Preserve the source’s mobile shells and its desktop/tablet visual guidance, but do not select a frontend framework, navigation library, platform configuration, bundle identifier, or desktop runtime.
 - Do not treat demonstration HTML values as production configuration. The source includes hostnames, paths, usernames, and a password-looking example value; real values must remain user input and never enter the repository.
 - The source JavaScript is visual-prototype behavior only: fixed delays, alerts, and optimistic state changes do not define runtime behavior, validation, relay selection, storage protocols, security, or error handling.
-- Implement **Sync Now** as manual instant sync alongside the selected 12/24-hour schedule. Do not infer continuous real-time behavior from the legacy “Live Sync” label.
+- Keep manual **Sync Now** independent. Current default Live is opportunistic first OS execution opportunity (ADR0005), not continuous realtime;12/24 mode does not upload immediately on change detection. Historical manual-only mapping no longer defines all current policy.
 - When rendering storage choices, show that WebDAV supports direct remote access or HTTP(S) relay when needed, while SMB is available only on the local LAN.
 - Replace legacy product strings in future application UI with the approved Kloda display name; do not modify the Stitch source assets themselves.
 
 ## Current implementation status
 
-- The existing mobile UI implements only the first setup controls: one Files folder selection and 12/24-hour schedule preference. It is not yet a visual implementation of the reference's folder inventory, selected-count summary, storage connection, queue, or tab shells.
-- The existing Electron renderer implements a functional source → storage → activity sequence, but has not yet received a visual review against this reference's responsive shells, typography, Material Symbols, and supplied logo.
-- No actual-device or visual screenshot comparison has been recorded. Do not represent the current UI as Stitch-complete until that review has happened.
+- Existing product baseline state is [first-vertical-slice-status.md](../implementation/first-vertical-slice-status.md): Files/Photos source/schedule/WebDAV setup foundations, incomplete mobile transfer/activity/native scheduling and desktop recovery. It is not implemented PC-first receiver/account/Live/restore/conflict UI.
+- Electron source→storage→activity foundations have not passed the full Stitch responsive/token/state visual acceptance.
+- Product onboarding/Backup Activity physical/visual comparison is not validated. Native PoC diagnostic screenshots/physical transport UI are different surfaces and do not make product UI Stitch-complete.
 
 ## Open questions
 
 1. Should folder and schedule selection remain combined in one visual step, or should they be separate screens while preserving the mandated order?
 2. What exact presentation follows the connection test for public-IP direct access versus CGNAT WebDAV relay access?
 3. Which validation, failure, retry, permission, empty, loading, and migration-deduplication states require approved designs?
-4. Which parts of the storage-management and multi-destination concepts are in scope for the first vertical slice, given the unresolved gallery and migration scope?
+4. What approved designs cover the current PC-first/Live/account/Files–Photos behavior while retaining advanced WebDAV/SMB? Product scope and migration hash direction are selected, but gallery/search scope and visual adaptation/implementation are still open.

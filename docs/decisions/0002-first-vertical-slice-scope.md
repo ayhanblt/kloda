@@ -1,9 +1,11 @@
 # ADR 0002 — İlk vertical slice kapsamı
 
 - Tarih: 2026-09-29
-- Durum: Kabul edildi
+- Durum: İlk WebDAV slice kapsamı kabul edildi; güncel PC-first ürün yönü ADR0005, bu kaydı tamamlanmış implementasyon yapmaz
 - Karar sahibi: Ayhan
 
+
+2026-10-04 notu: bu kayıt ilk WebDAV delivery baseline'ının tarihsel kapsamıdır. Sonraki genel dosya/PC alıcı/default Live/Files–Photos kararları [ADR0005](0005-computer-first-files-and-photos-backup.md), account politikası [ADR0006](0006-account-mfa-and-recovery-policy.md), authority yönü [ADR0004](0004-certificate-bound-capability-and-authority-responsibilities.md) içindedir. Baseline'ın kalan native transfer/recovery/scheduler/UI smoke kabulü [status](../implementation/first-vertical-slice-status.md) içinde açık tutulur; yeni ürün yönü eski işleri done yapmaz.
 ## Karar
 
 İlk vertical slice Android, iOS ve Electron desktop'ta onboarding, kaynak seçimi, 12/24 saatlik yerel zamanlı otomatik sync, Sync Now, WebDAV credentials, WebDAV erişim/yazma testi ve tek kaynak işi içerir.

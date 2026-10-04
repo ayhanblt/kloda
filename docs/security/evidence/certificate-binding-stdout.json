@@ -1,0 +1,606 @@
+{
+  "status": "pass",
+  "command": "node /tmp/kloda-authority-capability.XanvUI/inspect-tls-evidence.mjs /tmp/kloda-same-key-tls.hjUS9L",
+  "exitCode": 0,
+  "node": "v22.23.1",
+  "inputHashes": {
+    "/tmp/kloda-same-key-tls.hjUS9L/evidence/android-pc/tls-cases.json": "df20fc5bac70a03789f0dda252adfd27ea521f1fda6bcdbcb2709afda3833281",
+    "/tmp/kloda-same-key-tls.hjUS9L/evidence/ios-pc/tls-cases.json": "17b32c8cf315f85d1804391b28ebb0e9c3f000e0a9d96271a3d37c3c3633ed15"
+  },
+  "pairs": {
+    "android-pc": {
+      "PC": {
+        "ed25519": "oNjtxOZdtbPzpuFZBrvYnH0qGaKc0xcgqLkVBgNxfGU",
+        "certificateThumbprint": "JYoq_r-rkcL4j-nnpyn626pSAWXwI8vxumXBerXRpaw",
+        "spkiThumbprint": "on-LVaDwfOLU0bHusQSvyIoXJNy14DEyXqPkxbq0g-o",
+        "protocol": "TLSv1_3",
+        "alpn": "kloda-tls-poc/1",
+        "certificateVerifySignCount": 1,
+        "peerProbeReceived": true
+      },
+      "ANDROID": {
+        "ed25519": "o30TffXFFYFw+oChY9Qb3ZC2C4sxrwmEgW7kPgeTiMI",
+        "certificateThumbprint": "GKhM4FfQwF2NljPgu1TzArlQy2PBuBuIEG_86DZhDDs",
+        "spkiThumbprint": "4TJDZM0_feghbimWS7AgZBmvbQE6QSecR4t7HDKmyfs",
+        "protocol": "TLSv1_3",
+        "alpn": "kloda-tls-poc/1",
+        "certificateVerifySignCount": 1,
+        "peerProbeReceived": true
+      }
+    },
+    "ios-pc": {
+      "PC": {
+        "ed25519": "/BoOlk8RLhMMWCNCF47m/EmE4addcS4NYUfvgUKDXRQ",
+        "certificateThumbprint": "gRvJMpThFUvn474oNc15AKpCwzCWKT_-FxMdCasLjDI",
+        "spkiThumbprint": "7MXDCt0h3R3H_G7BbMOlCHkMB4NPmGrBd1uYJQaqxXE",
+        "protocol": "TLSv1_3",
+        "alpn": "kloda-tls-poc/1",
+        "certificateVerifySignCount": 1,
+        "peerProbeReceived": true
+      },
+      "IOS": {
+        "ed25519": "aTrxzpY88MQZqeusVoDvbx/T3E9uZTfvnLwqVBWZxzU",
+        "certificateThumbprint": "t1h5cf6g6RbP1_xFdYg7uC8lQ7johRSpRd6vA6mM0cE",
+        "spkiThumbprint": "52vebTrbsnSbtwoHxZyLDDl_Y7j2Snjj7mkeKgVYfNQ",
+        "protocol": "TLSv1_3",
+        "alpn": "kloda-tls-poc/1",
+        "certificateVerifySignCount": 1,
+        "peerProbeReceived": true
+      }
+    }
+  },
+  "checks": [
+    {
+      "id": "android-pc.oneHappy",
+      "passed": true,
+      "observed": 1,
+      "expected": 1
+    },
+    {
+      "id": "android-pc.status",
+      "passed": true,
+      "observed": "pass",
+      "expected": "pass"
+    },
+    {
+      "id": "android-pc.shape",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "android-pc.PC.fields",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "android-pc.PC.der.type",
+      "passed": true,
+      "observed": "string",
+      "expected": "string"
+    },
+    {
+      "id": "android-pc.PC.der.canonical",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "android-pc.PC.derBound",
+      "passed": true,
+      "observed": 342,
+      "expected": "1..16384"
+    },
+    {
+      "id": "android-pc.PC.rawDer",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "android-pc.PC.kty",
+      "passed": true,
+      "observed": "OKP",
+      "expected": "OKP"
+    },
+    {
+      "id": "android-pc.PC.crv",
+      "passed": true,
+      "observed": "Ed25519",
+      "expected": "Ed25519"
+    },
+    {
+      "id": "android-pc.PC.publicOnly",
+      "passed": true,
+      "observed": false,
+      "expected": false
+    },
+    {
+      "id": "android-pc.PC.jwk.type",
+      "passed": true,
+      "observed": "string",
+      "expected": "string"
+    },
+    {
+      "id": "android-pc.PC.jwk.canonical",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "android-pc.PC.keyLength",
+      "passed": true,
+      "observed": 32,
+      "expected": 32
+    },
+    {
+      "id": "android-pc.PC.identityKey",
+      "passed": true,
+      "observed": "oNjtxOZdtbPzpuFZBrvYnH0qGaKc0xcgqLkVBgNxfGU",
+      "expected": "oNjtxOZdtbPzpuFZBrvYnH0qGaKc0xcgqLkVBgNxfGU"
+    },
+    {
+      "id": "android-pc.PC.nativePeer",
+      "passed": true,
+      "observed": "oNjtxOZdtbPzpuFZBrvYnH0qGaKc0xcgqLkVBgNxfGU",
+      "expected": "oNjtxOZdtbPzpuFZBrvYnH0qGaKc0xcgqLkVBgNxfGU"
+    },
+    {
+      "id": "android-pc.PC.sasPeer",
+      "passed": true,
+      "observed": "oNjtxOZdtbPzpuFZBrvYnH0qGaKc0xcgqLkVBgNxfGU",
+      "expected": "oNjtxOZdtbPzpuFZBrvYnH0qGaKc0xcgqLkVBgNxfGU"
+    },
+    {
+      "id": "android-pc.PC.tls13",
+      "passed": true,
+      "observed": "TLSv1_3",
+      "expected": "TLSv1_3"
+    },
+    {
+      "id": "android-pc.PC.alpn",
+      "passed": true,
+      "observed": "kloda-tls-poc/1",
+      "expected": "kloda-tls-poc/1"
+    },
+    {
+      "id": "android-pc.PC.counter",
+      "passed": true,
+      "observed": 1,
+      "expected": "integer>=1"
+    },
+    {
+      "id": "android-pc.PC.probe",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "android-pc.PC.derThumbprint",
+      "passed": true,
+      "observed": "JYoq_r-rkcL4j-nnpyn626pSAWXwI8vxumXBerXRpaw",
+      "expected": "JYoq_r-rkcL4j-nnpyn626pSAWXwI8vxumXBerXRpaw"
+    },
+    {
+      "id": "android-pc.PC.notSpkiHash",
+      "passed": true,
+      "observed": {
+        "certificate": "JYoq_r-rkcL4j-nnpyn626pSAWXwI8vxumXBerXRpaw",
+        "spki": "on-LVaDwfOLU0bHusQSvyIoXJNy14DEyXqPkxbq0g-o"
+      },
+      "expected": "different"
+    },
+    {
+      "id": "android-pc.ANDROID.fields",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "android-pc.ANDROID.der.type",
+      "passed": true,
+      "observed": "string",
+      "expected": "string"
+    },
+    {
+      "id": "android-pc.ANDROID.der.canonical",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "android-pc.ANDROID.derBound",
+      "passed": true,
+      "observed": 347,
+      "expected": "1..16384"
+    },
+    {
+      "id": "android-pc.ANDROID.rawDer",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "android-pc.ANDROID.kty",
+      "passed": true,
+      "observed": "OKP",
+      "expected": "OKP"
+    },
+    {
+      "id": "android-pc.ANDROID.crv",
+      "passed": true,
+      "observed": "Ed25519",
+      "expected": "Ed25519"
+    },
+    {
+      "id": "android-pc.ANDROID.publicOnly",
+      "passed": true,
+      "observed": false,
+      "expected": false
+    },
+    {
+      "id": "android-pc.ANDROID.jwk.type",
+      "passed": true,
+      "observed": "string",
+      "expected": "string"
+    },
+    {
+      "id": "android-pc.ANDROID.jwk.canonical",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "android-pc.ANDROID.keyLength",
+      "passed": true,
+      "observed": 32,
+      "expected": 32
+    },
+    {
+      "id": "android-pc.ANDROID.identityKey",
+      "passed": true,
+      "observed": "o30TffXFFYFw-oChY9Qb3ZC2C4sxrwmEgW7kPgeTiMI",
+      "expected": "o30TffXFFYFw-oChY9Qb3ZC2C4sxrwmEgW7kPgeTiMI"
+    },
+    {
+      "id": "android-pc.ANDROID.nativePeer",
+      "passed": true,
+      "observed": "o30TffXFFYFw+oChY9Qb3ZC2C4sxrwmEgW7kPgeTiMI",
+      "expected": "o30TffXFFYFw+oChY9Qb3ZC2C4sxrwmEgW7kPgeTiMI"
+    },
+    {
+      "id": "android-pc.ANDROID.sasPeer",
+      "passed": true,
+      "observed": "o30TffXFFYFw+oChY9Qb3ZC2C4sxrwmEgW7kPgeTiMI",
+      "expected": "o30TffXFFYFw+oChY9Qb3ZC2C4sxrwmEgW7kPgeTiMI"
+    },
+    {
+      "id": "android-pc.ANDROID.tls13",
+      "passed": true,
+      "observed": "TLSv1_3",
+      "expected": "TLSv1_3"
+    },
+    {
+      "id": "android-pc.ANDROID.alpn",
+      "passed": true,
+      "observed": "kloda-tls-poc/1",
+      "expected": "kloda-tls-poc/1"
+    },
+    {
+      "id": "android-pc.ANDROID.counter",
+      "passed": true,
+      "observed": 1,
+      "expected": "integer>=1"
+    },
+    {
+      "id": "android-pc.ANDROID.probe",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "android-pc.ANDROID.derThumbprint",
+      "passed": true,
+      "observed": "GKhM4FfQwF2NljPgu1TzArlQy2PBuBuIEG_86DZhDDs",
+      "expected": "GKhM4FfQwF2NljPgu1TzArlQy2PBuBuIEG_86DZhDDs"
+    },
+    {
+      "id": "android-pc.ANDROID.notSpkiHash",
+      "passed": true,
+      "observed": {
+        "certificate": "GKhM4FfQwF2NljPgu1TzArlQy2PBuBuIEG_86DZhDDs",
+        "spki": "4TJDZM0_feghbimWS7AgZBmvbQE6QSecR4t7HDKmyfs"
+      },
+      "expected": "different"
+    },
+    {
+      "id": "android-pc.donorCertMismatch",
+      "passed": true,
+      "observed": {
+        "PC": "JYoq_r-rkcL4j-nnpyn626pSAWXwI8vxumXBerXRpaw",
+        "ANDROID": "GKhM4FfQwF2NljPgu1TzArlQy2PBuBuIEG_86DZhDDs"
+      },
+      "expected": "different"
+    },
+    {
+      "id": "ios-pc.oneHappy",
+      "passed": true,
+      "observed": 1,
+      "expected": 1
+    },
+    {
+      "id": "ios-pc.status",
+      "passed": true,
+      "observed": "pass",
+      "expected": "pass"
+    },
+    {
+      "id": "ios-pc.shape",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "ios-pc.PC.fields",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "ios-pc.PC.der.type",
+      "passed": true,
+      "observed": "string",
+      "expected": "string"
+    },
+    {
+      "id": "ios-pc.PC.der.canonical",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "ios-pc.PC.derBound",
+      "passed": true,
+      "observed": 342,
+      "expected": "1..16384"
+    },
+    {
+      "id": "ios-pc.PC.rawDer",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "ios-pc.PC.kty",
+      "passed": true,
+      "observed": "OKP",
+      "expected": "OKP"
+    },
+    {
+      "id": "ios-pc.PC.crv",
+      "passed": true,
+      "observed": "Ed25519",
+      "expected": "Ed25519"
+    },
+    {
+      "id": "ios-pc.PC.publicOnly",
+      "passed": true,
+      "observed": false,
+      "expected": false
+    },
+    {
+      "id": "ios-pc.PC.jwk.type",
+      "passed": true,
+      "observed": "string",
+      "expected": "string"
+    },
+    {
+      "id": "ios-pc.PC.jwk.canonical",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "ios-pc.PC.keyLength",
+      "passed": true,
+      "observed": 32,
+      "expected": 32
+    },
+    {
+      "id": "ios-pc.PC.identityKey",
+      "passed": true,
+      "observed": "_BoOlk8RLhMMWCNCF47m_EmE4addcS4NYUfvgUKDXRQ",
+      "expected": "_BoOlk8RLhMMWCNCF47m_EmE4addcS4NYUfvgUKDXRQ"
+    },
+    {
+      "id": "ios-pc.PC.nativePeer",
+      "passed": true,
+      "observed": "/BoOlk8RLhMMWCNCF47m/EmE4addcS4NYUfvgUKDXRQ",
+      "expected": "/BoOlk8RLhMMWCNCF47m/EmE4addcS4NYUfvgUKDXRQ"
+    },
+    {
+      "id": "ios-pc.PC.sasPeer",
+      "passed": true,
+      "observed": "/BoOlk8RLhMMWCNCF47m/EmE4addcS4NYUfvgUKDXRQ",
+      "expected": "/BoOlk8RLhMMWCNCF47m/EmE4addcS4NYUfvgUKDXRQ"
+    },
+    {
+      "id": "ios-pc.PC.tls13",
+      "passed": true,
+      "observed": "TLSv1_3",
+      "expected": "TLSv1_3"
+    },
+    {
+      "id": "ios-pc.PC.alpn",
+      "passed": true,
+      "observed": "kloda-tls-poc/1",
+      "expected": "kloda-tls-poc/1"
+    },
+    {
+      "id": "ios-pc.PC.counter",
+      "passed": true,
+      "observed": 1,
+      "expected": "integer>=1"
+    },
+    {
+      "id": "ios-pc.PC.probe",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "ios-pc.PC.derThumbprint",
+      "passed": true,
+      "observed": "gRvJMpThFUvn474oNc15AKpCwzCWKT_-FxMdCasLjDI",
+      "expected": "gRvJMpThFUvn474oNc15AKpCwzCWKT_-FxMdCasLjDI"
+    },
+    {
+      "id": "ios-pc.PC.notSpkiHash",
+      "passed": true,
+      "observed": {
+        "certificate": "gRvJMpThFUvn474oNc15AKpCwzCWKT_-FxMdCasLjDI",
+        "spki": "7MXDCt0h3R3H_G7BbMOlCHkMB4NPmGrBd1uYJQaqxXE"
+      },
+      "expected": "different"
+    },
+    {
+      "id": "ios-pc.IOS.fields",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "ios-pc.IOS.der.type",
+      "passed": true,
+      "observed": "string",
+      "expected": "string"
+    },
+    {
+      "id": "ios-pc.IOS.der.canonical",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "ios-pc.IOS.derBound",
+      "passed": true,
+      "observed": 343,
+      "expected": "1..16384"
+    },
+    {
+      "id": "ios-pc.IOS.rawDer",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "ios-pc.IOS.kty",
+      "passed": true,
+      "observed": "OKP",
+      "expected": "OKP"
+    },
+    {
+      "id": "ios-pc.IOS.crv",
+      "passed": true,
+      "observed": "Ed25519",
+      "expected": "Ed25519"
+    },
+    {
+      "id": "ios-pc.IOS.publicOnly",
+      "passed": true,
+      "observed": false,
+      "expected": false
+    },
+    {
+      "id": "ios-pc.IOS.jwk.type",
+      "passed": true,
+      "observed": "string",
+      "expected": "string"
+    },
+    {
+      "id": "ios-pc.IOS.jwk.canonical",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "ios-pc.IOS.keyLength",
+      "passed": true,
+      "observed": 32,
+      "expected": 32
+    },
+    {
+      "id": "ios-pc.IOS.identityKey",
+      "passed": true,
+      "observed": "aTrxzpY88MQZqeusVoDvbx_T3E9uZTfvnLwqVBWZxzU",
+      "expected": "aTrxzpY88MQZqeusVoDvbx_T3E9uZTfvnLwqVBWZxzU"
+    },
+    {
+      "id": "ios-pc.IOS.nativePeer",
+      "passed": true,
+      "observed": "aTrxzpY88MQZqeusVoDvbx/T3E9uZTfvnLwqVBWZxzU",
+      "expected": "aTrxzpY88MQZqeusVoDvbx/T3E9uZTfvnLwqVBWZxzU"
+    },
+    {
+      "id": "ios-pc.IOS.sasPeer",
+      "passed": true,
+      "observed": "aTrxzpY88MQZqeusVoDvbx/T3E9uZTfvnLwqVBWZxzU",
+      "expected": "aTrxzpY88MQZqeusVoDvbx/T3E9uZTfvnLwqVBWZxzU"
+    },
+    {
+      "id": "ios-pc.IOS.tls13",
+      "passed": true,
+      "observed": "TLSv1_3",
+      "expected": "TLSv1_3"
+    },
+    {
+      "id": "ios-pc.IOS.alpn",
+      "passed": true,
+      "observed": "kloda-tls-poc/1",
+      "expected": "kloda-tls-poc/1"
+    },
+    {
+      "id": "ios-pc.IOS.counter",
+      "passed": true,
+      "observed": 1,
+      "expected": "integer>=1"
+    },
+    {
+      "id": "ios-pc.IOS.probe",
+      "passed": true,
+      "observed": true,
+      "expected": true
+    },
+    {
+      "id": "ios-pc.IOS.derThumbprint",
+      "passed": true,
+      "observed": "t1h5cf6g6RbP1_xFdYg7uC8lQ7johRSpRd6vA6mM0cE",
+      "expected": "t1h5cf6g6RbP1_xFdYg7uC8lQ7johRSpRd6vA6mM0cE"
+    },
+    {
+      "id": "ios-pc.IOS.notSpkiHash",
+      "passed": true,
+      "observed": {
+        "certificate": "t1h5cf6g6RbP1_xFdYg7uC8lQ7johRSpRd6vA6mM0cE",
+        "spki": "52vebTrbsnSbtwoHxZyLDDl_Y7j2Snjj7mkeKgVYfNQ"
+      },
+      "expected": "different"
+    },
+    {
+      "id": "ios-pc.donorCertMismatch",
+      "passed": true,
+      "observed": {
+        "PC": "gRvJMpThFUvn474oNc15AKpCwzCWKT_-FxMdCasLjDI",
+        "IOS": "t1h5cf6g6RbP1_xFdYg7uC8lQ7johRSpRd6vA6mM0cE"
+      },
+      "expected": "different"
+    }
+  ],
+  "limits": [
+    "Public historical native evidence inspection only",
+    "No JWT signing or verification, issuance, admission, offline time or publication execution",
+    "Different-key donor certificates do not prove same-key certificate renewal",
+    "No private keys read or exported"
+  ]
+}

@@ -7,7 +7,7 @@
 
 ## Context
 
-Kloda, kullanıcının seçtiği kaynakları kendi depolamasına yedekler. Kullanıcı otomatik sync için 12 veya 24 saat aralığını ve çalışma saatini seçer; örneğin 12 saatlik program 12.00 / 00.00 olabilir. Manuel **Sync Now** bu programın yanında bulunur. Aktif sync sessiz bir ilerleme bildirimiyle görünür olmalı; sunucuya erişim denemeleri tükenirse hata bildirimi verilmelidir.
+İlk WebDAV vertical slice otomatik12/24 saat ve cihazın yerel çalışma saatini, ayrıca Sync Now'ı kabul etti. Session'da daha sonra kabul edilen PC-first ürün kapsamı ve default opportunistic Live [ADR0005](0005-computer-first-files-and-photos-backup.md) içindedir;12/24 program/retry kuralları korunur. Aktif sync sessiz ilerleme bildirimiyle görünür; erişim bütçesi tükenirse hata bildirimi gerekir. Davranış hedefleri tamamlanmış native runtime sayılmaz.
 
 Framework değerlendirmesinde mobile için React Native + Expo development build ve React Native bare/native; desktop için Electron ve Tauri incelendi. NestJS backend ve FSD frontend kararları değişmez. WebDAV doğrudan veya gerektiğinde HTTP(S) relay üzerinden kullanılabilir; SMB yalnızca LAN içindedir.
 
@@ -34,8 +34,9 @@ Sunucuya erişilememesi ile işletim sisteminin işi ertelemesi veya iptal etmes
 ### 3. Eski iOS ve Android sürümleri
 
 - Uygulama yalnızca iOS 26+ cihazlarla sınırlandırılmaz; eski iOS sürümlerinde ve eski Android telefonlarda da kullanılabilmelidir.
-- Minimum iOS / Android sürüm numaraları bu kararda belirlenmemiştir. "Eski sürüm desteği", bütün tarihsel OS sürümlerine sınırsız uyumluluk taahhüdü değildir.
+İlk karar minimum sürüm seçmedi. Daha sonraki transport araştırmasında kullanıcı **iOS16.4+ / Android7+ (API24)** compatibility/destek hedefini ve ortak native kripto bileşenini seçti. Bu hedef bütün toolchain/API'ların çalıştığı veya release minimumunun doğrulandığı anlamına gelmez; sonraki PoC'nin minSdk24 değeri açıkça experimental ve product minimum kanıtı olmayan build ayarıdır.
 - Yalnız yeni OS sürümlerindeki bir API, tüm desteklenen cihazlar için tek çözüm olarak seçilemez. Framework ve native entegrasyon değerlendirmesi eski sürümlerin imkânlarını da kapsamalıdır.
+- **Production gate:** Expo/RN/SDK/build toolchain fiilî minimumları, eski hedef cihazlarda API/crypto/TLS/key-provider/background ve release compatibility ayrı kanıtlanır. iOS16.4 ve güncel iOS, Android API24 ve güncel fiziksel cihaz karşılaştırması gerekir; framework/minimumu sessiz yükseltme veya bütün eski OS'lere sınırsız destek vaadi yok.
 
 ### 4. iOS kaynak seçimi
 
@@ -49,6 +50,7 @@ Sunucuya erişilememesi ile işletim sisteminin işi ertelemesi veya iptal etmes
 - Desktop uygulama **Electron** ile kurulacaktır.
 - Her iki uygulama da TypeScript kullanır ve mevcut FSD katman sınırlarını korur.
 - Expo development build, gerektiğinde native modül eklenmesine izin verir; bu karar belirli bir native API, paket veya minimum OS sürümü seçmez.
+- Ortak native kripto bileşeni yönü Expo/Electron frontend seçimini değiştirmez; native PoC core veya SDK patch'i production dependency adoption değildir. [ADR0007](0007-matrix-verification-and-device-continuity.md) aynı-device-key/verification sınırıdır.
 - Electron renderer'a doğrudan Node.js veya dosya sistemi erişimi verilmez; yetkili masaüstü API'leri main/preload sınırında kalır.
 
 ## Alternatives considered
@@ -68,7 +70,7 @@ Sunucuya erişilememesi ile işletim sisteminin işi ertelemesi veya iptal etmes
 - Sync takibi yalnız bir `updated` bitinden ibaret olamaz: çalışmanın kuyruktaki, aktif, ertelenmiş, iptal edilmiş ve tamamlanmış durumlarını ayırt etmek gerekir. Bu ADR belirli bir veri tabanı, şema veya scheduler implementasyonu seçmez.
 - Tamamlanmamış işin ve deneme durumunun süreç yaşam döngüsü nedeniyle kaybolmaması gerekir. OS'nin iptaline rağmen işi takip etmek, OS'nin uygulamayı sonlandırmasını veya askıya almasını engelleyebilmek demek değildir.
 - **5 dakikalık kontrol bir ürün zamanlama hedefidir, koşulsuz OS garantisi değildir.** Uygulama/worker çalıştırılmıyorsa kendi timer'ıyla uyanamaz, kuyruğu kontrol edemez veya iptali anında öğrenemez. OS yeniden yürütme fırsatı verdiğinde tamamlanmamış işin durumu değerlendirilmelidir. Bu sınırlama, kararı uygulanmış veya kesin zamanlı çalışan bir mekanizma olarak sunmayı engeller.
-- Bir push/bildirim mekanizması, teslim veya çalışma garantisi olarak varsayılamaz. Bu karar push servisi seçmez ve NestJS backend'in henüz açık olan rolünü değiştirmez.
+- Push/bildirim teslim veya çalışma garantisi değildir; bu ADR push servisi seçmez. İlk kayıt backend rolünü açık bırakmıştı; artık [ADR0004](0004-certificate-bound-capability-and-authority-responsibilities.md) central control–PC enforcement rolü kabul edilmiştir, hosting/gerçek servis gate'i açık kalır.
 - Eski cihaz desteği, platforma ve OS sürümüne göre farklı native yolların incelenmesini gerektirir. Expo development build seçimi, minimum sürümleri veya fallback davranışlarını varsayımla kesinleştirmez.
 - Electron main/preload/renderer ayrımı, FSD renderer katmanlarının yetkili masaüstü işlemlerinden ayrılmasını gerektirir.
 - Feature, paket, yapılandırma, native proje veya bağımlılık değişikliği bu ADR'nin önceki davranış kararının parçası değildi; framework scaffold'ı bu kararın ardından ayrı görevde kurulabilir. Diğer açık konuların karar durumu değişmez.
@@ -91,3 +93,7 @@ Platform sınırları için framework değerlendirmesinde kontrol edilen resmi k
 - Kullanımı yalnız iOS 26+ ile sınırlamak veya eski cihaz ihtiyacını değerlendirme dışında bırakmak.
 - iOS kaynaklarını yalnız Files ile sınırlamak ya da kullanıcı yerine bütün klasörleri seçmek.
 - React Native bare/native veya Tauri'yi framework kararı verilmemiş saymak; minimum OS sürümünü veya diğer açık mimari konuları bu framework kararından hareketle onaylanmış saymak.
+
+## Session güncellemesi ve kanıt ayrımı
+
+2026-10-04 kalıcılaştırması ilk karar ile sonradan seçilen destek hedefini ayırır. Tarihsel kaynak: `kloda-transport-analysis-plan.md` kullanıcı ortak native kripto/iOS16.4+/Android7+ seçimi; `kloda-android-poc-scope-freeze.md` deney minSdk24'ün product minimum olmadığını açıklar. [Transport kanıtı](../security/poc-transport-evidence.md) ve [production/physical gate kaydı](../security/production-gates.md) çalışmış senaryo ile release gereksinimini ayırır; bu doc işi yeni runtime veya minimum-OS kararı değildir.

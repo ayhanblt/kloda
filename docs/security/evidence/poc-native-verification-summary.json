@@ -1,0 +1,1169 @@
+{
+  "recordKind": "sanitized historical public-evidence extract; not a rerun or independent attestation",
+  "documentedOn": "2026-10-04",
+  "rustPublicApi": {
+    "counts": {
+      "fail": 0,
+      "gap": 0,
+      "pass": 17
+    },
+    "library": "0.19.1",
+    "cases": [
+      {
+        "case": "standard-two-approvals",
+        "status": "pass"
+      },
+      {
+        "case": "commitment",
+        "status": "pass"
+      },
+      {
+        "case": "wrong-flow",
+        "status": "pass"
+      },
+      {
+        "case": "wrong-account",
+        "status": "pass"
+      },
+      {
+        "case": "ephemeral-key-substitution",
+        "status": "pass"
+      },
+      {
+        "case": "invalid-key-mac",
+        "status": "pass"
+      },
+      {
+        "case": "user-sas-mismatch",
+        "status": "pass"
+      },
+      {
+        "case": "done-before-confirmation-and-mac",
+        "status": "pass"
+      },
+      {
+        "case": "old-flow-mac-replay",
+        "status": "pass"
+      },
+      {
+        "case": "old-mac-relabelled-as-new-flow",
+        "status": "pass"
+      },
+      {
+        "case": "duplicate-accept-no-trust",
+        "status": "pass"
+      },
+      {
+        "case": "reordered-key-before-accept",
+        "status": "pass"
+      },
+      {
+        "case": "cached-device-key-replacement-rejected",
+        "status": "pass"
+      },
+      {
+        "case": "first-discovery-same-device-id-key-substitution",
+        "status": "pass"
+      },
+      {
+        "case": "one-approval-process-restart",
+        "status": "pass"
+      },
+      {
+        "case": "completed-pair-process-restart",
+        "status": "pass"
+      },
+      {
+        "case": "long-term-device-signature-capability",
+        "status": "pass"
+      }
+    ],
+    "productionReady": false,
+    "fileChannelImplemented": false,
+    "nativeBindingsValidated": false
+  },
+  "historicalNativeVerification": {
+    "versions": {
+      "matrixSdkCrypto": "0.19.1",
+      "matrixSdkSqlite": "0.19.1",
+      "rust": {
+        "version": "1.99.0",
+        "commit": "b940084d7eb6a299eb4bfeb8e34901bc051e7ac4",
+        "llvm": "23.1.1",
+        "host": "aarch64-apple-darwin"
+      },
+      "xcode": {
+        "version": "27.0",
+        "build": "27A266a"
+      },
+      "swift": {
+        "version": "6.4",
+        "compiler": "swiftlang-6.4.0.34.1",
+        "languageMode": "5"
+      },
+      "clang": {
+        "version": "21.0.0",
+        "compiler": "clang-2100.3.34.2"
+      },
+      "macOS": {
+        "version": "26.6.2",
+        "build": "25G83",
+        "arch": "arm64"
+      },
+      "electron": {
+        "version": "44.4.5",
+        "node": "24.21.0",
+        "napi": 10,
+        "addonNapiTarget": 8,
+        "arch": "arm64",
+        "platform": "darwin"
+      },
+      "warnings": [
+        "Linker ignores duplicate -lSystem from reported native-static-libs and compiler driver.",
+        "blake3 NEON object was built with macOS deployment 27.0, while addon links minimum13.0. No older macOS compatibility claim."
+      ],
+      "limits": [
+        "OS-protected software keys only; no RAM erasure/process-compromise guarantee.",
+        "safeStorage async APIs necessarily create a plaintext base64 JavaScript string copy, which is not deterministically erasable.",
+        "Provider-unavailable cases are injected, not real Keychain locking.",
+        "No physical-device hardware, lock, background, backup/restore, Expo, Windows or Linux proof."
+      ],
+      "android": {
+        "api": 35,
+        "abi": "arm64-v8a",
+        "image": "android-35/google_apis/arm64-v8a",
+        "imageRevision": 9,
+        "ndk": "27.1.12297006",
+        "buildTools": "35.0.0",
+        "java": "17",
+        "wrappingKeyHardwareClaim": false
+      },
+      "ios": {
+        "kind": "simulator",
+        "runtime": "26.5",
+        "sdk": "27.0",
+        "target": "arm64-apple-ios16.4-simulator",
+        "signing": "ad-hoc; simulator Mach-O embedded Keychain entitlements; no device provisioning"
+      }
+    },
+    "counts": {
+      "passed": 52,
+      "failed": 0,
+      "blocked": 0,
+      "inconclusive": 0,
+      "postStorageFailureSigningRefusal": true,
+      "electronDomReadinessBeforeScreenshot": true
+    },
+    "commands": [
+      {
+        "command": "bash scripts/build-core.sh",
+        "exitCode": 0
+      },
+      {
+        "command": "bash scripts/build-android.sh",
+        "exitCode": 0
+      },
+      {
+        "command": "bash scripts/build-ios.sh",
+        "exitCode": 0
+      },
+      {
+        "command": "bash scripts/build-electron.sh",
+        "exitCode": 0
+      },
+      {
+        "command": "bash scripts/start-lab.sh",
+        "exitCode": 0
+      },
+      {
+        "command": "node driver/run.mjs --pair android-pc --all",
+        "exitCode": 0,
+        "passed": 26,
+        "failed": 0
+      },
+      {
+        "command": "node driver/run.mjs --pair ios-pc --all",
+        "exitCode": 0,
+        "passed": 26,
+        "failed": 0
+      },
+      {
+        "command": "node --check driver/fixture.mjs && node --check driver/run.mjs && node --check driver/scenarios.mjs && node --check driver/evidence.mjs",
+        "exitCode": 0
+      },
+      {
+        "command": "node --check electron/main.cjs && node --check electron/renderer.js",
+        "exitCode": 0
+      },
+      {
+        "command": "bash -n scripts/build-core.sh && bash -n scripts/build-android.sh && bash -n scripts/build-ios.sh && bash -n scripts/build-electron.sh && bash -n scripts/start-lab.sh",
+        "exitCode": 0
+      }
+    ],
+    "cases": [
+      {
+        "id": "mutual-sas-same-key-proof",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "cancel-after-single-confirm",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "restart-completed",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "restart-incomplete",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "attack-commitment",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "attack-key",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "attack-mac",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "attack-wrong-account",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "attack-wrong-flow",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "attack-legacy-mac",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "duplicate-accept",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "first-discovery-key-substitution",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "reordered-key-before-accept",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "old-mac-replay",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-PC-unavailable",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-PC-missing",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-PC-corrupt",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-PC-wrong_secret",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-PC-missing_epoch",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-ANDROID-unavailable",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-ANDROID-missing",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-ANDROID-corrupt",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-ANDROID-wrong_secret",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-ANDROID-missing_epoch",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "abi-closed-PC",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "abi-closed-ANDROID",
+        "pair": "android-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "mutual-sas-same-key-proof",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "cancel-after-single-confirm",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "restart-completed",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "restart-incomplete",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "attack-commitment",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "attack-key",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "attack-mac",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "attack-wrong-account",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "attack-wrong-flow",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "attack-legacy-mac",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "duplicate-accept",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "first-discovery-key-substitution",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "reordered-key-before-accept",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "old-mac-replay",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-PC-unavailable",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-PC-missing",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-PC-corrupt",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-PC-wrong_secret",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-PC-missing_epoch",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-IOS-unavailable",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-IOS-missing",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-IOS-corrupt",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-IOS-wrong_secret",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "storage-IOS-missing_epoch",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "abi-closed-PC",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      },
+      {
+        "id": "abi-closed-IOS",
+        "pair": "ios-pc",
+        "status": "pass",
+        "platformKind": "native-emulator-simulator-macos",
+        "confirmationSource": "automation",
+        "limit": "Simulator/emulator and automated confirmation evidence only; no production authority."
+      }
+    ],
+    "nativePocComplete": true,
+    "productionReady": false
+  },
+  "laterSameKeyTls": {
+    "hostTests": {
+      "passed": 8,
+      "failed": 0
+    },
+    "results": {
+      "android-pc": {
+        "tls": {
+          "total": 25,
+          "passed": 25,
+          "failed": 0,
+          "blocked": 0,
+          "evidence": "evidence/android-pc/tls-cases.json"
+        },
+        "verification": {
+          "total": 26,
+          "passed": 26,
+          "failed": 0,
+          "blocked": 0,
+          "evidence": "evidence/android-pc/cases.json"
+        }
+      },
+      "ios-pc": {
+        "tls": {
+          "total": 25,
+          "passed": 25,
+          "failed": 0,
+          "blocked": 0,
+          "evidence": "evidence/ios-pc/tls-cases.json"
+        },
+        "verification": {
+          "total": 26,
+          "passed": 26,
+          "failed": 0,
+          "blocked": 0,
+          "evidence": "evidence/ios-pc/cases.json"
+        }
+      }
+    },
+    "timing": {
+      "android-pc": {
+        "total": 25,
+        "passed": 25,
+        "failed": 0,
+        "blocked": 0,
+        "reconnects": 20,
+        "reconnectMinMs": 1691,
+        "reconnectMaxMs": 2727
+      },
+      "ios-pc": {
+        "total": 25,
+        "passed": 25,
+        "failed": 0,
+        "blocked": 0,
+        "reconnects": 20,
+        "reconnectMinMs": 1577,
+        "reconnectMaxMs": 2598
+      }
+    },
+    "pins": {
+      "matrix-sdk-crypto": "0.19.1",
+      "matrix-sdk-sqlite": "0.19.1",
+      "vodozemac": "0.11.1",
+      "ruma": "0.17.0",
+      "rustls": "0.23.45",
+      "rcgen": "0.12.1",
+      "libc": "0.2.189",
+      "uuid": "1.26.1",
+      "cc": "1.5.1",
+      "tokio": "1.53.1"
+    },
+    "runtimes": {
+      "rustc": "1.99.0 b940084d7",
+      "cargo": "1.99.0 5f94df478",
+      "driverNode": "22.23.1",
+      "electron": "44.4.5",
+      "electronNode": "24.21.0",
+      "chrome": "152.0.7977.130",
+      "android": "API35 Android15 arm64-v8a emulator",
+      "ios": "26.5 iPhone17 Pro simulator arm64"
+    },
+    "sdkPatchFiles": [
+      "src/olm/account.rs",
+      "src/machine/mod.rs"
+    ],
+    "sameKeyBinarySigning": true,
+    "nativeTlsAndroidElectron": true,
+    "nativeTlsIosElectron": true,
+    "sdkPatchRequired": true,
+    "productionReady": false,
+    "physicalDevicesValidated": false,
+    "realPeerNetworkValidated": false,
+    "authorityImplemented": false,
+    "tlsCases": {
+      "android-pc": [
+        {
+          "id": "happy-path",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "incomplete-sas",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "certificate-key-substitution",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "record-mutation-PC",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "record-mutation-ANDROID",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "cross-session-handshaking-PC",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "cross-session-handshaking-ANDROID",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "cross-session-established-PC",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "cross-session-established-ANDROID",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "reconnect-deadlock-guard-20",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "real-process-restart",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "bounds-lifecycle-PC",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "bounds-lifecycle-ANDROID",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "closed-PC",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "closed-ANDROID",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-PC-unavailable",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-PC-missing",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-PC-corrupt",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-PC-wrong_secret",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-PC-missing_epoch",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-ANDROID-unavailable",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-ANDROID-missing",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-ANDROID-corrupt",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-ANDROID-wrong_secret",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-ANDROID-missing_epoch",
+          "pair": "android-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        }
+      ],
+      "ios-pc": [
+        {
+          "id": "happy-path",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "incomplete-sas",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "certificate-key-substitution",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "record-mutation-PC",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "record-mutation-IOS",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "cross-session-handshaking-PC",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "cross-session-handshaking-IOS",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "cross-session-established-PC",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "cross-session-established-IOS",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "reconnect-deadlock-guard-20",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "real-process-restart",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "bounds-lifecycle-PC",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "bounds-lifecycle-IOS",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "closed-PC",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "closed-IOS",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-PC-unavailable",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-PC-missing",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-PC-corrupt",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-PC-wrong_secret",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-PC-missing_epoch",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-IOS-unavailable",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-IOS-missing",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-IOS-corrupt",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-IOS-wrong_secret",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        },
+        {
+          "id": "storage-IOS-missing_epoch",
+          "pair": "ios-pc",
+          "status": "pass",
+          "platformKind": "native-emulator-simulator-macos",
+          "confirmationSource": "automation",
+          "limit": "Native crypto through loopback ciphertext pump; no physical-device, peer-network or production authority claim."
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "rustup run 1.99.0 cargo generate-lockfile --manifest-path core/Cargo.toml",
+        "exitCode": 0
+      },
+      {
+        "command": "rustup run 1.99.0 cargo update --manifest-path core/Cargo.toml -p cc --precise 1.5.1 && rustup run 1.99.0 cargo update --manifest-path core/Cargo.toml -p libc --precise 0.2.189 && rustup run 1.99.0 cargo update --manifest-path core/Cargo.toml -p tokio --precise 1.53.1 && rustup run 1.99.0 cargo update --manifest-path core/Cargo.toml -p uuid --precise 1.26.1",
+        "exitCode": 0
+      },
+      {
+        "command": "rustup run 1.99.0 cargo clippy --locked --manifest-path core/Cargo.toml --all-targets -- -D warnings",
+        "exitCode": 0
+      },
+      {
+        "command": "rustup run 1.99.0 cargo test --locked --manifest-path core/Cargo.toml -- --nocapture",
+        "exitCode": 0
+      },
+      {
+        "command": "bash scripts/build-core.sh && bash scripts/build-android.sh && bash scripts/build-ios.sh && bash scripts/build-electron.sh",
+        "exitCode": 0
+      },
+      {
+        "command": "node driver/run.mjs --pair android-pc --suite tls && node driver/run.mjs --pair ios-pc --suite tls",
+        "exitCode": 0
+      },
+      {
+        "command": "node driver/run.mjs --pair android-pc --suite verification --all && node driver/run.mjs --pair ios-pc --suite verification --all",
+        "exitCode": 0
+      }
+    ]
+  },
+  "sourceSha256": {
+    "/tmp/kloda-native-verification.ZjL8Y0/report.json": "6c8141fe0523a71dcce6a964f30236ab1ab2cefffd48b544e39a9fd7303320d1",
+    "/tmp/kloda-native-verification-proof.tar.gz": "83aed3c915418d346a6a12599e2d488cf50cb1367d87e4e971c881d4fe0179dc",
+    "/tmp/kloda-same-key-tls.hjUS9L/report.json": "c4729b6cdf1a4a70015fed16936bd2079fffcb8344ae4c425b985db4579c50d7",
+    "/tmp/kloda-same-key-tls.hjUS9L/proof.tar.gz": "db9e72a619acb9b619f0912978d4c8fdd45de0ffab9d5e4d35d3f3c873adc241",
+    "/tmp/kloda-same-key-tls.hjUS9L/sdk-byte-signer.patch": "5b56cfe81e41fd7f31e32d20ffa829f7315b8b3699e979379f0255b46b45cc87",
+    "/tmp/kloda-matrix-pairing.mYGX18/report.json": "f7b0741cecc03a08acc0e2bd63daa7caa0039e27b1a3c04104b54e50a1d21a17",
+    "/tmp/kloda-matrix-pairing.mYGX18/kloda-matrix-pairing-evidence.tar.gz": "518642ac3a8c752645fc9d380f5df76ea3682c37ad5e08c3370d9706778960aa"
+  },
+  "limits": [
+    "Historical native52 and copied verification52 are separate runs; TLS50 and host8 are different suites.",
+    "Automation is not human SAS comparison; localhost fixture pump is not real peer network.",
+    "No authority, file session admission, hardware isolation or production SDK support is established.",
+    "Archive hashes identify historical artifacts, not durable retention of their complete bytes."
+  ]
+}

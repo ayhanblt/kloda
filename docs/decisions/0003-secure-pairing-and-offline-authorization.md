@@ -1,14 +1,14 @@
 # ADR 0003 — Güvenli eşleştirme ve offline yetkilendirme
 
 - Tarih: 2026-10-02
-- Durum: Tasarım politikası kabul edildi; protokol ve ürün implementasyonu onaylanmadı
+- Durum: Tasarım politikası kabul edildi; sonraki capability/mTLS yönleri ADR0004 ile kabul, ürün implementasyonu/production doğrulaması açık
 - Karar sahibi: Ayhan
 
 ## Bağlam ve yetki sınırı
 
-Telefonun kullanıcının bilgisayarına güvenli erişimi için hesap oturumu, cihaz eşleşmesi ve dosya yetkisi ayrı tutulacaktır. Fiziksel Android transport PoC'sindeki USB pair-secret dağıtımı ve ADB signaling üretim eşleştirmesi değildir. Bu kayıt davranış politikasını onaylar; kriptografik algoritma/kitaplık, üretim key derivation, native storage API'si, minimum OS, sertifika sistemi veya hosting seçmez.
+Telefon–PC erişiminde hesap, pairing ve dosya yetkisi ayrı tutulur. Fiziksel Android transport'taki USB pair-secret/ADB signaling production provisioning değildir. İlk kayıt davranış politikasını kabul etti; sonraki [ADR0007](0007-matrix-verification-and-device-continuity.md) Matrix verification ve [ADR0004](0004-certificate-bound-capability-and-authority-responsibilities.md) capability/mTLS/certificate lifecycle yönlerini kaydeder. Exact production API/crypto storage/hosting ve runtime gate'leri hâlâ açıktır.
 
-[ADR 0002](0002-first-vertical-slice-scope.md) değiştirilmez. Mevcut WebDAV/SMB ve relay sınırları bu kayıtla sessizce değiştirilmez; bilgisayar alıcı kanalı için aşağıdaki politika henüz uygulanmış ürün özelliği değildir. NestJS'in kontrol servisi rolü tasarım önerisi olarak kalır.
+[ADR0002](0002-first-vertical-slice-scope.md) ilk WebDAV baseline'ıdır; güncel PC-first ürün yönü [ADR0005](0005-computer-first-files-and-photos-backup.md), account/recovery policy [ADR0006](0006-account-mfa-and-recovery-policy.md) içindedir. WebDAV/SMB/relay sınırları sessiz değiştirilmez. Başlangıçta öneri olan Nest control–PC local enforcement rolü ADR0004 ile kabul edilmiştir; aşağıdaki politika çalışan ürün özelliği değildir.
 
 ## Eşleştirme ve anahtar güveni
 
@@ -48,4 +48,4 @@ Recovery reset eski hesap oturumlarının ve cihaz/eşleşme onaylarının merke
 
 Akış, durum/geçiş tabloları, kanıt sınırları ve on adversarial kabul senaryosu [güvenli eşleştirme tasarımında](../security/secure-pairing-design.md) tanımlanır. İki belgede 24 saat başlangıcı, online ret önceliği, yerel iptal ve merkezi recovery gecikmesi aynı uygulanacaktır.
 
-Fiziksel Android transport matrisi 14 pass / 1 direct-connectivity inconclusive olarak korunur; genel `complete: false` ve production-ready false değişmez. iOS: simulator inconclusive; physical-device validation pending; architecture retained; not production-ready. Bu ADR çalışan güvenlik protokolü, fiziksel pairing veya penetration test kanıtı değildir.
+[Transport kaydı](../security/poc-transport-evidence.md): physical Android14pass/1direct-connectivity inconclusive, `complete:false`/production false; önceki iOS URLSession simulator yolu inconclusive/physical pending/architecture retained. [Native verification/TLS kaydı](../security/poc-native-verification-evidence.md) daha sonraki iOS simulator native SAS/TLS pass'ini **ayrı deney** olarak tutar; eski transport inconclusive sonucunu kapatmaz. [Production gate kaydı](../security/production-gates.md) fiziksel pairing/background ve authority/runtime eksiklerini ayrı listeler.
