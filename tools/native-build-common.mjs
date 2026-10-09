@@ -6,7 +6,10 @@ import { fileURLToPath } from 'node:url';
 export const root = fileURLToPath(new URL('../', import.meta.url));
 export const crate = join(root, 'packages/pairing-native');
 export const targetDirectory = join(crate, 'target');
-export const rustToolchain = '1.99.0';
+// Bare versions follow rustup's default host, which may be GNU on Windows.
+export const rustToolchain = process.platform === 'win32'
+  ? `1.99.0-${process.arch === 'arm64' ? 'aarch64' : 'x86_64'}-pc-windows-msvc`
+  : '1.99.0';
 
 export function requireFile(path, executable = false) {
   try { accessSync(path, executable ? constants.X_OK : constants.R_OK); }
