@@ -1,0 +1,37 @@
+[package]
+name = "kloda_pairing_native"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.88"
+publish = false
+
+[lib]
+crate-type = ["rlib", "cdylib"]
+
+[features]
+default = []
+desktop-node = ["dep:napi", "dep:napi-derive", "dep:napi-build"]
+android-jni = ["dep:jni"]
+
+[dependencies]
+rustls = { version = "=0.23.45", default-features = false, features = ["std", "ring"] }
+ring = "=0.17.14"
+x509-parser = { version = "=0.17.0", features = ["verify"] }
+rcgen = { version = "=0.13.2", default-features = false, features = ["crypto", "ring"] }
+zeroize = "=1.8.1"
+serde = { version = "=1.0.228", features = ["derive"] }
+serde_json = "=1.0.145"
+rusqlite = { version = "=0.32.1", features = ["bundled"] }
+socket2 = { version = "=0.6.1", features = ["all"] }
+libc = "=0.2.177"
+napi = { version = "=3.8.1", default-features = false, features = ["napi8"], optional = true }
+napi-derive = { version = "=3.5.1", optional = true }
+
+[target.'cfg(target_os = "android")'.dependencies]
+jni = { version = "=0.21.1", optional = true }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-sys = { version = "=0.61.2", features = ["Win32_Foundation", "Win32_Security", "Win32_Security_Cryptography", "Win32_Security_Authorization", "Win32_NetworkManagement_IpHelper", "Win32_NetworkManagement_Ndis", "Win32_Networking_WinSock", "Win32_Storage_FileSystem", "Win32_System_Threading", "Win32_System_SystemInformation", "Win32_System_SystemServices", "Win32_System_WindowsProgramming", "Win32_System_Com", "Win32_UI_Shell"] }
+
+[build-dependencies]
+napi-build = { version = "=2.3.1", optional = true }

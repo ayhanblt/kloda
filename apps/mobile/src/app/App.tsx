@@ -1,9 +1,13 @@
+import { ScanQrCode } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Platform, Text, TextInput, View } from 'react-native';
 import type { NativeDirectorySource, NativePhotoAlbum, NativePhotoSource, NativeSourceAccess, NativeStorageConfig } from '../../modules/my-module/src/KlodaSyncRuntimeModule';
 import '../shared/i18n';
 import { saveWebDavCredentials, testWebDavWriteAccess, type MobileStorageForm } from '../shared/api/webdav';
+import { PairingButton } from '../features/pairing/ui/pairing-button';
+import { PairingPage } from '../pages/pairing/ui/pairing-page';
+import { colors } from '../shared/ui/tokens';
 
 interface NativeScheduleRuntime {
   loadDirectorySources(): Promise<NativeDirectorySource[]>;
@@ -34,6 +38,7 @@ export function App() {
   const [sourceAccess, setSourceAccess] = useState<Record<string, boolean>>({});
   const [storageTested, setStorageTested] = useState(false);
   const [step, setStep] = useState<'sources' | 'storage'>('sources');
+  const [page, setPage] = useState<'setup' | 'pairing'>('setup');
 
   useEffect(() => {
     void runtime?.loadSchedule().then((schedule) => {
@@ -107,10 +112,13 @@ export function App() {
     }
   };
 
+  if (page === 'pairing') return <PairingPage onBack={() => setPage('setup')} />;
+
   if (step === 'storage') {
     return (
       <View className="flex-1 justify-center gap-4 bg-surface p-6">
         <Button onPress={() => setStep('sources')} title={t('onboarding.back')} />
+        <PairingButton label={t('pairing.open')} secondary icon={<ScanQrCode color={colors.ink} size={20} />} onPress={() => setPage('pairing')} />
         <Text className="text-3xl font-bold text-ink">{t('onboarding.storageTitle')}</Text>
         <Text className="text-base text-muted">{t('onboarding.storageDescription')}</Text>
         <TextInput accessibilityLabel={t('onboarding.endpoint')} autoCapitalize="none" className="rounded-lg border border-border bg-white p-3 text-ink" onChangeText={(endpoint) => setStorage((value) => ({ ...value, endpoint }))} value={storage.endpoint} />
@@ -127,6 +135,7 @@ export function App() {
 
   return (
     <View className="flex-1 justify-center gap-4 bg-surface p-6">
+      <PairingButton label={t('pairing.open')} secondary icon={<ScanQrCode color={colors.ink} size={20} />} onPress={() => setPage('pairing')} />
       <Text className="text-xs font-semibold uppercase text-muted">{t('onboarding.step', { current: 1, total: 2 })}</Text>
       <Text className="text-3xl font-bold text-ink">{t('onboarding.title')}</Text>
       <Text className="text-base text-muted">{t('onboarding.description')}</Text>

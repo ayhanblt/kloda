@@ -2,11 +2,11 @@
 
 ## Durum ve kapsam
 
-Bu belge [ADR0003](../decisions/0003-secure-pairing-and-offline-authorization.md) politikası, [ADR0004](../decisions/0004-certificate-bound-capability-and-authority-responsibilities.md) capability/mTLS yönleri ve [ADR0007](../decisions/0007-matrix-verification-and-device-continuity.md) Matrix verification-only sınırının hedef sözleşmesidir. Yönler kabul edilmiş; API/wire/DB veya production crypto implementation doğrulanmış değildir. ES256 provisional, platform/TLS/device-key production gate açıktır; dosya key-derivation/manifest ve actual enrollment/time/fence uygulaması ayrı gate'tir.
+Bu belge ADR0003 offline file authorization ve ADR0004 exact-DER capability sınırlarını [ADR0012](../decisions/0012-kloda-owned-p256-device-identity.md) P-256 identity ve [ADR0013](../decisions/0013-qr-based-local-lan-pairing.md) backend-independent QR LAN trust kararıyla uygular. Matrix/SAS current pairing path değildir. ES256 server signer ayrı ve provisional; QR/native protocol, enrollment/time/fence implementation açık, production proof yoktur.
 
-Hedef, USB test provisioning/signaling yerine geçecek güven sınırlarını tanımlamaktır. Aynı hesap, PC'de bir kez onay ve iki uçta transcript'e bağlı kısa doğrulama seçilmiştir; QR zorunlu değildir. İlk pairing veya recovery sonrası yeniden pairing, normal otomatik/manual sync'ten ayrı kullanıcı etkileşimidir.
+İlk QR trust internet/backend/login olmadan tamamlanabilir. Same-account eligibility, step-up, PC scope approval ve capability yalnız ayrı file authorization koşullarıdır; local pin dosya yetkisi yaratmaz.
 
-[Transport evidence](poc-transport-evidence.md): physical Android **14pass/1direct-connectivity inconclusive**, `complete:false`/production false; eski iOS URLSession simulator **inconclusive**, physical pending, architecture retained. [Native verification/TLS](poc-native-verification-evidence.md) Rust17, native52, later TLS25/pair+host8 başarılarını ayrı evrelerde kaydeder; iOS simulator native pass eski background-transport inconclusive sonucunu kapatmaz. Hiçbiri product authority veya fiziksel SAS/provider/backups proof değildir.
+[Transport evidence](poc-transport-evidence.md): physical Android **14pass/1direct-connectivity inconclusive**, `complete:false`/production false; eski iOS URLSession simulator **inconclusive**, physical pending. [Historical native verification/TLS](poc-native-verification-evidence.md) Rust17, native52, later TLS25/pair+host8 eski Matrix same-key scope sonuçlarıdır; yeni QR/P-256 session/remote kanıtı değildir. Dar Android hardware TLS signer PASS ayrı [production gate](production-gates.md) kaydıdır; iOS simulator pass background/physical gate kapatmaz.
 
 ## Güven sınırları
 
@@ -14,8 +14,8 @@ Hedef, USB test provisioning/signaling yerine geçecek güven sınırlarını ta
 |---|---|---|
 | Hesap oturumu | İlgili hesap/session'ın doğrulanmış kimliği | Peer private key sahipliği, PC onayı veya dosya anahtarı |
 | Taze işlem yükseltmesi | İlgili yüksek riskli işlem için taze kullanıcı doğrulaması | Diğer işlemlere açık yetki veya otomatik peer trust |
-| Cihaz kimliği | Doğrulanacak uç kimliği ve ilgili özel anahtara sahiplik | Cihaz adının güvenilirliği veya hesap oturumunun yeterliliği |
-| Cihaz çifti | İki uçta doğrulanmış görüşme/kimlik bağlamı ve onay | Hesaptaki bütün cihazlara otomatik erişim |
+| Kloda cihaz kimliği | Ayrı P-256 key ile gerçek channel başlangıcında mutual possession ve durable local peer pin | Registry, cihaz adı veya login JWT tek başına trust değildir; hardware universal garanti değil |
+| İlk cihaz pairing'i | QR PC SPKI equality + gerçek mutual TLS possession + aynı channel/transcript secret HMAC + exact candidate PC approval + durable pins | Account/file grant, scope veya capability yaratmaz; QR library güven protokolü değildir |
 | PC izinli alanı ve işlem kapsamı | Belirli peer'in seçilmiş alandaki izinleri | PC'nin tüm dosya sistemine erişim veya kapsam genişletme |
 | Signaling | Görüşme kontrol metadata'sının taşınması | Sunucunun verdiği kimliği körlemesine güvenilir kabul etme |
 | TURN yetkisi | Payload relay hizmetini kullanabilme | Peer trust, dosya erişimi veya recovery yetkisi |
@@ -23,48 +23,31 @@ Hedef, USB test provisioning/signaling yerine geçecek güven sınırlarını ta
 
 [ADR0006](../decisions/0006-account-mfa-and-recovery-policy.md) Supabase Auth+Postgres ve MFA/operation-step-up/recovery politikasını kabul eder; entegrasyon yoktur. [ADR0004](../decisions/0004-certificate-bound-capability-and-authority-responsibilities.md) Nest control–PC scope/admission/file/fence ayrımı kabul; ES256 provisional/platform-TLS-device-key production gate açık. Hosting/custody ve gerçek API seçilmedi. Backend file bytes/endpoint private key/pair secret/plaintext media catalog/media hash listesi tutmaz; [ADR0005](../decisions/0005-computer-first-files-and-photos-backup.md) PC-first medya/organizasyon metadata'sı E2EE sınırıdır.
 
-Signaling kontrol metadata'sını, TURN payload byte'larını taşır. Relay'in içerik okuyamaması hedefi üretim session/key derivation ve peer kimlik bağlamının ayrıca doğrulanmasını gerektirir. TURN credential dosya anahtarı değildir; Cloudflare Tunnel ve TURN farklı hizmetlerdir. PoC'de USB üzerinden verilen test pair secret üretim provisioning yolu olmaz.
+Remote yönü **WebRTC/DTLS + signed signaling/fingerprint + Kloda mutual device proof**; direct ICE P2P mümkünse tercih, **Cloudflare TURN relay fallback**. Signaling kontrol metadata'sını, TURN şifreli kanal byte'larını taşır; relay trust/store authority değildir, Tunnel ile aynı hizmet değildir. Exact proof/encoding/freshness/native APIs, credentials/bootstrap/cost/limits/redundancy/hosting/distribution ve background/physical proof açık; sessiz backend payload fallback yok. USB test pair secret production provisioning yolu olmaz. Optional payload encryption TLS/DTLS üstünde defense-in-depth'tir, kanal veya peer auth yerine geçmez.
 
 Hesap yetkilendirme otoritesi ile signaling taşıyıcısının rolleri ayrıdır: peer key substitution'a direnç, ele geçirilmiş hesap yetkilendirme otoritesinin bütün kararlarının doğru olduğu garantisi değildir. Metadata gözlemi ve hizmet engelleme riski E2EE ile yok olmaz. Ele geçirilmiş uç veya PC'deki yerel erişim riski JWT/TOTP ile çözülmüş sayılmaz.
 
 ## İlk eşleştirme
 
-### Sıralı akış
+### Frozen KLODA-QR-PAIR-V1
 
-1. Uçlar aynı hesap bağlamında işlem başlatır. Yeni istemci yetkilendirmesi taze yüksek riskli işlem doğrulaması ister. MFA kapalı hesapta mevcut parola + mevcut doğrulanmış e-posta kodu; MFA açık hesapta seçilmiş MFA/step-up politikası geçerlidir. Hesap ispatı peer doğrulamasının yerine geçmez.
-2. Kullanıcı PC'de aday cihazı ve verilecek izinli alan/işlem kapsamını onaylar. Cihaz adı bilgilendirmedir, kriptografik kimlik değildir. Başka bir alanın onayı bu alana yetki vermez.
-3. Uç kimlikleri, uç rolleri ve görüşme bağlamı doğrulama transcript'ine bağlanır. Commitment ve karşılıklı anahtar doğrulama belgelenmiş tam protokolle sağlanmalıdır; bu belge algoritma veya mesaj sırası icat etmez.
-4. Uçlar kendi transcript'lerinden hesaplanan kısa doğrulama bilgisini gösterir; kullanıcı iki uçta karşılaştırıp onaylar. Sunucunun ürettiği eşleştirme numarası veya yalnız public key hash'inden kısaltılmış sayı yeterli değildir.
-5. PC onayı, iki kullanıcı karşılaştırma onayı ve karşılıklı kriptografik key-confirmation tamamlanıp yerel güven kaydı kalıcılaşmadan dosya erişimi açılmaz. Görüşmenin tamamlanması ve kapsamın yetkilendirilmesi ayrı koşullardır.
-6. Mismatch, cancel veya görüşme süresinin dolmasında geçici anahtar/yetki atılır; doğrulanmamış anahtar trusted kayda yükseltilmez. Pairing süresi ve tam protokol uygulama öncesi ayrı seçimdir; burada keyfi timeout değeri tanımlanmaz.
+[Frozen protocol and minimum native behavioral contract](qr-pairing-v1-protocol.md) is the sole normative byte/native/state source; [synthetic vectors](qr-pairing-v1-protocol-vectors.json) provide documentation consistency fixtures. Actual platform API/ABI/adoption/integration and implementation remain unverified/not-executed.
 
-### Mantıksal durum/geçiş tablosu
+Local PC QR carries sid, canonical actual P-256 SPKI fingerprint, one-time secret and validated LAN hint. Fresh full mutual TLS possession and phone same-channel exporter-bound HMAC precede exact PC candidate approval. Native strict parsing/locality/certificate profile are mandatory, not accept-all. Phone durably writes PENDING before proof; PC atomically consumes invitation with its peer pin; phone durably pins before ACK. Fresh exact-key recovery finishes lost result/ACK/completion without retaining the secret or reopening consumed sid. One sid cannot durably trust two keys; distributed all-or-nothing is not claimed.
 
-Bu isimler tasarım durumlarıdır; mevcut kod enum'u veya onaylı wire alanı değildir.
-
-| Önce | Olay ve zorunlu koşul | Sonra | Dosya erişimi |
-|---|---|---|---|
-| `unpaired` | Aynı hesap ve taze işlem ispatıyla yeni görüşme başlar | `pending_verification` | Kapalı |
-| `pending_verification` | Görüşmeye bağlı peer/transcript doğrulaması karşılaştırma aşamasına ulaşır | `awaiting_both_confirmations` | Kapalı |
-| `awaiting_both_confirmations` | PC kapsam onayı + iki kullanıcı onayı + karşılıklı key-confirmation ve durable güven kaydı | `trusted` | Yalnız ayrıca geçerli kapsam/yetki varsa |
-| Her tamamlanmamış durum | Mismatch, cancel veya süre dolması | `unpaired` | Kapalı; geçici materyal/yetki atılır |
-| Her tamamlanmamış durum | Restart; tamamlanmış görüşmenin durable ispatı yok | `unpaired` | Yarım görüşme trusted'a dönüştürülemez |
-| Her durum | Eski görüşmenin onayı/key-confirmation'ı veya başka kimlik/rol bağlamı | Değişmez; mesaj reddedilir | Yeni trust veya kapsam açılmaz |
-| Her durum | Aynı mesajın mükerrer teslimi | Yeni trust yaratmaz | Eksik koşul tamamlanmış varsayılmaz |
-| `trusted` | Peer anahtarı değişir | Yeni kimlik için `unpaired` | Yeni key eski trust'ı miras alamaz |
-| `trusted` | Yerel veya öğrenilmiş merkezi iptal | İptal edilmiş güven kaydı | Kapalı; stale yetki iptali geri alamaz |
-
-Yalnız PC onayı, tek uçta kısa doğrulama onayı, sunucunun “onaylandı” mesajı veya yeniden hesap girişi `trusted` oluşturamaz. Tamamlanmış güven kaydı ile hâlâ geçerli erişim yetkisi aynı şey değildir. İptal geçmişi, yeni pairing'i aynı eski güveni diriltme işlemine dönüştürmez.
+Initial trust works without backend/login/internet. Local pins/pending do not create file authority; account/step-up/scope/capability/time/deny/fence remain separate. Stolen/live QR racers, mistaken approval, fake-QR endpoint intent and DoS remain residual risks. [Roadmap](../implementation/qr-pairing-implementation-roadmap.md) requires separately authorized implementation and actual native/physical evidence; no second QR/SAS comparison is a required V1 gate.
 
 ## Kalıcı kullanım ve journal resume
 
-Private key'ler uçlarda OS korumalı storage'da kalır; backend public key kaydı bunların yerine geçmez. Doğrulanmış peer kimliği PC'de izinli alan ve işlem kapsamına bağlanır. Account JWT, peer private key sahipliğini veya dosya kanalı anahtarını ispatlamaz.
+Kloda private key'ler platform mümkünse non-exportable güvenli donanımda tercih edilir: iOS/macOS Secure Enclave, Android Keystore StrongBox/TEE, Windows TPM. Exact API/ABI/encoding/availability/no-per-run-userPresence/background compatibility, hardware olmayan cihaz/fallback/Linux policy açık; plaintext/export/silent identity fallback yok. Backend key registry local peer pin'in yerine geçmez; hesabın JWT'si yalnız backend user session'dır.
 
-Dosya kanalı açılmadan peer, doğrulanmış kimliğine ait ilgili private key'in sahipliğini kanıtlamalıdır. Hesap oturumu, cihaz adı veya geçmiş journal bu güncel sahiplik ispatının yerine geçmez.
+Peer, session/channel **başlangıcında** doğrulanmış local Kloda pin'ine ait key possession'ını mutual proof ile canlı channel/role/flow'a bağlamalıdır. Exact signed proof/freshness/encoding/cancel/close/generation contract açık; her request'e hardware ECDSA signature/nonce sistemi eklenmez. Sonrasında TLS/DTLS kanalı korur, capability/time/scope/current deny/revoke/fence denetimi sürer.
 
-Her yeni session verified peer ve izinli bağlama bağlanır; signaling key/SDP/aday değiştirmesi başka peer'e trust/authority açamaz. ADR0004 fresh full same-device-key TLS1.3 + exact leaf-DER-bound capability yönünü seçti; actual leaf SPKI ayrıca SAS snapshot'ıyla eşittir. [Profile](capability-profile.md) byte serialization/enrollment/clock/fence production implementation'ını seçilmiş veya kanıtlanmış saymaz; taşıma bağlantısı tek başına admission değildir.
+LAN initial QR profile'da actual TLS SPKI **Kloda P-256 key'in kendisidir**; QR canonical SPKI SHA256 hash'i capability exact leaf-DER hash'i değildir. Pairing-only channel capability istemez; file admission fresh full pinned TLS1.3 + actual exact leaf-DER-bound capability/time/scope/deny/fence ister. PSK/0-RTT/replayed proof yeni admission açmaz. Remote DTLS binding bu initial LAN equality'den türetilmez. [Profile](capability-profile.md) encoding/enrollment/clock/fence implementation kanıtı değildir.
 
 Normal onaylı cihaz yedeklemesi her çalışmada yeniden TOTP istemez. Yeni cihaz, yeni kapsam veya recovery sonrası pairing bu normal kullanım istisnasından yararlanamaz. Korunmuş transfer UUID, ciphertext, eski receipt ve journal yalnız veri devamlılığı kanıtıdır; yetki kontrolünü atlayamaz.
+
+Required Kloda key/pin/pairing/epoch/authorization state kaybı veya restore şüphesi fresh local QR re-trust + ayrı gerekli online PC scope approval/yeni grant ister; key retention install continuity değildir. Matrix store current mechanism veya continuity gate değildir.
 
 PC'de dosyalar normal formatta kalır. Aktarım E2EE ile PC at-rest gizliliği farklıdır; disk gizliliği OS disk şifrelemesi/yerel erişim kontrollerine dayanır. Kayıp mobil anahtar yeni cihaz pairing'iyle değiştirilebilir; hesap recovery kayıp dosya private key'ini sunucudan üretmez.
 
@@ -87,7 +70,7 @@ Geçen zamanın güvenilir üst sınırı sleep/suspend ve restart dahil kanıtl
 | Merkezi kontrol yeniden başarılı, kapsam ve güven sürümü uygun, yeni kontrolün başlangıcından ölçülen pencere henüz dolmamış | Doğrulanan kapsamda yetki | Yalnız yeni kontrolün başlangıcından yeni pencere |
 | Merkez ulaşılamıyor; mevcut güven ve aynı kapsamlı LAN yetkisi henüz 24 saatten kısa; süre doğrulanabilir | Aynı kapsamlı LAN işlemleri çalışabilir | Önceki pencere uzamaz |
 | Merkez ulaşılamıyor; süre dolmuş veya süre/kapsam güvenle doğrulanamıyor | Çevrimiçi doğrulama beklenir | Pencere yenilenmez |
-| İlk pairing, yeni cihaz, yetki genişletme, hesap recovery veya remote erişim | Offline LAN istisnası yetki vermez | Eski pencere yeni yetki üretmez |
+| İlk file grant, yeni cihazın file authorization'ı, yetki genişletme, hesap recovery veya remote erişim | Offline LAN authorization istisnası yetki vermez; offline QR trust mümkündür | Eski pencere yeni yetki üretmez |
 | PC offline veya izinli alan erişilemiyor | İş bekler/gerçek engel gösterilir | Yetki varlığı dosyanın aktarıldığı anlamına gelmez |
 
 Bu tablo offline LAN davranışını tanımlar; remote yetkinin ömrünü veya yenileme protokolünü seçmez. Erişilebilir otoritenin açık reddi ile ağ/servis erişilemezliği ayırt edilmelidir; ret cevabını bağlantı hatası diye gizleyip offline moda düşmek yasaktır.
@@ -114,11 +97,11 @@ Merkez erişilemiyorsa yalnız önceden doğrulanmış, kapsamı değişmemiş, 
 
 Recovery reset eski hesap session/device/pair yetkilerini merkezi olarak iptal eder. Yeniden giriş eski trust'ı canlandırmaz; yeni MFA kurulumu ve yeniden PC onayı/peer doğrulaması gerekir. Çevrimdışı PC için bu iptalin gecikmesi aynı 24 saat sınırına tabidir. Hesap kurtarma, dosyaları veya mevcut private key'leri silmez; kayıp private key'i sunucudan geri üretmez.
 
-MFA recovery code hesap/faktör kurtarma ispatıdır; peer kısa doğrulama bilgisi veya dosya anahtarı değildir. Peer kısa doğrulama TOTP değildir. Normal sync, yüksek riskli işlem ispatını her upload'da tekrar istemez; bu, iptal ve süre denetimlerini atlama hakkı değildir.
+MFA recovery code hesap/faktör kurtarma ispatıdır; QR invitation secret veya dosya anahtarı değildir. TOTP setup QR ayrı hesap akışıdır. Normal sync yüksek riskli işlem ispatını her upload'da istemez; iptal ve süre denetimi sürer.
 
 ## Doğrulanmış kanıt ve sınırları
 
-Aşağıdaki eski primitive/provider source araştırması tarihsel gözlemdir; current Matrix yönü ADR0007, qualified capability yönü ADR0004'tür. Source support product library adoption, audit veya runtime proof değildir. Sonraki kanıtlar [native/TLS](poc-native-verification-evidence.md), [transport](poc-transport-evidence.md) ve [public inspection](evidence/certificate-binding-inspection.json) içinde ayrı kayıtlıdır.
+Aşağıdaki primitive/provider kaynakları **eski scope historical** gözlemlerdir. Aktif identity/channel yönü ADR0012; source support library adoption/audit/runtime proof değildir. Eski Matrix single-key, software-only ve byte signer sonuçları yeni Kloda P-256 gate'lerine taşınmaz. [Native/TLS](poc-native-verification-evidence.md), [transport](poc-transport-evidence.md) ve [public inspection](evidence/certificate-binding-inspection.json) ayrı historical kayıtlardır.
 
 | Kaynak / sürüm | Bulgular | Kanıtlanmayan sınır |
 |---|---|---|
@@ -132,13 +115,13 @@ Aşağıdaki eski primitive/provider source araştırması tarihsel gözlemdir; 
 
 | Açık konu | Gerekli karar / doğrulama | Bugünkü sınır |
 |---|---|---|
-| Tam SAS protokolü ve native SDK | Matrix standart verification-only yönü ADR0007 ile kabul; local confirmation/MAC/done/native key snapshot ve packaging/provider/UX kanıtı gerekir | Isolated Matrix0.19.1 native PoC var; production SDK/version/fork support ve fiziksel insan SAS gate'i açık; custom/bare-SAS alternatif seçilmedi |
-| Üretim session ve key derivation | Peer kimliğine bağlı oturum ve dosya koruma protokolü; anahtar yaşam döngüsü | ADR 0004 capability/mTLS ve certificate lifecycle yönünü kabul eder; ES256 provisional, platform/TLS/device-key ve ürün key-derivation doğrulaması açık |
-| OS key storage adapter'ları | Android/iOS/Electron storage ve yaşam döngüsü; kayıp/erişilemez anahtarda fail-closed davranış | Native API/paket, hardware non-exportability ve background accessibility doğrulanmadı |
+| QR payload/lifecycle/native binding | [Frozen V1](qr-pairing-v1-protocol.md); native-owned TLS SPKI/mutual proof/exporter HMAC/reservation/approval/pending/pins/ACK recovery | Rust/Android-Electron implementation/build and43 synthetic native regressions recorded in [QR roadmap](../implementation/qr-pairing-implementation-roadmap.md); physical custody/LAN adoption blocked/unverified, iOS native deferred; no Matrix/SAS gate |
+| Native session/channel proof | LAN pinned fresh full TLS1.3/SPKI; remote WebRTC/DTLS signed signaling/fingerprint; mutual Kloda P-256 proof + separate capability | Exact provider/native callbacks/ownership/proof/encoding/freshness/channel association açık; no fake ABI/trusted factory/custom TLS bypass; payload encryption yalnız optional defense-in-depth |
+| P-256 hardware provider/storage | Secure Enclave/StrongBox/TEE/TPM, non-exportability, install/key/pin lifecycle, no-per-run-auth/background compatibility | Android/macOS SDK implementations written; actual Mac key creation fails missing entitlement `-34018`. Physical bridge/backup/background/support, Windows TPM and Linux/fallback policy remain open; no software fallback |
 | Güvenilir süre/fence uygulaması | Sleep/restart dahil süre üst sınırı, durable iptal ve commit yarışının gerçek platform ispatı | Güvenilir süre kanıtı yoksa online doğrulama beklenir; yeni offline pencere yaratılmaz |
-| USB'siz signaling ve kontrol servisi | Yetki denetimi, metadata sınırları, hosting ve gerçek uçlarla entegrasyon | NestJS merkezi control–PC yerel enforcement ayrımı ADR 0004 ile kabul edildi; servis/hosting kurulmadı, gerçek hesap/cihaz entegrasyonu ve hosting kararı açık |
+| USB'siz signaling ve remote/provider deployment | WebRTC/DTLS signed signaling/fingerprint + Kloda proof; direct P2P preferred/Cloudflare TURN fallback; Nest control–PC enforcement | Yön seçildi, servis/hosting/credentials/cost/redundancy/distribution ve gerçek account/device/channel proof yok; remote belirsiz yön değil açık deployment/protocol gate |
 | OS compatibility/release minimum | iOS16.4+/Android7/API24 kullanıcı destek hedefi, toolchain/API/native crypto compatibility ve release minimum approval/validation | Generated deployment target veya experimental APK minSdk product proof değildir; eski/current physical test gerekli |
-| Fiziksel iOS | Gerçek trust/transport/storage/background/SAS/key provider | URLSession simulator inconclusive; sonraki simulator SAS/TLS pass ayrı; physical-device validation required, not production-ready |
+| Fiziksel iOS | Real P-256 provider/QR local pin, storage/transport/background/release | Cihaz yokluğu ertelenmiş physical validation; URLSession simulator inconclusive ve eski Matrix SAS/TLS pass ayrı; simulator production proof değil |
 
 Bu kapıların kapatılması ayrı onay ve implementasyon işidir. Storage yok/uygunsuzken plaintext key fallback veya sunucudan private-key recreation yapılmaz. Geçici OS erişim engeli erişimi bekletir; gerçekten kayıp anahtar yeni pairing gerektirir. Bu durumlar normal PC dosyalarını silmez.
 
@@ -148,8 +131,8 @@ Aşağıdakiler implementasyonun sağlaması gereken tasarım kabul sonuçlarıd
 
 | # | Girdi | Eylem | Beklenen yetki kararı | Korunan veri |
 |---|---|---|---|---|
-| 1 | Aynı hesap/cihaz adı altında signaling sunucusu peer key'i değiştirir | Kullanıcı iki uç transcript doğrulamasını karşılaştırır; saldırgan mevcut pair'e bağlanmayı dener | Kimlik/transcript uyuşmazlığında trust ve dosya erişimi açılmaz; yeni key eski trust'ı miras alamaz | Mevcut geçerli pair kayıtları ve PC dosyaları korunur; saldırgana dosya verilmez |
-| 2 | Yalnız PC onayı veya yalnız bir uçta kısa doğrulama onayı vardır | Eksik onayla dosya erişimi istenir; başka görüşmenin key-confirmation'ı tekrar gönderilir | İki onay ve bu görüşmeye bağlı mutual key-confirmation olmadan trusted değil; eski confirmation reddedilir | PC dosyaları ve tamamlanmış önceki kayıtlar değişmez; geçici materyal cancel/expiry'de atılır |
+| 1 | LAN hint veya registry PC key'ini değiştirir | QR fingerprint actual TLS SPKI ile karşılaştırılır; mutual possession ve same-channel secret proof uygulanır | Wrong fingerprint/key/channel ret; registry trust yaratmaz | Eski local pin/grant/PC dosyaları korunur |
+| 2 | Yalnız PC approval, socket veya başka session'ın secret proof'u | Reservation/trust/file access istenir | Mutual TLS + bound HMAC + exact reserved approval + durable consume/pins olmadan completion yok; pins olsa da ayrı file grant gerekir | Pending invitation failure'da invalid; eski pin ve dosyalar korunur |
 | 3 | Önceden doğrulanmış aynı kapsamlı LAN pair; merkez ulaşılamıyor; güvenilir süre 23 saat 59 dakika | LAN işlemi başlatılır; aynı koşullarda süre tam 24 saat olduğunda yeni işlem/publication denenir | 23:59'da aynı kapsam izinli; 24:00'da yeni erişim/publication kapalı ve online doğrulama bekler; pencere yenilenmez | Geçerli committed dosyalar, durable journal ve ciphertext korunur |
 | 4 | Süre dolması veya öğrenilmiş/yerel iptal final commit ile yarışır | Final publication yetki fence'ini geçmeye çalışır | Fence'ten önce geçerli durable final kabul edilir; fence'ten sonra yeni publication yok; sahte completed yok | Önceden committed final ve durable journal/ciphertext silinmez |
 | 5 | Duvar saati geri alınır, restart olur veya suspend süresi güvenle sınırlandırılamaz | Eski yetkiyle iş sürdürülmeye çalışılır | Pencere uzamaz; güvenilir süre üst sınırı kanıtlanamıyorsa online doğrulama bekler; restart yeni 24 saat vermez | Durable aktarım durumu ve normal PC dosyaları korunur |

@@ -25,11 +25,11 @@ Belgeleme tarihi: 2026-10-04. [ADR 0006](../decisions/0006-account-mfa-and-recov
 | Katman | Kabul koşulu | Yerine geçemediği katman |
 |---|---|---|
 | Hesap session | Supabase user/session, trusted JWT validation ve güncel security/revocation state | PC onayı, peer key veya dosya alanı yetkisi |
-| Cihaz güveni | Aynı hesap + belirli cihaz kimliğine bağlanmış PC onayı + izinli alan ve iptal edilebilir kalıcı kayıt | Yalnız login/cihaz adı veya server signaling |
+| Yerel peer trust | [ADR0013](../decisions/0013-qr-based-local-lan-pairing.md) QR LAN: actual mutual P-256 TLS/SPKI, same-channel secret HMAC, exact PC approval ve durable local pins/ACK; backend/login/internet gerekmez | Account enrollment, same-account file eligibility, işlem step-up, PC scope approval veya capability/file grant |
 | İşlem step-up | Taze ispat yalnız ilgili user/session/device/**işleme** bağlı; kısa ömür, tek kullanım, replay reject | Başka yüksek riskli işlem, genel AAL yükseltmesi veya dosya E2EE |
-| Dosya kanalı | Bilateral peer doğrulaması ve güncel scope/operation authority | Supabase JWT/TOTP veya tunnel token |
+| Dosya kanalı | Local peer pins + fresh native mutual proof + same-account eligibility ve current capability/scope/operation/time/deny/version/fence | QR completion, Supabase JWT/TOTP veya tunnel token |
 
-Yeni istemci onayı, recovery/güvenlik ayarı değişikliği ve MFA kapatma gibi yüksek riskli işlerde aktif JWT/eski AAL2 bulunması taze step-up yerine geçmez. Cihaz onayı için alınan yetki MFA kapatamaz. İspatın tazeliği/güvence seviyesi ayrı değerlendirilir; her yerde “TOTP mi?” hardcode edilmez, fakat passkey veya yeni yöntem bu belgeyle benimsenmez. Face ID/Touch ID yalnız app kilidini açıyorsa server MFA yapılmış değildir.
+Yeni istemci **file authorization** onayı, recovery/güvenlik ayarı değişikliği ve MFA kapatma gibi yüksek riskli işlerde aktif JWT/eski AAL2 taze step-up yerine geçmez. Backend-independent QR local trust bunlardan ayrıdır; cihaz file onayı için alınan yetki MFA kapatamaz. İspatın tazeliği/güvence seviyesi ayrı değerlendirilir; her yerde “TOTP mi?” hardcode edilmez, fakat passkey/yeni yöntem bu belgeyle benimsenmez. Face ID/Touch ID yalnız app kilidini açıyorsa server MFA değildir.
 
 ### MFA kapalı hesap
 
@@ -52,7 +52,7 @@ MFA ilk kurulum/normal yerel veya remote kullanım için genel zorunluluk değil
 >
 > [MFA'yı etkinleştir] [Şimdilik geç]
 
-tr/en/de karşılıkları i18next locale dosyalarında bulunur. “Şimdilik geç” kaynak/program/PC onayı akışını engellemez; AAL veya security authority yükseltmez. Sonradan güvenlik ayarından açılabilir. Enroll → ilk başarılı TOTP doğrulaması bitmeden UI “MFA açık” demez. Peer pairing QR'ının zorunlu olmaması TOTP authenticator kurulumu için QR/manual secret kullanımını yasaklamaz; amaçlar farklıdır. Recovery reset sonrası zorunlu reenrollment'da “Şimdilik geç” yoktur.
+tr/en/de karşılıkları i18next locale dosyalarında bulunur. “Şimdilik geç” kaynak/program/PC onayı akışını engellemez; AAL veya security authority yükseltmez. Sonradan güvenlik ayarından açılabilir. Enroll → ilk başarılı TOTP doğrulaması bitmeden UI “MFA açık” demez. TOTP authenticator setup QR/manual secret, ADR0013 peer-pairing QR invitation'ından farklı amaç ve secret taşır; birbirinin trust/authority kanıtı değildir. Recovery reset sonrası zorunlu reenrollment'da “Şimdilik geç” yoktur.
 
 ## 4. MFA kaybında recovery sırası
 
@@ -85,7 +85,7 @@ Aşağıdaki adlar mantıksal güvenlik durumlarıdır, mevcut repository sembol
 | Partial failure | Supabase + Kloda DB tek transaction değildir: aşamalar durable/idempotent ve fail-closed olur. Factor delete/global sign-out başarısızken “recovery tamamlandı” yoktur. |
 | Yeniden giriş | Sonlandırılmış session enroll için kullanılmaz. Birincil giriş yeniden yapılır; recovery-only kısıtını aşmaz. |
 | Zorunlu reenrollment | Yeni TOTP enroll + ilk başarılı doğrulama + yeni code setinin güvenli teslimi tamamlanmadan kısıt kaldırılmaz; skip yoktur. |
-| Dosya erişiminin yeniden kurulması | Yeni MFA login eski pair'i canlandırmaz. PC'de yeniden onay + bilateral peer doğrulaması gerekir. |
+| Dosya erişiminin yeniden kurulması | Yeni MFA login eski file grant'i canlandırmaz; gerekli online authorization/step-up + PC scope approval + yeni grant gerekir. Required peer key/pin/epoch continuity kayıpsa fresh local QR trust ayrıca gerekir; tek başına QR eski grant'i açmaz. |
 | Korunan veri | Dosyalar ve mevcut uç private key'leri silinmez; kayıp key sunucudan geri üretilmez. |
 
 ### Access JWT ve offline PC sınırı

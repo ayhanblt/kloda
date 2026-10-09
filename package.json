@@ -10,6 +10,7 @@
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
+    "pretest": "npm run build --workspace @kloda/sync-core",
     "test": "npm run test --workspaces --if-present",
     "dev:mobile": "npm run dev --workspace=@kloda/mobile",
     "dev:desktop": "npm run dev --workspace=@kloda/desktop"

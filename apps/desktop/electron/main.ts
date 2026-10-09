@@ -5,11 +5,24 @@ import { fileURLToPath } from 'node:url';
 import { DesktopSyncJournal } from './runtime/journal.js';
 import { ElectronScheduleAdapter } from './runtime/scheduler.js';
 import { DesktopSyncRuntime } from './runtime/runtime.js';
+import { bindPairingWindow, closeNativePairing, registerPairingHandlers } from './runtime/pairing.js';
+import { desktopDisplayName, initializeDesktopProfile } from './runtime/desktop-profile.js';
+
+try {
+  initializeDesktopProfile(app);
+} catch (error) {
+  console.error('Kloda desktop profile initialization failed.', error);
+  app.exit(1);
+  throw error;
+}
 
 let mainWindow: BrowserWindow | null = null;
+let runtime: DesktopSyncRuntime;
+let scheduler: ElectronScheduleAdapter;
 
 function createWindow(): BrowserWindow {
   const window = new BrowserWindow({
+    title: desktopDisplayName,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -17,6 +30,8 @@ function createWindow(): BrowserWindow {
       sandbox: true,
     },
   });
+  bindPairingWindow(window);
+  window.on('closed', () => { if (mainWindow === window) mainWindow = null; });
   const developmentServerUrl = process.env.VITE_DEV_SERVER_URL;
   if (developmentServerUrl) void window.loadURL(developmentServerUrl);
   else void window.loadFile(fileURLToPath(new URL('../renderer/index.html', import.meta.url)));
@@ -58,17 +73,34 @@ function isStorageForm(value: unknown): value is { endpoint: string; password: s
   return ['endpoint', 'password', 'targetPath', 'username'].every((key) => typeof storage[key] === 'string');
 }
 
-await app.whenReady();
-const runtime = new DesktopSyncRuntime(new DesktopSyncJournal(join(app.getPath('userData'), 'sync.sqlite')), () => mainWindow);
-const scheduler = new ElectronScheduleAdapter(async () => { await runtime.startSync(); });
-scheduler.schedule(await runtime.getSchedule());
-powerMonitor.on('resume', () => scheduler.resume());
-registerHandlers();
-createWindow();
+// Do not suspend Electron's ESM entrypoint on ready: entry loading precedes ready.
+void app.whenReady().then(async () => {
+  const sqliteBinding = fileURLToPath(new URL('../native/better_sqlite3.node', import.meta.url));
+  runtime = new DesktopSyncRuntime(new DesktopSyncJournal(join(app.getPath('userData'), 'sync.sqlite'), sqliteBinding), () => mainWindow);
+  scheduler = new ElectronScheduleAdapter(async () => { await runtime.startSync(); });
+  scheduler.schedule(await runtime.getSchedule());
+  powerMonitor.on('resume', () => scheduler.resume());
+  registerHandlers();
+  registerPairingHandlers(() => mainWindow);
+  createWindow();
 
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) createWindow();
-});
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') app.quit();
+  });
+
+  let pairingClosedForQuit = false;
+  app.on('before-quit', (event) => {
+    if (pairingClosedForQuit) return;
+    event.preventDefault();
+    void closeNativePairing().catch(() => undefined).finally(() => {
+      pairingClosedForQuit = true;
+      app.quit();
+    });
+  });
+}).catch(() => {
+  console.error('Kloda startup failed.');
+  app.exit(1);
 });

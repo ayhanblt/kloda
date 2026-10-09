@@ -7,7 +7,13 @@
     "userInterfaceStyle": "automatic",
     "plugins": [
       "expo-dev-client",
-      "expo-secure-store"
+      "expo-secure-store",
+      ["expo-camera", {
+        "cameraPermission": "Allow Kloda to scan your computer pairing QR.",
+        "microphonePermission": false,
+        "recordAudioAndroid": false,
+        "barcodeScannerEnabled": true
+      }]
     ],
     "ios": {
       "bundleIdentifier": "com.kloda.app",
@@ -19,7 +25,10 @@
       "package": "com.kloda.app",
       "permissions": [
         "READ_MEDIA_IMAGES",
-        "READ_MEDIA_VIDEO"
+        "READ_MEDIA_VIDEO",
+        "CAMERA",
+        "ACCESS_NETWORK_STATE",
+        "INTERNET"
       ]
     }
   }

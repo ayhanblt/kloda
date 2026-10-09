@@ -30,6 +30,9 @@ node_modules/
 .omp/cache/
 .omp/tmp/
 
+# Local-only evidence archives and recovery artifacts
+/.local-evidence/
+
 # Serena generated/runtime data
 .serena/cache/
 
@@ -57,8 +60,14 @@ apps/desktop/.webpack/
 apps/mobile/modules/**/android/build/
 apps/mobile/modules/**/ios/build/
 
+# Shared pairing native generated output
+packages/pairing-native/target/
+apps/mobile/modules/my-module/android/src/main/jniLibs/
+apps/mobile/modules/my-module/ios/NativePairing/
+
 # Logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+tools/android-keystore-tls-poc/

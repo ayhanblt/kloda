@@ -4,6 +4,6 @@
     "modules": ["KlodaSyncRuntimeModule"]
   },
   "android": {
-    "modules": ["com.kloda.sync.KlodaSyncRuntimeModule"]
+    "modules": ["com.kloda.sync.KlodaSyncRuntimeModule", "com.kloda.sync.KlodaPairingModule"]
   }
 }

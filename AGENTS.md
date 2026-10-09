@@ -55,3 +55,28 @@ Before spawning subagents or starting PoCs:
 
 The goal is not maximum implementation breadth per task; it is maximum validated progress per unit of model usage.
 
+For routine/mechanical tasks, delegate to @smol:
+- repository search
+- file/symbol lookup
+- evidence extraction
+- simple edits
+- repetitive test fixes
+- documentation updates
+
+Use @default only for tasks requiring judgment, multi-file reasoning, or design decisions.
+
+## Execution flow
+Continue through roadmap steps without waiting for user confirmation.
+
+After completing a step:
+- verify it with tests/build/checks,
+- immediately continue to the next incomplete step,
+- do not ask for approval between steps.
+
+Stop only if:
+- a new architectural decision is required,
+- requirements conflict,
+- a destructive/irreversible action is needed,
+- progress is blocked by missing information or failing infrastructure.
+
+

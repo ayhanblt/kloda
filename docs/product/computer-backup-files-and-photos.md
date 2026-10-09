@@ -4,7 +4,7 @@ Belgeleme tarihi: 2026-10-04. [ADR 0005](../decisions/0005-computer-first-files-
 
 ## 1. Ana akış ve program
 
-- Mobil/desktop aynı Kloda hesabı → telefonda hedef PC seçimi → PC'de yeni istemci onayı + izinli alıcı alan → bilateral peer doğrulaması → iptal edilebilir kalıcı eşleşme. Aynı hesap girişi tek başına dosya yetkisi değildir; [ADR 0003](../decisions/0003-secure-pairing-and-offline-authorization.md) güven politikasını tanımlar.
+- İlk local trust: PC aktif invitation QR'ı → telefon QR-only scan → actual mutual TLS/P-256 SPKI + same-channel secret proof → exact candidate PC approval → iki durable local pin + ACK. [ADR0013](../decisions/0013-qr-based-local-lan-pairing.md) bu akışı backend/internet/login olmadan kabul eder; implementasyon yoktur. Dosya akışı ayrıca aynı Kloda account eligibility, taze gerekli step-up, PC izinli alıcı alan onayı ve capability ister. Offline local pins ≠ file grant; [ADR0003](../decisions/0003-secure-pairing-and-offline-authorization.md) offline file authorization sınırını korur.
 - Ana hedef PC, kaynak genel dosyalardır. WebDAV/SMB gelişmiş seçenekleri korunur; yeni PC kanalını SMB'yi internete açarak gerçekleştirme. Uzaktan listeleme bilgisayardaki izinli alandan yapılır; web dosya tarayıcısı veya merkezî dosya indeksi bu seçimden türetilmez.
 - Mobilde kaynak ve program; PC'de izinli alıcı klasör seçilir. Android/iOS ortak ürün davranışı hedeflenir, aynı native API veya kesintisiz background garanti edilmez. iOS Files security-scoped izinleri ve Android SAF grant'leri gerçek erişim sınırıdır; tüm cihaz dosya sistemi taranmaz. Kaynak izin iptali boş kaynak/başarı değildir.
 - Sessionda seçilmiş uyumluluk/destek **hedefi iOS 16.4+ / Android 7.0(API24)+** ve ortak native crypto yönüdür. Bu hedef tüm release/toolchain minima uyumluluğu/onayını veya tüm sürümlerde proved support'u kapatmaz. Fiziksel PoC'nin experimental minSdk24 APK'sı tek başına ürün minimum-OS kararı değildir; ADR0001 bu tarihsel seçim ve açık gate ayrımını korur.
@@ -93,9 +93,13 @@ API/izin dışındaki organizasyon unsurları görünür limit olarak raporlanı
 
 PC normal dosyaları Finder/Explorer ile açma/düzenleme/ekleme deneyimi korunur; kapalı Kloda vault yoktur. Private device key'ler uç OS storage'ında kalır. Hesap recovery bunları sunucudan yeniden üretmez; PC normal dosyaları koruduğundan kayıp telefon key'i yeni onaylı pairing ile değiştirilebilir.
 
+[ADR0012](../decisions/0012-kloda-owned-p256-device-identity.md) ayrı long-lived Kloda P-256 identity ve mümkün olduğunda Secure Enclave/Keystore-StrongBox-TEE/TPM non-exportable provider yönünü korur. [ADR0013](../decisions/0013-qr-based-local-lan-pairing.md) Matrix/SAS'ı current pairing path'ten çıkarır; QR/native channel binding, durable pins/ACK ve kalan hardware API/support/fallback/background/physical gate'leri açıktır. Local peer pin trust, backend registry yalnız control metadata'dır. Backend JWT user session, ayrı signed capability PC/device/scope/expiry file authorization'dır; QR trust veya session identity proof grant değildir.
+
 Relay'in yalnız depolamaması gizlilik kanıtı değildir: edge TLS + origin TLS iki farklı sınırdır. HTTPS veya tunnel token E2EE key'i değildir. Dosya/medya/album metadata'sı relay'e plaintext açılmaz; IP/zaman/boyut gibi trafik metadata'sının anonimliği vaat edilmez.
 
-Cloudflare Tunnel önce self-hosted relay yerine tercih edildi, ardından remote taşıma yeniden tartışmaya açıldı. Korunan araştırma adayı LAN HTTPS + remote WebRTC/ICE/STUN/TURN'dür; Tunnel **adopted production mimarisi değildir**. Tunnel, TURN, DNS ve P2P aynı şey değildir. Kullanıcı Cloudflare/alternatif sağlayıcı hesabı açmaz, router portu/DNS ayarlamaz. PC asleep/offline ise bulut dosya deposu olmadan dosya telefonda bekler. Relay disk/object-store ürünü eklenmez; geçici akış RAM tamponu kalıcı depolama değildir.
+Cloudflare Tunnel tarihsel tercih ve TURN'den farklı üründür. ADR0012 remote için **WebRTC/DTLS + signed signaling/fingerprint + Kloda device mutual proof**, mümkünse direct P2P ve **Cloudflare TURN yalnız relay fallback** yönünü seçti; LAN pinned TLS/SPKI + mutual proof. Exact source/native/provider deployment ve iOS background/physical proof açık; adopted production iddiası yok. TLS/DTLS kanal güvenliği zorunlu, varsa payload encryption ek defense-in-depth'tir, yerine geçmez. Kullanıcı sağlayıcı hesabı/port/DNS kurmaz. PC asleep/offline ise cloud file store olmadan telefonda beklenir; relay disk/object-store ürünü olmaz.
+
+Aşağıdaki eski provider araştırması tarihsel maliyet/limit bağlamıdır; Tunnel/DNS connector provisioning yeni remote yönünün prerequisite'i değildir. Güncel Cloudflare TURN deployment/credentials/cost/limits/redundancy ayrıca doğrulanır; historical fiyat güncel teklif değildir.
 
 | Gate | Saklanan araştırma bulgusu / sınır |
 |---|---|
@@ -106,7 +110,7 @@ Cloudflare Tunnel önce self-hosted relay yerine tercih edildi, ardından remote
 | Stream | Encode/store eden Cloudflare Stream yalnız byte taşıyan içerik saklamayan yolun sessiz alternatifi değildir. |
 | iOS | background URLSession HTTP(S)/file-backed'tir; remote DataChannel ona devredilmiş sayılmaz. iOS simulator inconclusive; gerçek iPhone trust/lifecycle/storage ve desteklenen eski OS kanıtı gerekir. |
 | Network/PC | CGNAT her zaman fail değildir; çift NAT/firewall/client isolation başarısız olabilir. TURN PC offline/sleep, suspend veya internet kesintisini çözmez. |
-| Değişiklik kapısı | Uygunsuz provider koşullarında self-hosted relay, başka managed tunnel veya foreground-only WebRTC'ye sessiz düşülmez; kullanıcı kararı gerekir. Hosting/production transport onayı ayrıca alınır. |
+| Değişiklik kapısı | Seçilen WebRTC/DTLS/direct-P2P/Cloudflare TURN fallback yönü provider deployment/native/background gate'lerini kapatmaz. Uygunsuz provider koşullarında self-hosted relay, managed tunnel, başka provider veya foreground-only garantiye sessiz cutover yok; ayrı kullanıcı kararı gerekir. |
 
 ## 7. Kanıt sınıfları ve baseline boşlukları
 

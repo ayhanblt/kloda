@@ -15,6 +15,7 @@ task:
   agentModelOverrides:
     sonic: "@smol"
     task: "@task"
+  maxEffort: high
     
 cycleOrder:
   - smol

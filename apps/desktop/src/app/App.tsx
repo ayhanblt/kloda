@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { HardDrive, Smartphone } from 'lucide-react';
+import { Toaster } from 'sonner';
 
 import '../shared/i18n';
 import { getDesktopBridge, type BackupDraft, type SyncProgress } from '../shared/api/desktop';
+import { PairingPage } from '../pages/pairing/PairingPage';
 
 const emptyDraft: BackupDraft = {
   intervalHours: 12,
@@ -14,6 +17,53 @@ const emptyDraft: BackupDraft = {
 
 export function App() {
   const { t } = useTranslation();
+  const [route, setRoute] = useState<'backup' | 'pairing'>(() => window.location.hash === '#/pairing' ? 'pairing' : 'backup');
+  const protectedDecision = useRef(false);
+  const [navigationBlocked, setNavigationBlocked] = useState(false);
+  const onProtectedDecisionChange = useCallback((protectedByNativeStatus: boolean) => {
+    // This only protects presentation; native candidate/commit validation owns trust.
+    protectedDecision.current = protectedByNativeStatus;
+    setNavigationBlocked(protectedByNativeStatus);
+  }, []);
+  const navigate = (next: 'backup' | 'pairing') => {
+    if (protectedDecision.current) return;
+    window.location.hash = `/${next}`;
+    setRoute(next);
+  };
+
+  useEffect(() => {
+    const onRouteChange = () => {
+      if (protectedDecision.current && window.location.hash !== '#/pairing') {
+        window.history.replaceState(window.history.state, '', '#/pairing');
+        return;
+      }
+      setRoute(window.location.hash === '#/pairing' ? 'pairing' : 'backup');
+    };
+    window.addEventListener('hashchange', onRouteChange);
+    return () => window.removeEventListener('hashchange', onRouteChange);
+  }, []);
+
+  return <>
+    <nav aria-label={t('pairing.navigationLabel')} className="desktop-navigation">
+      <span className="desktop-navigation-brand">Kloda: Secure Photos &amp; Sync</span>
+      <button aria-current={route === 'backup' ? 'page' : undefined}
+        disabled={navigationBlocked} onClick={() => navigate('backup')} type="button">
+        <HardDrive aria-hidden="true" size={18} />{t('pairing.backupNavigation')}
+      </button>
+      <button aria-current={route === 'pairing' ? 'page' : undefined}
+        disabled={navigationBlocked} onClick={() => navigate('pairing')} type="button">
+        <Smartphone aria-hidden="true" size={18} />{t('pairing.pairingNavigation')}
+      </button>
+    </nav>
+    <div hidden={route !== 'backup'}><BackupSetup /></div>
+    {route === 'pairing' && <PairingPage onProtectedDecisionChange={onProtectedDecisionChange} />}
+    <Toaster closeButton containerAriaLabel={t('pairing.notificationsLabel')} hotkey={[]} position="bottom-right" theme="light"
+      toastOptions={{ closeButtonAriaLabel: t('pairing.dismissNotification') }} />
+  </>;
+}
+
+function BackupSetup() {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState(emptyDraft);
   const [step, setStep] = useState<'sources' | 'storage' | 'activity'>('sources');
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +71,7 @@ export function App() {
   const [storage, setStorage] = useState({ endpoint: '', password: '', targetPath: 'Kloda', username: '' });
 
   useEffect(() => {
-    void getDesktopBridge().getDraft().then((nextDraft) => {
+    void (async () => getDesktopBridge().getDraft())().then((nextDraft) => {
       setDraft(nextDraft);
       if (nextDraft.storage) setStorage((current) => ({ ...current, ...nextDraft.storage }));
     }).catch((reason: unknown) => setError(reason instanceof Error ? reason.message : t('onboarding.loadError')));

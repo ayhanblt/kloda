@@ -1,8 +1,9 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 
 import type { StorageForm } from './types.js';
 
 export class NodeWebDavClient {
+  private readonly preparedDirectories = new Set<string>();
   constructor(private readonly storage: StorageForm) {}
 
   async verifyWriteAccess(): Promise<void> {
@@ -40,21 +41,69 @@ export class NodeWebDavClient {
     if (operationFailure) throw operationFailure;
   }
 
-  async uploadFile(remotePath: string, temporaryRemotePath: string, file: Blob): Promise<void> {
-    const target = new URL(remotePath.split('/').map(encodeURIComponent).join('/'), this.getBaseUrl());
+  async uploadTemporary(temporaryRemotePath: string, file: Blob): Promise<void> {
+    await this.prepareParentDirectories(temporaryRemotePath);
     const temporary = new URL(temporaryRemotePath.split('/').map(encodeURIComponent).join('/'), this.getBaseUrl());
     const upload = await this.request(temporary, 'PUT', { 'If-None-Match': '*' }, file);
-    if (!upload.ok) throw new Error(`WebDAV upload failed (${upload.status}).`);
-    const finalize = await this.request(temporary, 'MOVE', { Destination: target.toString(), Overwrite: 'F' });
-    if (!finalize.ok) {
-      await this.cleanupTemporaryUpload(temporary);
-      throw new Error(`WebDAV finalize failed (${finalize.status}).`);
-    }
+    await upload.body?.cancel();
+    if (upload.status !== 201) throw new Error(`WebDAV upload failed (${upload.status}).`);
   }
 
-  async removeTemporaryUpload(temporaryRemotePath: string): Promise<void> {
+  async finalizeUpload(remotePath: string, temporaryRemotePath: string): Promise<'moved' | 'conflict'> {
+    const target = new URL(remotePath.split('/').map(encodeURIComponent).join('/'), this.getBaseUrl());
     const temporary = new URL(temporaryRemotePath.split('/').map(encodeURIComponent).join('/'), this.getBaseUrl());
-    await this.cleanupTemporaryUpload(temporary);
+    const finalize = await this.request(temporary, 'MOVE', { Destination: target.toString(), Overwrite: 'F' });
+    await finalize.body?.cancel();
+    if (finalize.status === 412) return 'conflict';
+    if (finalize.status !== 201) throw new Error(`WebDAV finalize failed (${finalize.status}).`);
+    return 'moved';
+  }
+
+  async inspectFile(remotePath: string, revision: string): Promise<'missing' | 'match' | 'mismatch'> {
+    const target = new URL(remotePath.split('/').map(encodeURIComponent).join('/'), this.getBaseUrl());
+    const response = await this.request(target, 'GET');
+    if (response.status !== 200) {
+      await response.body?.cancel();
+      if (response.status === 404) return 'missing';
+      throw new Error(`WebDAV read verification failed (${response.status}).`);
+    }
+    const hash = createHash('sha256');
+    const reader = response.body?.getReader();
+    if (reader) {
+      try {
+        while (true) {
+          const chunk = await reader.read();
+          if (chunk.done) break;
+          hash.update(chunk.value);
+        }
+      } finally {
+        reader.releaseLock();
+      }
+    }
+    return revision === `sha256:${hash.digest('hex')}` ? 'match' : 'mismatch';
+  }
+
+  private async prepareParentDirectories(remotePath: string): Promise<void> {
+    const separator = remotePath.lastIndexOf('/');
+    if (separator < 0) return;
+    const parentPath = remotePath.slice(0, separator);
+    if (!parentPath || this.preparedDirectories.has(parentPath)) return;
+    const parts = parentPath.split('/');
+    const baseUrl = this.getBaseUrl();
+    let path = '';
+    let encodedPath = '';
+    for (const part of parts) {
+      path = path ? `${path}/${part}` : part;
+      encodedPath += `${encodeURIComponent(part)}/`;
+      if (this.preparedDirectories.has(path)) continue;
+      const directory = new URL(encodedPath, baseUrl);
+      const response = await this.request(directory, 'MKCOL');
+      await response.body?.cancel();
+      if (response.status !== 201 && response.status !== 405) {
+        throw new Error(`WebDAV parent directory creation failed (${response.status}).`);
+      }
+      this.preparedDirectories.add(path);
+    }
   }
 
   private async cleanupProbe(fileUrl: URL | undefined, directoryUrl: URL): Promise<Error | undefined> {
@@ -69,11 +118,6 @@ export class NodeWebDavClient {
       return reason instanceof Error ? reason : new Error('WebDAV probe cleanup failed.');
     }
     return undefined;
-  }
-
-  private async cleanupTemporaryUpload(url: URL): Promise<void> {
-    const response = await this.request(url, 'DELETE');
-    if (!response.ok && response.status !== 404) throw new Error(`WebDAV temporary upload cleanup failed (${response.status}).`);
   }
 
   private getBaseUrl(): URL {

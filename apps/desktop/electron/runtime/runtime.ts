@@ -1,10 +1,10 @@
 import { randomUUID } from 'node:crypto';
-import { openAsBlob } from 'node:fs';
-import { readdir, stat } from 'node:fs/promises';
-import { basename, relative } from 'node:path';
+import { readdir } from 'node:fs/promises';
+import { basename, relative, sep } from 'node:path';
 import { dialog, type BrowserWindow } from 'electron';
 
-import { DesktopSyncJournal } from './journal.js';
+import { DesktopSyncJournal, type PendingUpload } from './journal.js';
+import { openSourceSnapshot } from './source-snapshot.js';
 import type { BackupDraft, DesktopBridge, DesktopSource, StorageForm, SyncProgress } from './types.js';
 import { ElectronCredentialVault } from './vault.js';
 import { NodeWebDavClient } from './webdav.js';
@@ -35,9 +35,9 @@ export class DesktopSyncRuntime implements DesktopBridge {
     const parent = this.parentWindow();
     const result = parent ? await dialog.showOpenDialog(parent, options) : await dialog.showOpenDialog(options);
     if (result.canceled || result.filePaths.length === 0) return this.journal.getDraft().sources;
-    const sources = result.filePaths.map((path) => ({ displayName: basename(path), id: randomUUID(), path }));
+    const sources = result.filePaths.map((path) => ({ displayName: basename(path), path }));
     this.journal.replaceSources(sources);
-    return sources.map(({ id, displayName }) => ({ id, displayName }));
+    return this.journal.getDraft().sources;
   }
 
   saveSchedule(intervalHours: 12 | 24, localTime: string): Promise<void> {
@@ -77,40 +77,88 @@ export class DesktopSyncRuntime implements DesktopBridge {
     if (!draft.storageTested) throw new Error('Test WebDAV access before starting backup.');
     const sources = this.journal.getSourcePaths();
     if (sources.length === 0) throw new Error('Select at least one source folder.');
+    if (this.journal.hasUnscopedPendingUploads()) throw new Error('Cannot resume unscoped pending uploads without verified target reconciliation.');
+    const targetId = JSON.stringify([storage.endpoint, storage.targetPath, storage.username]);
     const client = new NodeWebDavClient(storage);
-    await this.reconcilePendingUploads(client);
+    await this.reconcilePendingUploads(client, targetId);
     const sourceFiles = await Promise.all(sources.map(async (source) => ({ source, files: await this.listFiles(source.path) })));
     const files = sourceFiles
       .flatMap(({ source, files }) => files.map((file) => ({
         file,
-        relativePath: relative(source.path, file.path),
-        revision: `${file.size}:${file.modifiedAt}`,
+        relativePath: relative(source.path, file).split(sep).join('/'),
         source,
-      })))
-      .filter(({ relativePath, revision, source }) => !this.journal.hasUploadReceipt(source.id, relativePath, revision));
-    const progress: SyncProgress = { bytesTransferred: 0, bytesTotal: files.reduce((total, { file }) => total + file.size, 0), completedFiles: 0, id: randomUUID(), status: 'running', totalFiles: files.length };
+      })));
+    const progress: SyncProgress = { bytesTransferred: 0, bytesTotal: 0, completedFiles: 0, id: randomUUID(), status: 'running', totalFiles: 0 };
     this.journal.saveProgress(progress);
-    for (const { file, relativePath, revision, source } of files) {
-      const remotePath = `${source.id}/${relativePath}`;
-      const temporaryPath = `${remotePath}.kloda-upload-${randomUUID()}`;
-      this.journal.savePendingUpload(source.id, relativePath, revision, temporaryPath);
-      await client.uploadFile(remotePath, temporaryPath, await openAsBlob(file.path));
-      this.journal.saveUploadReceipt(source.id, relativePath, revision);
-      this.journal.clearPendingUpload(source.id, relativePath, revision);
-      progress.bytesTransferred += file.size;
-      progress.completedFiles += 1;
-      this.journal.saveProgress(progress);
+    for (const { file, relativePath, source } of files) {
+      const snapshot = await openSourceSnapshot(file);
+      try {
+        const { body, revision } = snapshot;
+        const remotePath = `${source.id}/${relativePath}`;
+        if (this.journal.hasUploadReceipt(targetId, source.id, relativePath, revision) &&
+          await client.inspectFile(remotePath, revision) === 'match') continue;
+        progress.bytesTotal += body.size;
+        progress.totalFiles += 1;
+        this.journal.saveProgress(progress);
+        const temporaryPath = `${remotePath}.kloda-upload-${randomUUID()}`;
+        const pending: PendingUpload = { targetId, sourceId: source.id, relativePath, revision, temporaryPath, phase: 'prepared' };
+        this.journal.savePendingUpload(targetId, source.id, relativePath, revision, temporaryPath);
+        await client.uploadTemporary(temporaryPath, body);
+        this.journal.advancePendingUpload(targetId, pending, 'uploaded');
+        await this.finalizePendingUpload(client, targetId, pending);
+        progress.bytesTransferred += body.size;
+        progress.completedFiles += 1;
+        this.journal.saveProgress(progress);
+      } finally {
+        await snapshot.dispose();
+      }
     }
     progress.status = 'completed';
     this.journal.saveProgress(progress);
     return progress;
   }
 
-  private async reconcilePendingUploads(client: NodeWebDavClient): Promise<void> {
-    for (const pending of this.journal.getPendingUploads()) {
-      await client.removeTemporaryUpload(pending.temporaryPath);
-      this.journal.clearPendingUpload(pending.sourceId, pending.relativePath, pending.revision);
+  private async reconcilePendingUploads(client: NodeWebDavClient, targetId: string): Promise<void> {
+    const uploads = this.journal.getPendingUploads(targetId);
+    for (const pending of uploads) {
+      if (pending.phase !== 'prepared' && pending.phase !== 'uploaded' && pending.phase !== 'moving' &&
+        pending.phase !== 'moved' && pending.phase !== 'conflict') {
+        throw new Error('Cannot reconcile a pending upload without a known operation phase.');
+      }
     }
+    for (const pending of uploads) {
+      if (pending.phase === 'prepared') {
+        if (await client.inspectFile(pending.temporaryPath, pending.revision) !== 'missing') {
+          throw new Error('Unacknowledged temporary file cannot be adopted or deleted.');
+        }
+        this.journal.clearPendingUpload(targetId, pending);
+      } else {
+        await this.finalizePendingUpload(client, targetId, pending);
+      }
+    }
+  }
+
+  private async finalizePendingUpload(client: NodeWebDavClient, targetId: string, pending: PendingUpload): Promise<void> {
+    const remotePath = `${pending.sourceId}/${pending.relativePath}`;
+    if (pending.phase !== 'moved') {
+      if (await client.inspectFile(pending.temporaryPath, pending.revision) !== 'match') {
+        throw new Error('Owned temporary bytes are unavailable or changed; the final cannot be adopted.');
+      }
+      if (await client.inspectFile(remotePath, pending.revision) !== 'missing') {
+        if (pending.phase !== 'conflict') this.journal.advancePendingUpload(targetId, pending, 'conflict');
+        throw new Error('Existing final cannot be adopted or overwritten.');
+      }
+      this.journal.advancePendingUpload(targetId, pending, 'moving');
+      if (await client.finalizeUpload(remotePath, pending.temporaryPath) === 'conflict') {
+        this.journal.advancePendingUpload(targetId, pending, 'conflict');
+        throw new Error('WebDAV finalization conflicted without overwrite.');
+      }
+      this.journal.advancePendingUpload(targetId, pending, 'moved');
+    }
+    if (await client.inspectFile(remotePath, pending.revision) !== 'match') {
+      throw new Error('Acknowledged final byte verification failed.');
+    }
+    this.journal.completePendingUpload(targetId, pending);
   }
 
   private getStorage(): StorageForm {
@@ -120,16 +168,13 @@ export class DesktopSyncRuntime implements DesktopBridge {
     return { ...draft.storage, password };
   }
 
-  private async listFiles(rootPath: string): Promise<{ path: string; size: number; modifiedAt: number }[]> {
-    const files: { path: string; size: number; modifiedAt: number }[] = [];
+  private async listFiles(rootPath: string): Promise<string[]> {
+    const files: string[] = [];
     for (const entry of await readdir(rootPath, { withFileTypes: true })) {
       const path = `${rootPath}/${entry.name}`;
       if (entry.isSymbolicLink()) continue;
       if (entry.isDirectory()) files.push(...await this.listFiles(path));
-      if (entry.isFile()) {
-        const details = await stat(path);
-        files.push({ path, size: details.size, modifiedAt: details.mtimeMs });
-      }
+      if (entry.isFile()) files.push(path);
     }
     return files;
   }

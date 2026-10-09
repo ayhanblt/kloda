@@ -1,8 +1,14 @@
-# Matrix verification ve aynı-key native TLS — kalıcı kanıt
+# Matrix verification ve aynı-key native TLS — tarihsel kalıcı kanıt
 
 Belgeleme tarihi: **2026-10-04**. Geçmiş public sonuç/rapor/source sınırları konsolide edildi; bu turda deney, kurulum, build/lint/test, servis veya cihaz/cloud işlemi yapılmadı. Yeni mimari kararı veya üretim SDK cutover'ı değildir. [Sanitized machine-readable özet](evidence/poc-native-verification-summary.json), exact case ID/pair/status ve kaynak SHA256'larını repo'da tutar. Tarihsel transport sonucu ayrı [transport kaydında](poc-transport-evidence.md): **fiziksel Android14 pass/1 direct inconclusive; iOS URLSession simulator inconclusive**. Daha sonraki simulator verification/TLS başarıları bunların yerine geçmez.
 
-## Aşamalar birbirine eklenmez veya birbirinin yerine kullanılmaz
+**Current supersession — [ADR0013](../decisions/0013-qr-based-local-lan-pairing.md):** Bütün case/count/pin/hash/provenance ve aşağıdaki eski closing gate ifadeleri **Matrix Ed25519 same-key/software-only scope'unun historical kaydıdır**. Matrix/SAS/SDK/store/homeserver/upstream/fork current pairing dependency değildir; eski corpus recovery yeni gate değildir. [ADR0012](../decisions/0012-kloda-owned-p256-device-identity.md) Kloda-owned P-256 identity/hardware preference için korunur; backend registry local pin yaratmaz.
+
+Current QR first trust actual PC TLS Kloda P-256 canonical SPKI equality + real mutual CertificateVerify + same-channel secret HMAC + exact candidate PC approval + PC atomic consume/pin + phone PENDING-before-proof/durable pin/ACK/recovery'dir. Backend/login/internet gerekmez fakat account enrollment/step-up/scope/capability/file authority yaratmaz. [KLODA-QR-PAIR-V1](qr-pairing-v1-protocol.md) protocol bytes ve minimum native davranış frozen; actual API/ABI/adoption/integration unverified, implementation not executed. [QR roadmap](../implementation/qr-pairing-implementation-roadmap.md) future implementation/test planıdır. Full-DER capability hash QR SPKI hash'inden ayrı; renewal online reissue ve remote DTLS/signaling profile ayrımı korunur.
+
+Required local key/pin/pairing/epoch continuity kaybı fresh QR trust + ayrı gerekli online authorization ister. Bu historical deneylerde QR/P-256/hardware/session/remote proof yoktur. [Production gates](production-gates.md) ayrı mevcut SM-S921B/API36 device-local hardware-backed P-256→TLS1.3 CertificateVerify **CLOSED/PASS**'ını kaydeder; actual Android↔PC LAN/final app/Rust bridge/iOS physical/desktop/platform/authority gates kapanmaz. Historical counts/hash/results korunur; yeni rerun/rebuild/research yapılmadı.
+
+## Historical aşamalar birbirine eklenmez veya yeni P-256 proof yerine kullanılmaz
 
 | Aşama | Platform / pair | Final kanıt | Tamamlanan sınırlı kapı |
 |---|---|---:|---|
@@ -86,7 +92,7 @@ Published0.19.1 public device signer string/UTF-8 kabul ediyordu; arbitrary bina
 - `src/olm/account.rs`: crate-private `sign_bytes(&[u8])`, mevcut account'ın device key'i ile.
 - `src/machine/mod.rs`: public async `sign_bytes(&[u8])`, store cache/account üzerinden; cross-signing/master key kullanılmaz, private key export edilmez.
 
-Eski string signer korundu; registry SDK kaynakları değişmedi. Bu blocker **isolated patched feasibility** bakımından superseded'dır; production/upstream exact-byte signer desteği kanıtlandı diye yazılmaz. **SDK patch hâlâ gerekli**, upstream adoption/maintained fork/package/production cutover onayı yok. Public patch SHA256 aşağıdadır; methods burada self-contained kaydedildiği için kararın anlamı `/tmp` patch linkine bağlı değildir.
+Eski string signer korundu; registry SDK kaynakları değişmedi. Blocker **isolated patched feasibility** bakımından superseded'dı; production/upstream exact-byte signer kanıtlanmadı. **SDK patch yalnız bu historical Matrix same-key deneyinde gerekliydi**; ADR0012 ile arbitrary-byte upstream katkı optional future, Kloda product blocker/fork/migration prerequisite değil. Public patch SHA256 aşağıdadır; methods bu eski scope'ta self-contained kaydedildi, `/tmp` kaybı yeni P-256 gereksinimi değildir.
 
 Native core Rustls/rcgen signer bridge'i64byte signature ve5s timeout kullanır; synchronous sign yalnız awaited `spawn_blocking` içinde. JS raw byte-sign API'si eklenmedi; native shells'in yeni komutları fixture automation whitelist'ine girdi, normal UI whitelist'i genişletilmedi. Mevcut SDK public key'inden remote-key self-signed leaf; DigitalSignature + ServerAuth/ClientAuth; **normal WebPKI mutual auth**, TLS13-only, resumption/early-data/tickets kapalı. Private key extraction, custom handshake veya accept-all verifier eklenmedi. DER16KiB, records64KiB, canonical padded base64; tek Engine validation boundary, bounded session30s/128 handshake-step ve11byte fixed native probe receive buffer.
 
@@ -127,9 +133,11 @@ Ayrıntıların kaynak provenance'ı: historical `local://kloda-pairing-protocol
 
 ## 5. Açık fiziksel ve production kapıları
 
+**Historical bölüm — eski Matrix single-key scope.** Aşağıdaki eski prerequisites current acceptance contract değildir; current QR/P-256 gate'ler ADR0013 ve [production gates](production-gates.md) içindedir.
+
 **Physical-device-required:** Android/iOS minimum/current native ABI ve genuine iki-cihaz SAS comparison; gerçek screen lock/first unlock/reboot, task/background, OS wrapper/provider lock, backup/restore/reinstall/credential/biometry transitions; retained epoch + lost SDK DB; APK/iOS real signing/provisioning; source/WAL/DataProtection; temporary-unavailable ile real key loss ayrımı. Simulator entitlement success bunları kapatmaz.
 
-**Production-gate:** Expo integration, matching minimal-feature reproducible packaging/upstream-maintained signer support, Windows/Linux ve older macOS runtime, real peer LAN/remote/signaling, account↔Matrix user/device mapping, PC scope approval, grant/capability/session admission, certificate persistence/renewal, central deny/revoke/offline reliable time, operation/publication fence, filesystem races, issuer custody/enrollment, actual file transfer. SDK verified/cross-signing graph bu yetkilerin yerine geçmez. OS software-key protection RAM/root/process-compromise veya hardware-non-exportability değildir. Güvenilir key use + native TLS feasibility çalıştı; file authorization çalıştı denmez.
+**Historical production-gate list (eski scope):** Expo integration, matching minimal-feature Matrix packaging/signer support, desktop/real peer networks, account mapping, PC scope/capability/session admission, cert persistence/renewal, revoke/time/publication, filesystem, issuer/enrollment/file transfer açık kalmıştı. Güvenilir **Matrix-key** native TLS feasibility file authorization/hardware proof değildi. ADR0012 byte signer blocker'ını retired yaptı; ADR0013 standard SAS SDK/cryptographic Kloda binding gerekliliklerini de current path'ten çıkardı. Current QR protocol/native TLS-SPKI/secret-channel/persistence/physical gate'leri [production gates](production-gates.md) içindedir. Eski52/50/8 sonuçlar bu gate'lere aktarılmaz.
 
 ## Kaynak haritası, hash ve arşivsel sınır
 
@@ -152,5 +160,7 @@ Source→claim mapping:
 - TLS `RESULT.md` §§Son doğrulama/Değişiklik kaydı/Negatif kanıtlar/İlk koşu/Kapsam sınırları + `report.json`, `sdk-byte-signer.patch`, public `evidence/{android-pc,ios-pc}/tls-cases.json`: host8, TLS25/pair, copied verification26/pair, actual leaf pin,20 cycles,22/25 chronology, two-method patch, false production/physical/network/authority gates. `local://kloda-same-key-tls-feasibility-result.md` original archive hash ve isolation boundaries sağladı.
 
 Historical native archive kaydı75 member/1,261,164byte; TLS archive191 regular-file member olarak bildirilmişti. Bu tur member inventory yeniden taranmadı. Original archive policy DB/WAL/SHM, OS wrappers, live epoch, signing private key/runtime state, APK keystore/native binary ve secrets'ı dışlar; proof source/lock/public JSON/screenshot/hash taşır. **Repo'da tam arşiv, raw trace, screenshot veya native binary saklanmıyor**, yalnız self-contained sonuç/sınır ve allowlisted case/hash summary saklanıyor. Hash dosya kimliğini kontrol eder, dosya içeriğini geri üretmez. Ephemeral `/tmp` veya dış source arşivi kaybolursa bütün eski execution byte'larıyla reproduksiyon mümkün değildir; native binary/source hash kayıtları bu saklama eksikliğini çözmez.
+
+Sonraki2026-10-05 [retention/recovery kaydı](evidence-retention-and-recovery.md) SDK byte patch'in exact historical SHA256 ile kurtarıldığını ve yalnız1-member yeni paketin `.local-evidence/` proje-local/Git-dışı alanda tutulduğunu kaydeder. Full original archive/raw source corpus geri gelmedi;2026-10-04 archival sınırı history olarak korunur. Recovery byte doğrulaması eski suite rerun/production approval değildir; clone bu local artifact'ları taşımaz.
 
 Private DB/key/epoch/state, account credential, private hostname/port/serial veya medya byte'ı bu konsolidasyonda açılmadı/kopyalanmadı. Original PoC/session artifact'leri değiştirilmedi. Eski UTF-8 blocker, native23/26 ve TLS22/25 başarısız koşular tarihsel olarak korunur; final success onları hiç yaşanmamış yapmaz. No-op, mocked trust veya planlanmış-only case runtime pass olarak eklenmez.

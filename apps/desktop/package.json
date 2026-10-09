@@ -4,10 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "main": "dist/main/main.js",
+  "productName": "Kloda: Secure Photos & Sync",
+  "klodaDesktop": {
+    "profile": "development",
+    "applicationId": "com.kloda.desktop.dev"
+  },
   "scripts": {
     "dev": "npm run build:main && concurrently -k \"vite --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .\"",
     "build": "npm run typecheck && npm run build:main && vite build",
-    "build:main": "tsc -p tsconfig.main.json",
+    "build:main": "npm run build --workspace @kloda/sync-core && tsc -p tsconfig.main.json && node ../../tools/build-electron-sqlite.mjs && node ../../tools/build-native-desktop.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint \"src/**/*.{ts,tsx}\" \"electron/**/*.{ts,cts}\" vite.config.ts",
     "test": "vitest run --config vitest.config.ts"
@@ -17,9 +22,12 @@
     "@tailwindcss/vite": "^4.3.3",
     "better-sqlite3": "^12.8.0",
     "i18next": "^26.4.2",
+    "lucide-react": "1.52.0",
+    "qrcode": "1.5.4",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-i18next": "^17.0.15",
+    "sonner": "2.0.7",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
@@ -27,6 +35,7 @@
     "@testing-library/react": "^16.3.3",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^24.10.1",
+    "@types/qrcode": "1.5.6",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^6.1.1",

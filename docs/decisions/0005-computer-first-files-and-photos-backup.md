@@ -4,13 +4,15 @@
 - Durum: Ürün davranışı kabul edildi; ürün implementasyonu ve remote dağıtım kabulü tamamlanmadı.
 - Karar sahibi: Ayhan
 
+2026-10-07 scoped supersession: [ADR0013](0013-qr-based-local-lan-pairing.md) ilk trust'ın QR-optional/account-first ifadesini backend-independent yerel QR ile değiştirir. Account file eligibility, dosya/Photos davranışı ve remote yönü korunur.
+
 ## Bağlam
 
 NAS/WebDAV-first ilk dilimden sonra ana ürün odağı, router portu açtırmadan telefondan kullanıcının kendi bilgisayarına güvenli **genel dosya** yedeklemeye çevrildi. [ADR 0002](0002-first-vertical-slice-scope.md) tarihsel WebDAV dilimini kaydeder; o dilimin tamamlandığını veya yeni PC alıcısının mevcut olduğunu söylemez.
 
 ## Karar
 
-1. PC ana hedeftir; WebDAV ve SMB gelişmiş seçenekler olarak korunur. SMB LAN-only kalır. Aynı Kloda hesabıyla mobil/desktop giriş, bilgisayarda izinli alıcı klasör seçimi ve ilk istemci için PC onayı ana akıştır; QR zorunlu değildir. Peer doğrulaması ve dosya yetkisi [ADR 0003](0003-secure-pairing-and-offline-authorization.md) / [ADR 0004](0004-certificate-bound-capability-and-authority-responsibilities.md) kapsamındadır.
+1. PC ana hedeftir; WebDAV ve SMB gelişmiş seçenekler olarak korunur. SMB LAN-only kalır. İlk peer trust PC'nin yerel QR invitation'ını telefonda tarama, actual mutual TLS possession/PC SPKI eşitliği/aynı-channel secret proof ve explicit PC approval ile iki durable local pin kurma akışıdır; internet/backend/login gerekmez. File access için aynı Kloda hesabıyla eligibility, enrollment/step-up, bilgisayarda izinli alıcı klasör/scope seçimi ve capability ayrı gereklidir. Offline QR trust bu dosya grant'ini yaratmaz. Peer trust [ADR0013](0013-qr-based-local-lan-pairing.md), dosya yetkisi [ADR0003](0003-secure-pairing-and-offline-authorization.md) / [ADR0004](0004-certificate-bound-capability-and-authority-responsibilities.md) kapsamındadır.
 2. **Live varsayılandır:** OS izin verdiğinde ilk fırsatta çalışır; kesintisiz gerçek zamanlı çalışma sözü değildir. 12/24 saat + yerel saat alternatifi seçildiğinde değişiklik tespiti anında upload başlatmaz, programın yürütme fırsatı beklenir. **Sync Now** ayrı kalır; manuel çalıştırma programı kaydırmaz. ADR 0001'in OS sınırları ve iki ayrı retry bütçesi korunur.
 3. Temel mod tek yönlü backup + izinli PC alanında uzaktan listeleme/indirmedir. PC alanına elle eklenen dosyalar da telefonda görünür ve indirilebilir. Kullanıcı seçimiyle **Files çift yönlü sync** açılabilir; Photos'a uygulanmaz. Genel dosya desteği bütün telefon dosya sistemine erişim yetkisi değildir; birden fazla kaynak açıkça seçilir, Files için “Tümünü seç” eklenmez.
 4. Files'ta çift yönlü silme geri alınabilir olarak yayılır; trash **30 gün**, normal güncellemelerin önceki sürümleri de **30 gün** korunur. Bağımsız değişikliklerde varsayılan iki sürümü korumaktır; başarılı koruma sonrası sync tamamlanabilir, açık conflict sayısı ayrı kalır. Korumasız silme/overwrite, sessiz retention kısaltma veya retry ile çoğalan conflict yoktur.
@@ -22,9 +24,9 @@ Ayrıntılı edge-case, retention, conflict, restore ve kaynak eşlemesi [ürün
 
 ## Remote karar sınırı
 
-Cloudflare Tunnel self-hosted relay yerine **tarihsel kullanıcı tercihidir**, kanıtlanmış/adopted remote architecture değildir. Daha sonraki araştırmada remote seçim yeniden açılmış, LAN HTTPS + remote WebRTC/ICE/STUN/TURN adayı korunmuştur. Tunnel ve TURN farklı ürünlerdir. Kullanıcıdan router/DNS ayarı veya sağlayıcı hesabı istenmez; relay dosya saklamaz ve plaintext okuyamaz. PC kapalı/uykudaysa bulutta dosya deposu olmadan transfer tamamlanamaz; kaynak telefonda bekler.
+Cloudflare Tunnel tarihsel tercih olarak kalır; TURN ile aynı ürün değildir. [ADR0012](0012-kloda-owned-p256-device-identity.md) remote için **WebRTC/DTLS + signed signaling/fingerprint + Kloda device mutual proof**, mümkünse direct P2P ve **Cloudflare TURN yalnız relay fallback** yönünü seçti. Bu provider setup/native adoption/background proof değildir. Kullanıcıdan router/DNS ayarı veya sağlayıcı hesabı istenmez; relay dosya saklamaz/plaintext okuyamaz. PC kapalı/uykudaysa cloud file store olmadan transfer tamamlanmaz, kaynak telefonda bekler.
 
-Hosting, sağlayıcı hizmet/ölçek koşulları, dağıtılabilir connector/native stack, gerçek account enrollment ve platform/background kanıtları production gate olarak kalır. Tunnel, ngrok, Stream, self-hosted relay veya foreground-only WebRTC'ye sessiz cutover yoktur. Bu ADR yeni transport, algoritma, şema veya hosting seçmez.
+Hosting, Cloudflare TURN credential/bootstrap/cost/limits/redundancy, dağıtılabilir native stack, signaling/DTLS↔Kloda identity/session binding ve gerçek account enrollment/platform/background kanıtları production gate'tir. WebRTC-only kesintisiz background garantisi seçilmedi. TLS/DTLS channel security zorunludur; varsa payload encryption ek defense-in-depth'tir, kanal yerine geçmez. Advanced WebDAV/SMB sınırları değişmez.
 
 ## Kanıt ve sonuç
 

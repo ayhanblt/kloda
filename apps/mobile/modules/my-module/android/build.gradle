@@ -8,11 +8,53 @@ version = '0.1.0'
 
 android {
   namespace "com.kloda.sync"
+  ndkVersion "27.1.12297006"
   defaultConfig {
+    minSdkVersion 24
+    ndk {
+      abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64', 'x86'
+    }
     versionCode 1
     versionName "0.1.0"
   }
   lintOptions {
     abortOnError false
   }
+}
+
+def pairingRepo = file("../../../../..")
+def pairingCrate = new File(pairingRepo, "packages/pairing-native")
+def pairingAbis = ['arm64-v8a', 'armeabi-v7a', 'x86_64', 'x86']
+def pairingNdk = providers.provider { android.ndkDirectory.absolutePath }
+
+def buildPairingNative = tasks.register('buildPairingNative', Exec) {
+  workingDir pairingRepo
+  inputs.files(fileTree(pairingCrate) {
+    include 'src/**', 'Cargo.toml', 'Cargo.lock', 'build.rs', '.cargo/**'
+  }).withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.files(
+    new File(pairingRepo, 'tools/build-native-android.mjs'),
+    new File(pairingRepo, 'tools/native-build-common.mjs')
+  ).withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.property('rustToolchain', '1.99.0')
+  inputs.property('ndkVersion', '27.1.12297006')
+  inputs.property('ndkDirectory', pairingNdk)
+  inputs.property('apiLevel', 24)
+  inputs.property('abis', pairingAbis)
+  inputs.property('hostPlatform', System.getProperty('os.name'))
+  inputs.property('hostArchitecture', System.getProperty('os.arch'))
+  outputs.files(pairingAbis.collect {
+    file("src/main/jniLibs/${it}/libkloda_pairing_native.so")
+  })
+  doFirst {
+    commandLine(
+      System.getenv('NODE_BINARY') ?: 'node',
+      new File(pairingRepo, 'tools/build-native-android.mjs').absolutePath,
+      pairingNdk.get()
+    )
+  }
+}
+
+tasks.matching { it.name == 'preBuild' }.configureEach {
+  dependsOn buildPairingNative
 }

@@ -5,6 +5,8 @@
 - Karar sahibi: Ayhan
 - Kapsam: Mobile ve desktop framework seçimi; iki ayrı deneme politikası, eski mobil sürümlerin desteklenmesi ve iOS kaynak seçimi.
 
+2026-10-07 scoped supersession: [ADR0013](0013-qr-based-local-lan-pairing.md) aşağıdaki standard SAS referansının ilk-trust gerekliliğini yerel QR LAN pairing ile değiştirir; framework, schedule/retry, source selection ve support hedefleri değişmez.
+
 ## Context
 
 İlk WebDAV vertical slice otomatik12/24 saat ve cihazın yerel çalışma saatini, ayrıca Sync Now'ı kabul etti. Session'da daha sonra kabul edilen PC-first ürün kapsamı ve default opportunistic Live [ADR0005](0005-computer-first-files-and-photos-backup.md) içindedir;12/24 program/retry kuralları korunur. Aktif sync sessiz ilerleme bildirimiyle görünür; erişim bütçesi tükenirse hata bildirimi gerekir. Davranış hedefleri tamamlanmış native runtime sayılmaz.
@@ -50,7 +52,7 @@ Sunucuya erişilememesi ile işletim sisteminin işi ertelemesi veya iptal etmes
 - Desktop uygulama **Electron** ile kurulacaktır.
 - Her iki uygulama da TypeScript kullanır ve mevcut FSD katman sınırlarını korur.
 - Expo development build, gerektiğinde native modül eklenmesine izin verir; bu karar belirli bir native API, paket veya minimum OS sürümü seçmez.
-- Ortak native kripto bileşeni yönü Expo/Electron frontend seçimini değiştirmez; native PoC core veya SDK patch'i production dependency adoption değildir. [ADR0007](0007-matrix-verification-and-device-continuity.md) aynı-device-key/verification sınırıdır.
+- Ortak native kripto bileşeni yönü Expo/Electron frontend seçimini değiştirmez; native PoC core veya SDK patch'i production dependency adoption değildir. [ADR0007](0007-matrix-verification-and-device-continuity.md) korunan continuity, [ADR0012](0012-kloda-owned-p256-device-identity.md) ayrı Kloda P-256 identity/hardware-preferred, ADR0013 backend-independent ilk QR trust yönünü kaydeder. Yerel pinning file grant değildir; same-account authorization/step-up/scope/capability ayrı kalır. Android device-local hardware signer dar CLOSED/PASS'tir; exact app/native API/background/minimum cihaz ve actual LAN kanıtı açık.
 - Electron renderer'a doğrudan Node.js veya dosya sistemi erişimi verilmez; yetkili masaüstü API'leri main/preload sınırında kalır.
 
 ## Alternatives considered

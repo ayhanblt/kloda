@@ -1,3 +1,5 @@
+import type { DesktopPairingBridge } from './pairing';
+
 export interface DesktopSource {
   displayName: string;
   id: string;
@@ -23,6 +25,7 @@ export interface SyncProgress {
 declare global {
   interface Window {
     kloda?: {
+      pairing?: DesktopPairingBridge;
       getDraft(): Promise<BackupDraft>;
       pickSources(): Promise<readonly DesktopSource[]>;
       saveSchedule(intervalHours: 12 | 24, localTime: string): Promise<void>;

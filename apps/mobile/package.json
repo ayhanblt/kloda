@@ -11,14 +11,24 @@
     "test": "jest --runInBand --no-watchman"
   },
   "dependencies": {
+    "@gorhom/bottom-sheet": "5.2.14",
     "expo": "~57.0.26",
+    "expo-camera": "57.0.6",
     "expo-dev-client": "~57.0.0",
     "expo-secure-store": "~57.0.4",
     "i18next": "^26.4.2",
+    "lucide-react-native": "1.52.0",
     "nativewind": "^4.2.0",
     "react": "19.3.0",
     "react-i18next": "^17.0.15",
     "react-native": "0.86.3",
+    "react-native-gesture-handler": "2.32.0",
+    "react-native-reanimated": "4.5.1",
+    "react-native-safe-area-context": "5.7.0",
+    "react-native-screens": "4.26.0",
+    "react-native-svg": "15.15.4",
+    "react-native-worklets": "0.10.1",
+    "sonner-native": "0.27.0",
     "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
@@ -31,6 +41,19 @@
     "typescript": "~5.9.3"
   },
   "jest": {
-    "preset": "jest-expo"
+    "preset": "jest-expo",
+    "resolver": "react-native-reanimated/jest/resolver",
+    "setupFilesAfterEnv": ["<rootDir>/jest-setup.js"],
+    "transform": {
+      "\\.mjs$": ["babel-jest", {
+        "presets": ["expo/internal/babel-preset"],
+        "caller": { "name": "metro", "bundler": "metro", "platform": "ios" }
+      }]
+    },
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation|lucide-react-native|@gorhom/bottom-sheet|sonner-native))",
+      "/node_modules/react-native-reanimated/plugin/",
+      "/node_modules/@react-native/babel-preset/"
+    ]
   }
 }
