@@ -16,6 +16,8 @@ export function PairingPage({ onProtectedDecisionChange }: { onProtectedDecision
   const canCreate = phase === 'idle' || phase === 'invalid' || phase === 'revoked' || phase === 'complete';
   const preconsume = phase === 'open' || phase === 'reserved' || phase === 'connecting';
   const committed = phase === 'consumed_pending_ack' || phase === 'complete';
+  const backupScope = status?.backupScope;
+  const backupBlocked = Boolean(busy) || uncertain || !available || !status?.recordId;
   const visibleQr = phase === 'open' && !uncertain && !busy && status?.qr &&
     status.remainingMs !== undefined && status.remainingMs > 0 ? status.qr : null;
   const candidate = phase === 'reserved' && status?.operationId && status.candidateGeneration
@@ -68,6 +70,26 @@ export function PairingPage({ onProtectedDecisionChange }: { onProtectedDecision
           </button>}
         </div>
         {committed && <p className="pairing-caption">{t('pairing.revocationDescription')}</p>}
+        {phase === 'complete' && <div className="pairing-recovery">
+          <h3>{t('pairing.backupTitle')}</h3>
+          <p className="pairing-caption">{t('pairing.noFileGrant')}</p>
+          <p className="pairing-caption">{t('pairing.backupDescription')}</p>
+          <p role="status">{t(`pairing.backupStates.${backupScope?.state ?? 'not_approved'}`)}</p>
+          {backupScope?.folder && <p className="pairing-caption">{t('pairing.backupFolder')} <code>{backupScope.folder}</code></p>}
+          {backupScope?.errorCode && <p className="pairing-error" role="alert">{t(`pairing.errors.${backupScope.errorCode}`)}</p>}
+          <div className="pairing-card-actions">
+            <button className="pairing-button pairing-button-primary" disabled={backupBlocked}
+              onClick={() => { if (status?.recordId) void controller.approveBackup(status.recordId); }} type="button">
+              {t(backupScope?.state === 'approved' || backupScope?.state === 'unavailable'
+                ? 'pairing.reselectBackup' : 'pairing.approveBackup')}
+            </button>
+            {(backupScope?.state === 'approved' || backupScope?.state === 'unavailable') && <button className="pairing-button pairing-button-danger" disabled={backupBlocked}
+              onClick={() => { if (status?.recordId) void controller.revokeBackup(status.recordId); }} type="button">
+              {t('pairing.revokeBackup')}
+            </button>}
+          </div>
+          <p className="pairing-caption">{t('pairing.backupRevocationDescription')}</p>
+        </div>}
         {phase === 'reserved' && !candidate && <p className="pairing-error" role="alert">{t('pairing.candidateUnavailable')}</p>}
       </section>
       <PairingQuickpanel controller={controller} />

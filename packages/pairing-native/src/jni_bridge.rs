@@ -6,7 +6,7 @@ use crate::{
 };
 use jni::{
     objects::{JClass, JObject, JString},
-    sys::{jlong, jstring},
+    sys::{jboolean, jint, jlong, jstring},
     JNIEnv,
 };
 use std::{
@@ -65,6 +65,18 @@ fn text(env: &mut JNIEnv<'_>, value: &JString<'_>, limit: i32) -> Result<String>
         return Err(PairingError::InvalidQr);
     }
     Ok(text)
+}
+fn json_text(env: &mut JNIEnv<'_>, value: &JString<'_>, limit: i32) -> Result<String> {
+    let length = env
+        .call_method(value, "length", "()I", &[])
+        .and_then(|v| v.i())
+        .map_err(|_| PairingError::InvalidRequest)?;
+    if length < 0 || length > limit {
+        return Err(PairingError::InvalidRequest);
+    }
+    env.get_string(value)
+        .map(|text| text.into())
+        .map_err(|_| PairingError::InvalidRequest)
 }
 fn reply(env: &mut JNIEnv<'_>, id: i64, action: Result<Action>) -> jstring {
     let result = action
@@ -189,6 +201,50 @@ pub extern "system" fn Java_com_kloda_sync_KlodaPairingJni_resume(
 ) -> jstring {
     let action = text(&mut env, &record, 22).map(|record| Action::Resume { record });
     reply(&mut env, id, action)
+}
+#[no_mangle]
+pub extern "system" fn Java_com_kloda_sync_KlodaPairingJni_removePairing(
+    mut env: JNIEnv<'_>,
+    _: JClass<'_>,
+    id: jlong,
+    record: JString<'_>,
+    online: jboolean,
+) -> jstring {
+    let action = text(&mut env, &record, 22).map(|record| Action::RemovePairing {
+        record,
+        online: online != 0,
+    });
+    reply(&mut env, id, action)
+}
+#[no_mangle]
+pub extern "system" fn Java_com_kloda_sync_KlodaPairingJni_transfer(
+    mut env: JNIEnv<'_>,
+    _: JClass<'_>,
+    id: jlong,
+    record: JString<'_>,
+    command: JString<'_>,
+    descriptor: jint,
+) -> jstring {
+    let result = (|| {
+        let record = text(&mut env, &record, 22)?;
+        let command = json_text(
+            &mut env,
+            &command,
+            crate::file_protocol::METADATA_LIMIT as i32,
+        )?;
+        reference(id)?.transfer(record, &command, descriptor)
+    })();
+    let result = result.or_else(|error| crate::file_sender_command::json(Err(error)));
+    match result.and_then(|json| {
+        env.new_string(json)
+            .map_err(|_| PairingError::OutcomeUnknown)
+    }) {
+        Ok(value) => value.into_raw(),
+        Err(error) => {
+            failure(&mut env, error);
+            std::ptr::null_mut()
+        }
+    }
 }
 #[no_mangle]
 pub extern "system" fn Java_com_kloda_sync_KlodaPairingJni_close(

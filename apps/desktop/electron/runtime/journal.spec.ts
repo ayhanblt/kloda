@@ -22,6 +22,17 @@ describe('DesktopSyncJournal source selection', () => {
     rmSync(root, { recursive: true, force: true });
   });
 
+  it('restores the most recently updated run rather than the greatest ID or last inserted run', () => {
+    const progress = { id: 'a', status: 'running' as const, bytesTransferred: 3, bytesTotal: 7, completedFiles: 1, totalFiles: 2 };
+    journal.saveProgress(progress);
+    journal.saveProgress({ ...progress, id: 'z', status: 'completed', bytesTransferred: 7, completedFiles: 2 });
+    journal.saveProgress({ ...progress, status: 'failed' });
+    journal.database.close();
+    journal = new DesktopSyncJournal(join(root, 'journal.sqlite'));
+    expect(journal.getLatestProgress()).toEqual({ ...progress, status: 'failed' });
+    expect(journal.database.prepare("SELECT status FROM sync_progress WHERE id = 'z'").get()).toEqual({ status: 'completed' });
+  });
+
   function seedReceipt(targetId: string, sourceId: string, relativePath: string, revision: string): void {
     journal.database.prepare(
       'INSERT INTO upload_receipt (target_id, source_id, relative_path, revision) VALUES (?, ?, ?, ?)',
@@ -51,6 +62,33 @@ describe('DesktopSyncJournal source selection', () => {
       { targetId: 'target-a', sourceId: original.id, relativePath: 'pending.txt', revision: 'revision', temporaryPath: 'temporary', phase: 'prepared' },
     ]);
   });
+
+  it('preserves due-time on the same schedule and resets it atomically on configuration change', () => {
+    journal.saveSchedule(24, '09:00');
+    const due = new Date(2026, 0, 2, 9).getTime();
+    journal.saveScheduleDue(due);
+    journal.database.close();
+    journal = new DesktopSyncJournal(join(root, 'journal.sqlite'));
+    journal.saveSchedule(24, '09:00');
+    expect(journal.getScheduleDue()).toBe(due);
+    journal.database.exec(`CREATE TRIGGER fail_due_reset BEFORE DELETE ON setting
+      WHEN OLD.key = 'scheduleDue' BEGIN SELECT RAISE(ABORT, 'fixture failure'); END;`);
+    expect(() => journal.saveSchedule(12, '10:00')).toThrow();
+    expect(journal.getDraft()).toMatchObject({ intervalHours: 24, localTime: '09:00' });
+    expect(journal.getScheduleDue()).toBe(due);
+    journal.database.exec('DROP TRIGGER fail_due_reset');
+    journal.saveSchedule(12, '10:00');
+    expect(journal.getScheduleDue()).toBeUndefined();
+  });
+
+  it.each(['null', '"123"', '1.5', '9000000000000000', 'not-json'])(
+    'refuses invalid persisted due-time %s without silently resetting it',
+    value => {
+      journal.database.prepare("INSERT INTO setting(key,value) VALUES ('scheduleDue',?)").run(value);
+      expect(() => journal.getScheduleDue()).toThrow();
+      expect(journal.database.prepare("SELECT value FROM setting WHERE key = 'scheduleDue'").get()).toEqual({ value });
+    },
+  );
 
   it('isolates receipts and pending uploads by target and exact descriptor', () => {
     const sourceId = 'source';

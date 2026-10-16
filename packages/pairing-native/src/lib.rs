@@ -1,7 +1,22 @@
 #![deny(unsafe_op_in_unsafe_fn)]
 
+#[cfg(not(target_os = "android"))]
+mod backup_root;
 mod certificate;
 mod error;
+mod file_protocol;
+#[cfg(not(target_os = "android"))]
+mod file_receiver;
+mod file_schema;
+mod file_sender;
+mod file_sender_ack;
+mod file_sender_command;
+#[cfg(all(test, unix, not(target_os = "android")))]
+mod file_sender_tls_tests;
+mod file_transport;
+mod file_transport_client;
+mod file_transport_http;
+mod file_transport_io;
 mod frame;
 mod handle;
 mod identity;
@@ -22,12 +37,17 @@ mod runtime;
 mod state;
 mod status;
 mod store;
+#[cfg(not(target_os = "android"))]
+mod store_acl;
+mod store_acl_schema;
 mod store_pc;
 mod store_phone;
 mod store_rows;
 mod store_schema;
 mod tls;
 mod tls_config;
+#[cfg(test)]
+mod tls_test_identity;
 mod tls_verifier;
 pub use error::{PairingError, Result};
 pub use owner::{PairingOwner, PairingSnapshot};

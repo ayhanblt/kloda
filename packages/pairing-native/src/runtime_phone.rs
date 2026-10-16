@@ -145,6 +145,7 @@ impl Actor {
         if !owns {
             return Err(PairingError::CandidateStale);
         }
+        self.drop_sid(&sid);
         let mut work = if self.phone.as_ref().is_some_and(|work| work.sid == sid) {
             self.phone.take()
         } else {

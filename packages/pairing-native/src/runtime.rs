@@ -17,12 +17,19 @@ use std::time::Duration;
 mod actions;
 #[path = "runtime_actor.rs"]
 mod actor;
+#[cfg(not(target_os = "android"))]
+#[path = "runtime_backup.rs"]
+mod backup;
+#[path = "runtime_file.rs"]
+mod file;
 #[path = "runtime_phone.rs"]
 mod phone;
 #[path = "runtime_phone_progress.rs"]
 mod phone_progress;
 #[path = "runtime_progress.rs"]
 mod progress;
+#[path = "runtime_sender.rs"]
+mod sender;
 #[path = "runtime_session.rs"]
 mod session;
 #[path = "runtime_status.rs"]
@@ -50,6 +57,11 @@ struct Actor {
     last_now: u64,
     error: Option<PairingError>,
     fatal: Option<PairingError>,
+    file_transport: crate::file_transport::Managed,
+    file_sender: Option<(Route, crate::file_sender::Channel)>,
+    #[cfg(not(target_os = "android"))]
+    file_receiver: crate::file_receiver::Receiver,
+    unpair_result: Option<crate::status::UnpairResult>,
 }
 struct PcPeer {
     io: Io,
@@ -142,11 +154,23 @@ pub(crate) fn run(
                     Err(TryRecvError::Disconnected) => break 'worker None,
                 },
             };
-            if matches!(&command.action, Action::Close) {
-                break 'worker Some(command.reply);
+            match command {
+                Command::Pairing {
+                    action: Action::Close,
+                    reply,
+                } => break 'worker Some(reply),
+                Command::Pairing { action, reply } => {
+                    let _ = reply.send(owner.action(action));
+                }
+                Command::Transfer {
+                    record,
+                    task,
+                    reply,
+                } => {
+                    let result = owner.transfer(&record, task);
+                    let _ = reply.send(crate::file_sender_command::json(result));
+                }
             }
-            let result = owner.action(command.action);
-            let _ = command.reply.send(result);
             drained += 1;
         }
         // Commands ordered behind consume authorization get a chance to revoke before

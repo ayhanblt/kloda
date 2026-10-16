@@ -2,7 +2,7 @@
 
 ## Statü ve izin sınırı
 
-**Güncel yön [ADR0013](../decisions/0013-qr-based-local-lan-pairing.md) ve [future-only QR implementation roadmap](qr-pairing-implementation-roadmap.md); docs-only cutover, implementation not executed.** ADR0012 P-256 identity korunur. Eski Matrix-key issuance/mTLS1A→1B→1C→1D planı, tabloları ve grafiği historical/superseded scope'tur. Matrix/SAS/binding/upstream/fork hiçbir current prerequisite/task değildir. ADR0009 bağımsız prerequisite-ready implementation yönü korunur; eski corpus recovery veya2A rerun gerekmez. Bu belge feasibility/ürün/native execution izni vermez.
+**Güncel yön [ADR0013](../decisions/0013-qr-based-local-lan-pairing.md) ve [QR implementation/evidence roadmap](qr-pairing-implementation-roadmap.md); QR native/bridge/UI implemented/build-tested, physical acceptance open.** ADR0012 P-256 identity korunur. Eski Matrix-key issuance/mTLS1A→1B→1C→1D planı, tabloları ve grafiği historical/superseded scope'tur. Matrix/SAS/binding/upstream/fork hiçbir current prerequisite/task değildir. ADR0009 bağımsız prerequisite-ready implementation yönü korunur; eski corpus recovery veya2A rerun gerekmez. [Güncel handoff kuyruğu](implementation-session-handoff.md#optimize-yürütme-kuyruğu) fiziksel pause ve bağımsız QR host adayını ayırır. Bu belge feasibility/ürün/native execution izni vermez.
 
 Mevcut mobil/desktop/backend temelleri sıfırlanmaz. Sonraki 3. aşama mevcut uygulamalara gerçek authority/control entegrasyonunu, 4. aşama bunun üzerinden uçtan uca backup deneyimini tamamlamayı hedefler; ikisi de bu belgeyle yürütmeye açılmaz. İlgili platform kanıtı geliştirme boyunca toplanır: bütün release doğrulamalarını ürün kodundan önce bitmiş veya yalnız en sona bırakılmış varsayma.
 
@@ -120,9 +120,9 @@ Source-ID continuity prerequisite dilimi tamamlandıktan sonra, [handoff'taki ik
 
 ## Kesintisiz yürütme — kalan paketlerin checkpoint'i
 
-**Güncel ADR0013 checkpoint — QR protocol/native LAN/persistence, implementation not executed.**
+**Güncel ADR0013 checkpoint — QR native/bridge/UI implemented/build-tested; physical acceptance open.**
 
-Aktif dar prerequisite [frozen KLODA-QR-PAIR-V1 contract](../security/qr-pairing-v1-protocol.md) ile gerçek native mutual TLS/exporter API/ABI, state/approval/durable pins ve ACK recovery integration'dır; exact bytes/minimum native behavioral contract frozen, implementation not executed ve actual platform adoption unverified. [QR roadmap](qr-pairing-implementation-roadmap.md) future implementation sırasını korur. Eski [1D blocked-result](issuance-admission-preparation.md#1d-blocked-result-coverage-ledger) ve [2D not-ready ledger](issuance-admission-preparation.md#2d-not-ready-readiness-ledger) documentary historical teslimdir; pass aktarımı yok. Mevcut2A ve desktop smoke'ları yeniden yürütülmedi.
+[Frozen KLODA-QR-PAIR-V1 contract](../security/qr-pairing-v1-protocol.md) değişmedi; native mutual TLS/exporter API/ABI, state/approval/durable pins ve ACK recovery için mevcut implementation/build/synthetic evidence [QR roadmap'te](qr-pairing-implementation-roadmap.md) kayıtlıdır, yeniden implementation backlog'u değildir. Actual hardware LAN/adoption ve file authority açık kalır; Windows storage/certificate/VFS/continuity karar-blocker'ı ve physical pause için [güncel validation checkpoint](desktop-platform-validation-plan.md#güncel-yürütme-kapısı--fiziksel-doğrulama-duraklatıldı), bağımsız çalışma için [handoff kuyruğu](implementation-session-handoff.md#optimize-yürütme-kuyruğu) geçerlidir. Aşağıdaki Stage1/2 tabloları ve eski integration gereksinimi anlatımı historical bağlamdır; güncel source implemented/physical-open ayrımı roadmap'tedir. Eski [1D blocked-result](issuance-admission-preparation.md#1d-blocked-result-coverage-ledger) ve [2D not-ready ledger](issuance-admission-preparation.md#2d-not-ready-readiness-ledger) documentary historical teslimdir; pass aktarımı yok. Mevcut2A ve desktop smoke'ları yeniden yürütülmedi.
 
 | Paket | Güncel teslim / yürütme durumu | Kalan somut girdi |
 |---|---|---|

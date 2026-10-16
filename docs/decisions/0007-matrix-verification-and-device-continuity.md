@@ -1,5 +1,9 @@
 # ADR 0007 — Matrix verification sınırı ve cihaz sürekliliği
 
+> **Current V1 LAN override — 2026-10-13:** [ADR0016](0016-v1-pc-local-file-authority.md) supersedes central authorization/issuer/token/`<24h` and required online reauthorization for the native PC-local ACL. Installation/key/pin continuity, fail-closed restore suspicion, fresh QR when trust is lost, valid native certificate/profile and separate explicit PC file approval remain; retained key/login does not resurrect authority. Below's central recovery/reset implications are historical for this scope; recovery/central revocation versus offline PC/local grants and FINAL remote authorization are OPEN. No implemented ACL or platform custody proof is implied.
+
+2026-10-15 status clarification: later ADR0014/0016 native QR/local ACL/receiver implementation supersedes “implementation not-executed” statements below as current source status. They describe the original decision-only checkpoint; platform custody/physical/remote/recovery gate'leri açık kalır. [Current handoff](../implementation/codex-migration-handoff.md).
+
 - Kalıcı kayıt tarihi: 2026-10-04; session'da daha önce onaylanan kararın aktarımı
 - Durum: continuity policy korunur; single Matrix auth key/software-only kısmı [ADR0012](0012-kloda-owned-p256-device-identity.md), Matrix/SAS mechanism/SDK/binding gereklilikleri [ADR0013](0013-qr-based-local-lan-pairing.md) ile superseded; native/platform gate'leri açık
 - Karar sahibi: Ayhan

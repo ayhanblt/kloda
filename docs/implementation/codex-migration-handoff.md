@@ -1,0 +1,111 @@
+# Kloda — Codex CLI devir teslimi
+
+Denetim: 2026-10-15. Bu görev yalnız kaynak/belge/Git/oturum karşılaştırmasıdır; ürün kodu, dependency, commit/push veya yeni test/build/physical run yok. Önceki PASS'ler aşağıda tarihsel kapsamlarıyla aktarılır. **Aynı çalışma ağacında devam edilebilir; yalnız Git clone'u tüm kaynakları/kanıtı/tasarımı henüz taşımaz. Ürün production-ready değildir.**
+
+## 1. İlk oturumda okunacaklar
+
+1. Root `AGENTS.md` → [.omp/AGENTS.md](../../.omp/AGENTS.md): proje kuralları; OMP çalıştırmak gerekmez.
+2. [Implementation handoff](implementation-session-handoff.md), özellikle son Android sender ve ADR0017 bölümleri; [session index](session-documentation-index.md).
+3. [Mevcut QR roadmap](qr-pairing-implementation-roadmap.md) ve [first-slice status](first-vertical-slice-status.md). Yeni roadmap yok; eski checkpoint sayıları current sonuç değildir.
+4. [ADR0009](../decisions/0009-evidence-gated-incremental-implementation.md), [ADR0010§6](../decisions/0010-operation-bound-pc-commit-proof.md#approved-v1-sequential-contract), [ADR0012](../decisions/0012-kloda-owned-p256-device-identity.md), [ADR0013](../decisions/0013-qr-based-local-lan-pairing.md), [ADR0014](../decisions/0014-shared-rust-qr-pairing-core.md), [ADR0015](../decisions/0015-desktop-platform-and-signing-isolation.md), [ADR0016](../decisions/0016-v1-pc-local-file-authority.md), [ADR0017](../decisions/0017-photos-sidecar-manifest-and-import-recovery.md).
+5. [Frozen QR bytes](../security/qr-pairing-v1-protocol.md), [production gates](../security/production-gates.md), [desktop physical-pause checkpoint](desktop-platform-validation-plan.md#güncel-yürütme-kapısı--fiziksel-doğrulama-duraklatıldı).
+6. [Ürün sözleşmesi](../product/computer-backup-files-and-photos.md), [account/recovery](../security/account-mfa-and-recovery.md), UI işi için [Stitch eşlemesi](../ui/stitch-reference.md).
+
+## 2. Kesin mimari ve güvenlik sınırları
+
+- PC-first, internetsiz LAN backup; telefon seçilmiş Files/Photos kaynaklarını PC'ye gönderir. Backend'e sessiz payload fallback yok; PC offline ise iş bekler. Cellular default-off/explicit opt-in. PC normal dosya tutar; merkezi Supabase/Nest dosya byte'ı/private key/pair secret/plaintext katalog veya medya hash listesi tutmaz.
+- ADR0013 QR-only first trust: actual fresh full mutual TLS1.3, QR fingerprint = PC Kloda P-256 SPKI SHA256, aynı kanal secret proof, exact PC approval, iki durable local pin/ACK. Matrix/SAS/ikinci comparison/upstream SDK gate retired. Hardware-preferred/nonexportable identity; unsupported platform/software-key fallback seçilmedi. Android device-local signer PASS tekrar koşulmaz.
+- ADR0016: tek file authority Rust native owner/local app-data SQLite schema3 ACL/journal. QR trust file grant değildir; ayrı explicit PC-selected root/exact peer consent gerekir. V1 LAN için login/JWT/JWS/central issuer/KMS/exact-DER online reissue/24h central cache GEREKMEZ. Account/remote kontrol işi ayrı; bu cutover onların tamamlandığı anlamına gelmez.
+- Native HTTP1 sequential receiver aynı mutual TLS listener'da ayrı `kloda-file/1` ALPN kullanır; frozen `kloda-pair/1` değişmedi. Current peer/pin/root/ACL revision/operation/revoke/publication fence her ilgili turn'de enforce edilir. Journal/receipt/UI bool eski grant'i diriltmez; karşı peer/root/pending-work adoption yok. Explicit same-peer/same-root regrant/new-SID repair yalnız immutable Completed own history okuyabilir.
+- cap-std4.0.3 capability-relative confinement; hostile absolute/traversal/symlink inputs reddedilir. Trusted local PC/filesystem writer sınırı, local directory relocation/outside-origin hardlink karşısında containment garantisi VERMEZ. String-prefix/canonicalization/unconfined `std::fs` fallback yok.
+- Default one-way selected Files/Photos upload/status/finalize/OWN list/user-triggered own restore; delete/other-peer/outside-root/arbitrary browse/two-way grant değil. Online unpair ancak durable PC ACL+trust revoke ve exact pair-ID ACK sonrası local remove; lost reply PC-unconfirmed/trust retained. Explicit offline remove yalnız local; queued/delayed revoke veya eventual PC revoke sözü yok.
+- ADR0017: bounded version1 sidecar existing transfer üstünde, yalnız current-scope verified Completed resource referansları. Source-device/asset/album kimlikleri hedef URI/library kimliği değildir. Import intent/receipt ve actual-byte reconciliation; belirsiz intent/receipt/izin/metadata durumunda görünür review, kör ikinci import yok. Sidecar tam medya E2EE envelope/key lifecycle uygulaması değildir.
+- Account recovery/central revoke'nin offline PC-local grant'e etkisi ve final remote authorization OPEN: automatic grant survival/reset seçilmedi. Remote WebRTC/DTLS + signed signaling/fingerprint/device proof, direct P2P ve Cloudflare TURN fallback yönü var; production adapter/deployment/authorization yok. Advanced WebDAV/SMB ayrı; Cloudflare Tunnel TURN değildir.
+- Electron development/production authority, bundle/signing/Keychain/userData ayrıdır; default fresh production identity+QR. Private key/pin/cert/epoch/DB otomatik migration/reset/restore yok. Nest Clean Architecture/tek use-case dosyası, frontend FSD/max-lines, Stitch source of truth korunur.
+
+## 3. Tamamlanan kapsam ve kanıt
+
+Önceki OMP uygulama TODO'su **14/14** kapalı: Files native sender/queue/recovery/ACK UI; Photos/own-file restore; onaylı sidecar schema/publication, import journal/crash reconciliation, ayrı source/target IDs, idempotent desteklenen organization, bridge/üç locale ve otomatik/emülatör/review. Bu sayı bütün ürünün TODO sayısı değildir.
+
+| Dilim | Kaynak ve geçmiş kanıt | Kapanmayan kabul |
+|---|---|---|
+| Native QR/ACL/receiver/journal/online revoke | Rust core, Android JNI/Electron bridge, host loopback/software-fixture TCP mTLS/HTTP; resume/finalize/list/exact restore/revoke ACK ve disposable ENOSPC | Hardware custody, actual final-app iki endpoint, platform storage |
+| Android Files/Photos | `AndroidFilesQueue`, `AndroidSyncJournal`, private snapshots; foreground user Sync Now, native exact ACK/current Completed revalidation | OS scheduled/background, eski/current OEM ve gerçek Android↔PC |
+| ADR0017 Photos | `PhotoManifestCodec`, publisher/journals/catalog/import/MediaStore; tek/all OWN restore. API36 gerçek PNG/generated MP4, retry/receipt/URI crash-state reconciliation/album/cancel checks | Real process-kill matrix, API24–29/OEM, tüm resource/çoklu-albüm semantiği; unsupported durumda review |
+| Desktop host temel | Stable source ID, SHA snapshot, scoped WebDAV receipts/recovery; durable due-time/catch-up, timezone/wallclock, single-owner/tray, persisted/live Activity | PC-first tüm ürün cutover, physical lifecycle, tam durable run/config identity |
+
+Son Android/ADR0017 checkpoint: root lint, API1/desktop82/mobile30/sync-core117, mobile TS, root builds/Expo exports, dependency policy15 PASS; Android dört-ABI/app/test APK ve isolated API36 instrumentation PASS. Native91/strict clippy önceki sender checkpoint'idir; Photos değişiminde Rust değişmedi/yeniden koşulmadı. CI config bulunması CI run PASS değildir; Expo export native runtime kanıtı değildir.
+
+Ayrı review bulguları: Android10 video için Pictures yerine ortak DCIM hedefi; permission await öncesi pending-cancel generation. İkisi düzeltildi. Runtime: pending MediaStore indexed SIZE=0 iken actual68-byte/SHA doğrulaması doğruydu; bounded original-stream size/hash authoritative yapıldı. Raw reviewer sonuçlarındaki `incorrect` bu önceki bulgulara aittir, hâlâ açık bug diye yeniden uygulanmaz. Instrumentation fixture cleanup double-delete de düzeltildi. Ayrıntı/negatif senaryolar ana handoff'tadır; review dış bağımsız audit veya physical PASS değildir.
+
+## 4. Açık, engelli ve ertelenmiş işler
+
+- **Uygulanmadı:** Android/iOS scheduled/Live OS execution ve kalıcı scheduled-run/retry orchestration; ayar saklamak yürütme değildir. Android AppState background native worker'ı durdurur. Shared12/24/DST/retry kuralları mevcut ama WorkManager/BGTask entegrasyonu yok.
+- **iOS deferred/eksik kod:** Swift Files/bookmark/PhotoKit scan ve source-row journal var; gerçek native sender/ACK queue/Photos manifest/import/restore yok. TS transfer API Android-only; Expo iOS export bunu kapatmaz. Scanner resource size0 gerçek byte manifesti değildir.
+- **Karar-blocked Windows:** authority-state publication/cert replacement, SQLite DB/WAL/SHM gerçek-object binding ve continuity witness sınırları çözülmedi; yeni rename shim/onaysız API/layout/fallback yok. Mevcut inceleme yeni bilgi/karar olmadan tekrarlanmaz.
+- **Açık security/product:** medya envelope/key lifecycle/authenticated cryptographic manifest; account enrollment/MFA/recovery/central revoke integration; final remote policy/provider/signaling; optional two-way/trash/versions/conflicts, genel migration; galeri/thumbnail/search/AWS premium. TLS implemented olması bu kapsamları kapatmaz. Kullanıcının yaklaşık8000 FolderSync dosyası hash'lenmedi/migre edilmedi/değişmedi.
+- **Tek source debt marker:** `apps/mobile/src/app/App.tsx` içindeki `shortcut:` WebDAV credential/config writes atomik değil. PC-local native authority'den ayrı eski WebDAV sorunu; marker var diye restore'da çözülmüş sayılmaz. `apps/`, `packages/`, `tools/` taramasında başka TODO/FIXME/todo!/unimplemented!/shortcut:/ponytail: bulunmadı; açık işler esasen belgelerde.
+
+## 5. Platform kabulü ve gerçek engeller
+
+| Platform | Kayıtlı durum | Açık / yapılmayacak |
+|---|---|---|
+| Windows11 x64 | User-reported explicit MSVC compile/check/native53/desktop ABI PASS; sonraki owner `storage_failure`. `epoch.pending`/lock var, final authority yok. Probe WRITE_THROUGH error32; directory reopen error5, son rename çalışmadı | Bunlar özgün hatanın kesin nedeni değil. TPM key var/yok varsayılmaz; certificate/epoch/SQLite cleanup/adoption/reset veya yeni probe yok. Güncel storage source/graph acceptance ayrı |
+| macOS | Secure Enclave create `-34018`, lookup `-25300`; free Personal Team | Paid signing/provisioning/entitlement; real custody/TLS; sandbox/distribution/bookmark seçimi. Software/ad-hoc/legacy-Keychain bypass yok |
+| Linux | Native identity/storage `native_unsupported`; source CI tanımlı, physical cihaz yok | Hardware/provider/locality/fallback policy seçilmedi; VM/vTPM veya test software identity physical kanıt değil |
+| Android | API36 emülatör otomasyonu; SM-S921B device-local hardware P-256→TLS1.3 signer dar CLOSED/PASS | Signer deneyi tekrar yok. Actual app/Rust bridge/PC LAN+Photos/restore, eski API/OEM, Doze/background/lock/restore matrix açık |
+| iOS | Native pairing/transfer deferred; scanner var; cihaz yok. Historical simulator URLSession inconclusive | iOS16.4+/current hardware, PhotoKit/iCloud resources/import, background/termination ve custody açık |
+
+Physical pause sürer. ADR0009 grup-sonu fiziksel kabulü, otomatik PASS veya başarılı bir platform PoC'siyle kapanmaz. Historical Android transport14pass/direct1inconclusive ve iOS simulator inconclusive, mevcut ürün remote başarısı değildir.
+
+## 6. Tek sonraki görev ve bağımlılığı
+
+**Windows native authority-state publication/continuity kararını Ayhan ile sonuçlandırmak.** Mevcut validation checkpoint'teki certificate replacement/target TOCTOU, DB/WAL/SHM identity binding ve continuity witness kapsamı netleşmeden dependent owner-store fix uygulanmaz. Bu, yeni probe veya aynı incelemeyi tekrar koşma önerisi değildir; açık code-shaping kararı kapatmaktır. Çalışan PC owner → ayrı custody/device-key TLS → hazır iki endpoint ile grup-sonu Android↔PC kabulü bağımlılığı korunur. Mac signing'i beklemek gerekmez; physical pause kendiliğinden kalkmaz. Bu denetim o geliştirmeyi başlatmaz.
+
+## 7. Test/build komutları ve ortam
+
+Aşağıdakiler gelecek onaylı değişiklik için referanstır; bu devir görevinde çalıştırılmadı. İlk CLI oturumu kapsamlı matrisi yalnız geçişi doğrulamak için yeniden koşmaz.
+
+```sh
+npm ci
+npm run lint
+npm test
+npx tsc --noEmit -p apps/mobile/tsconfig.json
+npm run build
+node tools/check-native-dependencies.mjs --self-test
+node tools/check-rust-size.mjs
+rustup run 1.99.0 cargo test --manifest-path packages/pairing-native/Cargo.toml --locked --no-default-features
+rustup run 1.99.0 cargo clippy --manifest-path packages/pairing-native/Cargo.toml --locked --no-default-features --all-targets --features desktop-node,android-jni -- -D warnings
+```
+
+- Denetimde gözlenen Mac arm64 ortamı: Node22.23.1/npm10.9.8, Rust1.99.0, aktif Java17.0.19/JAVA_HOME; JDK25 de kurulu. CI Node24 kullanır. Android NDK exact27.1.12297006/API24 compiler, dört Rust Android target ve SDK/Expo development build gerekir; gerçek runtime smoke API36 isolated emulator idi. Native module Gradle preBuild JNI üretir. Generated `apps/mobile/android/` clone'da yoksa `npm run native:generate --workspace @kloda/mobile`; generated projects/APKs/JNI libs build çıktısıdır.
+- Android geçmiş smoke: generated `apps/mobile/android/` içinde `./gradlew :app:assembleDebug :my-module:assembleDebugAndroidTest --console=plain`; app ve module androidTest APK kurulumu sonrası `adb -s <isolated-serial> shell am instrument -w com.kloda.sync.test/com.kloda.sync.AndroidFilesQueueRecoveryInstrumentation`. Instrumentation shell exit0 başarısız testi gizleyebilir; gerçek PASS metni kontrol edilir. Physical cihazda kendiliğinden çalıştırılmaz.
+- Windows driver explicit `1.99.0-x86_64-pc-windows-msvc` seçer; Visual Studio/MSVC+Windows SDK+genuine node-gyp Python gerekir. Historical ortam Win11 Pro x64/MSVC14.51/SDK10.0.26100.0, kullanıcı bildirimidir. Eski53 test/current source graph ayrımı korunur; owner açılışı kalıcı state/TPM etkisi yaratabilir.
+- Electron ABI `better-sqlite3` ve Rust addon gerçek build driver'larıyla üretilir; Node/Electron ABI karıştırılmaz. NDK/Rust/package/Cargo lock güncellenmez; native TLS ring/default-off, JWT/AWS-LC kaldırılmıştır. Güncel lock/security policy için workflow ve ana handoff esas; eski AWS-LC/KMS draft yeniden etkinleştirilmez.
+
+## 8. Git ve clone taşınabilirliği
+
+Tam modified/untracked/staged/generated listesi: [Git envanteri](codex-migration-git-inventory.json). Salt-okunur denetim; add/commit/push/reset/clean/stash yapılmadı. Denetim başında89 modified +1 önceden staged deletion +75 untracked vardı; yeni kaynakların71'i untracked (Rust36/Kotlin27/TS6/TSX2). ADR0016/0017, sender/import kaynakları/testleri, tray asset ve dependency-policy aracı henüz Git'e eklenmemişti. Modified dosyaları da kaybetme; tek başına yeni ADR'yi almak yeterli değildir.
+
+Ignored source-path taramasında yalnız dört generated JNI `.so` bulundu; gerekli Kotlin/Rust/TS kaynaklarında yanlış ignore bulunmadı. `apps/mobile/.expo/dev/logs/start.log` tracked-modified ve export.log staged-deletion devralındı; loglar geliştirme kaynağı değildir, stage durumu bu görevde değiştirilmedi.
+
+**Clone dışında kalan iki kritik alan:** `.local-evidence/` public replay/visual/hash kanıtı ve `stitch_private_photo_cloud/` onaylı readonly tasarım referansı. İkisi de mevcut `.gitignore` ile hariç; commit/push veya clone bunları taşımaz. Aynı çalışma ağacında varlar; bağımsız backup seçilmedi. Gizli key/DB/token/user media veya büyük binary repo'ya alınmadı; bu denetim backup hedefi seçmedi.
+
+## 9. OMP'ye özgü ve geçici bilgi
+
+- Current TODO14/14 ve alt kapsam yukarıda kalıcı; yeni CLI önceki OMP todo aracını devralmaz. Bu migration audit'inin yedi maddesi de kayıt/kaynak tutarlılığıyla sınırlıdır. Bekleyen uygulama subagent'i yok; parked agents bitmiş incelemelerdir, teslim bekleyen işler değildir.
+- OMP session/compaction ve provider-native history CLI'ye otomatik aktarılmaz. İncelenen compaction kayıtları çoğunlukla opaque provider-history/file-reference özetleridir; bağımsız kaynak/karar kanıtı sayılmaz. Session recap'in “sırada physical kabul” ifadesi physical pause'u kaldırmaz. Kritik karar/bulgular ana handoff/ADRs ve bu belgede karşılanmıştır; tüm raw transcript taşınmadı.
+- `artifact://`, `agent://`, `proc://`, `history://`, `local://`, Eval JS state, model aliases ve OMP tool cihazları CLI API'si değildir. Root commands/paths/sonuç özetleri kalıcıdır; raw job logları ve reviewer chat'leri otomatik taşınmaz. Son root/Android PASS ve önceki failure→fix sonuçları ana handoff ve local checkpoint JSON'da kayıtlıdır; aynı işe tekrar başlamak gerekmez.
+- `.omp/config.yml` model roles/overrides OMP-specific; `.omp/mcp.json` Serena stdio config'i CLI'ye otomatik bağlanmaz. Serena/MCP, Context7 erişimi ve CLI sandbox/network yetkileri bu görevde kurulmadı/doğrulanmadı. Repo `.agents/skills/find-docs/` ve `.claude/skills/playwright-cli/` tracked; global ponytail/review/eval/browser plugin davranışları taşınmış varsayılmaz. Model/agent alias'larını CLI'de varmış gibi çağırma; proje kuralları runtime plugin'e bağlı değildir.
+- OMP registry eski5 Node UI-fixture server'ını ve browser helper'ı ready gösterdi; OS PID varlığı da gözlendi. Bunlar product owner/acceptance değildir; bu salt-okunur denetimde durdurulmadı. CLI process/port durumunu otomatik devralmaz. Son Photos Metro/emulator durmuş; eski files-emulator registry `stopping` kaydı OS process varlığıyla doğrulanmadı. Yeni server/device başlatılmadı.
+- İlgili `/tmp/kloda-{photos,files,native,windows}-*` taramasında dosya bulunmadı; sistem-geneli `/tmp` audit'i yapılmadı. Son disposable userdata/MP4 ve throwaway source'lar önceki görevde temizlendi; fixture MP4 public Kotlin fixture'da, private emulator image gerekmiyor. Eski `/tmp` yolları runnable prerequisite değildir.
+
+## 10. Kanıt saklama ve devir sonucu
+
+[Retention sözleşmesi](../security/evidence-retention-and-recovery.md): proje-local Git-dışı saklama, independent backup yok. Güncel public capsule'lar `.local-evidence/archives/` altında native file, mobile sender ve Photos manifest/import isimleriyle bulunur. Kaynak/komut/sonuç/PNG/XML/member-hash manifestleri local klasörlerde; yalnız OMP log ID'sine dayanılmaz. Önceki kurtarılamayan historical Matrix native corpus bilinçli archival eksiktir, current QR/Photos blocker'ı değildir.
+
+Bu denetimde mevcut native-file/mobile-sender/Photos/signature capsule SHA'ları kayıtlarla karşılaştırıldı; dördü de eşleşti. Yeni suite/restore experiment'i yapılmadı. Photos capsule SHA256 `df7cfad96308db2acf5ee04ac16a3d402444824cb6b0fed4c0aef44f9fa24219`; önceki74-member restore PASS ana handoff'tadır. Current dokümanlar eski arşiv snapshot'ından daha yenidir; kapsüllerin tarihsel byte'ları değiştirilmedi.
+
+Belge/kayıt kontrolü:30 Markdown belgesinde478 relative target (121 heading anchor),0 kırık bağlantı; envanterde eksik mevcut dosya0.224 kaynak dosyasının153'ü tracked,71'i untracked. Final snapshot91 modified/1 önceden staged deletion/77 untracked; tam yollar ve doğrulama sonucu Git JSON envanterindedir.
+
+**Hazırlık sonucu:** proje bağlamı aynı çalışma ağacında Codex için hazır. Fresh-clone/başka disk için kullanıcı Git envanterindeki gerekli kaynak/dokümanları kendi review/add/commit sürecine almalı; ignored kanıt ve tasarımlar mevcut local-only politika nedeniyle ayrıca korunmadıkça kayıp riski VAR. Bu belgenin kendisi bağımsız backup veya CLI kurulumu kanıtı değildir. Devir denetimi tamamlanınca raporla ve dur; yeni geliştirmeye geçme.

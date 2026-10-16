@@ -1,5 +1,9 @@
 # ADR 0008 — Upstream-first SDK ve persistent certificate yönü
 
+> **Current V1 LAN override — 2026-10-13:** [ADR0016](0016-v1-pc-local-file-authority.md) supersedes exact-DER-bound capability online reissue, signed central authority/trusted `<24h` cache and issuer/KMS prerequisites below for the native local ACL. Native certificate persistence direction and valid native certificate/profile, pins/possession/installation continuity/current operation/revoke/fence remain; persistence is not file permission. Platform SQLite/WAL/storage/custody support remains OPEN, not proven. FINAL remote authorization and central recovery/revocation versus offline PC/local grants are OPEN.
+
+2026-10-15 status clarification: native certificate/store/LAN implementation exists under ADR0014/0016; source/API adoption is not absent. Exact platform persistence/renewal/restore and physical acceptance remain unverified. Before-code/no-execution wording below records this ADR's historical decision-only delivery, not a request to recreate the current producer. [Current handoff](../implementation/codex-migration-handoff.md).
+
 - Kalıcı kayıt tarihi: 2026-10-05; kayıt zamanı gözlemi 2026-10-05T08:01:12Z UTC
 - Durum: D01 mandatory upstream auth signer yönü [ADR0012](0012-kloda-owned-p256-device-identity.md) ile retired; D03 native DER persistence kabul, exact storage/API ve runtime doğrulanmadı
 - Karar sahibi: Ayhan

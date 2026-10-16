@@ -7,6 +7,10 @@ import expo.modules.kotlin.activityresult.AppContextActivityResultLauncher
 import expo.modules.kotlin.functions.Coroutine
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
@@ -52,20 +56,38 @@ class KlodaSyncRuntimeModule : Module() {
       }
     }
 
+    AsyncFunction("loadPhotoSources") { photos().load() }
+    AsyncFunction("removePhotoSource") { id: String -> photos().remove(id) }
+    AsyncFunction("selectPhotoLibrary") Coroutine { ->
+      if (requestPhotoAccess()) photos().selectLibrary() else null
+    }
+    AsyncFunction("loadPhotoAlbums") Coroutine { ->
+      if (requestPhotoAccess()) photos().albums() else emptyList<Map<String, String>>()
+    }
+    AsyncFunction("selectPhotoAlbum") Coroutine { id: String ->
+      if (requestPhotoAccess()) photos().selectAlbum(id) else null
+    }
+
     AsyncFunction("prepareSourceJobs") {
       val context = appContext.reactContext ?: throw IllegalStateException("Application context is unavailable.")
       val sources = JSONArray(preferences().getString("directorySources", "[]"))
+      photos().load().forEach { sources.put(JSONObject(it)) }
       val scanner = AndroidSafSourceScanner(context.contentResolver)
-      val journal = AndroidSyncJournal(context)
+      val media = AndroidPhotosSources(context)
       var queuedFiles = 0
-      repeat(sources.length()) { index ->
-        val source = sources.getJSONObject(index)
-        queuedFiles += journal.replaceSourceFiles(source.getString("id"), scanner.scan(source.getString("reference")))
+      AndroidSyncJournal(context).use { journal ->
+        repeat(sources.length()) { index ->
+          val source = sources.getJSONObject(index)
+          val reference = source.getString("reference")
+          val files = if (AndroidPhotosSources.isPhotos(reference)) media.scan(reference) else scanner.scan(reference)
+          queuedFiles += journal.reconcileSourceFiles(source.getString("id"), reference, files)
+        }
       }
       mapOf("queuedFiles" to queuedFiles, "scannedSources" to sources.length())
     }
 
     AsyncFunction("removeDirectorySource") { id: String ->
+      synchronized(AndroidSyncJournal.sourceLock) {
       val sources = JSONArray(preferences().getString("directorySources", "[]"))
       val remainingSources = JSONArray()
       var removedReference: String? = null
@@ -77,7 +99,7 @@ class KlodaSyncRuntimeModule : Module() {
       if (!preferences().edit().putString("directorySources", remainingSources.toString()).commit()) {
         throw IllegalStateException("Could not remove the source.")
       }
-      AndroidSyncJournal(appContext.reactContext ?: throw IllegalStateException("Application context is unavailable.")).removeSource(id)
+      AndroidSyncJournal(appContext.reactContext ?: throw IllegalStateException("Application context is unavailable.")).use { it.removeSource(id) }
       removedReference?.let { reference ->
         runCatching {
           appContext.reactContext?.contentResolver?.releasePersistableUriPermission(
@@ -85,6 +107,7 @@ class KlodaSyncRuntimeModule : Module() {
             android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
           )
         }
+      }
       }
     }
 
@@ -128,6 +151,20 @@ class KlodaSyncRuntimeModule : Module() {
 
   private fun preferences() = appContext.reactContext?.getSharedPreferences("kloda-sync", 0)
     ?: throw IllegalStateException("Application context is unavailable.")
+
+  private fun photos() = AndroidPhotosSources(appContext.reactContext ?: throw IllegalStateException("Application context is unavailable."))
+
+  private suspend fun requestPhotoAccess(): Boolean {
+    if (photos().hasAccess()) return true
+    val permissions = appContext.permissions ?: throw IllegalStateException("Permissions module is unavailable.")
+    withContext(Dispatchers.Main) {
+      suspendCancellableCoroutine<Unit> { continuation ->
+        permissions.askForPermissions({ if (continuation.isActive) continuation.resume(Unit) },
+          *AndroidPhotosSources.requestPermissions(android.os.Build.VERSION.SDK_INT))
+      }
+    }
+    return photos().hasAccess()
+  }
 
   private fun saveDirectorySource(reference: String): Map<String, String> {
     val sources = JSONArray(preferences().getString("directorySources", "[]"))

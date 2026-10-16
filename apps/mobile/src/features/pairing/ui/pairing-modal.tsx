@@ -31,8 +31,8 @@ export function PairingModal({ snapshot, onCancel, onResume, onRefresh, onLeave,
       <View style={styles.card}>
         <ScrollView contentContainerStyle={styles.content}>
           <ShieldAlert color={colors.processing} size={32} />
-          <Text accessibilityRole="header" style={styles.title}>{t(repair ? 'pairing.repairTitle' : uncertain ? 'pairing.unknownTitle' : `pairing.phases.${phase}.title`)}</Text>
-          <Text style={styles.body}>{t(repair ? 'pairing.repairDescription' : uncertain ? 'pairing.unknownDescription' : `pairing.phases.${phase}.description`)}</Text>
+          <Text accessibilityRole="header" style={styles.title}>{t(action === 'remove' ? 'pairing.unpair.title' : repair ? 'pairing.repairTitle' : uncertain ? 'pairing.unknownTitle' : `pairing.phases.${phase}.title`)}</Text>
+          <Text style={styles.body}>{t(action === 'remove' ? 'pairing.unpair.description' : repair ? 'pairing.repairDescription' : uncertain ? 'pairing.unknownDescription' : `pairing.phases.${phase}.description`)}</Text>
           {status?.peerFingerprint && (
             <View style={styles.fingerprint}>
               <Text style={styles.label}>{t('pairing.peerFingerprint')}</Text>
@@ -53,8 +53,10 @@ export function PairingModal({ snapshot, onCancel, onResume, onRefresh, onLeave,
             <PairingButton label={t('pairing.resume')} disabled={!!action || uncertain} onPress={onResume} />
           )}
           <PairingButton label={t('pairing.refresh')} secondary disabled={action === 'cancel'} onPress={onRefresh} />
-          <Text style={styles.body}>{t('pairing.cancelConsequences')}</Text>
-          <PairingButton label={t('pairing.cancel')} secondary disabled={!operationId || action === 'cancel'} onPress={onCancel} />
+          {action !== 'remove' && <>
+            <Text style={styles.body}>{t('pairing.cancelConsequences')}</Text>
+            <PairingButton label={t('pairing.cancel')} secondary disabled={!operationId || action === 'cancel'} onPress={onCancel} />
+          </>}
           {!operationId && !action && (
             <>
               <Text style={styles.body}>{t('pairing.leaveConsequences')}</Text>

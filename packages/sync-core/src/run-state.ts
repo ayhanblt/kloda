@@ -10,7 +10,8 @@ export function updateScheduledRun(
   run: ScheduledRunSnapshot,
   jobStatuses: readonly JobStatus[],
 ): ScheduledRunSnapshot {
-  if (jobStatuses.length === 0 || !jobStatuses.every((status) => status === 'completed')) {
+  if (jobStatuses.length === 0 || jobStatuses.length !== run.jobIds.length ||
+    !jobStatuses.every((status) => status === 'completed')) {
     return { ...run, updated: 0 };
   }
 

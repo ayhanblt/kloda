@@ -64,6 +64,8 @@ export function usePairing() {
     cancel: () => controller.current?.cancel(),
     resume: () => controller.current?.resume(),
     refresh: () => controller.current?.refresh(),
+    removePairing: (recordId: string, online: boolean) =>
+      activeSession.current ? controller.current?.removePairing(recordId, online) : undefined,
     decide: (decision: 'approve' | 'deny', operationId: string, generation: string) =>
       controller.current?.decide(decision, operationId, generation),
   };

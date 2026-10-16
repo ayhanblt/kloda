@@ -7,6 +7,7 @@ impl Actor {
         let mut status = PairingStatus {
             hardware_class: Some(self.installation.identity.hardware_class()),
             error_code: self.error.map(|error| error.code()),
+            unpair_result: self.unpair_result.clone(),
             ..PairingStatus::default()
         };
         if matches!(self.context.role, OwnerRole::Phone) {
@@ -69,6 +70,14 @@ impl Actor {
             }
         } else if let Some(record) = &self.retained {
             record_status(&mut status, record);
+        }
+        #[cfg(not(target_os = "android"))]
+        if self.context.role == OwnerRole::Pc {
+            if let Some(record) = &self.retained {
+                if status.record_id.is_some() {
+                    status.backup_scope = Some(self.backup_status(record));
+                }
+            }
         }
         if self.fatal.is_some() {
             // A poisoned/unreadable store is not affirmative evidence that the preceding

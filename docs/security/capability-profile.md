@@ -1,5 +1,7 @@
 # Kloda — Capability ve admission profili
 
+**V1 LAN supersession:** [ADR0016](../decisions/0016-v1-pc-local-file-authority.md) seçilmiş PC-local SQLite ACL'yi normatif dosya authority yönü yapar. Bu belgenin merkezi signed capability/issuer/KMS, same-account/step-up, exact-DER online reissue ve `<24h` cache hükümleri **V1 LAN prerequisite'i değildir**; aşağıdaki profil bu kapsamda tarihsel modeldir. Native full TLS/pin/possession/continuity, ayrı explicit PC scope approval, her-operation default deny ve durable revoke/publication fence korunur. Account recovery/central revocation ile offline PC ilişkisi ve final remote authorization politikası **açık karar** olarak kalır; tarihsel profil bunları seçmez. Yerel ACL/receiver henüz uygulanmadı.
+
 **Statü:** [ADR0013](../decisions/0013-qr-based-local-lan-pairing.md) backend-independent QR LAN ilk trust yönüdür; [ADR0012](../decisions/0012-kloda-owned-p256-device-identity.md) Kloda-owned P-256 identity ve hardware preference için korunur. Matrix/SAS current pairing path'inden çıkarılmıştır. ADR0004 authorization/exact-DER LAN capability yönü korunur; ES256 **provisional**, platform/TLS/DTLS/device-key **production gate** açık. [KLODA-QR-PAIR-V1](qr-pairing-v1-protocol.md) protocol bytes/lifecycle ve minimum native davranış frozen; actual API/ABI/adoption/integration unverified, implementation not executed. Capability private claim/type/wire/DB, KMS/hosting ve runtime trust/time/fence açık.
 
 ## Sonuç ve kanıt sınıfları

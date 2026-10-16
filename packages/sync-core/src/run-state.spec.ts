@@ -26,5 +26,8 @@ describe('scheduled run state', () => {
     };
 
     expect(updateScheduledRun(run, ['completed', 'completed'])).toMatchObject({ updated: 1 });
+    for (const statuses of [[], ['completed'], ['completed', 'completed', 'completed']] as const) {
+      expect(updateScheduledRun(run, statuses)).toMatchObject({ updated: 0 });
+    }
   });
 });

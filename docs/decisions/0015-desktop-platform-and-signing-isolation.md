@@ -16,7 +16,7 @@ Development bundle ID is **com.kloda.desktop.dev**; production bundle ID is **co
 
 Default transition is a new production installation identity and **fresh QR re-pairing**, not automatic key/pin/database adoption. Do not copy/export development hardware private keys, certificates, pairing DB, installation epoch or consumed/pending/deny records into production; do not claim that a public-key match alone proves continuity. Existing development data is preserved in its own namespace and is not deleted or silently reopened by production.
 
-After production trust, file authorization still separately requires account eligibility, step-up as required, PC scope and capability. No pairing grants file access. A future migration alternative requires an explicit security decision and authenticated continuity/revocation design; none is approved now. Ordinary user Files/Photos are not pairing state and are not deleted by this transition.
+After production trust, file authorization remains separate: [ADR0016](0016-v1-pc-local-file-authority.md) requires explicit PC scope/native local ACL for V1 LAN, not account JWT/step-up/central capability. Final remote authorization and recovery/central revoke versus offline local grants remain OPEN. A future migration alternative requires an explicit security decision and authenticated continuity/revocation design; none is approved now. Ordinary user Files/Photos are not pairing state and are not deleted by this transition.
 
 ## Platform evidence boundaries
 

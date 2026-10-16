@@ -91,7 +91,7 @@ pub(super) fn visit(
     Ok(())
 }
 
-fn blob<const N: usize>(row: &Row<'_>, index: usize) -> Result<[u8; N]> {
+pub(super) fn blob<const N: usize>(row: &Row<'_>, index: usize) -> Result<[u8; N]> {
     row.get_ref(index)
         .map_err(storage)?
         .as_blob()

@@ -5,12 +5,14 @@ use rustls::pki_types::ServerName;
 use rustls::server::{ClientHello, NoServerSessionStorage, ProducesTickets, ResolvesServerCert};
 use rustls::sign::CertifiedKey;
 use rustls::{
-    ClientConfig, ClientConnection, Connection, ServerConfig, ServerConnection, SignatureScheme,
+    CipherSuite, ClientConfig, ClientConnection, Connection, HandshakeKind, NamedGroup,
+    ProtocolVersion, ServerConfig, ServerConnection, SignatureScheme,
 };
 use std::net::IpAddr;
 use std::sync::{Arc, LazyLock, Mutex};
 
 pub(crate) const ALPN: &[u8] = b"kloda-pair/1";
+pub(crate) const FILE_ALPN: &[u8] = b"kloda-file/1";
 
 #[derive(Debug)]
 struct Resolver(Arc<CertifiedKey>);
@@ -64,7 +66,7 @@ pub(super) fn algorithms() -> &'static rustls::crypto::WebPkiSupportedAlgorithms
     &PROVIDER.signature_verification_algorithms
 }
 
-pub(super) fn server(key: Arc<CertifiedKey>) -> Result<(Connection, Arc<Verifier>)> {
+pub(crate) fn server_config(key: Arc<CertifiedKey>) -> Result<(Arc<ServerConfig>, Arc<Verifier>)> {
     let verifier = Arc::new(Verifier {
         expected_pc: None,
         verified_key: Mutex::new(None),
@@ -74,21 +76,27 @@ pub(super) fn server(key: Arc<CertifiedKey>) -> Result<(Connection, Arc<Verifier
         .map_err(|_| PairingError::TlsRejected)?
         .with_client_cert_verifier(verifier.clone())
         .with_cert_resolver(Arc::new(Resolver(key)));
-    config.alpn_protocols = vec![ALPN.to_vec()];
+    config.alpn_protocols = vec![FILE_ALPN.to_vec()];
     config.session_storage = Arc::new(NoServerSessionStorage {});
     config.ticketer = Arc::new(DisabledTickets);
     config.send_tls13_tickets = 0;
     config.max_early_data_size = 0;
-    let connection =
-        ServerConnection::new(Arc::new(config)).map_err(|_| PairingError::TlsRejected)?;
+    Ok((Arc::new(config), verifier))
+}
+
+pub(super) fn server(key: Arc<CertifiedKey>) -> Result<(Connection, Arc<Verifier>)> {
+    let (mut config, verifier) = server_config(key)?;
+    Arc::get_mut(&mut config)
+        .ok_or(PairingError::TlsRejected)?
+        .alpn_protocols = vec![ALPN.to_vec(), FILE_ALPN.to_vec()];
+    let connection = ServerConnection::new(config).map_err(|_| PairingError::TlsRejected)?;
     Ok((Connection::Server(connection), verifier))
 }
 
-pub(super) fn client(
+pub(crate) fn client_config(
     key: Arc<CertifiedKey>,
     expected: [u8; 32],
-    ip: IpAddr,
-) -> Result<(Connection, Arc<Verifier>)> {
+) -> Result<(Arc<ClientConfig>, Arc<Verifier>)> {
     let verifier = Arc::new(Verifier {
         expected_pc: Some(expected),
         verified_key: Mutex::new(None),
@@ -99,11 +107,40 @@ pub(super) fn client(
         .dangerous()
         .with_custom_certificate_verifier(verifier.clone())
         .with_client_cert_resolver(Arc::new(Resolver(key)));
-    config.alpn_protocols = vec![ALPN.to_vec()];
+    config.alpn_protocols = vec![FILE_ALPN.to_vec()];
     config.resumption = Resumption::disabled();
     config.enable_early_data = false;
     config.enable_sni = false;
-    let connection = ClientConnection::new(Arc::new(config), ServerName::IpAddress(ip.into()))
+    Ok((Arc::new(config), verifier))
+}
+
+pub(super) fn client(
+    key: Arc<CertifiedKey>,
+    expected: [u8; 32],
+    ip: IpAddr,
+) -> Result<(Connection, Arc<Verifier>)> {
+    let (mut config, verifier) = client_config(key, expected)?;
+    Arc::get_mut(&mut config)
+        .ok_or(PairingError::TlsRejected)?
+        .alpn_protocols = vec![ALPN.to_vec()];
+    let connection = ClientConnection::new(config, ServerName::IpAddress(ip.into()))
         .map_err(|_| PairingError::TlsRejected)?;
     Ok((Connection::Client(connection), verifier))
+}
+
+pub(crate) fn full_profile(connection: &rustls::CommonState, alpn: &[u8]) -> bool {
+    !connection.is_handshaking()
+        && connection.protocol_version() == Some(ProtocolVersion::TLSv1_3)
+        && connection.alpn_protocol() == Some(alpn)
+        && connection
+            .negotiated_cipher_suite()
+            .is_some_and(|c| c.suite() == CipherSuite::TLS13_AES_128_GCM_SHA256)
+        && connection
+            .negotiated_key_exchange_group()
+            .is_some_and(|g| g.name() == NamedGroup::secp256r1)
+        && matches!(
+            connection.handshake_kind(),
+            Some(HandshakeKind::Full | HandshakeKind::FullWithHelloRetryRequest)
+        )
+        && connection.peer_certificates().is_some_and(|c| c.len() == 1)
 }

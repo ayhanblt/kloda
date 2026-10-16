@@ -32,6 +32,7 @@ function fixture() {
       return status;
     },
     resume: async () => status,
+    removePairing: async () => { throw new Error('unexpected removal'); },
     close: async () => { status = { phase: 'invalid' }; },
   };
   return {
@@ -150,6 +151,26 @@ describe('phone pairing consumer boundaries', () => {
     f.setStatus({ phase: 'idle' });
     await f.controller.refresh();
     expect(f.controller.getSnapshot().error).toBeNull();
+  });
+
+  it('rejects stale removal confirmation and concurrent phone-only removal during online acknowledgement', async () => {
+    const f = fixture();
+    f.setStatus({ phase: 'complete', recordId: 'current-pc', operationId: 'current-pc' });
+    await f.controller.refresh();
+    const reply = deferred<PairingStatus>();
+    const remove = jest.fn(() => reply.promise);
+    f.api.removePairing = remove;
+    await f.controller.removePairing('previous-pc', false);
+    expect(remove).not.toHaveBeenCalled();
+    const pending = f.controller.removePairing('current-pc', true);
+    await f.controller.removePairing('current-pc', false);
+    await f.controller.cancel();
+    expect(remove).toHaveBeenCalledTimes(1);
+    expect(f.controller.armScan()).toBe(false);
+    reply.resolve({ phase: 'complete', recordId: 'current-pc', unpairResult: { state: 'pc_unconfirmed' } });
+    await pending;
+    expect(f.controller.getSnapshot().action).toBeNull();
+    expect(f.controller.armScan()).toBe(false);
   });
 
   it('never displays raw native error text as a security result', () => {

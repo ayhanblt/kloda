@@ -4,7 +4,7 @@ import { pairingErrorCode, type PairingErrorCode } from '../../../shared/api/pai
 export interface PairingSnapshot {
   status: PairingStatus | null;
   error: PairingErrorCode | null;
-  action: 'scan' | 'cancel' | 'resume' | 'approve' | 'deny' | null;
+  action: 'scan' | 'cancel' | 'resume' | 'approve' | 'deny' | 'remove' | null;
   scanLocked: boolean;
   uncertain: boolean;
 }
@@ -67,7 +67,7 @@ export class PairingController {
 
   async cancel(): Promise<void> {
     const { status, action } = this.snapshot;
-    if (this.closed || !status?.operationId || action === 'cancel') return;
+    if (this.closed || !status?.operationId || action === 'cancel' || action === 'remove') return;
     const operationId = status.operationId;
     const revision = ++this.revision;
     this.publish({ scanLocked: true, action: 'cancel' });
@@ -94,6 +94,13 @@ export class PairingController {
     const revision = ++this.revision;
     this.publish({ action: decision, scanLocked: true });
     await this.perform(() => this.api[decision](operationId, candidateGeneration), revision);
+  }
+  async removePairing(recordId: string, online: boolean): Promise<void> {
+    const { status, action, uncertain } = this.snapshot;
+    if (this.closed || action || uncertain || status?.phase !== 'complete' || status.recordId !== recordId) return;
+    const revision = ++this.revision;
+    this.publish({ scanLocked: true, action: 'remove' });
+    await this.perform(() => this.api.removePairing(recordId, online), revision);
   }
 
 

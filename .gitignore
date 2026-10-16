@@ -71,3 +71,4 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 tools/android-keystore-tls-poc/
+apps/mobile/.expo/dev/logs/export.log

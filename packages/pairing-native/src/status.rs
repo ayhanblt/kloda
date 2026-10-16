@@ -4,6 +4,26 @@ use zeroize::Zeroizing;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
+pub(crate) struct BackupScopeStatus {
+    pub(crate) state: &'static str,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) folder: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) revision: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) error_code: Option<&'static str>,
+}
+
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct UnpairResult {
+    pub(crate) state: &'static str,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) error_code: Option<&'static str>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub(crate) struct PairingStatus {
     pub(crate) phase: &'static str,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -26,6 +46,10 @@ pub(crate) struct PairingStatus {
     pub(crate) error_code: Option<&'static str>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) hardware_class: Option<&'static str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) backup_scope: Option<BackupScopeStatus>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) unpair_result: Option<UnpairResult>,
 }
 impl Default for PairingStatus {
     fn default() -> Self {
@@ -40,6 +64,8 @@ impl Default for PairingStatus {
             repair_required: false,
             error_code: None,
             hardware_class: None,
+            backup_scope: None,
+            unpair_result: None,
         }
     }
 }

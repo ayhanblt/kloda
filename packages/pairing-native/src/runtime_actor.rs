@@ -13,6 +13,8 @@ impl Actor {
             OwnerRole::Phone => RecordRole::Phone,
         };
         let retained = installation.store.retained_record(role)?;
+        let file_transport =
+            crate::file_transport::Managed::new(!matches!(context.role, OwnerRole::Phone))?;
         let mut owner = Self {
             context,
             installation,
@@ -27,6 +29,11 @@ impl Actor {
             last_now: now,
             error: None,
             fatal: None,
+            file_transport,
+            file_sender: None,
+            #[cfg(not(target_os = "android"))]
+            file_receiver: crate::file_receiver::Receiver::new(),
+            unpair_result: None,
         };
         if !matches!(owner.context.role, OwnerRole::Phone) {
             if let Err(error) = owner.ensure_listener() {
@@ -105,7 +112,8 @@ impl Actor {
     }
 
     pub(super) fn wait_duration(&self) -> Duration {
-        let active = !self.peers.is_empty()
+        let active = self.file_transport.live_count() != 0
+            || !self.peers.is_empty()
             || self
                 .phone
                 .as_ref()
@@ -154,6 +162,8 @@ impl Actor {
             self.phone_tick(now);
             return;
         }
+        #[cfg(not(target_os = "android"))]
+        self.file_step();
         if let Err(error) = self.accept(now) {
             self.fail_all(error);
             return;
@@ -165,6 +175,15 @@ impl Actor {
         let mut peer = self.peers.swap_remove(index);
         self.cursor = (index + 1) % MAX_PEERS;
         match self.pc_step(&mut peer, now) {
+            Ok(()) if peer.io.tls.is_file() => {
+                let stream = {
+                    let _entered = self.file_transport.enter();
+                    peer.io.tls.into_file()
+                };
+                if let Err(error) = stream.and_then(|io| self.file_transport.accept(io)) {
+                    self.observe(error);
+                }
+            }
             Ok(()) => self.peers.push(peer),
             Err(error) => self.pc_failure(&peer, error),
         }
@@ -182,7 +201,7 @@ impl Actor {
             Err(error) if error.kind() == ErrorKind::WouldBlock => return Ok(()),
             Err(_) => return Err(PairingError::LanUnavailable),
         };
-        if self.peers.len() == MAX_PEERS {
+        if self.peers.len() + self.file_transport.live_count() >= MAX_PEERS {
             return Ok(());
         }
         // An invalid unproved contender affects only its own socket, not OPEN state.
@@ -244,11 +263,22 @@ impl Actor {
             }
         }
         self.peers.clear();
+        self.file_sender = None;
+        self.file_transport.cancel();
+        #[cfg(not(target_os = "android"))]
+        self.file_receiver.cancel_all();
         self.listener = None;
         self.observe(error);
     }
 
     pub(super) fn drop_sid(&mut self, sid: &[u8; 16]) {
+        if self
+            .file_sender
+            .as_ref()
+            .is_some_and(|(_, channel)| &channel.record.sid == sid)
+        {
+            self.file_sender = None;
+        }
         self.peers
             .retain(|peer| peer.io.sid.as_ref().is_some_and(|saved| saved != sid));
     }
@@ -261,6 +291,10 @@ impl Actor {
             }
         }
         self.phone = None;
+        self.file_sender = None;
+        self.file_transport.close();
+        #[cfg(not(target_os = "android"))]
+        self.file_receiver.cancel_all();
         self.peers.clear();
         self.listener = None;
     }

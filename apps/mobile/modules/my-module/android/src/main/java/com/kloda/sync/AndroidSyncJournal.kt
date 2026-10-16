@@ -1,60 +1,172 @@
 package com.kloda.sync
 
+import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
-internal data class QueuedSourceFile(
-  val reference: String,
-  val relativePath: String,
-  val revision: String,
-  val size: Long
+internal data class QueuedSourceFile(val reference: String, val relativePath: String, val revision: String, val size: Long)
+internal data class FilesJob(
+  val id: String, val recordId: String, val sourceId: String, val reference: String, val treeReference: String,
+  val name: String, val wireSourceId: String, val sha256: String, val size: Long, val operationId: String?,
+  val offset: Long, val state: String, val errorCode: String?
 )
 
-internal class AndroidSyncJournal(context: Context) : SQLiteOpenHelper(context, "kloda-sync.sqlite", null, 1) {
+internal class AndroidSyncJournal(context: Context) : SQLiteOpenHelper(context, "kloda-sync.sqlite", null, 2) {
+  companion object { val sourceLock = Any() }
+  init { setWriteAheadLoggingEnabled(true) }
+
+  override fun onConfigure(database: SQLiteDatabase) { database.execSQL("PRAGMA synchronous=FULL") }
   override fun onCreate(database: SQLiteDatabase) {
-    database.execSQL(
-      """CREATE TABLE queued_source_file (
-        source_id TEXT NOT NULL,
-        reference TEXT NOT NULL,
-        relative_path TEXT NOT NULL,
-        revision TEXT NOT NULL,
-        size_bytes INTEGER NOT NULL,
-        status TEXT NOT NULL,
-        PRIMARY KEY (source_id, reference)
-      )"""
-    )
+    database.execSQL("""CREATE TABLE queued_source_file (
+      source_id TEXT NOT NULL, reference TEXT NOT NULL, relative_path TEXT NOT NULL,
+      revision TEXT NOT NULL, size_bytes INTEGER NOT NULL, status TEXT NOT NULL,
+      available INTEGER NOT NULL DEFAULT 1, tree_reference TEXT NOT NULL DEFAULT '',
+      PRIMARY KEY (source_id, reference))""")
+    createTransfers(database)
   }
 
-  override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) = Unit
-
-  fun replaceSourceFiles(sourceId: String, files: Sequence<QueuedSourceFile>): Int {
-    writableDatabase.beginTransaction()
-    return try {
-      writableDatabase.delete("queued_source_file", "source_id = ?", arrayOf(sourceId))
-      var count = 0
-      writableDatabase.compileStatement(
-        "INSERT INTO queued_source_file (source_id, reference, relative_path, revision, size_bytes, status) VALUES (?, ?, ?, ?, ?, 'queued')"
-      ).use { statement ->
-        files.forEach { file ->
-          statement.bindString(1, sourceId)
-          statement.bindString(2, file.reference)
-          statement.bindString(3, file.relativePath)
-          statement.bindString(4, file.revision)
-          statement.bindLong(5, file.size)
-          statement.executeInsert()
-          statement.clearBindings()
-          count += 1
-        }
-      }
-      writableDatabase.setTransactionSuccessful()
-      count
-    } finally {
-      writableDatabase.endTransaction()
+  override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+    if (oldVersion == 1) {
+      database.execSQL("ALTER TABLE queued_source_file ADD COLUMN available INTEGER NOT NULL DEFAULT 1")
+      database.execSQL("ALTER TABLE queued_source_file ADD COLUMN tree_reference TEXT NOT NULL DEFAULT ''")
+      createTransfers(database)
     }
   }
 
-  fun removeSource(sourceId: String) {
-    writableDatabase.delete("queued_source_file", "source_id = ?", arrayOf(sourceId))
+  private fun createTransfers(database: SQLiteDatabase) {
+    database.execSQL("""CREATE TABLE files_job (
+      id TEXT PRIMARY KEY, record_id TEXT NOT NULL, source_id TEXT NOT NULL,
+      reference TEXT NOT NULL, tree_reference TEXT NOT NULL, name TEXT NOT NULL,
+      wire_source_id TEXT NOT NULL, sha256 TEXT NOT NULL, size_bytes INTEGER NOT NULL CHECK(size_bytes>=0),
+      operation_id TEXT, acknowledged_bytes INTEGER NOT NULL DEFAULT 0 CHECK(acknowledged_bytes>=0 AND acknowledged_bytes<=size_bytes),
+      state TEXT NOT NULL, error_code TEXT,
+      UNIQUE(record_id,source_id,reference,tree_reference,name,sha256,size_bytes))""")
+    database.execSQL("""CREATE TRIGGER retain_files_job BEFORE DELETE ON files_job
+      BEGIN SELECT RAISE(ABORT,'retained'); END""")
+    database.execSQL("""CREATE TRIGGER immutable_files_job BEFORE UPDATE ON files_job
+      WHEN NEW.id IS NOT OLD.id OR NEW.record_id IS NOT OLD.record_id OR NEW.source_id IS NOT OLD.source_id
+      OR NEW.reference IS NOT OLD.reference OR NEW.tree_reference IS NOT OLD.tree_reference OR NEW.name IS NOT OLD.name
+      OR NEW.wire_source_id IS NOT OLD.wire_source_id OR NEW.sha256 IS NOT OLD.sha256 OR NEW.size_bytes IS NOT OLD.size_bytes
+      OR (OLD.operation_id IS NOT NULL AND NEW.operation_id IS NOT OLD.operation_id)
+      OR NEW.acknowledged_bytes<OLD.acknowledged_bytes OR (OLD.state='completed' AND NEW.state!='completed')
+      BEGIN SELECT RAISE(ABORT,'binding'); END""")
+  }
+
+  fun reconcileSourceFiles(sourceId: String, treeReference: String, files: Sequence<QueuedSourceFile>): Int = synchronized(sourceLock) {
+    val database = writableDatabase
+    database.beginTransaction()
+    try {
+      database.execSQL("UPDATE queued_source_file SET available=0 WHERE source_id=?", arrayOf(sourceId))
+      var count = 0
+      files.forEach { file ->
+        val values = ContentValues().apply {
+          put("source_id", sourceId); put("reference", file.reference); put("relative_path", file.relativePath)
+          put("revision", file.revision); put("size_bytes", file.size); put("available", 1); put("tree_reference", treeReference)
+        }
+        if (database.update("queued_source_file", values, "source_id=? AND reference=?", arrayOf(sourceId, file.reference)) == 0) {
+          values.put("status", "queued")
+          database.insertOrThrow("queued_source_file", null, values)
+        }
+        count++
+      }
+      database.execSQL("""UPDATE files_job SET state='blocked',error_code='source_changed'
+        WHERE source_id=? AND state!='completed' AND NOT EXISTS(SELECT 1 FROM queued_source_file q
+        WHERE q.source_id=files_job.source_id AND q.reference=files_job.reference AND q.available=1
+        AND q.tree_reference=files_job.tree_reference)""", arrayOf(sourceId))
+      database.setTransactionSuccessful()
+      count
+    } finally { database.endTransaction() }
+  }
+
+  fun removeSource(sourceId: String) = synchronized(sourceLock) {
+    val database = writableDatabase
+    database.beginTransaction()
+    try {
+      database.execSQL("UPDATE queued_source_file SET available=0 WHERE source_id=?", arrayOf(sourceId))
+      database.execSQL("UPDATE files_job SET state='blocked',error_code='source_permission_lost' WHERE source_id=? AND state!='completed'", arrayOf(sourceId))
+      database.setTransactionSuccessful()
+    } finally { database.endTransaction() }
+  }
+
+  fun sourceFiles(sourceId: String, after: String?): List<QueuedSourceFile> = readableDatabase.rawQuery(
+    "SELECT reference,relative_path,revision,size_bytes FROM queued_source_file WHERE source_id=? AND available=1 AND reference>? ORDER BY reference LIMIT 32",
+    arrayOf(sourceId, after.orEmpty())
+  ).use { cursor -> buildList {
+    while (cursor.moveToNext()) add(QueuedSourceFile(cursor.getString(0), cursor.getString(1), cursor.getString(2), cursor.getLong(3)))
+  } }
+
+  fun sourceAvailable(job: FilesJob): Boolean = readableDatabase.rawQuery(
+    "SELECT 1 FROM queued_source_file WHERE source_id=? AND reference=? AND tree_reference=? AND available=1",
+    arrayOf(job.sourceId, job.reference, job.treeReference)
+  ).use { it.moveToFirst() }
+
+  fun version(record: String, source: String, file: QueuedSourceFile, tree: String, hash: String, size: Long): FilesJob? = readableDatabase.rawQuery(
+    "SELECT * FROM files_job WHERE record_id=? AND source_id=? AND reference=? AND tree_reference=? AND name=? AND sha256=? AND size_bytes=?",
+    arrayOf(record, source, file.reference, tree, file.relativePath.substringAfterLast('/'), hash, size.toString())
+  ).use { if (it.moveToFirst()) decode(it) else null }
+
+  fun retainsSnapshot(id: String): Boolean = readableDatabase.rawQuery(
+    "SELECT 1 FROM files_job WHERE id=?", arrayOf(id)
+  ).use { it.moveToFirst() }
+
+  fun snapshotCompleted(id: String): Boolean = readableDatabase.rawQuery(
+    "SELECT 1 FROM files_job WHERE id=? AND state='completed'", arrayOf(id)
+  ).use { it.moveToFirst() }
+
+  fun insert(job: FilesJob) {
+    writableDatabase.insertOrThrow("files_job", null, ContentValues().apply {
+      put("id", job.id); put("record_id", job.recordId); put("source_id", job.sourceId); put("reference", job.reference)
+      put("tree_reference", job.treeReference); put("name", job.name); put("wire_source_id", job.wireSourceId)
+      put("sha256", job.sha256); put("size_bytes", job.size); put("state", "queued")
+    })
+  }
+
+  fun jobs(record: String, source: String, after: String?): List<FilesJob> = readableDatabase.rawQuery(
+    "SELECT * FROM files_job WHERE record_id=? AND source_id=? AND state!='completed' AND id>? ORDER BY id LIMIT 32",
+    arrayOf(record, source, after.orEmpty())
+  ).use { cursor -> buildList { while (cursor.moveToNext()) add(decode(cursor)) } }
+
+  fun update(id: String, state: String, code: String? = null, operation: String? = null, offset: Long? = null) {
+    writableDatabase.update("files_job", ContentValues().apply {
+      put("state", state); if (code == null) putNull("error_code") else put("error_code", code)
+      if (operation != null) put("operation_id", operation)
+      if (offset != null) put("acknowledged_bytes", offset)
+    }, "id=? AND state!='completed'", arrayOf(id))
+  }
+
+  fun interrupt(record: String, code: String) {
+    writableDatabase.execSQL("UPDATE files_job SET state='paused',error_code=? WHERE record_id=? AND state IN ('queued','preparing','uploading','finalizing')", arrayOf(code, record))
+  }
+
+  fun blockSource(source: String, code: String) {
+    writableDatabase.execSQL("UPDATE files_job SET state='blocked',error_code=? WHERE source_id=? AND state!='completed'", arrayOf(code, source))
+  }
+  fun status(running: Boolean, errorCode: String?): Map<String, Any> {
+    val database = readableDatabase
+    val count = database.rawQuery("SELECT COUNT(*) FROM files_job", null).use { it.moveToFirst(); it.getLong(0) }
+    val jobs = database.rawQuery("SELECT * FROM files_job ORDER BY (state='completed'), CASE WHEN state='completed' THEN -rowid ELSE rowid END LIMIT 100", null).use { cursor ->
+      buildList { while (cursor.moveToNext()) {
+        val job = decode(cursor)
+        add(buildMap<String, Any> {
+          put("id", job.id); put("recordId", job.recordId); put("sourceId", job.sourceId); put("name", job.name)
+          put("state", if (!running && job.state in setOf("uploading", "finalizing", "preparing")) "paused" else job.state)
+          put("acknowledgedBytes", job.offset.toString()); put("totalBytes", job.size.toString())
+          job.errorCode?.let { put("errorCode", it) }
+        })
+      } }
+    }
+    return buildMap {
+      put("running", running); put("jobs", jobs); put("totalJobs", count.toString()); put("hasMore", count > jobs.size)
+      errorCode?.let { put("errorCode", it) }
+    }
+  }
+
+  private fun decode(cursor: Cursor): FilesJob {
+    fun text(name: String) = cursor.getString(cursor.getColumnIndexOrThrow(name))
+    fun number(name: String) = cursor.getLong(cursor.getColumnIndexOrThrow(name))
+    return FilesJob(text("id"), text("record_id"), text("source_id"), text("reference"), text("tree_reference"), text("name"),
+      text("wire_source_id"), text("sha256"), number("size_bytes"), text("operation_id"), number("acknowledged_bytes"), text("state"), text("error_code"))
   }
 }

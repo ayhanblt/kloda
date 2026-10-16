@@ -3,11 +3,13 @@ use crate::frame::{Frame, FrameDecoder};
 use crate::key::Spki;
 use crate::{proof, tls_config, tls_verifier::Verifier};
 use rustls::sign::CertifiedKey;
-use rustls::{CipherSuite, Connection, HandshakeKind, NamedGroup, ProtocolVersion};
+use rustls::Connection;
 use std::io::{ErrorKind, Read, Write};
 use std::net::{IpAddr, Shutdown, TcpStream};
 use std::sync::Arc;
 use zeroize::Zeroizing;
+#[path = "tls_admission.rs"]
+mod admission;
 
 pub(crate) struct Channel {
     generation: u64,
@@ -36,9 +38,9 @@ impl Channel {
 
 /// No channel evidence exists until the engine has completed full mutual TLS.
 pub(crate) struct Session {
-    connection: Connection,
+    connection: Option<Connection>,
     verifier: Arc<Verifier>,
-    socket: TcpStream,
+    socket: Option<TcpStream>,
     generation: u64,
     pc: bool,
     peer: Option<Spki>,
@@ -84,9 +86,9 @@ impl Session {
             .map_err(|_| PairingError::LanUnavailable)?;
         connection.set_buffer_limit(Some(4096));
         Ok(Self {
-            connection,
+            connection: Some(connection),
             verifier,
-            socket,
+            socket: Some(socket),
             generation,
             pc,
             peer: None,
@@ -106,6 +108,8 @@ impl Session {
     }
     pub(crate) fn peer_ip(&self) -> Result<IpAddr> {
         self.socket
+            .as_ref()
+            .ok_or(PairingError::ConnectionClosed)?
             .peer_addr()
             .map(|a| a.ip())
             .map_err(|_| PairingError::ConnectionClosed)
@@ -113,18 +117,8 @@ impl Session {
     pub(crate) fn established(&self) -> bool {
         self.established
     }
-    /// Authorization requires a live winning channel, unlike draining final frames.
-    pub(crate) fn authorize_live(&self) -> Result<()> {
-        if self.eof || self.peer_closed {
-            return Err(PairingError::ConnectionClosed);
-        }
-        if !self.established {
-            return Err(PairingError::TlsRejected);
-        }
-        Ok(())
-    }
     pub(crate) fn channel(&self, sid: &[u8; 16], local: &Spki) -> Result<Channel> {
-        if !self.established {
+        if !self.established || self.is_file() {
             return Err(PairingError::TlsRejected);
         }
         let peer = self.peer.as_ref().ok_or(PairingError::TlsRejected)?;
@@ -138,6 +132,8 @@ impl Session {
         let context = proof::context(sid, pc, phone);
         let mut binding = Zeroizing::new([0; 32]);
         self.connection
+            .as_ref()
+            .ok_or(PairingError::TlsRejected)?
             .export_keying_material(binding.as_mut(), proof::EXPORTER_LABEL, Some(&context))
             .map_err(|_| PairingError::TlsRejected)?;
         Ok(Channel {
@@ -165,13 +161,15 @@ impl Session {
     }
     pub(crate) fn pump(&mut self, now: u64) -> Result<()> {
         self.flush()?;
-        if !self.eof && self.connection.wants_read() {
-            match self.connection.read_tls(&mut self.socket) {
+        let connection = self.connection.as_mut().ok_or(PairingError::TlsRejected)?;
+        if !self.eof && connection.wants_read() {
+            let socket = self.socket.as_mut().ok_or(PairingError::ConnectionClosed)?;
+            match connection.read_tls(socket) {
                 Ok(0) => {
                     self.eof = true;
                 }
                 Ok(_) => {
-                    let state = self.connection.process_new_packets().map_err(|error|
+                    let state = connection.process_new_packets().map_err(|error|
                     if matches!(&error,rustls::Error::General(message) if message=="identity_unavailable") {
                         PairingError::IdentityUnavailable
                     } else {PairingError::TlsRejected})?;
@@ -182,25 +180,13 @@ impl Session {
             }
         }
         self.flush()?;
-        if !self.established && !self.connection.is_handshaking() {
-            let valid = self.connection.protocol_version() == Some(ProtocolVersion::TLSv1_3)
-                && self.connection.alpn_protocol() == Some(tls_config::ALPN)
-                && self
-                    .connection
-                    .negotiated_cipher_suite()
-                    .is_some_and(|c| c.suite() == CipherSuite::TLS13_AES_128_GCM_SHA256)
-                && self
-                    .connection
-                    .negotiated_key_exchange_group()
-                    .is_some_and(|g| g.name() == NamedGroup::secp256r1)
-                && matches!(
-                    self.connection.handshake_kind(),
-                    Some(HandshakeKind::Full | HandshakeKind::FullWithHelloRetryRequest)
-                )
-                && self
-                    .connection
-                    .peer_certificates()
-                    .is_some_and(|c| c.len() == 1);
+        let connection = self.connection.as_ref().ok_or(PairingError::TlsRejected)?;
+        if !self.established && !connection.is_handshaking() {
+            let alpn = connection
+                .alpn_protocol()
+                .ok_or(PairingError::TlsRejected)?;
+            let allowed = alpn == tls_config::ALPN || (self.pc && alpn == tls_config::FILE_ALPN);
+            let valid = allowed && tls_config::full_profile(connection, alpn);
             if !valid {
                 return Err(PairingError::TlsRejected);
             }
@@ -225,10 +211,14 @@ impl Session {
         if !self.established {
             return Ok(None);
         }
+        if self.is_file() {
+            return Err(PairingError::TlsRejected);
+        }
+        let connection = self.connection.as_mut().ok_or(PairingError::TlsRejected)?;
         let mut buffer = Zeroizing::new([0; 52]);
         loop {
             let limit = self.decoder.read_bound();
-            match self.connection.reader().read(&mut buffer[..limit]) {
+            match connection.reader().read(&mut buffer[..limit]) {
                 Ok(0) => {
                     self.decoder.finish()?;
                     return Err(PairingError::ConnectionClosed);
@@ -250,12 +240,14 @@ impl Session {
         }
     }
     pub(crate) fn send(&mut self, frame: &Frame) -> Result<()> {
-        if !self.established || self.outbound {
+        if !self.established || self.outbound || self.is_file() {
             return Err(PairingError::TlsRejected);
         }
         let mut encoded = Zeroizing::new([0; 52]);
         let length = frame.encode(&mut encoded);
         self.connection
+            .as_mut()
+            .ok_or(PairingError::TlsRejected)?
             .writer()
             .write_all(&encoded[..length])
             .map_err(|_| PairingError::ConnectionClosed)?;
@@ -264,15 +256,23 @@ impl Session {
     }
     pub(crate) fn sent(&mut self) -> Result<bool> {
         self.flush()?;
-        if self.outbound && !self.connection.wants_write() {
+        if self.outbound
+            && !self
+                .connection
+                .as_ref()
+                .ok_or(PairingError::TlsRejected)?
+                .wants_write()
+        {
             self.outbound = false;
             return Ok(true);
         }
         Ok(false)
     }
     fn flush(&mut self) -> Result<()> {
-        while self.connection.wants_write() {
-            match self.connection.write_tls(&mut self.socket) {
+        let connection = self.connection.as_mut().ok_or(PairingError::TlsRejected)?;
+        let socket = self.socket.as_mut().ok_or(PairingError::ConnectionClosed)?;
+        while connection.wants_write() {
+            match connection.write_tls(socket) {
                 Ok(0) => return Err(PairingError::ConnectionClosed),
                 Ok(_) => (),
                 Err(e) if e.kind() == ErrorKind::WouldBlock => break,
@@ -284,7 +284,9 @@ impl Session {
 }
 impl Drop for Session {
     fn drop(&mut self) {
-        let _ = self.socket.shutdown(Shutdown::Both);
+        if let Some(socket) = &self.socket {
+            let _ = socket.shutdown(Shutdown::Both);
+        }
     }
 }
 

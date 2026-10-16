@@ -99,7 +99,26 @@ export class DesktopSyncJournal {
   }
 
   saveSchedule(intervalHours: 12 | 24, localTime: string): void {
-    this.setSetting('schedule', JSON.stringify({ intervalHours, localTime }));
+    const value = JSON.stringify({ intervalHours, localTime });
+    this.database.transaction(() => {
+      if (this.getSetting('schedule') === value) return;
+      this.setSetting('schedule', value);
+      this.database.prepare("DELETE FROM setting WHERE key = 'scheduleDue'").run();
+    })();
+  }
+
+  getScheduleDue(): number | undefined {
+    const value = this.getSetting('scheduleDue');
+    if (value === undefined) return undefined;
+    const due: unknown = JSON.parse(value);
+    if (typeof due !== 'number' || !Number.isSafeInteger(due) || Math.abs(due) > 8.64e15) {
+      throw new Error('Invalid persisted schedule occurrence.');
+    }
+    return due;
+  }
+
+  saveScheduleDue(due: number): void {
+    this.setSetting('scheduleDue', JSON.stringify(due));
   }
 
   saveStorage(storage: Omit<StorageForm, 'password'>): void {
@@ -113,6 +132,12 @@ export class DesktopSyncJournal {
     this.database.prepare(`INSERT OR REPLACE INTO sync_progress
       (id, status, bytes_transferred, bytes_total, completed_files, total_files) VALUES (?, ?, ?, ?, ?, ?)`)
       .run(progress.id, progress.status, progress.bytesTransferred, progress.bytesTotal, progress.completedFiles, progress.totalFiles);
+  }
+
+  getLatestProgress(): SyncProgress | null {
+    return (this.database.prepare(`SELECT id, status, bytes_transferred AS bytesTransferred,
+      bytes_total AS bytesTotal, completed_files AS completedFiles, total_files AS totalFiles
+      FROM sync_progress ORDER BY rowid DESC LIMIT 1`).get() as SyncProgress | undefined) ?? null;
   }
 
   hasUploadReceipt(targetId: string, sourceId: string, relativePath: string, revision: string): boolean {

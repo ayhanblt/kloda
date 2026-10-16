@@ -1,5 +1,7 @@
 # ADR 0006 — Hesap sağlayıcısı, isteğe bağlı MFA ve recovery politikası
 
+> **Current V1 LAN override — 2026-10-13:** [ADR0016](0016-v1-pc-local-file-authority.md) makes new local grants and LAN operations independent of backend/login/JWT/step-up/issuer/KMS/`<24h` cache, with explicit PC scope approval and native ACL instead. Account/MFA history remains, but automatic local-grant reset/reopening and the central recovery/offline-PC delay guarantees below are not current local ACL policy: that relationship is OPEN, with neither automatic survival nor reset chosen. FINAL remote authorization is OPEN. Native local revoke/fence and approved V1 unpair semantics remain distinct from central recovery; implementation is not claimed.
+
 - Belgeleme tarihi: 2026-10-04; özgün session seçimlerinin ayrı tarihleri kayıtlı değil.
 - Durum: Sağlayıcı ve güvenlik davranışı kabul edildi; entegrasyon/production kabulü tamamlanmadı.
 - Karar sahibi: Ayhan

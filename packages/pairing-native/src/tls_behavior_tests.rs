@@ -69,17 +69,27 @@ fn real_received_ack_and_complete_require_actual_writer_callbacks() {
 }
 
 #[test]
-fn lost_commit_and_lost_complete_recover_after_store_reopen_with_same_pins() {
-    for lose_complete in [false, true] {
+fn lost_commit_ack_and_complete_recover_after_store_reopen_with_same_pins() {
+    for lost_reply in ["commit", "ack", "complete"] {
         let mut e = Exchange::reserved();
         let commit = e.consume();
-        if lose_complete {
-            let ack = e.pin(&commit);
-            let complete = e.acknowledge(&ack);
-            e.pair.send(Side::Pc, &complete); // Do not consume the phone's decrypted response.
-        } else {
+        if lost_reply == "commit" {
             e.pair.send(Side::Pc, &commit);
             e.pc.commit_sent(&e.pc_channel).unwrap(); // Drop before phone application read/pin.
+        } else {
+            let ack = e.pin(&commit);
+            if lost_reply == "complete" {
+                let complete = e.acknowledge(&ack);
+                e.pair.send(Side::Pc, &complete); // Drop before phone application read.
+            } else {
+                durable(&e.pc_dir, &e.pc_id, &e.sid, RecordState::Consumed);
+                durable(
+                    &e.phone_dir,
+                    &e.phone_id,
+                    &e.sid,
+                    RecordState::PinnedPendingAck,
+                );
+            }
         }
         let (mut e, commit) = e.reconnect();
         e.pair.send(Side::Pc, &commit);
@@ -214,14 +224,25 @@ fn mutual_auth_profile_pin_and_certificate_verify_fail_closed_on_real_peers() {
         pair.rejected(Side::Phone);
         assert!(pair.phone.channel(&[1; 16], &phone.spki).is_err());
     }
-    let mut pair = Loopback::configured(
-        pc.key.clone(),
+    let wrong_phone_signer = Identity::new(Role::Phone);
+    let bad_phone_certificate_verify = Arc::new(CertifiedKey::new(
+        phone.key.cert.clone(),
+        wrong_phone_signer.key.key.clone(),
+    ));
+    for certificate in [
         phone.certificate(Role::Pc, false),
-        pc.spki.fingerprint(),
-        1,
-        ClientMode::Normal,
-    );
-    pair.rejected(Side::Pc);
+        bad_phone_certificate_verify,
+    ] {
+        let mut pair = Loopback::configured(
+            pc.key.clone(),
+            certificate,
+            pc.spki.fingerprint(),
+            1,
+            ClientMode::Normal,
+        );
+        pair.rejected(Side::Pc);
+        assert!(pair.pc.channel(&[1; 16], &pc.spki).is_err());
+    }
     let mut pair = Loopback::configured(
         pc.key.clone(),
         phone.key.clone(),

@@ -1,5 +1,7 @@
 # ADR0013 — QR-based local LAN pairing
 
+> **Current V1 LAN override — 2026-10-13:** [ADR0016](0016-v1-pc-local-file-authority.md) supersedes item 5's central enrollment/eligibility/step-up/capability/cache/online reauthorization prerequisites and item 6's exact-DER online-reissue dependency for the local ACL. **Trust is still not file authorization:** separate explicit PC-selected backup-scope approval is required; no folder means pairing only. Frozen QR bytes/state/channel proof are unchanged; valid native certificate/profile, TLS/pins/possession/continuity/revoke/fence remain. FINAL remote authorization and recovery/central revocation versus offline PC/local grants are OPEN. QR implementation evidence does not prove ACL/receiver/online unpair.
+
 - Date: 2026-10-07 (execution clock; approval timestamp is not inferred).
 - Owner: Ayhan.
 - Status: **accepted direction; implementation/build/synthetic evidence recorded, physical adoption blocked**.

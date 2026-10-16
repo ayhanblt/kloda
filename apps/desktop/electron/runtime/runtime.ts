@@ -12,6 +12,8 @@ import { NodeWebDavClient } from './webdav.js';
 export class DesktopSyncRuntime implements DesktopBridge {
   private readonly vault: ElectronCredentialVault;
   private activeSync: Promise<SyncProgress> | undefined;
+  private activeProgressId: string | undefined;
+  private storageGeneration = 0;
 
   constructor(
     private readonly journal: DesktopSyncJournal,
@@ -21,6 +23,12 @@ export class DesktopSyncRuntime implements DesktopBridge {
   }
 
   getDraft(): Promise<BackupDraft> { return Promise.resolve(this.journal.getDraft()); }
+  getProgress(): Promise<SyncProgress | null> {
+    const progress = this.journal.getLatestProgress();
+    // Node transfers cannot survive their owning process.
+    return Promise.resolve(progress?.status === 'running' && progress.id !== this.activeProgressId
+      ? { ...progress, status: 'failed' } : progress);
+  }
   getSchedule(): Promise<{ intervalHours: 12 | 24; localTime: `${number}${number}:${number}${number}` }> {
     const { intervalHours, localTime } = this.journal.getDraft();
     return Promise.resolve({ intervalHours, localTime: localTime as `${number}${number}:${number}${number}` });
@@ -49,14 +57,17 @@ export class DesktopSyncRuntime implements DesktopBridge {
 
   saveStorage(storage: StorageForm): Promise<void> {
     this.validateStorage(storage);
+    this.storageGeneration += 1;
     this.vault.save(storage.password);
     this.journal.saveStorage({ endpoint: storage.endpoint, targetPath: storage.targetPath, username: storage.username });
     return Promise.resolve();
   }
 
   async testStorage(): Promise<void> {
+    const generation = this.storageGeneration;
     const storage = this.getStorage();
     await new NodeWebDavClient(storage).verifyWriteAccess();
+    if (generation !== this.storageGeneration) throw new Error('Storage settings changed during the connection test.');
     this.journal.setStorageTested();
   }
 
@@ -64,10 +75,22 @@ export class DesktopSyncRuntime implements DesktopBridge {
     if (this.activeSync) return this.activeSync;
     const sync = this.runSync();
     this.activeSync = sync;
-    void sync.then(
-      () => { if (this.activeSync === sync) this.activeSync = undefined; },
-      () => { if (this.activeSync === sync) this.activeSync = undefined; },
-    );
+    const finish = () => {
+      if (this.activeSync === sync) {
+        this.activeSync = undefined;
+        this.activeProgressId = undefined;
+      }
+    };
+    void sync.then(finish, () => {
+      try {
+        const progress = this.activeProgressId ? this.journal.getLatestProgress() : null;
+        if (progress?.id === this.activeProgressId && progress?.status === 'running') {
+          this.journal.saveProgress({ ...progress, status: 'failed' });
+        }
+      } catch {
+        console.error('Kloda backup failure progress could not be persisted.');
+      } finally { finish(); }
+    });
     return sync;
   }
 
@@ -89,6 +112,7 @@ export class DesktopSyncRuntime implements DesktopBridge {
         source,
       })));
     const progress: SyncProgress = { bytesTransferred: 0, bytesTotal: 0, completedFiles: 0, id: randomUUID(), status: 'running', totalFiles: 0 };
+    this.activeProgressId = progress.id;
     this.journal.saveProgress(progress);
     for (const { file, relativePath, source } of files) {
       const snapshot = await openSourceSnapshot(file);

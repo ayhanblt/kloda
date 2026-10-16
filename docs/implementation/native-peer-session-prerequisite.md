@@ -4,6 +4,8 @@
 - Statü: QR native Rust/Android-Electron bridges implemented/build-tested under [ADR0014](../decisions/0014-shared-rust-qr-pairing-core.md); hardware LAN adoption blocked. P-256 identity/ADR0013/frozen V1 remain normative; Matrix/SAS/upstream are inactive.
 - Kapsam: QR producer evidence is separate from ADR0010 authenticated file-result query and ADR0011 in-process query integration, which remain unimplemented. No physical/cloud execution or old corpus rebuild.
 
+**V1 local authority supersession:** [ADR0016](../decisions/0016-v1-pc-local-file-authority.md) aşağıdaki historical signed-capability/account/time/online-reissue producer'ını LAN prerequisite'i olmaktan çıkarır. Current producer gereksinimi actual native authenticated peer + durable local SQLite ACL + explicit own-peer backup scope + current operation/revoke/publication fence'tir. Existing native owner/store/TLS reuse edilir; native safe root capability ve file receiver henüz yoktur. Final remote authorization ve account recovery/central revoke↔offline-PC ilişkisi OPEN; bunlar yerel LAN implementasyonuna hayali koşul eklemez.
+
 ## Güncel producer ve rol ayrımı
 
 PC local QR invitation → telefon scan → actual mutual TLS1.3 possession + PC canonical SPKI SHA256 equality → same-channel secret proof → exact reserved adaya PC approval → durable local pins yönü kabul edildi. Yerel peer pin trust kaynağı; backend registry yalnız control metadata. İlk trust internet/backend/login olmadan tamamlanabilir; account enrollment, step-up, scope, capability ve dosya yetkisi yaratmaz.

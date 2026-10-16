@@ -3,6 +3,7 @@ use std::fmt;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PairingError {
     InvalidQr,
+    InvalidRequest,
     UnsupportedVersion,
     LanUnavailable,
     NativeUnsupported,
@@ -18,6 +19,14 @@ pub enum PairingError {
     OutcomeUnknown,
     Cancelled,
     Revoked,
+    AclBusy,
+    AclUnavailable,
+    BackupUnavailable,
+    BackupFull,
+    BackupBusy,
+    BackupPermissionDenied,
+    BackupPathRejected,
+    BackupScopeChanged,
 }
 
 impl PairingError {
@@ -25,6 +34,7 @@ impl PairingError {
         match self {
             Self::InvalidQr => "invalid_qr",
             Self::UnsupportedVersion => "unsupported_version",
+            Self::InvalidRequest => "invalid_request",
             Self::LanUnavailable => "lan_unavailable",
             Self::NativeUnsupported => "native_unsupported",
             Self::IdentityUnavailable => "identity_unavailable",
@@ -39,6 +49,14 @@ impl PairingError {
             Self::OutcomeUnknown => "outcome_unknown",
             Self::Cancelled => "cancelled",
             Self::Revoked => "revoked",
+            Self::AclBusy => "acl_busy",
+            Self::AclUnavailable => "acl_unavailable",
+            Self::BackupUnavailable => "backup_unavailable",
+            Self::BackupPermissionDenied => "backup_permission_denied",
+            Self::BackupFull => "backup_full",
+            Self::BackupBusy => "backup_busy",
+            Self::BackupPathRejected => "backup_path_rejected",
+            Self::BackupScopeChanged => "backup_scope_changed",
         }
     }
 }

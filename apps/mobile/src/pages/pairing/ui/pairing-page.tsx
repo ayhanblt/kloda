@@ -1,7 +1,7 @@
 import { ArrowLeft, Info, ScanQrCode, ShieldCheck } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, BackHandler, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, BackHandler, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { toast } from 'sonner-native';
 
@@ -14,7 +14,7 @@ import { colors } from '../../../shared/ui/tokens';
 
 export function PairingPage({ onBack }: { onBack: () => void }) {
   const { t } = useTranslation();
-  const { snapshot, foreground, armScan, scan, stopScanning, cancel, resume, refresh, decide } = usePairing();
+  const { snapshot, foreground, armScan, scan, stopScanning, cancel, resume, refresh, decide, removePairing } = usePairing();
   const [scanning, setScanning] = useState(false);
   const [help, setHelp] = useState(false);
   const completed = useRef<string | null>(null);
@@ -52,6 +52,15 @@ export function PairingPage({ onBack }: { onBack: () => void }) {
     stopScanning();
     setScanning(false);
   };
+  const confirmRemoval = () => {
+    const recordId = status?.recordId;
+    if (!recordId || status.phase !== 'complete' || protectedDecision) return;
+    Alert.alert(t('pairing.unpair.title'), t('pairing.unpair.description'), [
+      { text: t('pairing.unpair.cancel'), style: 'cancel' },
+      { text: t('pairing.unpair.online'), onPress: () => { void removePairing(recordId, true); } },
+      { text: t('pairing.unpair.offline'), style: 'destructive', onPress: () => { void removePairing(recordId, false); } },
+    ], { cancelable: true });
+  };
 
   return (
     <SafeAreaView style={styles.root}>
@@ -79,6 +88,8 @@ export function PairingPage({ onBack }: { onBack: () => void }) {
                 </View>
               )}
               {error && <Text accessibilityRole="alert" style={styles.error}>{t(`pairing.errors.${error}`)}</Text>}
+              {status?.unpairResult && <Text accessibilityRole="alert" style={styles.description}>{t(`pairing.unpair.${status.unpairResult.state}`)}</Text>}
+              {status?.phase === 'complete' && status.recordId && <PairingButton label={t('pairing.unpair.button')} secondary disabled={protectedDecision || cameraVisible} onPress={confirmRemoval} />}
               {canScan && <PairingButton label={t('pairing.startScan')} icon={<ScanQrCode color={colors.elevated} size={20} />} onPress={beginScan} />}
               {!protectedDecision && <PairingButton label={t('pairing.refresh')} secondary onPress={() => { void refresh(); }} />}
             </View>

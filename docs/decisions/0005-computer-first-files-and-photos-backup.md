@@ -1,5 +1,7 @@
 # ADR 0005 — Bilgisayar öncelikli genel dosya ve Photos yedekleme
 
+> **Current V1 LAN override — 2026-10-13:** [ADR0016](0016-v1-pc-local-file-authority.md) replaces the account/enrollment/step-up/central capability prerequisites below with separate explicit PC-selected backup-scope approval and native local ACL; no folder means pairing only. Defaults allow photo-upload/status/finalize/list OWN backup/user-triggered restore, not delete/other-peer/outside-root. Broader Files behaviors below remain product intentions, not permissions granted by this ACL. Remote transport preference remains unchanged; FINAL remote authorization and recovery/central revocation versus offline PC/local grants are OPEN. No receiver/ACL implementation is claimed.
+
 - Belgeleme tarihi: 2026-10-04; session kararlarının özgün günleri ayrı ayrı kayıtlı değil.
 - Durum: Ürün davranışı kabul edildi; ürün implementasyonu ve remote dağıtım kabulü tamamlanmadı.
 - Karar sahibi: Ayhan

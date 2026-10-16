@@ -13,7 +13,7 @@ pub(crate) struct Store {
     pub(super) conn: Connection,
     pub(super) local: Spki,
     pub(super) epoch: [u8; 16],
-    poisoned: bool,
+    pub(super) poisoned: bool,
 }
 
 impl Store {
@@ -69,7 +69,7 @@ impl Store {
             )
             .map_err(storage)?;
             tx.commit().map_err(|_| PairingError::OutcomeUnknown)?;
-        } else if version != 1 {
+        } else if !matches!(version, 1..=3) {
             return Err(PairingError::StorageFailure);
         }
         let mut integrity = conn.prepare("PRAGMA integrity_check").map_err(storage)?;
@@ -87,6 +87,15 @@ impl Store {
         drop(integrity);
         check_installation(&conn, &local, &epoch)?;
         visit(&conn, &local, &epoch, |_| Ok(()))?;
+        if !matches!(version, 2 | 3) {
+            let tx = conn
+                .transaction_with_behavior(TransactionBehavior::Immediate)
+                .map_err(storage)?;
+            tx.execute_batch(crate::store_acl_schema::SCHEMA)
+                .map_err(|_| PairingError::AclUnavailable)?;
+            tx.commit().map_err(|_| PairingError::OutcomeUnknown)?;
+        }
+        crate::file_schema::migrate(&mut conn, version)?;
         Ok(Self {
             conn,
             local,

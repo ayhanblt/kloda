@@ -1,6 +1,22 @@
 # Desktop platform validation — source, VM and physical evidence
 
-Current policy: [ADR0015](../decisions/0015-desktop-platform-and-signing-isolation.md). macOS/Windows/Linux development jobs are independent; a paid Mac signing gate must not gate Windows/Linux builds. No physical Windows/Android, VM setup or CI execution is claimed here.
+Current policy: [ADR0015](../decisions/0015-desktop-platform-and-signing-isolation.md). macOS/Windows/Linux development jobs are independent; a paid Mac signing gate must not gate Windows/Linux builds. User-reported Windows evidence is recorded below; no new device, VM or CI execution is claimed by this document update.
+
+## Güncel yürütme kapısı — fiziksel doğrulama duraklatıldı
+
+Bu checkpoint aşağıdaki eski `Next` yönergelerini supersede eder. Manuel komut blokları geçmiş/prosedür referansıdır; **şimdi çalıştırılmaz**. Kullanıcı physical pause'u kaldırmadan mevcut Windows/Android/iOS deneyleri veya yeni probe talep edilmez.
+
+Kullanıcı-bildirimli kanıt:
+
+- Windows11 x64 explicit MSVC native compile/check, native53 passed/0 failed/0 ignored ve desktop/native-Electron ABI build PASS; dependency/Cargo.lock değişmedi. Electron development owner açıldı, status `storage_failure`. QR/davet/telefon/onay yok. TPM key'in varlığı/yokluğu veya ilk hatalı Win32 işlem kanıtlanmadı.
+- Readonly layout: `owner.lock` 0 byte, `epoch.pending` 16 byte ve beklenen private ACL; final epoch/certificate/initialized/SQLite/listener kayıtları görülmedi. Mevcut pairing/probe/TPM kayıtları korunur; otomatik cleanup/adoption/reset yok.
+- Probe1: staged write/preflush PASS; `MoveFileExW WRITE_THROUGH` FAIL32.
+- Probe2: yalnız iki leaf-directory share READ→READ|WRITE; diğer koşullar aynı; yine FAIL32. Leaf WRITE sharing tek başına yetersiz.
+- Probe3: source `ReOpenFile` DELETE+metadata/shareALL PASS, aynı dosya kimliği PASS; directory `ReOpenFile` mask `0x120082` FAIL5; rename Stage3 çalışmadı. Hata5 sharing violation değildir. Probe sonuçları özgün app hatasının kesin nedeni değildir.
+
+Bağımsız design/API/security incelemesi: tek source handle + native simple-leaf/NULL-root rename yalnız koşullu absent-target adaydır; implementasyon seçimi/onayı veya runtime PASS değildir. Ordinary certificate replacement/target TOCTOU, SQLite DB/WAL/SHM gerçek-object binding ve bağımsız continuity witness sınırları çözülmedi. Bu kullanıcı görevi native API/features/schema/layout seçmez. Karar-blocked Windows işi, [handoff kuyruğundaki](implementation-session-handoff.md#optimize-yürütme-kuyruğu) bağımsız QR host coverage işini durdurmaz; aynı inceleme yeni code-shaping bilgi/karar yokken tekrarlanmaz.
+
+Fiziksel sıra, yalnız pause kaldırıldıktan sonra: ilgili platform grubunda hazır source+otomatik checks+ayrı security review → ayrı identity/custody kabulü → ayrı gerçek device-key TLS → QR grubu sonunda hazır iki endpoint ile Android↔PC kabulü. Daha önce geçen Android device-local signer deneyi tekrarlanmaz. Mac paid gate bağımsız işleri durdurmaz; iOS native deferred ve cihaz yokluğu değişmez. [Beşli grup index'i](qr-pairing-implementation-roadmap.md#geliştirme-grupları-ve-toplu-fiziksel-kabul) zorunlu bağımlılık sırası değildir; code-shaping storage/API/crypto kanıtı eksikse ADR0009 uyarınca yalnız bağımlı iş blocked kalır, grup sonu bahanesiyle varsayılmaz.
 
 ## Linux — no physical device available
 
@@ -23,7 +39,7 @@ Free Personal Team is the available account. Unsupported paid-profile/signing st
 
 ## Development → production
 
-Default is fresh production identity and fresh QR re-pairing, not copying development hardware keys/certificates/DB/epoch/pins. Preserve development data without opening it from production. Required account/step-up/PC scope/capability approval remains separate; no first file grant arises from pairing. A secure migration alternative requires a new explicit security decision and proof, not an environment switch or public-key comparison. Original user Files/Photos are not deleted by profile cutover.
+Default is fresh production identity and fresh QR re-pairing, not copying development hardware keys/certificates/DB/epoch/pins. Preserve development data without opening it from production. [ADR0016](../decisions/0016-v1-pc-local-file-authority.md) requires separate explicit PC scope/native ACL for V1 LAN, not account/step-up/central capability; pairing grants no files. Final remote authorization and recovery↔offline-PC remain OPEN. A secure migration alternative requires an explicit security decision and proof, not an environment switch/public-key comparison. Original user Files/Photos are not deleted.
 
 ## Next Windows manual prerequisite — read-only inventory
 
@@ -89,3 +105,69 @@ Install the named pinned `1.99.0-x86_64-pc-windows-msvc` toolchain with rustup's
 - Creating/opening an owner alone creates no peer trust or file authority. Initial development identity/certificate signing is not device-key TLS CertificateVerify proof; real peer/session validation remains a later step. No user Files/Photos, FolderSync archive, backend enrollment or cloud file operation is part of this step. No private key, raw QR/secret, DB or credential should be sent in chat.
 
 Complete the build first. Before providing the actual physical owner/launch command, restate this bounded persistent scope and obtain the user's readiness for that manual step; hardware key/custody/TLS and dependent Android tests remain open.
+
+### Reported Windows desktop ABI build
+
+Ayhan reports genuine Python verified, pinned Rust1.99.0 MSVC, npm ci and actual desktop build PASS: Rust release46.42s, Vite1963 modules/1.36s, exit0. Four known non_upper_case_globals warnings remain nonblocking. Dependencies and Cargo.lock unchanged. Electron/production native owner was not launched; no TPM identity or pairing session was created. This is real Windows build evidence, not key custody, non-exportability or device-key CertificateVerify.
+
+Next physical step is bounded development owner opening and certificate/identity inspection with no QR creation, phone scan or PC approval. Real-device TLS is a separate later gate, dependent on this result; no prior Android hardware signer experiment is rerun.
+
+### Physical identity step — development profile only
+
+After accepting the persistent development scope above, use the normal Windows account (not Run as administrator) and the existing built application, from repo root: `.\node_modules\.bin\electron.cmd .\apps\desktop`. Do not rebuild or run a dev server. Launch also initializes development sync.sqlite and Electron session/cache files under com.kloda.desktop.dev; no source selection or Sync Now is part of this check.
+
+Open “Telefon eşleştir” without creating an invitation. This page's first native status initializes the real owner, including CNG key/certificate/store and attempted direct-LAN listener. If a firewall permission dialog appears, do not grant it; stop/report before further action. Do not reset TPM, delete authority/key state, switch to production or install/use a software signer on failure.
+
+In the application's local Developer Tools console, call only the existing read-only bridge and print a whitelist, never a whole snapshot:
+
+```javascript
+window.kloda.pairing.status().then(
+  s => console.log({
+    phase: s.phase,
+    hardwareClass: s.hardwareClass ?? null,
+    errorCode: s.errorCode ?? null
+  }),
+  e => console.log({ errorCode: e?.code ?? "outcome_unknown" })
+);
+```
+
+Expected fresh owner is idle/windows_tpm with no error. Hardware class plus successful initialization means the actual Microsoft Platform Crypto Provider/key policy checks and certificate path ran; the label alone is not physical attestation. A lan_unavailable error is a separate route gate, not permission to bypass it. Report any error before retry/reset or the TLS step. No QR creation, phone scan, approval or trust completion in this stage.
+
+Close the app normally, then inspect only the public certificate in PowerShell. This reader never accesses/exports the private CNG key or writes state:
+
+```powershell
+@'
+const { X509Certificate, createHash } = require("node:crypto");
+const { readFileSync } = require("node:fs");
+const { join } = require("node:path");
+const cert = new X509Certificate(readFileSync(join(
+  process.env.LOCALAPPDATA, "com.kloda.desktop.dev", "pairing", "certificate.der"
+)));
+console.log({
+  keyType: cert.publicKey.asymmetricKeyType,
+  curve: cert.publicKey.asymmetricKeyDetails.namedCurve,
+  selfSignatureValid: cert.verify(cert.publicKey),
+  spkiSha256: createHash("sha256").update(
+    cert.publicKey.export({ type: "spki", format: "der" })
+  ).digest("hex")
+});
+'@ | node
+```
+
+Expected ec/prime256v1/selfSignatureValid:true; record the public SPKI hash locally for later continuity comparison. The certificate verifies possession/signing by its corresponding private key; combined with the actual native provider path this is bounded provider-bound P-256 identity/certificate-signing evidence, not an independent attestation or private-export denial test. Non-exportability enforcement by native property checks and empirical export/backup/restore assurances remain separate.
+
+Reader API verification: documented [Node24 X509Certificate.verify](https://nodejs.org/docs/latest-v24.x/api/crypto.html#x509verifypublickey) and public KeyObject export. The reader operations were smoke-exercised on a throwaway software certificate on Mac (ec/prime256v1/valid signature); ephemeral key output discarded to /dev/null, no product identity/files adopted. This is reader syntax/API proof only, never Windows hardware evidence.
+
+Report the sanitized native fields and public-reader results; do not send QR, private key, DB or credentials. Stop before phone/TLS until this result is assessed.
+
+### Separate real-device TLS step — blocked on the identity result
+
+Do not execute this yet. Assess Windows native owner/provider/certificate results first, then obtain the user's Android phone/USB/ADB readiness and guide the final app's native identity/permission setup separately. No prior Android P-256 signer experiment rerun, app-data wipe, uninstall, TPM clear or silent identity adoption. Any required LAN/firewall choice remains explicit; no public-network blanket allow or backend/internet/relay fallback.
+
+Use the unchanged frozen QR LAN flow, not a weaker TLS-only profile, software signer, Node HTTPS replacement or JS trust setter. The later first TLS observation is QR scan→fresh full mutual TLS1.3 with actual endpoint device keys→same-channel exporter HMAC proof→PC reserved/phone awaiting PC approval. Capture only sanitized native phase/error and public fingerprint evidence; do not approve yet. QR is120s, not paused/extended for reporting; expiry is not proof that a prior handshake failed.
+
+This real-device step has its own persistent effects: Android may create/open its scoped native hardware identity/certificate and writes pending recovery state before proof. Reserving a candidate does not complete PC trust; the later exact PC approval→atomic consume/pin→phone pin→ACK flow creates durable two-sided trust. Explain phone/install and pending-state scope before providing device commands; do not treat “not yet approved” as “no local state written”.
+
+Evidence distinctions: Windows provider policy and public self-signature are identity/certificate-signing evidence, not TLS CertificateVerify. A QR appearing is not a handshake. The native reserved transition is control-flow evidence of completed mutual TLS/exporter proof in the actual frozen path, not independent attestation or a packet/signature transcript. Collect actual real-peer evidence and retain its scope before closing a device-key TLS gate; a UI label alone is insufficient. Non-exportability/export-denial/backup-restore and complete pairing/negative-matrix/file-authority gates remain separately open.
+
+Only after the dependent manual result is actionable may approval/completion or restart/negative tests proceed. No file/media payload or FolderSync operation is part of identity/TLS verification.

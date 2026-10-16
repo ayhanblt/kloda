@@ -18,10 +18,8 @@ use std::time::{Duration, Instant};
 const LIMIT: Duration = Duration::from_secs(3);
 #[path = "tls_test_resolver.rs"]
 mod resolver;
+pub(super) use crate::tls_test_identity::Identity;
 use resolver::Resolver;
-#[path = "tls_test_identity.rs"]
-mod identity;
-pub(super) use identity::Identity;
 
 #[derive(Clone, Copy)]
 pub(super) enum ClientMode {
@@ -187,10 +185,15 @@ impl Loopback {
             Side::Phone => &mut self.phone,
         };
         if notify {
-            sender.connection.send_close_notify();
+            sender.connection.as_mut().unwrap().send_close_notify();
             sender.flush().unwrap();
         } else {
-            sender.socket.shutdown(std::net::Shutdown::Write).unwrap();
+            sender
+                .socket
+                .as_ref()
+                .unwrap()
+                .shutdown(std::net::Shutdown::Write)
+                .unwrap();
         }
     }
     pub fn close_observed(&mut self, side: Side, notify: bool) {
@@ -214,16 +217,24 @@ impl Loopback {
             Side::Pc => &mut self.pc,
             Side::Phone => &mut self.phone,
         };
-        session.connection.writer().write_all(bytes).unwrap();
+        session
+            .connection
+            .as_mut()
+            .unwrap()
+            .writer()
+            .write_all(bytes)
+            .unwrap();
         session.flush().unwrap();
         self.until(|p| {
             let (sender, receiver) = match side {
                 Side::Pc => (&mut p.pc, &mut p.phone),
                 Side::Phone => (&mut p.phone, &mut p.pc),
             };
-            !sender.connection.wants_write()
+            !sender.connection.as_ref().unwrap().wants_write()
                 && receiver
                     .connection
+                    .as_mut()
+                    .unwrap()
                     .process_new_packets()
                     .unwrap()
                     .plaintext_bytes_to_read()
@@ -256,3 +267,5 @@ impl Loopback {
         }
     }
 }
+#[path = "tls_file_tests.rs"]
+mod file_profile;

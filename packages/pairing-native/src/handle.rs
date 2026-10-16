@@ -39,11 +39,32 @@ pub(crate) enum Action {
     Resume {
         record: String,
     },
+    RemovePairing {
+        record: String,
+        online: bool,
+    },
+    #[cfg(not(target_os = "android"))]
+    ApproveBackup {
+        record: String,
+        folder: String,
+        revision: Option<String>,
+    },
+    #[cfg(not(target_os = "android"))]
+    RevokeBackup {
+        record: String,
+    },
     Close,
 }
-pub(crate) struct Command {
-    pub(crate) action: Action,
-    pub(crate) reply: SyncSender<Result<PairingStatus>>,
+pub(crate) enum Command {
+    Pairing {
+        action: Action,
+        reply: SyncSender<Result<PairingStatus>>,
+    },
+    Transfer {
+        record: String,
+        task: crate::file_sender_command::Task,
+        reply: SyncSender<Result<String>>,
+    },
 }
 pub(crate) struct Handle {
     sender: Mutex<SyncSender<Command>>,
@@ -89,7 +110,27 @@ impl Handle {
         self.sender
             .lock()
             .map_err(|_| PairingError::OutcomeUnknown)?
-            .send(Command { action, reply })
+            .send(Command::Pairing { action, reply })
+            .map_err(|_| PairingError::ConnectionClosed)?;
+        receiver.recv().map_err(|_| PairingError::OutcomeUnknown)?
+    }
+    pub(crate) fn transfer(
+        &self,
+        record: String,
+        task: crate::file_sender_command::Task,
+    ) -> Result<String> {
+        if self.closing.load(Ordering::Acquire) {
+            return Err(PairingError::Cancelled);
+        }
+        let (reply, receiver) = mpsc::sync_channel(1);
+        self.sender
+            .lock()
+            .map_err(|_| PairingError::OutcomeUnknown)?
+            .send(Command::Transfer {
+                record,
+                task,
+                reply,
+            })
             .map_err(|_| PairingError::ConnectionClosed)?;
         receiver.recv().map_err(|_| PairingError::OutcomeUnknown)?
     }

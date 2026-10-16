@@ -1,3 +1,11 @@
+## Kloda project context
+
+Before development, read [.omp/AGENTS.md](.omp/AGENTS.md) and the [Codex migration handoff](docs/implementation/codex-migration-handoff.md). These are repository documents, not a dependency on the OMP runtime. ADR0016 is current V1 LAN authority; ADR0017 is current Photos metadata/import recovery. Preserve their scoped supersession of older central-authorization requirements.
+
+OMP-only model/agent aliases (`@smol`, `@default`, `fast`, `good`), internal URIs and tool names below are not assumed configured in Codex CLI. Use available CLI capabilities; preserve the project/security workflow rather than inventing equivalent tools or silently changing model configuration.
+
+For documentation/audit-only requests, report and stop; the general execution flow below does not authorize starting development after that request.
+
 <!-- context7 -->
 Use the `ctx7` CLI to fetch current documentation whenever the user asks about a library, framework, SDK, API, CLI tool, or cloud service — even well-known ones like React, Next.js, Prisma, Express, Tailwind, Django, or Spring Boot. This includes API syntax, configuration, version migration, library-specific debugging, setup instructions, and CLI tool usage. Use even when you think you know the answer — your training data may not reflect recent changes. Prefer this over web search for library docs.
 
@@ -78,5 +86,26 @@ Stop only if:
 - requirements conflict,
 - a destructive/irreversible action is needed,
 - progress is blocked by missing information or failing infrastructure.
+
+
+## Codex Development Workflow
+
+- Treat the current ADRs and implementation handoff as authoritative.
+- Read the relevant ADR before modifying security-sensitive code.
+- Preserve PC-first offline LAN behavior and PC-local ACL.
+- Never reintroduce JWT/KMS as a LAN prerequisite.
+- Do not change unresolved recovery or remote policies.
+- Prefer minimal changes and existing abstractions.
+- Use Serena for complex symbol-level exploration when useful.
+- Use helper agents for bounded mechanical tasks.
+- Use independent review for security-sensitive changes.
+- Run relevant automated tests during implementation.
+- Defer physical acceptance to the documented acceptance gate.
+- Never report unperformed tests as PASS.
+- Continue approved roadmap work without repeated confirmation.
+- Stop for genuine architectural or security-policy decisions.
+- Do not add, commit, push, reset, clean, or stash Git changes
+  unless explicitly instructed.
+- Update handoff documentation when completing a meaningful work group.
 
 

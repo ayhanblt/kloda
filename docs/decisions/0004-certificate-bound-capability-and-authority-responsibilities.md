@@ -1,10 +1,14 @@
 # ADR 0004 — Certificate-bound capability ve authority sorumlulukları
 
+> **Current V1 LAN override:** [ADR0016](0016-v1-pc-local-file-authority.md) selects native PC-local SQLite ACL, not central certificate-bound issuance. Central Nest/issuer/JWT/KMS/ES256/account/step-up/24h cache/exact-DER reissue below are historical for V1 LAN. ACL/receiver/journal/revoke are implemented with host evidence; valid native cert/profile/TLS/pins/possession/continuity/current ACL/fence remain. Physical/platform support, final remote authorization and recovery/central revoke↔offline grants remain OPEN; automatic survival/reset not selected.
+
 - Tarih: 2026-10-04
 - Durum: authority/certificate lifecycle kabul; Matrix-key identity kısmı [ADR0012](0012-kloda-owned-p256-device-identity.md) ile superseded; ES256 provisional, production gate'leri açık
 - Karar sahibi: Ayhan
 
 2026-10-07 kapsamlı supersession: [ADR0013](0013-qr-based-local-lan-pairing.md) bu kaydın ilk Matrix/SAS pairing ve SAS↔Kloda binding gerekliliklerini yerel QR trust ile değiştirir; authority, issuer ve exact-DER certificate lifecycle kararları korunur.
+
+Son kullanıcı talebi merkezi file issuer/KMS zorunluluğunu reddeder ve PC-onaylı dosya işlemlerinin tamamen offline LAN'da çalışmasını ister. Aşağıdaki tarihsel merkezi issuance/`<24h`/online reissue hükümleri bu taleple çelişmektedir; bu hatta implementation durduruldu. [Yerel PC authority incelemesi](../implementation/implementation-session-handoff.md#local-pc-file-authority-review) minimum düzeltme önerisini ve kalan güvenlik kararlarını kaydeder; henüz uygulanmış ACL veya tamamlanmış yeni authorization contract'ı değildir.
 
 ## Onay ve kapsam
 

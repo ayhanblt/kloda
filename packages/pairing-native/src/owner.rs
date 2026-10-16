@@ -68,6 +68,38 @@ impl PairingOwner {
     pub fn resume(&self, record: String) -> Result<PairingSnapshot> {
         self.invoke(Action::Resume { record })
     }
+    pub fn remove_pairing(&self, record: &str, online: bool) -> Result<PairingSnapshot> {
+        self.invoke(Action::RemovePairing {
+            record: record.to_owned(),
+            online,
+        })
+    }
+    /// Metadata-only internal mobile ABI. The descriptor remains owned by the caller.
+    pub fn transfer(&self, record: String, command: &str, descriptor: i32) -> Result<String> {
+        let result = crate::file_sender_command::Task::parse(command, descriptor)
+            .and_then(|task| self.handle.transfer(record, task));
+        match result {
+            Ok(json) => Ok(json),
+            Err(error) => crate::file_sender_command::json(Err(error)),
+        }
+    }
+    #[cfg(not(target_os = "android"))]
+    pub fn approve_backup(
+        &self,
+        record: String,
+        folder: String,
+        revision: Option<String>,
+    ) -> Result<PairingSnapshot> {
+        self.invoke(Action::ApproveBackup {
+            record,
+            folder,
+            revision,
+        })
+    }
+    #[cfg(not(target_os = "android"))]
+    pub fn revoke_backup(&self, record: String) -> Result<PairingSnapshot> {
+        self.invoke(Action::RevokeBackup { record })
+    }
     pub fn close(&self) -> Result<()> {
         self.invoke(Action::Close).map(|_| ())
     }

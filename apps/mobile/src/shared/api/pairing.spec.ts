@@ -50,6 +50,18 @@ describe('phone native pairing availability', () => {
     expect((await pairing.status()).errorCode).toBeUndefined();
   });
 
+  it('rejects contradictory or unknown revocation evidence instead of claiming PC-confirmed removal', async () => {
+    for (const value of [
+      { phase: 'complete', unpairResult: { state: 'pc_confirmed' } },
+      { phase: 'revoked', unpairResult: { state: 'pc_unconfirmed' } },
+      { phase: 'revoked', unpairResult: { state: 'both_sides_maybe' } },
+      { phase: 'revoked', unpairResult: 'pc_confirmed' },
+    ]) {
+      optionalModule.mockReturnValue({ status: async () => value });
+      await expect(pairing.status()).rejects.toEqual(new PairingError('outcome_unknown'));
+    }
+  });
+
   it('does not interpret malformed or unrecognized native status as an idle or complete result', async () => {
     optionalModule.mockReturnValue({ status: async () => ({ phase: 'success', recordId: 'not-evidence' }) });
     await expect(pairing.status()).rejects.toEqual(new PairingError('outcome_unknown'));

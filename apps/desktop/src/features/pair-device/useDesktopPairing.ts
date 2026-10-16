@@ -7,7 +7,7 @@ import {
   type PairingErrorCode, type PairingPhase, type PairingStatus,
 } from '../../shared/api/pairing';
 
-export type PairingAction = 'create' | 'approve' | 'deny' | 'cancel' | 'resume' | 'refresh';
+export type PairingAction = 'create' | 'approve' | 'deny' | 'cancel' | 'resume' | 'approve-backup' | 'revoke-backup' | 'refresh';
 
 export interface DesktopPairingController {
   status: PairingStatus | null;
@@ -20,6 +20,8 @@ export interface DesktopPairingController {
   deny(operationId: string, generation: string): Promise<void>;
   cancel(operationId: string): Promise<void>;
   resume(recordId: string): Promise<void>;
+  approveBackup(recordId: string): Promise<void>;
+  revokeBackup(recordId: string): Promise<void>;
   refresh(): Promise<void>;
 }
 interface Runtime {
@@ -29,6 +31,7 @@ interface Runtime {
   timer?: number;
   flight: Promise<void> | null;
   commanding: boolean;
+  uncertain: boolean;
   lastError?: PairingErrorCode;
 }
 
@@ -51,6 +54,7 @@ export function useDesktopPairing(): DesktopPairingController {
     if (!current.alive) return;
     const code = pairingErrorCode(reason);
     setError(code);
+    current.uncertain = uncertain;
     setUncertain(uncertain);
     if (current.lastError !== code) toast.error(translate.current(`pairing.errors.${code}`));
     current.lastError = code;
@@ -61,6 +65,7 @@ export function useDesktopPairing(): DesktopPairingController {
     const previous = current.status;
     current.status = next;
     setStatus(next);
+    current.uncertain = false;
     setUncertain(false);
     if (next.errorCode !== undefined) report(current, { code: next.errorCode }, false);
     else {
@@ -99,7 +104,7 @@ export function useDesktopPairing(): DesktopPairingController {
 
   useEffect(() => {
     const current: Runtime = {
-      alive: true, bridge: null, status: null, flight: null, commanding: false,
+      alive: true, bridge: null, status: null, flight: null, commanding: false, uncertain: true,
     };
     runtime.current = current;
     try {
@@ -117,7 +122,11 @@ export function useDesktopPairing(): DesktopPairingController {
     };
   }, []);
 
-  async function execute(action: PairingAction, operation: (bridge: DesktopPairingBridge) => Promise<PairingStatus>) {
+  async function execute(
+    action: PairingAction,
+    operation: (bridge: DesktopPairingBridge) => Promise<PairingStatus>,
+    guard?: (current: Runtime) => boolean,
+  ) {
     const current = runtime.current;
     if (!current?.alive || !current.bridge || current.commanding) return;
     current.commanding = true;
@@ -125,7 +134,7 @@ export function useDesktopPairing(): DesktopPairingController {
     setBusy(action);
     try {
       await current.flight;
-      if (!current.alive) return;
+      if (!current.alive || (guard && !guard(current))) return;
       accept(current, await operation(current.bridge));
     } catch (reason) {
       report(current, reason);
@@ -138,6 +147,15 @@ export function useDesktopPairing(): DesktopPairingController {
     }
   }
 
+  function manageBackup(action: 'approve-backup' | 'revoke-backup', recordId: string) {
+    return execute(action, (bridge) => action === 'approve-backup'
+      ? bridge.approveBackup(recordId) : bridge.revokeBackup(recordId),
+    (current) => !current.uncertain && Boolean(recordId) && current.status?.phase === 'complete' &&
+      current.status.recordId === recordId &&
+      (action !== 'revoke-backup' || current.status.backupScope?.state === 'approved' ||
+        current.status.backupScope?.state === 'unavailable'));
+  }
+
   return {
     status, busy, error, uncertain, available,
     create: () => execute('create', (bridge) => bridge.createInvitation()),
@@ -145,6 +163,8 @@ export function useDesktopPairing(): DesktopPairingController {
     deny: (operationId: string, generation: string) => execute('deny', (bridge) => bridge.deny(operationId, generation)),
     cancel: (operationId: string) => execute('cancel', (bridge) => bridge.cancel(operationId)),
     resume: (recordId: string) => execute('resume', (bridge) => bridge.resume(recordId)),
+    approveBackup: (recordId: string) => manageBackup('approve-backup', recordId),
+    revokeBackup: (recordId: string) => manageBackup('revoke-backup', recordId),
     refresh: () => execute('refresh', (bridge) => bridge.status()),
   };
 }

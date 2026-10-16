@@ -21,6 +21,7 @@ export interface PairingStatus {
   repairRequired?: boolean;
   errorCode?: PairingErrorCode;
   hardwareClass?: 'secure_enclave' | 'strongbox' | 'hardware_tee' | 'secure_hardware' | 'windows_tpm';
+  unpairResult?: { state: 'pc_confirmed' | 'pc_unconfirmed' | 'local_only'; errorCode?: PairingErrorCode };
 }
 
 export interface PairingApi {
@@ -30,6 +31,7 @@ export interface PairingApi {
   deny(operationId: string, candidateGeneration: string): Promise<PairingStatus>;
   cancel(operationId: string): Promise<PairingStatus>;
   resume(recordId: string): Promise<PairingStatus>;
+  removePairing(recordId: string, online: boolean): Promise<PairingStatus>;
   close(): Promise<void>;
 }
 
@@ -40,6 +42,7 @@ interface NativePairingModule {
   deny(operationId: string, candidateGeneration: string): Promise<unknown>;
   cancel(operationId: string): Promise<unknown>;
   resume(recordId: string): Promise<unknown>;
+  removePairing(recordId: string, online: boolean): Promise<unknown>;
   close(): Promise<void>;
 }
 
@@ -66,6 +69,15 @@ function statusFromNative(value: unknown): PairingStatus {
     throw new PairingError('outcome_unknown');
   }
   const hardwareClass = 'hardwareClass' in value ? value.hardwareClass : undefined;
+  const unpairResult = 'unpairResult' in value ? value.unpairResult : undefined;
+  let unpair: PairingStatus['unpairResult'];
+  if (unpairResult != null) {
+    if (typeof unpairResult !== 'object' || !('state' in unpairResult)) throw new PairingError('outcome_unknown');
+    const state = unpairResult.state;
+    if (state !== 'pc_confirmed' && state !== 'pc_unconfirmed' && state !== 'local_only') throw new PairingError('outcome_unknown');
+    if (state === 'pc_unconfirmed' ? phase !== 'complete' : phase !== 'revoked') throw new PairingError('outcome_unknown');
+    unpair = { state, errorCode: 'errorCode' in unpairResult ? pairingErrorCode({ code: unpairResult.errorCode }) : undefined };
+  }
   return {
     phase,
     operationId: optionalText('operationId' in value ? value.operationId : undefined),
@@ -77,6 +89,7 @@ function statusFromNative(value: unknown): PairingStatus {
     errorCode: 'errorCode' in value ? pairingErrorCode({ code: value.errorCode }) : undefined,
     hardwareClass: typeof hardwareClass === 'string' && Object.prototype.hasOwnProperty.call(hardwareClasses, hardwareClass)
       ? hardwareClass as PairingStatus['hardwareClass'] : undefined,
+    unpairResult: unpair,
   };
 }
 
@@ -96,6 +109,7 @@ export const pairing: PairingApi = {
   deny: (operationId, generation) => invoke((native) => native.deny(operationId, generation)),
   cancel: (operationId) => invoke((native) => native.cancel(operationId)),
   resume: (recordId) => invoke((native) => native.resume(recordId)),
+  removePairing: (recordId, online) => invoke((native) => native.removePairing(recordId, online)),
   close: async () => {
     try { await module().close(); }
     catch (error) { throw new PairingError(pairingErrorCode(error)); }

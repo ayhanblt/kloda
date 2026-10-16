@@ -1,5 +1,13 @@
 {
-  "onboarding":{"step":"Step {{current}} of {{total}}","sourceTitle":"Select folders to back up","sourceDescription":"Kloda transfers directly to your personal storage.","chooseFolders":"Choose folders","frequency":"Auto-Sync Frequency","everyHours":"Every {{hours}} hours","localStartTime":"Local start time","continue":"Continue to Storage Setup","storageTitle":"Connect your personal storage","storageDescription":"WebDAV access and write permission are verified before backup starts.","endpoint":"Endpoint","targetPath":"Target path","username":"Username","password":"Password","testConnection":"Test WebDAV connection","verified":"WebDAV access and writing verified.","startBackup":"Start Backup","back":"Back","activityTitle":"Backup Activity","ready":"Ready to sync.","filesSynced":"{{completed}} of {{total}} files synced","syncNow":"Sync Now","loadError":"Unable to load setup.","selectError":"Unable to select folders.","sourceRequired":"Select at least one folder.","scheduleError":"Unable to save schedule.","testError":"WebDAV test failed.","startError":"Backup could not start."},
+  "activity": {
+    "snapshot": "Last observed backup state",
+    "idle": "No backup is running",
+    "running": "Running",
+    "completed": "Completed",
+    "failed": "Not completed",
+    "unknown": "No confirmed progress snapshot is available."
+  },
+  "onboarding":{"step":"Step {{current}} of {{total}}","sourceTitle":"Select folders to back up","sourceDescription":"Kloda transfers directly to your personal storage.","chooseFolders":"Choose folders","frequency":"Auto-Sync Frequency","everyHours":"Every {{hours}} hours","localStartTime":"Local start time","desktopBackgroundHint":"Scheduled backups run only while Kloda is open or running in the system tray. Quitting stops scheduled backups.","continue":"Continue to Storage Setup","storageTitle":"Connect your personal storage","storageDescription":"WebDAV access and write permission are verified before backup starts.","endpoint":"Endpoint","targetPath":"Target path","username":"Username","password":"Password","testConnection":"Test WebDAV connection","verified":"WebDAV access and writing verified.","startBackup":"Start Backup","back":"Back","activityTitle":"Backup Activity","ready":"Ready to sync.","filesSynced":"{{completed}} of {{total}} files synced","syncNow":"Sync Now","loadError":"Unable to load setup.","selectError":"Unable to select folders.","sourceRequired":"Select at least one folder.","scheduleError":"Unable to save schedule.","testError":"WebDAV test failed.","startError":"Backup could not start."},
   "pairing": {
     "navigationLabel": "Kloda navigation",
     "backupNavigation": "WebDAV backup",
@@ -36,6 +44,19 @@
     "revocationDescription": "Revoking disables trust on this PC. It does not promise rollback or deletion of the phone’s record.",
     "candidateUnavailable": "The exact candidate could not be identified. Approval is disabled; cancel or refresh status.",
     "noFileGrant": "Device trust is not file permission. Pairing grants no access to files, folders or photos.",
+    "backupTitle": "Photo backup permission",
+    "backupDescription": "Choose a folder on this PC, then explicitly confirm permission in the native dialog. This configures permission only; photo transfer is not implemented.",
+    "backupFolder": "PC folder:",
+    "approveBackup": "Choose and approve backup folder",
+    "reselectBackup": "Reselect folder and retry approval",
+    "revokeBackup": "Revoke file permission",
+    "backupRevocationDescription": "Revoking file permission keeps device trust and existing files. Folder failures can be retried without resetting pairing or deleting data.",
+    "backupStates": {
+      "not_approved": "No photo backup permission approved.",
+      "approved": "Photo backup permission configured — no transfer performed.",
+      "revoked": "Photo backup permission revoked.",
+      "unavailable": "Photo backup scope unavailable. Refresh status or reselect the folder."
+    },
     "phoneFingerprint": "Phone key fingerprint",
     "fingerprintUnavailable": "Fingerprint unavailable",
     "approvalTitle": "Approve this phone?",
@@ -90,6 +111,14 @@
       "connection_closed": "The pairing connection closed. Check native status; use explicit resume if a retained record is available.",
       "outcome_unknown": "The pairing outcome is unknown. Check native status before continuing.",
       "cancelled": "The pairing operation was cancelled.",
+      "acl_busy": "The native permission store is busy. Refresh status and retry.",
+      "acl_unavailable": "The native permission store is unavailable. Permission cannot be confirmed.",
+      "backup_unavailable": "The backup folder is unavailable. Reselect the folder and retry.",
+      "backup_full": "The backup target has no space or quota left. Free space or select another folder and approve again.",
+      "backup_busy": "The backup folder is currently in use or locked. Close the application using it and retry.",
+      "backup_permission_denied": "Access to the backup folder was denied. Check local permissions or reselect the folder.",
+      "backup_path_rejected": "The selected backup folder was rejected. Choose another folder.",
+      "backup_scope_changed": "The approved folder changed. Reselect it and explicitly approve again; do not reset pairing or delete files.",
       "revoked": "Local pairing trust was revoked. Late replies cannot restore it."
     }
   }

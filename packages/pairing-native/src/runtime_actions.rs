@@ -9,6 +9,9 @@ impl Actor {
             return Ok(self.status());
         }
         let now = self.guard()?;
+        if !matches!(&action, Action::RemovePairing { .. }) {
+            self.unpair_result = None;
+        }
         let result = match action {
             Action::CreateInvitation => self.create(now),
             Action::Scan(qr) => self.scan(qr),
@@ -22,9 +25,31 @@ impl Actor {
             } => self.deny(&operation, &generation),
             Action::Cancel { operation } => self.cancel(&operation),
             Action::Resume { record } => self.resume(&record),
+            Action::RemovePairing { record, online } => self.remove_pairing(&record, online),
+            #[cfg(not(target_os = "android"))]
+            Action::ApproveBackup {
+                record,
+                folder,
+                revision,
+            } => self.approve_backup(&record, &folder, revision.as_deref()),
+            #[cfg(not(target_os = "android"))]
+            Action::RevokeBackup { record } => self.revoke_backup(&record),
             Action::Status | Action::Close => Err(PairingError::CandidateStale),
         };
         if let Err(error) = result {
+            if matches!(
+                error,
+                PairingError::AclBusy
+                    | PairingError::AclUnavailable
+                    | PairingError::BackupUnavailable
+                    | PairingError::BackupFull
+                    | PairingError::BackupBusy
+                    | PairingError::BackupPermissionDenied
+                    | PairingError::BackupPathRejected
+                    | PairingError::BackupScopeChanged
+            ) {
+                self.error = Some(error);
+            }
             if matches!(
                 error,
                 PairingError::StorageFailure
@@ -181,6 +206,7 @@ impl Actor {
             self.drop_sid(&sid);
             self.retained = Some(result?);
         }
+        self.close_file_sid(&sid)?;
         self.error = Some(PairingError::Cancelled);
         Ok(())
     }

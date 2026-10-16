@@ -1,4 +1,12 @@
 {
+    "activity": {
+        "snapshot": "Bilinen son yedekleme durumu",
+        "idle": "Çalışan yedekleme yok",
+        "running": "Çalışıyor",
+        "completed": "Tamamlandı",
+        "failed": "Tamamlanmadı",
+        "unknown": "Doğrulanmış ilerleme kaydı yok."
+    },
     "onboarding": {
         "step": "Adım {{current}} / {{total}}",
         "sourceTitle": "Yedeklenecek klasörleri seçin",
@@ -7,6 +15,7 @@
         "frequency": "Otomatik senkronizasyon sıklığı",
         "everyHours": "Her {{hours}} saatte",
         "localStartTime": "Yerel başlangıç saati",
+        "desktopBackgroundHint": "Programlı yedekleme yalnızca Kloda açıkken veya sistem tepsisinde çalışırken sürer. Uygulamadan çıkınca programlı yedekleme durur.",
         "continue": "Depolama kurulumuna devam et",
         "storageTitle": "Kişisel depolamanıza bağlanın",
         "storageDescription": "Yedekleme başlamadan önce WebDAV erişimi ve yazma izni doğrulanır.",
@@ -65,6 +74,19 @@
         "revocationDescription": "İptal, bu bilgisayardaki güveni devre dışı bırakır. Telefonda kaydı geri alma veya silme sözü vermez.",
         "candidateUnavailable": "Kesin aday belirlenemedi. Onaylama devre dışı; iptal edin veya durumu yenileyin.",
         "noFileGrant": "Cihaz güveni dosya izni değildir. Eşleştirme dosyalara, klasörlere veya fotoğraflara erişim vermez.",
+        "backupTitle": "Fotoğraf yedekleme izni",
+        "backupDescription": "Bu bilgisayarda bir klasör seçin ve yerel iletişim kutusunda izni açıkça onaylayın. Bu yalnızca izin yapılandırır; fotoğraf aktarımı henüz uygulanmadı.",
+        "backupFolder": "Bilgisayardaki klasör:",
+        "approveBackup": "Yedekleme klasörünü seç ve onayla",
+        "reselectBackup": "Klasörü yeniden seç ve onayı tekrar dene",
+        "revokeBackup": "Dosya iznini iptal et",
+        "backupRevocationDescription": "Dosya iznini iptal etmek cihaz güvenini ve mevcut dosyaları korur. Klasör hataları eşleştirmeyi sıfırlamadan veya veri silmeden tekrar denenebilir.",
+        "backupStates": {
+            "not_approved": "Fotoğraf yedekleme izni onaylanmadı.",
+            "approved": "Fotoğraf yedekleme izni yapılandırıldı — aktarım yapılmadı.",
+            "revoked": "Fotoğraf yedekleme izni iptal edildi.",
+            "unavailable": "Fotoğraf yedekleme kapsamı kullanılamıyor. Durumu yenileyin veya klasörü yeniden seçin."
+        },
         "phoneFingerprint": "Telefon anahtarı parmak izi",
         "fingerprintUnavailable": "Parmak izi kullanılamıyor",
         "approvalTitle": "Bu telefon onaylansın mı?",
@@ -119,6 +141,14 @@
             "connection_closed": "Eşleştirme bağlantısı kapandı. Yerel modül durumunu kontrol edin; saklanan kayıt varsa açıkça sürdürün.",
             "outcome_unknown": "Eşleştirme sonucu bilinmiyor. Devam etmeden önce yerel modül durumunu kontrol edin.",
             "cancelled": "Eşleştirme işlemi iptal edildi.",
+            "acl_busy": "Yerel izin deposu meşgul. Durumu yenileyip tekrar deneyin.",
+            "acl_unavailable": "Yerel izin deposu kullanılamıyor. İzin doğrulanamıyor.",
+            "backup_unavailable": "Yedekleme klasörü kullanılamıyor. Klasörü yeniden seçip tekrar deneyin.",
+            "backup_full": "Yedekleme alanında boş alan veya kota kalmadı. Alan açın ya da başka bir klasör seçip yeniden onaylayın.",
+            "backup_busy": "Yedekleme klasörü şu an kullanımda veya kilitli. Kullanan uygulamayı kapatıp tekrar deneyin.",
+            "backup_permission_denied": "Yedekleme klasörüne erişim reddedildi. Yerel izinleri kontrol edin veya klasörü yeniden seçin.",
+            "backup_path_rejected": "Seçilen yedekleme klasörü reddedildi. Başka bir klasör seçin.",
+            "backup_scope_changed": "Onaylanan klasör değişti. Yeniden seçip açıkça tekrar onaylayın; eşleştirmeyi sıfırlamayın veya dosyaları silmeyin.",
             "revoked": "Yerel eşleştirme güveni iptal edildi. Geç yanıtlar güveni geri getiremez."
         }
     }

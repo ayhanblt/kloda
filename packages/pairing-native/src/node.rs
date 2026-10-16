@@ -90,6 +90,27 @@ impl NativePairing {
         self.submit(Action::Resume { record })
     }
     #[napi]
+    pub fn remove_pairing(&self, record: String, online: bool) -> AsyncTask<RequestTask> {
+        self.submit(Action::RemovePairing { record, online })
+    }
+    #[napi]
+    pub fn approve_backup(
+        &self,
+        record: String,
+        folder: String,
+        revision: Option<String>,
+    ) -> AsyncTask<RequestTask> {
+        self.submit(Action::ApproveBackup {
+            record,
+            folder,
+            revision,
+        })
+    }
+    #[napi]
+    pub fn revoke_backup(&self, record: String) -> AsyncTask<RequestTask> {
+        self.submit(Action::RevokeBackup { record })
+    }
+    #[napi]
     pub fn close(&self) -> AsyncTask<RequestTask> {
         self.submit(Action::Close)
     }

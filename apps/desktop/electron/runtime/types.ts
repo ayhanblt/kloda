@@ -29,6 +29,7 @@ export interface SyncProgress {
 
 export interface DesktopBridge {
   getDraft(): Promise<BackupDraft>;
+  getProgress(): Promise<SyncProgress | null>;
   pickSources(): Promise<readonly DesktopSource[]>;
   saveSchedule(intervalHours: 12 | 24, localTime: string): Promise<void>;
   saveStorage(storage: StorageForm): Promise<void>;

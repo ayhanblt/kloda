@@ -1,5 +1,9 @@
 # ADR 0003 — Güvenli eşleştirme ve offline yetkilendirme
 
+> **Current V1 LAN override — 2026-10-13:** [ADR0016](0016-v1-pc-local-file-authority.md) approves native-owned PC-local SQLite ACL with separate explicit backup-scope approval. Below, central first-grant/account/step-up/issuer requirements, `<24h` LAN cache and online exact-DER reissue are historical/superseded for this ACL, not current V1 LAN requirements. TLS/native pins/possession/installation continuity/current operation/local revoke/publication fence remain. Central recovery/revocation versus offline PC/local grants and FINAL remote authorization are OPEN; the historical recovery reset and delay guarantees below do not decide them. Approved direction is not implemented authority/unpair/receiver proof.
+
+2026-10-15 status clarification: dated “pairing not implemented” and central24h sections below describe earlier decision checkpoints, not current source. ADR0014/0016 native QR/ACL/receiver and ADR0017 Android Photos are implemented with bounded host/API36 evidence; physical/platform acceptance remains OPEN. See [current handoff](../implementation/codex-migration-handoff.md).
+
 - Tarih: 2026-10-02
 - Durum: Tasarım politikası kabul edildi; sonraki capability/mTLS yönleri ADR0004 ile kabul, ürün implementasyonu/production doğrulaması açık
 - Karar sahibi: Ayhan

@@ -1,5 +1,13 @@
 {
-  "onboarding":{"step":"Schritt {{current}} von {{total}}","sourceTitle":"Zu sichernde Ordner auswählen","sourceDescription":"Kloda überträgt direkt in deinen persönlichen Speicher.","chooseFolders":"Ordner auswählen","frequency":"Automatischer Synchronisierungsrhythmus","everyHours":"Alle {{hours}} Stunden","localStartTime":"Lokale Startzeit","continue":"Zur Speichereinrichtung","storageTitle":"Persönlichen Speicher verbinden","storageDescription":"WebDAV-Zugriff und Schreibberechtigung werden vor dem Backup geprüft.","endpoint":"Endpunkt","targetPath":"Zielpfad","username":"Benutzername","password":"Passwort","testConnection":"WebDAV-Verbindung testen","verified":"WebDAV-Zugriff und Schreibzugriff bestätigt.","startBackup":"Backup starten","back":"Zurück","activityTitle":"Backup-Aktivität","ready":"Bereit zur Synchronisierung.","filesSynced":"{{completed}} von {{total}} Dateien synchronisiert","syncNow":"Jetzt synchronisieren","loadError":"Einrichtung konnte nicht geladen werden.","selectError":"Ordner konnten nicht ausgewählt werden.","sourceRequired":"Wähle mindestens einen Ordner aus.","scheduleError":"Zeitplan konnte nicht gespeichert werden.","testError":"WebDAV-Test fehlgeschlagen.","startError":"Backup konnte nicht gestartet werden."},
+  "activity": {
+    "snapshot": "Zuletzt bekannter Sicherungsstatus",
+    "idle": "Keine Sicherung läuft",
+    "running": "Läuft",
+    "completed": "Abgeschlossen",
+    "failed": "Nicht abgeschlossen",
+    "unknown": "Kein bestätigter Fortschrittsstand verfügbar."
+  },
+  "onboarding":{"step":"Schritt {{current}} von {{total}}","sourceTitle":"Zu sichernde Ordner auswählen","sourceDescription":"Kloda überträgt direkt in deinen persönlichen Speicher.","chooseFolders":"Ordner auswählen","frequency":"Automatischer Synchronisierungsrhythmus","everyHours":"Alle {{hours}} Stunden","localStartTime":"Lokale Startzeit","desktopBackgroundHint":"Geplante Sicherungen laufen nur, solange Kloda geöffnet ist oder im Infobereich weiterläuft. Wenn Kloda beendet wird, stoppen geplante Sicherungen.","continue":"Zur Speichereinrichtung","storageTitle":"Persönlichen Speicher verbinden","storageDescription":"WebDAV-Zugriff und Schreibberechtigung werden vor dem Backup geprüft.","endpoint":"Endpunkt","targetPath":"Zielpfad","username":"Benutzername","password":"Passwort","testConnection":"WebDAV-Verbindung testen","verified":"WebDAV-Zugriff und Schreibzugriff bestätigt.","startBackup":"Backup starten","back":"Zurück","activityTitle":"Backup-Aktivität","ready":"Bereit zur Synchronisierung.","filesSynced":"{{completed}} von {{total}} Dateien synchronisiert","syncNow":"Jetzt synchronisieren","loadError":"Einrichtung konnte nicht geladen werden.","selectError":"Ordner konnten nicht ausgewählt werden.","sourceRequired":"Wähle mindestens einen Ordner aus.","scheduleError":"Zeitplan konnte nicht gespeichert werden.","testError":"WebDAV-Test fehlgeschlagen.","startError":"Backup konnte nicht gestartet werden."},
   "pairing": {
     "navigationLabel": "Kloda-Navigation",
     "backupNavigation": "WebDAV-Backup",
@@ -36,6 +44,19 @@
     "revocationDescription": "Ein Widerruf deaktiviert das Vertrauen auf diesem PC. Er verspricht weder Rückabwicklung noch Löschung des Eintrags auf dem Telefon.",
     "candidateUnavailable": "Der genaue Kandidat konnte nicht bestimmt werden. Genehmigung deaktiviert; abbrechen oder Status aktualisieren.",
     "noFileGrant": "Gerätevertrauen ist keine Dateiberechtigung. Die Kopplung gewährt keinen Zugriff auf Dateien, Ordner oder Fotos.",
+    "backupTitle": "Berechtigung für Foto-Backups",
+    "backupDescription": "Wähle einen Ordner auf diesem PC und bestätige die Berechtigung ausdrücklich im nativen Dialog. Dies konfiguriert nur die Berechtigung; Fotoübertragung ist nicht implementiert.",
+    "backupFolder": "PC-Ordner:",
+    "approveBackup": "Backup-Ordner auswählen und genehmigen",
+    "reselectBackup": "Ordner erneut auswählen und Genehmigung wiederholen",
+    "revokeBackup": "Dateiberechtigung widerrufen",
+    "backupRevocationDescription": "Der Widerruf der Dateiberechtigung erhält Gerätevertrauen und vorhandene Dateien. Ordnerfehler lassen sich ohne Zurücksetzen der Kopplung oder Löschen von Daten erneut versuchen.",
+    "backupStates": {
+      "not_approved": "Keine Foto-Backup-Berechtigung genehmigt.",
+      "approved": "Foto-Backup-Berechtigung konfiguriert — keine Übertragung durchgeführt.",
+      "revoked": "Foto-Backup-Berechtigung widerrufen.",
+      "unavailable": "Foto-Backup-Bereich nicht verfügbar. Status aktualisieren oder Ordner erneut auswählen."
+    },
     "phoneFingerprint": "Schlüssel-Fingerabdruck des Telefons",
     "fingerprintUnavailable": "Fingerabdruck nicht verfügbar",
     "approvalTitle": "Dieses Telefon genehmigen?",
@@ -90,6 +111,14 @@
       "connection_closed": "Die Kopplungsverbindung wurde geschlossen. Prüfe den nativen Status und setze ausdrücklich fort, falls ein gespeicherter Eintrag verfügbar ist.",
       "outcome_unknown": "Der Kopplungsausgang ist unbekannt. Prüfe vor dem Fortfahren den nativen Status.",
       "cancelled": "Der Kopplungsvorgang wurde abgebrochen.",
+      "acl_busy": "Der native Berechtigungsspeicher ist beschäftigt. Status aktualisieren und erneut versuchen.",
+      "acl_unavailable": "Der native Berechtigungsspeicher ist nicht verfügbar. Die Berechtigung kann nicht bestätigt werden.",
+      "backup_unavailable": "Der Backup-Ordner ist nicht verfügbar. Ordner erneut auswählen und wiederholen.",
+      "backup_full": "Am Backup-Ziel ist kein Speicherplatz oder Kontingent mehr verfügbar. Platz freigeben oder einen anderen Ordner auswählen und erneut genehmigen.",
+      "backup_busy": "Der Backup-Ordner wird gerade verwendet oder ist gesperrt. Die verwendende Anwendung schließen und wiederholen.",
+      "backup_permission_denied": "Zugriff auf den Backup-Ordner wurde verweigert. Lokale Berechtigungen prüfen oder Ordner erneut auswählen.",
+      "backup_path_rejected": "Der ausgewählte Backup-Ordner wurde abgelehnt. Wähle einen anderen Ordner.",
+      "backup_scope_changed": "Der genehmigte Ordner hat sich geändert. Erneut auswählen und ausdrücklich genehmigen; Kopplung nicht zurücksetzen und Dateien nicht löschen.",
       "revoked": "Lokales Kopplungsvertrauen wurde widerrufen. Verspätete Antworten können es nicht wiederherstellen."
     }
   }

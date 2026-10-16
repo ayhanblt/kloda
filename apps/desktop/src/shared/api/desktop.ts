@@ -27,6 +27,7 @@ declare global {
     kloda?: {
       pairing?: DesktopPairingBridge;
       getDraft(): Promise<BackupDraft>;
+      getProgress(): Promise<SyncProgress | null>;
       pickSources(): Promise<readonly DesktopSource[]>;
       saveSchedule(intervalHours: 12 | 24, localTime: string): Promise<void>;
       saveStorage(storage: { endpoint: string; password: string; targetPath: string; username: string }): Promise<void>;

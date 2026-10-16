@@ -2,6 +2,8 @@
 
 Belgeleme tarihi: 2026-10-04. [ADR 0006](../decisions/0006-account-mfa-and-recovery-policy.md) için kabul edilmiş güvenlik davranışını ve açık production gate'lerini saklar. Bu belge bir uygulanmış API/DB schema veya çalıştırılmış kabul testi değildir. Sağlayıcı özellikleri sessiondaki belge araştırmasıdır; bu konsolidasyonda live Supabase projesi/SDK/servis kurulmadı veya denenmedi.
 
+**Scoped V1 update:** [ADR0016](../decisions/0016-v1-pc-local-file-authority.md) LAN file grant/admission için mandatory merkezi eligibility/step-up/capability ve `<24h` cache'i supersede eder; PC-local explicit izin ayrı kalır. Bu belgenin account Auth/MFA/recovery davranışı korunur; recovery veya merkezi revoke'un offline PC-local ACL'ye etkisi **henüz kararlaştırılmadı**. Eski file-recovery maddeleri otomatik grant survival/reset ya da güncel LAN online-reissue zorunluluğu olarak uygulanmaz. Final remote authorization da açık kalır.
+
 ## 1. Sağlayıcı ve gizlilik
 
 **Supabase Auth + Postgres** seçildi; **NestJS** korunur, barındırma ayrı seçimdir. Hesap/cihaz/eşleşme metadata'sı merkezde tutulabilir; dosya byte'ları ve uç private encryption/possession key'leri tutulmaz. Plaintext dosya/album kataloğu, medya hash listesi veya merkezi dosya indeksi kurulmaz; listeleme izinli PC alanından yapılır. [PC/Photos metadata sözleşmesi](../product/computer-backup-files-and-photos.md) bu gizlilik sınırını tamamlar.
@@ -25,11 +27,11 @@ Belgeleme tarihi: 2026-10-04. [ADR 0006](../decisions/0006-account-mfa-and-recov
 | Katman | Kabul koşulu | Yerine geçemediği katman |
 |---|---|---|
 | Hesap session | Supabase user/session, trusted JWT validation ve güncel security/revocation state | PC onayı, peer key veya dosya alanı yetkisi |
-| Yerel peer trust | [ADR0013](../decisions/0013-qr-based-local-lan-pairing.md) QR LAN: actual mutual P-256 TLS/SPKI, same-channel secret HMAC, exact PC approval ve durable local pins/ACK; backend/login/internet gerekmez | Account enrollment, same-account file eligibility, işlem step-up, PC scope approval veya capability/file grant |
+| Yerel peer trust | ADR0013 mutual P-256 TLS/SPKI, same-channel HMAC, exact PC approval ve durable pins/ACK; backend/login/internet gerekmez | V1 explicit PC scope/native ACL file grant; account/control enrollment ve final remote authorization ayrı |
 | İşlem step-up | Taze ispat yalnız ilgili user/session/device/**işleme** bağlı; kısa ömür, tek kullanım, replay reject | Başka yüksek riskli işlem, genel AAL yükseltmesi veya dosya E2EE |
-| Dosya kanalı | Local peer pins + fresh native mutual proof + same-account eligibility ve current capability/scope/operation/time/deny/version/fence | QR completion, Supabase JWT/TOTP veya tunnel token |
+| V1 LAN dosya kanalı | Local pins + valid fresh native mutual TLS/continuity + explicit PC-native own-peer ACL/scope/operation/current revoke/publication fence | QR completion, Supabase JWT/TOTP, UI bool veya tunnel token |
 
-Yeni istemci **file authorization** onayı, recovery/güvenlik ayarı değişikliği ve MFA kapatma gibi yüksek riskli işlerde aktif JWT/eski AAL2 taze step-up yerine geçmez. Backend-independent QR local trust bunlardan ayrıdır; cihaz file onayı için alınan yetki MFA kapatamaz. İspatın tazeliği/güvence seviyesi ayrı değerlendirilir; her yerde “TOTP mi?” hardcode edilmez, fakat passkey/yeni yöntem bu belgeyle benimsenmez. Face ID/Touch ID yalnız app kilidini açıyorsa server MFA değildir.
+Recovery/security settings/MFA kapatma gibi merkezi yüksek riskli işlemlerde aktif JWT/eski AAL2 fresh step-up yerine geçmez. V1 LAN file grant ADR0016 PC-local approval'dır; merkezi enrollment/step-up/capability prerequisite'i değildir. Final remote authorization ayrıca OPEN. Account için ispatın işlem/tazelik/güvence sınırları korunur; her yerde “TOTP mi?” hardcode edilmez. Face ID/Touch ID app unlock server MFA değildir.
 
 ### MFA kapalı hesap
 
@@ -78,23 +80,23 @@ Aşağıdaki adlar mantıksal güvenlik durumlarıdır, mevcut repository sembol
 | Sıra | Zorunlu davranış / hata sınırı |
 |---|---|
 | Kabul edilmiş kanıt tüketimi | Code atomik tek kullanım veya bütün koşulları tamamlanmış support kararı; ikinci bağımsız reset yaratılmaz. |
-| Önce durable recovery-only fence | `recovery_required` tasarım durumu: normal hesap/dosya/device authorization kapalı; yalnız sınırlı recovery/enrollment. |
+| Önce durable recovery-only fence | Merkezi account/control için `recovery_required` tasarım durumu; offline PC-local grant'e etkisi ADR0016 uyarınca OPEN, anında file fence varsayılmaz. |
 | Eski faktör ve code iptali | Supabase Admin API ile **tam eski MFA factor listesi** kaldırılır; tüm eski recovery code seti iptal edilir. Kayıp/ele geçirilmiş ikinci faktör bırakılmaz. |
 | Session iptali | Bütün aktif hesap session refresh yetkileri sonlandırılır. Eski step-up yetkileri tekrar kullanılmaz. |
 | Cihaz/pair iptali | Eski erişim/eşleşme onaylarının merkezi authority'si iptal edilir; geçmiş kimlikler audit için kalabilir, aktif yetki değildir. |
 | Partial failure | Supabase + Kloda DB tek transaction değildir: aşamalar durable/idempotent ve fail-closed olur. Factor delete/global sign-out başarısızken “recovery tamamlandı” yoktur. |
 | Yeniden giriş | Sonlandırılmış session enroll için kullanılmaz. Birincil giriş yeniden yapılır; recovery-only kısıtını aşmaz. |
 | Zorunlu reenrollment | Yeni TOTP enroll + ilk başarılı doğrulama + yeni code setinin güvenli teslimi tamamlanmadan kısıt kaldırılmaz; skip yoktur. |
-| Dosya erişiminin yeniden kurulması | Yeni MFA login eski file grant'i canlandırmaz; gerekli online authorization/step-up + PC scope approval + yeni grant gerekir. Required peer key/pin/epoch continuity kayıpsa fresh local QR trust ayrıca gerekir; tek başına QR eski grant'i açmaz. |
+| Dosya erişiminin yeniden kurulması | Merkezi recovery ile offline PC-local grant survival/reset/regrant ilişkisi ADR0016'da OPEN; online step-up zorunluluğu veya otomatik grant canlanması icat edilmez. Local key/pin/epoch kaybı fail closed + fresh QR/explicit PC-local grant ister. |
 | Korunan veri | Dosyalar ve mevcut uç private key'leri silinmez; kayıp key sunucudan geri üretilmez. |
 
 ### Access JWT ve offline PC sınırı
 
-Global sign-out eski access JWT'lerini expiry öncesi kriptografik olarak iptal etmez. NestJS, varsa doğrudan erişilebilir DB/RLS ve PC file channel recovery/revocation state'i uygular; yalnız UI veya JWT expiry beklemek yeterli değildir. Verilmiş PC grant'leri merkezi recovery'den bağımsız sonsuza dek yaşayamaz.
+Global sign-out eski access JWT'lerini expiry öncesi kriptografik iptal etmez. NestJS ve doğrudan erişilebilir DB/RLS güncel account recovery/revocation state'ini ayrıca enforce etmelidir; UI veya expiry beklemek yeterli değildir. Bu account kontrol kararı, internetten bağımsız V1 PC-local ACL'yi otomatik iptal veya onaylayan protokol değildir.
 
-Erken source kaydındaki **tüm PC yollarında anında merkezi recovery iptali** hedefi, sonradan [ADR 0003](../decisions/0003-secure-pairing-and-offline-authorization.md) ile nitelendirildi: merkez unreachable olan, önceden doğrulanmış **aynı scope LAN** peer'da, trusted elapsed upper `<24h` ve güncel token/install continuity koşulları birlikte varsa yalnız kalan pencere kullanılabilir. Central revoke offline PC'ye anında bildirilemez; öğrendiğinde durable deny uygulanır. PC local revoke hemen keser. Merkez açık deny döndürüyorsa eski offline allow'a fallback yoktur. Yeni cihaz/pair/scope/recovery/remote authorization bu istisnaya girmez. Böylece erişilebilen enforcement yollarının reset sırasında kapanması ile ulaşılamayan PC'nin sınırlı gecikmesi karıştırılmaz.
+**Tarihsel ADR0003 `<24h` offline-cache modeli V1 LAN için superseded'dır.** ADR0016 merkez unreachable iken geçerli local grant'i merkezi cache süresine bağlamaz. Account recovery/central revoke'nin offline PC'deki local grant'lere etkisi ve final remote authorization **OPEN** kalır; ne sonsuz survival ne otomatik reset seçilmiştir. PC-local revoke durably/fenced uygulanır; ulaşılamayan PC'de immediate central revoke sözü verilmez.
 
-[ADR 0004](../decisions/0004-certificate-bound-capability-and-authority-responsibilities.md) merkez–PC authority/fence paylaşımını tanımlar; journal/file varlığı erişim yetkisi değildir, geçerli durable final sonradan iptal diye silinmez. Bu belge bu protokolü tekrar seçmez.
+[ADR0016](../decisions/0016-v1-pc-local-file-authority.md) V1 LAN authority/fence'i seçer; ADR0004 merkezi model yalnız superseded kapsamıyla okunur. Journal/file eski authority yaratmaz, geçerli durable final revoke nedeniyle silinmez. Bu kayıt yeni recovery/remote protokolü seçmez.
 
 ## 6. Experimental recovery-code production kararı
 

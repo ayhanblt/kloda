@@ -37,6 +37,15 @@ fn frozen_transcript_and_tag_with_live_binding_negatives() {
     assert!(verify(&secret, &other_sid, &pc, &phone, &cb, &expected).is_err());
     assert!(verify(&secret, &sid, &phone, &pc, &cb, &expected).is_err());
     assert!(verify(&secret, &sid, &pc, &phone, &cb, &expected[..31]).is_err());
+    let mut other_secret = secret;
+    other_secret[0] ^= 1;
+    let mut other_pc = pc;
+    other_pc[0] ^= 1;
+    let mut other_phone = phone;
+    other_phone[0] ^= 1;
+    assert!(verify(&other_secret, &sid, &pc, &phone, &cb, &expected).is_err());
+    assert!(verify(&secret, &sid, &other_pc, &phone, &cb, &expected).is_err());
+    assert!(verify(&secret, &sid, &pc, &other_phone, &cb, &expected).is_err());
     for index in 0..32 {
         let mut wrong = expected;
         wrong[index] ^= 1;

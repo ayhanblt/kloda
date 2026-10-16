@@ -1,0 +1,568 @@
+{
+  "date": "2026-10-15",
+  "scope": "Read-only Git audit; index/commits/history untouched. Inventory includes its own new path; statuses are a point-in-time record, not staging instructions.",
+  "initialCounts": {
+    "modified": 89,
+    "preexistingStagedDeletion": 1,
+    "untracked": 75
+  },
+  "finalCounts": {
+    " M": 91,
+    "D ": 1,
+    "??": 77
+  },
+  "modifiedTracked": [
+    {
+      "status": " M",
+      "path": ".github/workflows/quality.yml"
+    },
+    {
+      "status": " M",
+      "path": ".gitignore"
+    },
+    {
+      "status": " M",
+      "path": ".omp/AGENTS.md"
+    },
+    {
+      "status": " M",
+      "path": "AGENTS.md"
+    },
+    {
+      "status": " M",
+      "path": "apps/desktop/electron/main.ts"
+    },
+    {
+      "status": " M",
+      "path": "apps/desktop/electron/preload.cts"
+    },
+    {
+      "status": " M",
+      "path": "apps/desktop/electron/runtime/journal.spec.ts"
+    },
+    {
+      "status": " M",
+      "path": "apps/desktop/electron/runtime/journal.ts"
+    },
+    {
+      "status": " M",
+      "path": "apps/desktop/electron/runtime/pairing.ts"
+    },
+    {
+      "status": " M",
+      "path": "apps/desktop/electron/runtime/runtime.ts"
+    },
+    {
+      "status": " M",
+      "path": "apps/desktop/electron/runtime/scheduler.spec.ts"
+    },
+    {
+      "status": " M",
+      "path": "apps/desktop/electron/runtime/scheduler.ts"
+    },
+    {
+      "status": " M",
+      "path": "apps/desktop/electron/runtime/types.ts"
+    },
+    {
+      "status": " M",
+      "path": "apps/desktop/src/app/App.spec.tsx"
+    },
+    {
+      "status": " M",
+      "path": "apps/desktop/src/app/App.tsx"
+    },
+    {
+      "status": " M",
+      "path": "apps/desktop/src/features/pair-device/useDesktopPairing.ts"
+    },
+    {
+      "status": " M",
+      "path": "apps/desktop/src/pages/pairing/PairingPage.spec.tsx"
+    },
+    {
+      "status": " M",
+      "path": "apps/desktop/src/pages/pairing/PairingPage.tsx"
+    },
+    {
+      "status": " M",
+      "path": "apps/desktop/src/shared/api/desktop.ts"
+    },
+    {
+      "status": " M",
+      "path": "apps/desktop/src/shared/api/pairing.ts"
+    },
+    {
+      "status": " M",
+      "path": "apps/desktop/src/shared/i18n/locales/de.json"
+    },
+    {
+      "status": " M",
+      "path": "apps/desktop/src/shared/i18n/locales/en.json"
+    },
+    {
+      "status": " M",
+      "path": "apps/desktop/src/shared/i18n/locales/tr.json"
+    },
+    {
+      "status": " M",
+      "path": "apps/mobile/.expo/dev/logs/start.log"
+    },
+    {
+      "status": " M",
+      "path": "apps/mobile/modules/my-module/android/build.gradle"
+    },
+    {
+      "status": " M",
+      "path": "apps/mobile/modules/my-module/android/src/main/AndroidManifest.xml"
+    },
+    {
+      "status": " M",
+      "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSafSourceScanner.kt"
+    },
+    {
+      "status": " M",
+      "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSyncJournal.kt"
+    },
+    {
+      "status": " M",
+      "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaPairingModule.kt"
+    },
+    {
+      "status": " M",
+      "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt"
+    },
+    {
+      "status": " M",
+      "path": "apps/mobile/src/app/App.spec.tsx"
+    },
+    {
+      "status": " M",
+      "path": "apps/mobile/src/app/App.tsx"
+    },
+    {
+      "status": " M",
+      "path": "apps/mobile/src/features/pairing/model/pairing-controller.spec.ts"
+    },
+    {
+      "status": " M",
+      "path": "apps/mobile/src/features/pairing/model/pairing-controller.ts"
+    },
+    {
+      "status": " M",
+      "path": "apps/mobile/src/features/pairing/model/use-pairing.ts"
+    },
+    {
+      "status": " M",
+      "path": "apps/mobile/src/features/pairing/ui/pairing-modal.tsx"
+    },
+    {
+      "status": " M",
+      "path": "apps/mobile/src/pages/pairing/ui/pairing-page.tsx"
+    },
+    {
+      "status": " M",
+      "path": "apps/mobile/src/shared/api/pairing.spec.ts"
+    },
+    {
+      "status": " M",
+      "path": "apps/mobile/src/shared/api/pairing.ts"
+    },
+    {
+      "status": " M",
+      "path": "apps/mobile/src/shared/i18n/locales/de.json"
+    },
+    {
+      "status": " M",
+      "path": "apps/mobile/src/shared/i18n/locales/en.json"
+    },
+    {
+      "status": " M",
+      "path": "apps/mobile/src/shared/i18n/locales/tr.json"
+    },
+    {
+      "status": " M",
+      "path": "docs/decisions/0003-secure-pairing-and-offline-authorization.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/decisions/0004-certificate-bound-capability-and-authority-responsibilities.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/decisions/0005-computer-first-files-and-photos-backup.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/decisions/0006-account-mfa-and-recovery-policy.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/decisions/0007-matrix-verification-and-device-continuity.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/decisions/0008-upstream-first-sdk-and-persistent-certificate-direction.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/decisions/0009-evidence-gated-incremental-implementation.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/decisions/0010-operation-bound-pc-commit-proof.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/decisions/0011-in-process-native-query-peer-session.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/decisions/0012-kloda-owned-p256-device-identity.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/decisions/0013-qr-based-local-lan-pairing.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/decisions/0014-shared-rust-qr-pairing-core.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/decisions/0015-desktop-platform-and-signing-isolation.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/implementation/desktop-platform-validation-plan.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/implementation/first-vertical-slice-status.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/implementation/implementation-session-handoff.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/implementation/native-peer-session-prerequisite.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/implementation/qr-pairing-implementation-roadmap.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/implementation/session-documentation-index.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/implementation/stages-one-two-roadmap.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/product/computer-backup-files-and-photos.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/security/account-mfa-and-recovery.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/security/capability-acceptance.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/security/capability-profile.md"
+    },
+    {
+      "status": " M",
+      "path": "docs/security/production-gates.md"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/Cargo.lock"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/Cargo.toml"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/src/error.rs"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/src/handle.rs"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/src/jni_bridge.rs"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/src/lib.rs"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/src/node.rs"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/src/owner.rs"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/src/proof_tests.rs"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/src/runtime.rs"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/src/runtime_actions.rs"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/src/runtime_actor.rs"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/src/runtime_phone.rs"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/src/runtime_status.rs"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/src/status.rs"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/src/store.rs"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/src/store_rows.rs"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/src/tls.rs"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/src/tls_behavior_tests.rs"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/src/tls_config.rs"
+    },
+    {
+      "status": " M",
+      "path": "packages/pairing-native/src/tls_test_support.rs"
+    },
+    {
+      "status": " M",
+      "path": "packages/sync-core/src/run-state.spec.ts"
+    },
+    {
+      "status": " M",
+      "path": "packages/sync-core/src/run-state.ts"
+    },
+    {
+      "status": " M",
+      "path": "packages/sync-core/src/schedule.ts"
+    }
+  ],
+  "preexistingStaged": [
+    {
+      "status": "D ",
+      "path": "apps/mobile/.expo/dev/logs/export.log"
+    }
+  ],
+  "untrackedRequired": [
+    "apps/desktop/electron/runtime/pairing.spec.ts",
+    "apps/desktop/public/tray-logo.png",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryChecks.kt",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidOwnRestoreChecks.kt",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidPhotoManifestChecks.kt",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidPhotosCatalogChecks.kt",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidPhotosImportChecks.kt",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidPhotosSourceChecks.kt",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/PhotosVideoFixture.kt",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupDownload.kt",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesQueue.kt",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesSnapshots.kt",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesTransfer.kt",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidOwnBackups.kt",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidOwnRestore.kt",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotoManifestJournal.kt",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotoManifestPublisher.kt",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotoManifestSnapshots.kt",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosCatalog.kt",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosImportJournal.kt",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosMedia.kt",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosRestore.kt",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSession.kt",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/PhotoManifestCodec.kt",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/PhotosRestorePermissions.kt",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/PhotosRestoreRequests.kt",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/RestoreDestinationContract.kt",
+    "apps/mobile/src/app/native-runtime.fixture.ts",
+    "apps/mobile/src/features/file-transfer/model/use-file-transfer.ts",
+    "apps/mobile/src/pages/activity/ui/activity-page.spec.tsx",
+    "apps/mobile/src/pages/activity/ui/activity-page.tsx",
+    "apps/mobile/src/shared/api/file-transfer.spec.ts",
+    "apps/mobile/src/shared/api/file-transfer.ts",
+    "docs/decisions/0016-v1-pc-local-file-authority.md",
+    "docs/decisions/0017-photos-sidecar-manifest-and-import-recovery.md",
+    "docs/implementation/codex-migration-git-inventory.json",
+    "docs/implementation/codex-migration-handoff.md",
+    "packages/pairing-native/src/backup_root.rs",
+    "packages/pairing-native/src/file_protocol.rs",
+    "packages/pairing-native/src/file_receiver.rs",
+    "packages/pairing-native/src/file_receiver_commands.rs",
+    "packages/pairing-native/src/file_receiver_finalize.rs",
+    "packages/pairing-native/src/file_receiver_listing_tests.rs",
+    "packages/pairing-native/src/file_receiver_publication_tests.rs",
+    "packages/pairing-native/src/file_receiver_regrant_tests.rs",
+    "packages/pairing-native/src/file_receiver_repair_tests.rs",
+    "packages/pairing-native/src/file_receiver_resume_tests.rs",
+    "packages/pairing-native/src/file_receiver_revoke_tests.rs",
+    "packages/pairing-native/src/file_receiver_rows.rs",
+    "packages/pairing-native/src/file_receiver_safety_tests.rs",
+    "packages/pairing-native/src/file_receiver_scope_tests.rs",
+    "packages/pairing-native/src/file_receiver_storage_tests.rs",
+    "packages/pairing-native/src/file_receiver_tests.rs",
+    "packages/pairing-native/src/file_schema.rs",
+    "packages/pairing-native/src/file_schema_tests.rs",
+    "packages/pairing-native/src/file_sender.rs",
+    "packages/pairing-native/src/file_sender_ack.rs",
+    "packages/pairing-native/src/file_sender_command.rs",
+    "packages/pairing-native/src/file_sender_tests.rs",
+    "packages/pairing-native/src/file_sender_tls_tests.rs",
+    "packages/pairing-native/src/file_transport.rs",
+    "packages/pairing-native/src/file_transport_client.rs",
+    "packages/pairing-native/src/file_transport_http.rs",
+    "packages/pairing-native/src/file_transport_io.rs",
+    "packages/pairing-native/src/file_transport_tests.rs",
+    "packages/pairing-native/src/runtime_backup.rs",
+    "packages/pairing-native/src/runtime_file.rs",
+    "packages/pairing-native/src/runtime_sender.rs",
+    "packages/pairing-native/src/store_acl.rs",
+    "packages/pairing-native/src/store_acl_schema.rs",
+    "packages/pairing-native/src/store_acl_tests.rs",
+    "packages/pairing-native/src/tls_admission.rs",
+    "packages/pairing-native/src/tls_file_tests.rs",
+    "packages/sync-core/src/schedule.spec.ts",
+    "tools/check-native-dependencies.mjs"
+  ],
+  "sourceTracking": {
+    "enumeratedFiles": 224,
+    "tracked": 153,
+    "untracked": 71,
+    "untrackedByLanguage": {
+      "rs": 36,
+      "kt": 27,
+      "ts": 6,
+      "tsx": 2
+    },
+    "importantIgnoredSources": [],
+    "ignoredGeneratedOnly": [
+      "apps/mobile/modules/my-module/android/src/main/jniLibs/arm64-v8a/libkloda_pairing_native.so",
+      "apps/mobile/modules/my-module/android/src/main/jniLibs/armeabi-v7a/libkloda_pairing_native.so",
+      "apps/mobile/modules/my-module/android/src/main/jniLibs/x86/libkloda_pairing_native.so",
+      "apps/mobile/modules/my-module/android/src/main/jniLibs/x86_64/libkloda_pairing_native.so"
+    ]
+  },
+  "generatedNotDevelopmentSource": [
+    "apps/mobile/.expo/dev/logs/start.log",
+    "apps/mobile/.expo/dev/logs/export.log",
+    "apps/mobile/android/",
+    "apps/mobile/ios/",
+    "apps/mobile/modules/my-module/android/build/",
+    "apps/mobile/modules/my-module/android/src/main/jniLibs/",
+    "packages/pairing-native/target/",
+    "apps/desktop/dist/",
+    "node_modules/"
+  ],
+  "criticalLocalOnly": [
+    {
+      "path": ".local-evidence/",
+      "ignored": true,
+      "independentBackup": "not-configured",
+      "action": "Not transferred by Git; preserve separately under existing local-only policy. Do not add private state, user media, native binaries or raw sessions."
+    },
+    {
+      "path": "stitch_private_photo_cloud/",
+      "ignored": true,
+      "role": "Approved readonly UI source of truth",
+      "action": "Not transferred by Git; preserve approved design reference separately, do not rename or reinterpret."
+    }
+  ],
+  "codexEntrypoint": {
+    "root": "AGENTS.md",
+    "projectContext": ".omp/AGENTS.md",
+    "handoff": "docs/implementation/codex-migration-handoff.md",
+    "rootTracked": true,
+    "projectContextTracked": true,
+    "ompConfigurationAutomaticallyPortable": false,
+    "repoSkills": [
+      ".agents/skills/find-docs/SKILL.md",
+      ".claude/skills/playwright-cli/SKILL.md",
+      ".claude/skills/playwright-cli/references/element-attributes.md",
+      ".claude/skills/playwright-cli/references/playwright-tests.md",
+      ".claude/skills/playwright-cli/references/pr-attachments.md",
+      ".claude/skills/playwright-cli/references/request-mocking.md",
+      ".claude/skills/playwright-cli/references/running-code.md",
+      ".claude/skills/playwright-cli/references/session-management.md",
+      ".claude/skills/playwright-cli/references/storage-state.md",
+      ".claude/skills/playwright-cli/references/test-generation.md",
+      ".claude/skills/playwright-cli/references/tracing.md",
+      ".claude/skills/playwright-cli/references/video-recording.md"
+    ]
+  },
+  "retainedEvidenceHashes": [
+    {
+      "path": ".local-evidence/archives/photos-manifest-import-2026-10-14.tar.gz",
+      "exists": true,
+      "sha256": "df7cfad96308db2acf5ee04ac16a3d402444824cb6b0fed4c0aef44f9fa24219",
+      "matches": true
+    },
+    {
+      "path": ".local-evidence/archives/mobile-native-sender-2026-10-13.tar.gz",
+      "exists": true,
+      "sha256": "001861a9ccd11e77404d75e69c78ad666c92678258ace4e913987e00ca43f2d3",
+      "matches": true
+    },
+    {
+      "path": ".local-evidence/archives/v1-native-file-2026-10-13.tar.gz",
+      "exists": true,
+      "sha256": "7590fb39e7ff49139a267dc72d416b5e3f6d5e1abba52f31eeca36a1cdea2bed",
+      "matches": true
+    },
+    {
+      "path": ".local-evidence/archives/android-keystore-tls-signer-physical-2026-10-07.tar.gz",
+      "exists": true,
+      "sha256": "175ff68629163af5bb5c2bf360505f5e407663e46545ee1da7c4f21e36502470",
+      "matches": true
+    }
+  ],
+  "recordValidation": {
+    "markdownFiles": 30,
+    "relativeTargets": 478,
+    "headingAnchors": 121,
+    "broken": 0,
+    "missingInventoryFiles": 0,
+    "sourceFiles": 224,
+    "untrackedSourceFiles": 71,
+    "archiveHashesMatched": 4,
+    "runtimeTestsOrBuildsRerun": false,
+    "semantics": "Source-vs-decision audit; scoped LAN supersession and historical/automated/physical distinctions preserved. Not a full security audit or CLI runtime acceptance."
+  }
+}
