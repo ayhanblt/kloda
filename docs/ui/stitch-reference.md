@@ -1,5 +1,7 @@
 # Stitch UI Reference
 
+2026-10-17 approved scoped Desktop adaptation: Ayhan selected option1 in the [PC-first mapping](../implementation/desktop-pc-first-stitch-mapping.md#approved-mapping--2026-10-17). Existing visual language may be adapted to the already implemented native receiver/QR/separate ACL/devices/incoming/background settings. This closes the mapping decision for those functions only; the missing-state inventory below remains historical/design scope for other features. No new product/security behavior or physical/platform acceptance is approved by this visual adaptation.
+
 ## Design source
 
 `stitch_private_photo_cloud/` is Kloda's approved UI/UX reference. All seven supplied HTML compositions, their screenshots, the logo asset, and `private_photo_cloud/DESIGN.md` were inspected. The source describes a mobile-first design system and explicitly documents desktop/tablet adaptation, but it does not prescribe a mobile or desktop implementation framework.
@@ -108,7 +110,7 @@ The source layout groups folders then frequency before Storage Setup. This is hi
 ## Missing states
 
 - **Onboarding:** no permission request/denial, no empty or unavailable folder pool, no zero-selection continue state, field validation, invalid-address feedback, or explicit “other” storage-protocol path.
-- **QR LAN pairing:** [ADR0013](../decisions/0013-qr-based-local-lan-pairing.md) and [future-only roadmap](../implementation/qr-pairing-implementation-roadmap.md) require invitation/TTL display, QR-only camera permission/denial/no-camera/duplicate-scan handling, exact reserved candidate approval/deny, hidden QR after reservation, pending ACK/recovery, expiry/cancel/malformed payload/TLS/proof/persistence errors and separate “trusted, no file grant” state. No approved Stitch mapping for these states exists. This records a visual gate, not a new layout/design system; source assets remain unchanged.
+- **QR LAN pairing:** [ADR0013](../decisions/0013-qr-based-local-lan-pairing.md) and [future-only roadmap](../implementation/qr-pairing-implementation-roadmap.md) require invitation/TTL display, QR-only camera permission/denial/no-camera/duplicate-scan handling, exact reserved candidate approval/deny, hidden QR after reservation, pending ACK/recovery, expiry/cancel/malformed payload/TLS/proof/persistence errors and separate “trusted, no file grant” state. At the reference-only checkpoint no approved Stitch mapping for these states existed. The2026-10-17 scoped Desktop adaptation approval and implementation close that mapping gap for the already implemented Desktop QR/ACL surfaces; mobile/new behavior and other missing states are not approved by implication. Source assets remain unchanged.
 - **Connection test:** no authentication failure, unreachable host, timeout, malformed address, insufficient-space, unsupported protocol, or retry-after-failure result. No visual result confirms the required WAN-IP versus public-IP comparison or a CGNAT decision.
 - **Relay:** no distinct CGNAT/HTTP(S) relay state. Advanced WebDAV relay/SMB LAN-only rules remain. [ADR0012](../decisions/0012-kloda-owned-p256-device-identity.md) selects pinned LAN TLS and remote WebRTC/DTLS/direct P2P with Cloudflare TURN fallback; this does not adopt/deploy provider/native transport or approve new UI. No relay/source success graphic is connectivity, Kloda-key binding or authority proof; Stitch assets remain unchanged.
 - **Sync:** pending, active, paused, completed, queued, sleeping destination, Wi‑Fi wait, and per-photo backed-up/uploading/not-backed-up are represented. Failed, canceled, partially completed, conflict, quota/capacity-exhausted, and retryable item states are not.
@@ -133,7 +135,7 @@ Policy/design coverage remains incomplete: source Files select-all conflicts wit
 ## Current implementation status
 
 - Existing product baseline state is [first-vertical-slice-status.md](../implementation/first-vertical-slice-status.md): Files/Photos source/schedule/WebDAV setup foundations, incomplete mobile transfer/activity/native scheduling and desktop recovery. It is not implemented PC-first receiver/account/Live/restore/conflict UI.
-- Electron source→storage→activity foundations have not passed the full Stitch responsive/token/state visual acceptance.
+- Desktop PC-first integration now has scoped host Chromium/token/responsive visual review for the approved existing functions; see the [mapping evidence](../implementation/desktop-pc-first-stitch-mapping.md#delivered-integration-and-acceptance--2026-10-17). Advanced WebDAV foundations remain separate. This is not full product/physical visual acceptance.
 - Product onboarding/Backup Activity physical/visual comparison is not validated. Native PoC diagnostic screenshots/physical transport UI are different surfaces and do not make product UI Stitch-complete.
 
 ## Open questions

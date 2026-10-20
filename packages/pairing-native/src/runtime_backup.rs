@@ -16,18 +16,54 @@ impl Actor {
             .map(i64::try_from)
             .transpose()
             .map_err(|_| PairingError::CandidateStale)?;
+        let foreground = self.foreground.clone();
+        let epoch = self.action_epoch;
         self.installation
             .store
-            .approve_backup(&sid, folder, revision)?;
+            .approve_backup_guarded(&sid, folder, revision, || foreground.authorize(epoch))?;
         self.close_file_sid(&sid)?;
+        self.receiver_errors.retain(|(peer, _), _| peer != &sid);
         self.error = None;
         Ok(())
     }
 
     pub(super) fn revoke_backup(&mut self, record: &str) -> Result<()> {
         let sid = self.backup_reference(record)?;
-        self.installation.store.revoke_backup(&sid)?;
+        let foreground = self.foreground.clone();
+        let epoch = self.action_epoch;
+        self.installation
+            .store
+            .revoke_backup_guarded(&sid, || foreground.authorize(epoch))?;
         self.close_file_sid(&sid)?;
+        self.receiver_errors.retain(|(peer, _), _| peer != &sid);
+        self.error = None;
+        Ok(())
+    }
+
+    pub(super) fn remove_device(&mut self, reference: &str) -> Result<()> {
+        if self.context.role != OwnerRole::Pc {
+            return Err(PairingError::NativeUnsupported);
+        }
+        let sid = super::actions::reference(reference)?;
+        let foreground = self.foreground.clone();
+        let epoch = self.action_epoch;
+        let revoked = self
+            .installation
+            .store
+            .remove_device_guarded(&sid, || foreground.authorize(epoch))?;
+        self.close_file_sid(&sid)?;
+        self.peers.retain(|peer| peer.io.sid != Some(sid));
+        if self.pc.as_ref().is_some_and(|pc| pc.sid() == &sid) {
+            self.pc = None;
+        }
+        if self
+            .retained
+            .as_ref()
+            .is_some_and(|record| record.sid == sid)
+        {
+            self.retained = Some(revoked);
+        }
+        self.receiver_errors.retain(|(peer, _), _| peer != &sid);
         self.error = None;
         Ok(())
     }
@@ -37,54 +73,15 @@ impl Actor {
             return Err(PairingError::NativeUnsupported);
         }
         let sid = super::actions::reference(record)?;
-        if !self.retained.as_ref().is_some_and(|record| {
-            record.sid == sid
-                && record.role == RecordRole::Pc
-                && record.state == RecordState::Complete
-        }) || self
-            .pc
-            .as_ref()
-            .is_some_and(|pc| pc.sid() != &sid || pc.phase() != Phase::Complete)
-        {
+        if !self.installation.store.record(&sid)?.is_some_and(|record| {
+            record.role == RecordRole::Pc && record.state == RecordState::Complete
+        }) {
             return Err(PairingError::CandidateStale);
         }
         Ok(sid)
     }
 
     pub(super) fn backup_status(&self, record: &Record) -> BackupScopeStatus {
-        let mut status = BackupScopeStatus {
-            state: "not_approved",
-            folder: None,
-            revision: None,
-            error_code: None,
-        };
-        if let Some(error) = self.fatal {
-            status.state = "unavailable";
-            status.error_code = Some(error.code());
-            return status;
-        }
-        let scope = match self.installation.store.backup_scope(&record.sid) {
-            Ok(Some(scope)) => scope,
-            Ok(None) => return status,
-            Err(error) => {
-                status.state = "unavailable";
-                status.error_code = Some(error.code());
-                return status;
-            }
-        };
-        status.revision = Some(scope.revision.to_string());
-        if !scope.approved {
-            status.state = "revoked";
-        } else {
-            match crate::backup_root::verify(&scope.folder, &record.expected, scope.binding) {
-                Ok(()) => status.state = "approved",
-                Err(error) => {
-                    status.state = "unavailable";
-                    status.error_code = Some(error.code());
-                }
-            }
-        }
-        status.folder = Some(scope.folder);
-        status
+        crate::paired_devices::backup_status(&self.installation.store, record, self.fatal)
     }
 }

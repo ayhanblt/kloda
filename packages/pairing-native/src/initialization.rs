@@ -3,6 +3,7 @@ use crate::{
     error::{PairingError, Result},
     handle::{NativeContext, OwnerRole},
     identity, installation_files as files, route,
+    startup_diagnostics::{self as diagnostic, Stage},
     store::Store,
 };
 use rustls::{pki_types::CertificateDer, sign::CertifiedKey};
@@ -18,36 +19,53 @@ pub(crate) struct Installation {
     _owner_lock: files::OwnerLock,
 }
 pub(crate) fn open(context: &NativeContext) -> Result<Installation> {
+    diagnostic::run(|| open_inner(context))
+}
+fn open_inner(context: &NativeContext) -> Result<Installation> {
     if !context.directory.is_absolute() {
-        return Err(PairingError::StorageFailure);
+        return diagnostic::at(Stage::Directory, || Err(PairingError::StorageFailure));
     }
-    let lock = files::prepare(&context.directory)?;
-    let (epoch, create) = files::epoch(&context.directory)?;
+    let lock = diagnostic::at(Stage::Storage, || files::prepare(&context.directory))?;
+    let (epoch, create) = diagnostic::at(Stage::Epoch, || files::epoch(&context.directory))?;
     let initialized = context.directory.join("initialized");
-    if files::exists(&initialized)?
-        && (files::read_exact::<1>(&initialized)? != [1]
-            || !files::exists(&context.directory.join("pairing.sqlite3"))?)
-    {
-        return Err(PairingError::ContinuityLost);
-    }
+    diagnostic::at(Stage::Continuity, || {
+        if files::exists(&initialized)?
+            && (files::read_exact::<1>(&initialized)? != [1]
+                || !files::exists(&context.directory.join("pairing.sqlite3"))?)
+        {
+            return Err(PairingError::ContinuityLost);
+        }
+        Ok(())
+    })?;
     #[cfg(target_os = "android")]
-    let identity = identity::open(&context.directory, epoch, create, context.platform.clone())?;
+    let identity = diagnostic::at(Stage::Identity, || {
+        identity::open(&context.directory, epoch, create, context.platform.clone())
+    })?;
     #[cfg(not(target_os = "android"))]
-    let identity = identity::open(&context.directory, epoch, create)?;
+    let identity = diagnostic::at(Stage::Identity, || {
+        identity::open(&context.directory, epoch, create)
+    })?;
     let role = match context.role {
         #[cfg(not(target_os = "android"))]
         OwnerRole::Pc => Role::Pc,
         OwnerRole::Phone => Role::Phone,
     };
-    let der = certificate_for(&context.directory, &identity, role, route::unix_seconds()?)?;
+    let der = diagnostic::at(Stage::Certificate, || {
+        certificate_for(&context.directory, &identity, role, route::unix_seconds()?)
+    })?;
     let certified_key = Arc::new(CertifiedKey::new(
         vec![CertificateDer::from(der)],
         identity.signing_key(),
     ));
-    let store = Store::open(&context.directory, identity.spki().clone(), epoch)?;
-    if !files::exists(&initialized)? {
-        files::write_new(&initialized, &[1])?
-    }
+    let store = diagnostic::at(Stage::Database, || {
+        Store::open(&context.directory, identity.spki().clone(), epoch)
+    })?;
+    diagnostic::at(Stage::Initialized, || {
+        if !files::exists(&initialized)? {
+            files::write_new(&initialized, &[1])?;
+        }
+        Ok(())
+    })?;
     Ok(Installation {
         store,
         identity,

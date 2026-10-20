@@ -4,6 +4,7 @@ use axum::http::Response;
 
 fn upload() -> Upload {
     Upload {
+        rebackup_of: None,
         request_id: crate::qr_base64::encode(&[1; 16]),
         source_id: crate::qr_base64::encode(&[2; 16]),
         source_revision: "immutable-1".into(),

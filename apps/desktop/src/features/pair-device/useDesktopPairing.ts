@@ -36,7 +36,7 @@ interface Runtime {
 }
 
 const activePhases: Partial<Record<PairingPhase, true>> = {
-  open: true, reserved: true, consumed_pending_ack: true, pending: true, connecting: true,
+  open: true, reserved: true, consumed_pending_ack: true, pending: true, connecting: true, complete: true,
 };
 
 export function useDesktopPairing(): DesktopPairingController {

@@ -35,9 +35,14 @@
       "organization_review": "{{review}} Photos-Aufträge benötigen Album-/Ressourcenprüfung. Android-Ordner können nicht jede Photos-Beziehung darstellen; vollständige Wiederherstellung wird nicht angenommen."
     },
     "states": {
-      "queued": "Wartend", "preparing": "Quelle wird geprüft", "uploading": "Wird hochgeladen",
-      "finalizing": "Wartet auf dauerhafte PC-Bestätigung", "completed": "Abgeschlossen",
-      "paused": "Pausiert — Auftrag erhalten", "blocked": "Blockiert — Auftrag erhalten"
+      "queued": "Wartend",
+      "preparing": "Quelle wird geprüft",
+      "uploading": "Wird hochgeladen",
+      "finalizing": "Wartet auf dauerhafte PC-Bestätigung",
+      "completed": "Abgeschlossen",
+      "paused": "Pausiert — Auftrag erhalten",
+      "blocked": "Blockiert — Auftrag erhalten",
+      "owner_deleted": "Am Computer gelöscht; automatisches Hochladen unterdrückt"
     },
     "errors": {
       "pairing_required": "Kopple zuerst einen PC, bevor Dateien gesendet werden.",
@@ -73,8 +78,12 @@
       "lan_unavailable": "Der gekoppelte PC ist über die freigegebene LAN-Route nicht erreichbar.",
       "identity_unavailable": "Die native Geräteidentität ist nicht verfügbar. Der Dateizugriff bleibt geschlossen.",
       "revoked": "Die Kopplung wurde widerrufen. Unter der alten Kopplung werden keine Dateien gesendet.",
-      "outcome_unknown": "Das Ergebnis konnte nicht bestätigt werden. Der Auftrag bleibt erhalten; Erfolg wird nicht angenommen."
-    }
+      "outcome_unknown": "Das Ergebnis konnte nicht bestätigt werden. Der Auftrag bleibt erhalten; Erfolg wird nicht angenommen.",
+      "owner_deleted": "Diese Quellversion wurde am Computer gelöscht. Sie wird nicht automatisch erneut hochgeladen.",
+      "source_identity_unknown": "Gespeicherte Quellidentitäten sind mehrdeutig. Prüfung erforderlich; kein automatisches Hochladen."
+    },
+    "rebackup": "Diese Version erneut sichern",
+    "rebackupConfirm": "Diese unveränderte Quellversion ausdrücklich erneut an den gekoppelten Computer senden? Der Computer muss den Dateizugriff erlauben."
   },
   "onboarding": {
     "step": "Schritt {{current}} von {{total}}",
@@ -159,15 +168,42 @@
       "pc_unconfirmed": "Der PC hat den dauerhaften Widerruf nicht bestätigt. Die Kopplung bleibt auf diesem Telefon bestehen. Erneut versuchen oder ausdrücklich nur auf diesem Telefon entfernen."
     },
     "phases": {
-      "idle": { "title": "Bereit zum Scannen", "description": "Erstelle eine neue Einladung am Computer und scanne ihren QR-Code." },
-      "open": { "title": "Einladung offen", "description": "Die Einladung ist aktiv, aber es wurde noch kein Gerätevertrauen hergestellt." },
-      "connecting": { "title": "Sichere Verbindung wird aufgebaut", "description": "Das native Kloda prüft den Computer und die lokale Verbindung. Ein dauerhafter ausstehender Datensatz oder Vertrauenspin ist noch nicht bestätigt." },
-      "reserved": { "title": "Warten auf Computerzustimmung", "description": "Der Computer hat einen Kandidaten reserviert. Nur eine ausdrückliche Entscheidung am Computer kann die normale Kopplung genehmigen." },
-      "pending": { "title": "Kopplung ausstehend", "description": "Dieses Telefon hat eine ausstehende Bindung gespeichert. Die Bestätigung des Computers ist noch nicht bestätigt. Prüfe den Kandidaten am Computer." },
-      "consumed_pending_ack": { "title": "Pin gespeichert; Abschluss ausstehend", "description": "Die Computeridentität ist auf diesem Telefon dauerhaft angeheftet. Der Abschlussaustausch ist nicht bestätigt; Fortsetzen kann dasselbe Paar wiederherstellen." },
-      "complete": { "title": "Kopplung abgeschlossen", "description": "Dieses Telefon hat den Vertrauenspin des Computers gespeichert und den Abschlussaustausch empfangen. Dateizugriff erfordert weiterhin eine separate Autorisierung." },
-      "invalid": { "title": "Versuch beendet", "description": "Diese Einladung ist nicht mehr aktiv. Ein Computerdatensatz kann bestehen bleiben; gehe nicht von einem Rollback aus." },
-      "revoked": { "title": "Auf diesem Telefon deaktiviert", "description": "Der lokale Versuch oder die Bindung ist deaktiviert. Computervertrauen und Dateizugriffsverbote bleiben davon getrennt." }
+      "idle": {
+        "title": "Bereit zum Scannen",
+        "description": "Erstelle eine neue Einladung am Computer und scanne ihren QR-Code."
+      },
+      "open": {
+        "title": "Einladung offen",
+        "description": "Die Einladung ist aktiv, aber es wurde noch kein Gerätevertrauen hergestellt."
+      },
+      "connecting": {
+        "title": "Sichere Verbindung wird aufgebaut",
+        "description": "Das native Kloda prüft den Computer und die lokale Verbindung. Ein dauerhafter ausstehender Datensatz oder Vertrauenspin ist noch nicht bestätigt."
+      },
+      "reserved": {
+        "title": "Warten auf Computerzustimmung",
+        "description": "Der Computer hat einen Kandidaten reserviert. Nur eine ausdrückliche Entscheidung am Computer kann die normale Kopplung genehmigen."
+      },
+      "pending": {
+        "title": "Kopplung ausstehend",
+        "description": "Dieses Telefon hat eine ausstehende Bindung gespeichert. Die Bestätigung des Computers ist noch nicht bestätigt. Prüfe den Kandidaten am Computer."
+      },
+      "consumed_pending_ack": {
+        "title": "Pin gespeichert; Abschluss ausstehend",
+        "description": "Die Computeridentität ist auf diesem Telefon dauerhaft angeheftet. Der Abschlussaustausch ist nicht bestätigt; Fortsetzen kann dasselbe Paar wiederherstellen."
+      },
+      "complete": {
+        "title": "Kopplung abgeschlossen",
+        "description": "Dieses Telefon hat den Vertrauenspin des Computers gespeichert und den Abschlussaustausch empfangen. Dateizugriff erfordert weiterhin eine separate Autorisierung."
+      },
+      "invalid": {
+        "title": "Versuch beendet",
+        "description": "Diese Einladung ist nicht mehr aktiv. Ein Computerdatensatz kann bestehen bleiben; gehe nicht von einem Rollback aus."
+      },
+      "revoked": {
+        "title": "Auf diesem Telefon deaktiviert",
+        "description": "Der lokale Versuch oder die Bindung ist deaktiviert. Computervertrauen und Dateizugriffsverbote bleiben davon getrennt."
+      }
     },
     "errors": {
       "invalid_qr": "Dies ist kein gültiger Kloda-Kopplungs-QR.",

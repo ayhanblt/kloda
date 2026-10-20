@@ -14,6 +14,8 @@ pub(crate) struct Upload {
     pub(crate) name: String,
     pub(crate) sha256: String,
     pub(crate) size: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) rebackup_of: Option<String>,
 }
 
 pub(crate) enum Request {
@@ -81,6 +83,7 @@ pub(crate) enum Error {
     Denied,
     InvalidRequest,
     NotFound,
+    OwnerDeleted,
     Conflict,
     HashMismatch,
     AclBusy,

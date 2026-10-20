@@ -1,11 +1,12 @@
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { toast } from 'sonner';
 
 import { App } from './App';
 import { i18n } from '../shared/i18n';
 
 describe('App', () => {
+  beforeEach(() => { window.history.replaceState(null, '', '#/backup'); });
   afterEach(() => { cleanup(); vi.useRealTimers(); window.kloda = undefined; window.location.hash = ''; toast.dismiss(); });
 
   it('blocks storage setup until a source is selected', async () => {
@@ -17,7 +18,7 @@ describe('App', () => {
     };
     render(<App />);
     fireEvent.click(await screen.findByRole('button', { name: i18n.t('onboarding.continue') }));
-    expect(await screen.findByRole('alert')).toHaveTextContent(i18n.t('onboarding.sourceRequired'));
+    expect(await screen.findByText(i18n.t('onboarding.sourceRequired'))).toHaveAttribute('role', 'alert');
     fireEvent.click(screen.getByRole('button', { name: i18n.t('onboarding.chooseFolders') }));
     expect(await screen.findByText('DCIM')).toBeInTheDocument();
   });
@@ -41,7 +42,7 @@ describe('App', () => {
     expect(window.location.hash).toBe('#/pairing');
     await waitFor(() => expect(screen.getAllByText(i18n.t('pairing.errors.native_unsupported')).length).toBeGreaterThan(0));
     expect(screen.queryByRole('textbox', { name: i18n.t('onboarding.endpoint') })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: i18n.t('pairing.backupNavigation') }));
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('receiver.advancedNavigation') }));
     expect(window.location.hash).toBe('#/backup');
     expect(screen.getByRole('textbox', { name: i18n.t('onboarding.endpoint') })).toHaveValue('https://personal.example/webdav');
   });
@@ -71,7 +72,7 @@ describe('App', () => {
     fireEvent.change(screen.getByLabelText(i18n.t('onboarding.password')), { target: { value: 'public-fixture-password' } });
     await act(async () => { finishTest(); await pendingTest; });
     expect(start).toBeDisabled();
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByText(i18n.t('onboarding.verified'))).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: i18n.t('onboarding.testConnection') }));
     await waitFor(() => expect(start).toBeEnabled());
   });
@@ -129,7 +130,7 @@ describe('App', () => {
     await screen.findByRole('button', { name: i18n.t('onboarding.continue') });
     fireEvent.click(screen.getByRole('button', { name: i18n.t('pairing.pairingNavigation') }));
     await screen.findByRole('dialog');
-    const backup = screen.getByRole('button', { name: i18n.t('pairing.backupNavigation') });
+    const backup = screen.getByRole('button', { name: i18n.t('receiver.advancedNavigation') });
     expect(backup).toBeDisabled();
     fireEvent.click(backup);
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -151,7 +152,7 @@ describe('App', () => {
     expect(pairing.close).not.toHaveBeenCalled();
     await act(async () => { resolveDecision({ phase: 'invalid' }); await result; });
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
-    fireEvent.click(screen.getByRole('button', { name: i18n.t('pairing.backupNavigation') }));
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('receiver.advancedNavigation') }));
     expect(window.location.hash).toBe('#/backup');
     await waitFor(() => expect(pairing.close).toHaveBeenCalledOnce());
   });

@@ -10,10 +10,10 @@ internal data class QueuedSourceFile(val reference: String, val relativePath: St
 internal data class FilesJob(
   val id: String, val recordId: String, val sourceId: String, val reference: String, val treeReference: String,
   val name: String, val wireSourceId: String, val sha256: String, val size: Long, val operationId: String?,
-  val offset: Long, val state: String, val errorCode: String?
+  val offset: Long, val state: String, val errorCode: String?, val rebackupOf: String? = null
 )
 
-internal class AndroidSyncJournal(context: Context) : SQLiteOpenHelper(context, "kloda-sync.sqlite", null, 2) {
+internal class AndroidSyncJournal(context: Context) : SQLiteOpenHelper(context, "kloda-sync.sqlite", null, 3) {
   companion object { val sourceLock = Any() }
   init { setWriteAheadLoggingEnabled(true) }
 
@@ -25,6 +25,7 @@ internal class AndroidSyncJournal(context: Context) : SQLiteOpenHelper(context, 
       available INTEGER NOT NULL DEFAULT 1, tree_reference TEXT NOT NULL DEFAULT '',
       PRIMARY KEY (source_id, reference))""")
     createTransfers(database)
+    createDisposition(database)
   }
 
   override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -33,6 +34,15 @@ internal class AndroidSyncJournal(context: Context) : SQLiteOpenHelper(context, 
       database.execSQL("ALTER TABLE queued_source_file ADD COLUMN tree_reference TEXT NOT NULL DEFAULT ''")
       createTransfers(database)
     }
+    if (oldVersion >= 2) {
+    database.execSQL("DROP TRIGGER retain_files_job")
+    database.execSQL("DROP TRIGGER immutable_files_job")
+    database.execSQL("ALTER TABLE files_job RENAME TO legacy_files_job")
+    createTransfers(database)
+    database.execSQL("INSERT INTO files_job SELECT *,'' FROM legacy_files_job")
+    database.execSQL("DROP TABLE legacy_files_job")
+    }
+    createDisposition(database)
   }
 
   private fun createTransfers(database: SQLiteDatabase) {
@@ -41,17 +51,21 @@ internal class AndroidSyncJournal(context: Context) : SQLiteOpenHelper(context, 
       reference TEXT NOT NULL, tree_reference TEXT NOT NULL, name TEXT NOT NULL,
       wire_source_id TEXT NOT NULL, sha256 TEXT NOT NULL, size_bytes INTEGER NOT NULL CHECK(size_bytes>=0),
       operation_id TEXT, acknowledged_bytes INTEGER NOT NULL DEFAULT 0 CHECK(acknowledged_bytes>=0 AND acknowledged_bytes<=size_bytes),
-      state TEXT NOT NULL, error_code TEXT,
-      UNIQUE(record_id,source_id,reference,tree_reference,name,sha256,size_bytes))""")
+      state TEXT NOT NULL, error_code TEXT, rebackup_of TEXT NOT NULL DEFAULT '',
+      UNIQUE(record_id,source_id,reference,tree_reference,name,sha256,size_bytes,rebackup_of))""")
     database.execSQL("""CREATE TRIGGER retain_files_job BEFORE DELETE ON files_job
       BEGIN SELECT RAISE(ABORT,'retained'); END""")
     database.execSQL("""CREATE TRIGGER immutable_files_job BEFORE UPDATE ON files_job
       WHEN NEW.id IS NOT OLD.id OR NEW.record_id IS NOT OLD.record_id OR NEW.source_id IS NOT OLD.source_id
       OR NEW.reference IS NOT OLD.reference OR NEW.tree_reference IS NOT OLD.tree_reference OR NEW.name IS NOT OLD.name
-      OR NEW.wire_source_id IS NOT OLD.wire_source_id OR NEW.sha256 IS NOT OLD.sha256 OR NEW.size_bytes IS NOT OLD.size_bytes
+      OR NEW.rebackup_of IS NOT OLD.rebackup_of OR NEW.wire_source_id IS NOT OLD.wire_source_id OR NEW.sha256 IS NOT OLD.sha256 OR NEW.size_bytes IS NOT OLD.size_bytes
       OR (OLD.operation_id IS NOT NULL AND NEW.operation_id IS NOT OLD.operation_id)
       OR NEW.acknowledged_bytes<OLD.acknowledged_bytes OR (OLD.state='completed' AND NEW.state!='completed')
       BEGIN SELECT RAISE(ABORT,'binding'); END""")
+  }
+
+  private fun createDisposition(database: SQLiteDatabase) {
+    database.execSQL("CREATE TABLE owner_deleted (job TEXT PRIMARY KEY REFERENCES files_job(id))")
   }
 
   fun reconcileSourceFiles(sourceId: String, treeReference: String, files: Sequence<QueuedSourceFile>): Int = synchronized(sourceLock) {
@@ -103,9 +117,41 @@ internal class AndroidSyncJournal(context: Context) : SQLiteOpenHelper(context, 
   ).use { it.moveToFirst() }
 
   fun version(record: String, source: String, file: QueuedSourceFile, tree: String, hash: String, size: Long): FilesJob? = readableDatabase.rawQuery(
-    "SELECT * FROM files_job WHERE record_id=? AND source_id=? AND reference=? AND tree_reference=? AND name=? AND sha256=? AND size_bytes=?",
-    arrayOf(record, source, file.reference, tree, file.relativePath.substringAfterLast('/'), hash, size.toString())
+    "SELECT * FROM files_job WHERE record_id=? AND reference=? AND tree_reference=? AND name=? AND sha256=? AND size_bytes=? ORDER BY rowid DESC LIMIT 1",
+    arrayOf(record, file.reference, tree, file.relativePath.substringAfterLast('/'), hash, size.toString())
   ).use { if (it.moveToFirst()) decode(it) else null }
+
+  fun find(id: String): FilesJob? = readableDatabase.rawQuery("SELECT * FROM files_job WHERE id=?", arrayOf(id)).use {
+    if (it.moveToFirst()) decode(it) else null
+  }
+
+  fun parent(job: FilesJob): FilesJob? = readableDatabase.rawQuery("""SELECT * FROM files_job WHERE wire_source_id=?
+    AND reference=? AND tree_reference=? AND name=? AND sha256=? AND size_bytes=? AND operation_id IS NOT NULL
+    ORDER BY rowid DESC LIMIT 2""", arrayOf(job.wireSourceId, job.reference, job.treeReference, job.name, job.sha256, job.size.toString())
+  ).use { cursor ->
+    if (!cursor.moveToFirst()) null else decode(cursor).also {
+      if (cursor.moveToNext()) throw FilesFailure("source_identity_unknown")
+    }
+  }
+
+  fun deleted(id: String): Boolean = readableDatabase.rawQuery("SELECT 1 FROM owner_deleted WHERE job=?", arrayOf(id)).use { it.moveToFirst() }
+
+  fun clearDeleted(id: String) { writableDatabase.delete("owner_deleted", "job=?", arrayOf(id)) }
+
+  fun markDeleted(id: String) { writableDatabase.execSQL("INSERT OR IGNORE INTO owner_deleted(job) SELECT id FROM files_job WHERE id=?", arrayOf(id)) }
+
+  fun wireSource(record: String, file: QueuedSourceFile, tree: String): String {
+    val bindings = readableDatabase.rawQuery("""SELECT record_id,wire_source_id FROM files_job
+      WHERE reference=? AND tree_reference=? AND name=? ORDER BY (record_id=?) DESC,rowid""",
+      arrayOf(file.reference, tree, file.relativePath.substringAfterLast('/'), record)).use { cursor -> buildList {
+      while (cursor.moveToNext()) add(cursor.getString(0) to cursor.getString(1))
+    } }
+    val current = bindings.firstOrNull { it.first == record }?.second
+    if (current != null) return current
+    val wires = bindings.map { it.second }.distinct()
+    if (wires.size > 1) throw FilesFailure("source_identity_unknown")
+    return wires.singleOrNull() ?: AndroidFilesSnapshots.randomId()
+  }
 
   fun retainsSnapshot(id: String): Boolean = readableDatabase.rawQuery(
     "SELECT 1 FROM files_job WHERE id=?", arrayOf(id)
@@ -119,12 +165,12 @@ internal class AndroidSyncJournal(context: Context) : SQLiteOpenHelper(context, 
     writableDatabase.insertOrThrow("files_job", null, ContentValues().apply {
       put("id", job.id); put("record_id", job.recordId); put("source_id", job.sourceId); put("reference", job.reference)
       put("tree_reference", job.treeReference); put("name", job.name); put("wire_source_id", job.wireSourceId)
-      put("sha256", job.sha256); put("size_bytes", job.size); put("state", "queued")
+      put("sha256", job.sha256); put("size_bytes", job.size); put("state", "queued"); put("rebackup_of", job.rebackupOf.orEmpty())
     })
   }
 
   fun jobs(record: String, source: String, after: String?): List<FilesJob> = readableDatabase.rawQuery(
-    "SELECT * FROM files_job WHERE record_id=? AND source_id=? AND state!='completed' AND id>? ORDER BY id LIMIT 32",
+    "SELECT * FROM files_job WHERE record_id=? AND source_id=? AND state!='completed' AND NOT EXISTS(SELECT 1 FROM owner_deleted d WHERE d.job=files_job.id) AND id>? ORDER BY id LIMIT 32",
     arrayOf(record, source, after.orEmpty())
   ).use { cursor -> buildList { while (cursor.moveToNext()) add(decode(cursor)) } }
 
@@ -151,9 +197,9 @@ internal class AndroidSyncJournal(context: Context) : SQLiteOpenHelper(context, 
         val job = decode(cursor)
         add(buildMap<String, Any> {
           put("id", job.id); put("recordId", job.recordId); put("sourceId", job.sourceId); put("name", job.name)
-          put("state", if (!running && job.state in setOf("uploading", "finalizing", "preparing")) "paused" else job.state)
+          put("state", if (deleted(job.id)) "owner_deleted" else if (!running && job.state in setOf("uploading", "finalizing", "preparing")) "paused" else job.state)
           put("acknowledgedBytes", job.offset.toString()); put("totalBytes", job.size.toString())
-          job.errorCode?.let { put("errorCode", it) }
+          if (deleted(job.id)) put("errorCode", "owner_deleted") else job.errorCode?.let { put("errorCode", it) }
         })
       } }
     }
@@ -163,10 +209,10 @@ internal class AndroidSyncJournal(context: Context) : SQLiteOpenHelper(context, 
     }
   }
 
-  private fun decode(cursor: Cursor): FilesJob {
+  internal fun decode(cursor: Cursor): FilesJob {
     fun text(name: String) = cursor.getString(cursor.getColumnIndexOrThrow(name))
     fun number(name: String) = cursor.getLong(cursor.getColumnIndexOrThrow(name))
     return FilesJob(text("id"), text("record_id"), text("source_id"), text("reference"), text("tree_reference"), text("name"),
-      text("wire_source_id"), text("sha256"), number("size_bytes"), text("operation_id"), number("acknowledged_bytes"), text("state"), text("error_code"))
+      text("wire_source_id"), text("sha256"), number("size_bytes"), text("operation_id"), number("acknowledged_bytes"), text("state"), text("error_code"), text("rebackup_of").ifEmpty { null })
   }
 }

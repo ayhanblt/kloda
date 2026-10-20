@@ -1,5 +1,6 @@
 use super::{handles, principal, security};
 use crate::error::{PairingError, Result};
+use crate::startup_diagnostics::{self as diagnostic, Operation};
 use std::{
     ffi::OsString,
     fs::File,
@@ -46,6 +47,13 @@ static FOLDERS: LazyLock<Result<Folders>> = LazyLock::new(|| {
 fn known_folder(id: &GUID) -> Result<PathBuf> {
     let mut pointer = null_mut();
     let status = unsafe { SHGetKnownFolderPath(id, 0, null_mut(), &mut pointer) };
+    if status < 0 {
+        diagnostic::record(
+            Some(Operation::KnownFolder),
+            PairingError::StorageFailure,
+            None,
+        );
+    }
     let result = if status < 0 || pointer.is_null() {
         Err(PairingError::StorageFailure)
     } else {
@@ -112,10 +120,16 @@ fn selection(directory: &Path) -> Result<&'static Folders> {
 fn create_directory(path: &Path) -> Result<()> {
     let name = wide(path)?;
     principal::with_attributes(true, |attributes| {
-        if unsafe { CreateDirectoryW(name.as_ptr(), attributes) } == 0
-            && unsafe { GetLastError() } != ERROR_ALREADY_EXISTS
-        {
-            return Err(PairingError::StorageFailure);
+        if unsafe { CreateDirectoryW(name.as_ptr(), attributes) } == 0 {
+            let code = unsafe { GetLastError() };
+            if code != ERROR_ALREADY_EXISTS {
+                diagnostic::record(
+                    Some(Operation::CreateDirectory),
+                    PairingError::StorageFailure,
+                    Some(code),
+                );
+                return Err(PairingError::StorageFailure);
+            }
         }
         Ok(())
     })

@@ -198,7 +198,9 @@ fn failure(code: Error) -> HttpResponse {
         Error::InvalidRequest | Error::BackupPathRejected => StatusCode::BAD_REQUEST,
         Error::Denied | Error::BackupPermissionDenied => StatusCode::FORBIDDEN,
         Error::NotFound => StatusCode::NOT_FOUND,
-        Error::Conflict | Error::HashMismatch | Error::BackupScopeChanged => StatusCode::CONFLICT,
+        Error::OwnerDeleted | Error::Conflict | Error::HashMismatch | Error::BackupScopeChanged => {
+            StatusCode::CONFLICT
+        }
         Error::AclBusy | Error::BackupBusy => StatusCode::LOCKED,
         Error::BackupFull => StatusCode::INSUFFICIENT_STORAGE,
         Error::OutcomeUnknown => StatusCode::INTERNAL_SERVER_ERROR,

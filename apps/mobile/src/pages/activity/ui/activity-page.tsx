@@ -1,7 +1,7 @@
 import { ArrowLeft, Download, FolderSync, Pause, ShieldCheck } from 'lucide-react-native';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BackHandler, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, BackHandler, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFileTransfer } from '../../../features/file-transfer/model/use-file-transfer';
 import { PairingButton } from '../../../features/pairing/ui/pairing-button';
@@ -45,6 +45,11 @@ export function ActivityPage({ onBack }: { onBack: () => void }) {
                   <View style={[styles.progress, { width: `${percent}%` }]} />
                 </View>
               )}
+              {job.state === 'owner_deleted' && <PairingButton label={t('transfer.rebackup')} secondary disabled={working || !!queue?.running}
+                onPress={() => Alert.alert(t('transfer.rebackup'), t('transfer.rebackupConfirm'), [
+                  { text: t('pairing.cancel'), style: 'cancel' },
+                  { text: t('transfer.rebackup'), onPress: () => { void run(job); } },
+                ], { cancelable: true })} />}
               {job.errorCode && <Text accessibilityRole="alert" style={styles.error}>{t(`transfer.errors.${job.errorCode}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
             </View>
           );

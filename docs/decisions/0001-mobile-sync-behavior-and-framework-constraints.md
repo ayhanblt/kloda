@@ -99,3 +99,7 @@ Platform sınırları için framework değerlendirmesinde kontrol edilen resmi k
 ## Session güncellemesi ve kanıt ayrımı
 
 2026-10-04 kalıcılaştırması ilk karar ile sonradan seçilen destek hedefini ayırır. Tarihsel kaynak: `kloda-transport-analysis-plan.md` kullanıcı ortak native kripto/iOS16.4+/Android7+ seçimi; `kloda-android-poc-scope-freeze.md` deney minSdk24'ün product minimum olmadığını açıklar. [Transport kanıtı](../security/poc-transport-evidence.md) ve [production/physical gate kaydı](../security/production-gates.md) çalışmış senaryo ile release gereksinimini ayırır; bu doc işi yeni runtime veya minimum-OS kararı değildir.
+
+## Desktop WebDAV retry clarification — 2026-10-20
+
+Ayhan explicitly retained the existing WebDAV timeout behavior: total five access attempts, with each retry sixty seconds after an observed failure. No additional total timeout/deadline is introduced. An unanswered request is not an observed failure and this policy alone does not guarantee a bounded completion time. Existing native phone transport deadlines are separate and unchanged. The mobile OS deferral budget is not applied to the Desktop native receiver. Implementation/restart evidence is tracked in the [Desktop jobs handoff](../implementation/implementation-session-handoff.md#desktop-webdav-jobs-and-final-host-review--2026-10-20), separately from physical/platform acceptance.

@@ -47,3 +47,11 @@ it('rejects partial or review-blocked Photos imports advertised as complete', ()
     { ...review, state: 'idle' }, { ...review, total: '02' }, { ...review, state: 'importing_unknown' },
   ]) expect(() => photosImportStatusFromNative(invalid)).toThrow('outcome_unknown');
 });
+
+it('keeps an owner-deleted historical version separate from completed', () => {
+  const queue = fileQueueFromNative({ running: false, jobs: [{ id: 'deleted', sourceId: 'source',
+    recordId: 'AAAAAAAAAAAAAAAAAAAAAA', name: 'kept-on-phone.jpg', state: 'owner_deleted',
+    acknowledgedBytes: '4', totalBytes: '4', errorCode: 'owner_deleted' }], totalJobs: '1', hasMore: false });
+  expect(queue.jobs[0]?.state).toBe('owner_deleted');
+  expect(queue.jobs[0]?.errorCode).toBe('owner_deleted');
+});

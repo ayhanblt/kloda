@@ -107,6 +107,7 @@ pub(super) fn publish(
     }
     let (scope, directories) = admit(store, sid, peer)?;
     scope_matches(entry, &scope)?;
+    crate::backup_retention::validate_publication(store, sid, entry, &directories)?;
     let final_path = final_name(&entry.operation.id);
     match directories.peer.symlink_metadata(&final_path) {
         Ok(_) => {

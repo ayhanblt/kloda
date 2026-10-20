@@ -9,7 +9,7 @@ internal class AndroidFilesTransfer(private val send: (String, Int) -> String) {
     val codes = setOf("invalid_qr", "unsupported_version", "lan_unavailable", "native_unsupported", "identity_unavailable",
       "continuity_lost", "tls_rejected", "proof_rejected", "invitation_expired", "candidate_stale", "already_paired",
       "storage_failure", "connection_closed", "outcome_unknown", "cancelled", "revoked", "denied", "invalid_request",
-      "not_found", "conflict", "hash_mismatch", "acl_busy", "acl_unavailable", "backup_unavailable", "backup_full",
+      "owner_deleted", "not_found", "conflict", "hash_mismatch", "acl_busy", "acl_unavailable", "backup_unavailable", "backup_full",
       "backup_busy", "backup_permission_denied", "backup_path_rejected", "backup_scope_changed")
 
     private fun number(value: JSONObject, key: String): Long {
@@ -53,7 +53,8 @@ internal class AndroidFilesTransfer(private val send: (String, Int) -> String) {
 
   fun create(job: FilesJob): FilesAck = request(JSONObject().put("kind", "create").put("upload", JSONObject()
     .put("requestId", job.id).put("sourceId", job.wireSourceId).put("sourceRevision", job.sha256)
-    .put("name", job.name).put("sha256", job.sha256).put("size", job.size)), job)
+    .put("name", job.name).put("sha256", job.sha256).put("size", job.size)
+    .apply { job.rebackupOf?.let { put("rebackupOf", it) } }), job)
 
   fun status(job: FilesJob): FilesAck = request(JSONObject().put("kind", "status").put("id", job.operationId), job)
 

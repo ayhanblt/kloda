@@ -23,7 +23,17 @@ export interface SyncProgress {
   bytesTotal: number;
   completedFiles: number;
   id: string;
-  status: 'idle' | 'running' | 'completed' | 'failed';
+  status: 'idle' | 'running' | 'completed' | 'failed' | 'stopped' | 'waiting_retry' | 'needs_review';
+  contextId?: string;
+  targetId?: string;
+  sourceIds?: readonly string[];
+  errorCode?: string;
+  startedAt?: string;
+  attempts?: number;
+  retryAt?: number;
+  nextOpportunityAt?: number;
+  retryScheduleId?: string;
+  reviewCount?: number;
   totalFiles: number;
 }
 

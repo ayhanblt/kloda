@@ -35,9 +35,14 @@
       "organization_review": "{{review}} Photos jobs need album/resource review. Android folders cannot represent every Photos relationship; complete restoration is not assumed."
     },
     "states": {
-      "queued": "Queued", "preparing": "Preparing verified source", "uploading": "Uploading",
-      "finalizing": "Waiting for durable PC completion", "completed": "Completed",
-      "paused": "Paused — job retained", "blocked": "Blocked — job retained"
+      "queued": "Queued",
+      "preparing": "Preparing verified source",
+      "uploading": "Uploading",
+      "finalizing": "Waiting for durable PC completion",
+      "completed": "Completed",
+      "paused": "Paused — job retained",
+      "blocked": "Blocked — job retained",
+      "owner_deleted": "Deleted on computer; automatic reupload suppressed"
     },
     "errors": {
       "pairing_required": "Pair with a PC before sending files.",
@@ -73,8 +78,12 @@
       "lan_unavailable": "The paired PC is not reachable over the approved LAN route.",
       "identity_unavailable": "Native device identity is unavailable. File access stays closed.",
       "revoked": "Pairing was revoked. Files will not be sent under the old pairing.",
-      "outcome_unknown": "The result could not be confirmed. Pending work is retained; no success is assumed."
-    }
+      "outcome_unknown": "The result could not be confirmed. Pending work is retained; no success is assumed.",
+      "owner_deleted": "This source version was deleted on the computer. It will not be automatically uploaded again.",
+      "source_identity_unknown": "Retained source identities are ambiguous. Review is required; no automatic upload."
+    },
+    "rebackup": "Back up this version again",
+    "rebackupConfirm": "Explicitly send this unchanged source version again to the currently paired computer? The computer must approve file access."
   },
   "onboarding": {
     "step": "Step {{current}} of {{total}}",
@@ -159,15 +168,42 @@
       "pc_unconfirmed": "The PC did not confirm durable revocation. Pairing has not been removed on this phone. Retry, or explicitly remove only on this phone."
     },
     "phases": {
-      "idle": { "title": "Ready to scan", "description": "Create a fresh invitation on the computer, then scan its QR code." },
-      "open": { "title": "Invitation open", "description": "The invitation is active, but no device trust has been established." },
-      "connecting": { "title": "Connecting securely", "description": "Native Kloda is checking the computer and local connection. No durable pending record or trust pin is confirmed yet." },
-      "reserved": { "title": "Waiting for computer approval", "description": "The computer has reserved a candidate. Only an explicit decision on the computer can approve normal pairing." },
-      "pending": { "title": "Pairing pending", "description": "This phone saved a pending binding. The computer's commitment has not yet been confirmed. Check the candidate on your computer." },
-      "consumed_pending_ack": { "title": "Pinned; completion pending", "description": "The computer's identity is durably pinned on this phone. The completion exchange is not confirmed; resume can recover the same pair." },
-      "complete": { "title": "Pairing complete", "description": "This phone saved the computer's trust pin and received the completion exchange. File access still requires separate authorization." },
-      "invalid": { "title": "Attempt ended", "description": "This invitation is no longer active. A computer-side record may remain; do not assume rollback." },
-      "revoked": { "title": "Disabled on this phone", "description": "The local attempt or binding is disabled. Any computer-side trust and file-access denies remain separate." }
+      "idle": {
+        "title": "Ready to scan",
+        "description": "Create a fresh invitation on the computer, then scan its QR code."
+      },
+      "open": {
+        "title": "Invitation open",
+        "description": "The invitation is active, but no device trust has been established."
+      },
+      "connecting": {
+        "title": "Connecting securely",
+        "description": "Native Kloda is checking the computer and local connection. No durable pending record or trust pin is confirmed yet."
+      },
+      "reserved": {
+        "title": "Waiting for computer approval",
+        "description": "The computer has reserved a candidate. Only an explicit decision on the computer can approve normal pairing."
+      },
+      "pending": {
+        "title": "Pairing pending",
+        "description": "This phone saved a pending binding. The computer's commitment has not yet been confirmed. Check the candidate on your computer."
+      },
+      "consumed_pending_ack": {
+        "title": "Pinned; completion pending",
+        "description": "The computer's identity is durably pinned on this phone. The completion exchange is not confirmed; resume can recover the same pair."
+      },
+      "complete": {
+        "title": "Pairing complete",
+        "description": "This phone saved the computer's trust pin and received the completion exchange. File access still requires separate authorization."
+      },
+      "invalid": {
+        "title": "Attempt ended",
+        "description": "This invitation is no longer active. A computer-side record may remain; do not assume rollback."
+      },
+      "revoked": {
+        "title": "Disabled on this phone",
+        "description": "The local attempt or binding is disabled. Any computer-side trust and file-access denies remain separate."
+      }
     },
     "errors": {
       "invalid_qr": "This is not a valid Kloda pairing QR.",

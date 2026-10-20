@@ -48,17 +48,29 @@ impl Store {
         }))
     }
 
+    #[cfg(test)]
     pub(crate) fn approve_backup(
         &mut self,
         sid: &[u8; 16],
         folder: &str,
         expected_revision: Option<i64>,
     ) -> Result<()> {
+        self.approve_backup_guarded(sid, folder, expected_revision, || Ok(()))
+    }
+
+    pub(crate) fn approve_backup_guarded<G>(
+        &mut self,
+        sid: &[u8; 16],
+        folder: &str,
+        expected_revision: Option<i64>,
+        authorize: impl FnOnce() -> Result<G>,
+    ) -> Result<()> {
         let record = approved_peer(self.record(sid)?)?;
         if self.backup_scope(sid)?.map(|scope| scope.revision) != expected_revision {
             return Err(PairingError::CandidateStale);
         }
         let binding = backup_root::prepare(folder, &record.expected)?;
+        let _authorization = authorize()?;
         self.acl_write(|tx, local, epoch| {
             approved_peer(load(tx, sid, local, epoch)?)?;
             let revision: Option<i64> = tx
@@ -89,7 +101,17 @@ impl Store {
         })
     }
 
+    #[cfg(test)]
     pub(crate) fn revoke_backup(&mut self, sid: &[u8; 16]) -> Result<()> {
+        self.revoke_backup_guarded(sid, || Ok(()))
+    }
+
+    pub(crate) fn revoke_backup_guarded<G>(
+        &mut self,
+        sid: &[u8; 16],
+        authorize: impl FnOnce() -> Result<G>,
+    ) -> Result<()> {
+        let _authorization = authorize()?;
         self.acl_write(|tx, local, epoch| {
             let record = load(tx, sid, local, epoch)?.ok_or(PairingError::CandidateStale)?;
             if record.role != RecordRole::Pc {

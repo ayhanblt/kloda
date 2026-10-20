@@ -35,9 +35,14 @@
       "organization_review": "{{review}} Photos işi albüm/resource incelemesi gerektiriyor. Android klasörleri her Photos ilişkisini temsil edemez; tam geri yükleme varsayılmaz."
     },
     "states": {
-      "queued": "Kuyrukta", "preparing": "Kaynak doğrulanıyor", "uploading": "Yükleniyor",
-      "finalizing": "PC'nin kalıcı tamamlanma onayı bekleniyor", "completed": "Tamamlandı",
-      "paused": "Duraklatıldı — iş korunuyor", "blocked": "Engellendi — iş korunuyor"
+      "queued": "Kuyrukta",
+      "preparing": "Kaynak doğrulanıyor",
+      "uploading": "Yükleniyor",
+      "finalizing": "PC'nin kalıcı tamamlanma onayı bekleniyor",
+      "completed": "Tamamlandı",
+      "paused": "Duraklatıldı — iş korunuyor",
+      "blocked": "Engellendi — iş korunuyor",
+      "owner_deleted": "Bilgisayarda silindi; otomatik yeniden yükleme engellendi"
     },
     "errors": {
       "pairing_required": "Dosya göndermeden önce PC ile eşleşin.",
@@ -73,8 +78,12 @@
       "lan_unavailable": "Eşleşmiş PC onaylı LAN rotasından erişilemiyor.",
       "identity_unavailable": "Native cihaz kimliği kullanılamıyor. Dosya erişimi kapalı kalıyor.",
       "revoked": "Eşleşme iptal edildi. Eski eşleşme ile dosya gönderilmeyecek.",
-      "outcome_unknown": "Sonuç doğrulanamadı. Bekleyen iş korunuyor; başarı varsayılmıyor."
-    }
+      "outcome_unknown": "Sonuç doğrulanamadı. Bekleyen iş korunuyor; başarı varsayılmıyor.",
+      "owner_deleted": "Bu kaynak sürümü bilgisayarda silindi. Otomatik olarak yeniden yüklenmez.",
+      "source_identity_unknown": "Kalıcı kaynak kimlikleri belirsiz. İnceleme gerekiyor; otomatik yükleme yapılmaz."
+    },
+    "rebackup": "Bu sürümü yeniden yedekle",
+    "rebackupConfirm": "Bu değişmemiş kaynak sürümü eşleşmiş bilgisayara açık isteğinizle yeniden gönderilsin mi? Bilgisayarda dosya erişimi onaylı olmalıdır."
   },
   "onboarding": {
     "step": "Adım {{current}} / {{total}}",
@@ -159,15 +168,42 @@
       "pc_unconfirmed": "PC’den kalıcı iptal onayı alınamadı. Bu telefondaki eşleşme henüz kaldırılmadı. Tekrar deneyin veya açıkça yalnız telefonda kaldırın."
     },
     "phases": {
-      "idle": { "title": "Taramaya hazır", "description": "Bilgisayarda yeni bir davet oluşturun ve QR kodunu tarayın." },
-      "open": { "title": "Davet açık", "description": "Davet etkin, ancak henüz cihaz güveni oluşturulmadı." },
-      "connecting": { "title": "Güvenli bağlantı kuruluyor", "description": "Yerel Kloda bilgisayarı ve yerel bağlantıyı kontrol ediyor. Kalıcı bekleyen kayıt veya güven sabitlemesi henüz doğrulanmadı." },
-      "reserved": { "title": "Bilgisayar onayı bekleniyor", "description": "Bilgisayar bir adayı ayırdı. Normal eşleştirmeyi yalnızca bilgisayardaki açık karar onaylayabilir." },
-      "pending": { "title": "Eşleştirme bekliyor", "description": "Bu telefon bekleyen bir bağ kaydetti. Bilgisayarın kalıcı onayı henüz doğrulanmadı. Adayı bilgisayarınızda kontrol edin." },
-      "consumed_pending_ack": { "title": "Kimlik sabit; tamamlama bekliyor", "description": "Bilgisayarın kimliği bu telefonda kalıcı olarak sabitlendi. Tamamlama alışverişi doğrulanmadı; sürdürme aynı çifti kurtarabilir." },
-      "complete": { "title": "Eşleştirme tamamlandı", "description": "Bu telefon bilgisayarın güven sabitlemesini kaydetti ve tamamlama alışverişini aldı. Dosya erişimi yine ayrı yetkilendirme gerektirir." },
-      "invalid": { "title": "Girişim sona erdi", "description": "Bu davet artık etkin değil. Bilgisayarda kayıt kalabilir; geri alındığını varsaymayın." },
-      "revoked": { "title": "Bu telefonda devre dışı", "description": "Yerel girişim veya bağ devre dışı. Bilgisayar tarafındaki güven ve dosya erişim retleri ayrı kalır." }
+      "idle": {
+        "title": "Taramaya hazır",
+        "description": "Bilgisayarda yeni bir davet oluşturun ve QR kodunu tarayın."
+      },
+      "open": {
+        "title": "Davet açık",
+        "description": "Davet etkin, ancak henüz cihaz güveni oluşturulmadı."
+      },
+      "connecting": {
+        "title": "Güvenli bağlantı kuruluyor",
+        "description": "Yerel Kloda bilgisayarı ve yerel bağlantıyı kontrol ediyor. Kalıcı bekleyen kayıt veya güven sabitlemesi henüz doğrulanmadı."
+      },
+      "reserved": {
+        "title": "Bilgisayar onayı bekleniyor",
+        "description": "Bilgisayar bir adayı ayırdı. Normal eşleştirmeyi yalnızca bilgisayardaki açık karar onaylayabilir."
+      },
+      "pending": {
+        "title": "Eşleştirme bekliyor",
+        "description": "Bu telefon bekleyen bir bağ kaydetti. Bilgisayarın kalıcı onayı henüz doğrulanmadı. Adayı bilgisayarınızda kontrol edin."
+      },
+      "consumed_pending_ack": {
+        "title": "Kimlik sabit; tamamlama bekliyor",
+        "description": "Bilgisayarın kimliği bu telefonda kalıcı olarak sabitlendi. Tamamlama alışverişi doğrulanmadı; sürdürme aynı çifti kurtarabilir."
+      },
+      "complete": {
+        "title": "Eşleştirme tamamlandı",
+        "description": "Bu telefon bilgisayarın güven sabitlemesini kaydetti ve tamamlama alışverişini aldı. Dosya erişimi yine ayrı yetkilendirme gerektirir."
+      },
+      "invalid": {
+        "title": "Girişim sona erdi",
+        "description": "Bu davet artık etkin değil. Bilgisayarda kayıt kalabilir; geri alındığını varsaymayın."
+      },
+      "revoked": {
+        "title": "Bu telefonda devre dışı",
+        "description": "Yerel girişim veya bağ devre dışı. Bilgisayar tarafındaki güven ve dosya erişim retleri ayrı kalır."
+      }
     },
     "errors": {
       "invalid_qr": "Bu geçerli bir Kloda eşleştirme QR kodu değil.",

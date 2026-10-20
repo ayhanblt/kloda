@@ -6,12 +6,12 @@ use rusqlite::{
     params, Connection, ErrorCode, OptionalExtension, Row, Transaction, TransactionBehavior,
 };
 
-pub(super) struct Entry {
-    pub(super) id: [u8; 16],
-    pub(super) operation: Operation,
-    pub(super) revision: i64,
-    pub(super) binding: Binding,
-    pub(super) identity: [u8; 24],
+pub(crate) struct Entry {
+    pub(crate) id: [u8; 16],
+    pub(crate) operation: Operation,
+    pub(crate) revision: i64,
+    pub(crate) binding: Binding,
+    pub(crate) identity: [u8; 24],
 }
 
 fn blob<const N: usize>(row: &Row<'_>, index: usize) -> rusqlite::Result<[u8; N]> {
@@ -74,7 +74,7 @@ fn decode(row: &Row<'_>) -> rusqlite::Result<Entry> {
     Ok(entry)
 }
 
-pub(super) fn get(conn: &Connection, sid: &[u8; 16], id: &str) -> Result<Entry> {
+pub(crate) fn get(conn: &Connection, sid: &[u8; 16], id: &str) -> Result<Entry> {
     crate::qr_base64::fixed::<16>(id).map_err(|_| Error::InvalidRequest)?;
     conn.query_row(
         "SELECT id,request_id,source_id,source_revision,name,sha256,size,offset,state,revision,
@@ -87,7 +87,7 @@ pub(super) fn get(conn: &Connection, sid: &[u8; 16], id: &str) -> Result<Entry> 
     .ok_or(Error::NotFound)
 }
 
-pub(super) fn readable(
+pub(crate) fn readable(
     conn: &Connection,
     sid: &[u8; 16],
     peer: &crate::key::Spki,
@@ -112,7 +112,7 @@ pub(super) fn readable(
     .ok_or(Error::NotFound)
 }
 
-pub(super) fn by_request(conn: &Connection, sid: &[u8; 16], id: &str) -> Result<Option<Entry>> {
+pub(crate) fn by_request(conn: &Connection, sid: &[u8; 16], id: &str) -> Result<Option<Entry>> {
     conn.query_row(
         "SELECT id,request_id,source_id,source_revision,name,sha256,size,offset,state,revision,
         root,peer_root,file_identity FROM file_operations WHERE sid=?1 AND request_id=?2",
@@ -123,7 +123,7 @@ pub(super) fn by_request(conn: &Connection, sid: &[u8; 16], id: &str) -> Result<
     .map_err(storage)
 }
 
-pub(super) fn list(
+pub(crate) fn list(
     conn: &Connection,
     peer: &crate::key::Spki,
     scope: &Scope,
@@ -137,7 +137,8 @@ pub(super) fn list(
         "SELECT f.id,f.request_id,f.source_id,f.source_revision,f.name,f.sha256,f.size,f.offset,f.state,
         f.revision,f.root,f.peer_root,f.file_identity FROM file_operations f JOIN records r ON r.sid=f.sid
         WHERE f.root=?1 AND f.peer_root=?2 AND f.state=4 AND r.role=1 AND r.state IN (2,3)
-        AND r.expected=?3 AND r.peer=?4 AND (?5 IS NULL OR f.id>?5) ORDER BY f.id LIMIT 32",
+        AND r.expected=?3 AND r.peer=?4 AND NOT EXISTS(SELECT 1 FROM backup_deletions d WHERE d.id=f.id AND d.phase!=4)
+        AND (?5 IS NULL OR f.id>?5) ORDER BY f.id LIMIT 32",
     ).map_err(storage)?;
     let rows = statement
         .query_map(
@@ -151,15 +152,27 @@ pub(super) fn list(
             decode,
         )
         .map_err(storage)?;
-    rows.map(|row| {
-        let entry = row.map_err(storage)?;
-        super::checked_file(directories, &entry, true, false)?;
-        Ok(entry.operation)
+    rows.filter_map(|row| {
+        let result = (|| {
+            let mut entry = row.map_err(storage)?;
+            entry.identity = crate::backup_retention::live_identity_from_connection(
+                conn,
+                &entry.operation.id,
+                entry.identity,
+            )?;
+            super::checked_file(directories, &entry, true, false)?;
+            Ok(entry.operation)
+        })();
+        if matches!(result, Err(Error::OwnerDeleted)) {
+            None
+        } else {
+            Some(result)
+        }
     })
     .collect()
 }
 
-pub(super) fn write<T>(
+pub(crate) fn write<T>(
     store: &mut Store,
     change: impl FnOnce(&Transaction<'_>, &crate::key::Spki, &[u8; 16]) -> Result<T>,
 ) -> Result<T> {
@@ -185,7 +198,7 @@ pub(super) fn write<T>(
     Ok(value)
 }
 
-pub(super) fn insert(
+pub(crate) fn insert(
     store: &mut Store,
     sid: &[u8; 16],
     id: &str,
@@ -201,11 +214,18 @@ pub(super) fn insert(
             params![id, sid.as_slice(), upload.request_id, upload.source_id, upload.source_revision,
                 upload.name, hash.as_slice(), size, scope.revision, scope.binding.root.as_slice(),
                 scope.binding.peer.as_slice(), identity.as_slice()]).map_err(storage)?;
+        if let Some(previous) = &upload.rebackup_of {
+            tx.execute(
+                "INSERT INTO backup_rebackup_requests(id,previous_id) VALUES(?1,?2)",
+                params![id, previous],
+            )
+            .map_err(storage)?;
+        }
         get(tx, sid, id)
     })
 }
 
-pub(super) fn advance(
+pub(crate) fn advance(
     store: &mut Store,
     sid: &[u8; 16],
     entry: &mut Entry,
@@ -237,7 +257,7 @@ fn code(state: OperationState) -> i64 {
     }
 }
 
-pub(super) fn storage(error: rusqlite::Error) -> Error {
+pub(crate) fn storage(error: rusqlite::Error) -> Error {
     match error {
         rusqlite::Error::SqliteFailure(error, _) => match error.code {
             ErrorCode::DatabaseBusy | ErrorCode::DatabaseLocked => Error::AclBusy,

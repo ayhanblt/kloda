@@ -69,7 +69,7 @@ impl Store {
             )
             .map_err(storage)?;
             tx.commit().map_err(|_| PairingError::OutcomeUnknown)?;
-        } else if !matches!(version, 1..=3) {
+        } else if !matches!(version, 1..=4) {
             return Err(PairingError::StorageFailure);
         }
         let mut integrity = conn.prepare("PRAGMA integrity_check").map_err(storage)?;
@@ -87,7 +87,7 @@ impl Store {
         drop(integrity);
         check_installation(&conn, &local, &epoch)?;
         visit(&conn, &local, &epoch, |_| Ok(()))?;
-        if !matches!(version, 2 | 3) {
+        if !matches!(version, 2..=4) {
             let tx = conn
                 .transaction_with_behavior(TransactionBehavior::Immediate)
                 .map_err(storage)?;
@@ -96,6 +96,7 @@ impl Store {
             tx.commit().map_err(|_| PairingError::OutcomeUnknown)?;
         }
         crate::file_schema::migrate(&mut conn, version)?;
+        crate::backup_retention_schema::migrate(&mut conn, version)?;
         Ok(Self {
             conn,
             local,

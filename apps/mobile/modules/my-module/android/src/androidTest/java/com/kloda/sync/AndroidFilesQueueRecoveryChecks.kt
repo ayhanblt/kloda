@@ -28,7 +28,7 @@ internal object AndroidFilesQueueRecoveryChecks {
     }
     var journal = AndroidSyncJournal(context)
     try {
-      check(journal.writableDatabase.version == 2)
+      check(journal.writableDatabase.version == 3)
       val legacy = journal.readableDatabase.rawQuery("SELECT status FROM queued_source_file ORDER BY reference", null).use { cursor ->
         buildList { while (cursor.moveToNext()) add(cursor.getString(0)) }
       }
@@ -46,6 +46,18 @@ internal object AndroidFilesQueueRecoveryChecks {
       val operation = AndroidFilesSnapshots.randomId()
       journal.update(pending.id, "uploading", operation = operation, offset = 2)
       journal.update(completed.id, "completed", operation = AndroidFilesSnapshots.randomId(), offset = 4)
+      journal.markDeleted(completed.id)
+      check(journal.status(false, null)["jobs"].toString().contains("owner_deleted"))
+      val savedCompleted = journal.find(completed.id)!!
+      check(savedCompleted.state == "completed" && savedCompleted.operationId != null)
+      val retry = savedCompleted.copy(id = AndroidFilesSnapshots.randomId(), operationId = null, offset = 0,
+        state = "queued", rebackupOf = savedCompleted.operationId)
+      journal.insert(retry)
+      check(journal.find(completed.id) == savedCompleted)
+      check(journal.version(record, "reselected-source", second, tree, digest.sha256, 4)?.id == retry.id)
+      check(journal.wireSource(AndroidFilesSnapshots.randomId(), second, tree) == completed.wireSourceId)
+      check(journal.wireSource(record, first.copy(reference = "content://test/unrelated"), tree) != completed.wireSourceId)
+      journal.update(retry.id, "completed", operation = AndroidFilesSnapshots.randomId(), offset = 4)
       journal.close(); journal = AndroidSyncJournal(context)
       val resumed = journal.jobs(record, "source", null).single()
       check(resumed.operationId == operation && resumed.offset == 2L && resumed.sha256 == digest.sha256)
@@ -75,7 +87,7 @@ internal object AndroidFilesQueueRecoveryChecks {
       val removed = journal.jobs(record, "source", null).single()
       check(removed.state == "blocked" && removed.errorCode == "source_permission_lost" && removed.offset == 4L)
       val jobs = journal.status(false, null)["jobs"] as List<*>
-      check(jobs.size == 2 && jobs.any { (it as Map<*, *>)["state"] == "completed" })
+      check(jobs.size == 3 && jobs.any { (it as Map<*, *>)["state"] == "completed" })
       check(jobs.all { (it as Map<*, *>)["acknowledgedBytes"] is String })
       try { journal.writableDatabase.delete("files_job", "id=?", arrayOf(pending.id)); error("Retention must reject deletion") }
       catch (_: SQLiteException) { check(journal.retainsSnapshot(pending.id)) }

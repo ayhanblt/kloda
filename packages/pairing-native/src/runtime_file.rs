@@ -30,6 +30,7 @@ impl Actor {
                 .check(command.evidence.ip)
         });
         let revoke = matches!(&command.request, crate::file_protocol::Request::RevokePair);
+        let request_kind = super::desktop::request_kind(&command.request);
         let result = match authorized {
             Ok(()) => self.file_receiver.execute(
                 &mut self.installation.store,
@@ -39,23 +40,29 @@ impl Actor {
             ),
             Err(error) => Err(crate::file_protocol::Error::from(error)),
         };
+        // A caller-supplied SID cannot grow the error ledger without native durable trust.
+        let known_peer = self
+            .installation
+            .store
+            .record(&command.sid)
+            .is_ok_and(|record| {
+                record.is_some_and(|record| {
+                    record.role == RecordRole::Pc
+                        && record.peer.as_ref() == Some(&command.evidence.peer)
+                })
+            });
+        if known_peer {
+            super::desktop::observe_file_result(
+                &mut self.receiver_errors,
+                command.sid,
+                request_kind,
+                &result,
+            );
+        }
         if self.retained.as_ref().is_some_and(|record| {
             record.sid == command.sid && record.peer.as_ref() == Some(&command.evidence.peer)
         }) {
-            use crate::file_protocol::Error as FileError;
-            let target_error = match result.as_ref().err() {
-                Some(FileError::AclBusy) => Some(PairingError::AclBusy),
-                Some(FileError::AclUnavailable) => Some(PairingError::AclUnavailable),
-                Some(FileError::BackupUnavailable) => Some(PairingError::BackupUnavailable),
-                Some(FileError::BackupFull) => Some(PairingError::BackupFull),
-                Some(FileError::BackupBusy) => Some(PairingError::BackupBusy),
-                Some(FileError::BackupPermissionDenied) => {
-                    Some(PairingError::BackupPermissionDenied)
-                }
-                Some(FileError::BackupPathRejected) => Some(PairingError::BackupPathRejected),
-                Some(FileError::BackupScopeChanged) => Some(PairingError::BackupScopeChanged),
-                _ => None,
-            };
+            let target_error = result.as_ref().err().and_then(super::desktop::target_error);
             if let Some(error) = target_error {
                 self.error = Some(error);
             } else if result.is_ok()
@@ -77,6 +84,8 @@ impl Actor {
             }
         }
         if revoke && result.is_ok() {
+            self.receiver_errors
+                .retain(|(sid, _), _| sid != &command.sid);
             self.file_transport
                 .close_peer(&command.evidence.peer, Some(&command.evidence));
             self.drop_sid(&command.sid);

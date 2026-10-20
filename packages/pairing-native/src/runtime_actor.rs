@@ -3,7 +3,12 @@ use crate::store_rows::RecordRole;
 use std::io::ErrorKind;
 
 impl Actor {
-    pub(super) fn open(context: NativeContext) -> Result<Self> {
+    pub(super) fn open(
+        context: NativeContext,
+        #[cfg(not(target_os = "android"))] foreground: std::sync::Arc<
+            crate::foreground::Foreground,
+        >,
+    ) -> Result<Self> {
         let installation = crate::initialization::open(&context)?;
         installation.check()?;
         let now = crate::route::elapsed_ms()?;
@@ -17,6 +22,10 @@ impl Actor {
             crate::file_transport::Managed::new(!matches!(context.role, OwnerRole::Phone))?;
         let mut owner = Self {
             context,
+            #[cfg(not(target_os = "android"))]
+            foreground,
+            #[cfg(not(target_os = "android"))]
+            action_epoch: None,
             installation,
             listener: None,
             pc: None,
@@ -27,6 +36,8 @@ impl Actor {
             terminal: None,
             generation: 0,
             last_now: now,
+            #[cfg(not(target_os = "android"))]
+            last_maintenance: now,
             error: None,
             fatal: None,
             file_transport,
@@ -34,44 +45,17 @@ impl Actor {
             #[cfg(not(target_os = "android"))]
             file_receiver: crate::file_receiver::Receiver::new(),
             unpair_result: None,
+            #[cfg(not(target_os = "android"))]
+            receiver_errors: std::collections::BTreeMap::new(),
         };
         if !matches!(owner.context.role, OwnerRole::Phone) {
             if let Err(error) = owner.ensure_listener() {
                 owner.observe(error);
             }
         }
+        #[cfg(not(target_os = "android"))]
+        owner.maintain_backups();
         Ok(owner)
-    }
-
-    pub(super) fn now(&mut self) -> Result<u64> {
-        let result = crate::route::elapsed_ms().and_then(|now| {
-            if now < self.last_now {
-                Err(PairingError::NativeUnsupported)
-            } else {
-                Ok(now)
-            }
-        });
-        match result {
-            Ok(now) => {
-                self.last_now = now;
-                Ok(now)
-            }
-            Err(error) => {
-                self.fail_all(error);
-                Err(error)
-            }
-        }
-    }
-
-    pub(super) fn guard(&mut self) -> Result<u64> {
-        if let Some(error) = self.fatal {
-            return Err(error);
-        }
-        if let Err(error) = self.installation.check() {
-            self.fail_all(error);
-            return Err(error);
-        }
-        self.now()
     }
 
     pub(super) fn next_generation(&mut self) -> Result<u64> {
@@ -135,6 +119,15 @@ impl Actor {
         if self.fatal.is_some() {
             return;
         }
+        let now = match self.guard() {
+            Ok(now) => now,
+            Err(_) => return,
+        };
+        #[cfg(not(target_os = "android"))]
+        if now.saturating_sub(self.last_maintenance) >= 60_000 {
+            self.last_maintenance = now;
+            self.maintain_backups();
+        }
         if self.listener.is_none()
             && self
                 .phone
@@ -147,10 +140,6 @@ impl Actor {
         {
             return;
         }
-        let now = match self.guard() {
-            Ok(now) => now,
-            Err(_) => return,
-        };
         if let Some(pc) = &mut self.pc {
             if let Err(error) = pc.expire(now) {
                 let sid = *pc.sid();

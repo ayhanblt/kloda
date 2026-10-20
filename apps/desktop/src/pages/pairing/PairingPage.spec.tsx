@@ -39,6 +39,7 @@ describe('desktop pairing behavior', () => {
   afterEach(async () => {
     cleanup();
     await Promise.resolve();
+    vi.useRealTimers();
     window.kloda = undefined;
     toast.dismiss();
     vi.restoreAllMocks();
@@ -248,5 +249,48 @@ describe('desktop pairing behavior', () => {
     expect(bridge.cancel).not.toHaveBeenCalled();
     expect(bridge.createInvitation).not.toHaveBeenCalled();
     expect(bridge.revokeBackup).not.toHaveBeenCalled();
+  });
+
+  it('observes post-pairing folder failures and remote revocation without another user action', async () => {
+    vi.useFakeTimers();
+    const complete: PairingStatus = {
+      phase: 'complete', recordId: 'retained-1', backupScope: { state: 'approved', folder: '/Photos' },
+    };
+    const { bridge, update } = nativeStatus(complete);
+    await act(async () => { render(<PairingPage />); });
+    expect(screen.getByText(i18n.t('pairing.backupStates.approved'))).toBeInTheDocument();
+    update({ ...complete, backupScope: { state: 'unavailable', errorCode: 'backup_unavailable' } });
+    await act(async () => { await vi.advanceTimersByTimeAsync(1500); });
+    expect(screen.getByText(i18n.t('pairing.backupStates.unavailable'))).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent(i18n.t('pairing.errors.backup_unavailable'));
+    update({ phase: 'revoked', recordId: 'retained-1' });
+    await act(async () => { await vi.advanceTimersByTimeAsync(1500); });
+    expect(screen.queryByRole('button', { name: i18n.t('pairing.reselectBackup') })).not.toBeInTheDocument();
+    expect(screen.getAllByText(i18n.t('pairing.phases.revoked'))).toHaveLength(2);
+    await act(async () => { await vi.advanceTimersByTimeAsync(3000); });
+    expect(bridge.status).toHaveBeenCalledTimes(3);
+    expect(bridge.approveBackup).not.toHaveBeenCalled();
+  });
+
+  it('replaces stale permission success with uncertainty and recovers without overlapping polls', async () => {
+    vi.useFakeTimers();
+    const { bridge } = nativeStatus({ phase: 'complete', recordId: 'retained-1', backupScope: { state: 'approved' } });
+    let view!: ReturnType<typeof render>;
+    await act(async () => { view = render(<PairingPage />); });
+    const pending = Promise.withResolvers<PairingStatus>();
+    vi.mocked(bridge.status).mockReturnValueOnce(pending.promise);
+    await act(async () => { await vi.advanceTimersByTimeAsync(4500); });
+    expect(bridge.status).toHaveBeenCalledTimes(2);
+    await act(async () => { pending.reject({ code: 'connection_closed' }); });
+    expect(screen.queryByText(i18n.t('pairing.backupStates.approved'))).not.toBeInTheDocument();
+    expect(screen.getByText(i18n.t('pairing.backupStates.unknown'))).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: i18n.t('pairing.reselectBackup') })).toBeDisabled();
+    await act(async () => { await vi.advanceTimersByTimeAsync(1500); });
+    expect(screen.getByText(i18n.t('pairing.backupStates.approved'))).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: i18n.t('pairing.reselectBackup') })).toBeEnabled();
+    view.unmount();
+    await act(async () => { await vi.advanceTimersByTimeAsync(3000); });
+    expect(bridge.status).toHaveBeenCalledTimes(3);
+    expect(bridge.close).toHaveBeenCalledOnce();
   });
 });

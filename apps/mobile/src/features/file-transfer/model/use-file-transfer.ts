@@ -59,7 +59,7 @@ export function useFileTransfer() {
     };
   }, []);
 
-  const run = useCallback(async () => {
+  const run = useCallback(async (job?: { id: string; recordId: string }) => {
     if (action.current || !foreground.current) return;
     action.current = true;
     const version = ++epoch.current;
@@ -70,7 +70,7 @@ export function useFileTransfer() {
       if (!mounted.current || !foreground.current || version !== epoch.current) return;
       if (target.phase !== 'complete' || !target.recordId || !target.peerFingerprint) throw new Error('pairing_required');
       setPeer(target.peerFingerprint);
-      const observed = await fileTransfer.run(target.recordId);
+      const observed = job ? await fileTransfer.rebackup(target.recordId, job.id) : await fileTransfer.run(target.recordId);
       if (mounted.current && foreground.current && version === epoch.current) { setQueue(observed); setError(observed.errorCode ?? null); }
     } catch (cause) {
       if (mounted.current && version === epoch.current) setActionError(cause instanceof Error ? cause.message : 'outcome_unknown');

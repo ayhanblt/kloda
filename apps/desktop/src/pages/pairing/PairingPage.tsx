@@ -74,7 +74,7 @@ export function PairingPage({ onProtectedDecisionChange }: { onProtectedDecision
           <h3>{t('pairing.backupTitle')}</h3>
           <p className="pairing-caption">{t('pairing.noFileGrant')}</p>
           <p className="pairing-caption">{t('pairing.backupDescription')}</p>
-          <p role="status">{t(`pairing.backupStates.${backupScope?.state ?? 'not_approved'}`)}</p>
+          <p role="status">{t(`pairing.backupStates.${uncertain ? 'unknown' : backupScope?.state ?? 'not_approved'}`)}</p>
           {backupScope?.folder && <p className="pairing-caption">{t('pairing.backupFolder')} <code>{backupScope.folder}</code></p>}
           {backupScope?.errorCode && <p className="pairing-error" role="alert">{t(`pairing.errors.${backupScope.errorCode}`)}</p>}
           <div className="pairing-card-actions">

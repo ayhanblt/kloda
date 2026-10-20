@@ -152,7 +152,15 @@ fn durable(file: &File) -> Result<()> {
     }
     Ok(())
 }
-fn storage<E>(_: E) -> PairingError {
+fn storage(error: std::io::Error) -> PairingError {
+    #[cfg(target_os = "windows")]
+    crate::startup_diagnostics::record(
+        Some(crate::startup_diagnostics::Operation::Io),
+        PairingError::StorageFailure,
+        error.raw_os_error().map(|code| code as u32),
+    );
+    #[cfg(not(target_os = "windows"))]
+    let _ = error;
     PairingError::StorageFailure
 }
 

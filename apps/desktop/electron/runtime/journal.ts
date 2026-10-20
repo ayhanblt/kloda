@@ -12,6 +12,9 @@ export interface PendingUpload {
   relativePath: string;
   revision: string;
   temporaryPath: string;
+  issueCode?: string;
+  skipped?: boolean;
+  publishedPath?: string;
   phase: 'prepared' | 'uploaded' | 'moving' | 'moved' | 'conflict' | 'unknown';
 }
 
@@ -45,16 +48,18 @@ export class DesktopSyncJournal {
       const removePending = this.database.prepare(`
         DELETE FROM pending_upload WHERE target_id = ? AND source_id = ? AND relative_path = ?
           AND revision = ? AND temporary_path = ? AND phase = 'moved'
+          AND issue_code IS ? AND skipped = ? AND published_path IS ?
       `);
       const saveReceipt = this.database.prepare(`
-        INSERT OR IGNORE INTO upload_receipt (target_id, source_id, relative_path, revision) VALUES (?, ?, ?, ?)
+        INSERT INTO upload_receipt (target_id, source_id, relative_path, revision, published_path) VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(target_id, source_id, relative_path, revision) DO UPDATE SET published_path=excluded.published_path
       `);
       this.completePendingUpload = this.database.transaction((targetId: string, pending: PendingUpload) => {
         if (pending.targetId !== targetId) throw new Error('Pending upload target changed before settlement.');
         if (pending.phase !== 'moved') throw new Error('Cannot settle an unacknowledged upload.');
-        const removed = removePending.run(targetId, pending.sourceId, pending.relativePath, pending.revision, pending.temporaryPath);
+        const removed = removePending.run(targetId, pending.sourceId, pending.relativePath, pending.revision, pending.temporaryPath, ...this.pendingDetail(pending));
         if (removed.changes !== 1) throw new Error('Pending upload ownership changed before settlement.');
-        saveReceipt.run(targetId, pending.sourceId, pending.relativePath, pending.revision);
+        saveReceipt.run(targetId, pending.sourceId, pending.relativePath, pending.revision, pending.publishedPath ?? null);
       });
     } catch (error) {
       this.database.close();
@@ -88,6 +93,7 @@ export class DesktopSyncJournal {
         selectedPaths.add(source.path);
         insert.run(existing.get(source.path) ?? randomUUID(), source.path, source.displayName);
       }
+      if (selectedPaths.size !== existing.size || [...selectedPaths].some(path => !existing.has(path))) this.bumpWorkRevision();
     });
     save();
   }
@@ -121,23 +127,46 @@ export class DesktopSyncJournal {
     this.setSetting('scheduleDue', JSON.stringify(due));
   }
 
-  saveStorage(storage: Omit<StorageForm, 'password'>): void {
+  getWorkRevision(): string { return this.getSetting('workRevision') ?? 'legacy'; }
+
+  private bumpWorkRevision(): void { this.setSetting('workRevision', randomUUID()); }
+
+  saveStorage(storage: Omit<StorageForm, 'password'>, changed = true): void {
     this.setSetting('storage', JSON.stringify(storage));
     this.setSetting('storageTested', 'false');
+    if (changed) this.bumpWorkRevision();
   }
 
   setStorageTested(): void { this.setSetting('storageTested', 'true'); }
 
+  getAutostartChoice(): boolean | undefined {
+    const value = this.getSetting('autostartChoice');
+    return value === undefined ? undefined : value === 'true';
+  }
+
+  saveAutostartChoice(enabled: boolean): void { this.setSetting('autostartChoice', String(enabled)); }
+
   saveProgress(progress: SyncProgress): void {
+    const { id, status, bytesTransferred, bytesTotal, completedFiles, totalFiles, ...detail } = progress;
     this.database.prepare(`INSERT OR REPLACE INTO sync_progress
-      (id, status, bytes_transferred, bytes_total, completed_files, total_files) VALUES (?, ?, ?, ?, ?, ?)`)
-      .run(progress.id, progress.status, progress.bytesTransferred, progress.bytesTotal, progress.completedFiles, progress.totalFiles);
+      (id, status, bytes_transferred, bytes_total, completed_files, total_files, detail) VALUES (?, ?, ?, ?, ?, ?, ?)`)
+      .run(id, status, bytesTransferred, bytesTotal, completedFiles, totalFiles, JSON.stringify(detail));
   }
 
   getLatestProgress(): SyncProgress | null {
-    return (this.database.prepare(`SELECT id, status, bytes_transferred AS bytesTransferred,
-      bytes_total AS bytesTotal, completed_files AS completedFiles, total_files AS totalFiles
-      FROM sync_progress ORDER BY rowid DESC LIMIT 1`).get() as SyncProgress | undefined) ?? null;
+    const row = this.database.prepare(`SELECT id, status, bytes_transferred AS bytesTransferred,
+      bytes_total AS bytesTotal, completed_files AS completedFiles, total_files AS totalFiles, detail
+      FROM sync_progress ORDER BY rowid DESC LIMIT 1`).get() as (SyncProgress & { detail: string }) | undefined;
+    if (!row) return null;
+    const { detail, ...progress } = row;
+    return { ...JSON.parse(detail), ...progress };
+  }
+
+  getUploadReceiptPath(targetId: string, sourceId: string, relativePath: string, revision: string): string | undefined {
+    const row = this.database.prepare(`SELECT published_path AS path FROM upload_receipt
+      WHERE target_id = ? AND source_id = ? AND relative_path = ? AND revision = ?`)
+      .get(targetId, sourceId, relativePath, revision) as { path: string | null } | undefined;
+    return row ? row.path ?? `${sourceId}/${relativePath}` : undefined;
   }
 
   hasUploadReceipt(targetId: string, sourceId: string, relativePath: string, revision: string): boolean {
@@ -163,7 +192,8 @@ export class DesktopSyncJournal {
     const result = this.database.prepare(`
       UPDATE pending_upload SET phase = ? WHERE target_id = ? AND source_id = ? AND relative_path = ?
         AND revision = ? AND temporary_path = ? AND phase = ?
-    `).run(phase, targetId, pending.sourceId, pending.relativePath, pending.revision, pending.temporaryPath, pending.phase);
+        AND issue_code IS ? AND skipped = ? AND published_path IS ?
+    `).run(phase, targetId, pending.sourceId, pending.relativePath, pending.revision, pending.temporaryPath, pending.phase, ...this.pendingDetail(pending));
     if (result.changes !== 1) throw new Error('Pending upload ownership changed before transition.');
     pending.phase = phase;
   }
@@ -173,15 +203,56 @@ export class DesktopSyncJournal {
     const result = this.database.prepare(`
       DELETE FROM pending_upload WHERE target_id = ? AND source_id = ? AND relative_path = ?
         AND revision = ? AND temporary_path = ? AND phase = ?
-    `).run(targetId, pending.sourceId, pending.relativePath, pending.revision, pending.temporaryPath, pending.phase);
+        AND issue_code IS ? AND skipped = ? AND published_path IS ?
+    `).run(targetId, pending.sourceId, pending.relativePath, pending.revision, pending.temporaryPath, pending.phase, ...this.pendingDetail(pending));
     if (result.changes !== 1) throw new Error('Pending upload ownership changed before cleanup.');
   }
 
-  getPendingUploads(targetId: string): readonly PendingUpload[] {
-    return this.database.prepare(`
-      SELECT target_id AS targetId, source_id AS sourceId, relative_path AS relativePath, revision, temporary_path AS temporaryPath, phase
-      FROM pending_upload WHERE target_id = ?
-    `).all(targetId) as PendingUpload[];
+  setPendingIssue(targetId: string, pending: PendingUpload, code: string | undefined, skipped = false): void {
+    this.updatePending(targetId, pending, 'issue_code = ?, skipped = ?', [code ?? null, Number(skipped)]);
+    if (code === undefined) delete pending.issueCode;
+    else pending.issueCode = code;
+    if (skipped) pending.skipped = true;
+    else delete pending.skipped;
+  }
+
+  setPendingPublication(targetId: string, pending: PendingUpload, path: string): void {
+    if (pending.phase !== 'uploaded' && pending.phase !== 'conflict') throw new Error('Cannot change an in-flight publication.');
+    this.updatePending(targetId, pending, 'published_path = ?', [path]);
+    pending.publishedPath = path;
+  }
+
+  private updatePending(targetId: string, pending: PendingUpload, assignment: string, values: (string | number | null)[]): void {
+    if (pending.targetId !== targetId) throw new Error('Pending upload target changed before update.');
+    const result = this.database.prepare(`UPDATE pending_upload SET ${assignment}
+      WHERE target_id = ? AND source_id = ? AND relative_path = ? AND revision = ? AND temporary_path = ? AND phase = ?
+        AND issue_code IS ? AND skipped = ? AND published_path IS ?`)
+      .run(...values, targetId, pending.sourceId, pending.relativePath, pending.revision, pending.temporaryPath, pending.phase, ...this.pendingDetail(pending));
+    if (result.changes !== 1) throw new Error('Pending upload ownership changed before update.');
+  }
+
+  private pendingDetail(pending: PendingUpload): [string | null, number, string | null] {
+    return [pending.issueCode ?? null, Number(pending.skipped ?? false), pending.publishedPath ?? null];
+  }
+
+  getPendingUploads(targetId: string): readonly PendingUpload[] { return this.pendingRows('target_id = ?', [targetId]); }
+
+  getReviewUploads(includeOtherScopes = false): readonly PendingUpload[] {
+    const current = this.getDraft().storage;
+    const target = current ? JSON.stringify([current.endpoint, current.targetPath, current.username]) : '';
+    const otherScopes = includeOtherScopes ? ' OR target_id <> ? OR source_id NOT IN (SELECT id FROM source)' : '';
+    return this.pendingRows("issue_code IS NOT NULL OR phase IN ('conflict', 'unknown') OR target_id = ''" + otherScopes,
+      includeOtherScopes ? [target] : []);
+  }
+
+  private pendingRows(where: string, values: string[]): PendingUpload[] {
+    const rows = this.database.prepare(`SELECT target_id AS targetId, source_id AS sourceId, relative_path AS relativePath,
+      revision, temporary_path AS temporaryPath, phase, issue_code AS issueCode, skipped, published_path AS publishedPath
+      FROM pending_upload WHERE ${where}`).all(...values) as (Omit<PendingUpload, 'skipped' | 'issueCode' | 'publishedPath'> & { skipped: number; issueCode: string | null; publishedPath: string | null })[];
+    return rows.map(({ issueCode, skipped, publishedPath, ...row }) => ({ ...row,
+      ...(issueCode === null ? {} : { issueCode }), ...(skipped ? { skipped: true } : {}),
+      ...(publishedPath === null ? {} : { publishedPath }),
+    }));
   }
 
   hasUnscopedPendingUploads(): boolean {

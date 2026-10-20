@@ -60,6 +60,7 @@ fn actual_authenticated_sender_resumes_and_restores_own_durable_receiver() {
         .open(&restored_path)
         .unwrap();
     let upload = Upload {
+        rebackup_of: None,
         request_id: crate::qr_base64::encode(&[72; 16]),
         source_id: crate::qr_base64::encode(&[73; 16]),
         source_revision: "immutable".into(),

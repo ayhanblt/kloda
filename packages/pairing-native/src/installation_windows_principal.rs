@@ -1,5 +1,6 @@
-use super::security::check;
+use super::security::os_check;
 use crate::error::{PairingError, Result};
+use crate::startup_diagnostics::Operation;
 use std::{
     ffi::c_void,
     fs::File,
@@ -25,9 +26,10 @@ impl Sid {
     fn well_known(kind: WELL_KNOWN_SID_TYPE) -> Result<Self> {
         let mut sid = Self([0; SECURITY_MAX_SID_SIZE as usize / 4]);
         let mut size = SECURITY_MAX_SID_SIZE;
-        check(unsafe {
-            CreateWellKnownSid(kind, null_mut(), sid.0.as_mut_ptr().cast(), &mut size)
-        })?;
+        os_check(
+            unsafe { CreateWellKnownSid(kind, null_mut(), sid.0.as_mut_ptr().cast(), &mut size) },
+            Operation::WellKnownSid,
+        )?;
         Ok(sid)
     }
 }
@@ -38,32 +40,41 @@ pub(super) struct Principals {
 }
 static PRINCIPALS: LazyLock<Result<Principals>> = LazyLock::new(|| {
     let mut token = null_mut();
-    check(unsafe { OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &mut token) })?;
+    os_check(
+        unsafe { OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &mut token) },
+        Operation::OpenProcessToken,
+    )?;
     // File owns the token HANDLE too; CloseHandle is the required token destructor.
     let token = unsafe { File::from_raw_handle(token) };
     let mut buffer = [0usize; 32];
     let mut length = 0;
-    check(unsafe {
-        GetTokenInformation(
-            token.as_raw_handle(),
-            TokenUser,
-            buffer.as_mut_ptr().cast(),
-            size_of_val(&buffer) as u32,
-            &mut length,
-        )
-    })?;
+    os_check(
+        unsafe {
+            GetTokenInformation(
+                token.as_raw_handle(),
+                TokenUser,
+                buffer.as_mut_ptr().cast(),
+                size_of_val(&buffer) as u32,
+                &mut length,
+            )
+        },
+        Operation::TokenInformation,
+    )?;
     if length < size_of::<TOKEN_USER>() as u32 || length > size_of_val(&buffer) as u32 {
         return Err(PairingError::StorageFailure);
     }
     let user = unsafe { &*buffer.as_ptr().cast::<TOKEN_USER>() };
     let mut sid = Sid([0; SECURITY_MAX_SID_SIZE as usize / 4]);
-    check(unsafe {
-        CopySid(
-            SECURITY_MAX_SID_SIZE,
-            sid.0.as_mut_ptr().cast(),
-            user.User.Sid,
-        )
-    })?;
+    os_check(
+        unsafe {
+            CopySid(
+                SECURITY_MAX_SID_SIZE,
+                sid.0.as_mut_ptr().cast(),
+                user.User.Sid,
+            )
+        },
+        Operation::CopySid,
+    )?;
     Ok(Principals {
         user: sid,
         system: Sid::well_known(WinLocalSystemSid)?,
@@ -90,20 +101,36 @@ pub(super) fn with_attributes<T>(
     } else {
         0
     };
-    check(unsafe { InitializeAcl(acl, size_of_val(&acl_storage) as u32, ACL_REVISION) })?;
+    os_check(
+        unsafe { InitializeAcl(acl, size_of_val(&acl_storage) as u32, ACL_REVISION) },
+        Operation::InitializeAcl,
+    )?;
     for sid in [&principals.user, &principals.system] {
-        check(unsafe {
-            AddAccessAllowedAceEx(acl, ACL_REVISION, flags, FILE_ALL_ACCESS, sid.pointer())
-        })?;
+        os_check(
+            unsafe {
+                AddAccessAllowedAceEx(acl, ACL_REVISION, flags, FILE_ALL_ACCESS, sid.pointer())
+            },
+            Operation::AddAce,
+        )?;
     }
     let mut descriptor = SECURITY_DESCRIPTOR::default();
     let descriptor = ptr::from_mut(&mut descriptor).cast::<c_void>();
-    check(unsafe { InitializeSecurityDescriptor(descriptor, SECURITY_DESCRIPTOR_REVISION) })?;
-    check(unsafe { SetSecurityDescriptorOwner(descriptor, principals.user.pointer(), 0) })?;
-    check(unsafe { SetSecurityDescriptorDacl(descriptor, 1, acl, 0) })?;
-    check(unsafe {
-        SetSecurityDescriptorControl(descriptor, SE_DACL_PROTECTED, SE_DACL_PROTECTED)
-    })?;
+    os_check(
+        unsafe { InitializeSecurityDescriptor(descriptor, SECURITY_DESCRIPTOR_REVISION) },
+        Operation::InitializeDescriptor,
+    )?;
+    os_check(
+        unsafe { SetSecurityDescriptorOwner(descriptor, principals.user.pointer(), 0) },
+        Operation::SetOwner,
+    )?;
+    os_check(
+        unsafe { SetSecurityDescriptorDacl(descriptor, 1, acl, 0) },
+        Operation::SetDacl,
+    )?;
+    os_check(
+        unsafe { SetSecurityDescriptorControl(descriptor, SE_DACL_PROTECTED, SE_DACL_PROTECTED) },
+        Operation::SetControl,
+    )?;
     operation(&SECURITY_ATTRIBUTES {
         nLength: size_of::<SECURITY_ATTRIBUTES>() as u32,
         lpSecurityDescriptor: descriptor,

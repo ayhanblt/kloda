@@ -56,6 +56,12 @@ internal object AndroidPhotoManifestChecks {
     }
     fun prepare(value: PhotoManifest = source): PhotoPublication = AndroidPhotoManifestJournal(context).use { it.prepare(record, value) }
     val initial = prepare()
+    AndroidPhotoManifestJournal(context).use { journal ->
+      check(!journal.metadataChanged(record, source))
+      check(!journal.metadataChanged(record, source.copy(resources = source.resources.map { it.copy(operationId = AndroidFilesSnapshots.randomId()) })))
+      check(journal.metadataChanged(record, source.copy(favorite = false)))
+      check(!journal.metadataChanged(AndroidFilesSnapshots.randomId(), source.copy(favorite = false)))
+    }
     val native = NativeFixture()
     fun resume(publication: PhotoPublication, current: () -> Unit = {}) {
       AndroidSyncJournal(context).use { files ->

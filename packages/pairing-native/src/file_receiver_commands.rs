@@ -21,6 +21,8 @@ impl Receiver {
         validate_upload(&upload)?;
         if let Some(mut old) = rows::by_request(&store.conn, sid, &upload.request_id)? {
             scope_matches(&old, scope)?;
+            old.identity =
+                crate::backup_retention::live_identity(store, &old.operation.id, old.identity)?;
             let operation = &old.operation;
             if operation.source_id != upload.source_id
                 || operation.source_revision != upload.source_revision
@@ -41,6 +43,7 @@ impl Receiver {
             )?;
             return Ok(Response::Operation(old.operation));
         }
+        crate::backup_retention::admit_create(store, peer, scope, &upload)?;
         let random = SystemRandom::new();
         let (id, file) = loop {
             let mut id = [0; 16];

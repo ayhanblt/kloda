@@ -1,7 +1,7 @@
 import { requireOptionalNativeModule } from 'expo';
 import { Platform } from 'react-native';
 
-export type FileJobState = 'queued' | 'preparing' | 'uploading' | 'finalizing' | 'completed' | 'paused' | 'blocked';
+export type FileJobState = 'queued' | 'preparing' | 'uploading' | 'finalizing' | 'completed' | 'paused' | 'blocked' | 'owner_deleted';
 export interface FileJob {
   id: string;
   sourceId: string;
@@ -37,6 +37,7 @@ export interface PhotosImportStatus {
 }
 export const photoManifestPrefix = 'kloda-photo-v1-';
 interface NativeFiles {
+  rebackupFile(record: string, job: string): Promise<unknown>;
   runFiles(record: string): Promise<unknown>;
   queueStatus(): Promise<unknown>;
   pauseFiles(): Promise<unknown>;
@@ -47,7 +48,7 @@ interface NativeFiles {
   restorePhotos(record: string, operation: string | null, sha256: string | null, size: string | null, name: string | null): Promise<unknown>;
 }
 const states: Record<FileJobState, true> = {
-  queued: true, preparing: true, uploading: true, finalizing: true, completed: true, paused: true, blocked: true,
+  queued: true, preparing: true, uploading: true, finalizing: true, completed: true, paused: true, blocked: true, owner_deleted: true,
 };
 function decimal(value: unknown): string {
   if (typeof value !== 'string' || !/^(0|[1-9]\d{0,18})$/.test(value)) throw new Error('outcome_unknown');
@@ -143,6 +144,7 @@ async function invoke(action: (native: NativeFiles) => Promise<unknown>): Promis
 export const fileTransfer = {
   status: () => invoke((native) => native.queueStatus()),
   run: (recordId: string) => invoke((native) => native.runFiles(recordId)),
+  rebackup: (record: string, job: string) => invoke((native) => native.rebackupFile(record, job)),
   pause: () => invoke((native) => native.pauseFiles()),
   list: async (recordId: string, after?: string) => completedBackupsFromNative(
     await nativeCall((native) => native.listBackups(recordId, after ?? null)), after),

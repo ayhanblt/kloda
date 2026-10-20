@@ -45,3 +45,13 @@
 ## Sonuç
 
 Direction onayı kaydedildi; PC receiver/result API veya native code bu ADR kaydıyla implemented sayılmaz. Dar prerequisite durumu [handoff](../implementation/implementation-session-handoff.md#pc-commit-proof--dar-prerequisite-sınırı) içinde tutulur.
+
+## Approved advanced WebDAV review actions — 2026-10-20
+
+Ayhan approved file-level review without blocking independent files: explicit recheck, keep-both only for a verified genuine collision, and skip that retains an unresolved record. Uncertain results cannot be adopted, overwritten or marked complete; aggregate success cannot conceal unresolved work. This is the advanced outgoing WebDAV adapter, not a new native receiver/result-proof contract or two-way Files implementation.
+
+The approved conflict filename is `stem (Kloda <PC-name> <UTCYYYYMMDD-HHMMSS> <revision-first8>).extension`. The PC component is the sender computer's actual OS hostname, sanitized/bounded for a safe filename; no phone name is invented. UTC time and revision discriminator are frozen in the existing pending publication path at the first explicit choice, before MOVE. Preserve extension, enforce no-overwrite and retain that path in the existing receipt. A known occupied alternate name may use a bounded numeric suffix on a subsequent explicit choice; unknown/missing owned temp never permits rotating names or adopting an existing final. Unsupported/overlong names fail visibly and retain pending data.
+
+Only acknowledged owned temp plus full SHA match and a current genuine final collision permit keep-both. Durable MOVE201 acknowledgment precedes local settlement; missing temp after unacknowledged MOVE remains review even if final bytes match. Current saved WebDAV target/source context and visible active trusted main-frame actions are required. Older targets/removed sources remain visible but permit only local skip until their exact current context is available; history is not authority. Confirm keep-both with default Cancel in TR/EN/DE. No new receipt signer, broad migration, remote delete right, native ACL change or central service prerequisite.
+
+Existing timeout behavior is retained under [ADR0001's clarification](0001-mobile-sync-behavior-and-framework-constraints.md#desktop-webdav-retry-clarification--2026-10-20). Runtime/source/test evidence and outstanding platform gates remain in the [handoff](../implementation/implementation-session-handoff.md#desktop-webdav-jobs-and-final-host-review--2026-10-20).

@@ -12,7 +12,7 @@ mod commands;
 #[path = "file_receiver_finalize.rs"]
 mod finalize;
 #[path = "file_receiver_rows.rs"]
-mod rows;
+pub(crate) mod rows;
 use rows::Entry;
 
 pub(crate) struct Receiver {
@@ -117,13 +117,15 @@ pub(super) fn admit(store: &Store, sid: &[u8; 16], peer: &Spki) -> Result<(Scope
 }
 
 fn own(store: &Store, sid: &[u8; 16], scope: &Scope, id: &str) -> Result<Entry> {
-    let entry = rows::get(&store.conn, sid, id)?;
+    let mut entry = rows::get(&store.conn, sid, id)?;
+    entry.identity = crate::backup_retention::live_identity(store, id, entry.identity)?;
     scope_matches(&entry, scope)?;
     Ok(entry)
 }
 
 fn readable(store: &Store, sid: &[u8; 16], peer: &Spki, scope: &Scope, id: &str) -> Result<Entry> {
-    let entry = rows::readable(&store.conn, sid, peer, id)?;
+    let mut entry = rows::readable(&store.conn, sid, peer, id)?;
+    entry.identity = crate::backup_retention::live_identity(store, id, entry.identity)?;
     scope_matches(&entry, scope)?;
     Ok(entry)
 }

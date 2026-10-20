@@ -82,7 +82,7 @@ describe('NodeWebDavClient pending upload boundary', () => {
     const temp = '/Kloda/source/photo.jpg.kloda-upload-transaction';
     await client.uploadTemporary('source/photo.jpg.kloda-upload-transaction', new Blob(['pending bytes']));
     setMoveFailure(new TypeError('connection reset'));
-    await expect(client.finalizeUpload('source/photo.jpg', 'source/photo.jpg.kloda-upload-transaction')).rejects.toBeInstanceOf(TypeError);
+    await expect(client.finalizeUpload('source/photo.jpg', 'source/photo.jpg.kloda-upload-transaction')).rejects.toMatchObject({ code: 'connection_unavailable' });
     expect(files.get(temp)).toBe('pending bytes');
   });
 });

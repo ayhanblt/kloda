@@ -55,6 +55,15 @@ class KlodaPairingModule : Module() {
                 filesQueue().start(record, id)
             }
         } }
+        AsyncFunction("rebackupFile") { record: String, job: String -> guarded {
+            reference(record); reference(job)
+            synchronized(ownerLock) {
+                if (restore != null || photosRestore != null || photosRequests.active) fail("backup_busy")
+                if (destroyed || !foreground || !activityResumed()) fail("paused")
+                val id = transferOwner(record)
+                filesQueue().start(record, id, job)
+            }
+        } }
         AsyncFunction("queueStatus") { guarded { synchronized(ownerLock) { filesQueue().status() } } }
         AsyncFunction("pauseFiles") { guarded { synchronized(ownerLock) { restore?.pause(); photosRestore?.pause(); photosRequests.cancel(); filesQueue().pause() } } }
         AsyncFunction("cancelRestore") { guarded { synchronized(ownerLock) { restore?.pause(); photosRestore?.pause(); photosRequests.cancel() }; true } }

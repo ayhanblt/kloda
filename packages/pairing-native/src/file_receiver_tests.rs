@@ -27,6 +27,7 @@ fn operation(result: Result<Response>) -> Operation {
 }
 fn upload(request: u8, bytes: &[u8]) -> Upload {
     Upload {
+        rebackup_of: None,
         request_id: crate::qr_base64::encode(&[request; 16]),
         source_id: crate::qr_base64::encode(&[3; 16]),
         source_revision: "revision-1".into(),
@@ -77,3 +78,9 @@ mod safety;
 mod scope;
 #[path = "file_receiver_storage_tests.rs"]
 mod storage;
+
+#[path = "receiver_activity_tests.rs"]
+mod activity;
+
+#[path = "device_removal_tests.rs"]
+mod removal;

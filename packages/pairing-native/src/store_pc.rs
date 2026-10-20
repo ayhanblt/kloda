@@ -70,6 +70,24 @@ impl Store {
         self.revoke(sid, RecordRole::Pc)
     }
 
+    #[cfg(not(target_os = "android"))]
+    pub(crate) fn remove_device_guarded<G>(
+        &mut self,
+        sid: &[u8; 16],
+        authorize: impl FnOnce() -> Result<G>,
+    ) -> Result<Record> {
+        let _authorization = authorize()?;
+        self.pc_revoke(sid)?;
+        let record = self.record(sid)?.ok_or(PairingError::OutcomeUnknown)?;
+        if record.role != RecordRole::Pc
+            || record.state != RecordState::Revoked
+            || self.backup_scope(sid)?.is_some_and(|scope| scope.approved)
+        {
+            return Err(PairingError::OutcomeUnknown);
+        }
+        Ok(record)
+    }
+
     pub(super) fn revoke(&mut self, sid: &[u8; 16], role: RecordRole) -> Result<Record> {
         self.write(|tx, local, epoch| {
             let mut record = load(tx, sid, local, epoch)?.ok_or(PairingError::CandidateStale)?;

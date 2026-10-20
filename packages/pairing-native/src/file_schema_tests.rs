@@ -6,7 +6,7 @@ fn old_schema(directory: &Directory, version: i64) {
     let store = directory.store(key("pc"));
     store
         .conn
-        .execute_batch("DROP TABLE file_operations; PRAGMA user_version=2;")
+        .execute_batch("DROP TABLE backup_rebackup_requests; DROP TABLE backup_deletions; DROP TABLE backup_protections; DROP TABLE file_operations; PRAGMA user_version=2;")
         .unwrap();
     if version == 1 {
         store
@@ -36,7 +36,7 @@ fn valid_older_installations_upgrade_but_wrong_installation_never_changes_versio
         assert_eq!(version(&directory), old);
         let store = directory.store(key("pc"));
         validate(&store.conn).unwrap();
-        assert_eq!(version(&directory), 3);
+        assert_eq!(version(&directory), 4);
     }
 }
 

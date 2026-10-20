@@ -29,7 +29,10 @@ pub(crate) fn decode<B: AsRef<[u8]>>(
             Error::InvalidRequest | Error::BackupPathRejected => 400,
             Error::Denied | Error::BackupPermissionDenied => 403,
             Error::NotFound => 404,
-            Error::Conflict | Error::HashMismatch | Error::BackupScopeChanged => 409,
+            Error::OwnerDeleted
+            | Error::Conflict
+            | Error::HashMismatch
+            | Error::BackupScopeChanged => 409,
             Error::AclBusy | Error::BackupBusy => 423,
             Error::BackupFull => 507,
             Error::OutcomeUnknown => 500,

@@ -95,7 +95,7 @@ pub(crate) fn validate_acl(conn: &Connection) -> Result<()> {
 
 pub(crate) fn migrate(conn: &mut Connection, version: i64) -> Result<()> {
     validate_acl(conn)?;
-    if version != 3 {
+    if version < 3 {
         let existing: bool = conn
             .query_row(
                 "SELECT EXISTS(SELECT 1 FROM sqlite_schema WHERE name='file_operations' OR name IN

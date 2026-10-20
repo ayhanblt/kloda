@@ -1,6 +1,9 @@
 #![deny(unsafe_op_in_unsafe_fn)]
 
 #[cfg(not(target_os = "android"))]
+mod backup_retention;
+mod backup_retention_schema;
+#[cfg(not(target_os = "android"))]
 mod backup_root;
 mod certificate;
 mod error;
@@ -24,6 +27,8 @@ mod initialization;
 mod installation_files;
 mod key;
 mod owner;
+#[cfg(not(target_os = "android"))]
+mod paired_devices;
 mod pc;
 mod pc_commit;
 mod phone;
@@ -32,8 +37,11 @@ mod qr;
 mod qr_base64;
 mod qr_ip;
 mod qr_json;
+#[cfg(not(target_os = "android"))]
+mod receiver_activity;
 mod route;
 mod runtime;
+mod startup_diagnostics;
 mod state;
 mod status;
 mod store;
@@ -60,3 +68,8 @@ mod apple_cf;
 mod jni_bridge;
 #[cfg(all(feature = "desktop-node", not(target_os = "android"), not(test)))]
 mod node;
+#[cfg(all(feature = "desktop-node", not(target_os = "android"), not(test)))]
+mod node_retention;
+
+#[cfg(not(target_os = "android"))]
+mod foreground;

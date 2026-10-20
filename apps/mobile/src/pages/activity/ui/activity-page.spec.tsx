@@ -1,3 +1,4 @@
+import { Alert } from 'react-native';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { ActivityPage } from './activity-page';
 import { fileTransfer, photoManifestPrefix } from '../../../shared/api/file-transfer';
@@ -5,7 +6,7 @@ import { pairing } from '../../../shared/api/pairing';
 import { i18n } from '../../../shared/i18n';
 
 jest.mock('../../../shared/api/file-transfer', () => ({ photoManifestPrefix: 'kloda-photo-v1-', fileTransfer: {
-  status: jest.fn(), run: jest.fn(), pause: jest.fn().mockResolvedValue({ running: false, jobs: [], totalJobs: '0', hasMore: false }),
+  status: jest.fn(), run: jest.fn(), rebackup: jest.fn(), pause: jest.fn().mockResolvedValue({ running: false, jobs: [], totalJobs: '0', hasMore: false }),
   list: jest.fn(), restore: jest.fn(), cancelRestore: jest.fn().mockResolvedValue(true),
   photoStatus: jest.fn().mockResolvedValue({ state: 'idle', total: '0', completed: '0', review: '0' }), restorePhotos: jest.fn(),
 } }));
@@ -71,4 +72,25 @@ it('shows an ambiguous Photos import as review rather than successful restore', 
   await waitFor(() => expect(surface.getByText(i18n.t('transfer.photos.review_required', { review: '1' }))).toBeTruthy());
   expect(surface.queryByText(i18n.t('transfer.backups.restored', { name: backup.name }))).toBeNull();
   await surface.unmount();
+});
+
+it('requires explicit confirmation and uses current paired authority for an old-record deleted source version', async () => {
+  const job = { id: 'AAAAAAAAAAAAAAAAAAAAAQ', sourceId: 'source', recordId: 'AAAAAAAAAAAAAAAAAAAAAQ', name: 'deleted.jpg',
+    state: 'owner_deleted' as const, acknowledgedBytes: '4', totalBytes: '4', errorCode: 'owner_deleted' };
+  jest.mocked(fileTransfer.status).mockResolvedValue({ running: false, jobs: [job], totalJobs: '1', hasMore: false });
+  jest.mocked(fileTransfer.rebackup).mockResolvedValue({ running: true, jobs: [job], totalJobs: '1', hasMore: false });
+  const confirmation = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+  try {
+    const surface = await render(<ActivityPage onBack={() => undefined} />);
+    await waitFor(() => expect(surface.getByText(i18n.t('transfer.states.owner_deleted'))).toBeTruthy());
+    expect(surface.queryByText(i18n.t('transfer.states.completed'))).toBeNull();
+    jest.mocked(fileTransfer.rebackup).mockClear();
+    await fireEvent.press(surface.getByText(i18n.t('transfer.rebackup')));
+    expect(fileTransfer.rebackup).not.toHaveBeenCalled();
+    const buttons = confirmation.mock.calls[0]?.[2];
+    expect(buttons?.[0]?.style).toBe('cancel');
+    await act(async () => { buttons?.[1]?.onPress?.(); });
+    await waitFor(() => expect(fileTransfer.rebackup).toHaveBeenCalledWith('AAAAAAAAAAAAAAAAAAAAAA', job.id));
+    await surface.unmount();
+  } finally { confirmation.mockRestore(); }
 });

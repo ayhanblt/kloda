@@ -20,15 +20,16 @@ internal class AndroidFilesQueue(private val context: Context, private val foreg
   @Volatile private var activeRecord: String? = null
   @Volatile private var scanCancellation: CancellationSignal? = null
 
-  fun start(record: String, owner: Long): Map<String, Any> = synchronized(lock) {
+  fun start(record: String, owner: Long, rebackup: String? = null): Map<String, Any> = synchronized(lock) {
     if (worker?.isAlive == true) {
       if (activeRecord != record) throw FilesFailure("denied")
+      if (rebackup != null) throw FilesFailure("backup_busy")
       return@synchronized status()
     }
     val observed = journal.status(true, null)
     stopped.set(false); errorCode = null; activeRecord = record
     worker = Thread({
-      try { run(record, owner) }
+      try { run(record, owner, rebackup) }
       catch (error: Throwable) {
         val code = failureCode(error)
         errorCode = code
@@ -41,7 +42,15 @@ internal class AndroidFilesQueue(private val context: Context, private val foreg
     observed
   }
 
-  fun status(): Map<String, Any> = journal.status(worker?.isAlive == true, errorCode)
+  fun status(): Map<String, Any> {
+    val running = worker?.isAlive == true
+    val files = journal.status(running, errorCode)
+    val photos = manifests.status()
+    @Suppress("UNCHECKED_CAST")
+    val jobs = (photos + (files["jobs"] as List<Map<String, Any>>)).take(100)
+    val total = (files["totalJobs"] as String).toLong() + manifests.count()
+    return files + mapOf("jobs" to jobs, "totalJobs" to total.toString(), "hasMore" to (total > jobs.size))
+  }
 
   fun requestPause() { stopped.set(true); scanCancellation?.cancel(); snapshots.cancelRead() }
 
@@ -81,14 +90,64 @@ internal class AndroidFilesQueue(private val context: Context, private val foreg
     snapshots.checkAccess(job.treeReference, job.reference)
   }
 
-  private fun run(record: String, owner: Long) {
+  private fun run(record: String, owner: Long, rebackup: String?) {
     snapshots.recover(journal)
     manifests.recover()
     val transfer = AndroidFilesTransfer { command, descriptor ->
       checkPaused()
       KlodaPairingJni.transfer(owner, record, command, descriptor)
     }
+    if (rebackup != null) rebackup(record, rebackup, transfer)
     prepare(record, transfer)
+  }
+
+  private fun rebackup(record: String, id: String, transfer: AndroidFilesTransfer) {
+    checkPaused()
+    val prior = journal.find(id)
+    if (prior == null) {
+      manifests.rebackup(record, id, transfer) { resource -> rebackupResource(resource, transfer, record) }
+      return
+    }
+    rebackupResource(prior, transfer, record)
+  }
+
+  private fun rebackupResource(initial: FilesJob, transfer: AndroidFilesTransfer, record: String = initial.recordId): FilesJob {
+    val latest = journal.version(record, initial.sourceId, QueuedSourceFile(initial.reference, initial.name, "", initial.size),
+      initial.treeReference, initial.sha256, initial.size)
+    val prior = latest ?: initial.copy(recordId = record)
+    if (prior.wireSourceId != initial.wireSourceId) throw FilesFailure("source_identity_unknown")
+    if (prior.rebackupOf != null && prior.state != "completed" && !journal.deleted(prior.id)) {
+      sendJob(prior, transfer)
+      val resumed = journal.find(prior.id) ?: throw FilesFailure("outcome_unknown")
+      if (resumed.state == "completed" && !journal.deleted(resumed.id)) return resumed
+      if (!journal.deleted(resumed.id)) throw FilesFailure("outcome_unknown")
+    } else if (prior.id != initial.id && prior.operationId != null) {
+      try { if (transfer.status(prior).state == "completed") return prior }
+      catch (error: FilesFailure) { if (error.code != "owner_deleted") throw error }
+    }
+    val proof = if (prior.operationId != null) prior else if (initial.operationId != null) initial
+      else journal.parent(prior) ?: throw FilesFailure("source_identity_unknown")
+    if (proof.operationId == null) throw FilesFailure("source_identity_unknown")
+    try { transfer.status(proof); throw FilesFailure("conflict") }
+    catch (error: FilesFailure) { if (error.code != "owner_deleted") throw error }
+    journal.markDeleted(prior.id)
+    val staged = synchronized(AndroidSyncJournal.sourceLock) {
+      checkSource(prior)
+      val snapshot = snapshots.stage(prior.treeReference, prior.reference)
+      var retained = false
+      try {
+        if (snapshot.digest.sha256 != prior.sha256 || snapshot.digest.size != prior.size) throw FilesFailure("source_changed")
+        val file = QueuedSourceFile(prior.reference, prior.name, "", prior.size)
+        val latest = journal.version(prior.recordId, prior.sourceId, file, prior.treeReference, prior.sha256, prior.size)
+        if (latest != null && latest.id != prior.id && latest.rebackupOf == proof.operationId) return@synchronized latest
+        val job = prior.copy(id = snapshot.id, operationId = null, offset = 0, state = "queued", errorCode = null,
+          rebackupOf = proof.operationId)
+        journal.insert(job); retained = true
+        job
+      } finally { if (!retained) snapshots.discard(snapshot) }
+    }
+    if (staged.state != "completed") sendJob(staged, transfer)
+    return journal.find(staged.id)?.takeIf { it.state == "completed" } ?: throw FilesFailure("outcome_unknown")
   }
 
   private fun prepare(record: String, transfer: AndroidFilesTransfer) {
@@ -122,6 +181,7 @@ internal class AndroidFilesQueue(private val context: Context, private val foreg
           for (file in files) {
             after = file.reference
             var staged: FilesJob? = null
+            var suppressed = false
             synchronized(AndroidSyncJournal.sourceLock) {
               checkPaused()
               if (sources()[source] != tree) throw FilesFailure("source_permission_lost")
@@ -131,8 +191,15 @@ internal class AndroidFilesQueue(private val context: Context, private val foreg
                 else journal.version(record, source, file, tree, current.sha256, current.size)
               if (prior?.state == "completed") {
                 checkPaused()
-                if (transfer.status(prior).state != "completed") throw FilesFailure("outcome_unknown")
+                try {
+                  if (transfer.status(prior).state != "completed") throw FilesFailure("outcome_unknown")
+                  journal.clearDeleted(prior.id)
+                } catch (error: FilesFailure) {
+                  if (error.code != "owner_deleted") throw error
+                  journal.markDeleted(prior.id)
+                }
               }
+              suppressed = prior != null && journal.deleted(prior.id)
               if (prior == null) {
                 val snapshot = snapshots.stage(tree, file.reference)
                 var insertionAttempted = false
@@ -142,15 +209,17 @@ internal class AndroidFilesQueue(private val context: Context, private val foreg
                   if (journal.version(record, source, file, tree, snapshot.digest.sha256, snapshot.digest.size) == null) {
                     insertionAttempted = true
                     val job = FilesJob(snapshot.id, record, source, file.reference, tree, file.relativePath.substringAfterLast('/'),
-                      AndroidFilesSnapshots.randomId(), snapshot.digest.sha256, snapshot.digest.size, null, 0, "queued", null)
+                      journal.wireSource(record, file, tree), snapshot.digest.sha256, snapshot.digest.size, null, 0, "queued", null)
                     journal.insert(job)
                     staged = job
                   }
                 } finally { if (!insertionAttempted) snapshots.discard(snapshot) }
               }
             }
-            staged?.let { sendJob(it, transfer) }
-            if (AndroidPhotosSources.isPhotos(tree)) manifests.publish(record, source, tree, file, transfer)
+            staged?.let { sendJob(it, transfer); suppressed = journal.deleted(it.id) }
+            if (suppressed && !AndroidPhotosSources.isPhotos(tree)) continue
+            if (AndroidPhotosSources.isPhotos(tree)) try { manifests.publish(record, source, tree, file, transfer) { resource -> rebackupResource(resource, transfer) } }
+            catch (error: FilesFailure) { if (error.code != "owner_deleted") throw error }
           }
         }
       } catch (error: Throwable) {
@@ -204,6 +273,7 @@ internal class AndroidFilesQueue(private val context: Context, private val foreg
     }
     } catch (error: Throwable) {
       val code = failureCode(error)
+      if (code == "owner_deleted") { journal.markDeleted(initial.id); return }
       val blocked = code in setOf("source_changed", "source_permission_lost", "snapshot_unavailable", "denied", "revoked",
         "hash_mismatch", "backup_scope_changed", "backup_path_rejected", "invalid_request", "conflict", "not_found")
       journal.update(initial.id, if (blocked) "blocked" else "paused", code)

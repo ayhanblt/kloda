@@ -4,6 +4,8 @@ import { mkdtemp, open, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import { WebDavFailure } from './webdav-errors.js';
+
 export async function openSourceSnapshot(path: string): Promise<{
   body: Blob;
   revision: string;
@@ -16,7 +18,7 @@ export async function openSourceSnapshot(path: string): Promise<{
     const hash = createHash('sha256');
     try {
       const before = await source.stat({ bigint: true });
-      if (!before.isFile()) throw new Error('Backup source is not a regular file.');
+      if (!before.isFile()) throw new WebDavFailure('source_changed', 'Backup source is not a regular file.');
       const staged = await open(stagedPath, 'wx', 0o600);
       try {
         const buffer = Buffer.allocUnsafe(Number(before.size < 65536n ? before.size : 65536n));
@@ -40,7 +42,7 @@ export async function openSourceSnapshot(path: string): Promise<{
         if (before.size !== stagedSize || [after, current].some(value =>
           value.dev !== before.dev || value.ino !== before.ino || value.size !== before.size ||
           value.mtimeNs !== before.mtimeNs || value.ctimeNs !== before.ctimeNs
-        )) throw new Error('Source changed while preparing backup snapshot.');
+        )) throw new WebDavFailure('source_changed', 'Source changed while preparing backup snapshot.');
       } finally {
         await staged.close();
       }

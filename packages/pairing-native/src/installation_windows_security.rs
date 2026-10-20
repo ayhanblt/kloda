@@ -1,8 +1,9 @@
 use super::principal::{principals, same};
 use crate::error::{PairingError, Result};
+use crate::startup_diagnostics::{self as diagnostic, Operation};
 use std::{ffi::c_void, ptr::null_mut};
 use windows_sys::Win32::{
-    Foundation::{LocalFree, GENERIC_ALL, GENERIC_WRITE, HANDLE},
+    Foundation::{GetLastError, LocalFree, GENERIC_ALL, GENERIC_WRITE, HANDLE},
     Security::{
         Authorization::{GetSecurityInfo, SE_FILE_OBJECT},
         *,
@@ -16,6 +17,21 @@ use windows_sys::Win32::{
 
 pub(super) fn check(value: i32) -> Result<()> {
     if value == 0 {
+        diagnostic::record(
+            Some(Operation::SecurityValidation),
+            PairingError::StorageFailure,
+            None,
+        );
+        Err(PairingError::StorageFailure)
+    } else {
+        Ok(())
+    }
+}
+
+pub(super) fn os_check(value: i32, operation: Operation) -> Result<()> {
+    if value == 0 {
+        let code = unsafe { GetLastError() };
+        diagnostic::record(Some(operation), PairingError::StorageFailure, Some(code));
         Err(PairingError::StorageFailure)
     } else {
         Ok(())
@@ -53,6 +69,13 @@ fn security(handle: HANDLE) -> Result<Security> {
         )
     };
     let descriptor = Descriptor(descriptor);
+    if status != 0 {
+        diagnostic::record(
+            Some(Operation::SecurityInfo),
+            PairingError::StorageFailure,
+            Some(status),
+        );
+    }
     if status != 0 || descriptor.0.is_null() || owner.is_null() || acl.is_null() {
         return Err(PairingError::StorageFailure);
     }
@@ -60,7 +83,10 @@ fn security(handle: HANDLE) -> Result<Security> {
     check(unsafe { IsValidAcl(acl) })?;
     let mut control = 0;
     let mut revision = 0;
-    check(unsafe { GetSecurityDescriptorControl(descriptor.0, &mut control, &mut revision) })?;
+    os_check(
+        unsafe { GetSecurityDescriptorControl(descriptor.0, &mut control, &mut revision) },
+        Operation::GetControl,
+    )?;
     Ok(Security {
         _descriptor: descriptor,
         owner,
@@ -71,7 +97,10 @@ fn security(handle: HANDLE) -> Result<Security> {
 
 fn ace(acl: *mut ACL, index: u32) -> Result<(*const ACCESS_ALLOWED_ACE, PSID)> {
     let mut pointer = null_mut();
-    check(unsafe { GetAce(acl, index, &mut pointer) })?;
+    os_check(
+        unsafe { GetAce(acl, index, &mut pointer) },
+        Operation::GetAce,
+    )?;
     let header = unsafe { &*pointer.cast::<ACE_HEADER>() };
     let sid_offset = std::mem::offset_of!(ACCESS_ALLOWED_ACE, SidStart);
     if header.AceType as u32 != ACCESS_ALLOWED_ACE_TYPE
@@ -90,6 +119,13 @@ fn ace(acl: *mut ACL, index: u32) -> Result<(*const ACCESS_ALLOWED_ACE, PSID)> {
 }
 
 pub(super) fn protected(handle: HANDLE, directory: bool, inherited_sqlite: bool) -> Result<()> {
+    let result = protected_inner(handle, directory, inherited_sqlite);
+    if let Err(error) = result {
+        diagnostic::record(Some(Operation::SecurityValidation), error, None);
+    }
+    result
+}
+fn protected_inner(handle: HANDLE, directory: bool, inherited_sqlite: bool) -> Result<()> {
     let principals = principals()?;
     let security = security(handle)?;
     if !same(security.owner, &principals.user)
@@ -130,6 +166,13 @@ pub(super) fn protected(handle: HANDLE, directory: bool, inherited_sqlite: bool)
 }
 
 pub(super) fn user_directory(handle: HANDLE) -> Result<()> {
+    let result = user_directory_inner(handle);
+    if let Err(error) = result {
+        diagnostic::record(Some(Operation::SecurityValidation), error, None);
+    }
+    result
+}
+fn user_directory_inner(handle: HANDLE) -> Result<()> {
     let principals = principals()?;
     let security = security(handle)?;
     if !same(security.owner, &principals.user) {

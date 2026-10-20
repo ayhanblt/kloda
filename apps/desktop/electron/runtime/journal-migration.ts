@@ -30,5 +30,15 @@ export function migrateUploadJournal(database: Database.Database): void {
     if (!scopedPendingColumns.some(column => column.name === 'phase')) {
       database.exec("ALTER TABLE pending_upload ADD COLUMN phase TEXT NOT NULL DEFAULT 'unknown'");
     }
+    for (const [table, name, definition] of [
+      ['sync_progress', 'detail', "TEXT NOT NULL DEFAULT '{}'"],
+      ['pending_upload', 'issue_code', 'TEXT'],
+      ['pending_upload', 'skipped', 'INTEGER NOT NULL DEFAULT 0'],
+      ['pending_upload', 'published_path', 'TEXT'],
+      ['upload_receipt', 'published_path', 'TEXT'],
+    ]) {
+      const columns = database.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+      if (!columns.some(column => column.name === name)) database.exec(`ALTER TABLE ${table} ADD COLUMN ${name} ${definition}`);
+    }
   })();
 }

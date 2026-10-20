@@ -22,6 +22,8 @@ mod actor;
 mod backup;
 #[path = "runtime_file.rs"]
 mod file;
+#[path = "runtime_guard.rs"]
+mod guard;
 #[path = "runtime_phone.rs"]
 mod phone;
 #[path = "runtime_phone_progress.rs"]
@@ -35,6 +37,13 @@ mod session;
 #[path = "runtime_status.rs"]
 mod status;
 
+#[cfg(not(target_os = "android"))]
+#[path = "runtime_desktop.rs"]
+mod desktop;
+#[cfg(not(target_os = "android"))]
+#[path = "runtime_retention.rs"]
+mod retention;
+
 const MAX_PEERS: usize = 16;
 const COMMAND_BATCH: usize = 32;
 
@@ -45,6 +54,10 @@ struct Listener {
 }
 struct Actor {
     context: NativeContext,
+    #[cfg(not(target_os = "android"))]
+    foreground: std::sync::Arc<crate::foreground::Foreground>,
+    #[cfg(not(target_os = "android"))]
+    action_epoch: Option<u64>,
     installation: Installation,
     listener: Option<Listener>,
     pc: Option<Pc>,
@@ -55,6 +68,8 @@ struct Actor {
     terminal: Option<([u8; 16], Phase)>,
     generation: u64,
     last_now: u64,
+    #[cfg(not(target_os = "android"))]
+    last_maintenance: u64,
     error: Option<PairingError>,
     fatal: Option<PairingError>,
     file_transport: crate::file_transport::Managed,
@@ -62,6 +77,8 @@ struct Actor {
     #[cfg(not(target_os = "android"))]
     file_receiver: crate::file_receiver::Receiver,
     unpair_result: Option<crate::status::UnpairResult>,
+    #[cfg(not(target_os = "android"))]
+    receiver_errors: std::collections::BTreeMap<([u8; 16], u8), PairingError>,
 }
 struct PcPeer {
     io: Io,
@@ -121,12 +138,17 @@ pub(crate) fn run(
     context: NativeContext,
     receiver: Receiver<Command>,
     ready: SyncSender<Result<()>>,
+    #[cfg(not(target_os = "android"))] foreground: std::sync::Arc<crate::foreground::Foreground>,
 ) {
     // Declared before the actor so panic unwinding drops every TLS/hardware owner
     // before the last JNI reference performs platform cleanup.
     #[cfg(target_os = "android")]
     let platform = context.platform.clone();
-    let mut owner = match Actor::open(context) {
+    let mut owner = match Actor::open(
+        context,
+        #[cfg(not(target_os = "android"))]
+        foreground,
+    ) {
         Ok(owner) => owner,
         Err(error) => {
             #[cfg(target_os = "android")]
@@ -155,12 +177,45 @@ pub(crate) fn run(
                 },
             };
             match command {
+                #[cfg(not(target_os = "android"))]
+                Command::BackupVersions {
+                    after,
+                    trash,
+                    reply,
+                } => {
+                    let _ = reply.send(owner.backup_versions(after.as_deref(), trash));
+                }
+                #[cfg(not(target_os = "android"))]
+                Command::BackupMutation {
+                    ids,
+                    restore,
+                    epoch,
+                    reply,
+                } => {
+                    let _ = reply.send(owner.mutate_backups(&ids, restore, epoch));
+                }
                 Command::Pairing {
                     action: Action::Close,
                     reply,
                 } => break 'worker Some(reply),
                 Command::Pairing { action, reply } => {
                     let _ = reply.send(owner.action(action));
+                }
+                #[cfg(not(target_os = "android"))]
+                Command::ReceiverStatus { reply } => {
+                    let _ = reply.send(Ok(owner.receiver_status()));
+                }
+                #[cfg(not(target_os = "android"))]
+                Command::PairedDevice { record, reply } => {
+                    let _ = reply.send(owner.paired_device(&record));
+                }
+                #[cfg(not(target_os = "android"))]
+                Command::PairedDevices { after, reply } => {
+                    let _ = reply.send(owner.paired_devices(after.as_deref()));
+                }
+                #[cfg(not(target_os = "android"))]
+                Command::ReceiverActivity { after, reply } => {
+                    let _ = reply.send(owner.receiver_activity(after.as_deref()));
                 }
                 Command::Transfer {
                     record,

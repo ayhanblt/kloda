@@ -3,6 +3,14 @@ use crate::store_rows::{RecordRole, RecordState};
 
 impl Actor {
     pub(super) fn action(&mut self, action: Action) -> Result<PairingStatus> {
+        #[cfg(not(target_os = "android"))]
+        if let Action::Foreground { epoch, action } = action {
+            drop(self.foreground.authorize(Some(epoch))?);
+            self.action_epoch = Some(epoch);
+            let result = self.action(*action);
+            self.action_epoch = None;
+            return result;
+        }
         if matches!(&action, Action::Status) {
             let _ = self.guard();
             self.expire_status();
@@ -14,6 +22,8 @@ impl Actor {
         }
         let result = match action {
             Action::CreateInvitation => self.create(now),
+            #[cfg(not(target_os = "android"))]
+            Action::SuspendPairing => self.suspend_pairing(),
             Action::Scan(qr) => self.scan(qr),
             Action::Approve {
                 operation,
@@ -34,6 +44,10 @@ impl Actor {
             } => self.approve_backup(&record, &folder, revision.as_deref()),
             #[cfg(not(target_os = "android"))]
             Action::RevokeBackup { record } => self.revoke_backup(&record),
+            #[cfg(not(target_os = "android"))]
+            Action::RemoveDevice { record } => self.remove_device(&record),
+            #[cfg(not(target_os = "android"))]
+            Action::Foreground { .. } => Err(PairingError::CandidateStale),
             Action::Status | Action::Close => Err(PairingError::CandidateStale),
         };
         if let Err(error) = result {
@@ -89,7 +103,12 @@ impl Actor {
             .ok_or(PairingError::LanUnavailable)?
             .hint
             .clone();
-        self.pc = Some(Pc::create(&self.installation.store, hint, now)?);
+        let pc = Pc::create(&self.installation.store, hint, now)?;
+        #[cfg(not(target_os = "android"))]
+        let foreground = self.foreground.clone();
+        #[cfg(not(target_os = "android"))]
+        let _authorization = foreground.authorize(self.action_epoch)?;
+        self.pc = Some(pc);
         self.terminal = None;
         self.error = None;
         Ok(())
@@ -136,6 +155,10 @@ impl Actor {
             .channel
             .as_ref()
             .ok_or(PairingError::CandidateStale)?;
+        #[cfg(not(target_os = "android"))]
+        let foreground = self.foreground.clone();
+        #[cfg(not(target_os = "android"))]
+        let _authorization = foreground.authorize(self.action_epoch)?;
         let pc = self.pc.as_mut().ok_or(PairingError::CandidateStale)?;
         let frame = match pc.approve(&mut self.installation.store, &sid, generation, channel, now) {
             Ok(frame) => frame,

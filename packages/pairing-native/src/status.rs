@@ -85,3 +85,14 @@ fn serialize_qr<S: Serializer>(
         None => serializer.serialize_none(),
     }
 }
+
+/// Read-only Desktop lifecycle status; never contains invitation, identity or path data.
+#[cfg(not(target_os = "android"))]
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct ReceiverStatus {
+    pub(crate) available: bool,
+    pub(crate) active_transfers: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) error_code: Option<&'static str>,
+}

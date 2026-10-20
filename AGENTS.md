@@ -2,6 +2,8 @@
 
 Before development, read [.omp/AGENTS.md](.omp/AGENTS.md) and the [Codex migration handoff](docs/implementation/codex-migration-handoff.md). These are repository documents, not a dependency on the OMP runtime. ADR0016 is current V1 LAN authority; ADR0017 is current Photos metadata/import recovery. Preserve their scoped supersession of older central-authorization requirements.
 
+ADR0018 is the approved Windows/macOS/Linux Desktop background lifecycle: retain authorized native receipt across UI departure; separately invalidate foreground invitation/approval work. Never restore close-on-blur as the receiver lifecycle or bypass foreground grant fences. Linux requires a usable visible control before hiding; provider/signing/storage and physical gates remain open.
+
 OMP-only model/agent aliases (`@smol`, `@default`, `fast`, `good`), internal URIs and tool names below are not assumed configured in Codex CLI. Use available CLI capabilities; preserve the project/security workflow rather than inventing equivalent tools or silently changing model configuration.
 
 For documentation/audit-only requests, report and stop; the general execution flow below does not authorize starting development after that request.

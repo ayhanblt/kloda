@@ -12,6 +12,27 @@ async function pairingInvoke(method: string, ...args: unknown[]): Promise<unknow
 }
 
 contextBridge.exposeInMainWorld('kloda', {
+  webdav: {
+    issues: () => ipcRenderer.invoke('kloda:webdav:issues'),
+    review: (id: string, action: 'recheck' | 'keep_both' | 'skip', language: 'tr' | 'en' | 'de') => ipcRenderer.invoke('kloda:webdav:review', id, action, language),
+  },
+  background: {
+    activity: (after?: string) => pairingInvoke('activity', after),
+    status: () => ipcRenderer.invoke('kloda:background:status'),
+    setAutostart: (enabled: boolean) => ipcRenderer.invoke('kloda:background:autostart', enabled),
+    quit: () => ipcRenderer.invoke('kloda:background:quit'),
+  },
+  backups: {
+    list: (after?: string, trash = false) => pairingInvoke(trash ? 'backup-trash-list' : 'backup-list', after),
+    trash: (ids: string[], language: string) => pairingInvoke('backup-trash', ids, language),
+    restore: (ids: string[], language: string) => pairingInvoke('backup-restore', ids, language),
+  },
+  devices: {
+    removeDevice: (record: string, language: string) => pairingInvoke('device-remove', record, language),
+    list: (after?: string) => pairingInvoke('devices', after),
+    approveBackup: (record: string) => pairingInvoke('device-approve', record),
+    revokeBackup: (record: string) => pairingInvoke('device-revoke', record),
+  },
   pairing: {
     status: () => pairingInvoke('status'),
     createInvitation: () => pairingInvoke('create'),

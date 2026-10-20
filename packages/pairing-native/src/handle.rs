@@ -22,7 +22,14 @@ pub(crate) struct NativeContext {
     pub(crate) platform: crate::android_context::AndroidContext,
 }
 pub(crate) enum Action {
+    #[cfg(not(target_os = "android"))]
+    Foreground {
+        epoch: u64,
+        action: Box<Action>,
+    },
     Status,
+    #[cfg(not(target_os = "android"))]
+    SuspendPairing,
     CreateInvitation,
     Scan(Zeroizing<String>),
     Approve {
@@ -53,9 +60,45 @@ pub(crate) enum Action {
     RevokeBackup {
         record: String,
     },
+    #[cfg(not(target_os = "android"))]
+    RemoveDevice {
+        record: String,
+    },
     Close,
 }
 pub(crate) enum Command {
+    #[cfg(not(target_os = "android"))]
+    BackupVersions {
+        after: Option<String>,
+        trash: bool,
+        reply: SyncSender<Result<String>>,
+    },
+    #[cfg(not(target_os = "android"))]
+    BackupMutation {
+        ids: String,
+        restore: bool,
+        epoch: u64,
+        reply: SyncSender<Result<String>>,
+    },
+    #[cfg(not(target_os = "android"))]
+    PairedDevice {
+        record: String,
+        reply: SyncSender<Result<crate::paired_devices::Device>>,
+    },
+    #[cfg(not(target_os = "android"))]
+    PairedDevices {
+        after: Option<String>,
+        reply: SyncSender<Result<crate::paired_devices::Devices>>,
+    },
+    #[cfg(not(target_os = "android"))]
+    ReceiverActivity {
+        after: Option<String>,
+        reply: SyncSender<Result<crate::receiver_activity::Activity>>,
+    },
+    #[cfg(not(target_os = "android"))]
+    ReceiverStatus {
+        reply: SyncSender<Result<crate::status::ReceiverStatus>>,
+    },
     Pairing {
         action: Action,
         reply: SyncSender<Result<PairingStatus>>,
@@ -70,20 +113,36 @@ pub(crate) struct Handle {
     sender: Mutex<SyncSender<Command>>,
     worker: Mutex<Option<JoinHandle<()>>>,
     closing: AtomicBool,
+    #[cfg(not(target_os = "android"))]
+    pub(crate) foreground: std::sync::Arc<crate::foreground::Foreground>,
 }
 impl Handle {
     pub(crate) fn open(context: NativeContext) -> Result<Self> {
         let (sender, receiver): (SyncSender<Command>, Receiver<Command>) = mpsc::sync_channel(32);
         let (ready, ready_receiver) = mpsc::sync_channel(1);
+        #[cfg(not(target_os = "android"))]
+        let foreground = std::sync::Arc::new(crate::foreground::Foreground::default());
+        #[cfg(not(target_os = "android"))]
+        let worker_foreground = foreground.clone();
         let worker = thread::Builder::new()
             .name("kloda-pairing".into())
-            .spawn(move || crate::runtime::run(context, receiver, ready))
+            .spawn(move || {
+                crate::runtime::run(
+                    context,
+                    receiver,
+                    ready,
+                    #[cfg(not(target_os = "android"))]
+                    worker_foreground,
+                )
+            })
             .map_err(|_| PairingError::NativeUnsupported)?;
         match ready_receiver.recv() {
             Ok(Ok(())) => Ok(Self {
                 sender: Mutex::new(sender),
                 worker: Mutex::new(Some(worker)),
                 closing: AtomicBool::new(false),
+                #[cfg(not(target_os = "android"))]
+                foreground,
             }),
             failed => {
                 let joined = worker.join();
@@ -111,6 +170,64 @@ impl Handle {
             .lock()
             .map_err(|_| PairingError::OutcomeUnknown)?
             .send(Command::Pairing { action, reply })
+            .map_err(|_| PairingError::ConnectionClosed)?;
+        receiver.recv().map_err(|_| PairingError::OutcomeUnknown)?
+    }
+    #[cfg(not(target_os = "android"))]
+    pub(crate) fn receiver_status(&self) -> Result<crate::status::ReceiverStatus> {
+        if self.closing.load(Ordering::Acquire) {
+            return Err(PairingError::Cancelled);
+        }
+        let (reply, receiver) = mpsc::sync_channel(1);
+        self.sender
+            .lock()
+            .map_err(|_| PairingError::OutcomeUnknown)?
+            .send(Command::ReceiverStatus { reply })
+            .map_err(|_| PairingError::ConnectionClosed)?;
+        receiver.recv().map_err(|_| PairingError::OutcomeUnknown)?
+    }
+    #[cfg(not(target_os = "android"))]
+    pub(crate) fn receiver_activity(
+        &self,
+        after: Option<String>,
+    ) -> Result<crate::receiver_activity::Activity> {
+        if self.closing.load(Ordering::Acquire) {
+            return Err(PairingError::Cancelled);
+        }
+        let (reply, receiver) = mpsc::sync_channel(1);
+        self.sender
+            .lock()
+            .map_err(|_| PairingError::OutcomeUnknown)?
+            .send(Command::ReceiverActivity { after, reply })
+            .map_err(|_| PairingError::ConnectionClosed)?;
+        receiver.recv().map_err(|_| PairingError::OutcomeUnknown)?
+    }
+    #[cfg(not(target_os = "android"))]
+    pub(crate) fn paired_devices(
+        &self,
+        after: Option<String>,
+    ) -> Result<crate::paired_devices::Devices> {
+        if self.closing.load(Ordering::Acquire) {
+            return Err(PairingError::Cancelled);
+        }
+        let (reply, receiver) = mpsc::sync_channel(1);
+        self.sender
+            .lock()
+            .map_err(|_| PairingError::OutcomeUnknown)?
+            .send(Command::PairedDevices { after, reply })
+            .map_err(|_| PairingError::ConnectionClosed)?;
+        receiver.recv().map_err(|_| PairingError::OutcomeUnknown)?
+    }
+    #[cfg(not(target_os = "android"))]
+    pub(crate) fn paired_device(&self, record: String) -> Result<crate::paired_devices::Device> {
+        if self.closing.load(Ordering::Acquire) {
+            return Err(PairingError::Cancelled);
+        }
+        let (reply, receiver) = mpsc::sync_channel(1);
+        self.sender
+            .lock()
+            .map_err(|_| PairingError::OutcomeUnknown)?
+            .send(Command::PairedDevice { record, reply })
             .map_err(|_| PairingError::ConnectionClosed)?;
         receiver.recv().map_err(|_| PairingError::OutcomeUnknown)?
     }
@@ -160,3 +277,7 @@ impl Drop for Handle {
         let _ = self.close();
     }
 }
+
+#[cfg(not(target_os = "android"))]
+#[path = "handle_retention.rs"]
+mod retention;

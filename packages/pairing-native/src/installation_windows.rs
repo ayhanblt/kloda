@@ -1,4 +1,5 @@
 use crate::error::{PairingError, Result};
+use crate::startup_diagnostics::{self as diagnostic, Operation, Stage};
 use std::{
     fs::{self, File},
     io::Write,
@@ -25,20 +26,23 @@ pub(crate) struct OwnerLock {
 
 pub(crate) fn prepare(directory: &Path) -> Result<OwnerLock> {
     let ancestors = path::directories(directory, true)?;
-    let owner = handles::open(
-        &directory.join("owner.lock"),
-        GENERIC_READ | GENERIC_WRITE,
-        FILE_SHARE_NONE,
-        OPEN_ALWAYS,
-        false,
-        true,
-    )?
-    .ok_or(PairingError::StorageFailure)?;
-    security::protected(owner.as_raw_handle(), false, false)?;
-    if owner.metadata().map_err(super::storage)?.len() != 0 {
-        return Err(PairingError::StorageFailure);
-    }
-    flush(&owner)?;
+    let owner = diagnostic::at(Stage::OwnerLock, || {
+        let owner = handles::open(
+            &directory.join("owner.lock"),
+            GENERIC_READ | GENERIC_WRITE,
+            FILE_SHARE_NONE,
+            OPEN_ALWAYS,
+            false,
+            true,
+        )?
+        .ok_or(PairingError::StorageFailure)?;
+        security::protected(owner.as_raw_handle(), false, false)?;
+        if owner.metadata().map_err(super::storage)?.len() != 0 {
+            return Err(PairingError::StorageFailure);
+        }
+        flush(&owner)?;
+        Ok(owner)
+    })?;
     for entry in fs::read_dir(directory).map_err(super::storage)? {
         let entry = entry.map_err(super::storage)?;
         let file = entry.path();
@@ -149,14 +153,20 @@ fn publish(file: &Path, bytes: &[u8], replace: bool) -> Result<()> {
             0
         };
     // Same-directory NTFS move only: no copy/delete, deferred reboot, or ignored errors.
-    security::check(unsafe { MoveFileExW(source.as_ptr(), destination.as_ptr(), flags) })?;
+    security::os_check(
+        unsafe { MoveFileExW(source.as_ptr(), destination.as_ptr(), flags) },
+        Operation::Publish,
+    )?;
     // Flush the same write-through handle after its checked publication, not a directory.
     flush(&staged)?;
     handles::information(&staged, false)?;
     security::protected(staged.as_raw_handle(), false, false)
 }
 fn flush(file: &File) -> Result<()> {
-    security::check(unsafe { FlushFileBuffers(file.as_raw_handle()) })
+    security::os_check(
+        unsafe { FlushFileBuffers(file.as_raw_handle()) },
+        Operation::Flush,
+    )
 }
 
 #[cfg(test)]

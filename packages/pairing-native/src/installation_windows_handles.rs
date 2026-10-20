@@ -1,5 +1,6 @@
 use super::{path::wide, principal, security};
 use crate::error::{PairingError, Result};
+use crate::startup_diagnostics::{self as diagnostic, Operation};
 use std::{
     fs::File,
     os::windows::io::{AsRawHandle, FromRawHandle},
@@ -46,6 +47,15 @@ pub(super) fn open(
             {
                 return Ok(None);
             }
+            diagnostic::record(
+                Some(if disposition == CREATE_NEW {
+                    Operation::CreateNew
+                } else {
+                    Operation::OpenFile
+                }),
+                PairingError::StorageFailure,
+                Some(error),
+            );
             return Err(PairingError::StorageFailure);
         }
         let file = unsafe { File::from_raw_handle(handle) };
@@ -69,14 +79,31 @@ fn final_path(file: &File, expected: &[u16]) -> Result<()> {
             FILE_NAME_NORMALIZED | VOLUME_NAME_DOS,
         )
     } as usize;
-    if length == 0 || length >= actual.len() || actual[..length] != expected[..expected.len() - 1] {
+    if length == 0 {
+        let code = unsafe { GetLastError() };
+        diagnostic::record(
+            Some(Operation::FinalPath),
+            PairingError::StorageFailure,
+            Some(code),
+        );
+        return Err(PairingError::StorageFailure);
+    }
+    if length >= actual.len() || actual[..length] != expected[..expected.len() - 1] {
+        diagnostic::record(
+            Some(Operation::FinalPathValidation),
+            PairingError::StorageFailure,
+            None,
+        );
         return Err(PairingError::StorageFailure);
     }
     Ok(())
 }
 pub(super) fn information(file: &File, directory: bool) -> Result<()> {
     let mut information = BY_HANDLE_FILE_INFORMATION::default();
-    security::check(unsafe { GetFileInformationByHandle(file.as_raw_handle(), &mut information) })?;
+    security::os_check(
+        unsafe { GetFileInformationByHandle(file.as_raw_handle(), &mut information) },
+        Operation::FileInformation,
+    )?;
     let unsafe_attributes = FILE_ATTRIBUTE_REPARSE_POINT
         | FILE_ATTRIBUTE_OFFLINE
         | FILE_ATTRIBUTE_RECALL_ON_OPEN
@@ -86,6 +113,11 @@ pub(super) fn information(file: &File, directory: bool) -> Result<()> {
         || (information.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY != 0) != directory
         || (!directory && information.nNumberOfLinks != 1)
     {
+        diagnostic::record(
+            Some(Operation::FileValidation),
+            PairingError::StorageFailure,
+            None,
+        );
         return Err(PairingError::StorageFailure);
     }
     Ok(())
@@ -93,23 +125,31 @@ pub(super) fn information(file: &File, directory: bool) -> Result<()> {
 pub(super) fn local_ntfs(file: &File, root: &Path) -> Result<()> {
     let mut name = [0u16; 16];
     let mut flags = 0;
-    security::check(unsafe {
-        GetVolumeInformationByHandleW(
-            file.as_raw_handle(),
-            null_mut(),
-            0,
-            null_mut(),
-            null_mut(),
-            &mut flags,
-            name.as_mut_ptr(),
-            name.len() as u32,
-        )
-    })?;
+    security::os_check(
+        unsafe {
+            GetVolumeInformationByHandleW(
+                file.as_raw_handle(),
+                null_mut(),
+                0,
+                null_mut(),
+                null_mut(),
+                &mut flags,
+                name.as_mut_ptr(),
+                name.len() as u32,
+            )
+        },
+        Operation::VolumeInformation,
+    )?;
     let root = wide(root)?;
     if unsafe { GetDriveTypeW(root.as_ptr()) } != DRIVE_FIXED
         || flags & FILE_PERSISTENT_ACLS == 0
         || name[..5] != [b'N' as u16, b'T' as u16, b'F' as u16, b'S' as u16, 0]
     {
+        diagnostic::record(
+            Some(Operation::VolumeValidation),
+            PairingError::StorageFailure,
+            None,
+        );
         return Err(PairingError::StorageFailure);
     }
     Ok(())
