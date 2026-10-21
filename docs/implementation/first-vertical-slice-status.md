@@ -167,3 +167,7 @@ Tarihsel7 completed /10 open todo checkpoint uygulama completion ölçütü değ
 - Desktop production packaging/Windows TPM/macOS Secure Enclave/Linux veya hardware-absent fallback seçimi; native P-256/session provider APIs, secure backend fail closed, gerçek PC sleep/wake/receiver lifecycle.
 
 Merkezi liste: [production gate / doğrulanmamış varsayımlar](../security/production-gates.md). Physical-required, inconclusive, not-executed ve demonstrated subgate farklı statülerdir. [Session coverage index](session-documentation-index.md) kritik karar/kanıtların kalıcı karşılığını gösterir.
+
+## Windows D1 investigation checkpoint - 2026-10-21 18:58 UTC
+
+[Evidence](evidence/windows-publication-d1-2026-10-21/investigation-20261021T185816Z.json): baseline security-rule source13/13; explicit locked/no-run builds exit0. Collision rejected before Nonce/RootCreate: SecurityRule(UnexpectedDirectoryWriter), owner_match=true, supported other-principal ACE mask2032127/overlap852304. Restricted flags35; standard tool-approved execution flags16; both FAIL101. No current-policy guard defect proven; other principal identity/provenance/effective access unknown. Only cfg(test) fallible numeric logging added, independently reviewed. Diagnostic tests10PASS; fmt/clippy unavailable components (exit1), no installation; diff-check0. Other3 D1 NOT_RUN. Blocked pending compliant execution environment or separate security-policy decision; no ACL/owner/root/guard change. Production pending, D2/D3, cert/SQLite binding, continuity and physical acceptance remain open.

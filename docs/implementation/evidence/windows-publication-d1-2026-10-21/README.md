@@ -38,3 +38,5 @@ Kullanıcı raporunda12/12 source, compile/list0, collision FAIL101 ve `Fixture(
 - [Araştırma ve Astra/source review kaydı](security-rule-preparation.json): host10 diagnostic, strict clippy/fmt/line guard/native library build PASS; yeni Windows compile/runtime NOT_RUN.
 - [Yeni13 public source hash](security-rule-source-hashes.json): önceki inventory’ler korunur; yalnız ilk güncel tanılama kaynağını sabitler.
 - Windows araştırması her denemeye yeni UTC source/result bağını ekler; private SID/ACL/config/env/authority içeriği Git’e konmaz.
+
+- [Windows investigation 20261021T185816Z](investigation-20261021T185816Z.json) / [report](investigation-20261021T185816Z.txt): UnexpectedDirectoryWriter proven; restricted and tool-approved collision FAIL101; diagnostic10PASS, remaining3 NOT_RUN; no guard relaxation. [Final source inventory](writer-diagnostic-source-hashes-20261021T185244Z.json).

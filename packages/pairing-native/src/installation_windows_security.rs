@@ -221,6 +221,19 @@ fn user_directory_inner(handle: HANDLE) -> Result<()> {
             && !same(sid, &principals.system)
             && !same(sid, &principals.administrators)
         {
+            #[cfg(test)]
+            {
+                use std::io::Write;
+                let _ = writeln!(
+                    std::io::stderr(),
+                    "KLODA_FIXTURE_WRITER owner_match=true principal=other ace_type={} ace_size={} ace_flags={} mask={} mutation_overlap={}",
+                    ace.Header.AceType,
+                    ace.Header.AceSize,
+                    ace.Header.AceFlags,
+                    ace.Mask,
+                    ace.Mask & mutation,
+                );
+            }
             return rule!(UnexpectedDirectoryWriter, Err(PairingError::StorageFailure));
         }
     }

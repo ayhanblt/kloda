@@ -1,0 +1,88 @@
+{
+  "utc": "2026-10-21T18:52:14.3811458Z",
+  "label": "20261021T185214Z",
+  "baseHead": "1614d8409aa6b6fa2cba4f9934fae8e0ea2bc0fd",
+  "baselineManifest": "security-rule-source-hashes.json",
+  "hypothesis": "Rejected supported allow ACE has mutation grant to non-user/system/admin principal; numeric metadata distinguishes parser failure from actual checked writer grant",
+  "delta": "cfg(test) fixed numeric diagnostic at existing refusal; no predicate or API changes",
+  "files": [
+    {
+      "path": "packages/pairing-native/Cargo.toml",
+      "sha256": "b0eecb0ce6d1851670725d54a09b9e63ae36c889843849a2d1a8eec7e503dd9e",
+      "baselineSha256": "b0eecb0ce6d1851670725d54a09b9e63ae36c889843849a2d1a8eec7e503dd9e",
+      "baselineMatch": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows.rs",
+      "sha256": "10a30873150bdbe3de320b205a5898e0eb8e8194085dc94658ce060288429379",
+      "baselineSha256": "10a30873150bdbe3de320b205a5898e0eb8e8194085dc94658ce060288429379",
+      "baselineMatch": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate.rs",
+      "sha256": "a71e1feda91bb961342684615deb7a2a22f09932d46c49262483a88fc3b8cb55",
+      "baselineSha256": "a71e1feda91bb961342684615deb7a2a22f09932d46c49262483a88fc3b8cb55",
+      "baselineMatch": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate_buffer.rs",
+      "sha256": "c83e1f66be17b3bb3df1b98c84a6776cfc29687e479a7449f95a2925ff90ab93",
+      "baselineSha256": "c83e1f66be17b3bb3df1b98c84a6776cfc29687e479a7449f95a2925ff90ab93",
+      "baselineMatch": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate_fixture.rs",
+      "sha256": "245964e11fdddf7177004a92f6c47a8ade74329910bd4966f77347d2719b387a",
+      "baselineSha256": "245964e11fdddf7177004a92f6c47a8ade74329910bd4966f77347d2719b387a",
+      "baselineMatch": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate_tests.rs",
+      "sha256": "8af9ff8e6780544aa23304ef03b8aa372d642fd7f3ec57aaad641921f12b7dad",
+      "baselineSha256": "8af9ff8e6780544aa23304ef03b8aa372d642fd7f3ec57aaad641921f12b7dad",
+      "baselineMatch": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_handles.rs",
+      "sha256": "63094a39ad930d0b8d90134e6a1cb1e60caba81f351856ae89b99ef0d41f7403",
+      "baselineSha256": "63094a39ad930d0b8d90134e6a1cb1e60caba81f351856ae89b99ef0d41f7403",
+      "baselineMatch": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_path.rs",
+      "sha256": "964bb8827e11a6a0dfb60628333a8c37b6322eed82916ff3d67cec07bf6e8adf",
+      "baselineSha256": "964bb8827e11a6a0dfb60628333a8c37b6322eed82916ff3d67cec07bf6e8adf",
+      "baselineMatch": true
+    },
+    {
+      "path": "packages/pairing-native/src/lib.rs",
+      "sha256": "0d777bd3627f943cf5fd6db53ae05af4a6f3cc189224c770223e52520a192d62",
+      "baselineSha256": "0d777bd3627f943cf5fd6db53ae05af4a6f3cc189224c770223e52520a192d62",
+      "baselineMatch": true
+    },
+    {
+      "path": "packages/pairing-native/src/windows_publication_contract.rs",
+      "sha256": "84809f266b909353f6f863c9dd3e9ec61e4d3727b4c382e9bd77190267619368",
+      "baselineSha256": "84809f266b909353f6f863c9dd3e9ec61e4d3727b4c382e9bd77190267619368",
+      "baselineMatch": true
+    },
+    {
+      "path": "packages/pairing-native/src/startup_diagnostics.rs",
+      "sha256": "42627cf5dd5dcc4abd8171c8aab4eac945379a9e17219a265922926c740ecf79",
+      "baselineSha256": "42627cf5dd5dcc4abd8171c8aab4eac945379a9e17219a265922926c740ecf79",
+      "baselineMatch": true
+    },
+    {
+      "path": "packages/pairing-native/src/startup_diagnostics_fixture_tests.rs",
+      "sha256": "5df039e2c0bf416bcfed13f16867af87aa26122b69b8467f1ad796f2b6fda91e",
+      "baselineSha256": "5df039e2c0bf416bcfed13f16867af87aa26122b69b8467f1ad796f2b6fda91e",
+      "baselineMatch": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_security.rs",
+      "sha256": "ef1536b7c40ba883dde163a364e6667287f6b56bc7535ea10a5eab8a4efe5796",
+      "baselineSha256": "8545d9f511b4e46d28e79e109cc2dd31138f8059180b4029feb2a79a2a35cec5",
+      "baselineMatch": false
+    }
+  ]
+}

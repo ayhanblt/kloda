@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-21T18:58:16.2931524Z",
+  "head": "1614d8409aa6b6fa2cba4f9934fae8e0ea2bc0fd",
+  "baselineManifest": "security-rule-source-hashes.json",
+  "baselineMatches": 13,
+  "baselineSourceChecks": [
+    {
+      "path": "packages/pairing-native/Cargo.toml",
+      "expected": "b0eecb0ce6d1851670725d54a09b9e63ae36c889843849a2d1a8eec7e503dd9e",
+      "actual": "b0eecb0ce6d1851670725d54a09b9e63ae36c889843849a2d1a8eec7e503dd9e",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows.rs",
+      "expected": "10a30873150bdbe3de320b205a5898e0eb8e8194085dc94658ce060288429379",
+      "actual": "10a30873150bdbe3de320b205a5898e0eb8e8194085dc94658ce060288429379",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate.rs",
+      "expected": "a71e1feda91bb961342684615deb7a2a22f09932d46c49262483a88fc3b8cb55",
+      "actual": "a71e1feda91bb961342684615deb7a2a22f09932d46c49262483a88fc3b8cb55",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate_buffer.rs",
+      "expected": "c83e1f66be17b3bb3df1b98c84a6776cfc29687e479a7449f95a2925ff90ab93",
+      "actual": "c83e1f66be17b3bb3df1b98c84a6776cfc29687e479a7449f95a2925ff90ab93",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate_fixture.rs",
+      "expected": "245964e11fdddf7177004a92f6c47a8ade74329910bd4966f77347d2719b387a",
+      "actual": "245964e11fdddf7177004a92f6c47a8ade74329910bd4966f77347d2719b387a",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate_tests.rs",
+      "expected": "8af9ff8e6780544aa23304ef03b8aa372d642fd7f3ec57aaad641921f12b7dad",
+      "actual": "8af9ff8e6780544aa23304ef03b8aa372d642fd7f3ec57aaad641921f12b7dad",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_handles.rs",
+      "expected": "63094a39ad930d0b8d90134e6a1cb1e60caba81f351856ae89b99ef0d41f7403",
+      "actual": "63094a39ad930d0b8d90134e6a1cb1e60caba81f351856ae89b99ef0d41f7403",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_path.rs",
+      "expected": "964bb8827e11a6a0dfb60628333a8c37b6322eed82916ff3d67cec07bf6e8adf",
+      "actual": "964bb8827e11a6a0dfb60628333a8c37b6322eed82916ff3d67cec07bf6e8adf",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/lib.rs",
+      "expected": "0d777bd3627f943cf5fd6db53ae05af4a6f3cc189224c770223e52520a192d62",
+      "actual": "0d777bd3627f943cf5fd6db53ae05af4a6f3cc189224c770223e52520a192d62",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/windows_publication_contract.rs",
+      "expected": "84809f266b909353f6f863c9dd3e9ec61e4d3727b4c382e9bd77190267619368",
+      "actual": "84809f266b909353f6f863c9dd3e9ec61e4d3727b4c382e9bd77190267619368",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/startup_diagnostics.rs",
+      "expected": "42627cf5dd5dcc4abd8171c8aab4eac945379a9e17219a265922926c740ecf79",
+      "actual": "42627cf5dd5dcc4abd8171c8aab4eac945379a9e17219a265922926c740ecf79",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/startup_diagnostics_fixture_tests.rs",
+      "expected": "5df039e2c0bf416bcfed13f16867af87aa26122b69b8467f1ad796f2b6fda91e",
+      "actual": "5df039e2c0bf416bcfed13f16867af87aa26122b69b8467f1ad796f2b6fda91e",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_security.rs",
+      "expected": "8545d9f511b4e46d28e79e109cc2dd31138f8059180b4029feb2a79a2a35cec5",
+      "actual": "8545d9f511b4e46d28e79e109cc2dd31138f8059180b4029feb2a79a2a35cec5",
+      "match": true
+    }
+  ],
+  "finalSourceInventory": "writer-diagnostic-source-hashes-20261021T185244Z.json",
+  "priorIntermediateInventory": "writer-diagnostic-source-hashes-20261021T185214Z.json",
+  "normalization": "Strict UTF8; numeric first char65279; actual CRLF to LF; BOM-free UTF8 byte[] SHA256",
+  "sourceDelta": "Only installation_windows_security.rs: cfg(test) fallible numeric log at existing UnexpectedDirectoryWriter rejection; no changed security predicate, API, ACL or production behavior",
+  "attempts": [
+    {
+      "label": "20261021T185042Z",
+      "test": {
+        "name": "installation_files::windows::candidate::tests::rename_atomically_refuses_existing_target_and_preserves_pending",
+        "status": "FAIL",
+        "exitCode": 101,
+        "utc": "2026-10-21T18:51:19.3737356Z",
+        "wallSeconds": 0.077026
+      },
+      "context": "Managed restricted tool execution",
+      "diagnostics": [
+        "KLODA_STARTUP stage=SecurityRule(UnexpectedDirectoryWriter) operation=None code=storage_failure win32=None"
+      ],
+      "rawEvidence": ".local-evidence/windows-publication-d1-windows-runs/20261021T185042Z",
+      "build": {
+        "exitCode": 0,
+        "seconds": 6.115358
+      },
+      "executable": "packages/pairing-native/target/x86_64-pc-windows-msvc/debug/deps/kloda_pairing_native-4db531d21f449c60.exe",
+      "executableSha256": "e1569a13889874b6810ec38badae70e5ac2db851b5268f5ecba6026cf68b1334"
+    },
+    {
+      "label": "20261021T185244Z",
+      "test": {
+        "name": "installation_files::windows::candidate::tests::rename_atomically_refuses_existing_target_and_preserves_pending",
+        "status": "FAIL",
+        "exitCode": 101,
+        "utc": "2026-10-21T18:53:09.6119119Z",
+        "wallSeconds": 0.0690078
+      },
+      "context": "Managed restricted tool execution",
+      "diagnostics": [
+        "KLODA_FIXTURE_WRITER owner_match=true principal=other ace_type=0 ace_size=48 ace_flags=35 mask=2032127 mutation_overlap=852304",
+        "KLODA_STARTUP stage=SecurityRule(UnexpectedDirectoryWriter) operation=None code=storage_failure win32=None"
+      ],
+      "rawEvidence": ".local-evidence/windows-publication-d1-windows-runs/20261021T185244Z",
+      "build": {
+        "exitCode": 0,
+        "seconds": 2.9538461
+      },
+      "executable": "packages/pairing-native/target/x86_64-pc-windows-msvc/debug/deps/kloda_pairing_native-4db531d21f449c60.exe",
+      "executableSha256": "74f412cb22a7400dda4c82487511c858d77a0ce08f287a3443f2b6829aaa5faa"
+    },
+    {
+      "label": "20261021T185705Z",
+      "test": {
+        "name": "installation_files::windows::candidate::tests::rename_atomically_refuses_existing_target_and_preserves_pending",
+        "status": "FAIL",
+        "exitCode": 101,
+        "wallSeconds": 0.0419248
+      },
+      "context": "Standard require_escalated tool approval executed; no identity/config/ACL modification",
+      "diagnostics": [
+        "KLODA_FIXTURE_WRITER owner_match=true principal=other ace_type=0 ace_size=48 ace_flags=16 mask=2032127 mutation_overlap=852304",
+        "KLODA_STARTUP stage=SecurityRule(UnexpectedDirectoryWriter) operation=None code=storage_failure win32=None"
+      ],
+      "rawEvidence": ".local-evidence/windows-publication-d1-windows-runs/20261021T185705Z",
+      "build": null,
+      "executable": "packages/pairing-native/target/x86_64-pc-windows-msvc/debug/deps/kloda_pairing_native-4db531d21f449c60.exe",
+      "executableSha256": "74f412cb22a7400dda4c82487511c858d77a0ce08f287a3443f2b6829aaa5faa"
+    }
+  ],
+  "compileOnlyIntermediate": {
+    "seconds": 3.6816552,
+    "runtime": "NOT_RUN; diagnostic output changed to fallible writer after independent review",
+    "exitCode": 0,
+    "label": "20261021T185214Z"
+  },
+  "testCommand": "<verified compiler-artifact exe> <full collision case> --exact --ignored --nocapture --test-threads=1",
+  "listValidation": "Each runtime preceded by exact ignored list exit0, one exact case and executable hash validation",
+  "proof": "KnownFolder base owner matches same-process TokenUser. Supported validated allow ACE grants checked mutation bits to a SID distinct from user/system/administrators. Existing guard correctly rejects this ACL under current policy. Both permitted execution contexts refused before Nonce/RootCreate; candidate publish/assertions not reached.",
+  "notProven": "No exact SID identity, ACL creator/provenance, sandbox causality, effective Windows access, or production installation failure mechanism established. No raw SID/account/path/ACL dump or native state read.",
+  "processEvidence": "Session policy reports restricted managed workspace-write. Approval execution request succeeded. These launcher labels do not establish actual child token sandbox type; same-process owner and principal comparisons are direct anonymous runtime evidence.",
+  "checks": {
+    "diagnosticTests": {
+      "scope": "startup_diagnostics:: including isolated subprocess; synthetic routing, not fixture security acceptance",
+      "failed": 0,
+      "ignored": 0,
+      "passed": 10,
+      "exitCode": 0
+    },
+    "strictClippy": {
+      "reason": "cargo-clippy.exe not installed for explicit toolchain",
+      "status": "UNAVAILABLE",
+      "exitCode": 1
+    },
+    "changedSourceLines": 241,
+    "fmt": {
+      "reason": "cargo-fmt.exe not installed for explicit toolchain",
+      "status": "UNAVAILABLE",
+      "exitCode": 1
+    },
+    "diffCheck": {
+      "exitCode": 0
+    }
+  },
+  "remainingThree": "NOT_RUN",
+  "historicalAbsentTarget": "Not repeated; historical PASS only",
+  "warning": "InitializeDefaultDrives visible in restricted calls, absent from approved call output; same guard refusal in both. Warning not established as cause; no profile/config changes.",
+  "blocker": "Current permitted contexts contain an other-principal mutation ACE rejected by existing policy. Ignoring/accepting it or changing ACL/root requires a new security/environment decision; no further identical retries.",
+  "decision": "Provide an execution environment whose same KnownFolder base satisfies existing owner/writer policy, or explicitly decide whether to commission a separate security-policy review of the other-principal grant. No ACL/guard change performed.",
+  "limits": "No real authority/key/pin/epoch/cert/DB/user archive access or changes. No owner/probe/app/TPM/network/cleanup/Git mutation. D2/D3, cert/SQLite binding, continuity, power loss and product acceptance remain open.",
+  "separateReview": "Independent reviewer found no blocking code/privacy/policy issue after fallible logging adjustment. No current-policy guard fix justified. Separate result review: baseline13/13 and final inventory13/13, three raw FAIL101 results, no false PASS, source/exe links and redaction checked; review exit0. Reviewer ran no tests/build."
+}

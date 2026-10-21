@@ -1,0 +1,20 @@
+Windows D1 arastirma sonucu
+UTC: 2026-10-21T18:58:16.2931524Z
+HEAD: 1614d8409aa6b6fa2cba4f9934fae8e0ea2bc0fd
+Baslangic security-rule manifesti 13/13 eslesti. Eski manifestler korunuyor.
+Dar degisiklik: yalniz cfg(test) sayisal ACE tanilamasi; guvenlik kabul kosulu degismedi.
+Collision: baslangic FAIL101; sayisal tanilama FAIL101; standart onayli ayni exe FAIL101.
+Restricted: owner_match=true principal=other ace_type=0 ace_size=48 ace_flags=35 mask=2032127 mutation_overlap=852304.
+Onayli cagri: ayni alanlar, ace_flags=16.
+Ret: KLODA_STARTUP stage=SecurityRule(UnexpectedDirectoryWriter) operation=None code=storage_failure win32=None
+Nonce/RootCreate ve candidate publish/assertion asamalarina ulasilmadi; bu denemelerde yeni random root olusturulmadi.
+Alt principal kimligi/ACL kokeni veya sandbox nedenselligi kanitlanmadi.
+Mevcut guvenlik kurali altinda kod kusuru kaniti yok. Kabul kosulunu genisletmek veya ACL/root degistirmek bu gorevde uygulanmadi.
+Startup diagnostic: 10 PASS, exit0. Locked/no-run compile: 6.115358s, 3.6816552s, 2.9538461s, hepsi exit0.
+fmt ve strict clippy explicit toolchain component eksigi nedeniyle UNAVAILABLE/exit1; kurulum yapilmadi. Diff check exit0; degisen kaynak 241 satir.
+Diger uc D1 testi NOT_RUN. Tarihsel absent-target PASS tekrarlanmadi.
+InitializeDefaultDrives visible in restricted calls, absent from approved call output; same guard refusal in both. Warning not established as cause; no profile/config changes.
+Current permitted contexts contain an other-principal mutation ACE rejected by existing policy. Ignoring/accepting it or changing ACL/root requires a new security/environment decision; no further identical retries.
+Provide an execution environment whose same KnownFolder base satisfies existing owner/writer policy, or explicitly decide whether to commission a separate security-policy review of the other-principal grant. No ACL/guard change performed.
+No real authority/key/pin/epoch/cert/DB/user archive access or changes. No owner/probe/app/TPM/network/cleanup/Git mutation. D2/D3, cert/SQLite binding, continuity, power loss and product acceptance remain open.
+Ayri kaynak/sonuc review: engelleyici kod bulgusu yok; baseline13/13 ve final kaynak13/13, uc FAIL101/raw baglari ve privacy dogrulandi; review exit0.
