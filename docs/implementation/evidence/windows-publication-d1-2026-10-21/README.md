@@ -42,3 +42,5 @@ Kullanıcı raporunda12/12 source, compile/list0, collision FAIL101 ve `Fixture(
 - Windows araştırması her denemeye yeni UTC source/result bağını ekler; private SID/ACL/config/env/authority içeriği Git’e konmaz.
 
 - [Windows investigation 20261021T185816Z](investigation-20261021T185816Z.json) / [report](investigation-20261021T185816Z.txt): UnexpectedDirectoryWriter proven; restricted and tool-approved collision FAIL101; diagnostic10PASS, remaining3 NOT_RUN; no guard relaxation. [Final source inventory](writer-diagnostic-source-hashes-20261021T185244Z.json).
+
+- [Native-user A package 20261021T194101Z](native-user-package-20261021T194101Z.json) / [report](native-user-package-20261021T194101Z.txt): source14/14, locked/no-run build0, original/bundle five exact lists0; runtime NOT_RUN. [Single interactive user block](native-user-block-20261021T194101Z.txt) is outside the fixed five-file binary bundle.

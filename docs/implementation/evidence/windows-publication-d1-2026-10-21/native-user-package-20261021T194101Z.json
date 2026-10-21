@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-21T19:46:32.7275527Z",
+  "scope": "Native-user handoff phase A only",
+  "head": "b7a574728458e40c89c0cd2ba81bb940c133b2b6",
+  "initialGitStatus": "Only three untracked prior readonly observation evidence files; raw status saved Git-outside",
+  "sourceManifest": "native-user-source-hashes.json",
+  "sourceChecks": [
+    {
+      "path": "packages/pairing-native/Cargo.toml",
+      "expected": "b0eecb0ce6d1851670725d54a09b9e63ae36c889843849a2d1a8eec7e503dd9e",
+      "actual": "b0eecb0ce6d1851670725d54a09b9e63ae36c889843849a2d1a8eec7e503dd9e",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows.rs",
+      "expected": "10a30873150bdbe3de320b205a5898e0eb8e8194085dc94658ce060288429379",
+      "actual": "10a30873150bdbe3de320b205a5898e0eb8e8194085dc94658ce060288429379",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate.rs",
+      "expected": "fead30250dc841bba05ee26cef6511629dd41747153898a1987aab05fd627e2a",
+      "actual": "fead30250dc841bba05ee26cef6511629dd41747153898a1987aab05fd627e2a",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate_buffer.rs",
+      "expected": "c83e1f66be17b3bb3df1b98c84a6776cfc29687e479a7449f95a2925ff90ab93",
+      "actual": "c83e1f66be17b3bb3df1b98c84a6776cfc29687e479a7449f95a2925ff90ab93",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate_fixture.rs",
+      "expected": "76e2ea5a3f2ef98298d071ab01f5e37337581f3f26fca71921c7bca173ddc8a1",
+      "actual": "76e2ea5a3f2ef98298d071ab01f5e37337581f3f26fca71921c7bca173ddc8a1",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate_tests.rs",
+      "expected": "8af9ff8e6780544aa23304ef03b8aa372d642fd7f3ec57aaad641921f12b7dad",
+      "actual": "8af9ff8e6780544aa23304ef03b8aa372d642fd7f3ec57aaad641921f12b7dad",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_handles.rs",
+      "expected": "63094a39ad930d0b8d90134e6a1cb1e60caba81f351856ae89b99ef0d41f7403",
+      "actual": "63094a39ad930d0b8d90134e6a1cb1e60caba81f351856ae89b99ef0d41f7403",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_path.rs",
+      "expected": "964bb8827e11a6a0dfb60628333a8c37b6322eed82916ff3d67cec07bf6e8adf",
+      "actual": "964bb8827e11a6a0dfb60628333a8c37b6322eed82916ff3d67cec07bf6e8adf",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/lib.rs",
+      "expected": "0d777bd3627f943cf5fd6db53ae05af4a6f3cc189224c770223e52520a192d62",
+      "actual": "0d777bd3627f943cf5fd6db53ae05af4a6f3cc189224c770223e52520a192d62",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/windows_publication_contract.rs",
+      "expected": "dcc21d2a9343ba9dfdf93aa377a183516724e726df948cad3f41406d667367b0",
+      "actual": "dcc21d2a9343ba9dfdf93aa377a183516724e726df948cad3f41406d667367b0",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/startup_diagnostics.rs",
+      "expected": "97a9e50a90350c284add5176f2ff3a15f3751b05866b0437cbcd4d3e980d09b6",
+      "actual": "97a9e50a90350c284add5176f2ff3a15f3751b05866b0437cbcd4d3e980d09b6",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/startup_diagnostics_fixture_tests.rs",
+      "expected": "466d269f17c96ff874c968071de2d6768385c93790ca26c16a3d922ef91d85c2",
+      "actual": "466d269f17c96ff874c968071de2d6768385c93790ca26c16a3d922ef91d85c2",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_security.rs",
+      "expected": "c96f2b0a117d1d3ea17c301263048ede5fac5fbd216fd59f3afb6652bb5638a9",
+      "actual": "c96f2b0a117d1d3ea17c301263048ede5fac5fbd216fd59f3afb6652bb5638a9",
+      "match": true
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate_context.rs",
+      "expected": "5d30bb96b12b07b9e1ca8603381ab417083764a3796f195107603fa7673643c0",
+      "actual": "5d30bb96b12b07b9e1ca8603381ab417083764a3796f195107603fa7673643c0",
+      "match": true
+    }
+  ],
+  "normalization": "strict UTF8; numeric leading BOM65279 only; actual CRLF to LF; BOM-free UTF8 bytes SHA256",
+  "toolchain": "1.99.0-x86_64-pc-windows-msvc",
+  "toolchainExit": 0,
+  "buildCommand": "rustup.exe run 1.99.0-x86_64-pc-windows-msvc cargo test --manifest-path packages/pairing-native/Cargo.toml --locked --no-default-features --target x86_64-pc-windows-msvc --lib --no-run --message-format=json",
+  "build": {
+    "exitCode": 0,
+    "seconds": 32.6116149
+  },
+  "compilerArtifact": {
+    "validation": "Unique kloda_pairing_native test artifact; manifest/src/profile/path/regular exe/no-reparse verified",
+    "relativeExecutable": "packages/pairing-native/target/x86_64-pc-windows-msvc/debug/deps/kloda_pairing_native-4db531d21f449c60.exe",
+    "sha256": "b5440ca7c8314cd0e335f8351bfce48409268fa1b221fd65948e94a83be89dca"
+  },
+  "lists": [
+    {
+      "name": "installation_files::windows::candidate::context::native_user_preflight",
+      "artifactListExit": 0,
+      "bundleListExit": 0,
+      "runtime": "NOT_RUN"
+    },
+    {
+      "name": "installation_files::windows::candidate::tests::rename_atomically_refuses_existing_target_and_preserves_pending",
+      "artifactListExit": 0,
+      "bundleListExit": 0,
+      "runtime": "NOT_RUN"
+    },
+    {
+      "name": "installation_files::windows::candidate::tests::existing_pending_is_not_adopted_deleted_or_overwritten",
+      "artifactListExit": 0,
+      "bundleListExit": 0,
+      "runtime": "NOT_RUN"
+    },
+    {
+      "name": "installation_files::windows::candidate::tests::injected_cut_points_and_lost_reply_never_ack_or_regenerate",
+      "artifactListExit": 0,
+      "bundleListExit": 0,
+      "runtime": "NOT_RUN"
+    },
+    {
+      "name": "installation_files::windows::candidate::tests::target_appearing_after_preflush_is_not_replaced",
+      "artifactListExit": 0,
+      "bundleListExit": 0,
+      "runtime": "NOT_RUN"
+    }
+  ],
+  "bundleRelativePath": ".local-evidence/windows-publication-d1-windows-runs/20261021T194101Z/Kloda-D1-20261021T194101Z-b7a5747",
+  "bundleManifestSha256": "21864209cf40eb5cd4f9cdee7823edce71b8739ee19b56506cfd4aa26050b775",
+  "bundleInputs": [
+    {
+      "name": "kloda-d1-tests.exe",
+      "sha256": "b5440ca7c8314cd0e335f8351bfce48409268fa1b221fd65948e94a83be89dca"
+    },
+    {
+      "name": "windows-d1-native-user-handoff.md",
+      "sha256": "bd6ddd0c8bbedba3ec34107824f4fea1ba6bf534c59896f69d1f30017d6423b7"
+    },
+    {
+      "name": "native-user-source-hashes.json",
+      "sha256": "a376bfb2f1be027313e7f8f59d0eca6f12dcda9e05c83618af537bfe4ea3fead"
+    },
+    {
+      "name": "README.txt",
+      "sha256": "509d424fd1557e65f5bc5aa9fb0e9f7673efb1f5862346276908ee202bee0514"
+    }
+  ],
+  "bundleSelfCheck": "Exactly five allowlisted regular files, no extras/subdirs/reparse paths; four input hashes and pinned manifest verified; copied exe five exact ignored list calls all exit0",
+  "userBlock": "native-user-block-20261021T194101Z.txt",
+  "userBlockSha256": "65b10ee196fc6c80237b7496330fec038552ab95259117e81664f943f8b5bd66",
+  "userBlockSyntax": "PowerShell7 parser exit0, no execution; PS5 syntax reviewed, not executed there",
+  "runnerPolicy": "Interactive block only in separate fresh standard account: fixed pin, staging/private-copy verification, per-spawn revalidation, five lists then native context0/0/0/1 and four fail-stop cases. Streaming raw logs/PID; no auto-kill on timeout, UNKNOWN active child retained, no later case; missing loader/policy infrastructure not called test FAIL",
+  "nativeContext": "NOT_RUN",
+  "fixtures": "NOT_RUN",
+  "newAccount": "NOT_CREATED_BY_AGENT",
+  "notChanged": [
+    "source/test/assertions/manifests",
+    "ACL/owner/guard",
+    "environment/config/ExecutionPolicy",
+    "authority/keys/archive",
+    "Git index/history",
+    "model/effort"
+  ],
+  "warning": "InitializeDefaultDrives visible; operations succeeded; no causal attribution or attempted fix",
+  "rawEvidence": ".local-evidence/windows-publication-d1-windows-runs/20261021T194101Z",
+  "limits": "Bundle build/list/package only; no runtime PASS or product/platform/power-loss proof. Fresh-account policy/DLL/runtime gates unverified. D2/D3/cert/SQLite binding/continuity and real owner remain open.",
+  "independentSecurityReview": "Separate read-only reviewer verified bundle pin/input hashes and final block. Initial timeout logging and loader-failure classification findings corrected. No remaining blocking issue. Explicit UNKNOWN-active/no-kill policy accepted with PID/partial logs and warning not to close terminal/retry. Reviewer ran no runtime/build.",
+  "separateResultReview": "Checked source14/14, build exit0, original and bundle five list-only exit0 each, unique artifact/source/exe links, exactly five plain bundle inputs and hashes, fixed manifest pin, block syntax without execution, runtime NOT_RUN and no false PASS/private-state dump. Final review exit0."
+}

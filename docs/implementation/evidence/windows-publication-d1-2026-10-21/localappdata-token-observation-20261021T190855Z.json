@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-21T19:08:55.3922506Z",
+  "scope": "Independent second read-only observer-process snapshot; Q identifiers local to this snapshot only",
+  "threadImpersonationPresent": false,
+  "ownerMatchesProcessUser": true,
+  "tokenHasRestrictions": true,
+  "tokenIsAppContainer": true,
+  "tokenAppContainerSidPresent": true,
+  "tokenGroupCount": 14,
+  "restrictedSidCount": 0,
+  "capabilityCount": 2,
+  "rejectedAllowAces": [
+    {
+      "principal": "Q1",
+      "category": "ApplicationPackageSidStructure",
+      "wellKnownTypes": [],
+      "processUserMatch": false,
+      "tokenGroupMatch": false,
+      "tokenGroupAttributes": [],
+      "groupDenyOnlyStatus": "NOT_PRESENT_IN_TOKEN_GROUPS",
+      "restrictedSidMatch": false,
+      "restrictedAttributes": [],
+      "capabilityMatch": false,
+      "capabilityAttributes": [],
+      "tokenAppContainerSidMatch": true,
+      "aceType": 0,
+      "aceFlags": 35,
+      "aceSize": 48,
+      "mask": 2032127,
+      "mutationOverlap": 852304,
+      "inheritOnly": false
+    }
+  ],
+  "methods": "Existing WindowsIdentity interop via reflection, bounded SafeBuffer reads using loaded TOKEN_GROUPS/SID_AND_ATTRIBUTES layout; current-user KnownFolder via Environment.GetFolderPath; owner and DACL via managed GetAccessControl; local IsWellKnown/structural SID checks only",
+  "provenance": "No P1=Q1 or prior-test-principal equivalence asserted. Same numeric ACE fields alone are not identity evidence.",
+  "unknown": [
+    "ACL provenance/creator",
+    "Identity equivalence with earlier observers or tests",
+    "Effective access",
+    "Authorization/trust of structural class or membership"
+  ],
+  "notRun": [
+    "test",
+    "build",
+    "fixture",
+    "native owner/probe",
+    "network/domain/account lookup"
+  ],
+  "unchanged": [
+    "ACL",
+    "owner",
+    "guard",
+    "environment",
+    "config",
+    "production state"
+  ],
+  "warning": "InitializeDefaultDrives visible; no causal attribution",
+  "exitCode": 0,
+  "resultReview": "Separate saved-result review: one rejected allow ACE, same-observer token AppContainer SID match, no user/group/restricted/capability match; numeric fields and restricted/group state consistent. No raw SID/name/path/ACL/token/config dump in evidence. No prior identity equivalence or effective-access/trust claim. No test/build/fixture; review exit0.",
+  "groupStateClarification": "No matching TOKEN_GROUPS entry: enabled/deny-only attributes for this ACE principal are not present, not a fabricated denyOnly=false. HasRestrictions=true and an empty TokenRestrictedSids list are separate observed fields; no causal conclusion inferred.",
+  "independentReview": "Read-only reviewer inspected both saved observations: no blocking privacy/inference finding. Q1 token AppContainer SID match limited to second observing process; no prior-test identity/provenance/effective-access/trust inference. Reviewer did not rerun metadata queries/tests/build or modify files; runtime method not independently re-executed."
+}

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-21T19:07:39.3919068Z",
+  "scope": "Read-only current PowerShell process token and its current-user KnownFolder LocalAppData owner/DACL; no build/test/fixture",
+  "threadImpersonationPresent": false,
+  "ownerMatchesProcessUser": true,
+  "hasRestrictions": true,
+  "restrictedSidCount": 0,
+  "tokenGroupCount": 14,
+  "rejectedAllowAceCount": 1,
+  "anonymousPrincipalCount": 1,
+  "rejectedAllowAces": [
+    {
+      "principal": "P1",
+      "category": "ApplicationPackageSidStructure",
+      "wellKnownTypes": [],
+      "processUserMatch": false,
+      "tokenGroupMatch": false,
+      "tokenGroupMetadata": [],
+      "restrictedSidMatch": false,
+      "restrictedAttributes": [],
+      "aceType": 0,
+      "aceFlags": 35,
+      "aceSize": 48,
+      "mask": 2032127,
+      "mutationOverlap": 852304,
+      "inheritOnly": false,
+      "inherited": false
+    }
+  ],
+  "wellKnownClassificationErrors": 0,
+  "methods": "Environment.GetFolderPath(LocalApplicationData), FileSystemAclExtensions.GetAccessControl(Owner|Access), RawSecurityDescriptor. Existing WindowsIdentity native-query interop reflected, no code compilation; SafeBuffer copied with bounds checks; TOKEN_GROUPS layout from loaded runtime. Raw SID values used only for in-memory equality.",
+  "tokenLayout": {
+    "entryStride": 16,
+    "attributesOffset": 8,
+    "sidOffset": 0,
+    "groupOffset": 8
+  },
+  "network": "No Translate/LookupAccountSid/account lookup/domain/network query",
+  "unknown": [
+    "ACL creator/provenance",
+    "Principal equivalence with previous runs",
+    "Effective access of this or any other process",
+    "Trust/authorization of recognized groups",
+    "Local-machine versus domain provenance of unrecognized account SIDs"
+  ],
+  "warning": "InitializeDefaultDrives warning visible; no configuration change or causal attribution",
+  "intermediateDiagnostics": "Read-only introspection had initial generic token DWORD query size mismatch, a Marshal overload-selection error, and Win32-vs-.NET enum-name mismatch; corrected using runtime type/layout and actual enum names. No build/test/fixture or protected-data writes.",
+  "exitCode": 0,
+  "invariants": "No ACL/owner/guard/environment change; no full ACL/token/SID/account/path/config dump"
+}

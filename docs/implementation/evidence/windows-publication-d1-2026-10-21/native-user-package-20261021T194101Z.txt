@@ -1,0 +1,17 @@
+Windows D1 A asamasi - paket hazirligi
+UTC: 2026-10-21T19:46:32.7275527Z
+HEAD: b7a574728458e40c89c0cd2ba81bb940c133b2b6
+14/14 kaynak hash eslesti. Locked/no-run Windows build exit0; 32.6116149 saniye.
+Orijinal artifact ve paket kopyasinda beser exact ignored list: her biri exit0, 1 exact test, 0 benchmark.
+Paket relatif yol: .local-evidence/windows-publication-d1-windows-runs/20261021T194101Z/Kloda-D1-20261021T194101Z-b7a5747
+Manifest SHA256: 21864209cf40eb5cd4f9cdee7823edce71b8739ee19b56506cfd4aa26050b775
+EXE SHA256: b5440ca7c8314cd0e335f8351bfce48409268fa1b221fd65948e94a83be89dca
+Kullanici tek interaktif blok: native-user-block-20261021T194101Z.txt (paketin DISINDA; paket klasorune eklemeyin)
+Paket: yalniz exe, devir belgesi, kaynak inventory, README ve manifest. AppData/keys/config/ham kanit/toolchain/DLL/script kopyalanmadi.
+Native preflight ve tum fixture runtime NOT_RUN. Hesap acilmadi.
+Paketleme runtime PASS degildir. Yeni hesapta da ret/DLL/policy engeli mumkun.
+Timeout/kesinti: UNKNOWN; PID/partial logs korunur, otomatik kill/cleanup/retry ve sonraki case yok.
+InitializeDefaultDrives gorunur; ortam/config degistirilmedi.
+Kullanici yeni standart hesaba kendisi gecmeli; normal non-admin terminalde verilen blogu kullanmali.
+Bundle build/list/package only; no runtime PASS or product/platform/power-loss proof. Fresh-account policy/DLL/runtime gates unverified. D2/D3/cert/SQLite binding/continuity and real owner remain open.
+Ayri guvenlik/sonuc review tamamlandi; engelleyici bulgu yok; final review exit0. Timeout/kesinti varsa aktif child olabileceginden terminali kapatmayin/tekrarlamayin.

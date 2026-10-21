@@ -1,0 +1,139 @@
+& {
+    $ErrorActionPreference = 'Stop'
+    $pin = '21864209cf40eb5cd4f9cdee7823edce71b8739ee19b56506cfd4aa26050b775'
+    $inputs = @('kloda-d1-tests.exe','windows-d1-native-user-handoff.md','native-user-source-hashes.json','README.txt')
+    $allowed = $inputs + @('bundle-manifest.json')
+    function Assert-PlainPath([string]$path) {
+        $item = Get-Item -Force -LiteralPath $path
+        while ($null -ne $item) {
+            if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Reparse path: STOP' }
+            if ($item -is [IO.FileInfo]) { $item = $item.Directory } else { $item = $item.Parent }
+        }
+    }
+    function Assert-Bundle([string]$path) {
+        Assert-PlainPath $path
+        if (-not (Get-Item -Force -LiteralPath $path).PSIsContainer) { throw 'Not a folder' }
+        $items = @(Get-ChildItem -Force -LiteralPath $path)
+        if ($items.Count -ne 5) { throw 'Expected exactly five inputs' }
+        foreach ($item in $items) {
+            if ($item.PSIsContainer -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -or $allowed -cnotcontains $item.Name) { throw 'Unexpected input' }
+        }
+        $manifest = Join-Path $path 'bundle-manifest.json'
+        if ((Get-FileHash -Algorithm SHA256 -LiteralPath $manifest).Hash.ToLowerInvariant() -cne $pin) { throw 'Manifest hash mismatch' }
+        $m = Get-Content -Raw -Encoding UTF8 -LiteralPath $manifest | ConvertFrom-Json
+        if ($m.schemaVersion -ne 1 -or @($m.files).Count -ne 4) { throw 'Manifest schema mismatch' }
+        $seen = @()
+        $exeHash = $null
+        foreach ($f in $m.files) {
+            if ($inputs -cnotcontains $f.name -or $seen -ccontains $f.name -or $f.sha256 -cnotmatch '^[a-f0-9]{64}$') { throw 'Manifest entry mismatch' }
+            $seen += $f.name
+            if ((Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $path $f.name)).Hash.ToLowerInvariant() -cne $f.sha256) { throw 'Input hash mismatch' }
+            if ($f.name -ceq 'kloda-d1-tests.exe') { $exeHash = $f.sha256 }
+        }
+        if (-not $exeHash) { throw 'Executable absent' }
+        return $exeHash
+    }
+    if ((Read-Host 'Yeni, bos STANDART hesaptayim; terminal yonetici/Codex degil. Onay icin EVET') -cne 'EVET') { throw 'User context not confirmed' }
+    $stage = [IO.Path]::GetFullPath((Read-Host 'Aktarilan bes dosyali staging klasorunun tam yolu').Trim('"'))
+    $hash = Assert-Bundle $stage
+    $homePath = [Environment]::GetFolderPath([Environment+SpecialFolder]::UserProfile)
+    Assert-PlainPath $homePath
+    $label = [DateTime]::UtcNow.ToString('yyyyMMddTHHmmssZ') + '-' + [Guid]::NewGuid().ToString('N')
+    $private = Join-Path $homePath ('Kloda-D1-private-' + $label)
+    $logs = Join-Path $homePath ('Kloda-D1-results-' + $label)
+    if ((Test-Path -LiteralPath $private) -or (Test-Path -LiteralPath $logs)) { throw 'Destination exists' }
+    [void][IO.Directory]::CreateDirectory($private)
+    [void][IO.Directory]::CreateDirectory($logs)
+    foreach ($name in $allowed) { [IO.File]::Copy((Join-Path $stage $name),(Join-Path $private $name),$false) }
+    if ((Assert-Bundle $private) -cne $hash) { throw 'Private copy mismatch' }
+    Assert-PlainPath $logs
+    $exe = Join-Path $private 'kloda-d1-tests.exe'
+    $prefix = 'installation_files::windows::candidate::'
+    $cases = @(
+        ($prefix + 'context::native_user_preflight'),
+        ($prefix + 'tests::rename_atomically_refuses_existing_target_and_preserves_pending'),
+        ($prefix + 'tests::existing_pending_is_not_adopted_deleted_or_overwritten'),
+        ($prefix + 'tests::injected_cut_points_and_lost_reply_never_ack_or_regenerate'),
+        ($prefix + 'tests::target_appearing_after_preflush_is_not_replaced')
+    )
+    $results = @($cases | ForEach-Object { [pscustomobject]@{ name=$_; status='NOT_RUN'; exitCode=$null; seconds=$null } })
+    $resultFile = Join-Path $logs 'results.json'
+    $results | ConvertTo-Json -Depth 4 | Set-Content -Encoding UTF8 -LiteralPath $resultFile
+    function Invoke-FixedCase([int]$index,[bool]$list) {
+        if ((Assert-Bundle $private) -cne $hash) { throw 'Bundle changed: STOP' }
+        $name = $cases[$index]
+        $tag = if ($list) { 'list-' + $index } else { 'test-' + $index }
+        $argsText = if ($list) { $name + ' --exact --ignored --list' } else { $name + ' --exact --ignored --nocapture --test-threads=1' }
+        $pi = New-Object Diagnostics.ProcessStartInfo
+        $pi.FileName = $exe
+        $pi.Arguments = $argsText
+        $pi.WorkingDirectory = $private
+        $pi.UseShellExecute = $false
+        $pi.RedirectStandardOutput = $true
+        $pi.RedirectStandardError = $true
+        $sw = [Diagnostics.Stopwatch]::StartNew()
+        $p = $null
+        $outFile = [IO.File]::Open((Join-Path $logs ($tag + '.stdout.txt')),[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::Read)
+        $errFile = [IO.File]::Open((Join-Path $logs ($tag + '.stderr.txt')),[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::Read)
+        try {
+            try { $p = [Diagnostics.Process]::Start($pi) } catch {
+                if (-not $list) {
+                    $results[$index].status = 'NOT_RUN_INFRASTRUCTURE'
+                    $results | ConvertTo-Json -Depth 4 | Set-Content -Encoding UTF8 -LiteralPath $resultFile
+                }
+                throw
+            }
+            $p.Id | Set-Content -LiteralPath (Join-Path $logs ($tag + '.pid.txt'))
+            $outTask = $p.StandardOutput.BaseStream.CopyToAsync($outFile)
+            $errTask = $p.StandardError.BaseStream.CopyToAsync($errFile)
+            if (-not $p.WaitForExit(120000)) { throw 'UNKNOWN timeout; child may still run; no retry or later case' }
+            $outTask.GetAwaiter().GetResult()
+            $errTask.GetAwaiter().GetResult()
+        } finally {
+            if ($null -eq $p -or $p.HasExited) {
+                $outFile.Dispose()
+                $errFile.Dispose()
+                if ($null -ne $p) { 'exited' | Set-Content -LiteralPath (Join-Path $logs ($tag + '.process-state.txt')) }
+            } else {
+                # Do not kill a fixture or close live pipes. Keep partial logs and owned handles.
+                $script:KlodaD1Pending = @($p,$outFile,$errFile,$outTask,$errTask)
+                'UNKNOWN active child; PID and partial logs retained; do not retry or start another case' | Set-Content -LiteralPath (Join-Path $logs ($tag + '.process-state.txt'))
+            }
+        }
+        $code = $p.ExitCode
+        $stdout = [IO.File]::ReadAllText((Join-Path $logs ($tag + '.stdout.txt')))
+        $stderr = [IO.File]::ReadAllText((Join-Path $logs ($tag + '.stderr.txt')))
+        $sw.Stop()
+        $code | Set-Content -LiteralPath (Join-Path $logs ($tag + '.exit.txt'))
+        $p.Dispose()
+        if ($list) {
+            if ($code -ne 0 -or $stdout -notmatch ([regex]::Escape($name)+': test') -or $stdout -notmatch '1 test, 0 benchmarks' -or [regex]::Matches($stdout,': test').Count -ne 1) { throw 'Exact list failed: STOP' }
+        } else {
+            $results[$index].exitCode = $code
+            $results[$index].seconds = $sw.Elapsed.TotalSeconds
+            $ok = $code -eq 0 -and $stdout -match 'running 1 test' -and $stdout -match ([regex]::Escape($name)+' \.\.\. ok') -and $stdout -match 'test result: ok\. 1 passed; 0 failed; 0 ignored;'
+            if ($index -eq 0) { $ok = $ok -and ([regex]::Matches($stderr,'(?m)^KLODA_D1_CONTEXT app_container=0 restrictions=0 elevated=0 elevation_type=1\r?$').Count -eq 1) }
+            $started = $stdout -match 'running 1 test' -and $stdout -match ([regex]::Escape($name)+' \.\.\.')
+            $failed = $started -and $code -ne 0 -and $stdout -match 'test result: FAILED\. 0 passed; 1 failed; 0 ignored;'
+            $results[$index].status = if ($ok) { 'PASS' } elseif ($failed) { 'FAIL' } elseif (-not $started -and $code -ne 0) { 'NOT_RUN_INFRASTRUCTURE' } else { 'UNKNOWN' }
+            $results | ConvertTo-Json -Depth 4 | Set-Content -Encoding UTF8 -LiteralPath $resultFile
+            Write-Host ($tag + ': ' + $results[$index].status + '; exit=' + $code)
+            if (-not $ok) { throw 'First failed/unknown result: STOP; no retry' }
+        }
+    }
+    try {
+        Write-Host ('Ozel sonuc klasoru: ' + $logs)
+        for ($i=0; $i -lt 5; $i++) { Invoke-FixedCase $i $true }
+        for ($i=0; $i -lt 5; $i++) {
+            $results[$i].status = 'UNKNOWN'
+            $results | ConvertTo-Json -Depth 4 | Set-Content -Encoding UTF8 -LiteralPath $resultFile
+            Invoke-FixedCase $i $false
+        }
+        Write-Host 'Bitti. Sonuclari inceleme icin saklayin; tekrar/cleanup yapmayin.'
+    } catch {
+        $_.Exception.Message | Set-Content -Encoding UTF8 -LiteralPath (Join-Path $logs 'STOP.txt')
+        Write-Host ('DURULDU. Sonuclar: ' + $logs)
+        Write-Host 'Timeout/kesintide child aktif olabilir: terminali kapatmayin; tekrar veya baska case baslatmayin. PID/process-state ve kismi loglari koruyun.'
+        throw
+    }
+}

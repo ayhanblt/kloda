@@ -1,0 +1,15 @@
+LocalAppData ve inceleyen süreç token gözlemi
+UTC: 10/21/2026 19:08:55
+Kapsam: yalnız bu PowerShell inceleme süreci ve onun KnownFolder LocalAppData owner/DACL metadata bilgisi. Test/build/fixture başlatılmadı.
+Owner ile process kullanıcısı eşleşiyor; thread impersonation yok.
+Reddedilecek tek allow ACE: anonim Q1, ApplicationPackageSidStructure. Yerel well-known eşleşmesi bulunmadı.
+ACE: type=0, flags=35, size=48, mask=2032127, mutation overlap=852304; inherit-only=false.
+Q1: process user=false; TOKEN_GROUPS=false; TokenRestrictedSids=false; TokenCapabilities=false; bu sürecin TokenAppContainerSid eşleşmesi=true.
+TokenIsAppContainer=true; TokenHasRestrictions=true; token groups=14; restricted SIDs=0; capabilities=2.
+Q1 için TOKEN_GROUPS girdisi yok: enabled/deny-only öznitelikleri mevcut değil. Bu sonuç deny-only=false diye sunulmadı.
+Önceki gözlemdeki P1 veya önceki test süreçleriyle kimlik eşitliği kurulmadı. ACL kökeni/oluşturanı, effective access ve güven/authorization UNKNOWN.
+Yalnız yerel yapısal/well-known SID kontrolleri kullanıldı. Ağ/domain/hesap-adı sorgusu yok. Ham SID, hesap adı, özel yol, tam ACL/token/config dökümü yok.
+InitializeDefaultDrives uyarısı görüldü; nedensellik yüklenmedi.
+ACL/owner/guard/ortam/config/kurulum/veri değiştirilmedi. Yalnız yeni kanıt dosyaları yazıldı.
+Ayrı sonuç review: exit0; bağımsız kaynak/sonuç incelemesi ayrıca kaydedilir.
+Bağımsız salt okunur kanıt incelemesi: gizlilik/çıkarım açısından engelleyici bulgu yok; reviewer metadata sorgusunu veya test/build çalıştırmadı.
