@@ -18,3 +18,5 @@ Tarih:2026-10-21. Bu alan yalnız incelenmiş küçük metin/JSON kanıtları i�
 Ham Windows çıktısı gerekirse yalnız Git-dışı `.local-evidence/windows-publication-d1-windows-runs/` altında tutulur. Yeni derleme/test ham çıktısını otomatik buraya kopyalama; önce incele, private absolute path’leri redakte et, yalnız ilgili satırları `.txt`/JSON olarak ekle. Mevcut sonuçları yeni çalışmış gibi yeniden yazma; run/date/provenance alanıyla yeni checkpoint ekle. Derleme/native dosya-namespace sonucu power-loss/gerçek restart/ürün kabulü değildir.
 
 Windows görevi bitince seçilmiş sonuçlar burada güncellenir; agent Git işlemi yapmaz. Kullanıcı raporu ana macOS oturumuna getirir ve sonraki kararlar orada alınır. Eski raw probe kaynakları mevcut değilse varmış gibi oluşturulmaz; hash eski archive’ı geri üretmez.
+
+- [Windows run 20261021T125810Z](windows-run-20261021T125810Z.json) · [Türkçe rapor](windows-run-20261021T125810Z.txt): kaynak hash ön kontrolünde 10/10 uyuşmazlık; derleme ve dört test NOT_RUN.

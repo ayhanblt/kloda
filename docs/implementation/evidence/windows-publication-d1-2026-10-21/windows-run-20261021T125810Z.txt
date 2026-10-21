@@ -1,0 +1,13 @@
+﻿Windows D1 görev raporu
+UTC: 2026-10-21T12:58:10.8337692Z
+HEAD: 8c86b671644b52df3fd68f49487940fd8791cd51
+Ön kontrol: kaynak hash uyuşmazlığı; exit 2. Manifestteki 10 dosyanın 10 tanesi eşleşmedi.
+Strict UTF-8, en fazla bir leading BOM kaldırma ve CRLF→LF uygulandı. Başka normalizasyon uygulanmadı.
+Başlangıç Git status çıktısı boştu. Uyuşmazlığın nedeni belirlenmedi.
+Toolchain kontrolü, derleme, executable seçimi, list-only ve dört test: NOT_RUN.
+Test exit/süre/exe hash: yok; test çalıştırılmadı.
+Kaynaklar, mevcut kurulum ve yedekler değiştirilmedi; Git mutation yapılmadı.
+Önceki absent-target PASS tarihsel kayıttır; tekrarlanmadı.
+D2/D3, cert replacement, SQLite object binding, continuity ve power-loss sınırları açık.
+Ayrı sonuç review: JSON/metin ve ön kontrol karşılaştırıldı; false PASS veya özel absolute path yok.
+Windows görev raporu hazır; sonuç ana oturumda değerlendirilmeli.
