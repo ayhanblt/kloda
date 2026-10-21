@@ -136,7 +136,7 @@ fn create_directory(path: &Path) -> Result<()> {
 }
 
 pub(super) fn directories(directory: &Path, create: bool) -> Result<Vec<File>> {
-    let folders = selection(directory)?;
+    let folders = diagnostic::validation(Operation::PathSelectionValidation, selection(directory))?;
     let profile = directory.parent().ok_or(PairingError::StorageFailure)?;
     let mut handles = Vec::with_capacity(directory.components().count());
     let ancestors: Vec<_> = directory.ancestors().collect();
@@ -191,7 +191,7 @@ pub(super) fn sqlite(path: &Path) -> bool {
     )
 }
 pub(super) fn leaf(path: &Path) -> Result<()> {
-    if matches!(
+    let result = if matches!(
         path.file_name().and_then(|name| name.to_str()),
         Some("epoch" | "initialized" | "owner.lock" | "listener-port" | "certificate.der")
     ) || sqlite(path)
@@ -199,5 +199,36 @@ pub(super) fn leaf(path: &Path) -> Result<()> {
         Ok(())
     } else {
         Err(PairingError::StorageFailure)
+    };
+    diagnostic::validation(Operation::LeafNameValidation, result)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn leaf_allowlist_still_rejects_partial_and_unknown_files() {
+        for name in [
+            "epoch",
+            "initialized",
+            "owner.lock",
+            "listener-port",
+            "certificate.der",
+            "pairing.sqlite3",
+            "pairing.sqlite3-wal",
+            "pairing.sqlite3-shm",
+            "pairing.sqlite3-journal",
+        ] {
+            assert_eq!(leaf(Path::new(name)), Ok(()));
+        }
+        for name in [
+            "epoch.pending",
+            "certificate.der.pending",
+            "unrecognized",
+            "",
+        ] {
+            assert_eq!(leaf(Path::new(name)), Err(PairingError::StorageFailure));
+        }
     }
 }
