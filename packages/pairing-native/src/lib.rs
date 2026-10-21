@@ -73,3 +73,6 @@ mod node_retention;
 
 #[cfg(not(target_os = "android"))]
 mod foreground;
+
+#[cfg(test)]
+mod windows_publication_contract;

@@ -232,3 +232,8 @@ mod tests {
         }
     }
 }
+
+#[cfg(test)]
+pub(super) fn fixture_base() -> Result<PathBuf> {
+    Ok(FOLDERS.as_ref().map_err(|error| *error)?.local.clone())
+}

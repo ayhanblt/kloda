@@ -1,5 +1,8 @@
 # Session karar/kanıt kapsam indeksi
 
+2026-10-21 Windows CLI görev devri: kullanıcı sonuçları ana macOS oturumuna getirip burada devam edecek. [Windows-only devir belgesi](windows-codex-d1-handoff.md) ve [başlangıç prompt’u](windows-codex-d1-prompt.md), frozen kaynak/hash ve güncel derlemeden seçilen ikiliyle yalnız kalan dört exact ignored fixture’ın birer kez/fail-stop çalıştırılmasını kapsar; genel roadmap, kaynak düzeltmesi, owner/probe/cleanup/Git/model değişimi yok. [Git’e uygun seçilmiş kanıtlar](evidence/windows-publication-d1-2026-10-21/README.md) geçmiş host/Windows compile/ilk1PASS ile kalan4NOT_RUN ayrımını taşır; `.local-evidence` gerektirmez ve ignore kuralı değişmedi. Bu belge hazırlığında test/build/cihaz çalıştırılmadı. Kullanıcının Windows prompt’unu vermesi bu dört teste dar yürütme iznidir; sadece belgeyi okumak izin değildir. Sonuç ne olursa olsun raporla/dur; devam ana oturumda.
+
+
 **Codex migration audit — 2026-10-15:** [bağımsız kısa handoff](codex-migration-handoff.md), [tam Git envanteri](codex-migration-git-inventory.json). Önceki14/14 bounded implementation TODO, source markers, platform/security/current ADRs ve OMP-only bilgi karşılaştırıldı. Eski implementation/central-LAN durum çelişkileri scope/tarih ile düzeltildi; raw session/tool IDs taşınabilir prerequisite sayılmadı. Fiziksel pause ve Windows storage decision blocker/iOS deferral sürer. Bu iş docs/record-only; yeni test/build/device veya Git mutation yok.
 
 

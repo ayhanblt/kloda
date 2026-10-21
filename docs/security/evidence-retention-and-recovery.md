@@ -1,5 +1,7 @@
 # Kloda — Evidence retention ve public kaynak kurtarma
 
+2026-10-21 ek kullanıcı kararı: `.local-evidence/` topluca Git’e açılmaz; `/.local-evidence/` ignore kuralı korunur. Windows D1 için yalnız seçilmiş/sanitize edilmiş test sonuçları, literal/işaretli stdout parçaları, public kaynak SHA256 envanteri ve komut prosedürü [Git’e uygun kanıt alanında](../implementation/evidence/windows-publication-d1-2026-10-21/README.md) tutulur. Ham arşiv, native state/özel veri/build/binary/ZIP/screenshot/config/session burada yer almaz. Bu seçilmiş metin katmanı tam local archive yedeği veya yeni test çalıştırması değildir; dosyalar henüz kullanıcı tarafından commit/push edilmeden uzak yedek var sayılmaz. [Windows-only devir](../implementation/windows-codex-d1-handoff.md) yalnız kalan dört fixture görevi içindir; genel roadmap yetkisi değildir.
+
 ## Korunan sonuç ve kayıp kaynak ayrımı
 
 ADR0003/0004/0007/0008 kararları ve [sanitized native evidence](poc-native-verification-evidence.md) kaydı korunuyor. Rust17, historical native52, sonraki TLS25/pair+host8 sonuçları **historical-runtime** olarak kalır; raw archive kaybı bu kayıtları silmez veya yeni runtime proof üretmez. [Sanitized JSON](evidence/poc-native-verification-summary.json) rerun/independent attestation değildir. Source/lock/ABI/driver olmadan aynı deneyin reproduksiyonu veya kesin native execution spec hazır sayılamaz;36 authority hedefi not-executed kalır.
