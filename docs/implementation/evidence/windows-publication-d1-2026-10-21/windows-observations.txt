@@ -1,0 +1,28 @@
+CURATED WINDOWS OBSERVATIONS — 2026-10-21
+Provenance: user-pasted console output; not independently rerun.
+This file contains selected excerpts, not full raw transcripts or private state.
+
+[Guarded real-owner refusal; permission consumed]
+NATIVE_STARTUP_ATTEMPT_ONCE
+KLODA_STARTUP stage=Storage operation=Some(LeafNameValidation) code=storage_failure win32=None
+OWNER_OPEN_FAILED storage_failure
+
+[Library test compile, selected completion lines; no tests run]
+warning: kloda_pairing_native (lib test) generated 6 warnings
+Finished test profile [unoptimized + debuginfo] target(s) in 27.31s
+Executable unittests src/lib.rs (relative artifact under packages/pairing-native/target/x86_64-pc-windows-msvc/debug/deps/)
+WINDOWS_D1_TEST_COMPILE_COMPLETED
+Note: the three lines above the marker normalize Cargo formatting and redact the personal absolute path; see results.json for precise scope/warnings.
+
+[First disposable candidate case; exact user-pasted test output]
+WINDOWS_D1_ONE_FIXTURE_ATTEMPT
+
+running 1 test
+test installation_files::windows::candidate::tests::absent_targets_use_one_object_and_never_claim_durability ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 148 filtered out; finished in 0.11s
+
+WINDOWS_D1_ONE_FIXTURE_COMPLETED_NOT_PLATFORM_ACCEPTANCE
+
+[Remaining four guard cases]
+NOT_RUN at export. Do not infer PASS from compilation or first fixture result.

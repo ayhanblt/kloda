@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "scope": "D1 test-only source snapshot; no authority-state hashes",
+  "algorithm": "SHA-256",
+  "normalization": "strict UTF-8; remove at most one leading U+FEFF; replace CRLF with LF; preserve all other characters/whitespace",
+  "files": [
+    {
+      "path": "packages/pairing-native/Cargo.toml",
+      "sha256": "b0eecb0ce6d1851670725d54a09b9e63ae36c889843849a2d1a8eec7e503dd9e"
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows.rs",
+      "sha256": "10a30873150bdbe3de320b205a5898e0eb8e8194085dc94658ce060288429379"
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate.rs",
+      "sha256": "a71e1feda91bb961342684615deb7a2a22f09932d46c49262483a88fc3b8cb55"
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate_buffer.rs",
+      "sha256": "c83e1f66be17b3bb3df1b98c84a6776cfc29687e479a7449f95a2925ff90ab93"
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate_fixture.rs",
+      "sha256": "f57f0749e7c3f0d0d2b92fc6bb566f0a48b3f79260e690ff853ec1aba9dc0a78"
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate_tests.rs",
+      "sha256": "8af9ff8e6780544aa23304ef03b8aa372d642fd7f3ec57aaad641921f12b7dad"
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_handles.rs",
+      "sha256": "63094a39ad930d0b8d90134e6a1cb1e60caba81f351856ae89b99ef0d41f7403"
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_path.rs",
+      "sha256": "964bb8827e11a6a0dfb60628333a8c37b6322eed82916ff3d67cec07bf6e8adf"
+    },
+    {
+      "path": "packages/pairing-native/src/lib.rs",
+      "sha256": "0d777bd3627f943cf5fd6db53ae05af4a6f3cc189224c770223e52520a192d62"
+    },
+    {
+      "path": "packages/pairing-native/src/windows_publication_contract.rs",
+      "sha256": "84809f266b909353f6f863c9dd3e9ec61e4d3727b4c382e9bd77190267619368"
+    }
+  ]
+}

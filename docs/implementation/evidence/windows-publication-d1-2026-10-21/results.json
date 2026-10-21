@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "checkpointDate": "2026-10-21",
+  "provenance": "Curated from observed macOS tool results and user-pasted Windows outputs; original local archives are not required or copied. No tests rerun when preparing this curated record.",
+  "hostVerification": {
+    "platform": "macOS",
+    "provenance": "agent-observed D1 tool output",
+    "nativeRegression": {
+      "status": "PASS",
+      "passed": 139,
+      "failed": 0,
+      "ignored": 0,
+      "doctests": 0
+    },
+    "focusedContractFinal": {
+      "status": "PASS",
+      "passed": 4
+    },
+    "fmt": "PASS",
+    "strictDesktopClippy": "PASS",
+    "rust300LineGuard": "PASS",
+    "desktopBuild": "PASS",
+    "scope": "historical D1 checks, Windows cfg modules excluded; not Windows ABI/runtime proof"
+  },
+  "windowsCompile": {
+    "status": "USER_REPORTED_PASS",
+    "target": "x86_64-pc-windows-msvc",
+    "toolchain": "1.99.0-x86_64-pc-windows-msvc",
+    "seconds": 27.31,
+    "noRun": true,
+    "warnings": 6,
+    "scope": "D1 cfg(test) source/SDK types compiled; no test executed at that checkpoint"
+  },
+  "windowsWarnings": [
+    {
+      "file": "route_windows_query.rs",
+      "line": 155,
+      "kind": "unnecessary unsafe"
+    },
+    {
+      "file": "file_sender_ack.rs",
+      "line": 237,
+      "kind": "unused io_error"
+    },
+    {
+      "file": "route_windows_if.rs",
+      "line": 61,
+      "kind": "two SDK constant pattern naming warnings"
+    },
+    {
+      "file": "route_windows_if.rs",
+      "line": 64,
+      "kind": "two SDK constant pattern naming warnings"
+    }
+  ],
+  "firstFixture": {
+    "status": "USER_REPORTED_PASS",
+    "testName": "installation_files::windows::candidate::tests::absent_targets_use_one_object_and_never_claim_durability",
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "filteredOut": 148,
+    "seconds": 0.11,
+    "sourceScope": "four fixed final names, separate fresh fixtures; namespace/file checks only; not production integration"
+  },
+  "remainingFixtures": [
+    {
+      "testName": "installation_files::windows::candidate::tests::rename_atomically_refuses_existing_target_and_preserves_pending",
+      "status": "NOT_RUN",
+      "runs": 0
+    },
+    {
+      "testName": "installation_files::windows::candidate::tests::existing_pending_is_not_adopted_deleted_or_overwritten",
+      "status": "NOT_RUN",
+      "runs": 0
+    },
+    {
+      "testName": "installation_files::windows::candidate::tests::injected_cut_points_and_lost_reply_never_ack_or_regenerate",
+      "status": "NOT_RUN",
+      "runs": 0
+    },
+    {
+      "testName": "installation_files::windows::candidate::tests::target_appearing_after_preflush_is_not_replaced",
+      "status": "NOT_RUN",
+      "runs": 0
+    }
+  ],
+  "currentOwner": {
+    "status": "BLOCKED",
+    "provenance": "user-pasted guarded real owner diagnostic, not rerun",
+    "stage": "Storage",
+    "operation": "LeafNameValidation",
+    "error": "storage_failure",
+    "win32": null,
+    "currentCause": "existing epoch.pending rejected by prepare allowlist; exact guarded two-entry layout",
+    "originalPendingCause": "UNPROVEN; old separate probes32/5 are not original owner trace"
+  },
+  "reviews": {
+    "D1Source": "separate read-only security review, no concrete finding within test-only scope",
+    "transfer": "separate actual ZIP/script review, no concrete finding; no PowerShell/Windows execution by reviewer",
+    "limits": "final source dev-only scoping initially acknowledged from description; later actual transfer ZIP Cargo dev-dependencies inspected; no external independent audit",
+    "handoffEvidencePreparation": "separate read-only review; three document findings corrected and reread; no new native run"
+  },
+  "notEstablished": [
+    "other148 filtered cases pass",
+    "genuine process-kill/restart",
+    "power-loss metadata persistence",
+    "current owner recovery",
+    "TPM key existence/custody/TLS acceptance",
+    "certificate replacement safety",
+    "SQLite actual-object binding",
+    "independent continuity witness",
+    "complete Windows/Desktop/platform acceptance"
+  ],
+  "nextTask": "Only the four remaining exact fixtures; once each, sequentially, fail-stop, under explicit Windows prompt. Then report and stop; resume main work in original macOS session."
+}
