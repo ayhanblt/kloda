@@ -103,6 +103,8 @@ fn operation_labels_cannot_include_paths_or_native_payloads() {
         Operation::CreateNew,
         Operation::FileInformation,
         Operation::FileValidation,
+        Operation::PathSelectionValidation,
+        Operation::LeafNameValidation,
         Operation::FinalPath,
         Operation::FinalPathValidation,
         Operation::VolumeInformation,
@@ -261,4 +263,44 @@ fn isolated_process_fixture_and_existing_pending_preservation() {
         assert!(lines[0].contains(expected));
         assert!(lines[0].contains("stage=Epoch"));
     }
+}
+
+#[test]
+fn validation_labels_preserve_results_and_first_failure_without_os_codes() {
+    for operation in [
+        Operation::PathSelectionValidation,
+        Operation::LeafNameValidation,
+    ] {
+        run(|| {
+            let result = at(Stage::Storage, || {
+                assert_eq!(validation(operation, Ok(42)), Ok(42));
+                assert!(STATE.with(|state| state.get().unwrap().failure.is_none()));
+                validation::<()>(operation, Err(PairingError::StorageFailure))
+            });
+            assert_eq!(result, Err(PairingError::StorageFailure));
+            let text = line(observed());
+            assert!(text.contains(&format!("stage=Storage operation=Some({operation:?})")));
+            assert!(text.ends_with("code=storage_failure win32=None"));
+            Ok(())
+        })
+        .unwrap();
+    }
+    run(|| {
+        at(Stage::Storage, || {
+            record(
+                Some(Operation::KnownFolder),
+                PairingError::StorageFailure,
+                Some(5),
+            );
+            validation::<()>(
+                Operation::PathSelectionValidation,
+                Err(PairingError::StorageFailure),
+            )
+        })
+        .unwrap_err();
+        assert!(line(observed()).contains("operation=Some(KnownFolder)"));
+        assert_eq!(observed().win32, Some(5));
+        Ok(())
+    })
+    .unwrap();
 }

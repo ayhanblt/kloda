@@ -23,6 +23,8 @@ pub(crate) enum Operation {
     CreateNew,
     FileInformation,
     FileValidation,
+    PathSelectionValidation,
+    LeafNameValidation,
     FinalPath,
     FinalPathValidation,
     VolumeInformation,
@@ -83,6 +85,14 @@ pub(crate) fn record(operation: Option<Operation>, code: PairingError, win32: Op
             }
         }
     });
+}
+
+#[cfg(any(target_os = "windows", test))]
+pub(crate) fn validation<T>(operation: Operation, result: Result<T>) -> Result<T> {
+    if let Err(error) = &result {
+        record(Some(operation), *error, None);
+    }
+    result
 }
 
 pub(crate) fn at<T>(stage: Stage, action: impl FnOnce() -> Result<T>) -> Result<T> {
