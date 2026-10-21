@@ -15,6 +15,25 @@ use windows_sys::Win32::{
     System::SystemServices::ACCESS_ALLOWED_ACE_TYPE,
 };
 
+// Test builds name the failed predicate; production evaluates the same expression directly.
+macro_rules! rule {
+    ($name:ident, $expression:expr) => {{
+        #[cfg(test)]
+        {
+            diagnostic::at(
+                crate::startup_diagnostics::Stage::SecurityRule(
+                    crate::startup_diagnostics::SecurityRule::$name,
+                ),
+                || $expression,
+            )
+        }
+        #[cfg(not(test))]
+        {
+            $expression
+        }
+    }};
+}
+
 pub(super) fn check(value: i32) -> Result<()> {
     if value == 0 {
         diagnostic::record(
@@ -77,10 +96,10 @@ fn security(handle: HANDLE) -> Result<Security> {
         );
     }
     if status != 0 || descriptor.0.is_null() || owner.is_null() || acl.is_null() {
-        return Err(PairingError::StorageFailure);
+        return rule!(DescriptorPresence, Err(PairingError::StorageFailure));
     }
-    check(unsafe { IsValidSid(owner) })?;
-    check(unsafe { IsValidAcl(acl) })?;
+    rule!(OwnerSidValidity, check(unsafe { IsValidSid(owner) }))?;
+    rule!(AclValidity, check(unsafe { IsValidAcl(acl) }))?;
     let mut control = 0;
     let mut revision = 0;
     os_check(
@@ -103,18 +122,19 @@ fn ace(acl: *mut ACL, index: u32) -> Result<(*const ACCESS_ALLOWED_ACE, PSID)> {
     )?;
     let header = unsafe { &*pointer.cast::<ACE_HEADER>() };
     let sid_offset = std::mem::offset_of!(ACCESS_ALLOWED_ACE, SidStart);
-    if header.AceType as u32 != ACCESS_ALLOWED_ACE_TYPE
-        || (header.AceSize as usize) < sid_offset + 8
-    {
-        return Err(PairingError::StorageFailure);
+    if header.AceType as u32 != ACCESS_ALLOWED_ACE_TYPE {
+        return rule!(AceType, Err(PairingError::StorageFailure));
+    }
+    if (header.AceSize as usize) < sid_offset + 8 {
+        return rule!(AceHeaderSize, Err(PairingError::StorageFailure));
     }
     let sid = unsafe { pointer.cast::<u8>().add(sid_offset).cast::<c_void>() };
     // Bound the variable-length SID before IsValidSid/GetLengthSid may read it.
     let count = unsafe { *sid.cast::<u8>().add(1) } as usize;
     if sid_offset + 8 + count * 4 > header.AceSize as usize {
-        return Err(PairingError::StorageFailure);
+        return rule!(AceSidBounds, Err(PairingError::StorageFailure));
     }
-    check(unsafe { IsValidSid(sid) })?;
+    rule!(AceSidValidity, check(unsafe { IsValidSid(sid) }))?;
     Ok((pointer.cast(), sid))
 }
 
@@ -126,15 +146,18 @@ pub(super) fn protected(handle: HANDLE, directory: bool, inherited_sqlite: bool)
     result
 }
 fn protected_inner(handle: HANDLE, directory: bool, inherited_sqlite: bool) -> Result<()> {
-    let principals = principals()?;
+    let principals = rule!(Principals, principals())?;
     let security = security(handle)?;
     if !same(security.owner, &principals.user)
         || (!inherited_sqlite && security.control & SE_DACL_PROTECTED == 0)
     {
-        return Err(PairingError::StorageFailure);
+        return rule!(
+            ProtectedOwnerAndInheritance,
+            Err(PairingError::StorageFailure)
+        );
     }
     if unsafe { (*security.acl).AceCount } != 2 {
-        return Err(PairingError::StorageFailure);
+        return rule!(ProtectedAceCount, Err(PairingError::StorageFailure));
     }
     let mut seen = [false; 2];
     for index in 0..2 {
@@ -148,17 +171,20 @@ fn protected_inner(handle: HANDLE, directory: bool, inherited_sqlite: bool) -> R
             0
         };
         if ace.Mask != FILE_ALL_ACCESS || ace.Header.AceFlags != flags {
-            return Err(PairingError::StorageFailure);
+            return rule!(ProtectedAceMaskAndFlags, Err(PairingError::StorageFailure));
         }
         let slot = if same(sid, &principals.user) {
             0
         } else if same(sid, &principals.system) {
             1
         } else {
-            return Err(PairingError::StorageFailure);
+            return rule!(ProtectedAcePrincipal, Err(PairingError::StorageFailure));
         };
         if seen[slot] {
-            return Err(PairingError::StorageFailure);
+            return rule!(
+                ProtectedDuplicatePrincipal,
+                Err(PairingError::StorageFailure)
+            );
         }
         seen[slot] = true;
     }
@@ -173,10 +199,10 @@ pub(super) fn user_directory(handle: HANDLE) -> Result<()> {
     result
 }
 fn user_directory_inner(handle: HANDLE) -> Result<()> {
-    let principals = principals()?;
+    let principals = rule!(Principals, principals())?;
     let security = security(handle)?;
     if !same(security.owner, &principals.user) {
-        return Err(PairingError::StorageFailure);
+        return rule!(UserDirectoryOwner, Err(PairingError::StorageFailure));
     }
     let mutation = DELETE
         | FILE_DELETE_CHILD
@@ -195,7 +221,7 @@ fn user_directory_inner(handle: HANDLE) -> Result<()> {
             && !same(sid, &principals.system)
             && !same(sid, &principals.administrators)
         {
-            return Err(PairingError::StorageFailure);
+            return rule!(UnexpectedDirectoryWriter, Err(PairingError::StorageFailure));
         }
     }
     Ok(())

@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-21T18:36:54.173635+00:00",
+  "baseHead": "1369d3e448e2d8d964368362683b0852bc40e8ee",
+  "authorization": "User authorizes comprehensive evidence-driven disposable Windows investigation without per-small-attempt confirmation, preserving safety/data/architecture limits; explicitly authorizes Astra consultation.",
+  "windowsLatest": {
+    "provenance": "User-pasted 20261021T141939Z report; original new Windows JSON/TXT absent from this Mac checkout",
+    "head": "1369d3e448e2d8d964368362683b0852bc40e8ee",
+    "sourceMatches": 12,
+    "compileExit": 0,
+    "compileSeconds": 22.6248996,
+    "collisionExit": 101,
+    "diagnostic": "KLODA_STARTUP stage=Fixture(BaseSecurity) operation=Some(SecurityValidation) code=storage_failure win32=None",
+    "randomRootCreated": false,
+    "candidateReached": false,
+    "remaining3": "NOT_RUN"
+  },
+  "delta": [
+    "packages/pairing-native/src/installation_windows_security.rs",
+    "packages/pairing-native/src/startup_diagnostics.rs",
+    "packages/pairing-native/src/startup_diagnostics_fixture_tests.rs"
+  ],
+  "semantics": "cfg(test) Stage::SecurityRule, existing run/at/record; non-test macro directly evaluates original expression; equivalent ACE type/size short-circuit split; no changed acceptance policy or raw metadata logging",
+  "hostChecks": {
+    "diagnosticTests": {
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "command": "rustup run 1.99.0 cargo test --manifest-path packages/pairing-native/Cargo.toml --locked --no-default-features startup_diagnostics::",
+      "scope": "Includes isolated subprocess preservation fixture and 15 rule labels with/without numeric code; not Windows ACL execution",
+      "warning": "Cached xcrun SDK build-script warning visible; exit0"
+    },
+    "strictClippy": {
+      "exit": 0,
+      "seconds": 1.59,
+      "allTargets": true,
+      "features": "desktop-node"
+    },
+    "fmt": {
+      "exit": 0
+    },
+    "rustSizeGuard": {
+      "exit": 0
+    },
+    "gitDiffCheck": {
+      "exit": 0
+    },
+    "nativeDesktopBuild": {
+      "exit": 0,
+      "seconds": 1.52,
+      "features": "desktop-node",
+      "scope": "macOS native library; no app/owner execution or Windows compile"
+    }
+  },
+  "astraReview": {
+    "scope": "Independent read-only source and official-doc review, followed by separate three-file diff review",
+    "result": "No blocking finding; acceptance/error/OS calls preserved; first failure/OS code preserved; no SID/path/mask data output",
+    "limits": "Tests cover diagnostic routing, not Windows ACL parsing. Cached Principals failure cannot recover original OS detail. No Windows run or reviewer test/build."
+  },
+  "research": {
+    "codexSandbox": "https://learn.chatgpt.com/docs/windows/windows-sandbox",
+    "tokenUser": "https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-token_user",
+    "context7": "Resolved Microsoft Windows Rust docs; fetched token/security API reference. Using conceptual contracts only, not substituting windows crate for pinned windows-sys.",
+    "observedVsHypothesis": "Sandbox account difference is a hypothesis; actual mode/token/cause not yet observed. Unsupported ACE type is a known source restriction, not established failing branch."
+  },
+  "serena": "Activated Kloda; available language server TypeScript only; Rust call sites inspected with rg, no language-server/config mutation.",
+  "remoteExecution": "Available task list on this Mac app server did not include Windows conversation; no direct Windows command executed.",
+  "newWindowsCompile": "NOT_RUN",
+  "newWindowsRuntime": "NOT_RUN",
+  "limits": [
+    "Production owner still blocked on historical pending",
+    "No platform or power-loss acceptance",
+    "D2/D3, cert/SQLite binding and continuity decisions remain open"
+  ],
+  "documentChecks": {
+    "sourceHashesMatched": 13,
+    "previousInventoriesByteUnchanged": 2,
+    "relativeLinksChecked": 359,
+    "gitDiffCheckExit": 0
+  }
+}

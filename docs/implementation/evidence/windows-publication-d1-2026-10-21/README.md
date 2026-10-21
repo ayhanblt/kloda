@@ -1,5 +1,7 @@
 # D1 Windows — Git’e uygun seçilmiş test kanıtları
 
+**Güncel:** [Windows araştırma grubu](../../windows-d1-investigation-workflow.md) ve [13 kaynak manifesti](security-rule-source-hashes.json). Önceki tek-test/dört-test izinleri tarihsel; yeni onay yalnız kanıt bağımlı disposable D1 çalışmasıdır.
+
 Tarih:2026-10-21. Bu alan yalnız incelenmiş küçük metin/JSON kanıtları içindir. `.local-evidence/` Git dışında kalır; bu klasör onun kopyası veya tam yedeği değildir. Dosyalar Git’e eklenebilir durumdadır; Codex add/commit/push yapmadı. Kullanıcı kendi push/pull işlemlerini yapacaktır.
 
 - [results.json](results.json): macOS D1 host kontrolleri ile Windows compile ve ilk fixture sonucunun tarihsel/provenance ayrımı. İlk export sırasında kalan dört test NOT_RUN idi; aşağıdaki güncel checkpoint bu tarihsel durumu günceller.
@@ -28,3 +30,11 @@ Kullanıcının ilettiği Windows raporunda düzeltilmiş hash10/10, compile/lis
 - [Tek-test devir ve onay sınırı](../../windows-fixture-diagnostic-handoff.md).
 - [12 source hash](fixture-diagnostic-source-hashes.json): yalnız yeni onaylı tanılama denemesi; eski envanter korunur.
 - [Hazırlık, kontroller ve review](fixture-diagnostic-preparation.json):9 host diagnostic PASS, strict clippy/fmt/line guard ve macOS native build PASS. Windows yeni compile/tek retry NOT_RUN; gerçek alt hata bilinmiyor.
+
+## İç güvenlik ret koşulu tanılaması — 2026-10-21
+
+Kullanıcı raporunda12/12 source, compile/list0, collision FAIL101 ve `Fixture(BaseSecurity)/SecurityValidation/None` gözlendi; random root/candidate yok. Aşağıdaki yeni hazırlık Windows sonucunu değiştirmiş sayılmaz.
+
+- [Araştırma ve Astra/source review kaydı](security-rule-preparation.json): host10 diagnostic, strict clippy/fmt/line guard/native library build PASS; yeni Windows compile/runtime NOT_RUN.
+- [Yeni13 public source hash](security-rule-source-hashes.json): önceki inventory’ler korunur; yalnız ilk güncel tanılama kaynağını sabitler.
+- Windows araştırması her denemeye yeni UTC source/result bağını ekler; private SID/ACL/config/env/authority içeriği Git’e konmaz.

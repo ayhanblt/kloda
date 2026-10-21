@@ -1,41 +1,53 @@
-# Windows Codex — güncel tek fixture tanılama prompt'u
+# Windows Codex — güncel araştırma çalışma grubu prompt'u
 
-2026-10-21: Önceki dört-test prompt'u ilk fixture FAIL sonrası durdu. Aşağıdaki metin yalnız onaylanan tanılamalı tek yeniden denemeyi kapsar. Kullanıcı güncel kaynakları ve yeni dosyaları kendi Git aktarımıyla Windows'a taşıdıktan sonra bağlı Windows konuşmasına gönderir.
+2026-10-21: Kullanıcı, her küçük tanılamada onay beklemek yerine disposable Windows D1 engelinin kanıta dayalı araştırılmasını onayladı. Bu metin eski dört-test ve tek-retry prompt'larının yerine geçer; gerçek güvenlik/mimari/veri sınırları değişmez.
 
 ```text
 Repo: C:\Users\ayhan\Desktop\projects\kloda
 
-Önce AGENTS.md, .omp/AGENTS.md, Codex handoff ve
- docs/implementation/windows-fixture-diagnostic-handoff.md belgesini oku.
-Bu görev yalnız bu yeni tek-test belgesi kapsamındadır; eski dört-test
-prompt'unu yürütme.
+Önce AGENTS.md, .omp/AGENTS.md, güncel ADR'ler, Codex/session handoff ve
+ docs/implementation/windows-d1-investigation-workflow.md belgesini oku.
+Oradaki kanıta dayalı Windows-only araştırma grubunu uygula.
+Eski tek-deneme/dört-test prompt'larını güncel görev diye yürütme.
 
-Ayhan'ın onayladığı cfg(test) fixture tanılamasıyla yalnız şu exact case'i
-bir kez yeniden çalıştır:
-installation_files::windows::candidate::tests::rename_atomically_refuses_existing_target_and_preserves_pending
+Kullanıcı kapsam içindeki güvenli disposable tanılama/testleri, kanıtlanmış
+kusurun mevcut güvenlik kararlarını değiştirmeyen minimal düzeltmesini ve
+ilgili regresyon/review'ı onayladı. Her küçük adımda tekrar onay isteme.
+Yeni bilgi olmadan aynı FAIL'i körlemesine tekrar etme.
 
-Önce fixture-diagnostic-source-hashes.json envanterindeki 12 kaynak dosyasını
-strict UTF8, sayısal leading BOM kontrolü, CRLF→LF ve BOM'suz UTF8 SHA256 ile
-doğrula. Eski10 dosyalık envanteri değiştirme veya bu dilim için kullanma.
-Uyuşmazlıkta dur; kaynak overwrite veya hash benimseme yok.
+Başlangıçta security-rule-source-hashes.json içindeki13 dosyayı strict UTF8,
+sayısal leading BOM65279, gerçek CRLF→LF ve BOM'suz UTF8 SHA256 ile doğrula.
+Kaynak aktarımı eksik/farklıysa overwrite/reset veya yeni hash benimsemeden dur.
+İlk derlemenin Cargo artifact/path/exe hash'ini doğrula; önce collision case'in
+exact ignored list ve tanılamalı çalıştırmasıyla ilk iç ret koşulunu gözle.
 
-Yeni devir belgesindeki mevcut explicit MSVC1.99.0 locked/no-run derleme,
-Cargo artifact/path/hash doğrulaması ve tek exact ignored --list kontrolünü
-tamamla. Ardından yalnız yukarıdaki test için --exact --ignored --nocapture
---test-threads=1 kullan. Tek deneme; FAIL/UNKNOWN/PASS sonrasında dur.
-Diğer üç testi ve tarihsel absent-target PASS testini çalıştırma.
+Son bilinen actual ret Fixture(BaseSecurity)/SecurityValidation/None idi.
+Bu, candidate publish hatası değildir. Yeni SecurityRule etiketiyle owner,
+ACL/ACE parsing, writer grant veya principals nedenlerini ayır. Sandbox
+nedenini varsayma; gerçek process/launcher bağlamını anonim kanıtla doğrula.
+InitializeDefaultDrives uyarısına kanıtsız nedensellik yükleme.
 
-Gerçek stage/operation/varsa Win32 kodunu ve assertion sonucunu kaydet.
-Çıktı yalnız reddedilen işlemi kanıtlıyorsa sandbox/ACL vb. alt neden uydurma.
-InitializeDefaultDrives uyarısını koru; profil/config/ortam değiştirme.
+Bulgulara göre araştırma, güvenli dar tanılama, ilgili otomatik kontrol ve
+ayrı review ile devam et. Fixture kurulumu ve collision geçerse diğer üç
+belgelenmiş D1 testine geçebilirsin. Yeni source değişikliğini baseline/diff/
+review ve ayrı UTC hash envanteriyle kaydet; eski manifest/sonuçları ezme.
+Bilinmeyen güvenlik politikasını tasarlama veya test assertion'ını değiştirip
+PASS üretme. D1 başarısını production Windows başarısı sayma.
 
-Kaynak/test assertion/manifest, yetki/share/ACL veya güvenlik kontrolü
- değiştirme. Gerçek authority/anahtar/pin/epoch/cert/DB/arşive dokunma.
-Owner/probe/TPM/network/app, cleanup/reset/adoption/fallback/admin bypass,
-Git işlemi veya model/effort değişikliği yok.
+Mevcut authority/key/pin/epoch/cert/DB/WAL/SHM ve kullanıcı arşivine dokunma.
+ACL/owner/share veya guard gevşetme; sandbox kapatma/reconfigure, admin/UAC,
+runas/impersonation/GUI escape, namespace/provider/software fallback, cleanup/
+reset/adoption yok. Mevcut policy içindeki somut komuta özel standart araç approval akışını
+kullanabilirsin; gerekiyorsa gerçek UI onayını bekle, reddinde dur. Bunu
+sandbox bypass/config değişikliği izni sayma. Git mutation/network veya
+model/effort değişikliği yok. Gerçek owner/probe/app/TPM/network/QR/grant yok.
 
-Kanıtları mevcut Git-dışı raw ve Git'e uygun seçilmiş metin/JSON ayrımıyla
-kaydet; önceki raporları ezme. Ayrı sonuç review yap. Ne çalıştı, hangi
- aşamada durdu, kalan3 NOT_RUN ve yeni rapor yollarını Türkçe bildir ve dur.
-D2/D3, continuity, cert/SQLite binding veya platform kabulüne geçme.
+Kanıtları mevcut raw-Gitdışı ve seçilmiş-Gituygun metin/JSON ayrımıyla tut.
+Handoff/status/roadmap'e son checkpoint'i ve tamamlanan/açık/engelli işleri yaz.
+
+İzinli kapsamda ilerleyebildiğin sürece devam et. Yalnız gerçek yeni güvenlik/
+mimari kararında, mevcut veriye müdahale ihtiyacında veya izinli altyapıda
+çözülemeyen engelde somut kanıt ve tek net karar sorusuyla dur.
+D2/D3/certSQLitebinding/continuity ve fiziksel ürün kabulüne kendiliğinden geçme.
+Sonuçları Türkçe, test/exit/source/exe kanıtları ve kalan sınırlarla raporla.
 ```

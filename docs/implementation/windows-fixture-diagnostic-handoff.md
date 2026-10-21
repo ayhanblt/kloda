@@ -1,5 +1,7 @@
 # Windows D1 — fixture kurulum tanılaması ve yalnız tek yeniden deneme
 
+> **Güncel onay — 2026-10-21:** Kullanıcı artık her küçük denemede onay beklemeden, yalnız güvenli disposable D1 kapsamında kanıta dayalı araştırma/test/dar düzeltme/review yapılmasına izin verdi. [Güncel çalışma grubu](windows-d1-investigation-workflow.md) bu belgedeki eski tek/four-test stop kapsamının yerine geçer; mevcut veri, sandbox ve açık mimari sınırlarını kaldırmaz.
+
 2026-10-21. Ayhan, ilk collision testinin fixture kurulumu `StorageFailure` ile durmasından sonra yalnız test tanılamasını ve aynı başarısız case'in **bir kez** yeniden denenmesini onayladı. Bu belge, bu deneme için [eski dört-test devrinin](windows-codex-d1-handoff.md) yürütme kapsamını daraltır. Diğer üç test çalıştırılmaz; başarıda da otomatik devam yok.
 
 ## Kanıtlanan ve bilinmeyen

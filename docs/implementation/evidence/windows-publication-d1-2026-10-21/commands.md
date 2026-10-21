@@ -1,5 +1,7 @@
 # Windows D1 — izinli komutlar ve sonuç toplama
 
+> **Son çalışma grubu:** [Kanıta dayalı araştırma akışı](../../windows-d1-investigation-workflow.md) günceldir. İlk13 kaynak envanteri ve ilgili hipoteze dayalı kontroller kullanılır; eski tek/four-test stop kayıtları tarihsel kalır. Blind retry, security bypass ve gerçek authority erişimi hâlâ yasaktır.
+
 > **Güncel override:** İlk collision case fixture aşamasında FAIL; diğer3 NOT_RUN. Son onay yalnız [tek-test tanılama devrini](../../windows-fixture-diagnostic-handoff.md) kapsar. Eski10 yerine o dilimin12 dosyalık envanteri ve yalnız bir exact case kullanılır; aşağıdaki dört-test sırası bu denemede çalıştırılmaz.
 
 Bu prosedür yalnız [Windows görev belgesindeki](../../windows-codex-d1-handoff.md) dört kalan testi kapsar. Kullanıcının o belgeyi referans alan yürütme prompt’u gerekir. Burada hazırlanırken test/build/Windows komutu çalıştırılmadı.

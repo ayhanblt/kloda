@@ -16,6 +16,28 @@ pub(crate) enum Stage {
     Initialized,
     #[cfg(test)]
     Fixture(FixtureStep),
+    #[cfg(test)]
+    SecurityRule(SecurityRule),
+}
+
+#[cfg(test)]
+#[derive(Clone, Copy, Debug)]
+pub(crate) enum SecurityRule {
+    Principals,
+    DescriptorPresence,
+    OwnerSidValidity,
+    AclValidity,
+    AceType,
+    AceHeaderSize,
+    AceSidBounds,
+    AceSidValidity,
+    UserDirectoryOwner,
+    UnexpectedDirectoryWriter,
+    ProtectedOwnerAndInheritance,
+    ProtectedAceCount,
+    ProtectedAceMaskAndFlags,
+    ProtectedAcePrincipal,
+    ProtectedDuplicatePrincipal,
 }
 
 #[cfg(test)]
