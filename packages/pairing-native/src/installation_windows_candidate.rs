@@ -14,6 +14,8 @@ use windows_sys::{
 };
 #[path = "installation_windows_candidate_buffer.rs"]
 mod buffer;
+#[path = "installation_windows_candidate_context.rs"]
+mod context;
 #[path = "installation_windows_candidate_fixture.rs"]
 mod fixture;
 #[path = "installation_windows_candidate_tests.rs"]

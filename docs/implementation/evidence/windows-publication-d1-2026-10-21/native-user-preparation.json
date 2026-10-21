@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-21T19:34:05.611606+00:00",
+  "platform": "macOS host, not Windows",
+  "baseHead": "ea3c8e77505cb305e5bd2f298346a94359e60ac1",
+  "scope": "Approved separate standard-account D1 preparation; cfg(test)-only primary-process-token guard before every candidate Fixture; no product security policy or dependency change",
+  "sourceManifest": "native-user-source-hashes.json",
+  "hostChecks": [
+    {
+      "command": "rustup run 1.99.0 cargo test --manifest-path packages/pairing-native/Cargo.toml --locked --no-default-features --lib windows_publication_contract::",
+      "exit": 0,
+      "result": "5 passed; 0 failed; 0 ignored"
+    },
+    {
+      "command": "rustup run 1.99.0 cargo test --manifest-path packages/pairing-native/Cargo.toml --locked --no-default-features --lib startup_diagnostics::",
+      "exit": 0,
+      "result": "10 passed; 0 failed; 0 ignored; includes isolated diagnostic subprocess"
+    },
+    {
+      "command": "rustup run 1.99.0 cargo clippy --manifest-path packages/pairing-native/Cargo.toml --locked --all-targets --no-default-features --features desktop-node -- -D warnings",
+      "exit": 0
+    },
+    {
+      "command": "rustup run 1.99.0 cargo build --manifest-path packages/pairing-native/Cargo.toml --locked --no-default-features --features desktop-node --lib",
+      "exit": 0
+    },
+    {
+      "command": "rustup run 1.99.0 cargo fmt --manifest-path packages/pairing-native/Cargo.toml -- --check",
+      "exit": 0
+    },
+    {
+      "command": "node tools/check-rust-size.mjs",
+      "exit": 0
+    },
+    {
+      "command": "git diff --check; assert 14 normalized source hashes, handoff local links and context-before-KnownFolder ordering",
+      "exit": 0
+    }
+  ],
+  "hostWarning": "Test invocations replayed cached xcrun MacOSX.sdk warning; both test commands exit0. Warning not evidence of Windows behavior.",
+  "independentSecurityReview": {
+    "reviewer": "windows_security_astra, user-authorized Astra consultation; main model unchanged",
+    "result": "No blocking finding in source delta",
+    "limits": "Four primary-process-token fields only; not account identity, all sandboxing or thread impersonation absence. No runtime tests/build by reviewer."
+  },
+  "notRun": [
+    "new Windows test compilation",
+    "Windows context API/runtime",
+    "Windows bundle preparation/self-check",
+    "new account creation",
+    "fresh-account D1 four cases",
+    "production owner/startup/TPM/QR/transfer",
+    "D2/D3/power-loss/cert/SQLite binding/continuity/platform acceptance"
+  ],
+  "observerProvenance": "Latest readonly Q1=observer AppContainer SID report supplied in user message; original file not present locally during preparation. No earlier Rust-process identity or ACL-provenance/effective-access inference.",
+  "preserved": [
+    "production ACL/owner/private two-ACE guard",
+    "archive and authority state",
+    "historical evidence/source manifests",
+    "Git index/history",
+    "physical acceptance pause outside disposable D1 approval"
+  ],
+  "remaining": "Windows Codex builds/lists/packages only; user creates standard account and executes verified bundle outside Codex sandbox; results return to main session",
+  "documentationReview": {
+    "reviewer": "diagnostic_label_review, separate read-only pass",
+    "findingsAddressed": [
+      "Shared staging must not introduce unlisted adjacent DLLs: fixed five-input allowlist, no extra files/subdirectories/reparse paths, individually copied into new private directory, trusted out-of-band manifest digest, each executable spawn hash-pinned, separate outputs",
+      "Interactive command block is original launch method; executable/AppLocker/WDAC/organization-policy rejection is STOP, never alternative bypass"
+    ],
+    "scope": "Actual Windows package and generated execution block still require separate Windows review; not yet produced"
+  }
+}

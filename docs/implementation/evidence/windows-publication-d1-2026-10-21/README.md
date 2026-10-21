@@ -1,5 +1,7 @@
 # D1 Windows — Git’e uygun seçilmiş test kanıtları
 
+**Son yön:** [ayrı standart hesap devri](../../windows-d1-native-user-handoff.md), [14 kaynak inventory](native-user-source-hashes.json), [Mac kontrol/review kaydı](native-user-preparation.json). Yeni test-only süreç-token koruması hazırlanmıştır; Windows compile/package/hesap/runtime NOT_RUN. Eski kaynak inventory'leri tarihsel olarak korunur.
+
 **Güncel:** [Windows araştırma grubu](../../windows-d1-investigation-workflow.md) ve [13 kaynak manifesti](security-rule-source-hashes.json). Önceki tek-test/dört-test izinleri tarihsel; yeni onay yalnız kanıt bağımlı disposable D1 çalışmasıdır.
 
 Tarih:2026-10-21. Bu alan yalnız incelenmiş küçük metin/JSON kanıtları içindir. `.local-evidence/` Git dışında kalır; bu klasör onun kopyası veya tam yedeği değildir. Dosyalar Git’e eklenebilir durumdadır; Codex add/commit/push yapmadı. Kullanıcı kendi push/pull işlemlerini yapacaktır.

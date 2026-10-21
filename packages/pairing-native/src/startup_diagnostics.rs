@@ -43,6 +43,7 @@ pub(crate) enum SecurityRule {
 #[cfg(test)]
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum FixtureStep {
+    NativeUserContext,
     Base,
     VolumeRootOpen,
     AncestorOpen,

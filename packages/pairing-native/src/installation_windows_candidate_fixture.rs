@@ -25,6 +25,7 @@ impl Fixture {
     }
     fn new_inner() -> Result<Self> {
         use FixtureStep::*;
+        diagnostic::at(Stage::Fixture(NativeUserContext), super::context::verify)?;
         let base = diagnostic::at(Stage::Fixture(Base), path::fixture_base)?;
         let mut pins = Vec::new();
         for ancestor in base.ancestors().collect::<Vec<_>>().into_iter().rev() {

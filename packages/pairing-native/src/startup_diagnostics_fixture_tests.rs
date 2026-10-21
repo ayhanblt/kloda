@@ -4,6 +4,7 @@ use super::*;
 fn fixture_steps_preserve_first_failure_without_paths_or_fabricated_os_codes() {
     use FixtureStep::*;
     for step in [
+        NativeUserContext,
         Base,
         VolumeRootOpen,
         AncestorOpen,

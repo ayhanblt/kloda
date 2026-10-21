@@ -1,6 +1,34 @@
 //! Test-only candidate rules. Host checks do not exercise a Windows ABI or filesystem.
 use crate::error::{PairingError, Result};
 
+pub(crate) fn native_user_context(
+    app_container: u32,
+    restrictions: u32,
+    elevated: u32,
+    elevation_type: u32,
+) -> bool {
+    // TOKEN_ELEVATION_TYPE Default=1: no linked full/limited administrator token.
+    [app_container, restrictions, elevated, elevation_type] == [0, 0, 0, 1]
+}
+
+#[test]
+fn native_user_context_rejects_container_restricted_admin_and_unknown_values() {
+    assert!(native_user_context(0, 0, 0, 1));
+    for flags in [
+        [1, 0, 0, 1],
+        [0, 1, 0, 1],
+        [0, 0, 1, 1],
+        [0, 0, 0, 0],
+        [0, 0, 0, 2],
+        [0, 0, 0, 3],
+        [2, 0, 0, 1],
+        [0, 2, 0, 1],
+        [0, 0, 2, 1],
+    ] {
+        assert!(!native_user_context(flags[0], flags[1], flags[2], flags[3]));
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum Target {
     Epoch,
