@@ -195,3 +195,7 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+#[path = "installation_windows_candidate.rs"]
+mod candidate;
