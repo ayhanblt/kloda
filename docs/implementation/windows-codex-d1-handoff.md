@@ -1,5 +1,7 @@
 # Windows Codex CLI devir belgesi — yalnız D1 koruma testleri
 
+> **Güncel kapsam — 2026-10-21:** İlk collision testinin fixture kurulumunda FAIL olduğu kullanıcı raporuyla gözlendi; diğer3 NOT_RUN. Yeni onay yalnız test tanılaması ve aynı case için tek yeniden denemedir. Önce [tek-test tanılama devrini](windows-fixture-diagnostic-handoff.md) oku; eski dört-test yürütme talimatı bu denemede uygulanmaz.
+
 Checkpoint:2026-10-21. Ana geliştirme oturumu macOS’tadır. Windows Codex CLI yalnız bu belgedeki tek test görevini yapacak, kanıt ve rapor hazırlayıp duracak. Kullanıcı sonucu ana oturuma getirir; sonraki geliştirme/kararlar orada alınır. Bu belge kalıcı genel roadmap yürütme izni değildir.
 
 ## Yetki ve tek görev

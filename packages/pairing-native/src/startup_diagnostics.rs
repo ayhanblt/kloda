@@ -14,6 +14,29 @@ pub(crate) enum Stage {
     Certificate,
     Database,
     Initialized,
+    #[cfg(test)]
+    Fixture(FixtureStep),
+}
+
+#[cfg(test)]
+#[derive(Clone, Copy, Debug)]
+pub(crate) enum FixtureStep {
+    Base,
+    VolumeRootOpen,
+    AncestorOpen,
+    BaseOpen,
+    Volume,
+    BaseSecurity,
+    Nonce,
+    RootCreate,
+    PairingCreate,
+    RootOpen,
+    PairingOpen,
+    RootSecurity,
+    PairingSecurity,
+    OwnerCreate,
+    OwnerSecurity,
+    OwnerFlush,
 }
 
 #[cfg(any(target_os = "windows", test))]
@@ -173,3 +196,7 @@ fn line(failure: Failure) -> String {
 #[cfg(test)]
 #[path = "startup_diagnostics_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "startup_diagnostics_fixture_tests.rs"]
+mod fixture_tests;

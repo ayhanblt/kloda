@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-21T14:11:26.942244+00:00",
+  "baseHead": "d4c88d3629836e5eff2b98225286f724e9fe73c6",
+  "scope": "D1 test-only fixture diagnostics preparation; no Windows execution by macOS agent",
+  "windowsObservation": {
+    "provenance": "User-pasted Windows result; original 140036Z raw/JSON files not present in this checkout at preparation",
+    "head": "d4c88d3629836e5eff2b98225286f724e9fe73c6",
+    "sourceMatches": 10,
+    "compileExit": 0,
+    "compileSeconds": 10.2698947,
+    "firstCollisionTest": "FAIL",
+    "testExit": 101,
+    "failure": "Fixture::new().unwrap(), StorageFailure; candidate publish/assertions not reached",
+    "remainingTests": "NOT_RUN (3)",
+    "priorAbsentTarget": "historical PASS, not repeated",
+    "initializeDefaultDrives": "No proven causal link"
+  },
+  "approvedDelta": [
+    "packages/pairing-native/src/installation_windows_candidate_fixture.rs",
+    "packages/pairing-native/src/startup_diagnostics.rs",
+    "packages/pairing-native/src/startup_diagnostics_fixture_tests.rs"
+  ],
+  "hostChecks": {
+    "diagnosticTests": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "command": "rustup run 1.99.0 cargo test --manifest-path packages/pairing-native/Cargo.toml --locked --no-default-features startup_diagnostics::",
+      "scope": "macOS; includes isolated subprocess fixture; not Windows API execution",
+      "warning": "Cached build-script xcrun SDK warning remains visible; exit 0"
+    },
+    "strictClippy": {
+      "exit": 0,
+      "features": "desktop-node",
+      "allTargets": true
+    },
+    "fmt": {
+      "exit": 0
+    },
+    "rustSizeGuard": {
+      "exit": 0
+    },
+    "gitDiffCheck": {
+      "exit": 0
+    },
+    "nativeDesktopBuild": {
+      "exit": 0,
+      "seconds": 4.73,
+      "command": "rustup run 1.99.0 cargo build --manifest-path packages/pairing-native/Cargo.toml --locked --no-default-features --features desktop-node --lib",
+      "scope": "macOS native library; no app/owner execution, no Windows compile"
+    }
+  },
+  "review": "Independent read-only source review: no finding. Separate handoff review found an obsolete copyable four-test permission block; replaced with single-case prompt, no remaining four-test execution grant in current copyable prompt. No reviewer test/build/probe.",
+  "windowsDiagnosticCompile": "NOT_RUN",
+  "windowsDiagnosticOneRetry": "NOT_RUN",
+  "limits": [
+    "Windows fixture root cause still unknown",
+    "No claim of byte-identical production binary",
+    "No platform, power-loss, D2/D3, certificate/SQLite binding or continuity acceptance"
+  ],
+  "developmentChecks": "Initial Rust size guard rejected adding test to existing near-limit file; test moved to dedicated cfg(test) module. Initial strict clippy flagged derived-Debug-only FixtureStep field read; explicit stage assertion added. Final fmt/size/tests/clippy/build pass without warning suppression.",
+  "documentChecks": {
+    "sourceHashesMatched": 12,
+    "originalInventoryUnchanged": true,
+    "relativeLinksChecked": 337,
+    "gitDiffCheckExit": 0
+  }
+}

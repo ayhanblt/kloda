@@ -1,17 +1,41 @@
-# Windows Codex CLI başlangıç prompt’u — D1 kalan koruma testleri
+# Windows Codex — güncel tek fixture tanılama prompt'u
 
-Aşağıdaki metin kullanıcı tarafından Windows Codex CLI’ye verildiğinde yalnız belirtilendört test için dar yürütme iznidir. Bu dosyayı otomatik keşfetmek/okumak izin değildir. Görev bitince ana macOS oturumuna dönülür.
+2026-10-21: Önceki dört-test prompt'u ilk fixture FAIL sonrası durdu. Aşağıdaki metin yalnız onaylanan tanılamalı tek yeniden denemeyi kapsar. Kullanıcı güncel kaynakları ve yeni dosyaları kendi Git aktarımıyla Windows'a taşıdıktan sonra bağlı Windows konuşmasına gönderir.
 
 ```text
 Repo: C:\Users\ayhan\Desktop\projects\kloda
 
-Önce AGENTS.md, .omp/AGENTS.md ve docs/implementation/windows-codex-d1-handoff.md dosyasını oku. Bu Windows oturumu yalnız o devir belgesindeki D1 kalan dört koruma testi içindir; ana geliştirme planını yürütme.
+Önce AGENTS.md, .omp/AGENTS.md, Codex handoff ve
+ docs/implementation/windows-fixture-diagnostic-handoff.md belgesini oku.
+Bu görev yalnız bu yeni tek-test belgesi kapsamındadır; eski dört-test
+prompt'unu yürütme.
 
-Belgenin referans verdiği seçilmiş kanıtları ve kaynak hash envanterini oku; .local-evidence yokluğunu eksik önkoşul sayma. Repo/kaynak/toolchain kontrollerinden sonra test ikilisini çalıştırmadan derle ve gerçek compiler-artifact çıktısından seç. Dört exact ignored testin her birini bir kez, belirtilen sırada ve ilk hatada sonraki teste geçmeden durarak çalıştırmanı onaylıyorum. İlk daha önce PASS olan absent-target testini veya başka suite/owner/probe’u tekrar çalıştırma.
+Ayhan'ın onayladığı cfg(test) fixture tanılamasıyla yalnız şu exact case'i
+bir kez yeniden çalıştır:
+installation_files::windows::candidate::tests::rename_atomically_refuses_existing_target_and_preserves_pending
 
-Ürün/test kaynaklarını, güvenlik kontrollerini, mevcut epoch.pending/anahtar/pin/sertifika/authority/arşiv verisini değiştirme. Model/effort/config değiştirme; Git add/commit/push/pull/reset/clean/stash yapma. Sadece disposable fixture’lar, compiler artifact’ları ve belgedeki kanıt/status kayıtları izinlidir. Yeni karar, kaynak farkı, compile/test hatası, belirsizlik veya altyapı engelinde düzeltme/yeniden deneme yapmadan raporla ve dur.
+Önce fixture-diagnostic-source-hashes.json envanterindeki 12 kaynak dosyasını
+strict UTF8, sayısal leading BOM kontrolü, CRLF→LF ve BOM'suz UTF8 SHA256 ile
+doğrula. Eski10 dosyalık envanteri değiştirme veya bu dilim için kullanma.
+Uyuşmazlıkta dur; kaynak overwrite veya hash benimseme yok.
 
-Gerçek exit/assertion çıktılarıyla redakte kanıt ve dört testin sonuç tablosunu hazırla; çalışmayanı PASS sayma. Git’e uygun küçük sonuçları docs/implementation/evidence/windows-publication-d1-2026-10-21/ altında yeni run olarak kaydet; bütün .local-evidence veya ham private çıktı ekleme. Ayrı sonuç-review geçişi yap. Kesin kanıt sınırlarını koru: fixture başarısı power-loss/gerçek restart/mevcut kurulum onarımı/ürün kabulü değildir.
+Yeni devir belgesindeki mevcut explicit MSVC1.99.0 locked/no-run derleme,
+Cargo artifact/path/hash doğrulaması ve tek exact ignored --list kontrolünü
+tamamla. Ardından yalnız yukarıdaki test için --exact --ignored --nocapture
+--test-threads=1 kullan. Tek deneme; FAIL/UNKNOWN/PASS sonrasında dur.
+Diğer üç testi ve tarihsel absent-target PASS testini çalıştırma.
 
-Bitince Türkçe kısa rapor ver ve dur. Yeni geliştirmeye, D2/D3’e, Android/iOS’a veya sonraki roadmap adımına geçme. Sonucu bu Windows oturumundan alıp ana macOS oturumuna ben taşıyacağım; devam kararı orada verilecek.
+Gerçek stage/operation/varsa Win32 kodunu ve assertion sonucunu kaydet.
+Çıktı yalnız reddedilen işlemi kanıtlıyorsa sandbox/ACL vb. alt neden uydurma.
+InitializeDefaultDrives uyarısını koru; profil/config/ortam değiştirme.
+
+Kaynak/test assertion/manifest, yetki/share/ACL veya güvenlik kontrolü
+ değiştirme. Gerçek authority/anahtar/pin/epoch/cert/DB/arşive dokunma.
+Owner/probe/TPM/network/app, cleanup/reset/adoption/fallback/admin bypass,
+Git işlemi veya model/effort değişikliği yok.
+
+Kanıtları mevcut Git-dışı raw ve Git'e uygun seçilmiş metin/JSON ayrımıyla
+kaydet; önceki raporları ezme. Ayrı sonuç review yap. Ne çalıştı, hangi
+ aşamada durdu, kalan3 NOT_RUN ve yeni rapor yollarını Türkçe bildir ve dur.
+D2/D3, continuity, cert/SQLite binding veya platform kabulüne geçme.
 ```
