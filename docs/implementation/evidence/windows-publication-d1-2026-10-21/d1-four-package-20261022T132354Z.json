@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-22T13:25:37.2005235Z",
+  "scope": "Four original D1 fixtures in separate standard account after verified preflight PASS",
+  "head": "0a989a56a67ca9df9d0c12673cd0b4a6e7c94a53",
+  "priorPreflight": "token-boolean-native-result-20261022T131955Z.json",
+  "sourceInventory": "token-boolean-source-hashes-20261022T130517Z.json",
+  "sourceRecheck": 14,
+  "sourceChanged": false,
+  "rebuild": "NOT_RUN; identical already-built binary reused after hash validation",
+  "bundleRelativePath": ".local-evidence/windows-publication-d1-windows-runs/20261022T132354Z/Kloda-D1-Four-20261022T132354Z-0a989a5",
+  "manifestSha256": "17b635e2ebd6342aced00c7e9a4026ffc8259fd69766b21096c74a89b1a0f71f",
+  "exeSha256": "314e51387cdb9624e0ebb891c2ca2b4e29ba6224545439b9df1871e67703ab95",
+  "bundleFiles": [
+    {
+      "name": "kloda-d1-tests.exe",
+      "sha256": "314e51387cdb9624e0ebb891c2ca2b4e29ba6224545439b9df1871e67703ab95"
+    },
+    {
+      "name": "windows-d1-native-user-handoff.md",
+      "sha256": "e51eb184ebbf6c8f85aa059cb6a2a2495930c6c71863ad89cdeffc40273ca5f8"
+    },
+    {
+      "name": "native-user-source-hashes.json",
+      "sha256": "00913637f3a4cdcff26bbf61d7c12542a8abecb22016bdce0197d1c78f2f0a6e"
+    },
+    {
+      "name": "README.txt",
+      "sha256": "6fe541ba43420865189e8dc42a581e5aabc59455caca01d694146760a897c998"
+    }
+  ],
+  "block": "d1-four-block-20261022T132354Z.txt",
+  "blockSha256": "3875575636e0d42ab4a2402f9006d87506bfef51f12611d336f51287ba086dd8",
+  "standalonePreflight": "NOT_INCLUDED; no repeat needed; each Fixture retains native verification before KnownFolder/create",
+  "fixtureContext": "Runner verifies context0/0/0/1 in every fixture log; expected counts1/1/6/1, unchanged existing native guard",
+  "exactLists": [
+    {
+      "index": 0,
+      "exitCode": 0,
+      "runtime": "NOT_RUN"
+    },
+    {
+      "index": 1,
+      "exitCode": 0,
+      "runtime": "NOT_RUN"
+    },
+    {
+      "index": 2,
+      "exitCode": 0,
+      "runtime": "NOT_RUN"
+    },
+    {
+      "index": 3,
+      "exitCode": 0,
+      "runtime": "NOT_RUN"
+    }
+  ],
+  "runOrder": [
+    "rename_atomically_refuses_existing_target_and_preserves_pending",
+    "existing_pending_is_not_adopted_deleted_or_overwritten",
+    "injected_cut_points_and_lost_reply_never_ack_or_regenerate",
+    "target_appearing_after_preflush_is_not_replaced"
+  ],
+  "runtime": "NOT_RUN; current account list/package only; user will run each once fail-stop",
+  "checks": "Fixed five plain bundle entries/no reparse/extra files; manifest+four input hashes; block parser-only; no preflight/absent command path",
+  "rawEvidence": ".local-evidence/windows-publication-d1-windows-runs/20261022T132354Z",
+  "limits": "At most9 new disposable roots, no cleanup. No production authority/archive access, guard relaxation, environment/ExecutionPolicy/Git mutation or D2/D3/cert/SQLite/continuity/platform acceptance.",
+  "independentReview": "Read-only reviewer verified actual bundle/input hashes, identical preflight-PASS exe, only four authorized cases/no standalone preflight, per-fixture context before KnownFolder, expected context counts1/1/6/1, fail-stop/private-copy/per-spawn hash and raw logging. No blocking finding; no reviewer runtime/build/test.",
+  "resultReview": "Separate result/privacy review: source14 unchanged, four exact list0, all four runtimeNOT_RUN, fixed pin/hash provenance and no SID/private user-path/full token data in selected report; no false PASS. No recompile or current-account fixture."
+}

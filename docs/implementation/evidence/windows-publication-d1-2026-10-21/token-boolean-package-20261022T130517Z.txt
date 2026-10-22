@@ -1,0 +1,14 @@
+Aligned BOOLEAN decoder paketi
+UTC: 2026-10-22T13:09:24.0716915Z
+Kanıtlanan kusur: class21 başarılı ReturnLength1 döndürürken eski genel kontrol4 istiyordu. Microsoft win32metadata2308 BOOLEAN payload/DWORD alignment açıklamasıyla doğrulandı.
+Düzeltme: hizalı u32::MAX buffer/capacity4 korundu; yalnız class21 için length1/ilk byte, diğer3 için length4; bilinmeyenler kapalı ret. Tam0/0/0/1 kabul şartı ve ACL/owner/guard değişmedi.
+Derleme: locked/no-run exit0, 4.647765 saniye. Üç exact liste ve paket preflight liste kontrolü exit0.
+İki regresyon testi eklendi/derlendi/listelendi; bu hesapta runtime/test çalıştırılmadı. Native preflight, mutating4 ve sentetik2 NOT_RUN.
+Paket: .local-evidence/windows-publication-d1-windows-runs/20261022T130517Z/Kloda-D1-Boolean-20261022T130517Z-0a989a5
+Manifest SHA256: 0c255dfb62657533dca0f54d8574df53fa7bd369821560c7115466ab729b060d
+EXE SHA256: 314e51387cdb9624e0ebb891c2ca2b4e29ba6224545439b9df1871e67703ab95
+Tek blok: token-boolean-preflight-block-20261022T130517Z.txt; paket klasörüne eklemeyin.
+Astra araştırması, ayrı kaynak/güvenlik/paket ve sonuç review tamamlandı. VoidTaskResult bastırıldı; gerçek hatalar korunuyor.
+Yeni standart-hesap native sonuç gelmeden başarı/tamamlandı iddiası yok; yalnız preflight çalıştırıp sonuç ne olursa olsun durun.
+InitializeDefaultDrives visible; no environment change or causal claim
+Fix targets proven decoding rejection; runtime standard-account preflight still pending and may expose later conditions. No D1/production/power-loss/D2/D3/cert/SQLite/continuity acceptance.

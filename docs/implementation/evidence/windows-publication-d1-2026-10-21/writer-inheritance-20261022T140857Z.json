@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-22T14:08:57.8997623Z",
+  "scope": "Authorized read-only owner/DACL inspection of exactly five selected profile LocalAppData path components",
+  "targetSelection": "Explicit conventional path from user-provided standard-account profile location; not a new KnownFolder API result in the exited Rust process",
+  "historicalCorrelation": "Current base matches Rust numeric ACE type0/size36/flags19/mask2032127/account shape; historical SID identity not captured, so no identity equivalence assertion",
+  "sameObservationIdentity": "T labels mean direct SID equality in memory within this snapshot only",
+  "reparseCheck": "No reparse components",
+  "candidateCount": 1,
+  "ancestry": [
+    {
+      "level": 0,
+      "role": "fixture_base_candidate",
+      "status": "READ",
+      "daclProtected": false,
+      "ownerMatchesBaseOwner": true,
+      "ownerMatchesTarget": [],
+      "matchingAces": [
+        {
+          "principal": "T1",
+          "aceType": 0,
+          "aceFlags": 19,
+          "aceSize": 36,
+          "mask": 2032127,
+          "mutationOverlap": 852304,
+          "inherited": true,
+          "inheritOnly": false,
+          "objectInherit": true,
+          "containerInherit": true,
+          "noPropagate": false
+        }
+      ]
+    },
+    {
+      "level": 1,
+      "role": "appdata_parent",
+      "status": "READ",
+      "daclProtected": false,
+      "ownerMatchesBaseOwner": true,
+      "ownerMatchesTarget": [],
+      "matchingAces": [
+        {
+          "principal": "T1",
+          "aceType": 0,
+          "aceFlags": 19,
+          "aceSize": 36,
+          "mask": 2032127,
+          "mutationOverlap": 852304,
+          "inherited": true,
+          "inheritOnly": false,
+          "objectInherit": true,
+          "containerInherit": true,
+          "noPropagate": false
+        }
+      ]
+    },
+    {
+      "level": 2,
+      "role": "profile_root",
+      "status": "READ",
+      "daclProtected": true,
+      "ownerMatchesBaseOwner": false,
+      "ownerMatchesTarget": [],
+      "matchingAces": [
+        {
+          "principal": "T1",
+          "aceType": 0,
+          "aceFlags": 3,
+          "aceSize": 36,
+          "mask": 2032127,
+          "mutationOverlap": 852304,
+          "inherited": false,
+          "inheritOnly": false,
+          "objectInherit": true,
+          "containerInherit": true,
+          "noPropagate": false
+        }
+      ]
+    },
+    {
+      "level": 3,
+      "role": "profiles_container",
+      "status": "READ",
+      "daclProtected": true,
+      "ownerMatchesBaseOwner": false,
+      "ownerMatchesTarget": [],
+      "matchingAces": []
+    },
+    {
+      "level": 4,
+      "role": "volume_root",
+      "status": "READ",
+      "daclProtected": true,
+      "ownerMatchesBaseOwner": false,
+      "ownerMatchesTarget": [],
+      "matchingAces": []
+    }
+  ],
+  "unknown": [
+    "Actual account/group identity or membership",
+    "Who created grants and when",
+    "Historical process/principal identity equivalence",
+    "Effective access",
+    "Actual exited Rust KnownFolder choice independent of conventional-path correlation"
+  ],
+  "privacy": "No raw SID/name/private path/full ACL/token/config dump; only matching candidate ACE fields and owner relationship booleans retained",
+  "notRun": [
+    "test",
+    "build",
+    "fixture",
+    "native owner/probe",
+    "account-name/domain/network lookup"
+  ],
+  "unchanged": [
+    "ACL",
+    "owner",
+    "guard",
+    "data",
+    "config",
+    "environment",
+    "Git"
+  ],
+  "exitCode": 0
+}

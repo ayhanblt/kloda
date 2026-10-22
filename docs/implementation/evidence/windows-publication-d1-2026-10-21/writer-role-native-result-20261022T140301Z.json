@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-22T14:03:01.072657Z",
+  "scope": "Direct read-only review of user-executed single collision writer-role result",
+  "case": "installation_files::windows::candidate::tests::rename_atomically_refuses_existing_target_and_preserves_pending",
+  "status": "FAIL",
+  "exitCode": 101,
+  "wallSeconds": 0.0349009,
+  "processState": "exited",
+  "summary": "0 passed; 1 failed; 0 ignored; 154 filtered out; 0.00s",
+  "context": {
+    "app_container": 0,
+    "restrictions": 0,
+    "elevation_type": 1,
+    "elevated": 0
+  },
+  "writer": {
+    "aceSize": 36,
+    "aceType": 0,
+    "mutationOverlap": 852304,
+    "aceFlags": 19,
+    "accountSidShape": true,
+    "mask": 2032127,
+    "namedMatch": false,
+    "ownerMatch": true,
+    "principal": "other"
+  },
+  "diagnostics": [
+    "KLODA_D1_TOKEN_QUERY class=29 capacity=4 return_length=4",
+    "KLODA_D1_TOKEN_QUERY class=21 capacity=4 return_length=1",
+    "KLODA_D1_TOKEN_QUERY class=20 capacity=4 return_length=4",
+    "KLODA_D1_TOKEN_QUERY class=18 capacity=4 return_length=4",
+    "KLODA_D1_CONTEXT app_container=0 restrictions=0 elevated=0 elevation_type=1",
+    "KLODA_FIXTURE_WRITER owner_match=true principal=other ace_type=0 ace_size=36 ace_flags=19 mask=2032127 mutation_overlap=852304",
+    "KLODA_FIXTURE_PRINCIPAL role_check_complete=true named_match=false account_sid_shape=true",
+    "KLODA_STARTUP stage=SecurityRule(UnexpectedDirectoryWriter) operation=None code=storage_failure win32=None"
+  ],
+  "checkedNamedRoles": [
+    "system",
+    "builtin_administrators",
+    "account_administrator_relative",
+    "account_domain_admins_relative",
+    "world",
+    "authenticated_users",
+    "builtin_users",
+    "creator_owner",
+    "owner_rights"
+  ],
+  "boundary": "UnexpectedDirectoryWriter before Nonce/RootCreate; no new random fixture root or candidate publication/assertions reached",
+  "confirmed": "Validated allow ACE has checked mutation grant to a SID unequal current user/SYSTEM/built-in Administrators. Same rejecting process/descriptor reports account-SID shape and no named match in fixed set. Existing security policy rejects it.",
+  "unknown": [
+    "Specific SID/account/group identity",
+    "Whether principal is local or domain and its memberships/trust",
+    "Who created ACL and exact ancestor origin",
+    "Effective access after all Windows token/access checks",
+    "Identity equivalence with earlier observations"
+  ],
+  "sourceInventory": "writer-role-source-hashes-20261022T133736Z.json",
+  "packageRecord": "writer-role-package-20261022T133736Z.json",
+  "bundleManifestSha256": "d1f07c6e2473a356a59b1598f70ae4aba67af54b139f8f94a1ba1ffc80f0ca1e",
+  "expectedExecutableSha256": "b830c78557886c4a9999639739264fa2e2e6d355e81f524a73c1f777b318f845",
+  "artifactProvenance": "User ran supplied hash-pinned private-copy block; raw files directly read; no independent already-exited process/exe identity claim",
+  "remainingThree": "NOT_RUN",
+  "agentRuntime": "NOT_RUN; ingestion only, no new compile/test/fixture",
+  "rawEvidence": ".local-evidence/windows-publication-d1-windows-runs/20261022T140301Z",
+  "nextBoundary": "No repeated fixture without new information. Admitting extra trustee, ACL/owner/root change outside current policy. Tracing ancestor inheritance would extend the current same-fixture-base metadata scope and needs a concrete scope decision.",
+  "warning": "InitializeDefaultDrives in reader only; no causal attribution/config changes",
+  "review": "Saved-result verification against raw exit/summary/context/role/refusal/process state; no false PASS, SID/account/private path/token/ACL dump or fixture success claim",
+  "limits": "No product/power-loss/D2/D3/cert/SQLite/continuity/production owner acceptance; all security/data/environment/Git boundaries preserved.",
+  "astraEvidenceReview": "Evidence-only independent Astra analysis: no code defect demonstrated; extra account-shaped inherited trustee outside policy. Identity/membership/provenance unknown. Current same-fixture-base/process-token scope does not authorize ancestor ACL tracing. Stop for bounded readonly ancestry-scope decision or separately approved compliant environment, no guard/ACL/owner/root changes or blind retry. Astra performed no queries/tests/build/edits."
+}

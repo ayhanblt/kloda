@@ -1,5 +1,182 @@
 # Windows D1 — ayrı standart hesap devri
 
+## Sonuç — 2026-10-22: dört D1 fixture doğrulandı
+
+Yeni standart hesapta kullanıcı tarafından çalıştırılan aynı reviewed Four
+ikilisinin ortak alana kopyalanmış ham kayıtları doğrulandı: dört exact liste
+exit0, dört exact runtime PASS/exit0, sekiz süreç exited. Fixture context
+sayıları1/1/6/1, tamamı0/0/0/1. Ayrı readonly review bulgusuz; 41 ham dosya
+hash'i ve bundle hash'leri doğrulandı. Yeni test/build/retry/cleanup yok.
+
+[Sonuç](evidence/windows-publication-d1-2026-10-21/d1-four-native-result-20261022T144423Z.json)
+ve [Mac'e devir](evidence/windows-publication-d1-2026-10-21/d1-macos-handoff-20261022T144423Z.md).
+Bu güncelleme aşağıdaki tarihli NOT_RUN checkpoint'lerinden sonra gelir.
+Dört disposable D1 çalışma grubu tamamlandı; eski başarısız kayıtlar korunur.
+Production owner/preserved pending, D2/D3, cert/SQLite binding, continuity,
+power-loss durability ve platform kabulü açık. Windows'ta burada durulur.
+
+
+## Yeni profil ortamı onaylandı — 2026-10-22
+
+Kullanıcı, mevcut profillerin ACL/verisini koruyarak başka yeni standart
+hesapta dört D1 case'in birer kez/sıralı/fail-stop çalıştırılmasını açıkça
+onayladı. Hesabı kullanıcı UI'dan oluşturur; aynı adlı hesap varsa onu
+yeniden kullanma/silme/parola sıfırlama yok. Paket eski hesapta yalnız
+Public Documents'a konur. Yeni kullanıcı kendi oturumunda public staging'den
+özel kopyasını alır; eski hesap yeni profilin özel klasörlerine girmez,
+Explorer Continue onayı verilmez. Yeni kullanıcı sonuçları da ayrı bir
+Public Documents sonuç klasörüne kendisi kopyalar.
+
+Mevcut reviewed dört-case paket/ikili/blok hash'leri tekrar doğrulandı;
+yeniden derleme veya yeni standalone preflight gerekmiyor. Her Fixture'ın
+native context/ACL kontrolleri korunur. Dört runtime henüz NOT_RUN.
+Onay ACL/owner/guard değişikliği, eski hesap/profil cleanup'ı veya gerçek
+authority/arşiv müdahalesi değildir. D2/D3/platform sınırları değişmez.
+
+## Salt okunur kalıtım incelemesi — 2026-10-22
+
+Onaylanan beş-seviyeli metadata incelemesinde, seçilen standart-profil
+Local yolundaki benzersiz sayısal ACE adayı profil kökünde explicit
+flags3/mask2032127, AppData/Local'da inherited flags19 olarak gözlendi.
+Profil DACL'si protected; incelenen iki üst seviyede aynı SID ACE'si yok.
+Bağımsız güncel snapshot'ta ek trustee gözlemci process TokenUser'ıyla
+eşleşiyor. Bu karşılaştırmalar bellekte; SID/hesap/özel yol dump'ı yok.
+Çıkmış Rust sürecinin SID/yol kimliğiyle eşitlik iddia edilmez.
+
+Kullanıcı diğer profili Explorer'dan açarken Continue erişim onayı
+verdiğini hatırladığını doğruladı. [Microsoft KB950934](https://learn.microsoft.com/en-us/troubleshoot/windows-server/windows-security/dont-have-permission-access-folder)
+bu onayın kalıcı Full Control izni ekleyebildiğini açıklar. Gözlemler bu
+mekanizmayla güçlü biçimde uyumlu; tarihsel oluşturan/zaman/olay kanıtı yok.
+ACL/owner/guard/ortam değiştirilmedi; yeni test/build/fixture çalışmadı.
+
+Önerilen sonraki ortam kararı henüz onaylanmadı: mevcut profili/ACL'yi
+koruyarak başka yeni standart profil; paket yalnız Public Documents'a,
+özel kopya yeni kullanıcının kendi oturumundan; eski hesaptan yeni profile
+girme/Continue yok. Sonuçları da yeni kullanıcı Public Documents'a aktarır.
+Aynı reviewed binary/policy kullanılabilir; yeni derleme gerekmez.
+Yeni hesap veya ek runtime için bu readonly onayı izin sayılmaz.
+
+## Son gözlem — 2026-10-22: mevcut politika altında ortam engeli
+
+Tek writer-role collision ham sonucu okundu: token context0/0/0/1 PASS;
+collision FAIL101, süreç exited. Aynı ret dalındaki SID için
+named_match=false/account_sid_shape=true, ACE type0/size36/flags19,
+mask2032127/overlap852304. Bu yalnız hesap-domain SID şeklidir; hesabın
+kimliği, local/domain kökeni, üyeliği ve güvenilirliği UNKNOWN.
+Mevcut allowlist dışındaki inherited mutation grant reddi sürüyor;
+yeni kaynak kusuru gösterilmedi. Nonce/root/publication'a erişilmedi,
+diğer3 NOT_RUN. Aynı fixture yeni bilgi olmadan tekrarlanmaz.
+
+[Sonuç kaydı](evidence/windows-publication-d1-2026-10-21/writer-role-native-result-20261022T140301Z.json).
+Astra da guard/ACL/owner/root değişikliğini destekleyen kanıt olmadığını
+ve karar noktasını doğruladı. İlgili üst klasörlerde yalnız anonim ACL
+miras kaynağı araştırması, mevcut same-fixture-base metadata sınırını
+genişletir; açık kapsam kararı bekler. Alternatif uyumlu ortam seçimi de
+ayrı karardır. Bu checkpoint hiçbir ACL onarımı, trust genişlemesi veya
+mevcut veri müdahalesi izni değildir. Mevcut hesapta yeni runtime yoktur.
+
+## Güncel araştırma — 2026-10-22: yalnız reddedilen writer rolü
+
+Dört-test paketinin ilk collision ham çıktısı okundu: native context0/0/0/1
+geçti; valid basic allow ACE type0/size36/flags19/mask2032127,
+mutation overlap852304 için UnexpectedDirectoryWriter reddi, exit101.
+Process exited; diğer3 NOT_RUN. Nonce/RootCreate/publication'a erişilmedi.
+ACE boyutu veya benzer maskeden önceki süreç/principal kimliği çıkarılmaz.
+
+Mevcut araştırma onayı içinde yalnız cfg(test) ret dalı tanılaması eklendi.
+Aynı descriptor içindeki bounds/IsValidSid kontrolü geçmiş SID üzerinde
+yerel IsWellKnownSid sabit rol eşleşmeleri ve account_sid_shape boolean'ı
+yazılır. Hesap adı/SID/RID/domain/yol/ACL veya token dökümü yok; lookup ve
+ağ sorgusu yok. Named match veya account şekli güven/üyelik/admission
+gerekçesi değildir. Eşleşmeme API hatası diye kaydedilmez. Mevcut
+UnexpectedDirectoryWriter reddi ve production davranışı değişmez.
+
+Yeni paket yalnız collision case'ini **bir kez** çalıştırıp durur; ayrı
+preflight, kalan3, absent-target veya sentetik test çalıştırılmaz.
+Her Fixture kendi context kontrolünü sürdürür. Bu yeni ölçüm değişmeyen
+FAIL'in kör tekrarı değildir; rol ayrımı için hedefli tanılama sağlar.
+Tanılama sonunda bile mevcut allowlist dışındaki trustee'yi kabul etmek,
+ACL/owner/authority-root değiştirmek ayrı güvenlik/ortam kararı gerektirir.
+Mevcut hesap yalnız locked/no-run build, exact liste ve paket doğrular;
+kullanıcı ayrı standart hesabında yeni pinned tek-collision bloğunu kullanır.
+
+## Güncel aşama — 2026-10-22: PASS sonrası dört D1 fixture
+
+Yeni standart-hesap preflight ham kayıtları okundu: exit0, tek test PASS,
+process exited; sınıf21 ReturnLength1 ve context tam 0/0/0/1.
+[Doğrulanmış kayıt](evidence/windows-publication-d1-2026-10-21/token-boolean-native-result-20261022T131955Z.json).
+Kullanıcı sıradaki aşamaya geçilmesini onayladı. Kaynak ve ikili değişmez;
+önceki BOOLEAN snapshot'ı 14/14 tekrar doğrulandı. Yeni derleme gerekmez.
+
+Yeni paket/blok yalnız aşağıdaki dört D1 case içindir. Ayrı
+native_user_preflight testi tekrarlanmaz: her Fixture::new_inner başında
+aynı native context::verify, KnownFolder seçimi ve dosya yaratmadan önce
+zaten çalışır. Bu kontroller atlanmaz/değiştirilmez. Beş dosyalık sabit
+bundle ve dış manifest pin'i, yeni özel kopya, her spawn öncesi hash,
+dört exact ignored liste ve fail-stop runtime kuralları korunur.
+Sıra: collision, existing-pending, cut/lost-reply, late-target. Her biri
+bir kez; ilk FAIL/UNKNOWN/kesinti/altyapı engelinde kalanlar NOT_RUN.
+En fazla9 yeni disposable random kök; cleanup/adoption/retry yok.
+Tarihsel absent-target testi ve sentetik testler bu blokta çalıştırılmaz.
+Mevcut Codex hesabında yalnız liste/paket doğrulaması; runtime yine
+kullanıcının ayrı standart hesabında yapılır. D1 sonucu production owner,
+korunmuş pending, D2/D3, cert/SQLite binding/continuity veya ürün kabulü değildir.
+
+## Güncel dar düzeltme — 2026-10-22: hizalı BOOLEAN payload
+
+Yeni standart-hesap preflight çıktısı salt okunur incelendi: sınıf29 için
+capacity4/ReturnLength4, sınıf21 için capacity4/ReturnLength1; ardından
+length validation reddi ve exit101. Süreç exited; dosya fixture'ları NOT_RUN.
+[Microsoft Win32 açıklaması](https://github.com/microsoft/win32metadata/discussions/2308)
+TokenHasRestrictions için BOOLEAN payload / DWORD hizalamasını doğruluyor;
+Learn'deki DWORD tanımı için düzeltme açıklanmış. Kullanıcı araştırma ve
+dar çözüme devamı onayladı; Astra önerisi ve ayrı kaynak review aynı yönde.
+
+Yeni cfg(test) decoder, hizalı u32::MAX buffer ve kapasite4'ü korur.
+Yalnız TokenHasRestrictions başarılı ReturnLength1 ile ilk bellek byte'ını
+okur; diğer üç bilinen sorgu için tam ReturnLength4 ister. Bilinmeyen sınıf
+ve diğer boyutlar reddedilir. Sıfır dışı restriction kabul edilmez;
+native_user_context yine tam 0/0/0/1 ister. API hatası ve tanılama korunur.
+ACL/owner/guard, namespace ve production yollarında değişiklik yok.
+Kaynak düzeltmesi doğrulandı; yeni native runtime sonucu henüz NOT_RUN.
+Desteklenen tüm Windows sürümleri için test matrisi iddia edilmez.
+
+Bu düzeltme paketi de **yalnız exact readonly native_user_preflight** içindir.
+İki sentetik decoder regresyon testi eklenip derlendi; mevcut hesaptaki
+compile/list sınırı nedeniyle çalıştırılmış sayılmaz. Yeni preflight-only
+blok kullanılmalı; PASS olsa bile dört dosya fixture'ına geçilmez.
+Yeni UTC kaynak/paket envanteri eskileri ezmez; kullanıcı yeni paket ve
+onun ayrı manifest hash'iyle standart hesabında bir preflight çalıştırır.
+
+## Güncel dar görev — 2026-10-22: yalnız token ReturnLength tanılaması
+
+Kullanıcı bildirimi: önceki yeni-hesap paketinde beş liste exit0, yalnız
+`native_user_preflight` exit101: `Fixture(NativeUserContext)` /
+`TokenInformation` / `storage_failure` / `win32=None`. Dört mutating case
+NOT_RUN, süreçler exited. Bu checkpoint kullanıcı mesajıdır; burada ZIP
+incelenmiş veya yeni runtime çalıştırılmış sayılmaz.
+
+Bu yeni paket yalnız exact `installation_files::windows::candidate::context::native_user_preflight`
+case'ini çalıştırma yetkisi taşır. Aşağıdaki tarihsel dört-fixture çalışma
+grubuna bu paketle devam edilmez; preflight PASS olsa bile durulur.
+Mevcut hesapta yalnız locked/no-run derleme ve exact ignored liste yapılır.
+
+`scalar()` tanılaması her ulaşılan sorgu için sabit sayısal `class`, verilen
+`capacity` ve gerçek `return_length` alanlarını yazar. Gerçek API hatası
+diagnostic I/O'dan önce mevcut `os_check` ile korunur. Boyut eşitliği,
+sonuç değeri ve token/ACL/owner/guard kabul koşulları değişmedi. API hatası
+üzerindeki ReturnLength başarılı okuma veya kök neden diye yorumlanmaz.
+Yeni sonuç gelmeden boyut kusuru veya düzeltme varsayılmaz.
+
+Yeni UTC bundle eski paketi ezmez; aynı beş dosyalık allowlist ve dış kanaldan
+manifest hash pin'i korunur. Bundle içindeki `native-user-source-hashes.json`
+bu yeni dar tanılama kaynak snapshot'ıdır; depodaki eski inventory değişmez.
+Paket dışındaki yeni, hash-pinned interaktif **preflight-only** blok kullanılır;
+eski beş-case kullanıcı bloğu kullanılmaz. Kullanıcı normal standart hesap
+terminalinde yalnız liste + bir preflight çalıştırır; dört dosya fixture'ı
+hiç başlatılmaz. Sonuç ne olursa olsun raporla/dur; retry, cleanup veya
+ExecutionPolicy/ortam değişikliği yok.
+
 2026-10-21. **Ayhan onayladı:** mevcut profilin ACL/guard/verisini değiştirmek yerine ayrı, yeni, boş standart Windows hesabında disposable D1 doğrulaması. Bu belge bu çalışma grubu için eski collision-retry talimatlarından önce gelir. Yeni hesap henüz oluşturulmadı; yeni Windows derleme/paket/runtime sonucu henüz yok.
 
 ## Kanıt ve sınır

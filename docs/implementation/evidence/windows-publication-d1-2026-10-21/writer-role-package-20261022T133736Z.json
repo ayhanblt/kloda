@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-22T13:40:04.9587428Z",
+  "scope": "Existing rejected-writer fixed role diagnostic; one collision only",
+  "head": "0a989a56a67ca9df9d0c12673cd0b4a6e7c94a53",
+  "priorFourCaseResult": {
+    "collision": "FAIL",
+    "context": "0/0/0/1",
+    "process": "exited",
+    "writer": "owner_matchtrue,other,type0size36flags19mask2032127overlap852304",
+    "exitCode": 101,
+    "remaining3": "NOT_RUN",
+    "boundary": "BeforeNonce/RootCreate; no new root or publication reached",
+    "failure": "SecurityRuleUnexpectedDirectoryWriter"
+  },
+  "priorEvidenceProvenance": "Five exact raw result files directly read and copied Git-outside; process exited, nativecontext0/0/0/1, otherwriter rejection before rootcreation",
+  "hypothesis": "Named IsWellKnownSid matches can distinguish a principal-comparison consistency issue from an extra trustee; account shape only is anonymous structure, not identity/trust",
+  "astra": "Inherited basic allow grants mutation to extra principal; code defect not proven. Size36 not SID identity. Minimal fixed local role/shape classification, no lookup or trust inference.",
+  "newSourceInventory": "writer-role-source-hashes-20261022T133736Z.json",
+  "sourceDelta": "Only cfg(test) rejected-ACE logger and helper; same validated SID and still-live descriptor; no path reopen/token/ACL lookup; original unconditional failure preserved",
+  "newDiagnostic": [
+    "KLODA_FIXTURE_PRINCIPAL role=<fixed matched role, if any>",
+    "KLODA_FIXTURE_PRINCIPAL role_check_complete=true named_match=<bool> account_sid_shape=<bool>"
+  ],
+  "interpretation": "No local-account/domain/human/group membership/privilege or earlier-principal inference from shape. IsWellKnownSid nonmatch not OS error. Named role never grants admission. Current category UNKNOWN pending runtime.",
+  "primarySource": "https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-iswellknownsid",
+  "compile": {
+    "exitCode": 0,
+    "seconds": 4.3834148
+  },
+  "toolchain": "1.99.0-x86_64-pc-windows-msvc",
+  "compileMode": "--locked --no-default-features --target x86_64-pc-windows-msvc --lib --no-run --message-format=json",
+  "artifact": {
+    "validation": "Unique compiler-artifact manifest/src/profile/path/regular/no-reparse",
+    "relativeExecutable": "packages/pairing-native/target/x86_64-pc-windows-msvc/debug/deps/kloda_pairing_native-4db531d21f449c60.exe",
+    "sha256": "b830c78557886c4a9999639739264fa2e2e6d355e81f524a73c1f777b318f845"
+  },
+  "exactCase": "installation_files::windows::candidate::tests::rename_atomically_refuses_existing_target_and_preserves_pending",
+  "originalListExit": 0,
+  "bundleListExit": 0,
+  "bundleRelativePath": ".local-evidence/windows-publication-d1-windows-runs/20261022T133736Z/Kloda-D1-WriterRole-20261022T133736Z-0a989a5",
+  "bundleManifestSha256": "d1f07c6e2473a356a59b1598f70ae4aba67af54b139f8f94a1ba1ffc80f0ca1e",
+  "bundleFiles": [
+    {
+      "name": "kloda-d1-tests.exe",
+      "sha256": "b830c78557886c4a9999639739264fa2e2e6d355e81f524a73c1f777b318f845"
+    },
+    {
+      "name": "windows-d1-native-user-handoff.md",
+      "sha256": "f0198fa92dfbee994690687b7e086921d0b8e492004028995627fdf68804201a"
+    },
+    {
+      "name": "native-user-source-hashes.json",
+      "sha256": "ada76d4a27062a7309b941cf5ceb1f97f0608fac29673939427204f80bee85ca"
+    },
+    {
+      "name": "README.txt",
+      "sha256": "35689f419269761add1260dc1ab5e7cb61049e19983e593ae86bc4a31511080d"
+    }
+  ],
+  "block": "writer-role-block-20261022T133736Z.txt",
+  "blockSha256": "d8129a01f880b6ef302e9ed587216c6340e691c2d7e6bfff3cc0fe9abc3912a6",
+  "blockValidation": "Parser-only, one collision command path, no preflight/remaining3/absent; fixedpin/fivefile/privatecopy/perspawnhash/failstop/rawlogs retained",
+  "currentAccountRuntime": "NOT_RUN",
+  "dependentThree": "NOT_RUN",
+  "sourceReview": "Independent read-only reviewer: no blocking finding; bounds/lifetime/privacy/error/admission preserved",
+  "warning": "InitializeDefaultDrives visible; no causal attribution or config change",
+  "rawEvidence": ".local-evidence/windows-publication-d1-windows-runs/20261022T133736Z",
+  "limits": "No policy/ACL/owner/root changes, no retry without new information. Extra-trustee admission or ACL repair remains separate security/environment decision. No real authority/archive, owner/TPM/network, cleanup/Git/ExecutionPolicy/model changes or D1/product/durability acceptance.",
+  "independentPackageReview": "Read-only reviewer verified actual fixed pin/input hashes/five files and single collision/no-preflight/no-dependent case path; context0/0/0/1 guard, private-copy/per-spawn hash/rawlogs/failstop preserved; no blocking finding or runtime.",
+  "separateResultReview": "Source14 new hashes match; source security274lines; baseline prior collision101/contextPASS and dependent3NOT_RUN raw cross-checked; build0/original list0/bundlelist0, source/exe/pin links and public privacy verified. All new native runtimeNOT_RUN; no false PASS."
+}

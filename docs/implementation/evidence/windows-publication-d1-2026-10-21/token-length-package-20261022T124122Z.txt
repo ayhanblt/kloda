@@ -1,0 +1,17 @@
+Token ReturnLength tanılama paketi
+UTC: 2026-10-22T12:46:18.7362805Z
+HEAD: 0a989a56a67ca9df9d0c12673cd0b4a6e7c94a53
+Eski 14 kaynak manifesti eşleşti; yalnız context scalar tanılaması değişti; yeni ayrı 14 kaynak snapshot kaydedildi.
+Boyut eşitliği, buffer/sorgu argümanları, token kabul ve ACL/owner/guard aynı. API hata kaydı logdan önce korunuyor.
+Locked/no-run Windows derleme: exit 0, 32.7146135 saniye.
+Orijinal ve paket kopyası exact preflight list: exit0, tek test/0 benchmark.
+Native preflight ve dört mutating fixture bu hesapta NOT_RUN. Diğer otomatik kontroller yalnız statik kaynak/paket/blok doğrulaması; unit/fmt/clippy PASS iddiası yok.
+Paket relatif yol: .local-evidence/windows-publication-d1-windows-runs/20261022T124122Z/Kloda-D1-TokenLength-20261022T124122Z-0a989a5
+Manifest SHA256: eaacc3a4c19b2cc72815149b518d039af1d02f6eca570986bc103f454a24f800
+EXE SHA256: 3ec9d69917e74c8a5a041dbcdacc427abf5228f1c7352e4132649b860ea19278
+Tek preflight-only blok: token-length-preflight-block-20261022T124122Z.txt; paket klasörüne eklenmez.
+Kullanıcı ayrı standart hesapta yalnız readonly preflight çalıştırıp sonuç ne olursa olsun duracak. Dört mutating komut blokta yok.
+Ayrı kaynak, paket/güvenlik ve sonuç review tamamlandı; engelleyici bulgu yok.
+Yeni ReturnLength runtime değeri veya kesin neden henüz gözlenmedi; boyut düzeltmesi varsayılmadı.
+InitializeDefaultDrives visible; no environment fix or causal attribution
+D1 mutating4, real owner/TPM/archive, power-loss/D2/D3/cert/SQLite/continuity and platform acceptance remain open

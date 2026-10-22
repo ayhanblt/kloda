@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-22T13:09:24.0716915Z",
+  "scope": "Aligned BOOLEAN decode correction; preflight-only handoff",
+  "head": "0a989a56a67ca9df9d0c12673cd0b4a6e7c94a53",
+  "rawEvidence": ".local-evidence/windows-publication-d1-windows-runs/20261022T130517Z",
+  "priorObserved": "Separate-user raw preflight exit101: class29 capacity4 return_length4; class21 capacity4 return_length1; processes exited. Read-only source logs inspected, no retry.",
+  "cause": "Successful TokenHasRestrictions returns byte1 length at aligned capacity4; old u32 length-equality check rejected before token policy. Interpretation bug, not evidence of restricted token in separate account.",
+  "sources": [
+    "https://github.com/microsoft/win32metadata/discussions/2308",
+    "https://learn.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-token_information_class"
+  ],
+  "documentation": "Microsoft maintainer clarification identifies BOOLEAN payload at DWORD-aligned address and byte0 valid on success/length1; enumeration still says DWORD. No formal all-Windows matrix asserted. Context7 lookup found no matching sample docs; primary Microsoft sources used.",
+  "change": "Keep aligned u32::MAX and API capacity4; class21 length1 uses first native memory byte; other named three classes length4 fullu32; all unknown classes/sizes fail closed. Existing API-error handling/logs and exact0/0/0/1 policy unchanged; cfg(test) only.",
+  "newInventory": "token-boolean-source-hashes-20261022T130517Z.json",
+  "finalInventoryMatches": 14,
+  "compile": {
+    "exitCode": 0,
+    "seconds": 4.647765
+  },
+  "toolchain": "1.99.0-x86_64-pc-windows-msvc",
+  "compileArgs": "cargo test --manifest-path packages/pairing-native/Cargo.toml --locked --no-default-features --target x86_64-pc-windows-msvc --lib --no-run --message-format=json",
+  "executable": "packages/pairing-native/target/x86_64-pc-windows-msvc/debug/deps/kloda_pairing_native-4db531d21f449c60.exe",
+  "executableSha256": "314e51387cdb9624e0ebb891c2ca2b4e29ba6224545439b9df1871e67703ab95",
+  "lists": [
+    {
+      "name": "installation_files::windows::candidate::context::native_user_preflight",
+      "exitCode": 0,
+      "runtime": "NOT_RUN"
+    },
+    {
+      "name": "installation_files::windows::candidate::context::restriction_byte_ignores_unwritten_tail_but_never_masks_a_nonzero_flag",
+      "exitCode": 0,
+      "runtime": "NOT_RUN"
+    },
+    {
+      "name": "installation_files::windows::candidate::context::token_query_classes_require_their_exact_payload_size",
+      "exitCode": 0,
+      "runtime": "NOT_RUN"
+    }
+  ],
+  "bundleRelativePath": ".local-evidence/windows-publication-d1-windows-runs/20261022T130517Z/Kloda-D1-Boolean-20261022T130517Z-0a989a5",
+  "bundleManifestSha256": "0c255dfb62657533dca0f54d8574df53fa7bd369821560c7115466ab729b060d",
+  "bundleFiles": [
+    {
+      "name": "kloda-d1-tests.exe",
+      "sha256": "314e51387cdb9624e0ebb891c2ca2b4e29ba6224545439b9df1871e67703ab95"
+    },
+    {
+      "name": "windows-d1-native-user-handoff.md",
+      "sha256": "f84678366d8960a3cc0380275e64984106a641f0144a65a8e5c5edfb4f43351b"
+    },
+    {
+      "name": "native-user-source-hashes.json",
+      "sha256": "00913637f3a4cdcff26bbf61d7c12542a8abecb22016bdce0197d1c78f2f0a6e"
+    },
+    {
+      "name": "README.txt",
+      "sha256": "509d35bbdcbc4cfc4ed7a3c71045a9bd09ec83c280bc864e7a723c48aef5e00b"
+    }
+  ],
+  "bundleSelfCheck": "Five fixed plain inputs, no subdir/reparse/extra DLL/script; hashes match; copied preflight exact ignored list exit0",
+  "block": "token-boolean-preflight-block-20261022T130517Z.txt",
+  "blockSha256": "d253ed08202e01ee2fce642334a12550644d47f9bbc66a0c41e4dc1bfd08f520",
+  "blockScope": "One exact readonly preflight only, even on PASS stop. No mutating names; same pinned private-copy/per-spawn hash checks. VoidTaskResult output suppressed via void cast, exceptions preserved.",
+  "tests": "Two synthetic security/decoder regressions added, compiled and exact listed; NOT_RUN under current-account compile/list restriction",
+  "runtime": {
+    "synthetic2": "NOT_RUN",
+    "nativePreflight": "NOT_RUN",
+    "mutating4": "NOT_RUN"
+  },
+  "staticChecks": "Inventory14/14; sentinel/class-specific sizes and unchanged0/0/0/1 source assertions; block parser without execution; no mutating command path; diff check",
+  "reviews": {
+    "result": "Separate saved-result check verified build0, exact list0 for3 and bundle list0, source/exe hashes and NOT_RUN distinctions; no false PASS",
+    "package": "Separate reviewer verified actual pin/four inputhashes/five normal files and sole preflight path; no blocking issue",
+    "source": "Independent reviewer no blocking issue; tail/nonzero/size regression source inspected; no runtime/tests by reviewer",
+    "astra": "Independent official-source research: strict1 class21, strict4 other3, aligned buffer/sentinel retained; unknowns reject; semantics unchanged"
+  },
+  "warning": "InitializeDefaultDrives visible; no environment change or causal claim",
+  "notChanged": "ACL/owner/guard/private-root/production/native authority/account/config/ExecutionPolicy/Git/model; old reports/manifests/bundles preserved",
+  "limits": "Fix targets proven decoding rejection; runtime standard-account preflight still pending and may expose later conditions. No D1/production/power-loss/D2/D3/cert/SQLite/continuity acceptance."
+}

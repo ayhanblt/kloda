@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-22T14:11:10.1301543Z",
+  "scope": "Independent bounded metadata re-observation and current observer primary-token User equality",
+  "principal": "R1 unique current base candidate; labels not persisted SID identifiers",
+  "baseCandidateCount": 1,
+  "baseAce": {
+    "flags": 19,
+    "size": 36,
+    "mask": 2032127,
+    "type": 0
+  },
+  "profileRootProtected": true,
+  "matchingExplicitProfileRootAceCount": 1,
+  "explicitProfileRootFlags": 3,
+  "observerTokenUserMatchesCandidate": true,
+  "observerTokenUserMatchesBaseOwner": false,
+  "threadImpersonationPresent": false,
+  "comparison": "SID equality in memory only; no account-name lookup, raw SID or account/path data retained",
+  "interpretation": "Observer account is/is not the explicit trustee according to boolean only; no assertion it created ACE. Historical Rust SID equality and exact KnownFolder correlation remain unproven.",
+  "priorReport": "writer-inheritance-20261022T140857Z.json",
+  "changes": "None except selected evidence file",
+  "notRun": [
+    "test",
+    "build",
+    "fixture",
+    "account/domain/network lookup"
+  ],
+  "exitCode": 0
+}

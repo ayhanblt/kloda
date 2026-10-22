@@ -1,0 +1,222 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-22T14:44:24.3032473Z",
+  "scope": "Four disposable Windows D1 fixtures; public-copy raw evidence verified without rerun",
+  "results": [
+    {
+      "name": "installation_files::windows::candidate::tests::rename_atomically_refuses_existing_target_and_preserves_pending",
+      "status": "PASS",
+      "exitCode": 0,
+      "seconds": 0.0674309
+    },
+    {
+      "name": "installation_files::windows::candidate::tests::existing_pending_is_not_adopted_deleted_or_overwritten",
+      "status": "PASS",
+      "exitCode": 0,
+      "seconds": 0.06958149999999999
+    },
+    {
+      "name": "installation_files::windows::candidate::tests::injected_cut_points_and_lost_reply_never_ack_or_regenerate",
+      "status": "PASS",
+      "exitCode": 0,
+      "seconds": 0.1612343
+    },
+    {
+      "name": "installation_files::windows::candidate::tests::target_appearing_after_preflush_is_not_replaced",
+      "status": "PASS",
+      "exitCode": 0,
+      "seconds": 0.0801455
+    }
+  ],
+  "exactLists": "4/4 exit0, exact single test, empty stderr; all eight list/test process states exited",
+  "fixtureContextCounts": [
+    1,
+    1,
+    6,
+    1
+  ],
+  "context": "Nine fixture contexts exactly0/0/0/1; capacity4; classes29/21/20/18 ReturnLength4/1/4/4",
+  "manifestSha256": "17b635e2ebd6342aced00c7e9a4026ffc8259fd69766b21096c74a89b1a0f71f",
+  "exeSha256": "314e51387cdb9624e0ebb891c2ca2b4e29ba6224545439b9df1871e67703ab95",
+  "sourceInventory": "token-boolean-source-hashes-20261022T130517Z.json",
+  "binaryProvenance": "Reviewed Four bundle hashes revalidated; user pinned runner verifies private input hashes per spawn. Exited process image not independently attested posthoc. Later writer-role diagnostic code is not in this binary.",
+  "rawEvidence": ".local-evidence/windows-publication-d1-windows-runs/20261022T144423Z",
+  "rawFileHashes": [
+    {
+      "sha256": "994b64fd03f8a2a3e80d118eb196d04034172764336cb38af9d750ea8f1d4cac",
+      "name": "results.json"
+    },
+    {
+      "sha256": "0949d536cc45ee5311cd95a946ab4c4c73f2147b1fed5d707fa20d83b538f45f",
+      "name": "list-0.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-0.stderr.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "list-0.exit.txt"
+    },
+    {
+      "sha256": "0766cbbee949b04b8c8a9ea46537dc38ccf0b7aa7b60ecd4083c247388603095",
+      "name": "list-0.process-state.txt"
+    },
+    {
+      "sha256": "5116cef6cd45bbfce7979685955eb0809e5d67da0c9e5589be7f0b520de2c15b",
+      "name": "list-0.pid.txt"
+    },
+    {
+      "sha256": "d786a74db6aadeca0435db4a194e3a71ea90d4fb65343ae2585bb0b8eccb1413",
+      "name": "test-0.stdout.txt"
+    },
+    {
+      "sha256": "cb2f143cfc61daa59fbe7352ab9144804ed17e9b6c5e8512986e5311c74fd23e",
+      "name": "test-0.stderr.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "test-0.exit.txt"
+    },
+    {
+      "sha256": "0766cbbee949b04b8c8a9ea46537dc38ccf0b7aa7b60ecd4083c247388603095",
+      "name": "test-0.process-state.txt"
+    },
+    {
+      "sha256": "b51b52dd6c708f00fed12d3d00b76fe1ef9f05fe7ce3eacb21d6f68be3426024",
+      "name": "test-0.pid.txt"
+    },
+    {
+      "sha256": "52f99c7f5b3e02bcd79012ebaac6f8a119e279ffc14d9e78da8f0deb7dec2721",
+      "name": "list-1.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-1.stderr.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "list-1.exit.txt"
+    },
+    {
+      "sha256": "0766cbbee949b04b8c8a9ea46537dc38ccf0b7aa7b60ecd4083c247388603095",
+      "name": "list-1.process-state.txt"
+    },
+    {
+      "sha256": "55a27d61d7e9327ea47015d7a229611c20dd03aa23d01401c05301ea6764ac41",
+      "name": "list-1.pid.txt"
+    },
+    {
+      "sha256": "9fce05e779796747f37bfcaaeb466a7ab41f87e7c3ae9d5d33e70a82f9f26547",
+      "name": "test-1.stdout.txt"
+    },
+    {
+      "sha256": "cb2f143cfc61daa59fbe7352ab9144804ed17e9b6c5e8512986e5311c74fd23e",
+      "name": "test-1.stderr.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "test-1.exit.txt"
+    },
+    {
+      "sha256": "0766cbbee949b04b8c8a9ea46537dc38ccf0b7aa7b60ecd4083c247388603095",
+      "name": "test-1.process-state.txt"
+    },
+    {
+      "sha256": "1fd96f2ed9fa1a4d765e48bde54198f340bb8efd97f4384ded6872d5afcc72f9",
+      "name": "test-1.pid.txt"
+    },
+    {
+      "sha256": "0c74fd3e800bd4e1fcc74ab700f88b44658b3dbe3c21e14d2e7cb9406cd03cc9",
+      "name": "list-2.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-2.stderr.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "list-2.exit.txt"
+    },
+    {
+      "sha256": "0766cbbee949b04b8c8a9ea46537dc38ccf0b7aa7b60ecd4083c247388603095",
+      "name": "list-2.process-state.txt"
+    },
+    {
+      "sha256": "4e9ce47db66eaa8c10f3161196bc0641f69f26e1ef44f635a68ced79d6751d1f",
+      "name": "list-2.pid.txt"
+    },
+    {
+      "sha256": "2adb31ba121ab8332925b45a54378f3ecbb6bc128402198ec6018fdaf173c79e",
+      "name": "test-2.stdout.txt"
+    },
+    {
+      "sha256": "6484dc96b303954c5975c2c9db38993a7de1cfcbfa3afe9702e5fb4919664840",
+      "name": "test-2.stderr.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "test-2.exit.txt"
+    },
+    {
+      "sha256": "0766cbbee949b04b8c8a9ea46537dc38ccf0b7aa7b60ecd4083c247388603095",
+      "name": "test-2.process-state.txt"
+    },
+    {
+      "sha256": "4de08061144c32826be94329d514d4fb02a331b6cc34f99cf6bae2cda56c9b1f",
+      "name": "test-2.pid.txt"
+    },
+    {
+      "sha256": "fc7cfecbf54aef0ffb27199f82e9eb80e6b0154439a2d56060e910f215975354",
+      "name": "list-3.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-3.stderr.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "list-3.exit.txt"
+    },
+    {
+      "sha256": "0766cbbee949b04b8c8a9ea46537dc38ccf0b7aa7b60ecd4083c247388603095",
+      "name": "list-3.process-state.txt"
+    },
+    {
+      "sha256": "beb28fcb0ba3a43bae1fafeb3c85466f2ef4cf6fdba3f73fcd077aa7c84d66c8",
+      "name": "list-3.pid.txt"
+    },
+    {
+      "sha256": "2a740b4b215ee5e6e499081e7b474d77ea7d55c520971acf415dbc7001348963",
+      "name": "test-3.stdout.txt"
+    },
+    {
+      "sha256": "cb2f143cfc61daa59fbe7352ab9144804ed17e9b6c5e8512986e5311c74fd23e",
+      "name": "test-3.stderr.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "test-3.exit.txt"
+    },
+    {
+      "sha256": "0766cbbee949b04b8c8a9ea46537dc38ccf0b7aa7b60ecd4083c247388603095",
+      "name": "test-3.process-state.txt"
+    },
+    {
+      "sha256": "cd47d54b66e9e32d36b0ffccfc6ad30ba6d14432852dde9d64a9a22b71c7a7c4",
+      "name": "test-3.pid.txt"
+    }
+  ],
+  "priorEvidence": [
+    "hash-diagnostic-20261021T134958Z.json",
+    "token-boolean-native-result-20261022T131955Z.json",
+    "writer-inheritance-summary-20261022T141516Z.json",
+    "fresh-profile-authorization-20261022T142133Z.json"
+  ],
+  "explanation": "Numeric BOM check fixed original hash command error. cfg(test) TokenHasRestrictions decodes exact BOOLEAN length1 from aligned buffer. Earlier extra writer rejection retained; fresh profile passes same Four binary without guard/ACL relaxation. Explorer Continue consistent with prior metadata, historical creator/time unproven.",
+  "startupWarning": "InitializeDefaultDrives FileSystem warning remains visible. Reads/hash/copies succeed; causal impact on native run not established.",
+  "notRun": "No new build/test/retry/cleanup here; absent-target historical only; two synthetic decoder tests compiled/listed, NOT_RUN.",
+  "limits": "D1 disposable namespace/protection evidence only; production owner/authority, TPM/QR/transfer, D2/D3, cert/SQLite binding, continuity, power-loss durability and platform acceptance remain open. Old failures/profiles preserved; no Git/ACL/environment changes.",
+  "validationNote": "Initial audit list comparison used platform newline and rejected LF logs before writing; corrected to exact nonempty lines. No native command executed.",
+  "review": "Independent read-only reviewer: no blocking findings; four exact PASS/exit0, four list0, eight exited states, contexts1/1/6/1, all41 raw hashes and bundle hashes verified; privacy/provenance/NOT_RUN/scope distinctions correct. No reviewer runtime/build/write."
+}

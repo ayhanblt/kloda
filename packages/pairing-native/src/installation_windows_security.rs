@@ -233,9 +233,42 @@ fn user_directory_inner(handle: HANDLE) -> Result<()> {
                     ace.Mask,
                     ace.Mask & mutation,
                 );
+                writer_principal(sid);
             }
             return rule!(UnexpectedDirectoryWriter, Err(PairingError::StorageFailure));
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+fn writer_principal(sid: PSID) {
+    use std::io::Write;
+    let mut matched = false;
+    for (kind, role) in [
+        (WinLocalSystemSid, "system"),
+        (WinBuiltinAdministratorsSid, "builtin_administrators"),
+        (WinAccountAdministratorSid, "account_administrator_relative"),
+        (WinAccountDomainAdminsSid, "account_domain_admins_relative"),
+        (WinWorldSid, "world"),
+        (WinAuthenticatedUserSid, "authenticated_users"),
+        (WinBuiltinUsersSid, "builtin_users"),
+        (WinCreatorOwnerSid, "creator_owner"),
+        (WinCreatorOwnerRightsSid, "owner_rights"),
+    ] {
+        if unsafe { IsWellKnownSid(sid, kind) } != 0 {
+            matched = true;
+            let _ = writeln!(std::io::stderr(), "KLODA_FIXTURE_PRINCIPAL role={role}");
+        }
+    }
+    // ace() already bounded and validated this SID; its descriptor is still alive.
+    let count = unsafe { *GetSidSubAuthorityCount(sid) };
+    let authority = unsafe { (*GetSidIdentifierAuthority(sid)).Value };
+    let account_shape = count == 5
+        && authority == [0, 0, 0, 0, 0, 5]
+        && unsafe { *GetSidSubAuthority(sid, 0) } == 21;
+    let _ = writeln!(
+        std::io::stderr(),
+        "KLODA_FIXTURE_PRINCIPAL role_check_complete=true named_match={matched} account_sid_shape={account_shape}"
+    );
 }

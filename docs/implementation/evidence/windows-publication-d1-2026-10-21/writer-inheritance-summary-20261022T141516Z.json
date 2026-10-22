@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-22T14:15:16.8069074Z",
+  "scope": "Authorized bounded read-only inheritance investigation summary",
+  "reports": [
+    "writer-inheritance-20261022T140857Z.json",
+    "writer-inheritance-observer-20261022T141110Z.json"
+  ],
+  "observed": [
+    "Unique current conventional-profile base candidate matches native numeric shape, not captured historical SID identity",
+    "Same snapshot SID explicit allow mask2032127 flags3 at protected profile root",
+    "Same snapshot SID inherited allow mask2032127 flags19 at AppData and Local",
+    "No matching SID ACE in inspected profiles container or volume root",
+    "Independent fresh snapshot unique candidate is current observer primary-token User; not base owner"
+  ],
+  "userRecollection": {
+    "question": "Whether Explorer Continue permission prompt was approved when accessing other test profile",
+    "answer": "YES",
+    "provenance": "Direct asynchronous user reply; recollection, not audit event"
+  },
+  "officialSource": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/windows-security/dont-have-permission-access-folder",
+  "sourceSummary": "KB950934 documents that Explorer Continue can permanently grant the accessing user Full Control and propagate permission changes below; permission-validating programs may then refuse the folder.",
+  "conclusion": "Observed ACL chain, observer-user match and user recollection strongly support the documented Explorer mechanism. Creator/time/event and exact identity/path of the exited Rust run are not independently proven.",
+  "unknown": [
+    "Historical creator/time/event",
+    "Actual SID/account name/group membership",
+    "Effective access",
+    "Historical Rust SID identity and actual KnownFolder independent of conventional-path correlation"
+  ],
+  "changes": "Only selected reports/handoff text; no ACL/owner/guard/data/environment/config changes",
+  "notRun": [
+    "test",
+    "build",
+    "fixture",
+    "native owner/probe",
+    "account-name/domain/network lookup"
+  ],
+  "review": {
+    "independentSavedEvidence": "Read-only reviewer found no privacy/inference issue in two snapshots; no metadata reread/runtime",
+    "result": "Saved counts/flags/explicit/inherited and observer boolean checked; no SID/account/private path/full ACL/token/config in public evidence",
+    "astra": "Evidence-only analysis supports documented mechanism with caveats; recommend preserving existing ACL and separate fresh standard profile, no external profile browsing, package/results transfer viaPublicDocuments; explicit environment-choice approval required"
+  },
+  "proposedNext": "Pending explicit environment-choice approval: another fresh standard profile; only existing frozen five-file test package through Public Documents; new user copies in own session and returns results through public staging, never external profile browsing/Continue. Same reviewed binary/policy and fail-stop D1 sequence, no recompile indicated.",
+  "status": "READ_ONLY_INVESTIGATION_COMPLETE; environment choice pending, D1 runtime not complete"
+}

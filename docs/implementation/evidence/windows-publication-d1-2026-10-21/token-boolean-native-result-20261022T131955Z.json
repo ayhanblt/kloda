@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-22T13:19:55.0903869Z",
+  "scope": "Read-only ingestion of user-executed separate standard-account native preflight result",
+  "case": "installation_files::windows::candidate::context::native_user_preflight",
+  "status": "PASS",
+  "exitCode": 0,
+  "summary": "1 passed; 0 failed; 0 ignored; 154 filtered out; 0.00s",
+  "wallSeconds": 0.038292,
+  "processState": "exited",
+  "listExit": 0,
+  "tokenQueryLines": [
+    "KLODA_D1_TOKEN_QUERY class=29 capacity=4 return_length=4",
+    "KLODA_D1_TOKEN_QUERY class=21 capacity=4 return_length=1",
+    "KLODA_D1_TOKEN_QUERY class=20 capacity=4 return_length=4",
+    "KLODA_D1_TOKEN_QUERY class=18 capacity=4 return_length=4"
+  ],
+  "nativeContext": {
+    "elevation_type": 1,
+    "elevated": 0,
+    "restrictions": 0,
+    "app_container": 0
+  },
+  "packageRecord": "token-boolean-package-20261022T130517Z.json",
+  "bundleManifestSha256": "0c255dfb62657533dca0f54d8574df53fa7bd369821560c7115466ab729b060d",
+  "expectedExecutableSha256": "314e51387cdb9624e0ebb891c2ca2b4e29ba6224545439b9df1871e67703ab95",
+  "artifactProvenance": "User ran supplied hash-pinned private-copy block; result and all eight listed raw output files directly read. No independent claim of live process identity, rehash of its already-exited executable, or prior-observer identity.",
+  "rawEvidence": ".local-evidence/windows-publication-d1-windows-runs/20261022T131955Z",
+  "confirmed": "The same class21 length1 that previously failed is now decoded; all four token queries completed and existing exact0/0/0/1 preflight predicate passed in this observed process.",
+  "notRun": "Four mutating D1 fixture cases remain NOT_RUN. No new build/test/native process was launched by agent during ingestion.",
+  "limits": "Preflight success only, not fixture setup/publication/ACL/power-loss/platform acceptance. Real owner/preserved pending, D2/D3, cert/SQLite binding/continuity remain open.",
+  "review": "Saved raw stdout/stderr/exit/process-state/list/results cross-checked; correct token fields and no false fixture PASS. No SID/account/private path/full token data in selected evidence; no source/policy/environment changes."
+}

@@ -44,3 +44,19 @@ Kullanıcı raporunda12/12 source, compile/list0, collision FAIL101 ve `Fixture(
 - [Windows investigation 20261021T185816Z](investigation-20261021T185816Z.json) / [report](investigation-20261021T185816Z.txt): UnexpectedDirectoryWriter proven; restricted and tool-approved collision FAIL101; diagnostic10PASS, remaining3 NOT_RUN; no guard relaxation. [Final source inventory](writer-diagnostic-source-hashes-20261021T185244Z.json).
 
 - [Native-user A package 20261021T194101Z](native-user-package-20261021T194101Z.json) / [report](native-user-package-20261021T194101Z.txt): source14/14, locked/no-run build0, original/bundle five exact lists0; runtime NOT_RUN. [Single interactive user block](native-user-block-20261021T194101Z.txt) is outside the fixed five-file binary bundle.
+
+- [Token ReturnLength package 20261022T124122Z](token-length-package-20261022T124122Z.json) / [report](token-length-package-20261022T124122Z.txt): unchanged acceptance, numeric query/capacity/ReturnLength diagnostic; build0, preflight list-only0; runtime NOT_RUN. [Preflight-only block](token-length-preflight-block-20261022T124122Z.txt), [new source snapshot](token-length-source-hashes-20261022T124122Z.json).
+
+- [Aligned BOOLEAN fix 20261022T130517Z](token-boolean-package-20261022T130517Z.json) / [report](token-boolean-package-20261022T130517Z.txt): Microsoft2308-confirmed class21 length1/DWORD alignment; strict unchanged token policy. Compile0/list-only0; runtime NOT_RUN. [Preflight-only block](token-boolean-preflight-block-20261022T130517Z.txt), [new source snapshot](token-boolean-source-hashes-20261022T130517Z.json).
+
+- [Native BOOLEAN preflight result 20261022T131955Z](token-boolean-native-result-20261022T131955Z.json): user execution raw output read directly; preflight1PASS/exit0, native fields0/0/0/1, class21 length1; process exited. Mutating4 NOT_RUN; no agent runtime.
+
+- [Four-case stage 20261022T132354Z](d1-four-package-20261022T132354Z.json): after verified native preflightPASS; identical exe reused, source14 unchanged, four exact lists0, runtimeNOT_RUN. [Four-case user block](d1-four-block-20261022T132354Z.txt) includes no standalone preflight; every existing Fixture still verifies native context.
+
+- [Writer-role diagnostic 20261022T133736Z](writer-role-package-20261022T133736Z.json): standard-account contextPASS then extra valid writer ACE rejected (collision101; remaining3NOT_RUN); cfg(test) fixed local role/shape metadata only, unchanged refusal. Compile/list0, new runtimeNOT_RUN. [Single collision block](writer-role-block-20261022T133736Z.txt), [new source snapshot](writer-role-source-hashes-20261022T133736Z.json).
+
+- [Writer-role native result 20261022T140301Z](writer-role-native-result-20261022T140301Z.json): raw collision101/contextPASS/process exited; named_match=false/account_sid_shape=true at same rejected ACE; extra trustee outside current allowlist. Remaining3NOT_RUN; exact identity/provenance UNKNOWN; no new agent runtime.
+
+- [Readonly inheritance summary 20261022T141516Z](writer-inheritance-summary-20261022T141516Z.json): matching candidate grant explicit at protected profile root, inherited in AppData/Local; independent observer-user match, user recalls Explorer Continue; MicrosoftKB950934 behavior consistent. Historical creator/event UNKNOWN; no ACL/guard/test changes; next environment decision pending.
+
+- [Verified four-case native result](d1-four-native-result-20261022T144423Z.json): four exact PASS/exit0, four list0, eight exited; independent evidence/privacy review complete. [Mac handoff](d1-macos-handoff-20261022T144423Z.md). Disposable D1 only; production/durability/continuity/platform gates remain open.

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-22T14:21:33.1173121Z",
+  "authorization": "User explicitly approved another fresh standard-account environment and four D1 cases once each in documented order, fail-stop",
+  "bundleRecord": "d1-four-package-20261022T132354Z.json",
+  "bundleManifestSha256": "17b635e2ebd6342aced00c7e9a4026ffc8259fd69766b21096c74a89b1a0f71f",
+  "exeSha256": "314e51387cdb9624e0ebb891c2ca2b4e29ba6224545439b9df1871e67703ab95",
+  "block": "d1-four-block-20261022T132354Z.txt",
+  "blockSha256": "3875575636e0d42ab4a2402f9006d87506bfef51f12611d336f51287ba086dd8",
+  "revalidation": "Five plain files, no reparse ancestor, fixed manifest and four input hashes, previously reviewed block hash all match",
+  "transfer": "Only public staging. New user copies bundle within own session and returns results to new public results folder. Never browse new profile from old account or approve Explorer Continue.",
+  "accountCreation": "User UI action only; choose unique new standard account, keep prior accounts/data/ACL unchanged",
+  "runtime": "NOT_RUN; no build/test/list/fixture invocation in this revalidation",
+  "limits": "No ACL/owner/guard/environment/ExecutionPolicy changes, account cleanup or production authority/archive access; no general platform/durability acceptance"
+}
