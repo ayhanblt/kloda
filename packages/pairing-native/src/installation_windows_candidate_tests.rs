@@ -114,3 +114,35 @@ fn target_appearing_after_preflush_is_not_replaced() {
         b"new"
     );
 }
+
+#[test]
+fn publication_failures_preserve_uncertainty_and_original_diagnostics() {
+    for cut in [Cut::Created, Cut::Written, Cut::PreFlushed] {
+        assert_eq!(
+            Failure::Interrupted(cut).outcome(),
+            PairingError::StorageFailure
+        );
+    }
+    for cut in [Cut::Renamed, Cut::PostFlushed, Cut::Verified] {
+        assert_eq!(
+            Failure::Interrupted(cut).outcome(),
+            PairingError::OutcomeUnknown
+        );
+    }
+    for status in [0, 0x103, -1, i32::MIN] {
+        let failure = Failure::Native {
+            status,
+            io_status: Some(status),
+        };
+        assert_eq!(failure.outcome(), PairingError::OutcomeUnknown);
+        let text = failure.to_string();
+        assert!(text.contains(&format!("ntstatus={status}")));
+        assert!(text.contains(&format!("io=Some({status})")));
+    }
+    let error = PairingError::ContinuityLost;
+    assert_eq!(Failure::Storage(error).outcome(), error);
+    let failure = Failure::UncertainAfterRename(error);
+    assert_eq!(failure.outcome(), PairingError::OutcomeUnknown);
+    assert!(failure.to_string().contains(error.code()));
+    assert!(failure.to_string().starts_with("outcome_unknown "));
+}

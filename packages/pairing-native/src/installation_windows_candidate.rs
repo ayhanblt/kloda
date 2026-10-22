@@ -40,8 +40,23 @@ enum Failure {
     UncertainAfterRename(PairingError),
     Interrupted(Cut),
 }
+impl Failure {
+    fn outcome(&self) -> PairingError {
+        match self {
+            Self::Storage(error) => *error,
+            // A failed/unconfirmed native request does not establish no namespace effect.
+            Self::Native { .. } | Self::UncertainAfterRename(_) => PairingError::OutcomeUnknown,
+            Self::Interrupted(Cut::Renamed | Cut::PostFlushed | Cut::Verified) => {
+                PairingError::OutcomeUnknown
+            }
+            // Staged bytes may exist; StorageFailure never authorizes cleanup or retry.
+            Self::Interrupted(_) => PairingError::StorageFailure,
+        }
+    }
+}
 impl std::fmt::Display for Failure {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} ", self.outcome().code())?;
         match self {
             Self::Storage(error) => write!(f, "candidate_storage {}", error.code()),
             Self::Native { status, io_status } => write!(

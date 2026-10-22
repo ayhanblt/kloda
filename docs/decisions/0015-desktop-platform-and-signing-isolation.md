@@ -20,6 +20,22 @@ After production trust, file authorization remains separate: [ADR0016](0016-v1-p
 
 ## Platform evidence boundaries
 
+### Approved Windows D2 contract and D3 design scope — 2026-10-22
+
+Ayhan approved: Windows authority publication must not report success before both
+correct content and final name are persistent. Existing D1 observations are not a
+durability witness. Bounded test-only outcome work and relevant pure automated
+checks may proceed; production integration is conditional on an evidenced matching
+API/protocol contract and separate security review, not on lowering the guarantee.
+
+For D3, preserve old state and prioritize fresh trust, fresh QR and separate local
+file grant. Ayhan selected detailing native-owned generations with no automatic
+fallback and initially no automatic new remote access to preserved old backups.
+This is design scope only: no new namespace/key, reset/adoption/migration/cleanup,
+old authority mutation, provider fallback or physical-pause lift. Selector layout,
+durable activation/replacement, old-binary coexistence, rollback witness and verified
+old-backup access remain integration gates. [Design and acceptance checkpoint](../implementation/windows-d2-d3-contract-and-fresh-trust.md).
+
 Mac current native key creation fails with missing entitlement -34018. Windows TPM non-exportable P-256 remains the accepted hardware direction; actual CNG/route/private-storage source and physical Rust/rustls proof remain separate. Unsupported hardware/platforms fail visibly before unprotected authority-state creation. Linux custody/provider/fallback policy remains unselected; CI test-only software identities are not a product fallback.
 
 See [ADR0014](0014-shared-rust-qr-pairing-core.md), [frozen V1](../security/qr-pairing-v1-protocol.md) and [implementation roadmap](../implementation/qr-pairing-implementation-roadmap.md).

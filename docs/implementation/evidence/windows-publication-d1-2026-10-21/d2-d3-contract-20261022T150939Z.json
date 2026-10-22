@@ -1,0 +1,463 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-22T18:28:05.1826118Z",
+  "scope": "D2 test-only outcome contract and two synthetic decoder gaps; D3 design only",
+  "head": "da5de0c1d94e26558a5b4492341a26a3ea57d0c0",
+  "buildCommand": "rustup.exe run 1.99.0-x86_64-pc-windows-msvc cargo test --manifest-path packages/pairing-native/Cargo.toml --locked --offline --no-default-features --target x86_64-pc-windows-msvc --lib --no-run --message-format=json",
+  "buildExit": 0,
+  "compilerWarnings": 7,
+  "executableSha256": "a0ea925bd0a8792e4b9368b65a345a37e96674f6aa0ced24c9385296b8563234",
+  "testArguments": "each fixed full name --exact --list, then --exact --nocapture --test-threads=1; no ignored/native cases",
+  "results": [
+    {
+      "name": "installation_files::windows::candidate::context::restriction_byte_ignores_unwritten_tail_but_never_masks_a_nonzero_flag",
+      "pass": true,
+      "exitCode": 0
+    },
+    {
+      "name": "installation_files::windows::candidate::context::token_query_classes_require_their_exact_payload_size",
+      "pass": true,
+      "exitCode": 0
+    },
+    {
+      "name": "installation_files::windows::candidate::tests::publication_failures_preserve_uncertainty_and_original_diagnostics",
+      "pass": true,
+      "exitCode": 0
+    },
+    {
+      "name": "windows_publication_contract::native_user_context_rejects_container_restricted_admin_and_unknown_values",
+      "pass": true,
+      "exitCode": 0
+    },
+    {
+      "name": "windows_publication_contract::only_compiled_final_leaves_are_accepted_with_the_real_staged_names",
+      "pass": true,
+      "exitCode": 0
+    },
+    {
+      "name": "windows_publication_contract::buffer_capacity_is_checked_for_each_target_and_host_layout_model",
+      "pass": true,
+      "exitCode": 0
+    },
+    {
+      "name": "windows_publication_contract::invalid_layouts_and_length_overflow_are_rejected_before_allocation",
+      "pass": true,
+      "exitCode": 0
+    },
+    {
+      "name": "windows_publication_contract::pending_warning_error_and_unverified_postconditions_are_never_success",
+      "pass": true,
+      "exitCode": 0
+    }
+  ],
+  "sourceInventory": [
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate.rs",
+      "normalizedSha256": "9f9f17efa8f90614345fe8f27ef5b6ee937371d3396376333287d97c4603380c"
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate_tests.rs",
+      "normalizedSha256": "e6b47711e4309bd25f9c8e4e1a94e673754fe84aa61c11638e236a0d9161db35"
+    },
+    {
+      "path": "packages/pairing-native/src/windows_publication_contract.rs",
+      "normalizedSha256": "0effb5bfb05a0e7845d4400834da78f9e54cfc4573b3f441745364e873311562"
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_candidate_context.rs",
+      "normalizedSha256": "f5863fdba4ad57bdcec7b1353dde36e422907cb415071ec7873377220f677c5d"
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows.rs",
+      "normalizedSha256": "10a30873150bdbe3de320b205a5898e0eb8e8194085dc94658ce060288429379"
+    },
+    {
+      "path": "packages/pairing-native/src/error.rs",
+      "normalizedSha256": "8bc134ff54c333dc9c9ab43051afbf1f7d73b3d882d59dce207d136cbbd485e6"
+    },
+    {
+      "path": "packages/pairing-native/Cargo.toml",
+      "normalizedSha256": "b0eecb0ce6d1851670725d54a09b9e63ae36c889843849a2d1a8eec7e503dd9e"
+    },
+    {
+      "path": "packages/pairing-native/Cargo.lock",
+      "normalizedSha256": "3018af056e687be5d50edf55a51a45c68aca8918121d619df0f7e4a0f69e8db5"
+    }
+  ],
+  "normalization": "Strict UTF8, remove at most one numeric leading65279, actualCRLF->LF, BOM-freeUTF8 bytes SHA256",
+  "sourceTiming": "Final source snapshot saved before final build. Initial8 pure tests ran before formatting-only edit; final locked/offline/no-run and same8 exact pure tests close source provenance concern. Final test0 passed before a Select-String positional-argument audit error; corrected named arguments validated existing logs, no test0 retry; remaining7 then executed.",
+  "rawEvidence": ".local-evidence/windows-d2-d3/20261022T150522Z",
+  "rawFileHashes": [
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "build.exit.txt"
+    },
+    {
+      "sha256": "90fc9d21b72bf1ad05f66e8b11e99ead9edf7d604a8fac8bc7f6e1acaeb9953a",
+      "name": "build.jsonl"
+    },
+    {
+      "sha256": "4eabd299ff7cd553a53a1c2ab73ff0ce1d842f3911ea6a030f294b82202bea59",
+      "name": "build.stderr.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "final-build.exit.txt"
+    },
+    {
+      "sha256": "d6e7c2aab9e3a216964ad58ecc7273ac9bac55ce5331700a0c9d593b011e1547",
+      "name": "final-build.jsonl"
+    },
+    {
+      "sha256": "ccd2e39b8b2195a07b7c1c74ab0e626b08d20707565063d88dd4eb9a347c3e40",
+      "name": "final-build.stderr.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "final-list-0.stderr.txt"
+    },
+    {
+      "sha256": "9cae3f197321fd54c638633e8faa870c8bd1ee30e8930a8e6a8c7b0a7da734c8",
+      "name": "final-list-0.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "final-list-1.stderr.txt"
+    },
+    {
+      "sha256": "a7f7d6c7f1b45ee3d8e09f32c5463ba547ca66fd8f39d9f6d67941b3dadf9847",
+      "name": "final-list-1.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "final-list-2.stderr.txt"
+    },
+    {
+      "sha256": "53e67a2278430b53691714adb156eeb7a2bc915cd819a9797ec346437effbc4e",
+      "name": "final-list-2.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "final-list-3.stderr.txt"
+    },
+    {
+      "sha256": "4e2ef56b27c0d2fa670878917260ddfecaf2394c9159dace9ece6b8392097864",
+      "name": "final-list-3.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "final-list-4.stderr.txt"
+    },
+    {
+      "sha256": "23ff858900d10682998c3d1de4c1d055b0911c2833cf34e6975740fa64a92e22",
+      "name": "final-list-4.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "final-list-5.stderr.txt"
+    },
+    {
+      "sha256": "55357f36847e445ad5bdde5c81cde5a78470411d41158de62a92489dfabb920b",
+      "name": "final-list-5.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "final-list-6.stderr.txt"
+    },
+    {
+      "sha256": "7980818d0da2b0ac8774691743fec4f64ac4cdeb97133db2a64b2a194bfb1439",
+      "name": "final-list-6.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "final-list-7.stderr.txt"
+    },
+    {
+      "sha256": "4dfe7bd2e0ee7353a31087fb22e1eacd0de908c52db97e3367533e87aa5dcc91",
+      "name": "final-list-7.stdout.txt"
+    },
+    {
+      "sha256": "6eee5d71c1d3440f54aefbc12a074881723add35e0a065093f7de84fd2fdef1d",
+      "name": "final-results.json"
+    },
+    {
+      "sha256": "2cffaa934a22d9f95788de806331102f18d5e00c67afc797ee7ddbf7c591df3d",
+      "name": "final-source-before-build.json"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "final-test-0.exit.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "final-test-0.stderr.txt"
+    },
+    {
+      "sha256": "14bf95f9207e2a6907a2580e7db187d7d72473e26ab438097329e0c1445463c5",
+      "name": "final-test-0.stdout.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "final-test-1.exit.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "final-test-1.stderr.txt"
+    },
+    {
+      "sha256": "104f5d2efaefacec9f74e80523e02cda425cf3d1e3be6208f8a7fe55bd34d5de",
+      "name": "final-test-1.stdout.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "final-test-2.exit.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "final-test-2.stderr.txt"
+    },
+    {
+      "sha256": "353346cb7bc28e89633b4e513e53f2351d128ebb04fb1d531217f9c282ef4e51",
+      "name": "final-test-2.stdout.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "final-test-3.exit.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "final-test-3.stderr.txt"
+    },
+    {
+      "sha256": "568d92ef4161c0d579037302327b28d67301284135af95aa7c1779bd31bcc48c",
+      "name": "final-test-3.stdout.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "final-test-4.exit.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "final-test-4.stderr.txt"
+    },
+    {
+      "sha256": "6ae5a427b7df522704fdbf1d22bca222325b42d09fff36174ea5085cdbbae1ff",
+      "name": "final-test-4.stdout.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "final-test-5.exit.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "final-test-5.stderr.txt"
+    },
+    {
+      "sha256": "7d855c1e7b4f10e4e209089c1949e3e0085efd02038f1eff5906f5549c3ab4c3",
+      "name": "final-test-5.stdout.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "final-test-6.exit.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "final-test-6.stderr.txt"
+    },
+    {
+      "sha256": "fc530ca1271be971036ac8dc057792bdbd70330a7629edf229c66908dfeb669a",
+      "name": "final-test-6.stdout.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "final-test-7.exit.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "final-test-7.stderr.txt"
+    },
+    {
+      "sha256": "30829fd9afb4eb785bd72a41eb9ee10004cca681a604b9470c89919e50d8e006",
+      "name": "final-test-7.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-0.stderr.txt"
+    },
+    {
+      "sha256": "9cae3f197321fd54c638633e8faa870c8bd1ee30e8930a8e6a8c7b0a7da734c8",
+      "name": "list-0.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-1.stderr.txt"
+    },
+    {
+      "sha256": "a7f7d6c7f1b45ee3d8e09f32c5463ba547ca66fd8f39d9f6d67941b3dadf9847",
+      "name": "list-1.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-2.stderr.txt"
+    },
+    {
+      "sha256": "53e67a2278430b53691714adb156eeb7a2bc915cd819a9797ec346437effbc4e",
+      "name": "list-2.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-3.stderr.txt"
+    },
+    {
+      "sha256": "4e2ef56b27c0d2fa670878917260ddfecaf2394c9159dace9ece6b8392097864",
+      "name": "list-3.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-4.stderr.txt"
+    },
+    {
+      "sha256": "23ff858900d10682998c3d1de4c1d055b0911c2833cf34e6975740fa64a92e22",
+      "name": "list-4.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-5.stderr.txt"
+    },
+    {
+      "sha256": "55357f36847e445ad5bdde5c81cde5a78470411d41158de62a92489dfabb920b",
+      "name": "list-5.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-6.stderr.txt"
+    },
+    {
+      "sha256": "7980818d0da2b0ac8774691743fec4f64ac4cdeb97133db2a64b2a194bfb1439",
+      "name": "list-6.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-7.stderr.txt"
+    },
+    {
+      "sha256": "4dfe7bd2e0ee7353a31087fb22e1eacd0de908c52db97e3367533e87aa5dcc91",
+      "name": "list-7.stdout.txt"
+    },
+    {
+      "sha256": "85e2b59bd05b81e9ec7b6d1492564cb1e7ba22eac53f174c9bf87926dda58e91",
+      "name": "results.json"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "test-0.exit.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "test-0.stderr.txt"
+    },
+    {
+      "sha256": "14bf95f9207e2a6907a2580e7db187d7d72473e26ab438097329e0c1445463c5",
+      "name": "test-0.stdout.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "test-1.exit.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "test-1.stderr.txt"
+    },
+    {
+      "sha256": "104f5d2efaefacec9f74e80523e02cda425cf3d1e3be6208f8a7fe55bd34d5de",
+      "name": "test-1.stdout.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "test-2.exit.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "test-2.stderr.txt"
+    },
+    {
+      "sha256": "353346cb7bc28e89633b4e513e53f2351d128ebb04fb1d531217f9c282ef4e51",
+      "name": "test-2.stdout.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "test-3.exit.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "test-3.stderr.txt"
+    },
+    {
+      "sha256": "568d92ef4161c0d579037302327b28d67301284135af95aa7c1779bd31bcc48c",
+      "name": "test-3.stdout.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "test-4.exit.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "test-4.stderr.txt"
+    },
+    {
+      "sha256": "6ae5a427b7df522704fdbf1d22bca222325b42d09fff36174ea5085cdbbae1ff",
+      "name": "test-4.stdout.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "test-5.exit.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "test-5.stderr.txt"
+    },
+    {
+      "sha256": "7d855c1e7b4f10e4e209089c1949e3e0085efd02038f1eff5906f5549c3ab4c3",
+      "name": "test-5.stdout.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "test-6.exit.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "test-6.stderr.txt"
+    },
+    {
+      "sha256": "fc530ca1271be971036ac8dc057792bdbd70330a7629edf229c66908dfeb669a",
+      "name": "test-6.stdout.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "test-7.exit.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "test-7.stderr.txt"
+    },
+    {
+      "sha256": "30829fd9afb4eb785bd72a41eb9ee10004cca681a604b9470c89919e50d8e006",
+      "name": "test-7.stdout.txt"
+    }
+  ],
+  "checks": {
+    "rustfmt": "UNAVAILABLE: not installed on explicit toolchain; no installation",
+    "productionIntegration": "NOT_IMPLEMENTED; durability composition gate blocked",
+    "productionOwnerTpm": "NOT_RUN",
+    "sourceNonblankLineLimit": "PASS max218 nonblank among four relevant Rust modules, limit300",
+    "crashPowerLoss": "NOT_RUN",
+    "nativeFixtures": "NOT_RUN",
+    "diffCheck": "PASS",
+    "clippy": "UNAVAILABLE: not installed on explicit toolchain; no installation"
+  },
+  "mechanism": "Official NTFS write-through/file flush contracts include metadata incl rename. Exact native rename+same handle+postflush durable-name composition not established strongly enough for production promotion; no impossibility claim.",
+  "d3": "User selected detailing native-owned generations/no-fallback; proposal completed, old backups initially not exposed through new trust. Selector activation durability, old-binary coexistence and stronger rollback witness remain gates. No namespace/key/state created.",
+  "review": "Independent security reviewer: delivered3 Rust cfg(test) changes/base design no blockers. Independent Astra final readonly review: generation detail and final evidence no blockers; final8 exact1PASS each, build0 with7warnings, exe/raw/source hashes verified, no sensitive data or false durability claim. Reviewer ran no tests/builds/native actions. Separate local result/privacy pass also verified final lists/empty stderrs/source/raw hashes.",
+  "startupWarning": "InitializeDefaultDrives FileSystem warning visible; build and pure tests exited0; no fix or causal claim",
+  "limits": "No authority/archive/ACL/token/TPM/owner access; no native fixture or production startup; no dependencies/Git/model/environment changes."
+}

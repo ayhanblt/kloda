@@ -97,6 +97,14 @@ pub(crate) enum Observation {
     NamespaceObservedDurabilityUnproven,
 }
 
+impl Observation {
+    pub(crate) fn require_durable_authority(self) -> Result<()> {
+        // Neither observation proves that content AND the final name are persistent.
+        // Keep the existing closed error vocabulary; no success witness exists yet.
+        Err(PairingError::OutcomeUnknown)
+    }
+}
+
 pub(crate) fn completion(status: i32, io_status: i32, post_verified: bool) -> Observation {
     if status == 0 && io_status == 0 && post_verified {
         Observation::NamespaceObservedDurabilityUnproven
@@ -203,6 +211,10 @@ fn pending_warning_error_and_unverified_postconditions_are_never_success() {
         for io_status in [0, 0x103, 1, i32::MIN, -1] {
             for verified in [false, true] {
                 let observed = completion(status, io_status, verified);
+                assert_eq!(
+                    observed.require_durable_authority(),
+                    Err(PairingError::OutcomeUnknown)
+                );
                 assert_eq!(
                     observed == Observation::NamespaceObservedDurabilityUnproven,
                     status == 0 && io_status == 0 && verified
