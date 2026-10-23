@@ -2,7 +2,6 @@ use crate::error::{PairingError, Result};
 use crate::startup_diagnostics::{self as diagnostic, Operation, Stage};
 use std::{
     fs::{self, File},
-    io::Write,
     os::windows::io::AsRawHandle,
     path::Path,
 };
@@ -18,10 +17,26 @@ mod path;
 mod principal;
 #[path = "installation_windows_security.rs"]
 mod security;
+#[path = "installation_windows_candidate_buffer.rs"]
+mod rename_buffer;
+#[path = "installation_windows_publication.rs"]
+mod publication;
+// Reopen-only D3 admission; no legacy bootstrap or fallback from production startup.
+#[path = "installation_windows_legacy_fence.rs"]
+mod legacy_fence;
+#[path = "installation_windows_generation.rs"]
+mod generation;
+pub(crate) use generation::{selected, Selected};
 
-pub(crate) struct OwnerLock {
+struct OwnerPins {
     _owner: File,
     _ancestors: Vec<File>,
+    _generation: Option<generation::Pins>,
+}
+#[derive(Clone)]
+pub(crate) struct OwnerLock {
+    _pins: std::sync::Arc<OwnerPins>,
+    directory: std::path::PathBuf,
 }
 
 pub(crate) fn prepare(directory: &Path) -> Result<OwnerLock> {
@@ -55,8 +70,12 @@ pub(crate) fn prepare(directory: &Path) -> Result<OwnerLock> {
         }
     }
     Ok(OwnerLock {
-        _owner: owner,
-        _ancestors: ancestors,
+        _pins: std::sync::Arc::new(OwnerPins {
+            _owner: owner,
+            _ancestors: ancestors,
+            _generation: None,
+        }),
+        directory: directory.to_path_buf(),
     })
 }
 
@@ -103,64 +122,23 @@ pub(super) fn open_file(file: &Path) -> Result<File> {
     Ok(handle)
 }
 
-pub(crate) fn write_new(file: &Path, bytes: &[u8]) -> Result<()> {
-    publish(file, bytes, false)
+pub(crate) fn write_new(file: &Path, bytes: &[u8], owner: &OwnerLock) -> Result<()> {
+    path::leaf(file)?;
+    if file.parent() != Some(owner.directory.as_path()) {
+        return Err(PairingError::StorageFailure);
+    }
+    let ancestors = path::directories(file.parent().ok_or(PairingError::StorageFailure)?, false)?;
+    publication::publish(file, bytes, ancestors, owner.clone())
 }
-pub(crate) fn replace(file: &Path, bytes: &[u8]) -> Result<()> {
-    // Certificate renewal may replace public DER; epoch/initialized/port are never reset.
+pub(crate) fn replace(file: &Path, bytes: &[u8], owner: &OwnerLock) -> Result<()> {
+    // Windows replacement is deliberately unsupported; initial DER is create-only.
     if file.file_name().and_then(|name| name.to_str()) != Some("certificate.der") {
         return Err(PairingError::StorageFailure);
     }
-    publish(file, bytes, true)
-}
-fn publish(file: &Path, bytes: &[u8], replace: bool) -> Result<()> {
-    path::leaf(file)?;
-    let _ancestors = path::directories(file.parent().ok_or(PairingError::StorageFailure)?, false)?;
-    let existing = handles::open(
-        file,
-        FILE_READ_ATTRIBUTES | READ_CONTROL,
-        FILE_SHARE_READ | FILE_SHARE_DELETE,
-        OPEN_EXISTING,
-        false,
-        false,
-    )?;
-    if let Some(existing) = &existing {
-        security::protected(existing.as_raw_handle(), false, false)?;
-        if !replace {
-            return Err(PairingError::StorageFailure);
-        }
+    if exists(file)? {
+        return Err(PairingError::NativeUnsupported);
     }
-    let pending = file.with_extension("pending");
-    // CREATE_NEW preserves an interrupted attempt; no stale state is deleted/adopted.
-    let mut staged = handles::open(
-        &pending,
-        GENERIC_READ | GENERIC_WRITE,
-        FILE_SHARE_READ | FILE_SHARE_DELETE,
-        CREATE_NEW,
-        false,
-        true,
-    )?
-    .ok_or(PairingError::StorageFailure)?;
-    security::protected(staged.as_raw_handle(), false, false)?;
-    staged.write_all(bytes).map_err(super::storage)?;
-    flush(&staged)?;
-    let source = path::wide(&pending)?;
-    let destination = path::wide(file)?;
-    let flags = MOVEFILE_WRITE_THROUGH
-        | if existing.is_some() {
-            MOVEFILE_REPLACE_EXISTING
-        } else {
-            0
-        };
-    // Same-directory NTFS move only: no copy/delete, deferred reboot, or ignored errors.
-    security::os_check(
-        unsafe { MoveFileExW(source.as_ptr(), destination.as_ptr(), flags) },
-        Operation::Publish,
-    )?;
-    // Flush the same write-through handle after its checked publication, not a directory.
-    flush(&staged)?;
-    handles::information(&staged, false)?;
-    security::protected(staged.as_raw_handle(), false, false)
+    write_new(file, bytes, owner)
 }
 fn flush(file: &File) -> Result<()> {
     security::os_check(

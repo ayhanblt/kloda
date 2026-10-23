@@ -1,0 +1,269 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-23T08:19:16.0597566Z",
+  "head": "5cf2ffb5094239423550f89856b9c6de0a0ae2f8",
+  "scope": "D3 staged implementation: canonical record codec and complete inventory validator only; cfg(test) until native admission/layout gates",
+  "sourceInventory": [
+    {
+      "normalizedSha256": "7a9c6dcc706d075d5a54c6eb2e4aa393b267e568fe9aa3566d8cdd0eae7eb1c8",
+      "path": "packages/pairing-native/src/installation_generation_record.rs"
+    },
+    {
+      "normalizedSha256": "3827333df21db361cc962c360c1be87f8df7b2e9fc63d962288453a13fa93be0",
+      "path": "packages/pairing-native/src/installation_generation_record_tests.rs"
+    },
+    {
+      "normalizedSha256": "c17c7d03d6e91cb2db43261d70757aae629f3c538021564648f986392fb2ca38",
+      "path": "packages/pairing-native/src/installation_generation_chain.rs"
+    },
+    {
+      "normalizedSha256": "fcb033ef2aeaf96a504303043d66dadb7975137a2a3a03fcb88e498c86f9c93e",
+      "path": "packages/pairing-native/src/installation_generation_chain_tests.rs"
+    },
+    {
+      "normalizedSha256": "ec23e75d3bbdeba874ca101a75410f2d8e15e0fe1145ec8c6131b87b14a89c63",
+      "path": "packages/pairing-native/src/lib.rs"
+    }
+  ],
+  "normalization": "strictUTF8; remove at most1 leading numeric65279; actualCRLF->LF; BOMfreeUTF8 SHA256",
+  "format": "164byte big-endian v1, namespace role, kind, nonzero revision/generation/epoch commitment, predecessor/intent/SPKI commitments; canonical16lowerhex names",
+  "inventory": "Max256 activations/512 records; bounded revision before allocation; exact role/name/header, contiguous intent+activation, predecessor/intent bindings; generation/epoch/SPKI reuse rejected; pending/unknown/duplicate/gaps/incomplete intent fail closed, no last-valid-prefix fallback",
+  "authorityBoundary": "Empty is not fresh-install permission; Selected is graph consistency only, not native readiness/identity/authority/pastACK/rollback witness. Terminal SPKI structural mutation test explicitly requires later independent native key binding.",
+  "buildCommand": "rustup.exe run 1.99.0-x86_64-pc-windows-msvc cargo test --manifest-path packages/pairing-native/Cargo.toml --locked --offline --no-default-features --target x86_64-pc-windows-msvc --lib --no-run --message-format=json",
+  "buildExit": 0,
+  "exeSha256": "2e9dd0dc497d2a3a9ca816a29e812aeb2f32d6299b2cb4191ac4502f8d02702d",
+  "results": [
+    {
+      "exitCode": 0,
+      "name": "installation_generation_record::tests::canonical_roundtrip_preserves_all_fields_and_domains",
+      "listExit": 0,
+      "pass": true
+    },
+    {
+      "exitCode": 0,
+      "name": "installation_generation_record::tests::malformed_schema_truncation_extension_and_zero_identity_are_rejected",
+      "listExit": 0,
+      "pass": true
+    },
+    {
+      "exitCode": 0,
+      "name": "installation_generation_record::tests::intent_cannot_claim_activation_and_activation_requires_both_claims",
+      "listExit": 0,
+      "pass": true
+    },
+    {
+      "exitCode": 0,
+      "name": "installation_generation_record::tests::names_are_exact_lowercase_bounded_leaf_components",
+      "listExit": 0,
+      "pass": true
+    },
+    {
+      "exitCode": 0,
+      "name": "installation_generation_chain::tests::complete_chain_uses_bound_revision_not_enumeration_order",
+      "listExit": 0,
+      "pass": true
+    },
+    {
+      "exitCode": 0,
+      "name": "installation_generation_chain::tests::incomplete_or_unknown_inventory_never_falls_back_to_valid_prefix",
+      "listExit": 0,
+      "pass": true
+    },
+    {
+      "exitCode": 0,
+      "name": "installation_generation_chain::tests::role_leaf_predecessor_intent_and_generation_bindings_are_mandatory",
+      "listExit": 0,
+      "pass": true
+    },
+    {
+      "exitCode": 0,
+      "name": "installation_generation_chain::tests::subsequent_activation_cannot_reuse_generation_epoch_or_key",
+      "listExit": 0,
+      "pass": true
+    },
+    {
+      "exitCode": 0,
+      "name": "installation_generation_chain::tests::inventory_capacity_and_record_lengths_are_bounded",
+      "listExit": 0,
+      "pass": true
+    }
+  ],
+  "testCommand": "9 fixed NEW exact pure cases, each --exact --list then --exact --nocapture --test-threads=1; no ignored cases",
+  "rawEvidence": ".local-evidence/windows-d3-protocol/20261023T081551Z",
+  "rawFileHashes": [
+    {
+      "sha256": "98e4796ab883e270e79361295de07f4548eb6fcba8c9ea8076f3779a6579c2f1",
+      "name": "source-before-build.json"
+    },
+    {
+      "sha256": "be5046f37153b40586d1b0b1adf789da7768524b16632e87564c03bfc8503f57",
+      "name": "build.jsonl"
+    },
+    {
+      "sha256": "ca4497e5a6906020d9603d19e53aa696a7a5ed6510d7c6187b0e88e1c4db7f28",
+      "name": "build.stderr.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "build.exit.txt"
+    },
+    {
+      "sha256": "e50679937dacc472a82415c540b303333cb6cbc903c9768c285321bec8045088",
+      "name": "results.json"
+    },
+    {
+      "sha256": "b22b2a706108bd7cd3efb36b48ddac8bae3f332f9d8b02b743b8ddd06fef639a",
+      "name": "list-0.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-0.stderr.txt"
+    },
+    {
+      "sha256": "d3b59639885163ecfde84aac6b9bccb432654fc2c19da5f395277c2235590762",
+      "name": "test-0.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "test-0.stderr.txt"
+    },
+    {
+      "sha256": "78388f8f4bdae1b835de8ee002f07acc96fa9e7e25fd74f2810cc2d784401dcf",
+      "name": "list-1.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-1.stderr.txt"
+    },
+    {
+      "sha256": "c6d70449ab50d58a3130c33a6aefc2eaa7f000218586be152b7c173ed26deb24",
+      "name": "test-1.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "test-1.stderr.txt"
+    },
+    {
+      "sha256": "a92437542d65bcb6c359d6cac76f9a8e760673d3d6f372e52ee5feec39814152",
+      "name": "list-2.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-2.stderr.txt"
+    },
+    {
+      "sha256": "f1258478dc3f9a06360bd4eb6c451ff7273fa3c7dc56616ad3a057b64eba2798",
+      "name": "test-2.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "test-2.stderr.txt"
+    },
+    {
+      "sha256": "3f4f6940e8465441a117794dfb7c153832e3d2aeff840a9424e7fac6942c0913",
+      "name": "list-3.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-3.stderr.txt"
+    },
+    {
+      "sha256": "4d47ea382320f9dcc33e68db387352e1a9c31070112057a6df19ac0d03b45bc1",
+      "name": "test-3.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "test-3.stderr.txt"
+    },
+    {
+      "sha256": "351dd3216114c00563b5115d20abeaad0d215b22e1f0f8909abd4ee19b8b448e",
+      "name": "list-4.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-4.stderr.txt"
+    },
+    {
+      "sha256": "d15b84cd3cbe357f16027d8c843c4fb443d73254c3ab8fe2e09a30f13357692a",
+      "name": "test-4.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "test-4.stderr.txt"
+    },
+    {
+      "sha256": "9054a3e0c6040d6941be43a7c8743257cb5b593b82377adf3b0278c82b7042b9",
+      "name": "list-5.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-5.stderr.txt"
+    },
+    {
+      "sha256": "2df3e59f6b544b83b20b92d5793fdb66824a6ed4e81b05462f84b456e4d831f3",
+      "name": "test-5.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "test-5.stderr.txt"
+    },
+    {
+      "sha256": "8653ab4f2f1b62c8ceb420f12d7de199eaee17fed5c659d572c73bc7ece30f19",
+      "name": "list-6.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-6.stderr.txt"
+    },
+    {
+      "sha256": "e04e79d06203e3929f5ca89a8cc4cdf9a53ee97a7aa2b84bb89eb1651f070127",
+      "name": "test-6.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "test-6.stderr.txt"
+    },
+    {
+      "sha256": "6620875700c6badbecd45fafa5cd557924cb1b55de5322a0c672f9d7ff95043f",
+      "name": "list-7.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-7.stderr.txt"
+    },
+    {
+      "sha256": "65d1dc196bae922ec6a58bc11a0b98da56786e82db97ded91f566fd8e08f4d83",
+      "name": "test-7.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "test-7.stderr.txt"
+    },
+    {
+      "sha256": "3d9721fc4a00bdc6929f80399a2e5cb260d211aa2b53b32333403fa40e8be92c",
+      "name": "list-8.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list-8.stderr.txt"
+    },
+    {
+      "sha256": "a066cbee7c1f27282a46b049a4f59667ae8daf38dc59bcee57c8e48f1e481d24",
+      "name": "test-8.stdout.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "test-8.stderr.txt"
+    }
+  ],
+  "checks": {
+    "sourceNonblankLimit": "PASS all new source/test files<=300",
+    "fmt": "UNAVAILABLE explicit installed components contain no rustfmt",
+    "warningSuppressions": "NONE added",
+    "diffCheck": "Pending final check",
+    "clippy": "UNAVAILABLE explicit installed components contain no clippy"
+  },
+  "review": "Independent staged source/security/results review complete: no blockers; exact164byte safety, bindings/no fallback/bounds, nine purePASS/build0/source5 verified; no reviewer runtime/build/write",
+  "notRun": "No namespace/key/intent/activation created; no real file/authority/archive reads, token/owner/TPM/probe/native fixture/crash/powerloss. D1/D2/decoder tests not rerun; completed D2 source preserved.",
+  "open": "Native namespace/layout+role-wide and legacy-binary admission; SQLite opened-object binding; actual hardware key freshness; foreground/revoke fencing; activation publication/reflush; restart/rollback/old-backup gates. Existing legacy owner.lock fencing source policy question pending."
+}

@@ -61,3 +61,14 @@ Kullanıcı raporunda12/12 source, compile/list0, collision FAIL101 ve `Fixture(
 
 - [Verified four-case native result](d1-four-native-result-20261022T144423Z.json): four exact PASS/exit0, four list0, eight exited; independent evidence/privacy review complete. [Mac handoff](d1-macos-handoff-20261022T144423Z.md). Disposable D1 only; production/durability/continuity/platform gates remain open.
 - [D2 contract / D3 generation design checkpoint](d2-d3-contract-20261022T150939Z.json): final Windows locked/offline test build0; eight exact pure tests PASS including the two decoder gaps. Production integration blocked on exact durability composition; generation design only, no namespace/key/old-state access. See [design and acceptance](../../windows-d2-d3-contract-and-fresh-trust.md).
+- [D2 NTFS parent-link composition / no-replace source integration](d2-parent-integration-20261022T232900Z.json): final production check0/test compile0/three NEW pure exact PASS; original owner-retention review fix included. No D1/native fixture rerun; cert/SQLite/D3 restart and physical gates remain open. [Scope](../../windows-d2-ntfs-parent-durability.md).
+- [Final D2 parent-link/initial-certificate integration](d2-parent-certificate-20261023T073810Z.json): user-selected safe-stop renewal, legacy MoveFileEx removed; production check0/test compile0/four new pure exact PASS. [D3 atomic-selection design](../../windows-d3-atomic-generation-selection.md) remains proposal only, no state created. Earlier232900 record is pre-certificate snapshot.
+- [D3 staged protocol implementation](d3-protocol-20261023T082249Z.json): codec164byte + bounded complete-chain validation; nine new pure exact PASS/build0/source5 reviewed. cfg(test) only until native admission/layout/key/SQLite gates; no real state or D1/D2 rerun. Earlier081915 record is the first snapshot before the added hostile-u64MAX assertion.
+
+- [D3 staged legacy fence](d3-legacy-fence-20261023T084430Z.json): compile-only, no real legacy access; separate security review complete.
+
+- [D3 connected existing-only source](d3-connected-source-20261023T091848Z.json): final no-run0, Desktop native build/link0, production-role check0, five exact controls PASS; five ignored native fixtures NOT_RUN pending scoped runtime permission. Fresh-bootstrap/live-switch incomplete.
+
+- d3-integration-gate-20261023T090216Z.json is an earlier historical checkpoint before the SQLite/compiled-role choices and connected source work; use d3-connected-source-20261023T091848Z.json for current status.
+
+- [D3 authorized disposable native runtime](d3-native-runtime-20261023T102540Z.json):5/5 exact PASS/exit0; fixture scope only, no full production startup/publisher/TPM/powerloss acceptance.

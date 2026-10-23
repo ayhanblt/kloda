@@ -12,15 +12,13 @@ use windows_sys::{
         System::IO::IO_STATUS_BLOCK,
     },
 };
-#[path = "installation_windows_candidate_buffer.rs"]
-mod buffer;
 #[path = "installation_windows_candidate_context.rs"]
 mod context;
 #[path = "installation_windows_candidate_fixture.rs"]
 mod fixture;
 #[path = "installation_windows_candidate_tests.rs"]
 mod tests;
-use buffer::RenameBuffer;
+use super::rename_buffer::RenameBuffer;
 use fixture::Fixture;
 
 #[derive(Clone, Copy, Debug, PartialEq)]

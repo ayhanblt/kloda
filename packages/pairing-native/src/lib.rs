@@ -76,3 +76,15 @@ mod foreground;
 
 #[cfg(test)]
 mod windows_publication_contract;
+#[cfg(any(target_os = "windows", test))]
+mod installation_generation_record;
+#[cfg(any(target_os = "windows", test))]
+mod installation_generation_chain;
+#[cfg(target_os = "windows")]
+mod store_windows_vfs;
+#[cfg(target_os = "windows")]
+mod store_windows_connection;
+#[cfg(all(test, not(target_os = "android")))]
+mod store_generation_tests;
+#[cfg(any(target_os = "windows", test))]
+mod windows_publication_name;

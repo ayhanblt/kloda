@@ -16,6 +16,8 @@ use std::{
 mod windows;
 #[cfg(target_os = "windows")]
 pub(super) use windows::{exists, prepare, replace, write_new, OwnerLock};
+#[cfg(target_os = "windows")]
+pub(super) use windows::{selected as select_generation, Selected};
 #[cfg(not(target_os = "windows"))]
 pub(crate) type OwnerLock = File;
 
@@ -43,7 +45,7 @@ pub(super) fn prepare(directory: &Path) -> Result<File> {
     Ok(lock)
 }
 
-pub(super) fn epoch(directory: &Path) -> Result<([u8; 16], bool)> {
+pub(super) fn epoch(directory: &Path, owner: &OwnerLock) -> Result<([u8; 16], bool)> {
     let bound = ["initialized", "pairing.sqlite3", "certificate.der"]
         .iter()
         .try_fold(false, |found, name| {
@@ -60,7 +62,7 @@ pub(super) fn epoch(directory: &Path) -> Result<([u8; 16], bool)> {
     SystemRandom::new()
         .fill(&mut epoch)
         .map_err(|_| PairingError::NativeUnsupported)?;
-    write_new(&path, &epoch)?;
+    write_new(&path, &epoch, owner)?;
     Ok((epoch, true))
 }
 
@@ -98,7 +100,7 @@ pub(super) fn read_certificate(path: &Path) -> Result<Vec<u8>> {
     Ok(bytes)
 }
 #[cfg(not(target_os = "windows"))]
-pub(super) fn write_new(path: &Path, bytes: &[u8]) -> Result<()> {
+pub(super) fn write_new(path: &Path, bytes: &[u8], _owner: &OwnerLock) -> Result<()> {
     let mut options = OpenOptions::new();
     options.write(true).create_new(true);
     #[cfg(unix)]
@@ -112,12 +114,12 @@ pub(super) fn write_new(path: &Path, bytes: &[u8]) -> Result<()> {
         .map_err(storage)
 }
 #[cfg(not(target_os = "windows"))]
-pub(super) fn replace(path: &Path, bytes: &[u8]) -> Result<()> {
+pub(super) fn replace(path: &Path, bytes: &[u8], owner: &OwnerLock) -> Result<()> {
     let temporary = path.with_extension("pending");
     if exists(&temporary)? {
         fs::remove_file(&temporary).map_err(storage)?
     }
-    write_new(&temporary, bytes)?;
+    write_new(&temporary, bytes, owner)?;
     fs::rename(&temporary, path).map_err(storage)?;
     File::open(path.parent().ok_or(PairingError::StorageFailure)?)
         .map_err(storage)?

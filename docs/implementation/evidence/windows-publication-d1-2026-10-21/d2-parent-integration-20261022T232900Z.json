@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-22T23:29:00.804885Z",
+  "head": "5cf2ffb5094239423550f89856b9c6de0a0ae2f8",
+  "scope": "D2 no-replace write_new source integration, narrowed NTFS ancestor durability composition; no native publication runtime",
+  "officialSources": [
+    "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-fsa/0de7dc40-9627-437e-a4df-c4696cdc3d02",
+    "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-fsa/4e3695bd-7574-4f24-a223-b4679c065b63",
+    "https://learn.microsoft.com/en-us/previous-versions/windows/drivers/ifs/irp-mj-flush-buffers"
+  ],
+  "inference": "Compose local FlushFileBuffers/IRP NTFS metadata contract with MS-FSA2.1.5.7 DataFile directory-structure persistence and AppendixA80 NTFS-only behavior: child postflush supports final-name reachability including new ancestor links. Not a global tree/sibling flush, verbatim local MS-FSA API promise, hardware attestation or power-loss test.",
+  "sourceInventory": [
+    {
+      "normalizedSha256": "626b617fe5e2b54a2acaa0349760f32d3475c2cbb57e6216264acae061713941",
+      "path": "packages/pairing-native/Cargo.toml"
+    },
+    {
+      "normalizedSha256": "3018af056e687be5d50edf55a51a45c68aca8918121d619df0f7e4a0f69e8db5",
+      "path": "packages/pairing-native/Cargo.lock"
+    },
+    {
+      "normalizedSha256": "e19772dc1692331f417756e9c249cb8e71c60c892965c244bbcfad2a33612ca0",
+      "path": "packages/pairing-native/src/lib.rs"
+    },
+    {
+      "normalizedSha256": "be6597a862ebf2a0dd1f8dfefcd1c73afeec240a861326fbeb189ac9fedfe0e9",
+      "path": "packages/pairing-native/src/initialization.rs"
+    },
+    {
+      "normalizedSha256": "c9911d560f1d8acbae9f86f3f29eb9e8eae3dd77b53bf5451cf05832077eb34d",
+      "path": "packages/pairing-native/src/installation_files.rs"
+    },
+    {
+      "normalizedSha256": "395910c1e4601f6555cb1ffe18c334bc3506f4eb8e17f682e7f1833e51ea65b8",
+      "path": "packages/pairing-native/src/installation_windows.rs"
+    },
+    {
+      "normalizedSha256": "2db7a939cfe338fd585db02026b4c7b23485e6b4943e3d426a7e8d8b9418af2e",
+      "path": "packages/pairing-native/src/installation_windows_publication.rs"
+    },
+    {
+      "normalizedSha256": "a58943ed48de4145f1fded87bd8c841279071adb4b2764b9edbe15846310584a",
+      "path": "packages/pairing-native/src/installation_windows_candidate.rs"
+    },
+    {
+      "normalizedSha256": "b7ea207ba7b87ef60d5662cfc7efea6e89be2fbda79471ff65db98ed963a2a84",
+      "path": "packages/pairing-native/src/installation_windows_candidate_buffer.rs"
+    },
+    {
+      "normalizedSha256": "e94acc609e9ad66ce6ff87f62c56804d68eeba733498d168ac468b9307f2a7fc",
+      "path": "packages/pairing-native/src/installation_windows_handles.rs"
+    },
+    {
+      "normalizedSha256": "8303633b615a835156cdc7e9ee5c0bbeda28f0aaa01ef29d880b6fe1d23698ba",
+      "path": "packages/pairing-native/src/windows_publication_name.rs"
+    },
+    {
+      "normalizedSha256": "33c4b50bb3654b46f6b20429b6a93b8b1d52295330a42cf54a8aa0a3292926b5",
+      "path": "packages/pairing-native/src/windows_publication_contract.rs"
+    },
+    {
+      "normalizedSha256": "3a8cd757fcf293dbf5f675b9fca9ef15b9de08d121ae7a0bd42cffe0e69ba1b4",
+      "path": "packages/pairing-native/src/startup_diagnostics.rs"
+    },
+    {
+      "normalizedSha256": "615c467b14a74efdc522c504bff3640f05b8944cbc07baa6fa1de4283249cffd",
+      "path": "packages/pairing-native/src/startup_diagnostics_tests.rs"
+    },
+    {
+      "normalizedSha256": "ee37c050931ad8dac5393f95b1196b23d945b3d7a09986df562b8eb2111a8f35",
+      "path": "packages/pairing-native/src/startup_diagnostics_native_tests.rs"
+    }
+  ],
+  "normalization": "strictUTF8; remove at most one leading numeric65279; actualCRLF->LF; BOMfreeUTF8 SHA256",
+  "buildCommand": "rustup.exe run 1.99.0-x86_64-pc-windows-msvc cargo test --manifest-path packages/pairing-native/Cargo.toml --locked --offline --no-default-features --target x86_64-pc-windows-msvc --lib --no-run --message-format=json",
+  "productionCheck": "same toolchain/options with cargo check --lib instead of test --no-run; exit0",
+  "buildExit": 0,
+  "compilerWarningCounts": {
+    "delivered-build": 7,
+    "delivered-check": 6
+  },
+  "exeSha256": "adcdeb14ce79157033472b3eaeeab90e7c13433fdce5779bdb8fc0898bfd9206",
+  "results": [
+    {
+      "name": "installation_files::windows::publication::tests::only_exact_native_success_is_confirmed",
+      "listExit": 0,
+      "exitCode": 0,
+      "pass": true
+    },
+    {
+      "name": "installation_files::windows::publication::tests::exact_content_check_rejects_truncation_growth_and_changed_bytes",
+      "listExit": 0,
+      "exitCode": 0,
+      "pass": true
+    },
+    {
+      "name": "startup_diagnostics::native_tests::native_publication_status_keeps_first_error_and_never_fakes_win32",
+      "listExit": 0,
+      "exitCode": 0,
+      "pass": true
+    }
+  ],
+  "testCommand": "Fixed3 exact pure case names, each --exact --list then --exact --nocapture --test-threads=1; no ignored/native case",
+  "rawEvidence": ".local-evidence/windows-d2-integration/20261022T232115Z",
+  "rawFileHashes": [
+    {
+      "name": "delivered-source-before-build.json",
+      "sha256": "3170b44672371759456484b331f8b487f2f9e467be01c4b4401003617413d986"
+    },
+    {
+      "name": "delivered-check.jsonl",
+      "sha256": "c48926c0a8dc07adba68c5c1f59bf15c40f8840cfda61d54bed3b6525424ce72"
+    },
+    {
+      "name": "delivered-check.exit.txt",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "name": "delivered-build.jsonl",
+      "sha256": "3052e93b0631f276020071d0b25b5dd4aa123b999b8685e265a93af6a183d9b1"
+    },
+    {
+      "name": "delivered-build.exit.txt",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "name": "delivered-results.json",
+      "sha256": "bcd7bd4eeff869863621edd6536da4f7093d4527403988cecbe2654de69093e2"
+    },
+    {
+      "name": "delivered-list-0.stdout.txt",
+      "sha256": "a34f422d7f081c976473c3fd84fc3a8359d74eb6377febb8817260e388506995"
+    },
+    {
+      "name": "delivered-list-0.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "delivered-pure-0.stdout.txt",
+      "sha256": "69319959ccac7c416ac405fea99bed2ad6959558a549669987c4290d99da93b9"
+    },
+    {
+      "name": "delivered-pure-0.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "delivered-list-1.stdout.txt",
+      "sha256": "451454e24517e594e0284edb622af467bfe7ba2021dcba8e32c24372993ce2b8"
+    },
+    {
+      "name": "delivered-list-1.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "delivered-pure-1.stdout.txt",
+      "sha256": "db4a75351c9d7911201d16c183a701840aeeafe448a3dd7c327eb04ca8233481"
+    },
+    {
+      "name": "delivered-pure-1.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "delivered-list-2.stdout.txt",
+      "sha256": "8a91be9dd16b66eb3d2a7434cde8931ce251182869d32da08e59529174c14831"
+    },
+    {
+      "name": "delivered-list-2.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "delivered-pure-2.stdout.txt",
+      "sha256": "924b861c394eacaa8d46b9be420981d47a9f8c657a456da82686b68cac85c7ce"
+    },
+    {
+      "name": "delivered-pure-2.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "preliminary": "Initial compile/check succeeded. Security review found missing original owner retention; fixed using Arc ownership and explicit owner argument. A diagnostics test split to preserve300line limit initially failed compilation due missing local observed helper; repaired. Preliminary/failed logs retained ignored; final source snapshot precedes delivered check/build/tests.",
+  "checks": {
+    "fmt": "UNAVAILABLE explicittoolchain component absent, not installed",
+    "nonblankLimit": "PASS max298 among touched Rust files",
+    "clippy": "UNAVAILABLE explicittoolchain component absent, not installed",
+    "diffCheck": "PASS"
+  },
+  "cert": "UNCHANGED legacy replace route, including initial absent cert; no fallback from new write_new; separate user renewal-boundary choice pending; not certified",
+  "d3": "Design-only preserved-state generations/no-fallback selected. No namespace/key/selector created; persistent restart witness, selector replacement, old executable coexistence, SQLite object binding and old backup access remain gates.",
+  "review": "Independent pre-certificate source/evidence review completed: no blockers after original owner lease fix, source15/raw18 hashes, check0/build0/3purePASS verified. This is historical pre-certificate snapshot, not current final tree.",
+  "notRun": "No D1 native tests or decoder reruns, no new production publisher native runtime, token/fixture/owner/TPM/probe/crash/powerloss run. No real authority/archive access or Git mutation.",
+  "startupWarning": "InitializeDefaultDrives FileSystem warning remains visible; no config/environment change or causal attribution. Incremental cache hardlink-copy fallback warning retained in ignored compiler log."
+}

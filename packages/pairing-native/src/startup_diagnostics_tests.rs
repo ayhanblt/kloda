@@ -134,6 +134,7 @@ fn operation_labels_cannot_include_paths_or_native_payloads() {
             operation: Some(operation),
             code: PairingError::StorageFailure,
             win32: Some(32),
+            native: None,
         });
         assert!(value.len() < 150);
         assert!(!value.contains(['/', '\\', ':', '\n', '\r']));

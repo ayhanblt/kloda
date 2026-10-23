@@ -109,12 +109,20 @@ fn local_syntax(path: &Path) -> Result<()> {
 fn selection(directory: &Path) -> Result<&'static Folders> {
     let folders = FOLDERS.as_ref().map_err(|error| *error)?;
     local_syntax(directory)?;
-    if directory.as_os_str() != folders.development.as_os_str()
-        && directory.as_os_str() != folders.production.as_os_str()
+    let legacy = compiled_legacy()?;
+    let role = legacy.parent().ok_or(PairingError::StorageFailure)?.join("pairing-generations");
+    let generation = directory.parent() == Some(role.as_path())
+        && directory.file_name().and_then(|v| v.to_str()).is_some_and(super::generation::generation_name);
+    if directory != legacy && directory != role && !generation
     {
         return Err(PairingError::StorageFailure);
     }
     Ok(folders)
+}
+
+pub(super) fn compiled_legacy() -> Result<&'static Path> {
+    let folders = FOLDERS.as_ref().map_err(|error| *error)?;
+    Ok(if cfg!(feature = "desktop-production") { &folders.production } else { &folders.development })
 }
 
 fn create_directory(path: &Path) -> Result<()> {
@@ -137,7 +145,10 @@ fn create_directory(path: &Path) -> Result<()> {
 
 pub(super) fn directories(directory: &Path, create: bool) -> Result<Vec<File>> {
     let folders = diagnostic::validation(Operation::PathSelectionValidation, selection(directory))?;
-    let profile = directory.parent().ok_or(PairingError::StorageFailure)?;
+    if create && directory != compiled_legacy()? {
+        return Err(PairingError::StorageFailure);
+    }
+    let profile = compiled_legacy()?.parent().ok_or(PairingError::StorageFailure)?;
     let mut handles = Vec::with_capacity(directory.components().count());
     let ancestors: Vec<_> = directory.ancestors().collect();
     for ancestor in ancestors.into_iter().rev() {
@@ -170,7 +181,7 @@ pub(super) fn directories(directory: &Path, create: bool) -> Result<Vec<File>> {
         if ancestor == folders.local || ancestor == profile {
             security::user_directory(file.as_raw_handle())?;
         }
-        if ancestor == directory {
+        if ancestor == directory || (ancestor.starts_with(profile) && ancestor != profile) {
             security::protected(file.as_raw_handle(), true, false)?;
         }
         // Denying WRITE/DELETE sharing pins every checked ancestor for the owner lifetime.

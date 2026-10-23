@@ -1,0 +1,41 @@
+{
+  "utc": "2026-10-23T08:44:30.5194709Z",
+  "scope": "Staged cfg(test) native legacy exclusion helper; no startup integration",
+  "decision": "User approved retaining existing validated legacy owner.lock exclusively without modifying it; missing lock refuses transition",
+  "sourceInventory": [
+    {
+      "normalizedSha256": "7dc6d7149229f65970e40b0b79a37800abc730b74a39b4e454c6ae84262416aa",
+      "path": "packages/pairing-native/src/installation_windows.rs"
+    },
+    {
+      "normalizedSha256": "ede37ec4acba2f15077d58c36c658c849c6a7667da96ef509c6b534cf9602ea9",
+      "path": "packages/pairing-native/src/installation_windows_legacy_fence.rs"
+    }
+  ],
+  "normalization": "strictUTF8/max1 leading numeric65279/actualCRLF to LF/BOMfreeUTF8 SHA256",
+  "mechanism": "Existing exact KnownFolder dev/prod pairing root only; directories(create=false) retains original guarded ancestors. OPEN_EXISTING, FILE_READ_ATTRIBUTES|READ_CONTROL, FILE_SHARE_NONE, create=false; original regular single-link no-reparse/finalpath/NTFS/ACL guards, zero length. Distinct non-Clone fence retains original owner and ancestors. No write/flush/enumeration/adoption.",
+  "buildCommand": "rustup.exe run 1.99.0-x86_64-pc-windows-msvc cargo test --manifest-path packages/pairing-native/Cargo.toml --locked --offline --no-default-features --target x86_64-pc-windows-msvc --lib --no-run --message-format=json",
+  "buildExit": 0,
+  "uniqueTestExecutable": true,
+  "executableSha256": "e1ad6a4a62fbfb895ce2fdc83f4500d974dd50a5c1f6c6d0146715828f74784c",
+  "compilerWarnings": 9,
+  "rawEvidence": ".local-evidence/windows-d3-legacy-fence-20261023T084342Z",
+  "rawHashes": [
+    {
+      "sha256": "b86a78c7272acf75eee3156f89a93f30f83a6a0644833f4ef38e0009f4de7ba7",
+      "name": "build.jsonl"
+    },
+    {
+      "sha256": "6daa38cb04825f441d12857a455002373c13632be3fd23be0d65fef7efe228e1",
+      "name": "build.stderr.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "build.exit.txt"
+    }
+  ],
+  "runtime": "NOT_RUN: no acquire call, native fixture, real legacy handle, namespace, key or authority access; no exclusion or powerloss runtime acceptance",
+  "checks": "diff check PASS; no new tests needed for direct native wrapper without permitted native execution; earlier nine pure protocol tests historical; fmt/clippy unavailable",
+  "review": "Independent security/source review complete, no blockers; reviewer performed no tests/build/native calls/writes. Staged scope and future lifetime/admission gates confirmed.",
+  "remaining": "Must bind compiled namespace role, hold alongside future generation role lease for full owner lifetime; preserve on unknown publication; no fresh-install permission when missing; native admission/layout, SQLite/key/foreground/revoke/restart/rollback gates remain open"
+}

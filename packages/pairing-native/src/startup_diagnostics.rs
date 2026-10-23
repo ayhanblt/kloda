@@ -103,6 +103,7 @@ struct Failure {
     operation: Option<Operation>,
     code: PairingError,
     win32: Option<u32>,
+    native: Option<(i32, Option<i32>)>,
 }
 #[cfg(any(target_os = "windows", test))]
 #[derive(Clone, Copy)]
@@ -126,6 +127,25 @@ pub(crate) fn record(operation: Option<Operation>, code: PairingError, win32: Op
                     operation,
                     code,
                     win32,
+                    native: None,
+                });
+                state.set(Some(current));
+            }
+        }
+    });
+}
+
+#[cfg(any(target_os = "windows", test))]
+pub(crate) fn native_publish(status: i32, io_status: Option<i32>) {
+    STATE.with(|state| {
+        if let Some(mut current) = state.get() {
+            if current.failure.is_none() {
+                current.failure = Some(Failure {
+                    stage: current.stage,
+                    operation: Some(Operation::Publish),
+                    code: PairingError::OutcomeUnknown,
+                    win32: None,
+                    native: Some((status, io_status)),
                 });
                 state.set(Some(current));
             }
@@ -207,18 +227,27 @@ pub(crate) fn run<T>(action: impl FnOnce() -> Result<T>) -> Result<T> {
 
 #[cfg(any(target_os = "windows", test))]
 fn line(failure: Failure) -> String {
-    format!(
+    let mut text = format!(
         "KLODA_STARTUP stage={:?} operation={:?} code={} win32={:?}",
         failure.stage,
         failure.operation,
         failure.code.code(),
         failure.win32
-    )
+    );
+    if let Some((status, io_status)) = failure.native {
+        use std::fmt::Write;
+        let _ = write!(text, " ntstatus={status} io_status={io_status:?}");
+    }
+    text
 }
 
 #[cfg(test)]
 #[path = "startup_diagnostics_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "startup_diagnostics_native_tests.rs"]
+mod native_tests;
 
 #[cfg(test)]
 #[path = "startup_diagnostics_fixture_tests.rs"]

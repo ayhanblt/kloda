@@ -21,12 +21,13 @@ pub(crate) struct Installation {
 pub(crate) fn open(context: &NativeContext) -> Result<Installation> {
     diagnostic::run(|| open_inner(context))
 }
+#[cfg(not(target_os = "windows"))]
 fn open_inner(context: &NativeContext) -> Result<Installation> {
     if !context.directory.is_absolute() {
         return diagnostic::at(Stage::Directory, || Err(PairingError::StorageFailure));
     }
     let lock = diagnostic::at(Stage::Storage, || files::prepare(&context.directory))?;
-    let (epoch, create) = diagnostic::at(Stage::Epoch, || files::epoch(&context.directory))?;
+    let (epoch, create) = diagnostic::at(Stage::Epoch, || files::epoch(&context.directory, &lock))?;
     let initialized = context.directory.join("initialized");
     diagnostic::at(Stage::Continuity, || {
         if files::exists(&initialized)?
@@ -51,7 +52,13 @@ fn open_inner(context: &NativeContext) -> Result<Installation> {
         OwnerRole::Phone => Role::Phone,
     };
     let der = diagnostic::at(Stage::Certificate, || {
-        certificate_for(&context.directory, &identity, role, route::unix_seconds()?)
+        certificate_for(
+            &context.directory,
+            &identity,
+            role,
+            route::unix_seconds()?,
+            &lock,
+        )
     })?;
     let certified_key = Arc::new(CertifiedKey::new(
         vec![CertificateDer::from(der)],
@@ -62,7 +69,7 @@ fn open_inner(context: &NativeContext) -> Result<Installation> {
     })?;
     diagnostic::at(Stage::Initialized, || {
         if !files::exists(&initialized)? {
-            files::write_new(&initialized, &[1])?;
+            files::write_new(&initialized, &[1], &lock)?;
         }
         Ok(())
     })?;
@@ -74,6 +81,13 @@ fn open_inner(context: &NativeContext) -> Result<Installation> {
         epoch,
         _owner_lock: lock,
     })
+}
+#[cfg(target_os = "windows")]
+#[path = "initialization_windows_generation.rs"]
+mod windows_generation;
+#[cfg(target_os = "windows")]
+fn open_inner(context: &NativeContext) -> Result<Installation> {
+    windows_generation::open(context)
 }
 impl Installation {
     pub(crate) fn check(&self) -> Result<()> {
@@ -103,7 +117,11 @@ impl Installation {
         match self.listener_port()? {
             Some(saved) if saved != port => Err(PairingError::StorageFailure),
             Some(_) => Ok(()),
-            None => files::write_new(&self.directory.join("listener-port"), &port.to_be_bytes()),
+            None => files::write_new(
+                &self.directory.join("listener-port"),
+                &port.to_be_bytes(),
+                &self._owner_lock,
+            ),
         }
     }
 }
@@ -112,6 +130,7 @@ fn certificate_for(
     identity: &identity::Identity,
     role: Role,
     now: u64,
+    owner: &files::OwnerLock,
 ) -> Result<Vec<u8>> {
     let path = directory.join("certificate.der");
     if files::exists(&path)? {
@@ -129,11 +148,7 @@ fn certificate_for(
         if certificate::validate(&der, role, before)? != *identity.spki() {
             return Err(PairingError::ContinuityLost);
         }
-        if now >= before
-            && after
-                .checked_sub(now)
-                .is_some_and(|left| left >= 30 * 86_400)
-        {
+        if reuse_certificate(now, before, after)? {
             return Ok(der);
         }
     }
@@ -147,6 +162,45 @@ fn certificate_for(
         after,
         identity.certificate_signer(),
     )?;
-    files::replace(&path, &der)?;
+    files::replace(&path, &der, owner)?;
     Ok(der)
+}
+
+fn reuse_certificate(now: u64, before: u64, after: u64) -> Result<bool> {
+    if now >= before && after.checked_sub(now).is_some_and(|left| left >= 30 * 86_400) {
+        return Ok(true);
+    }
+    // Only reached after persisted DER/key/profile validation, before signing or writes.
+    #[cfg(target_os = "windows")]
+    {
+        Err(PairingError::NativeUnsupported)
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Ok(false)
+    }
+}
+
+#[cfg(all(test, target_os = "windows"))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn persisted_certificate_reuses_only_when_renewal_is_unnecessary() {
+        let now = 100;
+        let remaining = 30 * 86_400;
+        assert_eq!(reuse_certificate(now, now, now + remaining), Ok(true));
+        assert_eq!(reuse_certificate(now, 0, u64::MAX), Ok(true));
+        for (before, after) in [
+            (0, now + remaining - 1),
+            (0, now),
+            (0, now - 1),
+            (now + 1, u64::MAX),
+        ] {
+            assert_eq!(
+                reuse_certificate(now, before, after),
+                Err(PairingError::NativeUnsupported)
+            );
+        }
+    }
 }

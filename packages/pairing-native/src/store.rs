@@ -10,25 +10,55 @@ use std::time::Duration;
 
 /// Owned by the native serialized worker; never shared with managed callers.
 pub(crate) struct Store {
+    #[cfg(not(target_os = "windows"))]
     pub(super) conn: Connection,
+    #[cfg(target_os = "windows")]
+    pub(super) conn: crate::store_windows_connection::WindowsConnection,
     pub(super) local: Spki,
     pub(super) epoch: [u8; 16],
     pub(super) poisoned: bool,
 }
 
 impl Store {
+    #[cfg(any(not(target_os = "windows"), test))]
     pub(crate) fn open(directory: &Path, local: Spki, epoch: [u8; 16]) -> Result<Self> {
         let path = directory.join("pairing.sqlite3");
         let existed = path
             .try_exists()
             .map_err(|_| PairingError::StorageFailure)?;
-        let mut conn = Connection::open_with_flags(
+        let conn = Connection::open_with_flags(
             &path,
             OpenFlags::SQLITE_OPEN_READ_WRITE
                 | OpenFlags::SQLITE_OPEN_CREATE
                 | OpenFlags::SQLITE_OPEN_NO_MUTEX,
         )
         .map_err(storage)?;
+        #[cfg(target_os = "windows")]
+        let conn = crate::store_windows_connection::WindowsConnection::Legacy(conn);
+        Self::finish_open(conn, local, epoch, existed, false)
+    }
+    #[cfg(target_os = "windows")]
+    pub(crate) fn open_generation(
+        conn: crate::store_windows_vfs::BoundConnection,
+        local: Spki,
+        epoch: [u8; 16],
+    ) -> Result<Self> {
+        Self::finish_open(
+            crate::store_windows_connection::WindowsConnection::Generation(conn),
+            local,
+            epoch,
+            true,
+            true,
+        )
+    }
+    fn finish_open(
+        #[cfg(not(target_os = "windows"))] mut conn: Connection,
+        #[cfg(target_os = "windows")] mut conn: crate::store_windows_connection::WindowsConnection,
+        local: Spki,
+        epoch: [u8; 16],
+        existed: bool,
+        selected_generation: bool,
+    ) -> Result<Self> {
         conn.busy_timeout(Duration::from_secs(5)).map_err(storage)?;
         conn.execute_batch(
             "PRAGMA foreign_keys=ON; PRAGMA trusted_schema=OFF;
@@ -57,6 +87,10 @@ impl Store {
         let version: i64 = conn
             .pragma_query_value(None, "user_version", |r| r.get(0))
             .map_err(storage)?;
+        // Reopening an activated generation is not permission to migrate/create.
+        if selected_generation && version != 4 {
+            return Err(PairingError::ContinuityLost);
+        }
         if version == 0 && !existed {
             let tx = conn
                 .transaction_with_behavior(TransactionBehavior::Immediate)
@@ -97,6 +131,8 @@ impl Store {
         }
         crate::file_schema::migrate(&mut conn, version)?;
         crate::backup_retention_schema::migrate(&mut conn, version)?;
+        #[cfg(target_os = "windows")]
+        conn.healthy()?;
         Ok(Self {
             conn,
             local,
@@ -169,6 +205,8 @@ impl Store {
     }
 
     pub(super) fn ready(&self) -> Result<()> {
+        #[cfg(target_os = "windows")]
+        self.conn.healthy()?;
         if self.poisoned {
             return Err(PairingError::OutcomeUnknown);
         }
@@ -207,6 +245,11 @@ impl Store {
             }
         };
         if tx.commit().is_err() {
+            self.poisoned = true;
+            return Err(PairingError::OutcomeUnknown);
+        }
+        #[cfg(target_os = "windows")]
+        if self.conn.healthy().is_err() {
             self.poisoned = true;
             return Err(PairingError::OutcomeUnknown);
         }

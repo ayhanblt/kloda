@@ -1,5 +1,5 @@
 use crate::error::{PairingError, Result};
-use crate::windows_publication_contract::{buffer_size, Target};
+use crate::windows_publication_name::{buffer_size, Target};
 use std::{
     alloc::{alloc_zeroed, dealloc, Layout},
     mem::{align_of, offset_of, size_of},

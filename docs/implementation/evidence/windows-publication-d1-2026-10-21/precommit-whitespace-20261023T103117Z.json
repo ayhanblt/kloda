@@ -1,0 +1,9 @@
+{
+  "utc": "2026-10-23T10:31:17.6441155Z",
+  "path": "packages/pairing-native/src/windows_publication_name.rs",
+  "change": "Remove extra blank line at EOF found by staged diff check on previously untracked source. No token/logic changes.",
+  "normalizedSha256Before": "8303633b615a835156cdc7e9ee5c0bbeda28f0aaa01ef29d880b6fe1d23698ba",
+  "normalizedSha256After": "750a2cd0102dd6ba3650c8f19c2b4c4ec876c6eb938ff09fc94874b9b01c2db2",
+  "normalization": "strictUTF8/BOMfree/actualCRLF to LF",
+  "testStatus": "No tests rerun for trailing-newline-only edit. Prior runtime/source evidence is historical tested snapshot; this note records the single formatting delta."
+}

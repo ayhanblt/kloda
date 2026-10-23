@@ -1,0 +1,160 @@
+{
+  "utc": "2026-10-23T09:02:16.8731161Z",
+  "head": "5cf2ffb5094239423550f89856b9c6de0a0ae2f8",
+  "scope": "D3 positive integration blocked by SQLite opened-object architecture prerequisite; existing D2/fence preserved",
+  "sourceInventory": [
+    {
+      "path": "packages/pairing-native/src/lib.rs",
+      "normalizedSha256": "f602f6ffe952bf3b4332207ff466f6d91268b71a555a3cb83245e1ecc5bd91b2"
+    },
+    {
+      "path": "packages/pairing-native/src/store_generation_tests.rs",
+      "normalizedSha256": "48560f9a8c0a27cea1b31c4a150de47e0cde37221e8b37d4e437e32606ed7dbd"
+    },
+    {
+      "path": "packages/pairing-native/src/store.rs",
+      "normalizedSha256": "6db1a12f3777d53514fd22aa5cdd3b433d97363d2553307cf9a42d68bf0e368c"
+    },
+    {
+      "path": "packages/pairing-native/src/initialization.rs",
+      "normalizedSha256": "eb9f603dee2daeb93452529507aef8be5022cab597016d68332ea4a82cd4e07b"
+    },
+    {
+      "path": "packages/pairing-native/src/installation_windows_legacy_fence.rs",
+      "normalizedSha256": "ede37ec4acba2f15077d58c36c658c849c6a7667da96ef509c6b534cf9602ea9"
+    }
+  ],
+  "normalization": "strictUTF8/max1 leading numeric65279/actualCRLF to LF/BOMfreeUTF8 SHA256",
+  "checks": {
+    "exactList": 0,
+    "fmt": "UNAVAILABLE rustfmt not installed on explicit1.99.0",
+    "lockedOfflineWindowsTestCompile": 0,
+    "testStderrBytes": 0,
+    "lockedOfflineWindowsProductionCheck": 0,
+    "clippy": "UNAVAILABLE clippy not installed on explicit1.99.0",
+    "testName": "store_generation_tests::fresh_store_does_not_inherit_old_trust_and_completed_qr_has_no_file_grant",
+    "exactTest": 0,
+    "diffCheck": "pending final pass",
+    "fullOldGroups": "NOT_RERUN unchanged D1/D2/decoder/protocol groups",
+    "typescriptLintTypecheck": "NOT_RUN no TS/UI/ABI changes"
+  },
+  "commands": [
+    "rustup.exe run 1.99.0-x86_64-pc-windows-msvc cargo test --manifest-path packages/pairing-native/Cargo.toml --locked --offline --no-default-features --target x86_64-pc-windows-msvc --lib --no-run --message-format=json",
+    "rustup.exe run 1.99.0-x86_64-pc-windows-msvc cargo check --manifest-path packages/pairing-native/Cargo.toml --locked --offline --no-default-features --target x86_64-pc-windows-msvc --lib --message-format=json",
+    "unique Cargo test executable: fixed exact new test --exact --list; then --exact --nocapture --test-threads=1"
+  ],
+  "rawEvidence": ".local-evidence/windows-d3-final-20261023T085708Z",
+  "rawHashes": [
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "build.exit.txt"
+    },
+    {
+      "sha256": "0b751b43120b24cc3b0eb6bea131efc749680fd4f4eb90b3b17a6718eaf9b123",
+      "name": "build.jsonl"
+    },
+    {
+      "sha256": "c2eafa80f52e7cd3b19347f3a871d346313ef068307ef834ad40943ad6e8c953",
+      "name": "build.stderr.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "final-build.exit.txt"
+    },
+    {
+      "sha256": "d26985291350d27940ae680db032a965b928ca5821d90d4872eb523888877c54",
+      "name": "final-build.jsonl"
+    },
+    {
+      "sha256": "9501a7289bd370a6b30680afefd2ef6e62a4234f5006ef7bea7b0daf0344ffcb",
+      "name": "final-build.stderr.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "list.stderr.txt"
+    },
+    {
+      "sha256": "b78eee66ea1888b48966caf7670bd305553fb2c2b10b336b2fa774cd5c56754c",
+      "name": "list.stdout.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "production-check.exit.txt"
+    },
+    {
+      "sha256": "d15d1dd0885d7c458b33b6ea4671ff500c874b48bf5d4371e717b2bd3416eff1",
+      "name": "production-check.jsonl"
+    },
+    {
+      "sha256": "ca7e5825309c4819d99070ed8fb77f9dc5d9ef774ef37b8489e9fbfacb170e3a",
+      "name": "production-check.stderr.txt"
+    },
+    {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "name": "test.exit.txt"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "test.stderr.txt"
+    },
+    {
+      "sha256": "9434569b3b59778f84869e1c34c5f9d86cbfd5649d1728518edc24f57e28e4e0",
+      "name": "test.stdout.txt"
+    }
+  ],
+  "review": "Independent security review identified CandidateStale test expectation; corrected without production change, exact rerun PASS. Final delta/results review complete. Independent source review confirmed production blockers.",
+  "blockers": [
+    "Store path CREATE/WAL/migration before actual Windows DB/WAL/SHM object binding",
+    "Native role layout/admission and fence lifetime not integrated; remains staged",
+    "Existing identity open may adopt alias; fresh create collision semantics require separate strict path"
+  ],
+  "decision": "User chose separate SQLite opened-object architecture design before positive D3 integration. New singleconnection EXCLUSIVE WAL vs NORMAL with SHM VFS hook remains pending.",
+  "runtime": "NOT_RUN native owner/fence/publisher/generation/TPM/probe/process-cut/powerloss. Only test-owned disposable SQLite store fixture ran; no existing authority/key/pending/archive touched.",
+  "acceptance": {
+    "lostReply": "NOT_RUN_NEW_NATIVE; prior D2 source unknown retention preserved",
+    "qrOnlyNoGrant": "PASS completed fresh synthetic QR state and reopened store no scope",
+    "selectionOwnerLifetime": "NOT_IMPLEMENTED_NATIVE; prior pure graph tests historical",
+    "partialChainNoFallback": "historical9 pure protocol PASS, no new native admission claim",
+    "concurrentOpen": "NOT_RUN_NATIVE; legacy source fence staged",
+    "oldGrants": "NOT_PROVEN_NATIVE; new store has no inherited record or scope, no old granted-scope copy test",
+    "oldTrust": "PASS new separate-store regression, not actual generation startup"
+  },
+  "precommitInventory": [
+    " M docs/decisions/0015-desktop-platform-and-signing-isolation.md",
+    " M docs/implementation/codex-migration-handoff.md",
+    " M docs/implementation/evidence/windows-publication-d1-2026-10-21/README.md",
+    " M docs/implementation/first-vertical-slice-status.md",
+    " M docs/implementation/implementation-session-handoff.md",
+    " M docs/implementation/qr-pairing-implementation-roadmap.md",
+    " M docs/implementation/windows-authority-publication-recovery-design.md",
+    " M docs/implementation/windows-d2-d3-contract-and-fresh-trust.md",
+    " M packages/pairing-native/Cargo.toml",
+    " M packages/pairing-native/src/initialization.rs",
+    " M packages/pairing-native/src/installation_files.rs",
+    " M packages/pairing-native/src/installation_windows.rs",
+    " M packages/pairing-native/src/installation_windows_candidate.rs",
+    " M packages/pairing-native/src/installation_windows_candidate_buffer.rs",
+    " M packages/pairing-native/src/installation_windows_handles.rs",
+    " M packages/pairing-native/src/lib.rs",
+    " M packages/pairing-native/src/startup_diagnostics.rs",
+    " M packages/pairing-native/src/startup_diagnostics_tests.rs",
+    " M packages/pairing-native/src/windows_publication_contract.rs",
+    "?? docs/implementation/evidence/windows-publication-d1-2026-10-21/d2-parent-certificate-20261023T073810Z.json",
+    "?? docs/implementation/evidence/windows-publication-d1-2026-10-21/d2-parent-integration-20261022T232900Z.json",
+    "?? docs/implementation/evidence/windows-publication-d1-2026-10-21/d3-legacy-fence-20261023T084430Z.json",
+    "?? docs/implementation/evidence/windows-publication-d1-2026-10-21/d3-protocol-20261023T081915Z.json",
+    "?? docs/implementation/evidence/windows-publication-d1-2026-10-21/d3-protocol-20261023T082249Z.json",
+    "?? docs/implementation/windows-d2-ntfs-parent-durability.md",
+    "?? docs/implementation/windows-d3-atomic-generation-selection.md",
+    "?? docs/implementation/windows-d3-sqlite-object-binding-design.md",
+    "?? packages/pairing-native/src/installation_generation_chain.rs",
+    "?? packages/pairing-native/src/installation_generation_chain_tests.rs",
+    "?? packages/pairing-native/src/installation_generation_record.rs",
+    "?? packages/pairing-native/src/installation_generation_record_tests.rs",
+    "?? packages/pairing-native/src/installation_windows_legacy_fence.rs",
+    "?? packages/pairing-native/src/installation_windows_publication.rs",
+    "?? packages/pairing-native/src/startup_diagnostics_native_tests.rs",
+    "?? packages/pairing-native/src/store_generation_tests.rs",
+    "?? packages/pairing-native/src/windows_publication_name.rs"
+  ]
+}

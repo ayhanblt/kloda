@@ -155,7 +155,6 @@ pub(super) fn local_ntfs(file: &File, root: &Path) -> Result<()> {
     Ok(())
 }
 
-#[cfg(test)]
 pub(super) fn check_final_path(file: &File, expected: &Path) -> Result<()> {
     final_path(file, &wide(expected)?)
 }

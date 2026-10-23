@@ -22,6 +22,25 @@ After production trust, file authorization remains separate: [ADR0016](0016-v1-p
 
 ### Approved Windows D2 contract and D3 design scope — 2026-10-22
 
+2026-10-23 user-selected certificate boundary: initial absent DER uses no-replace
+publication; persisted validated DER is reused under the existing lifetime rule.
+When Windows renewal is required, fail visibly before signing/writing rather than
+falling back to legacy replacement. Certificate replacement remains unsupported.
+User also selected designing atomic active-generation selection changes, rather
+than first-activation-only behavior. [Immutable activation/intent chain proposal](../implementation/windows-d3-atomic-generation-selection.md)
+is design only; its exact layout/schema, role-wide admission, SQLite bindings and
+restart/coexistence/rollback gates are not silently approved implementations.
+
+2026-10-23 clarification: Ayhan accepts explicit composition of official contracts,
+without requiring a single document listing every call. The narrowed new-parent
+NTFS persistence question is supported by MS-FSA2.1.5.7/AppendixA80 combined with
+local file-flush/IRP semantics. Narrow no-replace write_new source integration and
+automated pure verification proceed under the existing NTFS/ACL/pinning guards;
+not a physical acceptance or full initialization/recovery approval. Original owner
+ownership must remain retained for unconfirmed native publication. Certificate
+replacement, SQLite binding and D3 restart/selector/old-binary/rollback gates remain
+open. [Evidence and exact limits](../implementation/windows-d2-ntfs-parent-durability.md).
+
 Ayhan approved: Windows authority publication must not report success before both
 correct content and final name are persistent. Existing D1 observations are not a
 durability witness. Bounded test-only outcome work and relevant pure automated
@@ -73,3 +92,11 @@ Following the BaseSecurity failure, Ayhan authorized comprehensive evidence-driv
 Ayhan approved a new, empty **standard local Windows account**, created interactively by the user, to run only the disposable D1 fixtures without changing the current profile's ACL, owner, archive or authority state. Only verified public test binary/material crosses accounts; no AppData, keys, pins, certificates, epochs, DBs or Codex configuration. No account cleanup or password handling by agents is authorized. Tests run in a normal unelevated terminal, not through the Codex sandbox. The existing account may compile/list/package only.
 
 A cfg(test)-only process-token precondition checks non-AppContainer, unfiltered, unelevated/no-linked-token fields before every fixture. It neither certifies account identity nor authorizes package-SID trust or relaxed private two-ACE ACLs. User/UI account verification and unchanged native storage guards remain required. This is an environment choice, not AppContainer support, a fallback provider, production storage recovery or a lift of physical product acceptance. Fresh-account D1 success would not establish current-profile operation. [Exact handoff and limits](../implementation/windows-d1-native-user-handoff.md).
+
+### D3 existing legacy lock exclusion — 2026-10-23
+
+Ayhan approved a source path that retains an existing validated legacy owner.lock exclusively without modifying its contents. Missing lock refuses this transition; no legacy lock creation or automatic admission. Exact native KnownFolder/NTFS/path/ACL guards remain mandatory. This decision does not authorize real legacy handles, namespace/key creation or physical acceptance in this task. Staged helper is compile-checked and independently reviewed; full role-owner lifetime and compiled-role binding remain integration gates.
+
+### D3 compiled role and SQLite admission — 2026-10-23
+
+Ayhan selected a separate SQLite opened-object architecture slice before positive D3 owner integration, then approved NEW Windows generations using one serialized connection, EXCLUSIVE WAL established and verified before first WAL access, and a narrow private validating VFS. Real DB/WAL handles must be checked before data I/O; unexpected SHM/files or invalid bindings refuse. No NORMAL fallback. This does not change legacy stores or other platform policies. Native namespace is compiled: development by default, production only with explicit Cargo desktop-production feature, never debug/release or environment inference. Existing data and physical/Git boundaries remain. Reopen-only integration is not fresh generation bootstrap or a runtime/platform acceptance claim.
