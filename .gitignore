@@ -72,3 +72,6 @@ yarn-debug.log*
 yarn-error.log*
 tools/android-keystore-tls-poc/
 apps/mobile/.expo/dev/logs/export.log
+
+# Reviewed public Step12 evidence only; private/runtime logs stay ignored
+!/docs/implementation/evidence/lovable-step12-2026-10-28/**/*.log

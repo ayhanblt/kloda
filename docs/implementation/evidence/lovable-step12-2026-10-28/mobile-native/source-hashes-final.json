@@ -1,0 +1,77 @@
+{
+  "utc": "2026-10-28T18:23:45.828394+00:00",
+  "files": [
+    {
+      "path": "apps/mobile/App.tsx",
+      "sha256": "215dc2c0ee33f42053e64fb03abf69f8822f15524c81c8dac17ed7ce0c52cda4"
+    },
+    {
+      "path": "apps/mobile/metro.config.js",
+      "sha256": "0f70baec2ff4801d4c3c1f2d11857d83bcb23077ec0cda461ff2dca54e429ba4"
+    },
+    {
+      "path": "apps/mobile/tailwind.config.js",
+      "sha256": "8b16862d211f2fb97d3bdc959587e2994a3404f020a6238718c3f44d26dace76"
+    },
+    {
+      "path": "apps/mobile/global.css",
+      "sha256": "cc1a7ad0d019ddb1d32d0ecb588ba0ac26ce41d8625dd6c366348b25f83a28ec"
+    },
+    {
+      "path": "apps/mobile/src/app/App.tsx",
+      "sha256": "4aa3efbd3cbe3623d5e2d301597f4d0c580fc3f951d50222eef67f1f5c92f71e"
+    },
+    {
+      "path": "apps/mobile/src/widgets/mobile-shell/ui.tsx",
+      "sha256": "698afcec86d6a844935303d587469f715c2dbcd3df67535912590850cd9c3dda"
+    },
+    {
+      "path": "apps/mobile/src/shared/ui/logo.tsx",
+      "sha256": "d889fe736b88be0f81f23f6aee50a12062fa9c107248bb602105c9b272e33a85"
+    },
+    {
+      "path": "apps/mobile/src/shared/ui/byte-progress.tsx",
+      "sha256": "d51929e813b62fb8703d3084988710c0833ca81ab6ff1d3b9d95fa89dae9df82"
+    },
+    {
+      "path": "apps/mobile/src/shared/ui/native-safe-area.tsx",
+      "sha256": "953c51c76b619218a2c40a3d6799d4e7444a850d04755bf19843eafc000c1a6e"
+    },
+    {
+      "path": "apps/mobile/src/pages/activity/ui/activity-page.tsx",
+      "sha256": "82248ee3e2fa361c5c6932b88e4dc08f04f193693947c9c52ca1f6fda3e448be"
+    },
+    {
+      "path": "apps/mobile/src/pages/computer/ui/computer-page.tsx",
+      "sha256": "87237f638f5a67c117ed19b0e170e91938472fb5c4321d3ed6cebe12b87105ff"
+    },
+    {
+      "path": "apps/mobile/src/pages/pairing/ui/pairing-page.tsx",
+      "sha256": "3d7e471c96118123a73ed15e37d4b4393736af65b8e4fa0ffc2cb32bc5710c1d"
+    },
+    {
+      "path": ".local-evidence/mobile-step12-native/entry.js",
+      "sha256": "d8601a9c0b5e60ed28d9358a2bab7a2c89bf4d68ddb8b689ffe3b3c8b33e778e"
+    },
+    {
+      "path": "assets/fonts/inter/Inter-Medium.ttf",
+      "sha256": "ffec5bb6bd59310d94034e445e03c3f19faf0cdddd971ec983a3178a6c2bcf88"
+    },
+    {
+      "path": "assets/fonts/inter/Inter-Bold.ttf",
+      "sha256": "b8b760374cb3846fef01e7ed6855a047ac257514b382fa36ae17a6011624f8ce"
+    },
+    {
+      "path": "assets/fonts/inter/Inter-Regular.ttf",
+      "sha256": "a7e85d838fd6739a47c3b38a63ca7a36357770cc61f7d18eb9fb5a8807104d45"
+    },
+    {
+      "path": "assets/fonts/inter/Inter-SemiBold.ttf",
+      "sha256": "127d711e8ca7b938a0cc58d40e6f881277cd1f9881dd8c1bc5aa36b4a238bab7"
+    },
+    {
+      "path": "apps/mobile/src/shared/ui/text.tsx",
+      "sha256": "07f863bb374783d1bc58ab6023a18a74d15f092ff2fc86b5fe7ed00c2919f07a"
+    }
+  ]
+}

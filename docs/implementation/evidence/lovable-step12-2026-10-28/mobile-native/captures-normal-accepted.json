@@ -1,0 +1,19 @@
+[
+  {
+    "result": "READY",
+    "id": 68,
+    "stage": "home",
+    "language": "de",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "de-home-normal.png",
+    "sha256": "fa1d6acb0cba79939a1bbfe40d64bfa0ca9fd9b6506b39e28f7e01dcbc1c3954"
+  }
+]

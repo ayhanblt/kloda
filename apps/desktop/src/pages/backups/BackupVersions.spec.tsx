@@ -154,3 +154,15 @@ it.each(['tr', 'en', 'de'])('provides %s labels without raw translation keys', a
   expect(screen.getByRole('button', { name: i18n.t('backups.deleteOne') })).toBeInTheDocument();
   expect(document.body.textContent).not.toContain('backups.');
 });
+
+it('opens the dedicated trash route with a native trash read and reports tab navigation without mutation', async () => {
+  const { list, trash, restore } = fixture({ items: [] });
+  const onViewChange = vi.fn();
+  render(<BackupVersions initialTrash onViewChange={onViewChange} />);
+  await screen.findByText(i18n.t('backups.emptyTrash'));
+  expect(list).toHaveBeenLastCalledWith(undefined, true);
+  fireEvent.click(screen.getByRole('button', { name: i18n.t('backups.active') }));
+  expect(onViewChange).toHaveBeenCalledWith(false);
+  expect(trash).not.toHaveBeenCalled();
+  expect(restore).not.toHaveBeenCalled();
+});

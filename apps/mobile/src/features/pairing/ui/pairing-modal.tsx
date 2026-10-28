@@ -1,11 +1,15 @@
 import { ShieldAlert } from 'lucide-react-native';
+import { cssInterop } from 'nativewind';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, View } from 'react-native';
+import { Text } from '../../../shared/ui/text';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { colors } from '../../../shared/ui/tokens';
 import type { PairingSnapshot } from '../model/pairing-controller';
 import { PairingButton } from './pairing-button';
+
+const ModalSurface = cssInterop(Animated.View, { className: 'style' });
 
 interface Props {
   snapshot: PairingSnapshot;
@@ -26,22 +30,22 @@ export function PairingModal({ snapshot, onCancel, onResume, onRefresh, onLeave,
   const phase = status?.phase ?? 'connecting';
 
   return (
-    <Animated.View entering={FadeIn.duration(180)} style={styles.overlay} accessibilityViewIsModal importantForAccessibility="yes">
-      <View style={styles.backdrop} onStartShouldSetResponder={() => true} />
-      <View style={styles.card}>
-        <ScrollView contentContainerStyle={styles.content}>
+    <ModalSurface entering={FadeIn.duration(180)} className="absolute inset-0 z-20 justify-center p-6" accessibilityViewIsModal importantForAccessibility="yes">
+      <View className="absolute inset-0 bg-ink/95" onStartShouldSetResponder={() => true} />
+      <View className="max-h-[95%] overflow-hidden rounded-3xl bg-surface">
+        <ScrollView contentContainerClassName="gap-4 p-6">
           <ShieldAlert color={colors.processing} size={32} />
-          <Text accessibilityRole="header" style={styles.title}>{t(action === 'remove' ? 'pairing.unpair.title' : repair ? 'pairing.repairTitle' : uncertain ? 'pairing.unknownTitle' : `pairing.phases.${phase}.title`)}</Text>
-          <Text style={styles.body}>{t(action === 'remove' ? 'pairing.unpair.description' : repair ? 'pairing.repairDescription' : uncertain ? 'pairing.unknownDescription' : `pairing.phases.${phase}.description`)}</Text>
+          <Text accessibilityRole="header" className="text-[22px] font-inter-semibold leading-7 text-ink">{t(action === 'remove' ? 'pairing.unpair.title' : repair ? 'pairing.repairTitle' : uncertain ? 'pairing.unknownTitle' : `pairing.phases.${phase}.title`)}</Text>
+          <Text className="font-sans text-sm leading-5 text-muted">{t(action === 'remove' ? 'pairing.unpair.description' : repair ? 'pairing.repairDescription' : uncertain ? 'pairing.unknownDescription' : `pairing.phases.${phase}.description`)}</Text>
           {status?.peerFingerprint && (
-            <View style={styles.fingerprint}>
-              <Text style={styles.label}>{t('pairing.peerFingerprint')}</Text>
-              <Text selectable style={styles.fingerprintText}>{status.peerFingerprint}</Text>
+            <View className="gap-2 rounded-xl border border-border p-3">
+              <Text className="text-xs font-inter-medium text-muted">{t('pairing.peerFingerprint')}</Text>
+              <Text selectable className="font-sans font-mono text-xs leading-5 text-ink">{status.peerFingerprint}</Text>
             </View>
           )}
-          {repair && <Text style={styles.body}>{t('pairing.repairConsequences')}</Text>}
-          <Text style={styles.body}>{t('pairing.noFileGrant')}</Text>
-          {error && <Text accessibilityRole="alert" style={styles.error}>{t(`pairing.errors.${error}`)}</Text>}
+          {repair && <Text className="font-sans text-sm leading-5 text-muted">{t('pairing.repairConsequences')}</Text>}
+          <Text className="font-sans text-sm leading-5 text-muted">{t('pairing.noFileGrant')}</Text>
+          {error && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-error">{t(`pairing.errors.${error}`)}</Text>}
           {action && <ActivityIndicator color={colors.ink} accessibilityLabel={t('pairing.working')} />}
           {repair && (
             <>
@@ -54,30 +58,17 @@ export function PairingModal({ snapshot, onCancel, onResume, onRefresh, onLeave,
           )}
           <PairingButton label={t('pairing.refresh')} secondary disabled={action === 'cancel'} onPress={onRefresh} />
           {action !== 'remove' && <>
-            <Text style={styles.body}>{t('pairing.cancelConsequences')}</Text>
+            <Text className="font-sans text-sm leading-5 text-muted">{t('pairing.cancelConsequences')}</Text>
             <PairingButton label={t('pairing.cancel')} secondary disabled={!operationId || action === 'cancel'} onPress={onCancel} />
           </>}
           {!operationId && !action && (
             <>
-              <Text style={styles.body}>{t('pairing.leaveConsequences')}</Text>
+              <Text className="font-sans text-sm leading-5 text-muted">{t('pairing.leaveConsequences')}</Text>
               <PairingButton label={t('pairing.leave')} secondary onPress={onLeave} />
             </>
           )}
         </ScrollView>
       </View>
-    </Animated.View>
+    </ModalSurface>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: { ...StyleSheet.absoluteFill, zIndex: 20, justifyContent: 'center', padding: 24 },
-  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(28,25,23,0.94)' },
-  card: { maxHeight: '95%', borderRadius: 16, overflow: 'hidden', backgroundColor: colors.surface },
-  content: { padding: 24, gap: 16 },
-  title: { color: colors.ink, fontSize: 22, lineHeight: 28, fontWeight: '600' },
-  body: { color: colors.muted, fontSize: 14, lineHeight: 20 },
-  label: { color: colors.muted, fontSize: 12, fontWeight: '500' },
-  error: { color: colors.error, fontSize: 14, lineHeight: 20 },
-  fingerprint: { padding: 12, gap: 8, borderWidth: 1, borderColor: colors.border, borderRadius: 12 },
-  fingerprintText: { color: colors.ink, fontFamily: 'monospace', fontSize: 13, lineHeight: 18 },
-});

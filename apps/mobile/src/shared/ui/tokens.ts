@@ -1,13 +1,16 @@
-// Stitch warm-stone palette; surface/ink/muted/border match tailwind.config.js.
+// Frozen Lovable OKLCH tokens converted to native sRGB; see step12 visual evidence.
 export const colors = {
-  surface: '#fff8f5',
-  ink: '#1C1917',
-  muted: '#57534E',
-  border: '#E7E5E4',
-  card: '#F5F5F4',
-  elevated: '#FFFFFF',
-  primary: '#141010',
-  secure: '#10B981',
-  processing: '#F59E0B',
-  error: '#ba1a1a',
+  "surface": "#fcfaf7",
+  "outerSurface": "#f8f4f1",
+  "ink": "#1c1917",
+  "muted": "#57534d",
+  "border": "#e8e5e2",
+  "card": "#f3efec",
+  "elevated": "#ffffff",
+  "primary": "#292524",
+  "secure": "#009966",
+  "processing": "#c26f00",
+  "error": "#d02c2a",
+  "soft": "#f3efec",
+  "secureSoft": "#ddfaec"
 } as const;

@@ -1,5 +1,14 @@
 # Kloda mobil geliştirme akışı — 23 Ekim 2026
 
+2026-10-28 **Liste11 tasarım alımı tamam:** [Frozen Lovable kaynak/asset ve42kalem eşleme](lovable-design-intake-step11-2026-10-28.md). Proje222ef478… / cb1143d16f73,151dosya,7JPEG decode,6web capture; native/test/build kabulü değil. Demo grant/QR/header-state, i18n/inline-style/max-lines farkları12uyarlama girdisi.15eski Stitch tasarım+5Finder metadata yerel özel ZIP’e hash/readback ile yedeklenip eski klasör kaldırıldı; bağımsız backup yok. Revizyon kapanışta değişmedi. Uygulama kodu/Lovable kaynağı/authority/Git mutation yok; sıradaki12, henüz başlamadı.
+
+
+2026-10-28 **Bağlayıcı tasarım ve Live Activities güncellemesi:** [Lovable proje/revizyonu](../ui/lovable-design-reference.md) MCP ile erişildi; kullanıcı bu tasarımı kesin UI kaynağı olarak onayladı. Eski Stitch kaynak değil tarihsel kanıt. Mevcut max-lines300 (yorum/boş satır hariç), TR/EN/DE metin anahtarları, Tailwind/NativeWind+global CSS, Lucide ve FSD/component kuralları teyit edildi. [Güncel plan](expanded-execution-plan-2026-10-28.md):18 bulut sonrası19 iOS Live Activities,20 bütünleşik hazırlık,21 son fiziksel kabul. Önceki20-adım özetler tarihsel. Ayrıntılı tasarım alımı/native uyarlama henüz başlamadı; klasör kaldırma yeni asset/source capture sonrasında. Bu güncellemede test/build/cihaz/Lovable üretimi yok.
+
+
+2026-10-28 **Kullanıcı onaylı plan genişletmesi:** [Güncel20-adım sıra](expanded-execution-plan-2026-10-28.md).1–10 önceki kanıt sınırlarıyla korunur;11 Lovable/Stitch alımı,12 ana akış/kurulumu atla,13 galeri/detay,14 teknik karar matrisi,15 mobil WebDAV gönderici,16 SMB/SFTP/FTP,17 S3uyumlu/AmazonS3,18 diğer10bulut,19 bütünleşik/platform hazırlığı,20 toplu fiziksel kabul. Tüm42 tasarım kalemi ve16 protokol/sağlayıcı seçeneği izlenir; FTP/SFTP/auth/SDK/lisans/maliyet kararları verilmiş sayılmaz. Tasarım kullanıcıdan bekleniyor; bu güncellemede geliştirme/test/build/cihaz veya Lovable üretim komutu yok. Eski11 kabul atıfları tarihsel; kabul en sona taşındı.
+
+
 **Sonraki takip:** [lint kapanışı ve statik uyumluluk kanıtı](android-lint-and-compatibility-2026-10-25.md) ile explicit K1 tam lint ve dört ABI ELF16KB kontrolü PASS; aşağıdaki eski K2 BLOCKED kaydı tarihsel olarak korunur. Gerçek OS/cihaz kabulü ve kaynak tüketimi açıktır.
 
 Güncel sıra kullanıcının sabitlediği [11-adım yürütme listesidir](mobile-execution-checklist-2026-10-24.md); aşağıdaki ilk plan teknik ayrıntı olarak korunur. Liste1 [Android iş/ayar bağlamı](android-run-context-2026-10-24.md) tamamlandı; [liste2 owner/kuyruk](android-background-owner-2026-10-25.md) kaynak/host kapsamında tamam. [Liste3 Live/program/OS](android-scheduling-2026-10-25.md) uygulandı; Android lint araç engeli ve liste4 runtime kabulü açık.

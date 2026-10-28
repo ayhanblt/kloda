@@ -1,0 +1,12 @@
+{
+  "source": "code-archive (Google Stitch static HTML mockups + brief)",
+  "capabilities": [
+    {"capability": "code/screens", "source": "7 Stitch HTML screens + brief M1-M13, D1-D13, P1-P5, C1-C11", "outcome": "rebuild as clickable TanStack prototype", "status": "migrated", "next_action": "none"},
+    {"capability": "design system", "source": "DESIGN.md tokens", "outcome": "ported to src/styles.css", "status": "migrated", "next_action": "none"},
+    {"capability": "logo", "source": "private_photo_cloud_logo (svg + screen.png)", "outcome": "vector variants in shared/ui/logo", "status": "migrated", "next_action": "none"},
+    {"capability": "schema/records", "source": "none (static mockups)", "outcome": "not applicable; brief forbids backend", "status": "accepted", "next_action": "none"},
+    {"capability": "auth", "source": "none", "outcome": "not applicable; brief forbids real accounts", "status": "accepted", "next_action": "none"},
+    {"capability": "provider integrations (WebDAV, SMB, FTP, SFTP, S3, 11 clouds)", "source": "brief", "outcome": "design-only forms marked as integration points", "status": "accepted", "next_action": "real integrations in native apps later"},
+    {"capability": "i18n tr/en/de", "source": "brief", "outcome": "dictionaries in shared/i18n", "status": "migrated", "next_action": "none"}
+  ]
+}

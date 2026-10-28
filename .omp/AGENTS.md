@@ -4,11 +4,23 @@
 - Proje adı: **Kloda**.
 - Kullanıcıya ve store'larda gösterilecek uygulama adı: **Kloda: Secure Photos & Sync**.
 - "Private Photo Cloud" eski/geçici isimdir; uygulama kodunda, dokümantasyonda ve kullanıcıya gösterilen metinlerde kullanılmaz.
-- Repository kökündeki `stitch_private_photo_cloud/` klasörü onaylanmış UI/UX tasarım referansıdır; görsel geliştirmede mümkün olduğunca source of truth kabul edilir.
-- Stitch kaynak dosyaları salt tasarım referansıdır; bu dosyalar rename amacıyla değiştirilmez.
-- Tasarım keyfi olarak yeniden yorumlanmaz veya başka bir design system ile değiştirilmez. Teknik platformda uygulanamayan bir tasarım varsa varsayım yapılmaz; Ayhan'a bildirilip karar beklenir.
+- 28 Ekim2026 itibarıyla [Lovable tasarım referansı](../docs/ui/lovable-design-reference.md) bağlayıcı UI/UX kaynağıdır; proje/revizyon ve görsel uyum kuralları oradadır. Eski Stitch klasörü11. adımda kullanıcının izniyle arşivlenip kaldırıldı; yerel Lovable snapshot/manifest kullanılmalıdır.
+- Eski Stitch kanıtları tarihseldir; bunları yeni Lovable kabulü veya çalışan platform kanıtı gibi sunma.
+- Onaylı Lovable tasarımı keyfi olarak yeniden yorumlanmaz veya başka bir design system ile değiştirilmez. Teknik platformda uygulanamayan bir tasarım varsa varsayım yapılmaz; Ayhan'a bildirilip karar beklenir.
 
 Bu belge, projenin tek geliştirme aracı olan Codex için devir belgesidir. Projede başka bir AI aracı yoktur: hem implementasyon hem review Codex tarafından yapılır. Planlama ve mimari kararlar Ayhan'a aittir.
+
+## Güncel çalışma/devir kararı — 29 Ekim2026
+- Yalnız ana ajan: subagent başlatma/devam ettirme/delegasyon veya otomatik Astra yok;
+  model/effort değiştirilmez. Eski helper/model alias talimatları bunu aşmaz.
+- [Kısa devir ve tam kalan sıra](../docs/implementation/new-chat-handoff-2026-10-29.md)
+  yeni sohbetin girişidir. Hedefli Serena sembol/caller/reference keşfi kullan;
+  tüm sohbeti veya belge ağacını bağlama yükleme.
+- Uygulama ve review aynı ana ajanda ayrı geçişlerdir; bu bağımsız ajan review'u
+  olarak sunulmaz. Gerçek bağımsız review kapısı varsa kullanıcıya açıkça bildir.
+- Aşağıdaki eski sayılar/platform durumları tarihsel checkpoint'tir. Güncel
+  tamamlanma için handoff'un en yeni kaydı ve28Ekim11/12 raporları esas alınır;
+  örneğin iOS5–8 kaynak/Simulator kapsamı artık uygulanmıştır, fiziksel kabul değildir.
 
 ## 1. Amaç
 Ana ürün yönü, kullanıcının telefonundaki **genel dosyalar ve Photos kaynaklarını kendi bilgisayarına** yedeklemesi, listelemesi/indirmesi ve isteğe bağlı Files çift yönlü sync'tir. WebDAV/SMB/NAS gelişmiş seçenekler olarak korunur. PC normal dosyaları tutar; aktarım E2EE, galeri/thumbnail/arama ve AWS premium kapsamı açık kalır. Merkezi servis dosya byte'ı, uç private key'i, pair secret, plaintext medya/album kataloğu veya medya hash listesi tutmaz; Supabase Auth+Postgres yalnız account/device/pair control metadata yönüdür.
@@ -29,7 +41,7 @@ Kalıcı ürün politikası: [ADR0005](../docs/decisions/0005-computer-first-fil
 ## 4. Onboarding ve sync davranışı
 - “Depolama ekle” başlangıcı yok; kullanıcı kendi Files/Photos kaynaklarını seçer, Files “Tümünü seç” düğmesi yok. Photos library/albums ayrı izin/kaynaktır.
 - Güncel ürün default **Live = OS izin verdiğinde ilk fırsat**;12/24 saat + yerel saat alternatifinde change detection hemen upload başlatmaz. Manual **Sync Now** ayrı kalır, programı kaydırmaz.
-- İlk WebDAV ekran sırası/kapsamı [ADR0002](../docs/decisions/0002-first-vertical-slice-scope.md) tarihsel baseline; PC-first account/PC approval/target davranışı ADR0005/0006'da kabul. Ürün/UI cutover uygulanmış sayılmaz; yeni ekran düzeni bu belgede icat edilmez, Stitch referansı korunur.
+- İlk WebDAV ekran sırası/kapsamı [ADR0002](../docs/decisions/0002-first-vertical-slice-scope.md) tarihsel baseline; PC-first account/PC approval/target davranışı ADR0005/0006'da kabul. Ürün/UI cutover uygulanmış sayılmaz; yeni ekran düzeni bu belgede icat edilmez; bağlayıcı Lovable referansı korunur.
 - Files optional two-way:30-day trash/previous versions, two-copy conflict preservation; Photos backup-first, kullanıcı başlatmalı restore. Kesin edge-case kapsamı [ürün kaydı](../docs/product/computer-backup-files-and-photos.md) içindedir; davranış onayı runtime proof değildir.
 
 ## 5. Migrasyon gereksinimi
@@ -49,7 +61,8 @@ FolderSync'teki ~8000 dosya tekrar yüklenmemeli. Kullanıcı **SHA-256 içerik 
 - Her dosya işleminde gerçek native peer/pin/possession/installation continuity ve güncel ACL doğrulanır; local revoke üstün, journal authority değildir. Key/pin/epoch kaybı/restore şüphesi fail closed + fresh local QR/PC grant ister. Account recovery/central revoke↔offline-PC ilişkisi ve final remote policy henüz kararlaştırılmadı; automatic grant survival/reset icat edilmez. Online unpair durable PC ACL+trust revoke ACK ister; offline yalnız local kaldırma/PC-unconfirmed, gecikmeli signed revoke/queue V2 dışıdır.
 ## 7. Kod kalitesi kuralları (bağlayıcı)
 Uzun ve dağınık ("AI slop") dosyalar istenmiyor.
-- ESLint `max-lines` kuralı; ihlalde **CI fail**.
+- ESLint `max-lines`: **300 satır**, boş satırlar ve yorumlar hariç; ihlalde **CI fail**. Sayfalar sorumluluk bazlı component/hook olarak bölünür; dev JSX ile limit dolanılmaz.
+- Kullanıcı metinleri TR/EN/DE çevirilerden; sayfalarda hardcoded metin yok. Yeni UI Tailwind/mevcut NativeWind; inline style/sayfa içi StyleSheet yok, ortak CSS globalde. Lucide ikonları. Native OS/SwiftUI uyumsuzluğunda dar istisna kullanıcı kararı olmadan uygulanmaz.
 - FSD sınır denetimi (steiger veya eslint-plugin-boundaries); ihlalde CI fail.
 - Backend'de bir use-case = bir dosya. Katmanlar arası bağımlılık yönü: interface → application → domain; infrastructure, domain'deki port'ları uygular.
 - Bu kurallar kod yazılmadan **önce** kurulur.

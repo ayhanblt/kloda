@@ -1,4 +1,8 @@
-# Stitch UI Reference
+# Historical Stitch UI Reference
+
+**Superseded28October2026:** [User-approved Lovable design](lovable-design-reference.md) is now authoritative. The material below is historical comparison evidence, not a competing current design. Replacement source/assets were captured in step11 and the old folder was archived+removed; see [retirement record](lovable-reference/cb1143d16f73/stitch-retirement.json).
+
+2026-10-28 **Design expansion requested:** User sent the Lovable design prompt and expanded M/D/P/C inventory. Updated design artifacts are awaiting the user’s project link/result; no new Lovable output has been accepted or implemented. Setup-skip/home, gallery/detail and protocol/cloud connection screens are now tracked in the [expanded plan](../implementation/expanded-execution-plan-2026-10-28.md); original Stitch sources remain unchanged.
 
 2026-10-24 **Mobile scoped adaptation approved and implemented:** Ayhan approved reuse of the existing Stitch visual language for source selection → native QR trust → separate PC-side folder/grant guidance → Activity/history, retaining WebDAV as advanced. [Mobile mapping and evidence](../implementation/mobile-pc-first-stitch-mapping.md). This supersedes the mobile mapping approval gap below only for these existing functions; it does not implement iOS native transport, background execution or grant/readiness APIs, and is not native/platform/physical acceptance.
 
@@ -6,7 +10,7 @@
 
 ## Design source
 
-`stitch_private_photo_cloud/` is Kloda's approved UI/UX reference. All seven supplied HTML compositions, their screenshots, the logo asset, and `private_photo_cloud/DESIGN.md` were inspected. The source describes a mobile-first design system and explicitly documents desktop/tablet adaptation, but it does not prescribe a mobile or desktop implementation framework.
+`stitch_private_photo_cloud/` was Kloda's original approved UI/UX reference. All seven supplied HTML compositions, their screenshots, the logo asset, and `private_photo_cloud/DESIGN.md` were inspected. The source describes a mobile-first design system and explicitly documents desktop/tablet adaptation, but it does not prescribe a mobile or desktop implementation framework.
 
 | Source | Reference coverage |
 | --- | --- |

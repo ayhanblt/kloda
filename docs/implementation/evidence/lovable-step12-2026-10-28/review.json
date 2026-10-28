@@ -1,0 +1,36 @@
+{
+  "utc": "2026-10-28T18:25:33.867340+00:00",
+  "independentReview": "Bounded separate agent source/security and saved-result review; no runtime/test rerun by reviewer",
+  "sourceScopes": [
+    "skip/native write separation",
+    "protected pairing/tab/history guards",
+    "stale WebDAV/mobile invalidation and Desktop draft",
+    "trash-route read-only selection",
+    "local font loading/error and package version",
+    "adaptive header/tabs",
+    "text-only remeasurement; no refs/imperative callers, no page/job hook remount"
+  ],
+  "verifiedByReviewer": {
+    "mobileSourceHashes": "11/11",
+    "desktopSourceHashes": "7/7",
+    "mobileSuiteLog": "123 tests /14 suites",
+    "desktopCounts": "322 full then13 targeted, not323 full rerun",
+    "androidAndGestureLimits": "NOT_RUN/BLOCKED explicit"
+  },
+  "resolvedFindings": [
+    {
+      "finding": "WebDAV route-abort claim too broad",
+      "resolution": "Documentation scoped to mobile; Desktop hidden draft/test lifetime explicitly retained"
+    },
+    {
+      "finding": "Three selected cycle PNG references absent",
+      "resolution": "Root copied exact raw de-home-text-cycle-initial.png, de-home-maximum-before-font-correction.png, de-home-normal-before-font-correction.png; root readback SHA256 assertions match saved records. No runtime rerun."
+    }
+  ],
+  "remaining": [
+    "Android native visual blocked by unauthorized",
+    "Native swipe/VoiceOver/landscape not exercised",
+    "Native platform/physical/provider acceptance not claimed"
+  ],
+  "selectionRisk": "Native text selection/accessibility focus may reset on OS font change; page/job/trust state does not reset"
+}

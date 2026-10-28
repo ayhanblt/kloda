@@ -1,5 +1,7 @@
 ## Kloda project context
 
+Current UI source of truth is the user-approved [Lovable design](docs/ui/lovable-design-reference.md), superseding the legacy Stitch folder. Preserve strict visual mapping, TR/EN/DE translation keys for all static user-facing text, Tailwind/existing NativeWind with shared global CSS (no new inline/page styles), Lucide, FSD/component boundaries and the existing300-line ESLint limit excluding comments/blank lines. Native OS/SwiftUI exceptions require an explicit decision.
+
 Before development, read [.omp/AGENTS.md](.omp/AGENTS.md) and the [Codex migration handoff](docs/implementation/codex-migration-handoff.md). These are repository documents, not a dependency on the OMP runtime. ADR0016 is current V1 LAN authority; ADR0017 is current Photos metadata/import recovery. Preserve their scoped supersession of older central-authorization requirements.
 
 ADR0018 is the approved Windows/macOS/Linux Desktop background lifecycle: retain authorized native receipt across UI departure; separately invalidate foreground invitation/approval work. Never restore close-on-blur as the receiver lifecycle or bypass foreground grant fences. Linux requires a usable visible control before hiding; provider/signing/storage and physical gates remain open.
@@ -29,51 +31,26 @@ Run Context7 CLI requests outside Codex's default sandbox. If a Context7 CLI com
 <!-- context7 -->
 
 
-## Subagent model routing
+## Single-agent and usage policy — user decision, 2026-10-29
 
-When delegating work:
-
-- Use `fast` for mechanical, well-specified, low-risk work:
-  simple edits, configuration, boilerplate, data/evidence collection,
-  straightforward tests, repetitive implementation.
-
-- Use `good` for work requiring judgment:
-  non-trivial debugging, native integration, multi-file refactors,
-  protocol/state logic, concurrency, persistence, recovery, or security-sensitive implementation.
-
-Start with `fast` when the task is clearly mechanical.
-Escalate to `good` if the fast worker stalls, discovers ambiguity, or requires design judgment.
-
-Choose by the specific subtask's complexity, not by the subagent/session name.
-
-## Usage-budget policy
-
-Optimize for limited model usage and context budget.
-
-Before spawning subagents or starting PoCs:
-- Prefer the smallest experiment that can falsify or validate the current assumption.
-- Do not build production-grade abstractions for a PoC unless the acceptance criteria explicitly require them.
-- Avoid duplicating implementation in temporary PoC environments.
-- Reuse existing code, fixtures, and agents whenever possible.
-- Prefer one focused subagent over several parallel agents when parallelism does not materially shorten the critical path.
-- Use cheaper models for mechanical, deterministic, low-risk subtasks.
-- Use GPT-6.1 Sol Medium for normal implementation.
-- Escalate to Sol High or Astra only when the task materially requires deeper reasoning.
-- Do not run exhaustive build/test matrices before the minimal path works.
-- Stop expanding scope once the PoC acceptance criteria are satisfied.
-- If a task is likely to consume substantial usage, first state the minimal validation path and avoid speculative extra work.
-
-The goal is not maximum implementation breadth per task; it is maximum validated progress per unit of model usage.
-
-For routine/mechanical tasks, delegate to @smol:
-- repository search
-- file/symbol lookup
-- evidence extraction
-- simple edits
-- repetitive test fixes
-- documentation updates
-
-Use @default only for tasks requiring judgment, multi-file reasoning, or design decisions.
+- Work with the main agent only. Do not spawn, resume or delegate to subagents;
+  do not invoke Astra automatically. A new explicit user instruction is required
+  to change this rule. It supersedes older helper/model-routing instructions.
+- Keep the main model and effort unchanged.
+- Use Serena for targeted symbol/caller/reference discovery when useful; verify
+  project activation and available tools first. It does not replace ADRs.
+- Start from [the compact handoff](docs/implementation/new-chat-handoff-2026-10-29.md),
+  current handoff/status sections and relevant ADRs. Do not load the entire chat,
+  enumerate/read all repo documents, or replay historical evidence by default.
+- Reuse existing mechanisms/fixtures. State the smallest validation path before
+  substantial work; prove one representative path before broadening a matrix.
+- Batch routine checks; repeat only checks affected by a change or unresolved
+  failure. Do not redo full capture/build matrices after every cosmetic edit.
+- Perform a separate review pass after implementation. A same-agent review is
+  not an independent-agent review; report that distinction honestly. If a gate
+  truly requires independent review, report it instead of launching another agent.
+- Run the relevant tests/lint/typecheck/build and scoped isolated smoke; never
+  trade away security, recovery or accessibility to reduce usage.
 
 ## Execution flow
 Continue through roadmap steps without waiting for user confirmation.
@@ -99,8 +76,8 @@ Stop only if:
 - Do not change unresolved recovery or remote policies.
 - Prefer minimal changes and existing abstractions.
 - Use Serena for complex symbol-level exploration when useful.
-- Use helper agents for bounded mechanical tasks.
-- Use independent review for security-sensitive changes.
+- Keep all work in the main agent under the single-agent policy above.
+- Review security-sensitive changes in a separate pass; disclose any unmet independent-review gate.
 - Run relevant automated tests during implementation.
 - Defer physical acceptance to the documented acceptance gate.
 - Never report unperformed tests as PASS.

@@ -13,10 +13,17 @@ const emptyDraft: BackupDraft = {
   storageTested: false,
 };
 
-export function BackupSetup({ visible }: { visible: boolean }) {
+export function BackupSetup({ visible, showActivity = false }: { visible: boolean; showActivity?: boolean }) {
   const { t } = useTranslation();
   const [draft, setDraft] = useState(emptyDraft);
   const [step, setStep] = useState<'sources' | 'storage' | 'activity'>('sources');
+  const previousActivity = useRef(false);
+  useEffect(() => {
+    if (!visible) return;
+    if (showActivity) setStep('activity');
+    else if (previousActivity.current) setStep('sources');
+    previousActivity.current = showActivity;
+  }, [visible, showActivity]);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<SyncProgress | null>(null);
   const progressVersion = useRef(0);

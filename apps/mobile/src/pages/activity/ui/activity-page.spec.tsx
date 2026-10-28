@@ -1,4 +1,4 @@
-import { Alert, AppState, Platform, StyleSheet, type AppStateStatus } from 'react-native';
+import { Alert, AppState, Platform, type AppStateStatus } from 'react-native';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { ActivityPage } from './activity-page';
 import { fileTransfer, photoManifestPrefix } from '../../../shared/api/file-transfer';
@@ -46,7 +46,7 @@ it('uses only own completed list results for explicit destination restore; cance
   jest.mocked(fileTransfer.restore).mockResolvedValueOnce(backup);
   await fireEvent.press(surface.getByText(restoreLabel));
   await waitFor(() => expect(surface.getByText(i18n.t('transfer.backups.restored', { name: backup.name }))).toBeTruthy());
-  expect(StyleSheet.flatten(surface.getByText(i18n.t('transfer.backups.restored', { name: backup.name })).props.style).color).toBe('#1C1917');
+  expect(surface.getByText(i18n.t('transfer.backups.restored', { name: backup.name })).props.className).toContain('text-ink');
   await surface.unmount();
 });
 

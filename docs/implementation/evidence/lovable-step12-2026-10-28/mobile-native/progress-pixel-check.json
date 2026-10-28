@@ -1,0 +1,35 @@
+{
+  "scope": "Synthetic productionByteProgress screenshot; nottransferproof",
+  "groups": [
+    {
+      "first": 690,
+      "last": 707,
+      "maxRun": 528
+    },
+    {
+      "first": 852,
+      "last": 869,
+      "maxRun": 1046
+    },
+    {
+      "first": 1014,
+      "last": 1031,
+      "maxRun": 1057
+    }
+  ],
+  "expectedNonzeroBars": [
+    50,
+    99,
+    100
+  ],
+  "imageDimensions": [
+    1179,
+    2556
+  ],
+  "ratios": [
+    0.499527,
+    0.989593,
+    1.0
+  ],
+  "pixelCheck": "PASS (within1pixel for50/99percent versus100percent fullwidth)"
+}

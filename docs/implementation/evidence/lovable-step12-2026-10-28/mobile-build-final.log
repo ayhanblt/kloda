@@ -1,0 +1,66 @@
+
+> @kloda/mobile@0.0.0 build
+> expo export --platform ios && expo export --platform android
+
+Using src/app as the root directory for Expo Router.
+Expo Autolinking module resolution enabled
+Starting Metro Bundler
+
+| (node:38365) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:38365) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:38365) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:38365) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:38365) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:38365) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+iOS Bundled 12195ms node_modules/expo/AppEntry.js (3348 modules)
+
+› Assets (4):
+../../assets/fonts/inter/Inter-Bold.ttf (343KB)
+../../assets/fonts/inter/Inter-Medium.ttf (342KB)
+../../assets/fonts/inter/Inter-Regular.ttf (341KB)
+../../assets/fonts/inter/Inter-SemiBold.ttf (343KB)
+
+› ios bundles (1):
+_expo/static/js/ios/AppEntry-cea36b91430b0a405b803311bf527840.hbc (5.8MB)
+
+› Files (1):
+metadata.json (396B)
+
+Exported: dist
+Using src/app as the root directory for Expo Router.
+Expo Autolinking module resolution enabled
+Starting Metro Bundler
+
+| (node:39005) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:39005) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:39005) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:39005) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:39005) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:39005) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+Android Bundled 9148ms node_modules/expo/AppEntry.js (3347 modules)
+
+› Assets (4):
+../../assets/fonts/inter/Inter-Bold.ttf (343KB)
+../../assets/fonts/inter/Inter-Medium.ttf (342KB)
+../../assets/fonts/inter/Inter-Regular.ttf (341KB)
+../../assets/fonts/inter/Inter-SemiBold.ttf (343KB)
+
+› android bundles (1):
+_expo/static/js/android/AppEntry-95f7ac2ecb8e4ec5fec15fac9c4a3b17.hbc (5.8MB)
+
+› Files (1):
+metadata.json (404B)
+
+Exported: dist

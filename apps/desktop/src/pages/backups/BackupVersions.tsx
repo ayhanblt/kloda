@@ -3,11 +3,11 @@ import { useTranslation } from 'react-i18next';
 
 import type { BackupVersion, BackupVersionPage } from '../../shared/api/desktop';
 
-export function BackupVersions() {
+export function BackupVersions({ initialTrash = false, onViewChange }: { initialTrash?: boolean; onViewChange?(trash: boolean): void }) {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage?.split('-')[0];
   const confirmationLanguage = language === 'tr' || language === 'de' ? language : 'en';
-  const [trash, setTrash] = useState(false);
+  const [trash, setTrash] = useState(initialTrash);
   const [cursor, setCursor] = useState<string>();
   const [previous, setPrevious] = useState<(string | undefined)[]>([]);
   const [page, setPage] = useState<BackupVersionPage | null>(null);
@@ -101,7 +101,7 @@ export function BackupVersions() {
     <p className="mt-2 text-sm">{t('backups.suppression')}</p>
     <div className="mt-4 flex flex-wrap gap-4" role="group" aria-label={t('backups.view')}>
       {[false, true].map((value) => <button className="pairing-button" key={String(value)} type="button" aria-pressed={trash === value}
-        disabled={busy || trash === value} onClick={() => { reset(); setSelected([]); setPrevious([]); setTrash(value); }}>{t(value ? 'backups.trash' : 'backups.active')}</button>)}
+        disabled={busy || trash === value} onClick={() => { reset(); setSelected([]); setPrevious([]); setTrash(value); onViewChange?.(value); }}>{t(value ? 'backups.trash' : 'backups.active')}</button>)}
     </div>
     {error && <p className="mt-4 text-red-600" role="alert">{t('backups.unavailable')}</p>}
     {selectionError && <p className="mt-4 text-red-600" role="alert">{t('backups.selectionError')}</p>}

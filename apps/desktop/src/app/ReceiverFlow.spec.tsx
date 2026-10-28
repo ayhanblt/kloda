@@ -11,7 +11,7 @@ const initial: BackgroundStatus = {
   environmentLimited: false, shutdownError: false,
 };
 function fixture(status = initial) {
-  window.history.replaceState(null, '', '/');
+  window.history.replaceState(null, '', '#/receiver');
   const pairing = { status: vi.fn().mockResolvedValue({ phase: 'idle' }), createInvitation: vi.fn(),
     approve: vi.fn(), deny: vi.fn(), cancel: vi.fn(), resume: vi.fn(), close: vi.fn().mockResolvedValue(undefined),
     approveBackup: vi.fn(), revokeBackup: vi.fn() };
@@ -71,7 +71,7 @@ it('connects QR, separate permissions, history and settings without granting or 
 });
 
 it('shows unknown instead of a successful setup when the native bridge is absent', () => {
-  window.history.replaceState(null, '', '/');
+  window.history.replaceState(null, '', '#/receiver');
   render(<App />);
   expect(screen.getByText(i18n.t('background.unknown'))).toHaveAttribute('role', 'alert');
   expect(screen.queryByText(i18n.t('background.listening'))).not.toBeInTheDocument();
@@ -89,4 +89,17 @@ it.each(['tr', 'en', 'de'])('keeps the receiver flow and navigation translated i
   expect(screen.queryByText(/receiver\./)).not.toBeInTheDocument();
   cleanup();
   await i18n.changeLanguage('tr');
+});
+
+it('lets setup be skipped without manufacturing pairing, permissions or autostart', async () => {
+  const { pairing, devices, background } = fixture();
+  window.history.replaceState(null, '', '/');
+  render(<App />);
+  expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(i18n.t('ui.welcomeTitle'));
+  fireEvent.click(screen.getByRole('button', { name: i18n.t('ui.skipSetup') }));
+  expect(window.location.hash).toBe('#/receiver');
+  expect(await screen.findByText(i18n.t('background.listening'))).toBeVisible();
+  expect(pairing.createInvitation).not.toHaveBeenCalled();
+  expect(devices.approveBackup).not.toHaveBeenCalled();
+  expect(background.setAutostart).not.toHaveBeenCalled();
 });

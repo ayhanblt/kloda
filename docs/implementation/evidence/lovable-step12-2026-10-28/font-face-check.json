@@ -1,0 +1,32 @@
+{
+  "utc": "2026-10-28T18:20:27.385513+00:00",
+  "status": "PASS",
+  "method": "fontTools TTFont nameID6 and OS/2 usWeightClass; four distinct native face names",
+  "notProven": "Not a native runtime or pixel-parity assertion",
+  "faces": [
+    {
+      "path": "assets/fonts/inter/Inter-Regular.ttf",
+      "postScriptName": "Inter-Regular",
+      "weightClass": 400,
+      "sha256": "a7e85d838fd6739a47c3b38a63ca7a36357770cc61f7d18eb9fb5a8807104d45"
+    },
+    {
+      "path": "assets/fonts/inter/Inter-Medium.ttf",
+      "postScriptName": "Inter-Medium",
+      "weightClass": 500,
+      "sha256": "ffec5bb6bd59310d94034e445e03c3f19faf0cdddd971ec983a3178a6c2bcf88"
+    },
+    {
+      "path": "assets/fonts/inter/Inter-SemiBold.ttf",
+      "postScriptName": "Inter-SemiBold",
+      "weightClass": 600,
+      "sha256": "127d711e8ca7b938a0cc58d40e6f881277cd1f9881dd8c1bc5aa36b4a238bab7"
+    },
+    {
+      "path": "assets/fonts/inter/Inter-Bold.ttf",
+      "postScriptName": "Inter-Bold",
+      "weightClass": 700,
+      "sha256": "b8b760374cb3846fef01e7ed6855a047ac257514b382fa36ae17a6011624f8ce"
+    }
+  ]
+}

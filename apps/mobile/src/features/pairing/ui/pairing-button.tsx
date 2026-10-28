@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
-
-import { colors } from '../../../shared/ui/tokens';
+import { Pressable } from 'react-native';
+import { Text } from '../../../shared/ui/text';
 
 interface Props {
   label: string;
@@ -12,27 +11,17 @@ interface Props {
 }
 
 export function PairingButton({ label, onPress, disabled, secondary, icon }: Props) {
-  // Keep RN's pressed-style callback: this shared button already uses native StyleSheet styles.
   return (
     <Pressable
-      cssInterop={false}
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled: !!disabled }}
       disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [styles.button, secondary && styles.secondary, (pressed || disabled) && styles.dimmed]}
+      className={`min-h-[48px] min-w-0 shrink flex-row items-center justify-center gap-2 rounded-xl px-4 py-3 active:opacity-70 ${secondary ? 'border border-border bg-white' : 'bg-primary'} ${disabled ? 'opacity-50' : ''}`}
     >
       {icon}
-      <Text style={[styles.label, secondary && styles.secondaryLabel]}>{label}</Text>
+      <Text className={`min-w-0 shrink text-center text-base font-inter-semibold ${secondary ? 'text-ink' : 'text-white'}`}>{label}</Text>
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  button: { flexShrink: 1, minWidth: 0, minHeight: 48, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, backgroundColor: colors.primary, flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center' },
-  secondary: { backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.border },
-  dimmed: { opacity: 0.5 },
-  label: { flexShrink: 1, minWidth: 0, color: colors.elevated, fontSize: 16, fontWeight: '600', textAlign: 'center' },
-  secondaryLabel: { color: colors.ink },
-});

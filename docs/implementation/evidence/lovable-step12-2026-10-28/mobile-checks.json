@@ -1,0 +1,36 @@
+{
+  "utc": "2026-10-28T18:24:15.798351+00:00",
+  "scope": "step12 source/automated checks; native visual report separate",
+  "commands": {
+    "mobile-suite": "npm run test --workspace @kloda/mobile",
+    "lint": "npm run lint --workspace @kloda/mobile",
+    "typecheck": "npx tsc --noEmit -p apps/mobile/tsconfig.json",
+    "exports": "npm run build --workspace @kloda/mobile"
+  },
+  "checks": {
+    "jest": "123 tests /14 suites PASS; exit0",
+    "lint": "PASS exit0",
+    "typecheck": "PASS exit0",
+    "iosAndroidJsExports": "PASS exit0"
+  },
+  "sourceHashes": {
+    "apps/mobile/App.tsx": "215dc2c0ee33f42053e64fb03abf69f8822f15524c81c8dac17ed7ce0c52cda4",
+    "apps/mobile/metro.config.js": "0f70baec2ff4801d4c3c1f2d11857d83bcb23077ec0cda461ff2dca54e429ba4",
+    "apps/mobile/tailwind.config.js": "8b16862d211f2fb97d3bdc959587e2994a3404f020a6238718c3f44d26dace76",
+    "apps/mobile/src/app/App.tsx": "4aa3efbd3cbe3623d5e2d301597f4d0c580fc3f951d50222eef67f1f5c92f71e",
+    "apps/mobile/src/features/backup-setup/model/use-backup-setup.ts": "2db9b46acf97bb07f691306092d8c7040253905b642793d12d63f44bcafd0d20",
+    "apps/mobile/src/widgets/mobile-shell/ui.tsx": "698afcec86d6a844935303d587469f715c2dbcd3df67535912590850cd9c3dda",
+    "apps/mobile/src/shared/ui/byte-progress.tsx": "d51929e813b62fb8703d3084988710c0833ca81ab6ff1d3b9d95fa89dae9df82",
+    "apps/mobile/src/shared/ui/logo.tsx": "d889fe736b88be0f81f23f6aee50a12062fa9c107248bb602105c9b272e33a85",
+    "packages/sync-core/src/destination-catalog.ts": "4f011044554af2a7d4954c9a46ec29c2c735ef84e7342b8112999119c7c45487",
+    "assets/fonts/inter/provenance.json": "2bd2df11d7930352eb3db74f6ed7914b94d0a074d4d0e4c6c509e01404b7bb1d",
+    "apps/mobile/src/shared/ui/text.tsx": "07f863bb374783d1bc58ab6023a18a74d15f092ff2fc86b5fe7ed00c2919f07a"
+  },
+  "limits": [
+    "Jest flow assertions do not prove real QR/trust/native transfers",
+    "JS export is not a new native app build",
+    "Actual simulator visual fixtures recorded separately",
+    "No physical/product/provider acceptance"
+  ],
+  "finalFollowup": "Final123/14 suite/lint/typecheck/exports completed after unique native font names and text-only remeasurement fix. Font bytes/registration have separate self-check/native evidence; Jest does not load real fonts."
+}

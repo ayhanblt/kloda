@@ -1,0 +1,434 @@
+[
+  {
+    "result": "READY",
+    "id": 34,
+    "stage": "welcome",
+    "language": "tr",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production App initial route",
+    "file": "tr-welcome.png",
+    "sha256": "41cebe7f53df5a1184c26b884f0633970bebdfa2686607b177aa7b29f2615e5b",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 35,
+    "stage": "home",
+    "language": "tr",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "tr-home.png",
+    "sha256": "aab345334aefbd1691cc7d7a706458d5a18f9237e992dfe5e0c6cf12792d59be",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 36,
+    "stage": "connections",
+    "language": "tr",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "tr-connections.png",
+    "sha256": "b744b2957742ad43a4fe5891b844a58540e19fd151efe26e8eb11a448037989e",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 37,
+    "stage": "catalogue",
+    "language": "tr",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "tr-catalogue.png",
+    "sha256": "ed11859bb69d6c93e7263b89e5e622e9c90dce17bc255d9ab7fd90cf9b3e704d",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 38,
+    "stage": "provider",
+    "language": "tr",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "tr-provider.png",
+    "sha256": "fabaa0059e0f50d6fe5aa6461057d44062e1f71a799e530f5c642a70fc598207",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 39,
+    "stage": "activity",
+    "language": "tr",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "tr-activity.png",
+    "sha256": "dea3b1653d363ebf1d36d839d57dff8d2e982d21957d51ab40d1264313c27726",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 40,
+    "stage": "backups",
+    "language": "tr",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "tr-backups.png",
+    "sha256": "9110aed7fb1e3fa2b347fe1246ded07034487d1fbbf9865f37bd076a4119b303",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 41,
+    "stage": "settings",
+    "language": "tr",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "tr-settings.png",
+    "sha256": "8b91a23d11c4d56a23ccd6df3db9f7ff0bf67fbde298ea221363941938ce56a9",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 42,
+    "stage": "welcome",
+    "language": "en",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production App initial route",
+    "file": "en-welcome.png",
+    "sha256": "befc577b9f0245faa0fda80135f7ef00db83ea7a753dcf164cdddc39bbd4960b",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 43,
+    "stage": "home",
+    "language": "en",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "en-home.png",
+    "sha256": "bfb968341eeae1df433c12d7247800d74dc53349de9c2be95b13fc477ebc999e",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 44,
+    "stage": "connections",
+    "language": "en",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "en-connections.png",
+    "sha256": "fdc56023a591d5a84830d41bbe5d92e3e1940c11543ed57f3bef4ed9b6190a92",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 45,
+    "stage": "catalogue",
+    "language": "en",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "en-catalogue.png",
+    "sha256": "827166c854de50ee05bcdb349d3f3a75bcfde7639149f06fbd39fefde5b69452",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 46,
+    "stage": "provider",
+    "language": "en",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "en-provider.png",
+    "sha256": "d76e3bb55599db299a0dbce918f203e396e13afff810bb670f67e6a3ffddeab9",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 47,
+    "stage": "activity",
+    "language": "en",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "en-activity.png",
+    "sha256": "77cd01df3414487cf436f537dabcc12d61a9a67a23b66583d62bb6b0d0131838",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 48,
+    "stage": "backups",
+    "language": "en",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "en-backups.png",
+    "sha256": "6b8292a0de7449b2240b01ce67afe3b7567976149f88c4ee8b4b48dfa4344f29",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 49,
+    "stage": "settings",
+    "language": "en",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "en-settings.png",
+    "sha256": "cd4c9292e823ca5b5ce910c0375acf46839ef21994ab7f98beffd2c2e2831851",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 50,
+    "stage": "welcome",
+    "language": "de",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production App initial route",
+    "file": "de-welcome.png",
+    "sha256": "ced70e4ab0d1e83f6ef1abd3f44ae9dcefd161d1af9d3ae995ebc9962ff68f5d",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 51,
+    "stage": "home",
+    "language": "de",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "de-home.png",
+    "sha256": "04c08b915f281b486e63dc720c684116199e7f3593456e8a9ccc579ea04cda89",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 52,
+    "stage": "connections",
+    "language": "de",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "de-connections.png",
+    "sha256": "e82e1a992903dda60e0463220cf01e9db968f3a03837b29e05eee8069a13ce84",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 53,
+    "stage": "catalogue",
+    "language": "de",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "de-catalogue.png",
+    "sha256": "8c8857bd512d49816231de30a2df449371bf58011d3b048ed7b57c2dd323208c",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 54,
+    "stage": "provider",
+    "language": "de",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "de-provider.png",
+    "sha256": "c53f8da73658cba5033dd626c287d819403942a215eee8b7e19a258f443b1d54",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 55,
+    "stage": "activity",
+    "language": "de",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "de-activity.png",
+    "sha256": "741da448134fc1b94406c150afa7a017cacfa2e0ddc6621a4c2ddbb5cc2e8e8b",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 56,
+    "stage": "backups",
+    "language": "de",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "de-backups.png",
+    "sha256": "69065864a7f74202e13e8c7f321dc50148680ed7e768d3f5aacb5c5817b68782",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  },
+  {
+    "result": "READY",
+    "id": 57,
+    "stage": "settings",
+    "language": "de",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "de-settings.png",
+    "sha256": "cc0a8fa82b499491016128e04fa6365fd1898afbbe1543de4dde419433b99c5d",
+    "fonts": "production Inter regular/medium/semibold/bold loaded before mounting"
+  }
+]

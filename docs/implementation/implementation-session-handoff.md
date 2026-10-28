@@ -1,5 +1,17 @@
 # Kloda — implementation session handoff
 
+2026-10-28 **Liste12 UI kaynağı/otomatik/izole kapsam:** [Lovable ortak kabuk ve akış raporu](lovable-ui-step12-2026-10-28.md). Mobil123test/14suite, lint/TS/iOS+Android export; Desktop322tam test+sonra13hedefli, lint/TS/build ve42font-loaded renderer capture geçti. iOS production-page fixture + büyük yazı/font-change takipleri var; Android native görsel ADB unauthorized nedeniyle **açık/NOT_RUN**. Kurulumu atla oturumluk ve yetki yazmaz;16sağlayıcı kataloğu var, uygulanmamış adapterler kapalı. Galeri13, provider/auth14+, LiveActivities19, bütünleşik20 ve fiziksel21 ayrı. Eski başarı/örnek QR/grant gerçek duruma çevrilmedi. Fiziksel/platform kapıları, launcher/native OS görsel/a11y ve Android doğrulama açığı kapanmadı. Git/authority mutation yok.
+
+
+2026-10-28 **Liste11 tasarım alımı tamam:** [Frozen Lovable kaynak/asset ve42kalem eşleme](lovable-design-intake-step11-2026-10-28.md). Proje222ef478… / cb1143d16f73,151dosya,7JPEG decode,6web capture; native/test/build kabulü değil. Demo grant/QR/header-state, i18n/inline-style/max-lines farkları12uyarlama girdisi.15eski Stitch tasarım+5Finder metadata yerel özel ZIP’e hash/readback ile yedeklenip eski klasör kaldırıldı; bağımsız backup yok. Revizyon kapanışta değişmedi. Uygulama kodu/Lovable kaynağı/authority/Git mutation yok; sıradaki12, henüz başlamadı.
+
+
+2026-10-28 **Bağlayıcı tasarım ve Live Activities güncellemesi:** [Lovable proje/revizyonu](../ui/lovable-design-reference.md) MCP ile erişildi; kullanıcı bu tasarımı kesin UI kaynağı olarak onayladı. Eski Stitch kaynak değil tarihsel kanıt. Mevcut max-lines300 (yorum/boş satır hariç), TR/EN/DE metin anahtarları, Tailwind/NativeWind+global CSS, Lucide ve FSD/component kuralları teyit edildi. [Güncel plan](expanded-execution-plan-2026-10-28.md):18 bulut sonrası19 iOS Live Activities,20 bütünleşik hazırlık,21 son fiziksel kabul. Önceki20-adım özetler tarihsel. Ayrıntılı tasarım alımı/native uyarlama henüz başlamadı; klasör kaldırma yeni asset/source capture sonrasında. Bu güncellemede test/build/cihaz/Lovable üretimi yok.
+
+
+2026-10-28 **Kullanıcı onaylı plan genişletmesi:** [Güncel20-adım sıra](expanded-execution-plan-2026-10-28.md).1–10 önceki kanıt sınırlarıyla korunur;11 Lovable/Stitch alımı,12 ana akış/kurulumu atla,13 galeri/detay,14 teknik karar matrisi,15 mobil WebDAV gönderici,16 SMB/SFTP/FTP,17 S3uyumlu/AmazonS3,18 diğer10bulut,19 bütünleşik/platform hazırlığı,20 toplu fiziksel kabul. Tüm42 tasarım kalemi ve16 protokol/sağlayıcı seçeneği izlenir; FTP/SFTP/auth/SDK/lisans/maliyet kararları verilmiş sayılmaz. Tasarım kullanıcıdan bekleniyor; bu güncellemede geliştirme/test/build/cihaz veya Lovable üretim komutu yok. Eski11 kabul atıfları tarihsel; kabul en sona taşındı.
+
+
 2026-10-28 **Mobil liste10 otomatik/izole kapsam:**108 test/11suite, lint/TS/iki export, tam iOS Simulator app build, Android Kotlin+modül K1 lint geçti. WebDAV probe belirsizliği mevcut profilde kalıcı; native typed disk-full ve safe-area/NativeWind/klavye/büyük-yazı görünümü düzeltildi. Native iOS görsel/256MiB staging örneği ve6 host görsel kontrol kaydedildi; fixture gerçek LAN/PC veya fiziksel kabul değildir. [Kapsam, kanıt, açıklar ve SDK config yan etkisi](mobile-integrated-step10-2026-10-28.md). Büyük koruma kopyasının receiver gecikmesi ölçülmedi; alan/cleanup, gerçek WebDAV sender, iPhone/OS/PC ve tam ekran okuyucu kabulü açık. [Android dar UI followup PASS](mobile-android-step10-followup-2026-10-28.md): normal debugging onayı,480×800 sentetik kaynak/PC/ACK/unknown ve farklı-PID profil/uyarı reopen doğrulandı; fiziksel/LAN kabulü değil. Liste11 başlatılmadı.
 
 
@@ -97,7 +109,7 @@ Roadmap [checkpoint](stages-one-two-roadmap.md#kesintisiz-yürütme--kalan-paket
 3. [PC-first ürün sözleşmesi](../product/computer-backup-files-and-photos.md), [ADR0005](../decisions/0005-computer-first-files-and-photos-backup.md), [ADR0006](../decisions/0006-account-mfa-and-recovery-policy.md): Files/Photos, account, izin ve recovery kapsamı.
 4. [Production/physical gate envanteri](../security/production-gates.md): ilgili dilimin gerçek prerequisite'leri.
 5. Security/native entegrasyonuna dokunulursa [ADR0004](../decisions/0004-certificate-bound-capability-and-authority-responsibilities.md), [ADR0007](../decisions/0007-matrix-verification-and-device-continuity.md), [ADR0008](../decisions/0008-upstream-first-sdk-and-persistent-certificate-direction.md), [preparation](issuance-admission-preparation.md) ve [Stage1/2 roadmap](stages-one-two-roadmap.md).
-6. UI değişirse [Stitch eşlemesi](../ui/stitch-reference.md) ve readonly `stitch_private_photo_cloud/` tasarım referansı; yeni layout/design-system kararı varsayılmaz.
+6. UI değişirse [Lovable tasarım referansı](../ui/lovable-design-reference.md) ve frozen151-dosya snapshot/manifest kullanılmalıdır; eski Stitch klasörü arşivlenip kaldırıldı. Görsel değişiklik/güvenlik istisnası varsayılmaz.
 
 ## İlk implementation diliminin başlangıç kontrolü
 

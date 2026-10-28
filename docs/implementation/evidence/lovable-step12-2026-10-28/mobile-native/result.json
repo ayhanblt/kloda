@@ -1,0 +1,397 @@
+{
+  "utc": "2026-10-28T18:17:03.494372+00:00",
+  "scope": "Native iOS Simulator UI rendering with synthetic JS API overrides; not platform/transfer acceptance",
+  "simulator": "740846BE-AA4E-4507-9ADA-0E092B5563B9",
+  "app": "Pre-existing com.kloda.app Debug binary; no rebuild/reinstall",
+  "normalMatrix": {
+    "status": "CAPTURED24",
+    "languages": [
+      "tr",
+      "en",
+      "de"
+    ],
+    "stages": [
+      "welcome",
+      "home",
+      "connections",
+      "catalogue",
+      "provider",
+      "activity",
+      "backups",
+      "settings"
+    ],
+    "records": "captures.json",
+    "scope": "ProductionApp initial welcome; other cases direct productionpage+shell fixtures; captured before final adaptive-shell keys. Finalnormalhome recaptured below. All24matrixshots precede internalfontmetadata correction; not currentfourweightparityproof."
+  },
+  "finalCycle": {
+    "status": "PASS for observed geometry",
+    "sameAppProcessPid": 31171,
+    "sequence": {
+      "initial": {
+        "result": "READY",
+        "id": 66,
+        "stage": "home",
+        "language": "de",
+        "dimensions": {
+          "fontScale": 1,
+          "width": 393,
+          "height": 852,
+          "scale": 3
+        },
+        "active": true,
+        "platform": "ios",
+        "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+        "file": "de-home-cycle-initial.png",
+        "sha256": "c62957a75bafef6fc61f7b1fe17dd4442a7a81075287e6e26b7963e1b53e555d"
+      },
+      "maximum": {
+        "result": "READY",
+        "id": 67,
+        "stage": "home",
+        "language": "de",
+        "dimensions": {
+          "scale": 3,
+          "width": 393,
+          "height": 852,
+          "fontScale": 3.571
+        },
+        "active": true,
+        "platform": "ios",
+        "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+        "file": "de-home-maximum-before-font-correction.png",
+        "sha256": "577673d091bf8d5800a65c19396818bb2c406460a49cd1d21cfdbeebd56aa75f"
+      },
+      "return": {
+        "result": "READY",
+        "id": 68,
+        "stage": "home",
+        "language": "de",
+        "dimensions": {
+          "scale": 3,
+          "width": 393,
+          "height": 852,
+          "fontScale": 1
+        },
+        "active": true,
+        "platform": "ios",
+        "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+        "file": "de-home-normal-before-font-correction.png",
+        "sha256": "fa1d6acb0cba79939a1bbfe40d64bfa0ca9fd9b6506b39e28f7e01dcbc1c3954"
+      }
+    },
+    "commands": [
+      {
+        "command": "python3 capture-normal.py (initial)",
+        "exitCode": 0
+      },
+      {
+        "command": "simctl ui <owned> content_size accessibility-extra-extra-extra-large",
+        "exitCode": 0
+      },
+      {
+        "command": "python3 capture-max.py",
+        "exitCode": 0
+      },
+      {
+        "command": "simctl ui <owned> content_size large",
+        "exitCode": 0
+      },
+      {
+        "command": "python3 capture-normal.py (return)",
+        "exitCode": 0
+      }
+    ],
+    "observed": "Normal->3.571->normal in same process; final brand/status geometry and visible tab labels readable. Max footer horizontal strip shows first2full tabs; native swipe toremainingtabs NOT_RUN.",
+    "scope": "Priorfontmetadata; chrome-onlygeometrypass, not fullbodydynamicfontacceptance"
+  },
+  "largeFont": "Representative1.786 de home/activity/settings captured; final3.571 same-process check validates adaptive chrome and return; no fontcap applied",
+  "findingsFixed": [
+    "Initial1.786header/tab clipping reported to root; root corrected layout",
+    "3.571header/tab clipping reported; root added adaptiveheader/horizontalfulltexttabstrip",
+    "Return-to-normal stale chrome geometry resolved by root header/footer fontScale keys; main children not keyed",
+    "After internalfontPostScriptcorrection, dynamicbodyTextmeasurementfailure fixed by sharednativeText-onlyfontScale key; pagehooks/nativelifetimesnotremounted"
+  ],
+  "preservedFailures": [
+    "de-home-maximum-before-fix.png",
+    "de-home-normal-after-font-change.png",
+    "captures-max-before-fix.json"
+  ],
+  "progress": {
+    "scope": "Synthetic productionByteProgress screenshot; nottransferproof",
+    "groups": [
+      {
+        "first": 690,
+        "last": 707,
+        "maxRun": 528
+      },
+      {
+        "first": 852,
+        "last": 869,
+        "maxRun": 1046
+      },
+      {
+        "first": 1014,
+        "last": 1031,
+        "maxRun": 1057
+      }
+    ],
+    "expectedNonzeroBars": [
+      50,
+      99,
+      100
+    ],
+    "imageDimensions": [
+      1179,
+      2556
+    ],
+    "ratios": [
+      0.499527,
+      0.989593,
+      1.0
+    ],
+    "pixelCheck": "PASS (within1pixel for50/99percent versus100percent fullwidth)"
+  },
+  "fontEvidence": "Harness registered all4productionInteraliases with expo-font and mounted only after loaded; native screenshots include loadedInter. OS rasterization/platform layout remain outside pixel-perfect parity claim.",
+  "apiBoundary": "WebDAVload overridden null; native setup readonly getters overridden; pairing.status and fileTransfer status/photoStatus/list/cancelRestore replaced in JS only. No SecureStore reads/writes, native owner/pair/ACL/transfer/Photos calls or mutating handler invoked.",
+  "navigationBoundary": "Native captures do not simulate actual touch routing. Actual App skip/navigation is root Jest coverage. CUA Simulator unavailable: Invalid app by name/fullXcodepath; no swipe/scroll/VoiceOver/landscape/narrowdevice coverage claimed.",
+  "android": {
+    "status": "BLOCKED",
+    "scope": "Only pre-existing ownedAPI36AVD Kloda-Step10-20261028 on emulator5590 with isolatedadbserver5038",
+    "bootCommand": "python3 /tmp/kloda-step10-android-followup/boot.py",
+    "checkCommand": "python3 /tmp/kloda-step10-android-followup/adb.py shell getprop sys.boot_completed",
+    "checkExitCode": 1,
+    "stderr": "adb: device unauthorized. This adb server's $ADB_VENDOR_KEYS is /tmp/kloda-step10-android/adbkey. Try 'adb kill-server' if that seems wrong. Otherwise check for a confirmation dialog on your device.",
+    "notRun": [
+      "Androidapp launch",
+      "Androidscreenshots",
+      "physicaldevice",
+      "key/authorization reset"
+    ],
+    "cleanup": "CtrlC to ownedboot.py session; its existing finally terminated onlyownedemulator and ownedadbserver; OWNED_STOPPED exit0",
+    "inference": "No cause asserted for unauthorized; no existingkey/AVDconfig changed"
+  },
+  "infrastructure": [
+    "Initial sandbox denied CoreSimulator; escalated ownedSimulator access succeeded",
+    "Metro bound IPv6 localhost (127.0.0.1 refused); actual localhostURL succeeded",
+    "Expo/NativeWind watcher crashed on sourcechange: TypeError addedFiles undefined; raw metro.log retained. Restart aftersourcefreeze succeeded; no dependency workaround"
+  ],
+  "warnings": [
+    "Expo Debug floatinggear overlays top-right; this is developerUI not production",
+    "SafeAreaView deprecation in dependency log; owned surfaces use safe-area-context"
+  ],
+  "notRun": [
+    "physicalacceptance",
+    "realreceiver/peer/grant/transfer",
+    "Photos/files",
+    "actualtouchflow",
+    "nativehorizontal swipe",
+    "VoiceOver",
+    "landscape",
+    "narrowdevice",
+    "Androidnativevisual"
+  ],
+  "gitMutation": false,
+  "sourceHashes": "source-hashes-final.json",
+  "cleanup": {
+    "ownedIosAppTerminate": 0,
+    "ownedIosSimulatorShutdown": 0,
+    "ownedMetroCtrlCExit": 0,
+    "ownedHTTPServerCtrlCExit": 1,
+    "httpExitExplanation": "Expected KeyboardInterrupt from foreground fixture HTTP server; not a testfailure",
+    "ownedAndroid": "existing boot.py cleanup OWNED_STOPPED exit0",
+    "originalContentSize": "large restored before shutdown",
+    "others": "Unrelated booted Simulator/devices/processes untouched"
+  },
+  "fontMetadataCorrection": {
+    "utc": "2026-10-28T18:22:12.261923+00:00",
+    "normal": {
+      "result": "READY",
+      "fontRegistration": {
+        "Inter-Regular": true,
+        "Inter-Medium": true,
+        "Inter-SemiBold": true,
+        "Inter-Bold": true,
+        "KlodaInterRegular": true,
+        "KlodaInterMedium": true,
+        "KlodaInterSemiBold": true,
+        "KlodaInterBold": true
+      },
+      "id": 1,
+      "stage": "home",
+      "language": "de",
+      "dimensions": {
+        "fontScale": 1,
+        "width": 393,
+        "height": 852,
+        "scale": 3
+      },
+      "active": true,
+      "platform": "ios",
+      "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+      "file": "de-home-font-corrected-before-text-fix.png",
+      "sha256": "51a7842eded107d6380ef1ea5ed15f0a68d0737938afbc9d5144e767b6de2aa0"
+    },
+    "maximumFreshProcess": {
+      "result": "READY",
+      "fontRegistration": {
+        "Inter-Regular": true,
+        "Inter-Medium": true,
+        "Inter-SemiBold": true,
+        "Inter-Bold": true,
+        "KlodaInterRegular": true,
+        "KlodaInterMedium": true,
+        "KlodaInterSemiBold": true,
+        "KlodaInterBold": true
+      },
+      "id": 3,
+      "stage": "home",
+      "language": "de",
+      "dimensions": {
+        "fontScale": 3.571,
+        "width": 393,
+        "height": 852,
+        "scale": 3
+      },
+      "active": true,
+      "platform": "ios",
+      "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+      "file": "de-home-max-font-corrected-before-text-fix.png",
+      "sha256": "1d613b8903efef3ad32295a8635cf21c79243dd0c7f908901dddeec33951e9d7"
+    },
+    "normalCommandExit": 0,
+    "maxFreshCommandExit": 0,
+    "nativeRegistrationCheck": "PASS fourdistinctInterPostScriptnames +fourKlodaaliases true viaExpoFontLoader.getLoadedFonts (nativeModule). No UIFontdirectquery API available inexistingbridge; notadded.",
+    "fileNames": [
+      {
+        "file": "assets/fonts/inter/Inter-Medium.ttf",
+        "sha256": "ffec5bb6bd59310d94034e445e03c3f19faf0cdddd971ec983a3178a6c2bcf88"
+      },
+      {
+        "file": "assets/fonts/inter/Inter-Bold.ttf",
+        "sha256": "b8b760374cb3846fef01e7ed6855a047ac257514b382fa36ae17a6011624f8ce"
+      },
+      {
+        "file": "assets/fonts/inter/Inter-Regular.ttf",
+        "sha256": "a7e85d838fd6739a47c3b38a63ca7a36357770cc61f7d18eb9fb5a8807104d45"
+      },
+      {
+        "file": "assets/fonts/inter/Inter-SemiBold.ttf",
+        "sha256": "127d711e8ca7b938a0cc58d40e6f881277cd1f9881dd8c1bc5aa36b4a238bab7"
+      }
+    ],
+    "observed": "Freshnormal andfreshmaxbody+chrome readable; correctedactualsemiboldappears. Dynamicnormal\u2192maxbodystalegeometryFAIL, savedseparately. Nofullruntimea11yacceptance."
+  },
+  "openFinding": "Previouslyobserved dynamicbodytextclipping resolved by text-only nativeText remeasurement; finalsameprocesscycleobservedPASS. Androidunauthorized and unperformedaccessibilitygesturesremainverificationlimits.",
+  "correctedFontAndTextFinalCycle": {
+    "utc": "2026-10-28T18:23:45.826080+00:00",
+    "sameAppProcess": 38382,
+    "status": "PASS for observed body+chrome font remeasurement",
+    "cycle": {
+      "initial": {
+        "result": "READY",
+        "fontRegistration": {
+          "Inter-Regular": true,
+          "Inter-Medium": true,
+          "Inter-SemiBold": true,
+          "Inter-Bold": true,
+          "KlodaInterRegular": true,
+          "KlodaInterMedium": true,
+          "KlodaInterSemiBold": true,
+          "KlodaInterBold": true
+        },
+        "id": 4,
+        "stage": "home",
+        "language": "de",
+        "dimensions": {
+          "fontScale": 1,
+          "width": 393,
+          "height": 852,
+          "scale": 3
+        },
+        "active": true,
+        "platform": "ios",
+        "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+        "file": "de-home-text-cycle-initial.png",
+        "sha256": "c854fb2e3f263729003a623d32db5f66e0729dcd785574534b3eb9ba6489df0f"
+      },
+      "maximum": {
+        "result": "READY",
+        "fontRegistration": {
+          "Inter-Regular": true,
+          "Inter-Medium": true,
+          "Inter-SemiBold": true,
+          "Inter-Bold": true,
+          "KlodaInterRegular": true,
+          "KlodaInterMedium": true,
+          "KlodaInterSemiBold": true,
+          "KlodaInterBold": true
+        },
+        "id": 5,
+        "stage": "home",
+        "language": "de",
+        "dimensions": {
+          "scale": 3,
+          "width": 393,
+          "height": 852,
+          "fontScale": 3.571
+        },
+        "active": true,
+        "platform": "ios",
+        "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+        "file": "de-home-maximum.png",
+        "sha256": "503686aa57684db95d23381b2ed3aa0d29b6a46b32e87f8102d401aa6697c146"
+      },
+      "return": {
+        "result": "READY",
+        "fontRegistration": {
+          "Inter-Regular": true,
+          "Inter-Medium": true,
+          "Inter-SemiBold": true,
+          "Inter-Bold": true,
+          "KlodaInterRegular": true,
+          "KlodaInterMedium": true,
+          "KlodaInterSemiBold": true,
+          "KlodaInterBold": true
+        },
+        "id": 6,
+        "stage": "home",
+        "language": "de",
+        "dimensions": {
+          "scale": 3,
+          "width": 393,
+          "height": 852,
+          "fontScale": 1
+        },
+        "active": true,
+        "platform": "ios",
+        "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+        "file": "de-home-normal.png",
+        "sha256": "18ca14fb14d7ae884eca946f8a9b818c0f7bcacb77453e6f3209777640df9645"
+      }
+    },
+    "commands": [
+      {
+        "command": "capture-normal.py (initial)",
+        "exitCode": 0
+      },
+      {
+        "command": "simctl ui content_size accessibility-extra-extra-extra-large",
+        "exitCode": 0
+      },
+      {
+        "command": "capture-max.py",
+        "exitCode": 0
+      },
+      {
+        "command": "simctl ui content_size large",
+        "exitCode": 0
+      },
+      {
+        "command": "capture-normal.py (return)",
+        "exitCode": 0
+      }
+    ],
+    "nativeFontRegistration": "8/8 TRUE (fouruniquePostScript+fourKlodaaliases) inallthreephasecallbacks",
+    "scope": "ProductionHomePage+MobileShell directfixture withJS-onlyAPImocks; no nativegrant/transfer. Max firsttwofulltabs visible; nativehorizontalSwipe/VoiceOver/belowfoldnotrun."
+  }
+}

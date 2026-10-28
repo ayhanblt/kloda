@@ -1,0 +1,11 @@
+{
+  "source": "https://github.com/google/fonts/tree/main/ofl/inter",
+  "variableSha256": "29160a80ff49ddcab2c97711247e08b1fab27a484a329ce8b813d820dc559031",
+  "generation": "fontTools 4.57.0 instantiateVariableFont opsz=14, wght=400/500/600/700, updateFontNames=True; outlines unmodified; unique PostScript face names",
+  "files": {
+    "Inter-Medium.ttf": "ffec5bb6bd59310d94034e445e03c3f19faf0cdddd971ec983a3178a6c2bcf88",
+    "Inter-Bold.ttf": "b8b760374cb3846fef01e7ed6855a047ac257514b382fa36ae17a6011624f8ce",
+    "Inter-Regular.ttf": "a7e85d838fd6739a47c3b38a63ca7a36357770cc61f7d18eb9fb5a8807104d45",
+    "Inter-SemiBold.ttf": "127d711e8ca7b938a0cc58d40e6f881277cd1f9881dd8c1bc5aa36b4a238bab7"
+  }
+}

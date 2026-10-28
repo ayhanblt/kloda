@@ -1,0 +1,53 @@
+[
+  {
+    "result": "READY",
+    "id": 61,
+    "stage": "home",
+    "language": "de",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1.786
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "de-home-large.png",
+    "sha256": "e5dd459918b5ee9ade6a738e60cc9675a59a339d1595d578899dc7729e76f332"
+  },
+  {
+    "result": "READY",
+    "id": 62,
+    "stage": "activity",
+    "language": "de",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1.786
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "de-activity-large.png",
+    "sha256": "d89c746bc1a1032fb65d304aa84de6c3050c815027377e89e1581795a99a73d4"
+  },
+  {
+    "result": "READY",
+    "id": 63,
+    "stage": "settings",
+    "language": "de",
+    "dimensions": {
+      "scale": 3,
+      "width": 393,
+      "height": 852,
+      "fontScale": 1.786
+    },
+    "active": true,
+    "platform": "ios",
+    "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+    "file": "de-settings-large.png",
+    "sha256": "caf8429bc99a7dfba95420f9d5d3b8857aee80184490b3479101e523ce30b17c"
+  }
+]

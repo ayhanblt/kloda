@@ -1,0 +1,1509 @@
+{
+  "status": "PASS",
+  "scope": "isolated Electron renderer fixture only; synthetic IPC; no native owner/main/network",
+  "screenshots": [
+    {
+      "name": "welcome-tr-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "unloaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1440,
+      "headings": [
+        "Bu bilgisayarı alıcı yap"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 0
+    },
+    {
+      "name": "home-tr-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1425,
+      "headings": [
+        "Ana sayfa"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "catalogue-tr-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1425,
+      "headings": [
+        "Bağlantı ekle"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "sftp-tr-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1425,
+      "headings": [
+        "SFTP"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "devices-tr-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1440,
+      "headings": [
+        "Eşleşmiş cihazlar ve yedekleme erişimi"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "incoming-tr-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1440,
+      "headings": [
+        "Gelen aktarımlar ve geçmiş"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "settings-tr-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1440,
+      "headings": [
+        "Ayarlar"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "welcome-tr-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "unloaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 625,
+      "headings": [
+        "Bu bilgisayarı alıcı yap"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 0
+    },
+    {
+      "name": "home-tr-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 625,
+      "headings": [
+        "Ana sayfa"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "catalogue-tr-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 625,
+      "headings": [
+        "Bağlantı ekle"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "sftp-tr-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 625,
+      "headings": [
+        "SFTP"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "devices-tr-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 625,
+      "headings": [
+        "Eşleşmiş cihazlar ve yedekleme erişimi"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "incoming-tr-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 625,
+      "headings": [
+        "Gelen aktarımlar ve geçmiş"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "settings-tr-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 640,
+      "headings": [
+        "Ayarlar"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "welcome-en-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "unloaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1440,
+      "headings": [
+        "Make this computer a receiver"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 0
+    },
+    {
+      "name": "home-en-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1425,
+      "headings": [
+        "Home"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "catalogue-en-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1425,
+      "headings": [
+        "Add connection"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "sftp-en-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1425,
+      "headings": [
+        "SFTP"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "devices-en-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1440,
+      "headings": [
+        "Paired devices and backup access"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "incoming-en-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1440,
+      "headings": [
+        "Incoming transfers and history"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "settings-en-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1440,
+      "headings": [
+        "Settings"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "welcome-en-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "unloaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 625,
+      "headings": [
+        "Make this computer a receiver"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 0
+    },
+    {
+      "name": "home-en-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 625,
+      "headings": [
+        "Home"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "catalogue-en-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 625,
+      "headings": [
+        "Add connection"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "sftp-en-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 625,
+      "headings": [
+        "SFTP"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "devices-en-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 625,
+      "headings": [
+        "Paired devices and backup access"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "incoming-en-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 625,
+      "headings": [
+        "Incoming transfers and history"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "settings-en-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 640,
+      "headings": [
+        "Settings"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "welcome-de-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "unloaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1440,
+      "headings": [
+        "Diesen Computer zum Empfänger machen"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 0
+    },
+    {
+      "name": "home-de-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1425,
+      "headings": [
+        "Start"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "catalogue-de-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1425,
+      "headings": [
+        "Verbindung hinzufügen"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "sftp-de-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1425,
+      "headings": [
+        "SFTP"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "devices-de-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1440,
+      "headings": [
+        "Gekoppelte Geräte und Sicherungszugriff"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "incoming-de-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1440,
+      "headings": [
+        "Eingehende Übertragungen und Verlauf"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "settings-de-wide",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 1440,
+      "height": 1000,
+      "scrollWidth": 1440,
+      "headings": [
+        "Einstellungen"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "welcome-de-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "unloaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 625,
+      "headings": [
+        "Diesen Computer zum Empfänger machen"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 0
+    },
+    {
+      "name": "home-de-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 625,
+      "headings": [
+        "Start"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "catalogue-de-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 625,
+      "headings": [
+        "Verbindung hinzufügen"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "sftp-de-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 625,
+      "headings": [
+        "SFTP"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "devices-de-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 625,
+      "headings": [
+        "Gekoppelte Geräte und Sicherungszugriff"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "incoming-de-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 625,
+      "headings": [
+        "Eingehende Übertragungen und Verlauf"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    },
+    {
+      "name": "settings-de-narrow",
+      "interLoaded": true,
+      "interFaces": [
+        {
+          "family": "Inter",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "500",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "600",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "weight": "700",
+          "status": "loaded"
+        }
+      ],
+      "width": 640,
+      "height": 900,
+      "scrollWidth": 640,
+      "headings": [
+        "Einstellungen"
+      ],
+      "inlineStyleCount": 0,
+      "navCount": 1
+    }
+  ],
+  "calls": [
+    "background.status",
+    "draft",
+    "progress",
+    "draft",
+    "background.status",
+    "devices.list",
+    "pairing.close",
+    "activity",
+    "background.status",
+    "background.status",
+    "draft",
+    "progress",
+    "draft",
+    "background.status",
+    "devices.list",
+    "pairing.close",
+    "activity",
+    "background.status",
+    "background.status",
+    "draft",
+    "progress",
+    "draft",
+    "background.status",
+    "devices.list",
+    "pairing.close",
+    "activity",
+    "background.status",
+    "background.status",
+    "draft",
+    "progress",
+    "draft",
+    "background.status",
+    "devices.list",
+    "pairing.close",
+    "activity",
+    "background.status",
+    "background.status",
+    "draft",
+    "progress",
+    "draft",
+    "background.status",
+    "devices.list",
+    "pairing.close",
+    "activity",
+    "background.status",
+    "background.status",
+    "draft",
+    "progress",
+    "draft",
+    "background.status",
+    "devices.list",
+    "pairing.close",
+    "activity",
+    "background.status",
+    "background.status"
+  ],
+  "consoleErrors": [],
+  "checks": [
+    "3 locales x 2 widths x 7 pages",
+    "skip grants nothing",
+    "16 providers",
+    "planned input disabled",
+    "actual status failure removes listening",
+    "no horizontal overflow",
+    "no inline styles",
+    "one accessible navigation",
+    "document.fonts.ready plus actual Inter face loaded, no fallback"
+  ],
+  "notRun": [
+    "physical acceptance",
+    "real provider connections",
+    "native identity/storage",
+    "platform lifecycle acceptance"
+  ]
+}

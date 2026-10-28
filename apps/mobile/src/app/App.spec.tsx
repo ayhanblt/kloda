@@ -1,5 +1,6 @@
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { Platform } from 'react-native';
+import * as ReactNative from 'react-native';
 import { nativeRuntime, restoreNativeRuntime } from './native-runtime.fixture';
 import { App } from './App';
 import { loadWebDavSettings, testAndSaveWebDavSettings } from '../shared/api/webdav-settings';
@@ -7,9 +8,15 @@ import { i18n } from '../shared/i18n';
 
 jest.mock('../shared/api/webdav-settings', () => ({
   loadWebDavSettings: jest.fn().mockResolvedValue(null),
-  testAndSaveWebDavSettings: jest.fn().mockResolvedValue(undefined),
+  testAndSaveWebDavSettings: jest.fn().mockImplementation(async (value: { endpoint: string; targetPath: string; username: string }) => ({ config: { endpoint: value.endpoint, targetPath: value.targetPath, username: value.username }, testedAt: '2026-10-28T00:00:00.000Z' })),
 }));
 
+
+async function renderSetup() {
+  const surface = await render(<App />);
+  await fireEvent.press(surface.getByText(i18n.t('ui.setup.start')));
+  return surface;
+}
 
 describe('App', () => {
   afterAll(restoreNativeRuntime);
@@ -21,8 +28,9 @@ describe('App', () => {
     let finishProbe!: () => void;
     const oldProbe = new Promise<Awaited<ReturnType<typeof testAndSaveWebDavSettings>>>((resolve) => { finishProbe = () => resolve({ config: { endpoint: 'https://fixture.example', targetPath: 'Kloda', username: 'fixture' }, testedAt: null }); });
     jest.mocked(testAndSaveWebDavSettings).mockReturnValueOnce(oldProbe);
-    const { getByText, getByLabelText, queryAllByText } = await render(<App />);
+    const { getByText, getByLabelText, queryAllByText } = await renderSetup();
     await waitFor(() => expect(getByText('Documents')).toBeTruthy());
+    await fireEvent.press(getByText(i18n.t('ui.common.next')));
     await fireEvent.press(getByText(i18n.t('onboarding.saveSchedule')));
     await fireEvent.press(getByText(i18n.t('computer.advanced')));
     await waitFor(() => expect(getByLabelText(i18n.t('onboarding.endpoint'))).toBeTruthy());
@@ -42,8 +50,9 @@ describe('App', () => {
   it('loads only the saved profile metadata and labels its test as past evidence, never current PC success', async () => {
     nativeRuntime.loadDirectorySources.mockResolvedValueOnce([{ id: 'source-1', kind: 'directory', displayName: 'Documents' }]);
     jest.mocked(loadWebDavSettings).mockResolvedValueOnce({ config: { endpoint: 'https://fixture.example', targetPath: 'saved', username: 'fixture' }, testedAt: '2026-10-28T00:00:00.000Z', probeWarning: true });
-    const surface = await render(<App />);
+    const surface = await renderSetup();
     await waitFor(() => expect(surface.getByText('Documents')).toBeTruthy());
+    await fireEvent.press(surface.getByText(i18n.t('ui.common.next')));
     await fireEvent.press(surface.getByText(i18n.t('onboarding.saveSchedule')));
     await fireEvent.press(surface.getByText(i18n.t('computer.advanced')));
     await waitFor(() => expect(surface.getByLabelText(i18n.t('onboarding.targetPath')).props.value).toBe('saved'));
@@ -61,9 +70,10 @@ describe('App', () => {
       let cancel!: () => void;
       const probe = new Promise<Awaited<ReturnType<typeof testAndSaveWebDavSettings>>>((_, reject) => { cancel = () => reject(new Error('webdav_cancelled_probe')); });
       jest.mocked(testAndSaveWebDavSettings).mockReturnValueOnce(probe);
-      const surface = await render(<App />);
+      const surface = await renderSetup();
       await waitFor(() => expect(surface.getByText('Documents')).toBeTruthy());
-      await fireEvent.press(surface.getByText(i18n.t('onboarding.saveSchedule')));
+      await fireEvent.press(surface.getByText(i18n.t('ui.common.next')));
+    await fireEvent.press(surface.getByText(i18n.t('onboarding.saveSchedule')));
       await fireEvent.press(surface.getByText(i18n.t('computer.advanced')));
       await fireEvent.press(surface.getByText(i18n.t('onboarding.testConnection')));
       await fireEvent.changeText(surface.getByLabelText(i18n.t('onboarding.targetPath')), 'new-draft');
@@ -78,16 +88,17 @@ describe('App', () => {
   });
 
   it('lets the user save a 24-hour preference without claiming scheduling is active', async () => {
-    const { getByText } = await render(<App />);
-
+    const { getByText } = await renderSetup();
+    await fireEvent.press(getByText(i18n.t('ui.common.next')));
     await fireEvent.press(getByText(i18n.t('onboarding.everyHours', { hours: 24 })));
 
     await waitFor(() => expect(getByText(i18n.t('onboarding.everyHoursSelected', { hours: 24 }))).toBeTruthy());
   });
 
   it('blocks storage setup until a source is selected', async () => {
-    const { getByText } = await render(<App />);
+    const { getByText } = await renderSetup();
 
+    await fireEvent.press(getByText(i18n.t('ui.common.next')));
     await fireEvent.press(getByText(i18n.t('onboarding.saveSchedule')));
 
     await waitFor(() => expect(getByText(i18n.t('onboarding.sourceRequired'))).toBeTruthy());
@@ -100,7 +111,7 @@ describe('App', () => {
     nativeRuntime.loadPhotoSources.mockResolvedValueOnce([library]);
     nativeRuntime.loadPhotoAlbums.mockResolvedValueOnce([{ id: 'native-album', displayName: 'Camera' }]);
     nativeRuntime.selectPhotoAlbum.mockResolvedValueOnce(album);
-    const { getByText, getByRole, queryByText } = await render(<App />);
+    const { getByText, getByRole, queryByText } = await renderSetup();
     await waitFor(() => expect(getByText('Photos')).toBeTruthy());
     await fireEvent.press(getByRole('button', { name: new RegExp(i18n.t('onboarding.choosePhotoAlbum'), 'i') }));
     await waitFor(() => expect(getByRole('button', { name: /^Camera$/i })).toBeTruthy());
@@ -111,15 +122,16 @@ describe('App', () => {
   });
 
   it('does not treat denied or limited Photos access as a selected library', async () => {
-    const { getByText, queryByText } = await render(<App />);
+    const { getByText, queryByText } = await renderSetup();
     await fireEvent.press(getByText(i18n.t('onboarding.choosePhotoLibrary')));
     await waitFor(() => expect(getByText(i18n.t('onboarding.sourceUnavailable'))).toBeTruthy());
     expect(queryByText(i18n.t('onboarding.sourcesSelected'))).toBeNull();
   });
   it('continues source setup to the PC flow without requiring WebDAV credentials', async () => {
     nativeRuntime.loadDirectorySources.mockResolvedValueOnce([{ id: 'source-1', kind: 'directory', displayName: 'Documents' }]);
-    const surface = await render(<App />);
+    const surface = await renderSetup();
     await waitFor(() => expect(surface.getByText('Documents')).toBeTruthy());
+    await fireEvent.press(surface.getByText(i18n.t('ui.common.next')));
     await fireEvent.press(surface.getByText(i18n.t('onboarding.saveSchedule')));
     await waitFor(() => expect(surface.getByText(i18n.t('computer.title'))).toBeTruthy());
     expect(surface.getByText(i18n.t('computer.grantDescription'))).toBeTruthy();
@@ -131,8 +143,9 @@ describe('App', () => {
   it('retains setup when saving preferences fails', async () => {
     nativeRuntime.loadDirectorySources.mockResolvedValueOnce([{ id: 'source-1', kind: 'directory', displayName: 'Documents' }]);
     nativeRuntime.saveSchedule.mockRejectedValueOnce(new Error('fixture_storage_failure'));
-    const surface = await render(<App />);
+    const surface = await renderSetup();
     await waitFor(() => expect(surface.getByText('Documents')).toBeTruthy());
+    await fireEvent.press(surface.getByText(i18n.t('ui.common.next')));
     await fireEvent.press(surface.getByText(i18n.t('onboarding.saveSchedule')));
     await waitFor(() => expect(surface.getByText(i18n.t('onboarding.saveError'))).toBeTruthy());
     expect(surface.queryByText(i18n.t('computer.title'))).toBeNull();
@@ -142,7 +155,8 @@ describe('App', () => {
   it('uses the native Live default and saves it without changing the retained scheduled time', async () => {
     nativeRuntime.loadSchedule.mockResolvedValueOnce({ backupMode: 'live', intervalHours: 24, localTime: '23:45' });
     nativeRuntime.loadDirectorySources.mockResolvedValueOnce([{ id: 'source-1', kind: 'directory', displayName: 'Documents' }]);
-    const surface = await render(<App />);
+    const surface = await renderSetup();
+    await fireEvent.press(surface.getByText(i18n.t('ui.common.next')));
     await waitFor(() => expect(surface.getByText(i18n.t('onboarding.liveSelected'))).toBeTruthy());
     expect(surface.queryByLabelText(i18n.t('onboarding.localStartTime'))).toBeNull();
     await fireEvent.press(surface.getByText(i18n.t('onboarding.saveSchedule')));
@@ -154,7 +168,8 @@ describe('App', () => {
   it('preserves legacy scheduled preferences and switches from Live to an explicit scheduled choice', async () => {
     nativeRuntime.loadSchedule.mockResolvedValueOnce({ intervalHours: 24, localTime: '06:35' });
     nativeRuntime.loadDirectorySources.mockResolvedValueOnce([{ id: 'source-1', kind: 'directory', displayName: 'Documents' }]);
-    const surface = await render(<App />);
+    const surface = await renderSetup();
+    await fireEvent.press(surface.getByText(i18n.t('ui.common.next')));
     await waitFor(() => expect(surface.getByText(i18n.t('onboarding.everyHoursSelected', { hours: 24 }))).toBeTruthy());
     expect(surface.getByLabelText(i18n.t('onboarding.localStartTime')).props.value).toBe('06:35');
     await fireEvent.press(surface.getByText(i18n.t('onboarding.live')));
@@ -162,6 +177,56 @@ describe('App', () => {
     await fireEvent.press(surface.getByText(i18n.t('onboarding.saveSchedule')));
     await waitFor(() => expect(nativeRuntime.saveSchedule).toHaveBeenCalledWith(12, '06:35'));
     expect(nativeRuntime.saveLiveSchedule).not.toHaveBeenCalled();
+    await surface.unmount();
+  });
+
+  it.each(['tr', 'en', 'de'])('skips setup into the real shell without writing or granting in %s', async (language) => {
+    await i18n.changeLanguage(language);
+    const surface = await render(<App />);
+    await fireEvent.press(surface.getByText(i18n.t('ui.common.skip')));
+    expect(surface.getByRole('tab', { name: i18n.t('ui.nav.gallery') }).props.accessibilityState.selected).toBe(true);
+    expect(surface.getByText(i18n.t('ui.galleryNotLoaded'))).toBeTruthy();
+    expect(surface.getByText(i18n.t('ui.observedUnknown'))).toBeTruthy();
+    expect(nativeRuntime.saveSchedule).not.toHaveBeenCalled();
+    expect(nativeRuntime.saveLiveSchedule).not.toHaveBeenCalled();
+    expect(nativeRuntime.saveStorageConfig).not.toHaveBeenCalled();
+    expect(nativeRuntime.selectPhotoLibrary).not.toHaveBeenCalled();
+    expect(testAndSaveWebDavSettings).not.toHaveBeenCalled();
+    await fireEvent.press(surface.getByRole('tab', { name: i18n.t('ui.nav.connections') }));
+    await fireEvent.press(surface.getByText(i18n.t('ui.conn.add')));
+    for (const id of ['webdav','smb','ftp','sftp','s3-compatible','amazon-s3','box','cloudme','dropbox','google-drive','google-cloud-storage','kolab-now','mega','onedrive','nextcloud','yandex-disk']) {
+      expect(surface.getByRole('button', { name: i18n.t(`ui.providers.${id}`) })).toBeTruthy();
+    }
+    await fireEvent.press(surface.getByText(i18n.t('ui.providers.sftp')));
+    expect(surface.getByText(i18n.t('ui.integrationUnavailable'))).toBeTruthy();
+    expect(surface.getByLabelText(i18n.t('ui.providerFields.fingerprint')).props.editable).toBe(false);
+    expect(surface.getByRole('button', { name: i18n.t('ui.conn.test') }).props.accessibilityState.disabled).toBe(true);
+    await surface.unmount();
+    await i18n.changeLanguage('tr');
+  });
+
+  it('keeps setup skip session-only when the app mounts again', async () => {
+    const first = await render(<App />);
+    await fireEvent.press(first.getByText(i18n.t('ui.common.skip')));
+    await first.unmount();
+    const second = await render(<App />);
+    expect(second.getByText(i18n.t('ui.setup.start'))).toBeTruthy();
+    expect(second.queryByRole('tablist')).toBeNull();
+    await second.unmount();
+  });
+
+  it('keeps all navigation actions available at the largest accessibility font scale', async () => {
+    let fontScale = 3.571;
+    jest.spyOn(ReactNative, 'useWindowDimensions').mockImplementation(() => ({ width: 393, height: 852, scale: 3, fontScale }));
+    const surface = await render(<App />);
+    await fireEvent.press(surface.getByText(i18n.t('ui.common.skip')));
+    expect(surface.getAllByRole('tab')).toHaveLength(4);
+    await fireEvent.press(surface.getByRole('tab', { name: i18n.t('ui.nav.connections') }));
+    expect(surface.getByText(i18n.t('ui.pcInspect'))).toBeTruthy();
+    fontScale = 1;
+    await surface.rerender(<App />);
+    expect(surface.getByText(i18n.t('ui.pcInspect'))).toBeTruthy();
+    expect(nativeRuntime.loadSchedule).toHaveBeenCalledTimes(1);
     await surface.unmount();
   });
 

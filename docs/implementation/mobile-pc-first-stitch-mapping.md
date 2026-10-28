@@ -1,5 +1,7 @@
 # Mobil PC-first Stitch uyarlaması — 24 Ekim 2026
 
+28Ekim güncellemesi: Bu belgedeki Stitch uyarlama kayıtları tarihsel kanıttır. Yeni ekranlarda [Lovable tasarımı](../ui/lovable-design-reference.md) bağlayıcı; mevcut native akışlar yeniden yazılmadan ona uyarlanır.
+
 2026-10-28 **Mobil liste10 otomatik/izole kapsam:**108 test/11suite, lint/TS/iki export, tam iOS Simulator app build, Android Kotlin+modül K1 lint geçti. WebDAV probe belirsizliği mevcut profilde kalıcı; native typed disk-full ve safe-area/NativeWind/klavye/büyük-yazı görünümü düzeltildi. Native iOS görsel/256MiB staging örneği ve6 host görsel kontrol kaydedildi; fixture gerçek LAN/PC veya fiziksel kabul değildir. [Kapsam, kanıt, açıklar ve SDK config yan etkisi](mobile-integrated-step10-2026-10-28.md). Büyük koruma kopyasının receiver gecikmesi ölçülmedi; alan/cleanup, gerçek WebDAV sender, iPhone/OS/PC ve tam ekran okuyucu kabulü açık. [Android dar UI followup PASS](mobile-android-step10-followup-2026-10-28.md): normal debugging onayı,480×800 sentetik kaynak/PC/ACK/unknown ve farklı-PID profil/uyarı reopen doğrulandı; fiziksel/LAN kabulü değil. Liste11 başlatılmadı.
 
 

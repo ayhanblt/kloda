@@ -1,5 +1,12 @@
 # Mobil karar ve açık iş listesi — 24 Ekim 2026
 
+2026-10-28 **Bağlayıcı tasarım ve Live Activities güncellemesi:** [Lovable proje/revizyonu](../ui/lovable-design-reference.md) MCP ile erişildi; kullanıcı bu tasarımı kesin UI kaynağı olarak onayladı. Eski Stitch kaynak değil tarihsel kanıt. Mevcut max-lines300 (yorum/boş satır hariç), TR/EN/DE metin anahtarları, Tailwind/NativeWind+global CSS, Lucide ve FSD/component kuralları teyit edildi. [Güncel plan](expanded-execution-plan-2026-10-28.md):18 bulut sonrası19 iOS Live Activities,20 bütünleşik hazırlık,21 son fiziksel kabul. Önceki20-adım özetler tarihsel. Ayrıntılı tasarım alımı/native uyarlama henüz başlamadı; klasör kaldırma yeni asset/source capture sonrasında. Bu güncellemede test/build/cihaz/Lovable üretimi yok.
+
+
+2026-10-28 **Kullanıcı onaylı plan genişletmesi:** [Güncel20-adım sıra](expanded-execution-plan-2026-10-28.md).1–10 önceki kanıt sınırlarıyla korunur;11 Lovable/Stitch alımı,12 ana akış/kurulumu atla,13 galeri/detay,14 teknik karar matrisi,15 mobil WebDAV gönderici,16 SMB/SFTP/FTP,17 S3uyumlu/AmazonS3,18 diğer10bulut,19 bütünleşik/platform hazırlığı,20 toplu fiziksel kabul. Tüm42 tasarım kalemi ve16 protokol/sağlayıcı seçeneği izlenir; FTP/SFTP/auth/SDK/lisans/maliyet kararları verilmiş sayılmaz. Tasarım kullanıcıdan bekleniyor; bu güncellemede geliştirme/test/build/cihaz veya Lovable üretim komutu yok. Eski11 kabul atıfları tarihsel; kabul en sona taşındı.
+
+Yeni soruların somut kapsamı [planın karar kapılarında](expanded-execution-plan-2026-10-28.md#karar-kapıları--şimdi-varsayılmayacaklar) tutulur. Sağlayıcı başına inceleme bitmeden auth/protokol desteği tahmin edilmez.
+
 2026-10-28 **Mobil liste10 otomatik/izole kapsam:**108 test/11suite, lint/TS/iki export, tam iOS Simulator app build, Android Kotlin+modül K1 lint geçti. WebDAV probe belirsizliği mevcut profilde kalıcı; native typed disk-full ve safe-area/NativeWind/klavye/büyük-yazı görünümü düzeltildi. Native iOS görsel/256MiB staging örneği ve6 host görsel kontrol kaydedildi; fixture gerçek LAN/PC veya fiziksel kabul değildir. [Kapsam, kanıt, açıklar ve SDK config yan etkisi](mobile-integrated-step10-2026-10-28.md). Büyük koruma kopyasının receiver gecikmesi ölçülmedi; alan/cleanup, gerçek WebDAV sender, iPhone/OS/PC ve tam ekran okuyucu kabulü açık. [Android dar UI followup PASS](mobile-android-step10-followup-2026-10-28.md): normal debugging onayı,480×800 sentetik kaynak/PC/ACK/unknown ve farklı-PID profil/uyarı reopen doğrulandı; fiziksel/LAN kabulü değil. Liste11 başlatılmadı.
 
 

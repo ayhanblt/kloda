@@ -1,22 +1,30 @@
 import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView, type BottomSheetBackdropProps } from '@gorhom/bottom-sheet';
 import { Monitor, ShieldCheck, Wifi } from 'lucide-react-native';
-import { useCallback } from 'react';
+import { cssInterop } from 'nativewind';
+import { useCallback, type ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View } from 'react-native';
+import { Text } from '../../../shared/ui/text';
+import { NativeSafeArea } from '../../../shared/ui/native-safe-area';
 
 import { colors } from '../../../shared/ui/tokens';
 import { PairingButton } from './pairing-button';
 
+cssInterop(BottomSheet, { className: 'style', backgroundClassName: 'backgroundStyle' });
+// BottomSheet's animated generic props lose the inferred class keys in cssInterop.
+function HelpSheet(props: ComponentProps<typeof BottomSheet> & { className?: string; backgroundClassName?: string }) {
+  return <BottomSheet {...props} />;
+}
+const HelpScroll = cssInterop(BottomSheetScrollView, { contentContainerClassName: 'contentContainerStyle' });
+
 export function PairingQuickPanel({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
-  const insets = useSafeAreaInsets();
   const backdrop = useCallback((props: BottomSheetBackdropProps) => (
     <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} pressBehavior="none" />
   ), []);
 
   return (
-    <BottomSheet
+    <HelpSheet
       index={0}
       snapPoints={['75%']}
       enableDynamicSizing={false}
@@ -25,27 +33,20 @@ export function PairingQuickPanel({ onClose }: { onClose: () => void }) {
       enableHandlePanningGesture={false}
       handleComponent={null}
       backdropComponent={backdrop}
-      backgroundStyle={styles.background}
+      backgroundClassName="rounded-3xl bg-surface"
       accessibilityViewIsModal
-      style={styles.sheet}
+      className="z-10"
     >
-      <BottomSheetScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}>
-        <Text accessibilityRole="header" style={styles.title}>{t('pairing.helpTitle')}</Text>
-        <View style={styles.item}><Monitor color={colors.ink} size={24} /><Text style={styles.body}>{t('pairing.helpComputer')}</Text></View>
-        <View style={styles.item}><Wifi color={colors.ink} size={24} /><Text style={styles.body}>{t('pairing.helpLan')}</Text></View>
-        <View style={styles.item}><ShieldCheck color={colors.ink} size={24} /><Text style={styles.body}>{t('pairing.noFileGrant')}</Text></View>
-        <Text style={styles.body}>{t('pairing.helpRecovery')}</Text>
+      <HelpScroll contentContainerClassName="px-6 pt-6">
+        <NativeSafeArea edges={['bottom']} className="gap-6 pb-6">
+        <Text accessibilityRole="header" className="text-[22px] font-inter-semibold leading-7 text-ink">{t('pairing.helpTitle')}</Text>
+        <View className="flex-row items-start gap-4"><Monitor color={colors.ink} size={24} /><Text className="font-sans shrink text-sm leading-5 text-muted">{t('pairing.helpComputer')}</Text></View>
+        <View className="flex-row items-start gap-4"><Wifi color={colors.ink} size={24} /><Text className="font-sans shrink text-sm leading-5 text-muted">{t('pairing.helpLan')}</Text></View>
+        <View className="flex-row items-start gap-4"><ShieldCheck color={colors.ink} size={24} /><Text className="font-sans shrink text-sm leading-5 text-muted">{t('pairing.noFileGrant')}</Text></View>
+        <Text className="font-sans shrink text-sm leading-5 text-muted">{t('pairing.helpRecovery')}</Text>
         <PairingButton label={t('pairing.closeHelp')} onPress={onClose} />
-      </BottomSheetScrollView>
-    </BottomSheet>
+      </NativeSafeArea>
+      </HelpScroll>
+    </HelpSheet>
   );
 }
-
-const styles = StyleSheet.create({
-  sheet: { zIndex: 10 },
-  background: { backgroundColor: colors.surface, borderRadius: 24 },
-  content: { padding: 24, gap: 24 },
-  title: { color: colors.ink, fontSize: 22, lineHeight: 28, fontWeight: '600' },
-  item: { flexDirection: 'row', gap: 16, alignItems: 'flex-start' },
-  body: { flexShrink: 1, color: colors.muted, fontSize: 14, lineHeight: 20 },
-});

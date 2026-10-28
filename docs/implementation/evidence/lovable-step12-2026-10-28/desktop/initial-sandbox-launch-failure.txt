@@ -1,0 +1,1 @@
+Sandboxed Electron renderer launch exited SIGABRT before app output; no PASS claimed. Authorized isolated rerun outside sandbox followed.

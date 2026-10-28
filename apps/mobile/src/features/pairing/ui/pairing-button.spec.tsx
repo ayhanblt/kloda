@@ -1,5 +1,5 @@
 import { fireEvent, render } from '@testing-library/react-native';
-import { StyleSheet, Text } from 'react-native';
+import { Text } from 'react-native';
 import { PairingButton } from './pairing-button';
 import { i18n } from '../../../shared/i18n';
 import { colors } from '../../../shared/ui/tokens';
@@ -11,9 +11,10 @@ it.each(['tr', 'en', 'de'])('keeps an exact accessible label, wrapped uncapped t
     const pressed = jest.fn();
     const view = await render(<PairingButton label={label} icon={<Text>fixture icon</Text>} onPress={pressed} />);
     const button = view.getByRole('button', { name: label });
-    expect(StyleSheet.flatten(button.props.style).minHeight).toBeGreaterThanOrEqual(48);
+    expect(button.props.className).toContain('min-h-[48px]');
     const text = view.getByText(label);
-    expect(StyleSheet.flatten(text.props.style)).toMatchObject({ flexShrink: 1, minWidth: 0 });
+    expect(text.props.className).toContain('min-w-0');
+    expect(text.props.className).toContain('shrink');
     expect(text.props.numberOfLines).toBeUndefined();
     expect(text.props.allowFontScaling).not.toBe(false);
     expect(text.props.maxFontSizeMultiplier).toBeUndefined();

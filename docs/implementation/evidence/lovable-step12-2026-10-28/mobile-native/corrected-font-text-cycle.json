@@ -1,0 +1,112 @@
+{
+  "utc": "2026-10-28T18:23:45.826080+00:00",
+  "sameAppProcess": 38382,
+  "status": "PASS for observed body+chrome font remeasurement",
+  "cycle": {
+    "initial": {
+      "result": "READY",
+      "fontRegistration": {
+        "Inter-Regular": true,
+        "Inter-Medium": true,
+        "Inter-SemiBold": true,
+        "Inter-Bold": true,
+        "KlodaInterRegular": true,
+        "KlodaInterMedium": true,
+        "KlodaInterSemiBold": true,
+        "KlodaInterBold": true
+      },
+      "id": 4,
+      "stage": "home",
+      "language": "de",
+      "dimensions": {
+        "fontScale": 1,
+        "width": 393,
+        "height": 852,
+        "scale": 3
+      },
+      "active": true,
+      "platform": "ios",
+      "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+      "file": "de-home-text-cycle-initial.png",
+      "sha256": "c854fb2e3f263729003a623d32db5f66e0729dcd785574534b3eb9ba6489df0f"
+    },
+    "maximum": {
+      "result": "READY",
+      "fontRegistration": {
+        "Inter-Regular": true,
+        "Inter-Medium": true,
+        "Inter-SemiBold": true,
+        "Inter-Bold": true,
+        "KlodaInterRegular": true,
+        "KlodaInterMedium": true,
+        "KlodaInterSemiBold": true,
+        "KlodaInterBold": true
+      },
+      "id": 5,
+      "stage": "home",
+      "language": "de",
+      "dimensions": {
+        "scale": 3,
+        "width": 393,
+        "height": 852,
+        "fontScale": 3.571
+      },
+      "active": true,
+      "platform": "ios",
+      "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+      "file": "de-home-maximum.png",
+      "sha256": "503686aa57684db95d23381b2ed3aa0d29b6a46b32e87f8102d401aa6697c146"
+    },
+    "return": {
+      "result": "READY",
+      "fontRegistration": {
+        "Inter-Regular": true,
+        "Inter-Medium": true,
+        "Inter-SemiBold": true,
+        "Inter-Bold": true,
+        "KlodaInterRegular": true,
+        "KlodaInterMedium": true,
+        "KlodaInterSemiBold": true,
+        "KlodaInterBold": true
+      },
+      "id": 6,
+      "stage": "home",
+      "language": "de",
+      "dimensions": {
+        "scale": 3,
+        "width": 393,
+        "height": 852,
+        "fontScale": 1
+      },
+      "active": true,
+      "platform": "ios",
+      "scope": "production page + shell fixture; navigation callbacks synthetic; no native API mutations",
+      "file": "de-home-normal.png",
+      "sha256": "18ca14fb14d7ae884eca946f8a9b818c0f7bcacb77453e6f3209777640df9645"
+    }
+  },
+  "commands": [
+    {
+      "command": "capture-normal.py (initial)",
+      "exitCode": 0
+    },
+    {
+      "command": "simctl ui content_size accessibility-extra-extra-extra-large",
+      "exitCode": 0
+    },
+    {
+      "command": "capture-max.py",
+      "exitCode": 0
+    },
+    {
+      "command": "simctl ui content_size large",
+      "exitCode": 0
+    },
+    {
+      "command": "capture-normal.py (return)",
+      "exitCode": 0
+    }
+  ],
+  "nativeFontRegistration": "8/8 TRUE (fouruniquePostScript+fourKlodaaliases) inallthreephasecallbacks",
+  "scope": "ProductionHomePage+MobileShell directfixture withJS-onlyAPImocks; no nativegrant/transfer. Max firsttwofulltabs visible; nativehorizontalSwipe/VoiceOver/belowfoldnotrun."
+}

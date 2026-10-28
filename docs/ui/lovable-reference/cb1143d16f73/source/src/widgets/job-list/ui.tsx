@@ -1,0 +1,196 @@
+import {
+  AlertTriangle,
+  ArrowRight,
+  Ban,
+  Check,
+  CheckCircle2,
+  Clock,
+  Copy,
+  FileWarning,
+  Pause,
+  RefreshCw,
+  RotateCcw,
+  SearchCheck,
+  SkipForward,
+  XCircle,
+  type LucideIcon,
+} from "lucide-react";
+import { useI18n, fmt } from "@/shared/i18n";
+import { Panel, StatusPill, Notice, type Tone } from "@/shared/ui/kit";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { jobGroup, statusTone, type Job, type JobStatus } from "@/entities/job/model";
+import { photos } from "@/entities/photo/model";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { toast } from "sonner";
+import { FilterChips } from "@/shared/ui/kit";
+import { useDemo } from "@/shared/model/demo-store";
+
+const statusIcon: Record<JobStatus, LucideIcon> = {
+  syncing: RefreshCw,
+  pending: Clock,
+  paused: Pause,
+  retry: RotateCcw,
+  failed: XCircle,
+  review: SearchCheck,
+  conflict: Copy,
+  uncertain: FileWarning,
+  blocked: Ban,
+  skipped: SkipForward,
+  done: CheckCircle2,
+};
+
+const tileBg: Record<"active" | "waiting" | "attention" | "completed", string> = {
+  active: "bg-syncing-soft",
+  waiting: "bg-muted",
+  attention: "bg-attention-soft",
+  completed: "bg-synced-soft",
+};
+
+const groupDot: Record<"active" | "waiting" | "attention" | "completed", string> = {
+  active: "bg-syncing",
+  waiting: "bg-pending",
+  attention: "bg-attention",
+  completed: "bg-synced",
+};
+
+/** At-a-glance counters, so the screen can be read before reading the list. */
+export function JobSummary({ jobs }: { jobs: Job[] }) {
+  const { t } = useI18n();
+  const groups = (["active", "waiting", "attention", "completed"] as const).map((g) => ({
+    g,
+    n: jobs.filter((j) => jobGroup(j.status) === g).length,
+  }));
+  return (
+    <div className="mb-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
+      {groups.map(({ g, n }) => (
+        <div key={g} className={cn("rounded-xl p-3 animate-rise", tileBg[g])}>
+          <p className="text-xl font-bold leading-none tabular-nums text-ink">{n}</p>
+          <p className="mt-1 truncate text-xs font-medium text-ink-soft">{t.activity[g]}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function JobList({ jobs }: { jobs: Job[] }) {
+  const { t } = useI18n();
+  const [filter, setFilter] = useState<"all" | "active" | "waiting" | "attention" | "completed">("all");
+  const groups = (["active", "waiting", "attention", "completed"] as const)
+    .map((g) => ({ g, items: jobs.filter((j) => jobGroup(j.status) === g) }))
+    .filter((x) => x.items.length && (filter === "all" || filter === x.g));
+
+  return (
+    <div>
+      <FilterChips label={t.activity.title} value={filter} onChange={setFilter} options={[{ id: "all", label: t.gallery.filterAll }, { id: "active", label: t.activity.active, dot: "bg-attention" }, { id: "waiting", label: t.activity.waiting, icon: Clock }, { id: "attention", label: t.activity.attention, icon: AlertTriangle }, { id: "completed", label: t.activity.completed, icon: CheckCircle2 }]} />
+      {groups.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">{t.gallery.filterEmpty}</p>}
+      {groups.map(({ g, items }) => (
+        <div key={g} className="mt-6 first:mt-1">
+          <div className="mb-2 flex items-center gap-2 px-1 py-1">
+            <span className={cn("size-2 rounded-full", groupDot[g])} aria-hidden />
+
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+              {t.activity[g]}
+            </h2>
+            <span className="ml-auto text-[11px] font-semibold tabular-nums text-muted-foreground">
+              {items.length} {t.activity.itemsWord}
+            </span>
+          </div>
+          <div className="space-y-2">
+            {items.map((j) => (
+              <JobCard key={j.id} job={j} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function JobCard({ job }: { job: Job }) {
+  const { t } = useI18n();
+  const { demo, set } = useDemo();
+  const photo = photos[(job.photoIndex ?? 0) % photos.length];
+  const tone = statusTone[job.status];
+  return (
+    <Panel as="article" className="p-3">
+      <div className="flex flex-wrap items-center gap-3 sm:flex-nowrap">
+        <span className="relative grid size-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-muted">
+          <img src={photo?.src} alt="" loading="lazy" width={816} height={816} className="size-full object-cover" />
+          {job.status === "done" && (
+            <span className="absolute inset-0 grid place-items-center bg-ink/35">
+              <span className="grid size-5 place-items-center rounded-full bg-synced text-card">
+                <Check className="size-3" strokeWidth={3} aria-hidden />
+              </span>
+            </span>
+          )}
+        </span>
+        <div className="min-w-0 flex-1 basis-40 sm:basis-auto">
+          <div className="flex items-center justify-between gap-2">
+            <p className="truncate text-sm font-semibold text-ink" title={job.title}>
+              {job.title}
+            </p>
+            {job.size && <span className="shrink-0 text-xs tabular-nums text-muted-foreground">{job.size}</span>}
+          </div>
+          <p className="mt-0.5 flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
+            {job.reason ? (
+              <span className="truncate">{job.reason}</span>
+            ) : (
+              <>
+                <span className="truncate">{job.from}</span>
+                <ArrowRight className="size-3 shrink-0" aria-hidden />
+                <span className="truncate" title={job.to}>
+                  {job.to}
+                </span>
+              </>
+            )}
+          </p>
+          {job.status === "syncing" && job.progress !== undefined && (
+            <div className="mt-2 flex items-center gap-2">
+              <Progress value={job.progress} className="h-1.5 bg-muted [&>div]:bg-syncing" aria-label={t.status.syncing} />
+              {job.speed && <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">{job.speed}</span>}
+            </div>
+          )}
+          {job.status === "done" && (
+            <p className="mt-1 flex items-center gap-1 text-[11px] font-medium text-synced">
+              <CheckCircle2 className="size-3" aria-hidden />
+              {t.activity.verified}
+            </p>
+          )}
+        </div>
+        {job.status !== "syncing" && job.status !== "done" && <StatusPill tone={tone}>{t.status[job.status]}</StatusPill>}
+        {job.status === "done" && <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">{job.time}</span>}
+      </div>
+
+      {job.status === "conflict" && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Button size="sm" variant="secondary" onClick={() => toast(t.gallery.demoAction)}>{t.activity.recheck}</Button>
+          <Button size="sm" variant="secondary" onClick={() => toast(t.gallery.demoAction)}>{t.activity.keepBoth}</Button>
+          <Button size="sm" variant="ghost" onClick={() => toast(t.activity.skippedNote)}>{t.activity.skipForNow}</Button>
+        </div>
+      )}
+      {job.status === "uncertain" && (
+        <Notice tone="warn" icon={FileWarning} className="mt-3">
+          {t.activity.bytesSentNote}
+          <div className="mt-2">
+            <Button size="sm" variant="secondary" onClick={() => toast(t.gallery.demoAction)}>{t.activity.recheck}</Button>
+          </div>
+        </Notice>
+      )}
+      {job.status === "skipped" && <p className="mt-2 text-xs text-muted-foreground">{t.activity.skippedNote}</p>}
+      {job.status === "blocked" && <p className="mt-2 text-xs text-review">{t.schedule.changeWarning}</p>}
+      {job.status === "syncing" && (
+        <div className="mt-3">
+          <Button size="sm" variant="secondary" className="rounded-full" onClick={() => { set({ paused: !demo.paused }); toast(demo.paused ? t.gallery.resume : t.gallery.pausedNote); }}><Pause /> {demo.paused ? t.gallery.resume : t.gallery.pauseAll}</Button>
+        </div>
+      )}
+      {(job.status === "failed" || job.status === "retry") && (
+        <div className="mt-3">
+          <Button size="sm" variant="secondary" className="rounded-full" onClick={() => toast(t.activity.syncAllToast)}>{t.common.retry}</Button>
+        </div>
+      )}
+      <p className="sr-only">{fmt(t.activity.files, { n: job.files })} · {job.time}</p>
+    </Panel>
+  );
+}

@@ -1,5 +1,7 @@
 # Desktop PC-first / Stitch mapping — 2026-10-16
 
+28Ekim güncellemesi: Bu belgedeki Stitch uyarlama kayıtları tarihsel kanıttır. Yeni ekranlarda [Lovable tasarımı](../ui/lovable-design-reference.md) bağlayıcı; mevcut native akışlar yeniden yazılmadan ona uyarlanır.
+
 Status: **option 1 approved by Ayhan on 2026-10-17**; Desktop integration and scoped host/Chromium validation completed. This approval is design mapping, not physical/platform acceptance. Existing native receiver, ACL/device management, incoming history and ADR0018 lifecycle are retained. No mobile work, live native owner, OS registration, platform probe or physical acceptance was started.
 
 ## Reference facts

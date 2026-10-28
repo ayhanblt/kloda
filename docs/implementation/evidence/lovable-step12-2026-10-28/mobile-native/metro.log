@@ -1,0 +1,56 @@
+
+> @kloda/mobile@0.0.0 dev
+> expo start --dev-client --localhost --port 8089
+
+Starting project at <repo>/apps/mobile
+Logs: <repo>/apps/mobile/.expo/dev/logs/start.log
+Using src/app as the root directory for Expo Router.
+Expo Autolinking module resolution enabled
+Metro is running in CI mode, reloads are disabled. Remove CI=true to enable watch mode.
+Starting Metro Bundler
+
+Waiting on http://localhost:8089
+
+An update for expo is available: 57.0.26 → ~57.0.31
+4 other packages may need updating. Run npx expo install --check for details.
+Logs for your project will appear below.
+| (node:18992) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:18992) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:18992) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:18992) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:18992) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:18992) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+iOS Bundled 2082ms .local-evidence/mobile-step12-native/entry.js (3476 modules)
+iOS Bundled 47ms .local-evidence/mobile-step12-native/entry.js (1 module)
+iOS Bundled 51ms .local-evidence/mobile-step12-native/entry.js (1 module)
+ WARN  SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context
+iOS Bundled 251ms .local-evidence/mobile-step12-native/entry.js (1 module)
+iOS Bundled 72ms .local-evidence/mobile-step12-native/entry.js (1 module)
+ WARN  SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context
+<repo>/node_modules/@expo/cli/build/src/utils/errors.js:130
+    throw error;
+    ^
+
+TypeError: Cannot read properties of undefined (reading 'addedFiles')
+    at FileMap.listener (<repo>/node_modules/@expo/cli/build/src/start/server/metro/waitForMetroToObserveTypeScriptFile.js:65:38)
+    at FileMap.emit (node:events:531:35)
+    at Object.onChange (<repo>/node_modules/react-native-css-interop/dist/metro/index.js:179:19)
+    at ChildProcess.<anonymous> (<repo>/node_modules/nativewind/dist/metro/tailwind/v3/index.js:51:37)
+    at ChildProcess.emit (node:events:519:28)
+    at emit (node:internal/child_process:949:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+
+Node.js v22.23.1
+npm error Lifecycle script `dev` failed with error:
+npm error code 7
+npm error path <repo>/apps/mobile
+npm error workspace @kloda/mobile@0.0.0
+npm error location <repo>/apps/mobile
+npm error command failed
+npm error command sh -c expo start --dev-client --localhost --port 8089

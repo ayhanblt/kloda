@@ -1,0 +1,24 @@
+
+> @kloda/mobile@0.0.0 test
+> jest --runInBand --no-watchman
+
+PASS src/app/App.spec.tsx (8.014 s)
+PASS src/pages/activity/ui/activity-page.spec.tsx
+PASS src/pages/activity/ui/activity-automatic.spec.tsx
+PASS src/pages/pairing/ui/pairing-page.spec.tsx
+PASS src/pages/computer/ui/computer-page.spec.tsx
+PASS src/pages/activity/ui/backups-page.spec.tsx
+PASS src/shared/ui/byte-progress.spec.tsx
+PASS src/shared/api/file-transfer.spec.ts
+PASS src/shared/api/webdav-settings.spec.ts
+PASS src/app/mobile-root.spec.tsx
+PASS src/features/pairing/model/use-pairing.spec.ts
+PASS src/features/pairing/ui/pairing-button.spec.tsx
+PASS src/features/pairing/model/pairing-controller.spec.ts
+PASS src/shared/api/pairing.spec.ts
+
+Test Suites: 14 passed, 14 total
+Tests:       123 passed, 123 total
+Snapshots:   0 total
+Time:        13.673 s
+Ran all test suites.

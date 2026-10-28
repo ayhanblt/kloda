@@ -1,8 +1,9 @@
 import { ArrowLeft, Info, ScanQrCode, ShieldCheck } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, BackHandler, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ActivityIndicator, Alert, BackHandler, ScrollView, View } from 'react-native';
+import { Text } from '../../../shared/ui/text';
+import { NativeSafeArea } from '../../../shared/ui/native-safe-area';
 import { toast } from 'sonner-native';
 
 import { usePairing } from '../../../features/pairing/model/use-pairing';
@@ -63,38 +64,38 @@ export function PairingPage({ onBack, onContinue }: { onBack: () => void; onCont
   };
 
   return (
-    <SafeAreaView style={styles.root}>
-      <View style={styles.content} importantForAccessibility={protectedDecision || help ? 'no-hide-descendants' : 'auto'}>
-        <View style={styles.header}>
+    <NativeSafeArea className="flex-1 bg-surface">
+      <View className="flex-1" importantForAccessibility={protectedDecision || help ? 'no-hide-descendants' : 'auto'}>
+        <View className="flex-row items-center gap-4 border-b border-border px-4 py-4">
           <PairingButton label={t('pairing.back')} secondary disabled={protectedDecision || cameraVisible || help} icon={<ArrowLeft color={colors.ink} size={20} />} onPress={onBack} />
-          <Text style={styles.brand}>{t('pairing.brand')}</Text>
+          <Text className="shrink text-sm font-inter-semibold text-ink">{t('pairing.brand')}</Text>
         </View>
-        <ScrollView contentContainerStyle={styles.body}>
-          <Text accessibilityRole="header" style={styles.title}>{t('pairing.title')}</Text>
-          <Text style={styles.description}>{t('pairing.description')}</Text>
+        <ScrollView contentContainerClassName="gap-6 px-4 pt-5 pb-8">
+          <Text accessibilityRole="header" className="text-[28px] font-inter-semibold leading-9 text-ink">{t('pairing.title')}</Text>
+          <Text className="font-sans text-sm leading-5 text-muted">{t('pairing.description')}</Text>
           {cameraVisible ? (
             <QrScanner foreground={foreground} onScan={(qr) => { void scan(qr); }} onStop={stop} />
           ) : (
-            <View style={styles.card}>
+            <View className="gap-4 rounded-3xl border border-border bg-white p-5">
               {status?.phase === 'complete' && <ShieldCheck color={colors.secure} size={32} />}
               {!status && !error && <ActivityIndicator color={colors.ink} accessibilityLabel={t('pairing.loading')} />}
-              {status && <Text style={styles.statusTitle}>{t(`pairing.phases.${status.phase}.title`)}</Text>}
-              {status && <Text style={styles.description}>{t(`pairing.phases.${status.phase}.description`)}</Text>}
-              {status?.repairRequired && <Text accessibilityRole="alert" style={styles.description}>{t('pairing.repairDescription')}</Text>}
+              {status && <Text className="text-lg font-inter-semibold leading-6 text-ink">{t(`pairing.phases.${status.phase}.title`)}</Text>}
+              {status && <Text className="font-sans text-sm leading-5 text-muted">{t(`pairing.phases.${status.phase}.description`)}</Text>}
+              {status?.repairRequired && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-muted">{t('pairing.repairDescription')}</Text>}
               {status?.peerFingerprint && (
-                <View style={styles.fingerprint}>
-                  <Text style={styles.description}>{t('pairing.peerFingerprint')}</Text>
-                  <Text selectable style={styles.fingerprintText}>{status.peerFingerprint}</Text>
+                <View className="gap-2">
+                  <Text className="font-sans text-sm leading-5 text-muted">{t('pairing.peerFingerprint')}</Text>
+                  <Text selectable className="font-sans font-mono text-xs leading-5 text-ink">{status.peerFingerprint}</Text>
                 </View>
               )}
-              {error && <Text accessibilityRole="alert" style={styles.error}>{t(`pairing.errors.${error}`)}</Text>}
-              {status?.unpairResult && <Text accessibilityRole="alert" style={styles.description}>{t(`pairing.unpair.${status.unpairResult.state}`)}</Text>}
+              {error && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-error">{t(`pairing.errors.${error}`)}</Text>}
+              {status?.unpairResult && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-muted">{t(`pairing.unpair.${status.unpairResult.state}`)}</Text>}
               {status?.phase === 'complete' && status.recordId && <PairingButton label={t('pairing.unpair.button')} secondary disabled={protectedDecision || cameraVisible} onPress={confirmRemoval} />}
               {canScan && <PairingButton label={t('pairing.startScan')} icon={<ScanQrCode color={colors.elevated} size={20} />} onPress={beginScan} />}
               {!protectedDecision && <PairingButton label={t('pairing.refresh')} secondary onPress={() => { void refresh(); }} />}
             </View>
           )}
-          <Text style={styles.description}>{t('pairing.noFileGrant')}</Text>
+          <Text className="font-sans text-sm leading-5 text-muted">{t('pairing.noFileGrant')}</Text>
           {onContinue && foreground && !protectedDecision && !cameraVisible && !error && !uncertain
             && status?.phase === 'complete' && status.recordId && status.peerFingerprint && !status.repairRequired
             && <PairingButton label={t('computer.continue')} onPress={onContinue} />}
@@ -112,21 +113,6 @@ export function PairingPage({ onBack, onContinue }: { onBack: () => void; onCont
           onDecide={(decision, operationId, generation) => { void decide(decision, operationId, generation); }}
         />
       )}
-    </SafeAreaView>
+    </NativeSafeArea>
   );
 }
-
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.surface },
-  content: { flex: 1 },
-  header: { flexDirection: 'row', gap: 16, alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: colors.border },
-  brand: { flexShrink: 1, color: colors.ink, fontSize: 13, fontWeight: '600' },
-  body: { padding: 24, gap: 24 },
-  title: { color: colors.ink, fontSize: 32, lineHeight: 38, fontWeight: '600', letterSpacing: -0.48 },
-  statusTitle: { color: colors.ink, fontSize: 18, lineHeight: 24, fontWeight: '600' },
-  description: { color: colors.muted, fontSize: 14, lineHeight: 20 },
-  card: { backgroundColor: colors.card, borderRadius: 16, borderWidth: 1, borderColor: colors.border, padding: 16, gap: 16 },
-  fingerprint: { gap: 8 },
-  fingerprintText: { color: colors.ink, fontSize: 13, lineHeight: 18, fontFamily: 'monospace' },
-  error: { color: colors.error, fontSize: 14, lineHeight: 20 },
-});

@@ -1,0 +1,112 @@
+{
+  "scope": "only user-authorized legacy design directory; no user archive/authority/Git mutation",
+  "removedDirectory": "stitch_private_photo_cloud",
+  "designFileCount": 15,
+  "finderMetadataCount": 5,
+  "removedFiles": [
+    {
+      "path": "stitch_private_photo_cloud/.DS_Store",
+      "sha256": "47afbc166a8b667101886ba2eb1239ab30788cca12c85c004263be8303ee4575",
+      "bytes": 12292
+    },
+    {
+      "path": "stitch_private_photo_cloud/backup_activity_queue/.DS_Store",
+      "sha256": "ac823d171f4ca091ff12abd0f12ff8eed6908570de57de198ade2cf33208cdb5",
+      "bytes": 6148
+    },
+    {
+      "path": "stitch_private_photo_cloud/backup_activity_queue/backup_activity_queue.png",
+      "sha256": "478e78074afc86e913e6b81548ca6044793cbd1ba6f33defe8f6311b02ee3698",
+      "bytes": 264182
+    },
+    {
+      "path": "stitch_private_photo_cloud/backup_activity_queue/code.html",
+      "sha256": "d1a12d94694ce3ef204cee83729c994b14ed272eb602f88c480ec70b48003ecf",
+      "bytes": 27804
+    },
+    {
+      "path": "stitch_private_photo_cloud/main_gallery_sync_status/.DS_Store",
+      "sha256": "77d96dfe33121fbd6c77eae4357637b85c832b5caa6721e18437e099ae9408da",
+      "bytes": 6148
+    },
+    {
+      "path": "stitch_private_photo_cloud/main_gallery_sync_status/code.html",
+      "sha256": "a6703e07eb416dfce7a2185532a2264e12ea24b5dc822a1359a10f472ee70da0",
+      "bytes": 33267
+    },
+    {
+      "path": "stitch_private_photo_cloud/main_gallery_sync_status/main_gallery_sync_Status.png",
+      "sha256": "6c9a02e2605929162392587c714f045251761b8a72c4bced6d4cbc2e4303ef8b",
+      "bytes": 28
+    },
+    {
+      "path": "stitch_private_photo_cloud/onboarding_folder_selection/.DS_Store",
+      "sha256": "4dacd881a083d0dcd64741b5484846944af26a08a6ab02c82d0c3cf8841949a0",
+      "bytes": 6148
+    },
+    {
+      "path": "stitch_private_photo_cloud/onboarding_folder_selection/code.html",
+      "sha256": "360a2ac1037f022e053edc41183a7489f7e782c16216a84d8c362d7dedd8d542",
+      "bytes": 21955
+    },
+    {
+      "path": "stitch_private_photo_cloud/onboarding_folder_selection/onboarding_folder_selection.png",
+      "sha256": "3849b4ab8d1f5803344933f7fcbddd6200853251bf1cae06dbb942c3a77e1581",
+      "bytes": 272486
+    },
+    {
+      "path": "stitch_private_photo_cloud/onboarding_storage_connection/code.html",
+      "sha256": "399035c3ec855c143687ab667d05cfcec7823723fd21e344703245d10573d702",
+      "bytes": 16515
+    },
+    {
+      "path": "stitch_private_photo_cloud/onboarding_storage_connection/screen.png",
+      "sha256": "6c9a02e2605929162392587c714f045251761b8a72c4bced6d4cbc2e4303ef8b",
+      "bytes": 28
+    },
+    {
+      "path": "stitch_private_photo_cloud/photo_detail_destinations/code.html",
+      "sha256": "78051abc99a21cc61ea417e178431d61fa4ffd0464a06a650aac4bd058540831",
+      "bytes": 20290
+    },
+    {
+      "path": "stitch_private_photo_cloud/photo_detail_destinations/screen.png",
+      "sha256": "6c9a02e2605929162392587c714f045251761b8a72c4bced6d4cbc2e4303ef8b",
+      "bytes": 28
+    },
+    {
+      "path": "stitch_private_photo_cloud/private_photo_cloud/DESIGN.md",
+      "sha256": "455fb975fda52cf6c80abac4ae43b62cdc55a5493b098c4ff2b83ede7f9dfc0e",
+      "bytes": 10280
+    },
+    {
+      "path": "stitch_private_photo_cloud/private_photo_cloud_logo/.DS_Store",
+      "sha256": "4b24fd36971aca8056b59b1a17a9b473e5c2a4f3ef5522ac77e5b7c0c55b0647",
+      "bytes": 6148
+    },
+    {
+      "path": "stitch_private_photo_cloud/private_photo_cloud_logo/code.html",
+      "sha256": "68e8a8d71d7181f04d6d4a4383da6d5a4fd3ba99cb6019492e27394dc65570d4",
+      "bytes": 432
+    },
+    {
+      "path": "stitch_private_photo_cloud/private_photo_cloud_logo/screen.png",
+      "sha256": "d5bc029538ba0b40b48f7ed48ac30e2130b44410dc7f5d100ef8cf41e0f4834b",
+      "bytes": 93961
+    },
+    {
+      "path": "stitch_private_photo_cloud/storage_management/code.html",
+      "sha256": "f0b770c7da641e50c23ee1db9a56dad9b6544b20c3e3914b58bbdbcc391df94b",
+      "bytes": 21924
+    },
+    {
+      "path": "stitch_private_photo_cloud/storage_management/screen.png",
+      "sha256": "6c9a02e2605929162392587c714f045251761b8a72c4bced6d4cbc2e4303ef8b",
+      "bytes": 28
+    }
+  ],
+  "recoveryArchive": ".local-evidence/design-transition-2026-10-28/stitch-legacy-before-removal.zip",
+  "archiveSha256": "d9abb5ca5983bc3152f3840c13647c05994971a185d31c82d47ca7fd307c27b2",
+  "archiveVerifiedBeforeRemoval": true,
+  "archiveIndependentlyBackedUp": false
+}

@@ -1,0 +1,11 @@
+{
+  "status":"BLOCKED",
+  "scope":"Only pre-existing ownedAPI36AVD Kloda-Step10-20261028 on emulator5590 with isolatedadbserver5038",
+  "bootCommand":"python3 /tmp/kloda-step10-android-followup/boot.py",
+  "checkCommand":"python3 /tmp/kloda-step10-android-followup/adb.py shell getprop sys.boot_completed",
+  "checkExitCode":1,
+  "stderr":"adb: device unauthorized. This adb server's $ADB_VENDOR_KEYS is /tmp/kloda-step10-android/adbkey. Try 'adb kill-server' if that seems wrong. Otherwise check for a confirmation dialog on your device.",
+  "notRun":["Androidapp launch","Androidscreenshots","physicaldevice","key/authorization reset"],
+  "cleanup":"CtrlC to ownedboot.py session; its existing finally terminated onlyownedemulator and ownedadbserver; OWNED_STOPPED exit0",
+  "inference":"No cause asserted for unauthorized; no existingkey/AVDconfig changed"
+}
