@@ -15,6 +15,7 @@ export function useFileTransfer() {
   const [restoring, setRestoring] = useState(false);
   const [photos, setPhotos] = useState<PhotosImportStatus | null>(null);
   const restoreActive = useRef(false);
+  const permissionActive = useRef(false);
   const epoch = useRef(0);
   const foreground = useRef(AppState.currentState !== 'background' && AppState.currentState !== 'inactive');
   const action = useRef(false);
@@ -32,10 +33,16 @@ export function useFileTransfer() {
       try {
         const observed = await fileTransfer.status();
         if (mounted.current && foreground.current && version === epoch.current) { setQueue(observed); setError(observed.errorCode ?? null); }
-        const imports = await fileTransfer.photoStatus();
-        if (mounted.current && foreground.current && version === epoch.current) setPhotos(imports);
+        try {
+          const imports = await fileTransfer.photoStatus();
+          if (mounted.current && foreground.current && version === epoch.current) setPhotos(imports);
+        } catch (cause) {
+          if (mounted.current && foreground.current && version === epoch.current) {
+            setPhotos(null); setError(cause instanceof Error ? cause.message : 'outcome_unknown');
+          }
+        }
       } catch (cause) {
-        if (mounted.current && foreground.current && version === epoch.current) setError(cause instanceof Error ? cause.message : 'outcome_unknown');
+        if (mounted.current && foreground.current && version === epoch.current) { setQueue(null); setError(cause instanceof Error ? cause.message : 'outcome_unknown'); }
       } finally {
         reading = false;
         if (mounted.current && foreground.current) timer = setTimeout(() => void read(), 1000);
@@ -43,10 +50,9 @@ export function useFileTransfer() {
     };
     const subscription = AppState.addEventListener('change', (state) => {
       foreground.current = state === 'active';
-      if (!restoreActive.current) epoch.current += 1;
+      if (!restoreActive.current && !permissionActive.current) epoch.current += 1;
       clearTimeout(timer);
       if (foreground.current) void read();
-      else if (!restoreActive.current) void fileTransfer.pause().catch(() => undefined);
     });
     void read();
     return () => {
@@ -55,10 +61,14 @@ export function useFileTransfer() {
       clearTimeout(timer);
       subscription.remove();
       void fileTransfer.cancelRestore().catch(() => undefined);
-      void fileTransfer.pause().catch(() => undefined);
     };
   }, []);
 
+  const requestNotifications = useCallback(async () => {
+    permissionActive.current = true;
+    try { await fileTransfer.requestNotifications(); }
+    finally { permissionActive.current = false; }
+  }, []);
   const run = useCallback(async (job?: { id: string; recordId: string }) => {
     if (action.current || !foreground.current) return;
     action.current = true;
@@ -70,6 +80,8 @@ export function useFileTransfer() {
       if (!mounted.current || !foreground.current || version !== epoch.current) return;
       if (target.phase !== 'complete' || !target.recordId || !target.peerFingerprint) throw new Error('pairing_required');
       setPeer(target.peerFingerprint);
+      await requestNotifications();
+      if (!mounted.current || !foreground.current || version !== epoch.current) return;
       const observed = job ? await fileTransfer.rebackup(target.recordId, job.id) : await fileTransfer.run(target.recordId);
       if (mounted.current && foreground.current && version === epoch.current) { setQueue(observed); setError(observed.errorCode ?? null); }
     } catch (cause) {
@@ -78,23 +90,27 @@ export function useFileTransfer() {
       action.current = false;
       if (mounted.current) setWorking(false);
     }
-  }, []);
-  const pause = useCallback(async () => {
-    if (action.current) return;
+  }, [requestNotifications]);
+  const automatic = useCallback(async (resume: boolean) => {
+    if (action.current || !foreground.current) return;
     action.current = true;
     const version = ++epoch.current;
     setWorking(true);
     setActionError(null);
     try {
-      const observed = await fileTransfer.pause();
-      if (mounted.current && version === epoch.current) { setQueue(observed); setError(observed.errorCode ?? null); }
+      if (resume) {
+        await requestNotifications();
+        if (!mounted.current || !foreground.current || version !== epoch.current) return;
+      }
+      const observed = resume ? await fileTransfer.resumeAutomatic() : await fileTransfer.pause();
+      if (mounted.current && foreground.current && version === epoch.current) { setQueue(observed); setError(observed.errorCode ?? null); }
     } catch (cause) {
       if (mounted.current && version === epoch.current) setActionError(cause instanceof Error ? cause.message : 'outcome_unknown');
     } finally {
       action.current = false;
       if (mounted.current) setWorking(false);
     }
-  }, []);
+  }, [requestNotifications]);
   const ownBackup = useCallback(async (backup?: CompletedBackup, more = false, allPhotos = false) => {
     if (action.current || !foreground.current) return;
     action.current = true;
@@ -147,5 +163,5 @@ export function useFileTransfer() {
     try { await fileTransfer.cancelRestore(); }
     catch (cause) { if (mounted.current) setActionError(cause instanceof Error ? cause.message : 'outcome_unknown'); }
   }, []);
-  return { queue, error: error ?? actionError, working, peer, run, pause, backups, restored, restoring, ownBackup, cancelRestore, photos };
+  return { queue, error: error ?? actionError, working, peer, run, pause: () => automatic(false), resumeAutomatic: () => automatic(true), backups, restored, restoring, ownBackup, cancelRestore, photos };
 }

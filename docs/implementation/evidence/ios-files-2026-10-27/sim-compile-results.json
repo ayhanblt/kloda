@@ -1,0 +1,26 @@
+[
+  {
+    "name": "files",
+    "exitCode": 0
+  },
+  {
+    "name": "restore",
+    "exitCode": 0
+  },
+  {
+    "name": "run",
+    "exitCode": 0
+  },
+  {
+    "name": "upload",
+    "exitCode": 0
+  },
+  {
+    "name": "publication",
+    "exitCode": 0
+  },
+  {
+    "name": "snapshot",
+    "exitCode": 0
+  }
+]

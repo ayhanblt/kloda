@@ -1,0 +1,177 @@
+apps/mobile/android/app/src/main/AndroidManifest.xml:10: Warning: WRITE_EXTERNAL_STORAGE no longer provides write access when targeting Android 10+ [ScopedStorage]
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32" tools:replace="android:maxSdkVersion"/>
+                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "ScopedStorage":
+   Scoped storage is enforced on Android 10+ (or Android 11+ if using
+   requestLegacyExternalStorage). In particular, WRITE_EXTERNAL_STORAGE will
+   no longer provide write access to all files; it will provide the equivalent
+   of READ_EXTERNAL_STORAGE instead.
+
+   As of Android 13, if you need to query or interact with MediaStore or media
+   files on the shared storage, you should be using instead one or more new
+   storage permissions:
+   * android.permission.READ_MEDIA_IMAGES
+   * android.permission.READ_MEDIA_VIDEO
+   * android.permission.READ_MEDIA_AUDIO
+
+   and then add maxSdkVersion="33" to the older permission. See the developer
+   guide for how to do this:
+   https://developer.android.com/about/versions/13/behavior-changes-13#granula
+   r-media-permissions
+
+   The MANAGE_EXTERNAL_STORAGE permission can be used to manage all files, but
+   it is rarely necessary and most apps on Google Play are not allowed to use
+   it. Most apps should instead migrate to use scoped storage. To modify or
+   delete files, apps should request write access from the user as described
+   at https://goo.gle/android-mediastore-createwriterequest.
+
+   To learn more, read these resources: Play policy:
+   https://goo.gle/policy-storage-help Allowable use cases:
+   https://goo.gle/policy-storage-usecases
+
+   https://goo.gle/android-storage-usecases
+
+apps/mobile/android/app/src/main/AndroidManifest.xml:18: Warning: Attribute enableOnBackInvokedCallback is only used in API level 33 and higher (current min is 24) [UnusedAttribute]
+  <application android:name=".MainApplication" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:allowBackup="true" android:theme="@style/AppTheme" android:supportsRtl="true" android:enableOnBackInvokedCallback="false" android:fullBackupContent="@xml/secure_store_backup_rules" android:dataExtractionRules="@xml/secure_store_data_extraction_rules">
+                                                                                                                                                                                                                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UnusedAttribute":
+   This check finds attributes set in XML files that were introduced in a
+   version newer than the oldest version targeted by your application (with
+   the minSdkVersion attribute).
+
+   This is not an error; the application will simply ignore the attribute.
+   However, if the attribute is important to the appearance or functionality
+   of your application, you should consider finding an alternative way to
+   achieve the same result with only available attributes, and then you can
+   optionally create a copy of the layout in a layout-vNN folder which will be
+   used on API NN or higher where you can take advantage of the newer
+   attribute.
+
+   Note: This check does not only apply to attributes. For example, some tags
+   can be unused too, such as the new <tag> element in layouts introduced in
+   API 21.
+
+apps/mobile/android/app/src/main/AndroidManifest.xml:36: Warning: <uses-feature> tag appears after <application> tag [ManifestOrder]
+  <uses-feature android:name="android.hardware.camera" android:required="false"/>
+   ~~~~~~~~~~~~
+
+   Explanation for issues of type "ManifestOrder":
+   The <application> tag should appear after the elements which declare which
+   version you need, which features you need, which libraries you need, and so
+   on. In the past there have been subtle bugs (such as themes not getting
+   applied correctly) when the <application> tag appears before some of these
+   other elements, so it's best to order your manifest in the logical
+   dependency order.
+
+apps/mobile/android/app/build.gradle:165: Warning: A newer version of com.facebook.fresco:animated-gif than 3.6.0 is available: 3.9.0 [NewerVersionAvailable]
+        implementation("com.facebook.fresco:animated-gif:${expoLibs.versions.fresco.get()}")
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+apps/mobile/android/app/build.gradle:170: Warning: A newer version of com.facebook.fresco:webpsupport than 3.6.0 is available: 3.9.0 [NewerVersionAvailable]
+        implementation("com.facebook.fresco:webpsupport:${expoLibs.versions.fresco.get()}")
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "NewerVersionAvailable":
+   This detector checks with a central repository to see if there are newer
+   versions available for the dependencies used by this project. This is
+   similar to the GradleDependency check, which checks for newer versions
+   available in the Android SDK tools and libraries, but this works with any
+   MavenCentral dependency, and connects to the library every time, which
+   makes it more flexible but also much slower.
+
+apps/mobile/android/app/src/main/res/drawable/rn_edit_text_material.xml:17: Warning: The resource @dimen/abc_edit_text_inset_horizontal_material is marked as private in androidx.appcompat:appcompat:1.7.1 [PrivateResource]
+       android:insetLeft="@dimen/abc_edit_text_inset_horizontal_material"
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+apps/mobile/android/app/src/main/res/drawable/rn_edit_text_material.xml:18: Warning: The resource @dimen/abc_edit_text_inset_horizontal_material is marked as private in androidx.appcompat:appcompat:1.7.1 [PrivateResource]
+       android:insetRight="@dimen/abc_edit_text_inset_horizontal_material"
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+apps/mobile/android/app/src/main/res/drawable/rn_edit_text_material.xml:19: Warning: The resource @dimen/abc_edit_text_inset_top_material is marked as private in androidx.appcompat:appcompat:1.7.1 [PrivateResource]
+       android:insetTop="@dimen/abc_edit_text_inset_top_material"
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+apps/mobile/android/app/src/main/res/drawable/rn_edit_text_material.xml:20: Warning: The resource @dimen/abc_edit_text_inset_bottom_material is marked as private in androidx.appcompat:appcompat:1.7.1 [PrivateResource]
+       android:insetBottom="@dimen/abc_edit_text_inset_bottom_material"
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+apps/mobile/android/app/src/main/res/drawable/rn_edit_text_material.xml:33: Warning: The resource @drawable/abc_textfield_default_mtrl_alpha is marked as private in androidx.appcompat:appcompat:1.7.1 [PrivateResource]
+        <item android:state_enabled="false" android:drawable="@drawable/abc_textfield_default_mtrl_alpha"/>
+                                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+apps/mobile/android/app/src/main/res/drawable/rn_edit_text_material.xml:34: Warning: The resource @drawable/abc_textfield_activated_mtrl_alpha is marked as private in androidx.appcompat:appcompat:1.7.1 [PrivateResource]
+        <item android:drawable="@drawable/abc_textfield_activated_mtrl_alpha"/>
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "PrivateResource":
+   Private resources should not be referenced; the may not be present
+   everywhere, and even where they are they may disappear without notice.
+
+   To fix this, copy the resource into your own project instead.
+
+apps/mobile/android/app/src/main/AndroidManifest.xml:23: Warning: Fixed screen orientations will be ignored in most cases, starting from Android 16. Android is moving toward a model where apps are expected to adapt to various orientations, display sizes, and aspect ratios. [DiscouragedApi]
+    <activity android:name=".MainActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|uiMode|smallestScreenSize|assetsPaths" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:theme="@style/Theme.App.SplashScreen" android:exported="true" android:screenOrientation="unspecified">
+                                                                                                                                                                                                                                                                                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "DiscouragedApi":
+   Discouraged APIs are allowed and are not deprecated, but they may be unfit
+   for common use (e.g. due to slow performance or subtle behavior).
+
+apps/mobile/android/app/build.gradle: Warning: The resource R.integer.react_native_dev_server_port appears to be unused [UnusedResources]
+apps/mobile/android/app/build.gradle: Warning: The resource R.integer.react_native_dev_server_port appears to be unused [UnusedResources]
+apps/mobile/android/app/build.gradle: Warning: The resource R.integer.react_native_dev_server_port appears to be unused [UnusedResources]
+apps/mobile/android/app/build.gradle: Warning: The resource R.string.react_native_dev_server_ip appears to be unused [UnusedResources]
+apps/mobile/android/app/build.gradle: Warning: The resource R.string.react_native_dev_server_ip appears to be unused [UnusedResources]
+apps/mobile/android/app/build.gradle: Warning: The resource R.string.react_native_dev_server_ip appears to be unused [UnusedResources]
+apps/mobile/android/app/src/main/res/values/colors.xml:2: Warning: The resource R.color.splashscreen_background appears to be unused [UnusedResources]
+  <color name="splashscreen_background">#FFFFFF</color>
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+apps/mobile/android/app/src/main/res/drawable/ic_launcher_background.xml:1: Warning: The resource R.drawable.ic_launcher_background appears to be unused [UnusedResources]
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+^
+
+   Explanation for issues of type "UnusedResources":
+   Unused resources make applications larger and slow down builds.
+
+
+   The unused resource check can ignore tests. If you want to include
+   resources that are only referenced from tests, consider packaging them in a
+   test source set instead.
+
+   You can include test sources in the unused resource check by setting the
+   system property lint.unused-resources.include-tests =true, and to exclude
+   them (usually for performance reasons), use
+   lint.unused-resources.exclude-tests =true.
+   ,
+
+   Available options:
+
+   **skip-libraries** (default is true):
+   Whether the unused resource check should skip reporting unused resources in libraries.
+
+   Many libraries will declare resources that are part of the library surface; other modules depending on the library will also reference the resources. To avoid reporting all these resources as unused (in the context of a library), the unused resource check normally skips reporting unused resources in libraries. Instead, run the unused resource check on the consuming app module (along with `checkDependencies=true`).
+
+   However, there are cases where you want to check that all the resources declared in a library are used; in that case, you can disable the skip option.
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UnusedResources">
+           <option name="skip-libraries" value="true" />
+       </issue>
+   </lint>
+   ```
+
+apps/mobile/android/app/src/main/res/mipmap-hdpi/ic_launcher.webp: Warning: Misleading file extension; named .webp but the file format is png [IconExtension]
+apps/mobile/android/app/src/main/res/mipmap-mdpi/ic_launcher.webp: Warning: Misleading file extension; named .webp but the file format is png [IconExtension]
+apps/mobile/android/app/src/main/res/mipmap-xhdpi/ic_launcher.webp: Warning: Misleading file extension; named .webp but the file format is png [IconExtension]
+apps/mobile/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp: Warning: Misleading file extension; named .webp but the file format is png [IconExtension]
+apps/mobile/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp: Warning: Misleading file extension; named .webp but the file format is png [IconExtension]
+apps/mobile/android/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp: Warning: Misleading file extension; named .webp but the file format is png [IconExtension]
+apps/mobile/android/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp: Warning: Misleading file extension; named .webp but the file format is png [IconExtension]
+apps/mobile/android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp: Warning: Misleading file extension; named .webp but the file format is png [IconExtension]
+apps/mobile/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp: Warning: Misleading file extension; named .webp but the file format is png [IconExtension]
+apps/mobile/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp: Warning: Misleading file extension; named .webp but the file format is png [IconExtension]
+
+   Explanation for issues of type "IconExtension":
+   Ensures that icons have the correct file extension (e.g. a .png file is
+   really in the PNG format and not for example a GIF file named .png).
+
+0 errors, 30 warnings

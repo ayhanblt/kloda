@@ -1,0 +1,8 @@
+{
+  "utc": "2026-10-24T13:10:54.802571+00:00",
+  "exitCode": 0,
+  "seconds": 0.4937631670036353,
+  "sha256": "26db4decdd3a3c3a9c7dd61d5db885817e74fd00607b945d5b035867e34c5009",
+  "output": "PASS simulator ABI input pointer/length bounds\nPASS simulator ABI UTF8/JSON rejection\nPASS simulator phone command boundary\nPASS simulator stale owner and lifecycle rejection\nPASS simulator transfer rejects stale owner before descriptor use\nPASS simulator unsupported storage creates no authority directory\nPASS simulator real Rust reply consumption/free repeated 100 times\nIOS_ABI_SIMULATOR_CHECKS_COMPLETED_NOT_PRODUCT_ACCEPTANCE\n",
+  "scope": "Post-review final source; buffer length matches readable allocation. Fresh separate process, not persistent owner/journal restart acceptance."
+}

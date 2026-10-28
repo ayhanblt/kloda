@@ -12,7 +12,28 @@ export interface FileJob {
   totalBytes?: string;
   errorCode?: string;
 }
+export interface FileRun {
+  id: string;
+  recordId: string;
+  attempts: number;
+  state: 'running' | 'paused' | 'retry_wait' | 'finished' | 'needs_attention' | 'failed';
+  retryAt?: string;
+  errorCode?: string;
+}
+export interface AutomaticRun {
+  accessAttempts?: number;
+  attempts: number;
+  updated: 0 | 1;
+  state: 'running' | 'waiting' | 'finished' | 'exhausted' | 'paused';
+  retryAt?: string;
+  errorCode?: string;
+}
 export interface FileQueue {
+  automaticRun?: AutomaticRun;
+  automaticPaused?: boolean;
+  notificationsEnabled?: boolean;
+  automaticError?: string;
+  run?: FileRun;
   running: boolean;
   jobs: FileJob[];
   totalJobs: string;
@@ -41,6 +62,8 @@ interface NativeFiles {
   runFiles(record: string): Promise<unknown>;
   queueStatus(): Promise<unknown>;
   pauseFiles(): Promise<unknown>;
+  resumeAutomatic(): Promise<unknown>;
+  requestBackupNotifications?(): Promise<boolean>;
   listBackups(record: string, after: string | null): Promise<unknown>;
   restoreBackup(record: string, operation: string, sha256: string, size: string, name: string): Promise<unknown>;
   cancelRestore(): Promise<unknown>;
@@ -79,14 +102,55 @@ export function fileQueueFromNative(value: unknown): FileQueue {
       errorCode: 'errorCode' in job && job.errorCode != null ? text(job.errorCode) : undefined,
     };
   });
+  if ('automaticPaused' in value && typeof value.automaticPaused !== 'boolean') throw new Error('outcome_unknown');
+  if ('notificationsEnabled' in value && typeof value.notificationsEnabled !== 'boolean') throw new Error('outcome_unknown');
+  const notificationsEnabled = 'notificationsEnabled' in value ? value.notificationsEnabled as boolean : undefined;
+  const automaticPaused = 'automaticPaused' in value ? value.automaticPaused as boolean : undefined;
+  const automaticError = 'automaticError' in value && value.automaticError != null ? text(value.automaticError) : undefined;
   const totalJobs = decimal(value.totalJobs);
   if (BigInt(totalJobs) < BigInt(jobs.length) || value.hasMore !== (BigInt(totalJobs) > BigInt(jobs.length))
     || new Set(jobs.map(({ id }) => id)).size !== jobs.length) throw new Error('outcome_unknown');
-  return { running: value.running, jobs, totalJobs, hasMore: value.hasMore,
+  const run = 'run' in value && value.run != null ? fileRunFromNative(value.run, value.running) : undefined;
+  const automaticRun = 'automaticRun' in value && value.automaticRun != null ? automaticRunFromNative(value.automaticRun) : undefined;
+  return { automaticRun, running: value.running, jobs, totalJobs, hasMore: value.hasMore, run, automaticPaused, automaticError, notificationsEnabled,
+    errorCode: 'errorCode' in value && value.errorCode != null ? text(value.errorCode) : undefined };
+}
+function automaticRunFromNative(value: unknown): AutomaticRun {
+  if (typeof value !== 'object' || value === null || !('attempts' in value) || typeof value.attempts !== 'number'
+    || !Number.isInteger(value.attempts) || value.attempts < 1 || value.attempts > 5
+    || !('updated' in value) || (value.updated !== 0 && value.updated !== 1)
+    || !('state' in value) || typeof value.state !== 'string'
+    || !['running', 'waiting', 'finished', 'exhausted', 'paused'].includes(value.state)
+    || (value.updated === 1 && value.state !== 'finished')) throw new Error('outcome_unknown');
+  const accessAttempts = 'accessAttempts' in value ? value.accessAttempts : undefined;
+  if (accessAttempts !== undefined && (typeof accessAttempts !== 'number' || !Number.isInteger(accessAttempts) || accessAttempts < 0 || accessAttempts > 5)) throw new Error('outcome_unknown');
+  const errorCode = 'errorCode' in value && value.errorCode != null ? text(value.errorCode) : undefined;
+  const accessRetry = accessAttempts !== undefined && ['lan_unavailable', 'connection_closed'].includes(errorCode ?? '');
+  const retryAt = 'retryAt' in value && value.retryAt != null ? decimal(value.retryAt) : undefined;
+  if ((value.state === 'finished' && (value.updated !== 1 || errorCode !== undefined))
+    || (value.state === 'waiting' && accessAttempts !== undefined && !accessRetry && errorCode !== 'os_interrupted')
+    || (value.state === 'waiting' && accessRetry && (accessAttempts === 0 || accessAttempts === 5))
+    || (value.state === 'waiting') !== (retryAt !== undefined) || (value.state === 'waiting' && !accessRetry && value.attempts === 5)
+    || (retryAt !== undefined && (!Number.isSafeInteger(Number(retryAt)) || Number(retryAt) > 8640000000000000))) throw new Error('outcome_unknown');
+  return { attempts: value.attempts, accessAttempts: accessAttempts as number | undefined, updated: value.updated, state: value.state as AutomaticRun['state'], retryAt, errorCode };
+}
+function fileRunFromNative(value: unknown, running: boolean): FileRun {
+  if (typeof value !== 'object' || value === null || !('attempts' in value) || typeof value.attempts !== 'number'
+    || !Number.isInteger(value.attempts) || value.attempts < 1 || value.attempts > 5
+    || !('state' in value) || typeof value.state !== 'string'
+    || !['running', 'paused', 'retry_wait', 'finished', 'needs_attention', 'failed'].includes(value.state)) throw new Error('outcome_unknown');
+  const id = text('id' in value ? value.id : undefined);
+  const recordId = text('recordId' in value ? value.recordId : undefined);
+  if (!/^[A-Za-z0-9_-]{22}$/.test(recordId) || (['running', 'retry_wait'].includes(value.state) && !running)) throw new Error('outcome_unknown');
+  const retryAt = 'retryAt' in value && value.retryAt != null ? decimal(value.retryAt) : undefined;
+  if ((retryAt !== undefined && (!Number.isSafeInteger(Number(retryAt)) || Number(retryAt) > 8640000000000000 || value.attempts === 5))
+    || (value.state === 'retry_wait' && retryAt === undefined)
+    || (retryAt !== undefined && !['paused', 'retry_wait'].includes(value.state))) throw new Error('outcome_unknown');
+  return { id, recordId, attempts: value.attempts, state: value.state as FileRun['state'], retryAt,
     errorCode: 'errorCode' in value && value.errorCode != null ? text(value.errorCode) : undefined };
 }
 async function nativeCall(action: (native: NativeFiles) => Promise<unknown>): Promise<unknown> {
-  if (Platform.OS !== 'android') throw new Error('native_unsupported');
+  if (Platform.OS !== 'android' && Platform.OS !== 'ios') throw new Error('native_unsupported');
   const native = requireOptionalNativeModule<NativeFiles>('KlodaPairing');
   if (!native) throw new Error('native_unsupported');
   return action(native);
@@ -141,17 +205,31 @@ export function photosImportStatusFromNative(value: unknown): PhotosImportStatus
 async function invoke(action: (native: NativeFiles) => Promise<unknown>): Promise<FileQueue> {
   return fileQueueFromNative(await nativeCall(action));
 }
+async function requestNotifications(): Promise<boolean> {
+  if (Platform.OS !== 'android' && Platform.OS !== 'ios') return false;
+  const native = requireOptionalNativeModule<NativeFiles>('KlodaPairing');
+  if (!native?.requestBackupNotifications) return false;
+  const enabled = await native.requestBackupNotifications();
+  if (typeof enabled !== 'boolean') throw new Error('outcome_unknown');
+  return enabled;
+}
 export const fileTransfer = {
+  requestNotifications,
   status: () => invoke((native) => native.queueStatus()),
   run: (recordId: string) => invoke((native) => native.runFiles(recordId)),
   rebackup: (record: string, job: string) => invoke((native) => native.rebackupFile(record, job)),
   pause: () => invoke((native) => native.pauseFiles()),
+  resumeAutomatic: () => invoke((native) => native.resumeAutomatic()),
   list: async (recordId: string, after?: string) => completedBackupsFromNative(
     await nativeCall((native) => native.listBackups(recordId, after ?? null)), after),
   restore: async (recordId: string, backup: CompletedBackup) => restoredBackupFromNative(
     await nativeCall((native) => native.restoreBackup(recordId, backup.id, backup.sha256, backup.size, backup.name)), backup),
   cancelRestore: () => nativeCall((native) => native.cancelRestore()),
-  photoStatus: async () => photosImportStatusFromNative(await nativeCall((native) => native.photoImportStatus())),
-  restorePhotos: async (recordId: string, backup?: CompletedBackup) => photosImportStatusFromNative(
-    await nativeCall((native) => native.restorePhotos(recordId, backup?.id ?? null, backup?.sha256 ?? null, backup?.size ?? null, backup?.name ?? null))),
+  photoStatus: async () => {
+    return photosImportStatusFromNative(await nativeCall((native) => native.photoImportStatus()));
+  },
+  restorePhotos: async (recordId: string, backup?: CompletedBackup) => {
+    return photosImportStatusFromNative(await nativeCall((native) => native.restorePhotos(recordId,
+      backup?.id ?? null, backup?.sha256 ?? null, backup?.size ?? null, backup?.name ?? null)));
+  },
 };

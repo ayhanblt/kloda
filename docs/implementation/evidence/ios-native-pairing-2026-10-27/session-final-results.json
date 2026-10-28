@@ -1,0 +1,14 @@
+[
+  {
+    "name": "session-stub-compile",
+    "exitCode": 0
+  },
+  {
+    "name": "session-swift-compile",
+    "exitCode": 0
+  },
+  {
+    "name": "session-runtime-final",
+    "exitCode": 0
+  }
+]

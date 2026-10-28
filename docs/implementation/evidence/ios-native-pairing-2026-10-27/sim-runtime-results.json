@@ -1,0 +1,42 @@
+[
+  {
+    "name": "rust-foreground",
+    "exitCode": 0,
+    "seconds": 1.197
+  },
+  {
+    "name": "rust-abi",
+    "exitCode": 0,
+    "seconds": 0.608
+  },
+  {
+    "name": "rust-route-prefix",
+    "exitCode": 0,
+    "seconds": 0.568
+  },
+  {
+    "name": "rust-clock",
+    "exitCode": 0,
+    "seconds": 0.547
+  },
+  {
+    "name": "rust-no-state",
+    "exitCode": 0,
+    "seconds": 0.502
+  },
+  {
+    "name": "native-abi",
+    "exitCode": 0,
+    "seconds": 0.543
+  },
+  {
+    "name": "route-witness",
+    "exitCode": 0,
+    "seconds": 0.526
+  },
+  {
+    "name": "sqlite-fixture",
+    "exitCode": 0,
+    "seconds": 0.548
+  }
+]

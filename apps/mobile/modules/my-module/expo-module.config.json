@@ -1,9 +1,21 @@
 {
-  "platforms": ["apple", "android"],
+  "platforms": [
+    "apple",
+    "android"
+  ],
   "apple": {
-    "modules": ["KlodaSyncRuntimeModule"]
+    "modules": [
+      "KlodaSyncRuntimeModule",
+      "KlodaPairingModule"
+    ],
+    "appDelegateSubscribers": [
+      "IosAutomaticSubscriber"
+    ]
   },
   "android": {
-    "modules": ["com.kloda.sync.KlodaSyncRuntimeModule", "com.kloda.sync.KlodaPairingModule"]
+    "modules": [
+      "com.kloda.sync.KlodaSyncRuntimeModule",
+      "com.kloda.sync.KlodaPairingModule"
+    ]
   }
 }

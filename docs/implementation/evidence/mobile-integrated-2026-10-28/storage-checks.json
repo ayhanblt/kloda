@@ -1,0 +1,72 @@
+{
+  "scope": "Disk-full diagnostic classification only; import/restore/publication states unchanged",
+  "hostSwiftCompile": {
+    "exitCode": 0
+  },
+  "hostSwiftRun": {
+    "exitCode": 0
+  },
+  "simulatorCompile": {
+    "exitCode": 0
+  },
+  "kotlinHost": {
+    "compileExitCode": 0,
+    "runExitCode": 0,
+    "output": "PASS typed ENOSPC/quota/SQLite/nested classification and unrelated/cyclic failures\n"
+  },
+  "androidSdkCompile": {
+    "command": [
+      "./gradlew",
+      ":my-module:compileDebugKotlin",
+      ":my-module:compileDebugAndroidTestKotlin",
+      "--offline",
+      "--console=plain",
+      "-Pandroid.lint.useK2Uast=false"
+    ],
+    "exitCode": 0,
+    "gradleReportedSeconds": 43,
+    "scope": "Production+androidTest Kotlin compile only; no device/instrumentation/runtime"
+  },
+  "sourceHashes": [
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosFilesSource.swift",
+      "sha256": "85cb96ff8b0e8ed1c4b29e9e91f085049877693245ddee53682cac88235d549c"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosFilesQueue.swift",
+      "sha256": "7c7cc5f37ce567c89062a2a8d21fe629c869b5ceac5fb738c8bac5b8cb09676f"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosPhotosImport.swift",
+      "sha256": "b1faddd18e05d7a6db209cb0953db61aaecb0f70f99abc2a8a5087f75b0232d9"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidStorageErrors.kt",
+      "sha256": "99fe7febc52c8df55b08e6403e264ddafe423c6296aecdfe6bf17ebe78671759"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesQueue.kt",
+      "sha256": "5deaffe58aec2aa1ad99011ab159a5679434e39b08aad9a285e6d23db9729d01"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidOwnRestore.kt",
+      "sha256": "8240ddd6fcc62185159aead5e2000dc41d88583853cfb8cdc25f2ec87daeb758"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosRestore.kt",
+      "sha256": "39881ef0c8e11a963fc686d0d8bc11cea2a147e519c5ddc95b31cae60763d30e"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidStorageErrorsChecks.kt",
+      "sha256": "2eabfe263899a74033e0ecd3ed35be57778c08eda004156f60b0ac926931547e"
+    },
+    {
+      "path": "packages/pairing-native/apple/tests/IosFilesSnapshotChecks.swift",
+      "sha256": "4305a2298e23b6e6801f33600a90987cdcdd7c1f9c8de65f110370e3ff220488"
+    }
+  ],
+  "limits": [
+    "typed errors and platform type doubles; not actual volume exhaustion",
+    "Simulator classifier runtime and full app build recorded separately by parent"
+  ]
+}

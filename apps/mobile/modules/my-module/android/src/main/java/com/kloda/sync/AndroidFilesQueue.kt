@@ -1,61 +1,72 @@
 package com.kloda.sync
 
 import android.content.Context
-import android.database.sqlite.SQLiteFullException
 import android.database.sqlite.SQLiteException
 import android.os.CancellationSignal
-import android.system.ErrnoException
-import android.system.OsConstants
-import org.json.JSONArray
 import java.util.concurrent.atomic.AtomicBoolean
 
-internal class AndroidFilesQueue(private val context: Context, private val foreground: () -> Boolean) {
+internal class AndroidFilesQueue(private val context: Context, private val onStopped: (Thread) -> Unit = {}, private val mayRun: () -> Boolean) {
   private val lock = Any()
   private val journal = AndroidSyncJournal(context)
+  private val runs = AndroidFilesRunJournal(journal, context)
   private val stopped = AtomicBoolean(true)
   private val snapshots = AndroidFilesSnapshots(context) { checkPaused() }
   private val manifests = AndroidPhotoManifestPublisher(context, journal, snapshots, { checkPaused() }, { sources() })
   @Volatile private var worker: Thread? = null
   @Volatile private var errorCode: String? = null
+  @Volatile private var activeRun: String? = null
   @Volatile private var activeRecord: String? = null
+  @Volatile private var activeContext: FilesRunContext? = null
+  @Volatile private var pauseCode = "paused"
   @Volatile private var scanCancellation: CancellationSignal? = null
 
-  fun start(record: String, owner: Long, rebackup: String? = null): Map<String, Any> = synchronized(lock) {
+  fun start(record: String, owner: Long, rebackup: String? = null, expectedBinding: String? = null): Map<String, Any> = synchronized(lock) {
     if (worker?.isAlive == true) {
       if (activeRecord != record) throw FilesFailure("denied")
       if (rebackup != null) throw FilesFailure("backup_busy")
       return@synchronized status()
     }
-    val observed = journal.status(true, null)
-    stopped.set(false); errorCode = null; activeRecord = record
-    worker = Thread({
-      try { run(record, owner, rebackup) }
-      catch (error: Throwable) {
-        val code = failureCode(error)
-        errorCode = code
-        runCatching { journal.interrupt(record, code) }
-      } finally {
-        stopped.set(true)
-        runCatching { journal.interrupt(record, errorCode ?: "paused") }
-      }
+    val run = synchronized(AndroidSyncJournal.sourceLock) {
+      val snapshot = FilesRunContext.capture(context)
+      if (expectedBinding != null && snapshot.binding != expectedBinding) throw FilesFailure("settings_changed")
+      runs.begin(record, rebackup, snapshot.binding).also { activeContext = snapshot }
+    }
+    activeRun = run.id
+    stopped.set(false); pauseCode = "paused"; errorCode = null; activeRecord = record
+    val observed = status()
+    worker = Thread({ AndroidFilesRunWorker(runs, journal, ::checkPaused, ::failureCode,
+      { errorCode = it }, { errorCode }, { stopped.set(true) }) { retained ->
+      run(retained.record, owner, retained.rebackup)
+    }.execute(run)
+      onStopped(Thread.currentThread())
     }, "kloda-files-queue").also { it.start() }
     observed
   }
 
+  fun awaitStopped() {
+    val retained = worker
+    if (retained != null && retained !== Thread.currentThread()) retained.join()
+  }
+
+  fun running(): Boolean = worker?.isAlive == true
+
   fun status(): Map<String, Any> {
+    val binding = FilesRunContext.capture(context).binding
+    runs.invalidate(binding)
     val running = worker?.isAlive == true
     val files = journal.status(running, errorCode)
     val photos = manifests.status()
     @Suppress("UNCHECKED_CAST")
     val jobs = (photos + (files["jobs"] as List<Map<String, Any>>)).take(100)
     val total = (files["totalJobs"] as String).toLong() + manifests.count()
-    return files + mapOf("jobs" to jobs, "totalJobs" to total.toString(), "hasMore" to (total > jobs.size))
+    val run = runs.latest(activeRecord)?.takeIf { it.visibleFor(binding) }?.view(running)
+    return files + (if (run == null) emptyMap() else mapOf("run" to run)) + mapOf("jobs" to jobs, "totalJobs" to total.toString(), "hasMore" to (total > jobs.size))
   }
 
-  fun requestPause() { stopped.set(true); scanCancellation?.cancel(); snapshots.cancelRead() }
+  fun requestPause(code: String = "paused") { pauseCode = code; stopped.set(true); scanCancellation?.cancel(); snapshots.cancelRead() }
 
-  fun pause(): Map<String, Any> {
-    requestPause()
+  fun pause(code: String = "paused"): Map<String, Any> {
+    requestPause(code)
     val retained = synchronized(lock) { worker }
     if (retained != null && retained !== Thread.currentThread()) {
       var interrupted = false
@@ -64,24 +75,18 @@ internal class AndroidFilesQueue(private val context: Context, private val foreg
       }
       if (interrupted) Thread.currentThread().interrupt()
     }
-    activeRecord?.let { journal.interrupt(it, "paused") }
+    activeRecord?.let { journal.interrupt(it, code) }
     return status()
   }
 
   fun close() { try { pause() } finally { try { manifests.close() } finally { journal.close() } } }
 
-  private fun checkPaused() { if (stopped.get() || !foreground()) throw FilesFailure("paused") }
-
-  private fun sources(): Map<String, String> {
-    val preferences = context.getSharedPreferences("kloda-sync", 0)
-    return buildMap { for (key in listOf("directorySources", "photoSources")) {
-      val values = JSONArray(preferences.getString(key, "[]"))
-      repeat(values.length()) {
-        val source = values.getJSONObject(it)
-        put(source.getString("id"), source.getString("reference"))
-      }
-    } }
+  private fun checkPaused() {
+    activeContext?.check(context)
+    if (stopped.get() || !mayRun()) throw FilesFailure(if (stopped.get()) pauseCode else "paused")
   }
+
+  private fun sources(): Map<String, String> = activeContext?.sources ?: throw FilesFailure("queue_unavailable")
 
   private fun checkSource(job: FilesJob) {
     checkPaused()
@@ -190,6 +195,7 @@ internal class AndroidFilesQueue(private val context: Context, private val foreg
                 journal.version(record, source, file, tree, current.sha256, current.size)
                 else journal.version(record, source, file, tree, current.sha256, current.size)
               if (prior?.state == "completed") {
+                track(prior)
                 checkPaused()
                 try {
                   if (transfer.status(prior).state != "completed") throw FilesFailure("outcome_unknown")
@@ -231,8 +237,13 @@ internal class AndroidFilesQueue(private val context: Context, private val foreg
     }
   }
 
+  private fun track(job: FilesJob) {
+    AndroidScheduleJournal.track(journal.writableDatabase, activeRun ?: throw FilesFailure("queue_unavailable"), job.id, job.recordId)
+  }
+
   private fun sendJob(initial: FilesJob, transfer: AndroidFilesTransfer) {
     try {
+    track(initial)
     var job = initial
     snapshots.open(job).use { descriptor ->
       synchronized(AndroidSyncJournal.sourceLock) {
@@ -283,15 +294,10 @@ internal class AndroidFilesQueue(private val context: Context, private val foreg
   }
 
   private fun failureCode(error: Throwable): String {
-    if (stopped.get()) return "paused"
+    if (stopped.get()) return pauseCode
     if (error is FilesFailure) return error.code
     if (error is SecurityException) return "source_permission_lost"
-    if (error is SQLiteFullException) return "local_storage_full"
-    var cause: Throwable? = error
-    while (cause != null) {
-      if (cause is ErrnoException && cause.errno == OsConstants.ENOSPC) return "local_storage_full"
-      cause = cause.cause
-    }
+    if (isLocalStorageFull(error)) return "local_storage_full"
     if (error is SQLiteException) return "storage_failure"
     if (error is UnsatisfiedLinkError) return "native_unsupported"
     return "queue_unavailable"

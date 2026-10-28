@@ -29,7 +29,7 @@ internal class RestoreDestinationContract : AppContextActivityResultContract<Res
     if (resultCode == Activity.RESULT_OK) intent?.data?.takeIf { it.scheme == "content" } else null
 }
 
-// Activity results arrive before onResume; wait only for the explicit destination picker hand-off.
+// System picker/permission results arrive before onResume; wait for that explicit hand-off.
 internal suspend fun awaitRestoreForeground(activity: Activity?) = withContext(Dispatchers.Main) {
   val current = activity ?: throw FilesFailure("paused")
   val lifecycle = (current as? LifecycleOwner)?.lifecycle ?: throw FilesFailure("paused")

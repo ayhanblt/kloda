@@ -15,11 +15,11 @@ import org.json.JSONObject
 
 /** Managed callers receive opaque controls and sanitized observed state only. */
 class KlodaPairingModule : Module() {
-    private val ownerLock = Any()
-    private data class OwnedPlatform(val id: Long, val platform: KlodaPairingPlatform)
-    private var owner: OwnedPlatform? = null
+    private val ownerLock = AndroidPairingRuntime.lock
+    private val uiToken = Any()
+    private val owner get() = AndroidPairingRuntime.owner
+    private val files get() = AndroidPairingRuntime.files
     @Volatile private var destroyed = false
-    @Volatile private var files: AndroidFilesQueue? = null
     @Volatile private var foreground = false
     @Volatile private var restore: AndroidOwnRestore? = null
     @Volatile private var photosRestore: AndroidPhotosSession? = null
@@ -34,38 +34,45 @@ class KlodaPairingModule : Module() {
         Name("KlodaPairing")
         OnCreate { synchronized(ownerLock) {
             foreground = activityResumed()
-            appContext.reactContext?.applicationContext?.let { runCatching { AndroidOwnRestore.cleanup(it) } }
+            AndroidPairingRuntime.attach(uiToken, foreground)
+            appContext.reactContext?.applicationContext?.let { runCatching { AndroidOwnRestore.cleanup(it) }; AndroidBackupScheduler.reconcileAsync(it) }
         } }
-        OnActivityEntersForeground { synchronized(ownerLock) { if (!destroyed) foreground = true } }
+        OnActivityEntersForeground { if (!destroyed) { foreground = true; AndroidPairingRuntime.foreground(uiToken, true) } }
         OnActivityEntersBackground {
-            foreground = false; files?.requestPause(); restore?.pause(false); photosRestore?.pause()
+            foreground = false; AndroidPairingRuntime.foreground(uiToken, false); restore?.pause(false); photosRestore?.pause()
         }
         OnActivityDestroys {
-            foreground = false; files?.requestPause(); restore?.pause(); photosRestore?.pause(); photosRequests.cancel()
+            foreground = false; AndroidPairingRuntime.foreground(uiToken, false); restore?.pause(); photosRestore?.pause(); photosRequests.cancel()
         }
         AsyncFunction("runFiles") { record: String -> guarded {
             reference(record)
             synchronized(ownerLock) {
                 if (restore != null || photosRestore != null || photosRequests.active) fail("backup_busy")
-                if (destroyed || !foreground || !activityResumed()) fail("paused")
-                val id = currentOwner()
-                val status = JSONObject(KlodaPairingJni.status(id))
-                if (status.optString("phase") != "complete" || status.optString("recordId") != record ||
-                    status.optBoolean("repairRequired", true)) fail("denied")
-                filesQueue().start(record, id)
+                startFiles(record, transferOwner(record))
             }
         } }
         AsyncFunction("rebackupFile") { record: String, job: String -> guarded {
             reference(record); reference(job)
             synchronized(ownerLock) {
                 if (restore != null || photosRestore != null || photosRequests.active) fail("backup_busy")
-                if (destroyed || !foreground || !activityResumed()) fail("paused")
-                val id = transferOwner(record)
-                filesQueue().start(record, id, job)
+                startFiles(record, transferOwner(record), job)
             }
         } }
-        AsyncFunction("queueStatus") { guarded { synchronized(ownerLock) { filesQueue().status() } } }
-        AsyncFunction("pauseFiles") { guarded { synchronized(ownerLock) { restore?.pause(); photosRestore?.pause(); photosRequests.cancel(); filesQueue().pause() } } }
+        AsyncFunction("queueStatus") { guarded { synchronized(ownerLock) { withAutomaticState(filesQueue().status()) } } }
+        AsyncFunction("pauseFiles") { guarded { synchronized(ownerLock) {
+            checkUi()
+            AndroidBackupScheduler.pause(appContext.reactContext?.applicationContext ?: fail("native_unsupported"))
+            restore?.pause(); photosRestore?.pause(); photosRequests.cancel()
+            withAutomaticState(filesQueue().pause().also { AndroidFilesService.stop() })
+        } } }
+        AsyncFunction("requestBackupNotifications") Coroutine { -> guarded { checkUi() }
+            AndroidBackupNotifications.request(appContext.reactContext?.applicationContext ?: fail("native_unsupported"), appContext).also { guarded { checkUi() } }
+        }
+        AsyncFunction("resumeAutomatic") { guarded { synchronized(ownerLock) {
+            checkUi()
+            AndroidBackupScheduler.resume(appContext.reactContext?.applicationContext ?: fail("native_unsupported"))
+            withAutomaticState(filesQueue().status())
+        } } }
         AsyncFunction("cancelRestore") { guarded { synchronized(ownerLock) { restore?.pause(); photosRestore?.pause(); photosRequests.cancel() }; true } }
         AsyncFunction("listBackups") { record: String, after: String? -> guarded {
             reference(record); after?.let(::reference)
@@ -122,58 +129,54 @@ class KlodaPairingModule : Module() {
         AsyncFunction("status") { invoke { KlodaPairingJni.status(it) } }
         AsyncFunction("scan") { wire: String ->
             if (wire.length > 512 || wire.any { it.code > 127 }) fail("invalid_qr")
-            synchronized(ownerLock) { restore?.pause(); photosRestore?.pause(); photosRequests.cancel(); invoke { KlodaPairingJni.scan(it, wire) } }
+            changePeer { KlodaPairingJni.scan(it, wire) }
         }
         AsyncFunction("approve") { operation: String, generation: String ->
             references(operation, generation)
-            synchronized(ownerLock) { restore?.pause(); photosRestore?.pause(); photosRequests.cancel(); invoke { KlodaPairingJni.approve(it, operation, generation) } }
+            changePeer { KlodaPairingJni.approve(it, operation, generation) }
         }
         AsyncFunction("deny") { operation: String, generation: String ->
             references(operation, generation)
-            synchronized(ownerLock) { restore?.pause(); photosRestore?.pause(); photosRequests.cancel(); invoke { KlodaPairingJni.deny(it, operation, generation) } }
+            changePeer { KlodaPairingJni.deny(it, operation, generation) }
         }
         AsyncFunction("cancel") { operation: String ->
             reference(operation)
-            synchronized(ownerLock) { restore?.pause(); photosRestore?.pause(); photosRequests.cancel(); files?.pause(); invoke { KlodaPairingJni.cancel(it, operation) } }
+            changePeer { KlodaPairingJni.cancel(it, operation) }
         }
         AsyncFunction("resume") { record: String ->
             reference(record)
-            synchronized(ownerLock) { restore?.pause(); photosRestore?.pause(); photosRequests.cancel(); invoke { KlodaPairingJni.resume(it, record) } }
+            changePeer(record) { KlodaPairingJni.resume(it, record) }
         }
         AsyncFunction("removePairing") { record: String, online: Boolean ->
             reference(record)
-            synchronized(ownerLock) { restore?.pause(); photosRestore?.pause(); photosRequests.cancel(); files?.pause(); invoke { KlodaPairingJni.removePairing(it, record, online) } }
+            changePeer { KlodaPairingJni.removePairing(it, record, online) }
         }
         AsyncFunction("close") { closeOwner() }
         OnDestroy {
-            synchronized(ownerLock) {
-                destroyed = true
-                foreground = false
-                try { closeOwner() } finally { files?.close(); files = null }
-            }
+            destroyed = true; foreground = false
+            AndroidPairingRuntime.detach(uiToken)
+            restore?.pause(); photosRestore?.pause(); photosRequests.cancel()
         }
     }
 
     private fun currentOwner(): Long = synchronized(ownerLock) {
         if (destroyed) fail("cancelled")
-        owner?.id ?: run {
-            val context = appContext.reactContext?.applicationContext ?: fail("native_unsupported")
-            // Each reopened owner receives a new observer. Retain its platform until
-            // native close joins the worker, including any synchronous hardware callback.
-            val platform = KlodaPairingPlatform(context)
-            val id = try {
-                KlodaPairingJni.open(platform)
-            } catch (error: Throwable) {
-                // A failed JNI open has joined any worker it created. This also covers
-                // a missing native library, before JNI can take a global reference.
-                try { platform.nativeClose("") }
-                catch (_: Exception) { fail("outcome_unknown") }
-                throw error
-            }
-            owner = OwnedPlatform(id, platform)
-            id
-        }
+        AndroidPairingRuntime.currentOwner(appContext.reactContext?.applicationContext ?: fail("native_unsupported"))
     }
+
+    private fun changePeer(record: String? = null, action: (Long) -> String): Map<String, Any> = guarded { synchronized(ownerLock) {
+        checkUi()
+        val changed = record == null || JSONObject(KlodaPairingJni.status(currentOwner())).optString("recordId") != record
+        if (changed) FilesRunContext.invalidate(appContext.reactContext?.applicationContext ?: fail("native_unsupported"))
+        restore?.pause(); photosRestore?.pause(); photosRequests.cancel()
+        files?.pause(if (changed) "settings_changed" else "paused")
+        AndroidFilesService.stop()
+        AndroidPairingRuntime.authorizeUi(uiToken)
+        invoke(action).also {
+            AndroidBackupScheduler.reconcile(appContext.reactContext?.applicationContext ?: fail("native_unsupported"))
+        }
+    } }
+
     private fun invoke(action: (Long) -> String): Map<String, Any> = guarded { synchronized(ownerLock) {
         val value = JSONObject(action(currentOwner()))
         val fields = setOf("phase", "operationId", "candidateGeneration", "peerFingerprint",
@@ -183,15 +186,13 @@ class KlodaPairingModule : Module() {
             value.optJSONObject("unpairResult")?.let { result ->
                 put("unpairResult", buildMap<String, Any> {
                     put("state", result.getString("state"))
-                    if (result.has("errorCode") && !result.isNull("errorCode")) {
-                        put("errorCode", result.getString("errorCode"))
-                    }
+                    if (result.has("errorCode") && !result.isNull("errorCode")) put("errorCode", result.getString("errorCode"))
                 })
             }
         }
     } }
     private fun transferOwner(record: String): Long {
-        if (destroyed || !foreground || !activityResumed()) fail("paused")
+        checkUi()
         val id = currentOwner()
         val status = JSONObject(KlodaPairingJni.status(id))
         if (status.optString("phase") != "complete" || status.optString("recordId") != record ||
@@ -203,6 +204,7 @@ class KlodaPairingModule : Module() {
         if (restore != null || photosRestore != null || photosRequests.active) fail("backup_busy")
         val id = transferOwner(record)
         files?.pause()
+        AndroidFilesService.stop()
         val backup = AndroidOwnBackups.status(KlodaPairingJni.transfer(id, record,
             JSONObject().put("kind", "status").put("id", operation).toString(), -1), operation)
         if (backup.sha256 != sha256 || backup.size.toString() != size || backup.name != name) fail("conflict")
@@ -210,7 +212,7 @@ class KlodaPairingModule : Module() {
         transfer = AndroidOwnRestore(appContext.reactContext?.applicationContext ?: fail("native_unsupported"), backup,
             { synchronized(ownerLock) {
                 if (restore !== transfer || owner?.id != id) throw FilesFailure("cancelled")
-                if (destroyed || !foreground || !activityResumed()) throw FilesFailure("paused")
+                checkUi()
             } },
             { command, descriptor ->
                 synchronized(ownerLock) { transfer.check() }
@@ -227,11 +229,12 @@ class KlodaPairingModule : Module() {
         if (restore != null || photosRestore != null) fail("backup_busy")
         val id = transferOwner(record)
         files?.pause()
+        AndroidFilesService.stop()
         lateinit var session: AndroidPhotosSession
         session = AndroidPhotosSession(appContext.reactContext?.applicationContext ?: fail("native_unsupported"),
             { synchronized(ownerLock) {
                 if (photosRestore !== session || owner?.id != id) throw FilesFailure("cancelled")
-                if (destroyed || !foreground || !activityResumed()) throw FilesFailure("paused")
+                checkUi()
             } }, { command, descriptor ->
                 session.check()
                 val response = KlodaPairingJni.transfer(id, record, command, descriptor)
@@ -243,27 +246,39 @@ class KlodaPairingModule : Module() {
     }
     private fun filesQueue(): AndroidFilesQueue {
         if (destroyed) fail("cancelled")
-        return files ?: AndroidFilesQueue(appContext.reactContext?.applicationContext ?: fail("queue_unavailable")) {
-            !destroyed && foreground && activityResumed()
+        return AndroidPairingRuntime.queue(appContext.reactContext?.applicationContext ?: fail("queue_unavailable"))
+    }
+    private fun withAutomaticState(value: Map<String, Any>) =
+        AndroidBackupScheduler.view(appContext.reactContext?.applicationContext ?: fail("native_unsupported"), value)
+    private fun startFiles(record: String, id: Long, job: String? = null): Map<String, Any> {
+        checkUi()
+        val queue = filesQueue()
+        if (queue.running()) return withAutomaticState(queue.start(record, id, job))
+        if (AndroidPairingRuntime.hasScheduledLease()) fail("backup_busy")
+        val context = appContext.reactContext?.applicationContext ?: fail("native_unsupported")
+        AndroidFilesService.acquire(context)
+        try {
+            checkUi()
+            return withAutomaticState(queue.start(record, id, job))
+        } catch (error: Throwable) {
+            AndroidFilesService.stop()
+            throw error
         }
-            .also { files = it }
     }
     private fun closeOwner() = guarded {
-        synchronized(ownerLock) {
-            restore?.pause(); photosRestore?.pause(); photosRequests.cancel()
-            try { files?.pause() } finally {
-                owner?.let { owned ->
-                    try { KlodaPairingJni.close(owned.id) } finally { owner = null }
-                }
-            }
-        }
+        // UI departure invalidates pairing work; the application still owns authorized transfers.
+        AndroidPairingRuntime.suspendPairing(uiToken)
+        restore?.pause(); photosRestore?.pause(); photosRequests.cancel()
+    }
+    private fun checkUi() {
+        if (destroyed || !foreground || !activityResumed()) fail("paused")
+        AndroidPairingRuntime.checkUi(uiToken)
     }
     private fun reference(value: String) {
         if (value.length != 22 || value.any { !(it.isLetterOrDigit() && it.code < 128 || it == '-' || it == '_') }) fail("candidate_stale")
     }
     private fun references(operation: String, generation: String) {
-        reference(operation)
-        if (generation.length !in 1..20 || generation.any { it !in '0'..'9' }) fail("candidate_stale")
+        reference(operation); if (generation.length !in 1..20 || generation.any { it !in '0'..'9' }) fail("candidate_stale")
     }
     private fun <T> guarded(action: () -> T): T = try { action() }
     catch (error: CodedException) { throw error }
@@ -275,12 +290,13 @@ class KlodaPairingModule : Module() {
     private val codes = AndroidFilesTransfer.codes + setOf("source_permission_lost", "source_changed",
         "snapshot_unavailable", "local_storage_full", "queue_unavailable", "paused", "destination_unavailable",
         "destination_permission_lost", "destination_not_empty", "restore_cleanup_failed", "manifest_invalid",
-        "photo_permission_lost", "photo_review_required")
+        "photo_permission_lost", "photo_review_required", "background_unavailable", "automatic_pause_not_saved")
 }
 
 internal object KlodaPairingJni {
     init { System.loadLibrary("kloda_pairing_native") }
     @JvmStatic external fun open(platform: KlodaPairingPlatform): Long
+    @JvmStatic external fun setForeground(owner: Long, active: Boolean)
     @JvmStatic external fun status(owner: Long): String
     @JvmStatic external fun scan(owner: Long, wire: String): String
     @JvmStatic external fun approve(owner: Long, operation: String, generation: String): String

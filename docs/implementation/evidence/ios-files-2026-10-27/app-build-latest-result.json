@@ -1,0 +1,27 @@
+{
+  "command": [
+    "xcodebuild",
+    "-workspace",
+    "apps/mobile/ios/KlodaSecurePhotosSync.xcworkspace",
+    "-scheme",
+    "KlodaSecurePhotosSync",
+    "-configuration",
+    "Debug",
+    "-sdk",
+    "iphonesimulator",
+    "-destination",
+    "generic/platform=iOS Simulator",
+    "-derivedDataPath",
+    "/tmp/kloda-ios-step5/app-build",
+    "-disableAutomaticPackageResolution",
+    "CODE_SIGNING_ALLOWED=NO",
+    "COMPILER_INDEX_STORE_ENABLE=NO",
+    "LD_GENERATE_MAP_FILE=YES",
+    "LD_MAP_FILE_PATH=/tmp/kloda-ios-step5/$(TARGET_NAME)-$(CURRENT_ARCH).map",
+    "ARCHS=arm64",
+    "ONLY_ACTIVE_ARCH=YES",
+    "build"
+  ],
+  "exitCode": 0,
+  "seconds": 20.308966159820557
+}

@@ -63,7 +63,7 @@ apps/mobile/modules/**/ios/build/
 # Shared pairing native generated output
 packages/pairing-native/target/
 apps/mobile/modules/my-module/android/src/main/jniLibs/
-apps/mobile/modules/my-module/ios/NativePairing/
+apps/mobile/modules/my-module/ios/NativePairing
 
 # Logs
 *.log

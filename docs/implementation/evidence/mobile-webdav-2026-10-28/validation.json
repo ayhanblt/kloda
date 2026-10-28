@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-28T06:15:55.989793+00:00",
+  "scope": "Mobile checklist9 advanced WebDAV settings/probe only; not a WebDAV sender or PC receiver acceptance",
+  "checks": [
+    {
+      "name": "typecheck",
+      "command": [
+        "node_modules/.bin/tsc",
+        "--noEmit",
+        "-p",
+        "apps/mobile/tsconfig.json"
+      ],
+      "exitCode": 0,
+      "seconds": 1.8361019999720156
+    },
+    {
+      "name": "lint",
+      "command": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exitCode": 0,
+      "seconds": 3.424797958054114
+    },
+    {
+      "name": "export",
+      "command": [
+        "npm",
+        "run",
+        "build",
+        "--workspace",
+        "@kloda/mobile"
+      ],
+      "exitCode": 0,
+      "seconds": 17.207515499962028
+    }
+  ],
+  "jest": {
+    "exitCode": 0,
+    "suites": 10,
+    "passed": 98,
+    "command": "npm run test --workspace @kloda/mobile -- --runInBand",
+    "logSha256": "339b49b5b21199e0566fd24dfe2ea5c28176bb020e4637031a210ee931b4aff3"
+  },
+  "signedSimulatorBuild": {
+    "command": [
+      "xcodebuild",
+      "-workspace",
+      "apps/mobile/ios/KlodaSecurePhotosSync.xcworkspace",
+      "-scheme",
+      "KlodaSecurePhotosSync",
+      "-configuration",
+      "Debug",
+      "-sdk",
+      "iphonesimulator",
+      "-destination",
+      "generic/platform=iOS Simulator",
+      "-derivedDataPath",
+      "<disposable-derived-data>/app-build",
+      "-disableAutomaticPackageResolution",
+      "CODE_SIGNING_ALLOWED=YES",
+      "COMPILER_INDEX_STORE_ENABLE=NO",
+      "LD_GENERATE_MAP_FILE=YES",
+      "LD_MAP_FILE_PATH=<disposable-derived-data>/$(TARGET_NAME)-$(CURRENT_ARCH).map",
+      "ARCHS=arm64",
+      "ONLY_ACTIVE_ARCH=YES",
+      "build",
+      "CODE_SIGN_IDENTITY=-"
+    ],
+    "exitCode": 0,
+    "seconds": 25.544644250010606
+  },
+  "simulatorRuntime": {
+    "runtime": "iOS26.5 Simulator",
+    "profile": "synthetic unverified single SecureStore profile, no production key/authority",
+    "reports": [
+      {
+        "result": "PASS",
+        "phase": "seed",
+        "checks": [
+          "real_securestore_single_unverified_profile",
+          "production_https_validation_before_mutation",
+          "native_ambient_cookie_control_present",
+          "real_native_fetch_omits_ambient_cookie",
+          "real_native_fetch_redirect_error"
+        ]
+      },
+      {
+        "result": "PASS",
+        "phase": "reopen",
+        "checks": [
+          "process_restart_retains_whole_profile",
+          "production_https_validation_before_mutation",
+          "native_ambient_cookie_control_present",
+          "real_native_fetch_omits_ambient_cookie",
+          "real_native_fetch_redirect_error"
+        ]
+      }
+    ],
+    "allToolExitCodes": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "distinctProcessCount": 2,
+    "redirectTargetRequests": 0,
+    "transportScope": "Loopback HTTP transport only, positive cookie include control then omit, explicit synthetic Authorization retained,302/307 no-follow; production WebDAV validator rejects HTTP before mutation"
+  },
+  "failedAttempt": {
+    "reports": [
+      {
+        "result": "FAIL",
+        "checks": [],
+        "code": "ERR_KEY_CHAIN"
+      }
+    ],
+    "scope": "Prior CODE_SIGNING_ALLOWED=NO artifact failed ERR_KEY_CHAIN before checks; exact OSStatus not captured. Normal Xcode ad-hoc signed Simulator build subsequently passed; no Keychain/guard/provider policy change or reset."
+  },
+  "review": {
+    "independentReadOnly": true,
+    "blockingFindingsRemaining": 0,
+    "fixed": [
+      "stale cancellation must retain probe uncertainty warning",
+      "a new successful UUID probe cannot clear previous probe warning"
+    ],
+    "reviewerRanTests": false
+  },
+  "notRun": [
+    "real WebDAV HTTPS server/archive",
+    "Android native SecureStore/HTTP runtime (shared business tests + installed native source review only)",
+    "physical devices/platform acceptance",
+    "actual WebDAV scheduled/background byte sender",
+    "power-loss durability",
+    "Rust Clippy/four-ABI rebuild: no native/Rust source changed in step9"
+  ],
+  "openLimits": [
+    "An ambiguous/cancelled probe may leave its own random directory; no adoption/automatic recovery or destructive cleanup was added. Warning remains this UI session, not durable across process restart.",
+    "Legacy split settings/password are neither migrated nor removed; native metadata can be displayed only as unverified.",
+    "A corrupt/unreadable new secure profile fails closed; reset/recovery policy was not invented.",
+    "A prior connection test is not present reachability or a native PC receiver grant."
+  ],
+  "sourceHashes": [
+    {
+      "path": "apps/mobile/src/shared/api/webdav.ts",
+      "sha256": "c2518802ce44d1874e677a1632c7acd6c17823629a631df86936faf028807087"
+    },
+    {
+      "path": "apps/mobile/src/shared/api/webdav-settings.ts",
+      "sha256": "33edebbc9ed1768a706b3360d5393a627a713e30e1d0980223abcf9bf6ad77be"
+    },
+    {
+      "path": "apps/mobile/src/shared/api/webdav-settings.spec.ts",
+      "sha256": "17050a408c3df240100dced19996497ab2eef95c04c1721ad8988f122ae450a4"
+    },
+    {
+      "path": "apps/mobile/src/app/App.tsx",
+      "sha256": "bbebf115475ffcddd11d928d62cf30f043f9dd90ddd75f2238f03bc42e86c4ea"
+    },
+    {
+      "path": "apps/mobile/src/app/App.spec.tsx",
+      "sha256": "e36e04d15773523f4efa5bb255500c95fec4368f99c09f04aa673164da14245d"
+    },
+    {
+      "path": "packages/pairing-native/apple/tests/IosWebDavSettingsChecks.js",
+      "sha256": "dd545f9278af488fd4450b58e894d02f52f97dd28821382265aca33d04cc4057"
+    },
+    {
+      "path": "apps/mobile/src/shared/i18n/locales/tr.json",
+      "sha256": "9f69d35a3dfee4fb27cfd2580bae72edeb9e0e006b263044a7589e07e005c805"
+    },
+    {
+      "path": "apps/mobile/src/shared/i18n/locales/en.json",
+      "sha256": "bd6a3b74064672b86c254281e03cbfafa61bb3ef54b2635dc292edcabc98a468"
+    },
+    {
+      "path": "apps/mobile/src/shared/i18n/locales/de.json",
+      "sha256": "b38753a088a897bea1e9bb304cf56d69d41c1c8f11c7eecd2d2b7326e4ed5fd8"
+    }
+  ],
+  "savedResultReview": {
+    "independentReadOnly": true,
+    "blockingFindings": 0,
+    "checked": [
+      "source and Jest log hashes",
+      "10 suites98 tests",
+      "lint/typecheck/export and signed Simulator build exits",
+      "two distinct Simulator PIDs",
+      "positive cookie control and omit",
+      "zero redirect target requests",
+      "preserved initial ERR_KEY_CHAIN and explicit NOT_RUN/open limits"
+    ],
+    "reviewerReranRuntime": false
+  }
+}

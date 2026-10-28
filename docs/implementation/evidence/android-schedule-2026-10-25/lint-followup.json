@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-25T19:42:08.061787+00:00",
+  "head": "34dcbb8c204cb01e84583655651d10cb5baca8ec",
+  "scope": "List3 Android lint follow-up and list4 static ELF compatibility slice; prior dirty tree retained",
+  "command": "./gradlew :app:lintDebug :my-module:lintDebug :my-module:compileDebugAndroidTestKotlin --offline --console=plain -Pandroid.lint.useK2Uast=false",
+  "buildAndLint": {
+    "exitCode": 0,
+    "gradleReportedSeconds": 26,
+    "actionableTasks": 857,
+    "executed": 71,
+    "upToDate": 786,
+    "reports": {
+      "module": {
+        "Warning:InlinedApi": 7,
+        "Warning:ObsoleteSdkInt": 2,
+        "Warning:StaticFieldLeak": 1,
+        "Warning:UseKtx": 24
+      },
+      "app": {
+        "Warning:ScopedStorage": 1,
+        "Warning:UnusedAttribute": 1,
+        "Warning:ManifestOrder": 1,
+        "Warning:NewerVersionAvailable": 2,
+        "Warning:PrivateResource": 6,
+        "Warning:DiscouragedApi": 1,
+        "Warning:UnusedResources": 8,
+        "Warning:IconExtension": 10
+      }
+    }
+  },
+  "checks": [
+    {
+      "name": "Actual Kotlin SAF scanner host",
+      "groups": 12,
+      "exitCode": 0
+    },
+    {
+      "name": "Actual DirectoryPickerContract host",
+      "exitCode": 0
+    },
+    {
+      "name": "Expo camera config plugin creation/update/idempotence",
+      "exitCode": 0
+    },
+    {
+      "name": "ELF32/64 synthetic acceptance/rejection and produced four ABI LOAD alignment/congruence",
+      "exitCode": 0
+    },
+    {
+      "name": "Android-only build.rs output; other four OS targets unchanged",
+      "exitCode": 0
+    },
+    {
+      "name": "Scoped build.rs rustfmt and git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "sourceSha256": {
+    "apps/mobile/modules/my-module/android/build.gradle": "1ac8291d06aeeb12798bc6c975e028a415a5f0d4057a4e0e40b4797d85ca42c8",
+    "apps/mobile/modules/my-module/android/src/main/AndroidManifest.xml": "91d077690596ae71dda45b57a6a9fced6abf769b87321ec384a5009eacb90524",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/NativeLanRoutes.kt": "b6009563fd5c67c593ac99218748aa1a1001d6e90997fc5875ebf0852c95605b",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSafSourceScanner.kt": "ce7edea1ed89a117a2e5e552d72297979f5b36da965f62a8943c5c6ba9c717aa",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesSnapshots.kt": "ef349a9dfe8dd3d8be09b6c70924ea569d912383df5b8af8a3d2e9290de5d5c6",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/DirectoryPickerContract.kt": "c9ed7ac7b41f35f1890361b52d65c8fbf9f5abecb1f55fba109e1eea4377ccea",
+    "apps/mobile/app.json": "483058d32b0227bef9c27451ce65cc143ffbabb727226c86cd031b66c83e3671",
+    "apps/mobile/plugins/with-optional-camera.cjs": "0201e93f4af6027cb3dcf253e0437ece1544af29f0b069cff31e2a4c75874df8",
+    "packages/pairing-native/build.rs": "82cf09e801e6dac9ae0d23878e26aa71cea6aa8ddf0b1c3105bcbf84551c1b59",
+    "tools/test-android-saf.py": "906498f055646198f9ed499ae5568cbc040677a2d8181b462f2d4863978e6af5",
+    "tools/test-android-config.cjs": "1847e54b218f224fe724e48c06fbdd6b5fdb1ec50fa4d74d028f53bf87d582f8",
+    "tools/check-android-elf-alignment.py": "21b35fab8f2225eadeec00acde86e49dc47fdeb6b7f318c650a67fd19874a5f1"
+  },
+  "producedLibrarySha256": {
+    "arm64-v8a": "428465aee399122367ec0a20fe029cf1b86847dabf95e4ef473d75cb4f01d352",
+    "armeabi-v7a": "e64658b69ade97123bbdef8f0089b91301c33da642ad9dd3cc228b94d3e7359e",
+    "x86_64": "3ca1ea5640cd393dd31412c95b215bc057d6f221af50bf89dc3806445af59b42",
+    "x86": "504cebf8cbafba9b135ff73e53b18b3d0bb5836f43068df8744b20569f72d210"
+  },
+  "review": "Independent Sol source/security and saved-result review; cancellation gap and ELF congruence validator fixed; final no blocker. Reviewer did not execute tests.",
+  "historical": "64 mobile tests/Rust foreground5/other list2-3 host checks are prior work-group evidence, not rerun in this follow-up. Prior result.json remains historical snapshot.",
+  "limits": [
+    "Default K2 lint still has upstream KaModule failure; this PASS requires explicit K1 analysis option, no tasks/checks disabled. No dependency or toolchain version changed.",
+    "Remaining Android warnings retained; StaticFieldLeak points to process-singleton queue constructed with applicationContext, not proven Activity leak.",
+    "API24-28 provider traversal is cancellable but can be quadratic; slow provider may ignore cancellation. Large archive IO/battery/DB growth unmeasured.",
+    "APK/AAB ZIP alignment, Android runtime/instrumentation/16KB devices/Doze/reboot/SAF actual provider/LAN acceptance NOT_RUN. Physical/device/probe pause retained.",
+    "No Git mutation, archive/key/pin/authority change; generated ignored Android manifest updated only via same registered Expo plugin."
+  ],
+  "next": "List4 remaining static packaging/compatibility and resource evaluation; actual OS/device acceptance remains paused."
+}

@@ -23,13 +23,21 @@ internal class AndroidPhotoManifestPublisher(context: Context, private val files
     if (!pending) {
       if (prior.job.operationId == null) throw FilesFailure("denied")
       try {
-        if (transfer.status(prior.job).state == "completed") { journal.clearDeleted(prior.job.id); return }
+        val ack = transfer.status(prior.job)
+        check()
+        if (ack.state == "completed") {
+          journal.retain(prior.job, ack); journal.clearDeleted(prior.job.id); snapshots.discard(prior); return
+        }
         throw FilesFailure("outcome_unknown")
       } catch (error: FilesFailure) { if (error.code != "owner_deleted") throw error }
       journal.markDeleted(prior.job.id)
     } else if (prior.job.operationId != null) {
       try {
-        if (transfer.status(prior.job).state == "completed") { journal.clearDeleted(prior.job.id); return }
+        val ack = transfer.status(prior.job)
+        check()
+        if (ack.state == "completed") {
+          journal.retain(prior.job, ack); journal.clearDeleted(prior.job.id); snapshots.discard(prior); return
+        }
       } catch (error: FilesFailure) {
         if (error.code != "owner_deleted") throw error
         journal.markDeleted(prior.job.id); pending = false

@@ -13,6 +13,7 @@ default = []
 desktop-production = []
 desktop-node = ["dep:napi", "dep:napi-derive", "dep:napi-build"]
 android-jni = ["dep:jni"]
+ios-ffi = []
 
 [dependencies]
 axum = { version = "=0.8.9", default-features = false, features = ["http1", "tokio"] }

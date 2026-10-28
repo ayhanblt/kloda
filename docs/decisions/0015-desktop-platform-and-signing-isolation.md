@@ -20,6 +20,27 @@ After production trust, file authorization remains separate: [ADR0016](0016-v1-p
 
 ## Platform evidence boundaries
 
+### Free Personal Team local validation — 2026-10-26
+
+Ayhan explicitly authorized this Mac's secure-key/receiver validation with the free
+Personal Team and created an Apple Development certificate in Xcode. The missing
+Apple WWDR G3 public intermediate was verified against the existing Apple root and
+installed without a trust override. Xcode registered this Mac and issued the
+development `com.kloda.desktop.dev` profile. Paid membership is not a prerequisite
+for the now-observed scoped local tests. This refines the historical signing-blocked
+evidence below; it does not change custody, production isolation or release gates.
+
+Actual Secure Enclave certificate signing, native owner create/reopen and signed
+Electron-host/NAPI create/reopen passed in new isolated test authorities. A real
+reopen bug was fixed: CanSign metadata returned as CFNumber was falsely rejected by
+CFBoolean equality. Validation now checks support for the exact native ECDSA signing
+operation; private/Enclave/P-256/256-bit and actual signing-failure fences remain.
+No software fallback, legacy Keychain, ad-hoc access group or library-validation
+bypass was added. The free profile is time-limited and development-debug capable;
+release signing/notarization/distribution remain separate. Normal application
+startup/UI/tray/QR/grant and Android-Mac TLS/file acceptance are still open.
+[Exact source, checks and limits](../implementation/macos-personal-team-validation-2026-10-26.md).
+
 ### Approved Windows D2 contract and D3 design scope — 2026-10-22
 
 2026-10-23 user-selected certificate boundary: initial absent DER uses no-replace

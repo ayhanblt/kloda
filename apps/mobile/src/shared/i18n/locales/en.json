@@ -1,5 +1,13 @@
 {
   "transfer": {
+    "osAttempt": "OS execution attempt {{attempt}} / 5",
+    "osStates": {
+      "running": "Automatic work is active",
+      "waiting": "Waiting for an OS opportunity after interruption",
+      "finished": "Automatic work ended; check the file results",
+      "exhausted": "OS attempt budget exhausted; waiting for the next schedule",
+      "paused": "Automatic work paused"
+    },
     "title": "Backup Activity",
     "description": "Selected Files and Photos go directly to your paired PC over native encrypted LAN. The PC must separately approve your backup folder.",
     "running": "Sending files",
@@ -12,8 +20,8 @@
     "syncNow": "Sync Now",
     "backups": {
       "title": "Your completed PC backups",
-      "description": "Only this phone's completed backups on the currently paired PC are listed. Restore creates a new file at a location you choose in Android; existing files and Photos originals are never replaced or deleted.",
-      "photosOpen": "Verified Photos manifests can restore media into Android Photos. File backups still save to a new document. Existing media is not overwritten; ambiguous imports wait for review.",
+      "description": "Only this phone’s completed backups on the currently paired PC are listed. Files restore to a new location you choose on your phone; existing files and Photos originals are never replaced or deleted.",
+      "photosOpen": "Verified Photos manifests can restore media into the phone’s Photos library. File backups still save to a new document. Existing media is not overwritten; ambiguous or unsupported imports wait for review.",
       "load": "Read completed backups",
       "empty": "No completed backups were returned by this PC.",
       "completed": "PC backup completed · Local encrypted LAN",
@@ -30,9 +38,9 @@
       "restoreAll": "Restore all accessible Photos backups",
       "idle": "No Photos import jobs yet.",
       "pending": "{{completed}} / {{total}} Photos assets verified; remaining jobs wait for a user-triggered retry.",
-      "completed": "{{completed}} / {{total}} Photos assets and supported album metadata verified.",
+      "completed": "Last import verification: {{completed}} / {{total}} Photos assets and supported album metadata verified. Restoring again rechecks the target.",
       "review_required": "{{review}} Photos jobs need review. A previous import may already exist or access is uncertain; no second copy is created automatically.",
-      "organization_review": "{{review}} Photos jobs need album/resource review. Android folders cannot represent every Photos relationship; complete restoration is not assumed."
+      "organization_review": "{{review}} The media or album relationships need review; full restoration is not assumed."
     },
     "states": {
       "queued": "Queued",
@@ -46,7 +54,7 @@
     },
     "errors": {
       "pairing_required": "Pair with a PC before sending files.",
-      "cancelled": "Restore cancelled. No restore success is assumed.",
+      "cancelled": "Operation cancelled. Incomplete work is retained; no success is assumed.",
       "manifest_invalid": "The Photos manifest is incomplete, unsupported or inconsistent. Nothing is imported from it.",
       "photo_permission_lost": "Full Photos access is required to verify existing assets safely. Grant access and retry; no duplicate is created.",
       "photo_review_required": "Photos import needs review. A previous copy may already exist; no automatic second import is attempted.",
@@ -54,6 +62,9 @@
       "destination_permission_lost": "Restore destination access was lost. Choose a new file and retry.",
       "destination_not_empty": "The destination is not empty. It was not overwritten or deleted; choose a new file.",
       "restore_cleanup_failed": "Restore did not complete and the newly created destination could not be removed. An incomplete file may remain; remove it yourself before retrying to a new file.",
+      "os_interrupted": "The operating system stopped the job. Progress is retained while waiting for an execution opportunity.",
+      "automatic_pause_not_saved": "The automatic pause could not be saved. Work stopped for this session; it may restart after reopening. Check storage.",
+      "background_unavailable": "The operating system could not start the background backup service. Keep the app open and try again.",
       "native_unsupported": "Native LAN transfer is not available on this platform.",
       "source_permission_lost": "Source access was lost. Select the original folder again; pending work is retained.",
       "source_changed": "The source changed. The previous version will not resume with an old hash.",
@@ -80,16 +91,45 @@
       "revoked": "Pairing was revoked. Files will not be sent under the old pairing.",
       "outcome_unknown": "The result could not be confirmed. Pending work is retained; no success is assumed.",
       "owner_deleted": "This source version was deleted on the computer. It will not be automatically uploaded again.",
-      "source_identity_unknown": "Retained source identities are ambiguous. Review is required; no automatic upload."
+      "source_identity_unknown": "Retained source identities are ambiguous. Review is required; no automatic upload.",
+      "retry_clock_unavailable": "A reliable retry interval cannot be verified. Work is retained; automatic retry stopped.",
+      "storage_failure": "The durable record could not be read or saved. The pause or continue result is unconfirmed; check again.",
+      "automatic_unavailable": "The operating system could not schedule automatic backup. Automatic execution is not confirmed; you can start a manual backup with Sync now.",
+      "settings_changed": "Stopped because settings changed. Completed backups and recovery records are retained. New work uses the current sources, PC and schedule settings.",
+      "source_unavailable": "Make the source available in Files or select it again; pending work is retained.",
+      "local_permission_lost": "Kloda cannot access a local file or folder on this phone. Check its Files permission.",
+      "local_path_rejected": "A local path or file could not be verified safely. Nothing was overwritten.",
+      "interrupted": "The app stopped before the result was confirmed. Progress is retained for verified resume.",
+      "photos_unavailable": "iOS Photos backup is not connected yet. Files results are shown separately.",
+      "review_required": "Photos import needs review. No automatic second copy will be created.",
+      "organization_review": "The media or album relationships need review; full restoration is not assumed."
     },
     "rebackup": "Back up this version again",
-    "rebackupConfirm": "Explicitly send this unchanged source version again to the currently paired computer? The computer must approve file access."
+    "rebackupConfirm": "Explicitly send this unchanged source version again to the currently paired computer? The computer must approve file access.",
+    "notificationsDisabled": "Notifications are off. You may miss transfer and error notifications; check backup status on this screen.",
+    "automaticPaused": "Automatic backup is paused. It will stay paused until you explicitly continue.",
+    "continueAutomatic": "Continue automatic backup",
+    "pauseExplanation": "Pause stops the current transfer and automatic backup. Sync now starts one run only; it does not enable automatic backup.",
+    "retryWaiting": "Waiting to retry",
+    "runAttempt": "Access attempt {{attempt}} / 5",
+    "retryAt": "Next retry no earlier than {{time}} while Kloda is active.",
+    "runStates": {
+      "running": "Checking sources and sending selected backups.",
+      "paused": "Work interrupted or paused; progress and retry budget retained.",
+      "retry_wait": "Connection failed. Waiting 60 seconds before retrying.",
+      "finished": "Scan finished. Check individual backup results below.",
+      "needs_attention": "Scan finished with items needing attention; backup is not fully successful.",
+      "failed": "Work stopped. Review the error; unfinished backups are retained."
+    }
   },
   "onboarding": {
+    "live": "Live — first available opportunity",
+    "liveSelected": "Live — first available opportunity (selected)",
+    "liveDescription": "Backs up at the first opportunity allowed by the operating system. Continuous operation or an exact start time is not guaranteed.",
     "step": "Step {{current}} of {{total}}",
     "back": "Back",
     "title": "Select folders to back up",
-    "description": "Choose your sources, then set a local automatic sync time.",
+    "description": "Select folders or Photos sources to back up, then pair your computer.",
     "chooseFolder": "Choose folder",
     "choosePhotoLibrary": "Choose photo library",
     "choosePhotoAlbum": "Choose photo album",
@@ -107,13 +147,25 @@
     "username": "Username",
     "password": "Password",
     "testConnection": "Test connection",
-    "storageTested": "Storage access and write capability verified.",
+    "webdavScope": "Advanced WebDAV connection settings only. Automatic WebDAV file transfer is not connected; PC backups use the separate native receiver.",
+    "webdavErrors": {
+      "webdav_fields": "Enter an HTTPS endpoint, folder, username and password. Endpoint credentials, query/fragment and dot paths are not accepted.",
+      "webdav_connection": "The WebDAV connection or supplied credentials could not be verified.",
+      "webdav_probe_incomplete": "The probe could not be completed or cleaned up. Temporary Kloda test data may remain; no success was saved.",
+      "webdav_cancelled": "The test was cancelled.",
+      "webdav_cancelled_probe": "The test was cancelled after it started writing. Temporary Kloda test data may remain.",
+      "webdav_storage": "The secure settings could not be read or confirmed saved. Test status is not confirmed.",
+      "webdav_busy": "Another connection test is already running."
+    },
+    "storageTested": "Saved settings passed a previous connection test. This is not a current reachability guarantee.",
     "testError": "WebDAV connection could not be verified.",
     "localStartTime": "Local start time",
-    "saveSchedule": "Save automatic sync",
+    "saveSchedule": "Save and connect to computer",
     "invalidTime": "Use HH:mm for the local start time.",
     "runtimeUnavailable": "Kloda native runtime is unavailable. Rebuild the development app.",
-    "scheduleSaved": "Automatic sync schedule saved."
+    "scheduleSaved": "Automatic sync schedule saved.",
+    "saveError": "Preferences could not be saved. Try again.",
+    "testingConnection": "Testing connection…"
   },
   "pairing": {
     "brand": "Kloda: Secure Photos & Sync",
@@ -223,5 +275,26 @@
       "cancelled": "The local operation was cancelled. This does not promise deletion of the computer's record.",
       "revoked": "The local pairing is revoked and cannot be resumed."
     }
+  },
+  "computer": {
+    "title": "Back up to your computer",
+    "description": "Send selected files and photos to your own computer over your local network.",
+    "paired": "1. Device trust saved",
+    "pairTitle": "1. Pair your computer by QR",
+    "pairDescription": "Open Kloda on your computer and scan its pairing QR with this phone.",
+    "managePairing": "Manage pairing",
+    "grantTitle": "2. Approve the backup folder on the computer",
+    "grantDescription": "In Devices and permissions on the computer, select this phone. Choose a separate backup folder and explicitly approve file access. This permission cannot be granted from the phone.",
+    "transferTitle": "3. Start transfers and check results",
+    "availability": "Pairing does not confirm that the computer is currently reachable or its receiver is ready. Keep the computer awake with Kloda running. Backup Activity shows current access and transfer results.",
+    "iosBackground": "iOS may run authorized backups when it provides an execution opportunity. Locked protected data may defer work. New pairing, approvals and restore require the app in the foreground.",
+    "iosSchedulePreference": "iOS chooses when automatic work can run; exact timing or continuous execution is not guaranteed. Pause stops automatic backups until Continue is selected.",
+    "androidBackground": "Authorized backups continue when you leave this screen while Android permits. New pairing, approvals and restore require the app in the foreground. If the system stops the work, reopen the app to continue.",
+    "foregroundOnly": "Keep the app in the foreground for pairing, approval and restore. Native transfer and background integration are not complete on this platform yet.",
+    "advanced": "Advanced option: WebDAV",
+    "continue": "Continue to Backup Activity",
+    "inactive": "Bring Kloda to the foreground to read current status.",
+    "androidSchedulePreference": "Android runs automatic work when the OS allows; exact timing or continuous execution is not guaranteed. Pause also stops automatic backups until Continue is selected.",
+    "schedulePreference": "The schedule preference is saved; automatic execution is not enabled on this platform yet."
   }
 }

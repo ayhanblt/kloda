@@ -1,0 +1,52 @@
+[
+  {
+    "name": "files",
+    "part": 0,
+    "exitCode": 0
+  },
+  {
+    "name": "files",
+    "part": 1,
+    "exitCode": 0
+  },
+  {
+    "name": "restore",
+    "part": 0,
+    "exitCode": 0
+  },
+  {
+    "name": "restore",
+    "part": 1,
+    "exitCode": 0
+  },
+  {
+    "name": "run",
+    "part": 0,
+    "exitCode": 0
+  },
+  {
+    "name": "run",
+    "part": 1,
+    "exitCode": 0
+  },
+  {
+    "name": "upload",
+    "part": 0,
+    "exitCode": 0
+  },
+  {
+    "name": "publication",
+    "part": 0,
+    "exitCode": 0
+  },
+  {
+    "name": "publication",
+    "part": 1,
+    "exitCode": 0
+  },
+  {
+    "name": "snapshot",
+    "part": 0,
+    "exitCode": 0
+  }
+]

@@ -1,0 +1,320 @@
+{
+  "apkSha256": "295f66fcaab4ea1211466a53893b2cf86ced56616464780dcea7c1dd16ed51a4",
+  "elf64Count": 52,
+  "status": "PASS",
+  "scope": "ELF64 LOAD alignment and documented RELRO layout only; no runtime or ZIP/signature guarantee",
+  "libraries": [
+    {
+      "path": "lib/arm64-v8a/libandroidx.graphics.path.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "41e9a793c43a0f4fddb19e33f346bace464f30f888ba7b9eaf96294ea115bfb6"
+    },
+    {
+      "path": "lib/arm64-v8a/libappmodules.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "d6a1796aff272db3a1401e6d3507b8eebe4c483bf1e7ce2e13c7db2550afd381"
+    },
+    {
+      "path": "lib/arm64-v8a/libbarhopper_v3.so",
+      "relro": "aligned-end",
+      "error": null,
+      "sha256": "ec09597e9eb3aee0eb55ae3366da0d4ba416f5aa35a1af0b3811f50ff46743a1"
+    },
+    {
+      "path": "lib/arm64-v8a/libc++_shared.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "3e852764502d06e0cf1080d532ae7c608b7649d946a3a9d7e84e3d4b7d683214"
+    },
+    {
+      "path": "lib/arm64-v8a/libexpo-modules-core.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "b13c481dadf298c91fd29c18e80f59eeaf68ec807d23854a4f3823749794a6de"
+    },
+    {
+      "path": "lib/arm64-v8a/libfbjni.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "a9e35ba55d3f956920281f519385f8a72475ee24819799cb08375fdd4cce2b22"
+    },
+    {
+      "path": "lib/arm64-v8a/libgesturehandler.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "b399c43e67932acc32207d10ee5c3ac65bd8bf4ac64a93609e3ebb53cf73b5e2"
+    },
+    {
+      "path": "lib/arm64-v8a/libgifimage.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "9f605249728da7091569772a38a4dde298ed48e1e73fed3da0e4b662ef38715c"
+    },
+    {
+      "path": "lib/arm64-v8a/libhermestooling.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "0aa6fd6e02796b04848b075b0e48d5144e0a9d79078107e7c37f335353517dd6"
+    },
+    {
+      "path": "lib/arm64-v8a/libhermesvm.so",
+      "relro": "aligned-end",
+      "error": null,
+      "sha256": "6ccabd3fb1f96e683b57d8f6f193ef09009d834f49156e499f58fb4454f0fd24"
+    },
+    {
+      "path": "lib/arm64-v8a/libimage_processing_util_jni.so",
+      "relro": "aligned-end",
+      "error": null,
+      "sha256": "0292b063fafccf734472cbb59588e756c2dbca907c72021ba6fbf126385508a2"
+    },
+    {
+      "path": "lib/arm64-v8a/libimagepipeline.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "1b377992e4256fa9398ec057722f84a359c7d588e570c8a41f51d930c19ece7d"
+    },
+    {
+      "path": "lib/arm64-v8a/libjsi.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "f1aa2d6187976dacdb9f625c50cf22c3d778fb5a90fb979319135a15f497f08b"
+    },
+    {
+      "path": "lib/arm64-v8a/libnative-filters.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "4294b57460e70a6351ce7ae2733a79c088c907dfa54673a657227ec5bb669594"
+    },
+    {
+      "path": "lib/arm64-v8a/libnative-imagetranscoder.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "2aed28298a25afd52ac670cf9682398c6c7ba42a57195c01efd565e7ddfe17ca"
+    },
+    {
+      "path": "lib/arm64-v8a/libreact_codegen_rnscreens.so",
+      "relro": "aligned-end",
+      "error": null,
+      "sha256": "007bb0392a0494425d051e35e0abf8e5f8ff7d4bbb86614155176221a7f1de90"
+    },
+    {
+      "path": "lib/arm64-v8a/libreact_codegen_rnsvg.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "e18ec0597fe0c4cb18c416c79baeb8119783f4c0653d348fb551927ab0d49a15"
+    },
+    {
+      "path": "lib/arm64-v8a/libreact_codegen_safeareacontext.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "d35edc837a5c3b3b6403b6323bb9b6ad124c1934d093e4efd938b5dcad3151d7"
+    },
+    {
+      "path": "lib/arm64-v8a/libreactnative.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "4d3d6653d5e81f49e108cd559eb1c39c9ebcd59596d9ba56652ab58ccf3c4d78"
+    },
+    {
+      "path": "lib/arm64-v8a/libreanimated.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "bcef5b3dcb031966d44c634d37eb91eb614d9b149ec170d283abb93881448df6"
+    },
+    {
+      "path": "lib/arm64-v8a/librnscreens.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "ba3ca5b4c4732a00026783dffc79b3af50e3a7e9e084b49132283f7d583975fe"
+    },
+    {
+      "path": "lib/arm64-v8a/libstatic-webp.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "f3e5f9ab4f93f2a0a057285a2de9c93ba0ab59c76c22874d0356493ce283c4c7"
+    },
+    {
+      "path": "lib/arm64-v8a/libsurface_util_jni.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "a5c9d1928ea92ec7a94dff8cf666e7739cd734198b9f0ae1d4e28ea3c86516ba"
+    },
+    {
+      "path": "lib/arm64-v8a/libworklets.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "e5453388ee1e1251f727a5a1ce01860df1d9493353fe551cbb9e8a8caa18eb11"
+    },
+    {
+      "path": "lib/arm64-v8a/libzstd-kmp.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "10ec47f13bee884450b0911066019ba7aa6b4164a4c1f8c33c9d30dd3fd8868a"
+    },
+    {
+      "path": "lib/x86_64/libandroidx.graphics.path.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "4e56c996f13670e70082658de7880c4020eabf4f25e43387f88ed78a713fc9f0"
+    },
+    {
+      "path": "lib/x86_64/libappmodules.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "af60ce9bb57c9f436e1adb88dc7f427e6d7889bfd7ecc488ff718a2558becba4"
+    },
+    {
+      "path": "lib/x86_64/libbarhopper_v3.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "6c5deea87d962af008fd48c3229db13ab68eef2e9feeccb2df5b33a920c0579a"
+    },
+    {
+      "path": "lib/x86_64/libc++_shared.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "0a2c7afa35b183fdd5a3cb20e2080ad54cbea06c2a4f0bc8f122cb7d1e9e0b9f"
+    },
+    {
+      "path": "lib/x86_64/libexpo-modules-core.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "8347a5acefb39a367b7c7dcdd7866a0007faf8beb3780549015b7dd4654bd83f"
+    },
+    {
+      "path": "lib/x86_64/libfbjni.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "a51410366a0394e05bc04052cfb237c70dcf7d4d53a56e1d00a041436cb0b653"
+    },
+    {
+      "path": "lib/x86_64/libgesturehandler.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "4932f5633b09f61410d90e31a56f421eed3fa49a0ecaf4526b636acd36ec5c6a"
+    },
+    {
+      "path": "lib/x86_64/libgifimage.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "20768d822119deee9beeccfd4340987976381587b519b630f5393fee4d731c1f"
+    },
+    {
+      "path": "lib/x86_64/libhermestooling.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "50574f3ffe1ab922c903173533ec09a1db7a21d9e3ce1c13730671ba0dee90f3"
+    },
+    {
+      "path": "lib/x86_64/libhermesvm.so",
+      "relro": "aligned-end",
+      "error": null,
+      "sha256": "65d635496afff621d32b008688a2bd48db35e1dd059c2b8bc3b337f1b45d32cc"
+    },
+    {
+      "path": "lib/x86_64/libimage_processing_util_jni.so",
+      "relro": "aligned-end",
+      "error": null,
+      "sha256": "112703727717651e69e91f3ea2c3c2311737ee5809a909c9d342a811b6c7c069"
+    },
+    {
+      "path": "lib/x86_64/libimagepipeline.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "2e596f4955f65abaa93c891b49eb58b5416581806a04bde0097cc369ae4dbfb3"
+    },
+    {
+      "path": "lib/x86_64/libjsi.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "3401f8126ad78dc4a05b4285c47806cd330493a1b5cafbc296ede8c30e3f5d12"
+    },
+    {
+      "path": "lib/x86_64/libnative-filters.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "1a5270f007dd4b2f0fc52ceac82e05143648ba9be59c2213a21cf61c84f1f5e5"
+    },
+    {
+      "path": "lib/x86_64/libnative-imagetranscoder.so",
+      "relro": "aligned-end",
+      "error": null,
+      "sha256": "f6b92ad7f1c30973f40704c46987504757c3d079c7f4ace6efc8b318dd9c22f3"
+    },
+    {
+      "path": "lib/x86_64/libreact_codegen_rnscreens.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "8d0a47783f5e70c22d5c6ef31197d38a92480626cd6205baa97bf9374d03aafd"
+    },
+    {
+      "path": "lib/x86_64/libreact_codegen_rnsvg.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "ac35e303c2ae6b11d975c7c15bf92a08cdda579670ab9104bf91943cd8df6df0"
+    },
+    {
+      "path": "lib/x86_64/libreact_codegen_safeareacontext.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "4f34df44bca8881936aef6fb7540a95fe1300a81352462f062b71b56318045ae"
+    },
+    {
+      "path": "lib/x86_64/libreactnative.so",
+      "relro": "aligned-end",
+      "error": null,
+      "sha256": "4f31f3e5745d2a83f58394c97161aefc3de0ea50f12f53574329dd23a06d197d"
+    },
+    {
+      "path": "lib/x86_64/libreanimated.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "994fa099c5aede8b012eec88a94e0628adf210ba911b707ddae6d2879aa75f43"
+    },
+    {
+      "path": "lib/x86_64/librnscreens.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "c377044ddf432e113a0fd902f9c7ffbcd6400bbf09f685ae3cdeb499ac636038"
+    },
+    {
+      "path": "lib/x86_64/libstatic-webp.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "e7884cd18761b5ee54de98b9a3f4b9e4b0dea364c186e24ff9b740b29742562b"
+    },
+    {
+      "path": "lib/x86_64/libsurface_util_jni.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "e5311942b4fce0f7f2505d41150cf9921e558a6368929cb73127450f74dd4fe4"
+    },
+    {
+      "path": "lib/x86_64/libworklets.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "3ade098de44d79cd1581f75f101b14d6d6572d5fa3935c33babd1ae2a06fc2a7"
+    },
+    {
+      "path": "lib/x86_64/libzstd-kmp.so",
+      "relro": "own-load-no-writable-overlap",
+      "error": null,
+      "sha256": "fefcbdcd59580a3043c62380a83d92f13c031c278481e22591a2c75112296e28"
+    },
+    {
+      "path": "lib/arm64-v8a/libkloda_pairing_native.so",
+      "relro": "aligned-end",
+      "error": null,
+      "sha256": "d29d5ce2cd6e28cd40e4869516c508fef709dd735b6d77a55b214a7e3f6a4b69"
+    },
+    {
+      "path": "lib/x86_64/libkloda_pairing_native.so",
+      "relro": "aligned-end",
+      "error": null,
+      "sha256": "afc3857c91d59bc0dffb4e88b78a482931cffb82a053d432cb2046fd1e0d1f24"
+    }
+  ]
+}

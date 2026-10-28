@@ -14,11 +14,14 @@ Pod::Spec.new do |s|
 
   s.dependency 'ExpoModulesCore'
   s.libraries = 'sqlite3'
+  s.frameworks = 'Security', 'Network'
+  s.vendored_frameworks = 'NativePairing/KlodaPairingNative.xcframework'
 
   # Swift/Objective-C compatibility
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',
   }
 
-  s.source_files = "**/*.{h,m,mm,swift,hpp,cpp}"
+  s.source_files = ['*.swift', 'NativePairing/*.swift', 'NativePairing/KlodaPairingNative.h']
+  s.public_header_files = 'NativePairing/KlodaPairingNative.h'
 end

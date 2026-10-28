@@ -62,7 +62,7 @@ pub use owner::{PairingOwner, PairingSnapshot};
 
 #[cfg(target_os = "android")]
 mod android_context;
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "ios"))]
 mod apple_cf;
 #[cfg(all(target_os = "android", feature = "android-jni"))]
 mod jni_bridge;
@@ -71,20 +71,24 @@ mod node;
 #[cfg(all(feature = "desktop-node", not(target_os = "android"), not(test)))]
 mod node_retention;
 
-#[cfg(not(target_os = "android"))]
 mod foreground;
 
+#[cfg(any(target_os = "windows", test))]
+mod installation_generation_chain;
+#[cfg(any(target_os = "windows", test))]
+mod installation_generation_record;
+#[cfg(all(test, not(target_os = "android")))]
+mod store_generation_tests;
+#[cfg(target_os = "windows")]
+mod store_windows_connection;
+#[cfg(target_os = "windows")]
+mod store_windows_vfs;
 #[cfg(test)]
 mod windows_publication_contract;
 #[cfg(any(target_os = "windows", test))]
-mod installation_generation_record;
-#[cfg(any(target_os = "windows", test))]
-mod installation_generation_chain;
-#[cfg(target_os = "windows")]
-mod store_windows_vfs;
-#[cfg(target_os = "windows")]
-mod store_windows_connection;
-#[cfg(all(test, not(target_os = "android")))]
-mod store_generation_tests;
-#[cfg(any(target_os = "windows", test))]
 mod windows_publication_name;
+
+#[cfg(any(target_os = "ios", all(test, feature = "ios-ffi")))]
+mod ios_background;
+#[cfg(all(feature = "ios-ffi", any(target_os = "ios", test)))]
+mod ios_bridge;

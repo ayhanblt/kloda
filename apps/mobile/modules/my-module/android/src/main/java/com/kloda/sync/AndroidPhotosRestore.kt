@@ -155,7 +155,7 @@ internal class AndroidPhotosRestore(
         return@synchronized complete(journal, current)
       } catch (error: Exception) {
         if (error is FilesFailure && error.code in setOf("cancelled", "paused")) throw error
-        val reason = if (error is FilesFailure) error.code else if (error is SecurityException) "destination_permission_lost" else "outcome_unknown"
+        val reason = if (error is FilesFailure) error.code else if (error is SecurityException) "destination_permission_lost" else if (isLocalStorageFull(error)) "local_storage_full" else "outcome_unknown"
         val recorded = intent
         if (recorded != null) return@synchronized review(journal, recorded, reason)
         throw FilesFailure(reason)

@@ -1,0 +1,43 @@
+{
+  "utc": "2026-10-27T12:09:07.241596+00:00",
+  "scope": "Mobile step6 Files source integration and isolated host/Simulator evidence; not physical end-to-end acceptance",
+  "mobileTests": 65,
+  "mobileSuites": 8,
+  "simulatorFilesFixtureGroups": 28,
+  "simulatorAbiGroups": 7,
+  "hostSessionGroups": 5,
+  "nativeHostSenderTests": 7,
+  "nativeHostForegroundFilter": 8,
+  "nativeHostAbiTests": 8,
+  "filterOverlap": "foreground filter includes one ABI test, do not sum as unique tests",
+  "simulatorRuntime": "iOS26.5 arm64, own empty step5 disposable reused; new test data only",
+  "deployment": "16.4 device/simulator compilation only, not oldest OS runtime proof",
+  "actualExpo": "Current module methods, custody refusal, persistent early result and separate-process reopen PASS; no fake file jobs or authority directory",
+  "retryScope": "No automatic access/OS retry or scheduling implementation here; step8 retains approved policy",
+  "open": [
+    "Real security-scoped provider/iCloud positive reads, user picker and iPhone Secure Enclave",
+    "Real iPhone-PC Files/restore and runtime interruption/revoke matrix",
+    "Oldest OS/device, storage pressure/performance and final UI/a11y acceptance",
+    "iOS Photos step7 and background/scheduling/retry step8; broader backlog unchanged"
+  ],
+  "knownBoundaries": [
+    "Explicit rebackup requires a retained operation reference plus current native owner_deleted evidence; absent evidence is refused, never guessed",
+    "Unrecorded publication target is never adopted; conflict requires explicit user choice",
+    "Unknown provider/locality/custody or incomplete metadata never becomes completion"
+  ],
+  "failedAttempts": [
+    "Two old Photos tests implicitly ran under iOS; scoped Android tests and added iOS Files-only regression; final65 PASS",
+    "New Swift file missing old Pods file list; refreshed existing pod install, no version change",
+    "Swift inout capture exclusivity fixed by immutable argument capture",
+    "One host fixture deliberately stopped on wrong test path; corrected to new disposable fixture.sqlite",
+    "Review identified interrupted publication, omitted pending membership and pending-picker cancellation issues; fixed and retested",
+    "Local Expo initially started at repo root; stopped it and removed only its exact auto-generated root tsconfig; final workspace run used own local server"
+  ],
+  "gitMutations": false,
+  "userArchiveUsed": false,
+  "finalSourceNotes": [
+    "Matching pending/completed jobs reuse private snapshot or native result; no extra full source copy on resume",
+    "Known source directory identity mismatch blocks whole source before enumeration, no fresh wire-source assumption",
+    "Unknown errors are not assigned a journal/storage cause unless their native error domain identifies it"
+  ]
+}

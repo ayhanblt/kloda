@@ -1,0 +1,16 @@
+START files-runs
+PASS files-runs
+START files-recovery
+PASS files-recovery
+START photos-sources
+PASS photos-sources
+START own-restore
+PASS own-restore
+START photos-manifest
+PASS photos-manifest
+START photos-import
+PASS photos-import
+START photos-catalog
+PASS photos-catalog
+Android Files recovery, Photos manifest publication, import crash reconciliation and latest-asset catalog checks passed
+

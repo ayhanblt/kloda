@@ -51,17 +51,17 @@ internal class AndroidFilesSnapshots(private val context: Context, private val c
 
   fun cancelRead() { signal.get()?.cancel(); runCatching { input.get()?.close() } }
 
-  private fun checkedSource(tree: String, reference: String) =
-    if (AndroidPhotosSources.isPhotos(tree)) photos.checkedMedia(tree, reference) else scanner.checkedDocument(tree, reference)
+  private fun checkedSource(tree: String, reference: String, cancellation: CancellationSignal? = null) =
+    if (AndroidPhotosSources.isPhotos(tree)) photos.checkedMedia(tree, reference) else scanner.checkedDocument(tree, reference, cancellation, checkPaused)
 
   fun checkAccess(tree: String, reference: String) { checkedSource(tree, reference); checkPaused() }
 
   private fun <T> readSource(tree: String, reference: String, action: (InputStream) -> T): T {
     checkPaused()
-    val document = checkedSource(tree, reference)
     val cancellation = CancellationSignal()
     signal.set(cancellation)
     try {
+      val document = checkedSource(tree, reference, cancellation)
       checkPaused()
       val descriptor = if (AndroidPhotosSources.isPhotos(tree) && Build.VERSION.SDK_INT >= 31) {
         context.contentResolver.openTypedAssetFileDescriptor(document, "*/*",

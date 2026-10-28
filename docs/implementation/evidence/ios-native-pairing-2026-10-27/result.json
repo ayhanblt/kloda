@@ -1,0 +1,38 @@
+{
+  "utc": "2026-10-27T07:15:49.101631+00:00",
+  "scope": "Mobile step5 iOS pairing source and isolated Simulator; not physical pairing/transfer acceptance",
+  "rustSimulatorTests": 19,
+  "nativeAbiGroups": 7,
+  "swiftSessionFixtureGroups": 4,
+  "typedReplyGroups": 3,
+  "mobileTests": 64,
+  "mobileSuites": 8,
+  "appExpoChecks": {
+    "result": "PASS",
+    "checks": [
+      "module_methods",
+      "simulator_custody_refusal",
+      "empty_real_app_journal",
+      "empty_close"
+    ]
+  },
+  "androidRegression": "four ABI build only, no new Android runtime run",
+  "review": "Independent source security review, no blocking findings; runtime results produced by primary",
+  "knownLimits": [
+    "iPhone Secure Enclave/pairing/actual LAN not run",
+    "iOS16.4 runtime not run; deployment target compilation only",
+    "No direct-route/no-VPN or instantaneous path change guarantee: ADR0020",
+    "Files/Photos/background steps6-8 not implemented here",
+    "release signing/device profiling/physical acceptance separate"
+  ],
+  "failedAttempts": [
+    "ExpoModulesJSI private C++ extension cleanup missed new Swift colon syntax; known57.1.1 guarded patch and official rebuild resolved",
+    "Kloda main-actor compile errors resolved by synchronous runtime executor verification; final real-app build exit0",
+    "Deep-link left system open dialog: first runtime fixture inactive, not PASS; own Simulator restart and direct --initialUrl final PASS",
+    "Earlier callback connection failed/local server address/root corrected; not product result",
+    "Recursive formatting own format-only changes outside scope identified and restored with byte equality proof; see format-scope-correction",
+    "Fixture epoch test type inference compile error corrected using explicit dictionary-array type"
+  ],
+  "gitMutations": false,
+  "userArchiveUsed": false
+}

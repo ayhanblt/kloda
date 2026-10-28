@@ -1,0 +1,12 @@
+{
+  "type": "independent read-only source and saved-result review",
+  "result": "no blocking finding",
+  "sourceHashesMatched": 22,
+  "typedHelperHashesMatched": 9,
+  "recordedTests": 108,
+  "recordedSuites": 11,
+  "androidRuntime": "BLOCKED/NOT_RUN",
+  "sdkConfigIncident": "explicitly recorded; prior state unknown; no restore",
+  "newTestsBuildDeviceOrMetadataQueries": false,
+  "limits": "No independent runtime rerun; not full WCAG/platform acceptance"
+}

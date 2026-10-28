@@ -1,0 +1,41 @@
+{
+  "status": "PASS in isolated Android UI scope only",
+  "previous": "ADB unauthorized at step10 initial run; not a product receiver failure",
+  "auth": {
+    "standardAndroidAllowDialogObserved": true,
+    "presentedFingerprintMatchesExistingLocalAdbPublicKey": true,
+    "presentedFingerprintMatchesGeneratedTmpVendorKey": false,
+    "alwaysAllowSelected": false,
+    "hostKeyMutation": false,
+    "adbdAuthDisabled": false,
+    "scope": "one disposable emulator, normal visible dialog approval; no Kloda trust/grant"
+  },
+  "install": "existing debug APK install exit0; no rebuild needed for JS-only statusbar constant",
+  "pidBefore": 3691,
+  "pidAfter": 3830,
+  "reopen": "preexisting synthetic SecureStore profile and initial warning true before fixture write; READY then read profile metadata",
+  "screens": [
+    "sources/tr",
+    "computer/de",
+    "activity-progress/tr",
+    "activity-unknown/en",
+    "unknown-job scroll"
+  ],
+  "limits": [
+    "fake peer/job/source status; not actual LAN/transfer/authority",
+    "fontScale1 on480x800 only; not full Android visual matrix",
+    "VoiceOver/TalkBack full acceptance not run",
+    "nonfatal DevLauncher SplashScreenManager ClassNotFoundException and SafeAreaView deprecation warning observed; UI subsequently rendered"
+  ],
+  "initialHarnessIssue": "Immediate pidof/screenshot/preexisting assertion before new READY returned exit1/old record; bounded new phase/field-aware wait passed; no app state repair",
+  "sourceHashes": [
+    {
+      "path": "apps/mobile/App.tsx",
+      "sha256": "48dc28ea25acf42815ce48dbf0ba0b43ef421b5a624b360f406aa044de6e4504"
+    },
+    {
+      "path": "packages/pairing-native/apple/tests/IosIntegratedUiChecks.js",
+      "sha256": "8279ddc06c2a3de0283c997dc8e51bef2e6157cf0c583024811abafd2200baa2"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 
 const mockRuntime = {
-  loadSchedule: jest.fn<() => Promise<{ intervalHours: 12 | 24; localTime: string }>>().mockResolvedValue({ intervalHours: 12, localTime: '12:00' }),
+  loadSchedule: jest.fn<() => Promise<{ intervalHours: 12 | 24; localTime: string; backupMode?: 'live' | 'scheduled' }>>().mockResolvedValue({ intervalHours: 12, localTime: '12:00' }),
   loadDirectorySources: jest.fn<() => Promise<{ id: string; kind: string; displayName: string }[]>>().mockResolvedValue([]),
   loadPhotoSources: jest.fn<() => Promise<unknown[]>>().mockResolvedValue([]),
   selectPhotoLibrary: jest.fn<() => Promise<{ id: string; kind: string; displayName: string; reference: string } | null>>().mockResolvedValue(null),
@@ -11,6 +11,7 @@ const mockRuntime = {
   loadStorageConfig: jest.fn<() => Promise<null>>().mockResolvedValue(null),
   validateDirectorySources: jest.fn<() => Promise<unknown[]>>().mockResolvedValue([]),
   saveSchedule: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+  saveLiveSchedule: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
   saveStorageConfig: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
 };
 export const nativeRuntime = mockRuntime;

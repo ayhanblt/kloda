@@ -1,0 +1,8 @@
+{
+  "native-abi-checks": "ae3905d9ae9beaf1242170cdf552cf4c9c144232aa0e3d12a4235dc3782a5ba9",
+  "route-witness-checks": "369661c17dda402944ff632648437096aced3ead30f0075286e1b5895e3ac8c3",
+  "sqlite-link-checks": "6a56197c8992c4b1c6a535762e596e7c2947ee0ceb9c203b92366480d6c41d91",
+  "KlodaSecurePhotosSync.debug.dylib": "d74e9971004795932648ebaa4c6085436b41bd7c77e6f3c82fffb9fa0714fd62",
+  "aarch64-apple-ios/libkloda_pairing_native.a": "4f7579ec6973bf8ba754d6f069d9eb665aec68824f895b6f986aa1bfdcc182ca",
+  "aarch64-apple-ios-sim/libkloda_pairing_native.a": "653c0530a0c03a4a82d5849e0f0e2b5d974228bcab23325ee1c9723c2be1db1a"
+}

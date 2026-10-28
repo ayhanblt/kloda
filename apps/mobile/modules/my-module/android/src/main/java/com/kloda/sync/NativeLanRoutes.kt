@@ -85,7 +85,11 @@ internal class NativeLanRoutes(context: Context) : AutoCloseable {
     // Public type proof is API33+; older platforms receive an additional native rtnetlink proof.
     // https://developer.android.com/reference/android/net/RouteInfo#getType()
     if (Build.VERSION.SDK_INT >= 23) {
-      val request = NetworkRequest.Builder().clearCapabilities()
+      val builder = NetworkRequest.Builder()
+      if (Build.VERSION.SDK_INT >= 30) builder.clearCapabilities()
+      else builder.removeCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED)
+        .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
+      val request = builder
         .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
         .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
         .addTransportType(NetworkCapabilities.TRANSPORT_ETHERNET).build()

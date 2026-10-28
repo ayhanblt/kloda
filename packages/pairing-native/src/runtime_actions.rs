@@ -3,13 +3,21 @@ use crate::store_rows::{RecordRole, RecordState};
 
 impl Actor {
     pub(super) fn action(&mut self, action: Action) -> Result<PairingStatus> {
-        #[cfg(not(target_os = "android"))]
         if let Action::Foreground { epoch, action } = action {
             drop(self.foreground.authorize(Some(epoch))?);
             self.action_epoch = Some(epoch);
             let result = self.action(*action);
             self.action_epoch = None;
             return result;
+        }
+        #[cfg(any(target_os = "android", target_os = "ios"))]
+        if self.action_epoch.is_none()
+            && matches!(
+                &action,
+                Action::Scan(_) | Action::Approve { .. } | Action::Resume { .. }
+            )
+        {
+            return Err(PairingError::CandidateStale);
         }
         if matches!(&action, Action::Status) {
             let _ = self.guard();
@@ -46,7 +54,6 @@ impl Actor {
             Action::RevokeBackup { record } => self.revoke_backup(&record),
             #[cfg(not(target_os = "android"))]
             Action::RemoveDevice { record } => self.remove_device(&record),
-            #[cfg(not(target_os = "android"))]
             Action::Foreground { .. } => Err(PairingError::CandidateStale),
             Action::Status | Action::Close => Err(PairingError::CandidateStale),
         };

@@ -1,0 +1,21 @@
+{
+  "scope": "Synthetic journal clean-close and different-PID reader only; no UI, media or native owner",
+  "phases": [
+    {
+      "phase": "write",
+      "adbExit": 0,
+      "seconds": 0.7268075000029057,
+      "output": "PASS restart-write\n\n"
+    },
+    {
+      "phase": "read",
+      "adbExit": 0,
+      "seconds": 0.5584238339797594,
+      "output": "PASS restart-read\n\n"
+    }
+  ],
+  "testApkSha256": "e83ca8043ff5d920da0dc375fa07a57a8c5b34cc3eab7f7cbe7ee2c3eccea4f1",
+  "priorProcessPresent": false,
+  "verifiedStopped": true,
+  "distinctPidAsserted": true
+}

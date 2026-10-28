@@ -1,0 +1,21 @@
+{
+  "scope": "Clean writer close then independent reader process; PID differs assertion in Android; not in-flight-write crash or power loss",
+  "phases": [
+    {
+      "phase": "write",
+      "adbExit": 0,
+      "seconds": 0.5486215829732828,
+      "output": "PASS restart-write\n\n"
+    },
+    {
+      "phase": "read",
+      "adbExit": 0,
+      "seconds": 0.3660592919914052,
+      "output": "PASS restart-read\n\n"
+    }
+  ],
+  "testApkSha256": "60e963bed422fa6b4c039d5361df445c3b32b538cbfa197aa38dbf2f2ac90441",
+  "priorProcessPresent": false,
+  "forceStopVerifiedStopped": true,
+  "distinctWriterReaderProcessAsserted": true
+}

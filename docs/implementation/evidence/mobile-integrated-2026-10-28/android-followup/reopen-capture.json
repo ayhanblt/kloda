@@ -1,0 +1,22 @@
+[
+  {
+    "result": "READY",
+    "id": 5,
+    "stage": "activity-unknown",
+    "language": "en",
+    "platform": "android",
+    "profilePreexisting": true,
+    "initialProbeWarning": true,
+    "dimensions": {
+      "width": 480,
+      "height": 800,
+      "scale": 1,
+      "fontScale": 1
+    },
+    "active": true,
+    "durableProbeWarning": true,
+    "scope": "UI fixtures only; no actual peer or file transfer",
+    "screenshot": "activity-unknown-reopen-en.png",
+    "sha256": "9fa8afa7011bf0c6864f4f212e1f77ddf941d26ffc601dd407638338e44b85fe"
+  }
+]

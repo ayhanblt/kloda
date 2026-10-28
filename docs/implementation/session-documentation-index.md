@@ -1,5 +1,12 @@
 # Session karar/kanıt kapsam indeksi
 
+2026-10-28 **Mobil liste10 otomatik/izole kapsam:**108 test/11suite, lint/TS/iki export, tam iOS Simulator app build, Android Kotlin+modül K1 lint geçti. WebDAV probe belirsizliği mevcut profilde kalıcı; native typed disk-full ve safe-area/NativeWind/klavye/büyük-yazı görünümü düzeltildi. Native iOS görsel/256MiB staging örneği ve6 host görsel kontrol kaydedildi; fixture gerçek LAN/PC veya fiziksel kabul değildir. [Kapsam, kanıt, açıklar ve SDK config yan etkisi](mobile-integrated-step10-2026-10-28.md). Büyük koruma kopyasının receiver gecikmesi ölçülmedi; alan/cleanup, gerçek WebDAV sender, iPhone/OS/PC ve tam ekran okuyucu kabulü açık. [Android dar UI followup PASS](mobile-android-step10-followup-2026-10-28.md): normal debugging onayı,480×800 sentetik kaynak/PC/ACK/unknown ve farklı-PID profil/uyarı reopen doğrulandı; fiziksel/LAN kabulü değil. Liste11 başlatılmadı.
+
+
+- 2026-10-28 mobil liste9: [WebDAV kayıt/test, kanıt ve açık sınırlar](mobile-webdav-step9-2026-10-28.md).
+
+- 2026-10-27: [Mobil liste7 iOS Photos kapsam/kanıt/kalan sınırlar](ios-photos-step7-2026-10-27.md); native authority değiştirilmedi, gerçek PC/fiziksel kabul açık.
+
 2026-10-21 Windows CLI görev devri: kullanıcı sonuçları ana macOS oturumuna getirip burada devam edecek. [Windows-only devir belgesi](windows-codex-d1-handoff.md) ve [başlangıç prompt’u](windows-codex-d1-prompt.md), frozen kaynak/hash ve güncel derlemeden seçilen ikiliyle yalnız kalan dört exact ignored fixture’ın birer kez/fail-stop çalıştırılmasını kapsar; genel roadmap, kaynak düzeltmesi, owner/probe/cleanup/Git/model değişimi yok. [Git’e uygun seçilmiş kanıtlar](evidence/windows-publication-d1-2026-10-21/README.md) geçmiş host/Windows compile/ilk1PASS ile kalan4NOT_RUN ayrımını taşır; `.local-evidence` gerektirmez ve ignore kuralı değişmedi. Bu belge hazırlığında test/build/cihaz çalıştırılmadı. Kullanıcının Windows prompt’unu vermesi bu dört teste dar yürütme iznidir; sadece belgeyi okumak izin değildir. Sonuç ne olursa olsun raporla/dur; devam ana oturumda.
 
 

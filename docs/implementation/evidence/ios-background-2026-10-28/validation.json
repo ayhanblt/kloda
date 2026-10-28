@@ -1,0 +1,414 @@
+{
+  "mobileTests": {
+    "command": "npm run test --workspace @kloda/mobile -- --runInBand",
+    "exitCode": 0,
+    "suites": 9,
+    "tests": 70,
+    "logSha256": "79e6fc3c3bdb725582737d6c6f82c5cabb1fead37669d5309fe9d9a839dde689"
+  },
+  "rootLint": {
+    "command": "npm run lint",
+    "exitCode": 0
+  },
+  "mobileTypecheck": {
+    "command": "node_modules/.bin/tsc --noEmit -p apps/mobile/tsconfig.json",
+    "exitCode": 0
+  },
+  "closure": [
+    {
+      "name": "app-accepted",
+      "command": [
+        "xcodebuild",
+        "-workspace",
+        "apps/mobile/ios/KlodaSecurePhotosSync.xcworkspace",
+        "-scheme",
+        "KlodaSecurePhotosSync",
+        "-configuration",
+        "Debug",
+        "-sdk",
+        "iphonesimulator",
+        "-destination",
+        "generic/platform=iOS Simulator",
+        "-derivedDataPath",
+        "/tmp/kloda-ios-step5/app-build",
+        "-disableAutomaticPackageResolution",
+        "CODE_SIGNING_ALLOWED=NO",
+        "COMPILER_INDEX_STORE_ENABLE=NO",
+        "LD_GENERATE_MAP_FILE=YES",
+        "LD_MAP_FILE_PATH=/tmp/kloda-ios-step5/$(TARGET_NAME)-$(CURRENT_ARCH).map",
+        "ARCHS=arm64",
+        "ONLY_ACTIVE_ARCH=YES",
+        "build"
+      ],
+      "exitCode": 0,
+      "seconds": 19.441772292018868
+    },
+    {
+      "name": "mobile-export-final",
+      "command": [
+        "npm",
+        "run",
+        "build",
+        "--workspace",
+        "@kloda/mobile"
+      ],
+      "exitCode": 0,
+      "seconds": 21.963205874955747
+    }
+  ],
+  "swiftPolicyHost": {
+    "command": [
+      "xcrun",
+      "swiftc",
+      "-warnings-as-errors",
+      "-module-cache-path",
+      "/tmp/kloda-ios-automatic-host-cache",
+      "apps/mobile/modules/my-module/ios/IosSyncJournal.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesJournal.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesRestoreJournal.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesRunJournal.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesJob.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesTransfer.swift",
+      "apps/mobile/modules/my-module/ios/IosPhotoJson.swift",
+      "apps/mobile/modules/my-module/ios/IosPhotoManifest.swift",
+      "apps/mobile/modules/my-module/ios/IosPhotosJournal.swift",
+      "packages/pairing-native/apple/IosPairingReply.swift",
+      "apps/mobile/modules/my-module/ios/IosAutomaticPolicy.swift",
+      "apps/mobile/modules/my-module/ios/IosAutomaticJournal.swift",
+      "apps/mobile/modules/my-module/ios/IosAutomaticPlan.swift",
+      "apps/mobile/modules/my-module/ios/IosAutomaticClock.swift",
+      "packages/pairing-native/apple/tests/IosAutomaticChecks.swift",
+      "-lsqlite3",
+      "-o",
+      "/tmp/kloda-ios-step8/policy-checks"
+    ],
+    "runs": [
+      {
+        "phase": "seed",
+        "command": [
+          "/tmp/kloda-ios-step8/policy-checks",
+          "seed",
+          "/tmp/kloda-ios-automatic-na_dfzmd/fixture.sqlite"
+        ],
+        "exitCode": 0,
+        "seconds": 0.4279648750089109,
+        "output": "IOS_AUTOMATIC_CHECKS_PASS phase=seed policy=PASS context=immutable terminal=retained budgets=separate\n"
+      },
+      {
+        "phase": "reopen",
+        "command": [
+          "/tmp/kloda-ios-step8/policy-checks",
+          "reopen",
+          "/tmp/kloda-ios-automatic-na_dfzmd/fixture.sqlite"
+        ],
+        "exitCode": 0,
+        "seconds": 0.015354958013631403,
+        "output": "IOS_AUTOMATIC_CHECKS_PASS phase=reopen pause=true clocks=retained counters=retained receipts=untouched\n"
+      }
+    ],
+    "compileExitCode": 0,
+    "compileSeconds": 4.8086802089819685,
+    "executableSha256": "527e566771dcc165841109ca0d3ef0d9c1c1ac3e48a562ec8acb036e4ee66b7e"
+  },
+  "swiftPolicySimulatorCompile": {
+    "command": [
+      "xcrun",
+      "swiftc",
+      "-warnings-as-errors",
+      "-target",
+      "arm64-apple-ios16.4-simulator",
+      "-sdk",
+      "<Xcode>/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk",
+      "-module-cache-path",
+      "/tmp/kloda-ios-step8/automatic-sim-cache",
+      "apps/mobile/modules/my-module/ios/IosSyncJournal.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesJournal.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesRestoreJournal.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesRunJournal.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesJob.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesTransfer.swift",
+      "apps/mobile/modules/my-module/ios/IosPhotoJson.swift",
+      "apps/mobile/modules/my-module/ios/IosPhotoManifest.swift",
+      "apps/mobile/modules/my-module/ios/IosPhotosJournal.swift",
+      "packages/pairing-native/apple/IosPairingReply.swift",
+      "apps/mobile/modules/my-module/ios/IosAutomaticPolicy.swift",
+      "apps/mobile/modules/my-module/ios/IosAutomaticJournal.swift",
+      "apps/mobile/modules/my-module/ios/IosAutomaticPlan.swift",
+      "apps/mobile/modules/my-module/ios/IosAutomaticClock.swift",
+      "packages/pairing-native/apple/tests/IosAutomaticChecks.swift",
+      "-lsqlite3",
+      "-o",
+      "/tmp/kloda-ios-step8/automatic-sim-checks"
+    ],
+    "exitCode": 0,
+    "seconds": 3.5953516659792513,
+    "runtime": "NOT_RUN",
+    "runtimeScope": "Compile-only subrecord; actual isolated runtime is separately recorded in swiftPolicySimulatorRuntime."
+  },
+  "swiftPolicySimulatorRuntime": [
+    {
+      "phase": "seed",
+      "exitCode": 0,
+      "seconds": 0.6377509579760954
+    },
+    {
+      "phase": "reopen",
+      "exitCode": 0,
+      "seconds": 0.4709857499692589
+    }
+  ],
+  "realExpoSmoke": [
+    {
+      "result": "PASS",
+      "checks": [
+        "real_native_status_no_fake_work",
+        "live_setting_exported",
+        "native_schedule_saved",
+        "continue_does_not_invent_trust_or_jobs",
+        "explicit_pause_saved",
+        "ui_close_preserves_pause"
+      ],
+      "phase": "seed"
+    },
+    {
+      "result": "PASS",
+      "checks": [
+        "process_restart_retains_pause",
+        "live_setting_exported",
+        "native_schedule_saved",
+        "continue_does_not_invent_trust_or_jobs",
+        "explicit_pause_saved",
+        "ui_close_preserves_pause"
+      ],
+      "phase": "reopen"
+    }
+  ],
+  "realExpoProcessRestart": {
+    "launchExitCodes": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "distinctPids": true
+  },
+  "nativePackage": {
+    "command": "node tools/build-native-ios.mjs",
+    "exitCode": 0,
+    "seconds": 14.467859745025635,
+    "scope": "device+Simulator package/9 exports; no device runtime"
+  },
+  "androidSharedRegression": {
+    "command": "node tools/build-native-android.mjs",
+    "exitCode": 0,
+    "scope": "four JNI ABI compilation only",
+    "warnings": "Existing 9 compiler warnings remain; not strict Android Clippy"
+  },
+  "rustGroup": {
+    "provenance": "Same step8 work group recorded 27 October; not rerun for 28 October report",
+    "tests": [
+      {
+        "filter": "ios_background::tests",
+        "passed": 4
+      },
+      {
+        "filter": "ios_bridge::tests",
+        "passed": 9
+      },
+      {
+        "filter": "foreground::",
+        "passed": 7
+      }
+    ],
+    "clippy": "host lib/tests -D warnings exit0",
+    "fmt": "scoped native fmt exit0"
+  },
+  "review": {
+    "mode": "Independent read-only security review + narrow re-reviews",
+    "blockingFindingsRemaining": 0,
+    "fixed": [
+      "error terminal state",
+      "scheduler rejection suppressing foreground",
+      "same-settings context collision",
+      "pre-admission expiry budget",
+      "expiry/admission and success callback race",
+      "protected-data OS interruption",
+      "stale progress notifications"
+    ],
+    "reviewerRanTests": false
+  },
+  "failedAttempts": [
+    {
+      "check": "first Expo smoke",
+      "result": "callback timeout",
+      "cause": "New fixture absent from CI Metro file list; bundle404. Restart after file creation gave bundle200 and accepted two-process smoke. Not product success."
+    },
+    {
+      "check": "intermediate lint",
+      "result": "max-lines test file308>300",
+      "resolution": "New iOS access-counter test moved to its own bounded test file; final lint exit0."
+    },
+    {
+      "check": "initial pure host compiler",
+      "result": "sandbox macro initialization failed before tests",
+      "resolution": "Authorized host compilation exit0"
+    }
+  ],
+  "notRun": [
+    "real iPhone Secure Enclave/LAN/PC/ACL/revoke",
+    "actual BGTask OS delivery/expiration under device lock",
+    "real reboot/force-quit scheduling guarantees",
+    "iOS16.4 runtime (target compile only; current Simulator runtime26.5)",
+    "notification permission prompt/runtime denial",
+    "physical acceptance"
+  ],
+  "sourceHashes": [
+    {
+      "path": "apps/mobile/app.json",
+      "sha256": "4a689fe3bda6547739d7f5573ccb851e3a8646d19be3410c5d7a72dd9843d364"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/expo-module.config.json",
+      "sha256": "983df5a19e0fcf6d3dc34eb705f7e206450b37cb5b4cb6133770f969de7a2030"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosAutomaticClock.swift",
+      "sha256": "11cfbb27315b0bee32daacadeacbecdfc811b3094efebce87e489750405763fc"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosAutomaticCoordinator.swift",
+      "sha256": "f3c35dcffeca1c3ad1be3139031d662a011f7917bf0b26cfd72a8e261ffdc672"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosAutomaticJournal.swift",
+      "sha256": "d473bac10df1b79cb848d373a88309665c72f81293cf4d59bd8f29e99da2dde6"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosAutomaticPlan.swift",
+      "sha256": "c84ee6ae5f53efafb0741fb6558631bec7ee9962da311102dce1241cf17bf396"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosAutomaticPolicy.swift",
+      "sha256": "5bb97d67f45dbcae9a06238d018423770bbff5e8c9ecc42da33ebf736282b3df"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosAutomaticSubscriber.swift",
+      "sha256": "b5751456e66304dd54c217b3b5dcc40cd8a576136efe9a582ecdb88a19e48e6a"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosBackgroundLease.swift",
+      "sha256": "9775d4e390b14f4b424046e4e480f5c3411d3dcab2933f5921871e4b46e60347"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosBackupNotifications.swift",
+      "sha256": "dbe4ed5154dc1a714642c0cbd1fa5a140762616edd6dbbe47e3811674cf236c7"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosFilesQueue.swift",
+      "sha256": "f1edac8c5108eb9b27e9c61083c922a5fbf2e23cd2115b1a41f70a581a66132e"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosSyncJournal.swift",
+      "sha256": "2aaba689218fba631dceb1a63155d143bef41cf341a18d4528836dd05b23d0e3"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/KlodaPairingModule.swift",
+      "sha256": "d595de9ea138bf5e2240061df94175c069fc41afbb1540ef911aa4d85cb35a92"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/KlodaPairingSession.swift",
+      "sha256": "7fe2ffa471a1d00af5fe560a94c788ca5425a09ec71d4f0ce8a020b849014e74"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/KlodaSyncRuntimeModule.swift",
+      "sha256": "83c204feebdb7ea760ad266a0e6cbd477e7a035f09222f558582cf80257fa42e"
+    },
+    {
+      "path": "apps/mobile/src/app/App.tsx",
+      "sha256": "50f878402456918e8454852ae071a4b6c7b986ce3117f12bef82f4b2f23831ed"
+    },
+    {
+      "path": "apps/mobile/src/pages/activity/ui/activity-automatic.spec.tsx",
+      "sha256": "517bc6efb082b56d4f2704ff0f9b8756cd613b5c665dfb8c3827a9e5aad5121a"
+    },
+    {
+      "path": "apps/mobile/src/pages/activity/ui/activity-page.tsx",
+      "sha256": "8e4a43c2dd6151d6f1ccae82e9d0fd72af61328a651cf53af547852c3f178764"
+    },
+    {
+      "path": "apps/mobile/src/pages/computer/ui/computer-page.tsx",
+      "sha256": "b75f7266a3cc3de9d0646babf669cd5275c2940ac363b5bdbfdb08c138b6a0ad"
+    },
+    {
+      "path": "apps/mobile/src/shared/api/file-transfer.spec.ts",
+      "sha256": "cdee1208ae2b7fd9e042e28fc9af13809bb198bf4a6935cc942b7361640039aa"
+    },
+    {
+      "path": "apps/mobile/src/shared/api/file-transfer.ts",
+      "sha256": "42d049dbba1b51da3e9375ce780e97663d8351e2789bb4c1f3a851d792a66058"
+    },
+    {
+      "path": "apps/mobile/src/shared/i18n/locales/de.json",
+      "sha256": "5cd86b6d3b3e39190145852113edd55d32b6d1458c732fabe8eb750c4f90848c"
+    },
+    {
+      "path": "apps/mobile/src/shared/i18n/locales/en.json",
+      "sha256": "f764cabdae54fe61c1f496b78d7a3a9cca310228d4f44973bcda5b1d4f3e034d"
+    },
+    {
+      "path": "apps/mobile/src/shared/i18n/locales/tr.json",
+      "sha256": "40e4b670ff61a98bd165530946226c7f3c7fc16db618f236f9f82ed277dc3a06"
+    },
+    {
+      "path": "packages/pairing-native/apple/include/KlodaPairingNative.h",
+      "sha256": "59b3257dfe52d5966489be5cbc5636b0b2647db14d2adb8a0c1aad534a3010a8"
+    },
+    {
+      "path": "packages/pairing-native/apple/tests/IosAutomaticChecks.swift",
+      "sha256": "8c7dab65d5f030a7946a2710bf9d152c95765bff8e403312313121c075986dc9"
+    },
+    {
+      "path": "packages/pairing-native/apple/tests/IosAutomaticExpoChecks.js",
+      "sha256": "45f2a17ce53b452e1c52523fd4108aad2b1d1c144fe02fa932970568c1fe98cc"
+    },
+    {
+      "path": "packages/pairing-native/apple/tests/IosPhotosSessionStub.swift",
+      "sha256": "75ec01c4fda9049e921af09d860140232c408916aa9a218654e90796d880e68b"
+    },
+    {
+      "path": "packages/pairing-native/src/handle_sender.rs",
+      "sha256": "a7d85ac85f1cb61a436aec41655048deeaa5cc6cfa21f3b791fcfea22519022c"
+    },
+    {
+      "path": "packages/pairing-native/src/ios_background.rs",
+      "sha256": "71db6b77d0277c92f802ab418299d8b71cb28e1d7d7da0fa72d09e1686c87ac8"
+    },
+    {
+      "path": "packages/pairing-native/src/ios_background_tests.rs",
+      "sha256": "3f3007587676cea1d5af43e961fa392fcf0229a4a8bc09309df644c7f176b39c"
+    },
+    {
+      "path": "packages/pairing-native/src/ios_bridge_background.rs",
+      "sha256": "85c79ca945265c8eea5734289609aa792411270b7927fcd0ecae7621a45c997f"
+    },
+    {
+      "path": "tools/build-native-ios.mjs",
+      "sha256": "48485d218784d7cfd01903a77853e6532846f0c3ebfcbff621e71442b08da9d3"
+    }
+  ],
+  "utc": "2026-10-28T00:07:17.531402+00:00",
+  "savedResultReview": {
+    "independent": true,
+    "blockingFindings": 0,
+    "checked": [
+      "source hashes",
+      "Jest log SHA9 suites70 tests",
+      "accepted app/export exit0",
+      "host+Simulator seed/reopen",
+      "Expo distinct PIDs90031/90180",
+      "historical27Oct native provenance",
+      "explicit physical/OS-delivery NOT_RUN"
+    ],
+    "reviewerRanTests": false
+  }
+}

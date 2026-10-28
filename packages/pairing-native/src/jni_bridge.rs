@@ -80,7 +80,18 @@ fn json_text(env: &mut JNIEnv<'_>, value: &JString<'_>, limit: i32) -> Result<St
 }
 fn reply(env: &mut JNIEnv<'_>, id: i64, action: Result<Action>) -> jstring {
     let result = action
-        .and_then(|action| reference(id)?.invoke(action))
+        .and_then(|action| {
+            let owner = reference(id)?;
+            let action = if matches!(
+                &action,
+                Action::Scan(_) | Action::Approve { .. } | Action::Resume { .. }
+            ) {
+                owner.foreground_action(action)?
+            } else {
+                action
+            };
+            owner.invoke(action)
+        })
         .and_then(|status| status.json());
     match result {
         Ok(json) => match env.new_string(json.as_str()) {
@@ -94,6 +105,18 @@ fn reply(env: &mut JNIEnv<'_>, id: i64, action: Result<Action>) -> jstring {
             failure(env, error);
             std::ptr::null_mut()
         }
+    }
+}
+
+#[no_mangle]
+pub extern "system" fn Java_com_kloda_sync_KlodaPairingJni_setForeground(
+    mut env: JNIEnv<'_>,
+    _: JClass<'_>,
+    id: jlong,
+    active: jboolean,
+) {
+    if let Err(error) = reference(id).and_then(|owner| owner.set_foreground(active != 0)) {
+        failure(&mut env, error);
     }
 }
 

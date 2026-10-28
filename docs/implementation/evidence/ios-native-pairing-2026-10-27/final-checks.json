@@ -1,0 +1,41 @@
+[
+  {
+    "name": "root-lint",
+    "command": [
+      "npm",
+      "run",
+      "lint"
+    ],
+    "exitCode": 0,
+    "seconds": 3.018
+  },
+  {
+    "name": "native-dependency-policy",
+    "command": [
+      "node",
+      "tools/check-native-dependencies.mjs",
+      "--self-test"
+    ],
+    "exitCode": 0,
+    "seconds": 0.554
+  },
+  {
+    "name": "rust-size",
+    "command": [
+      "node",
+      "tools/check-rust-size.mjs"
+    ],
+    "exitCode": 0,
+    "seconds": 0.062
+  },
+  {
+    "name": "expo-fixture-syntax",
+    "command": [
+      "node",
+      "--check",
+      "packages/pairing-native/apple/tests/IosPairingExpoChecks.js"
+    ],
+    "exitCode": 0,
+    "seconds": 0.026
+  }
+]

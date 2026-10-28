@@ -3,14 +3,30 @@ use crate::file_sender_command::{Reply, Task};
 use crate::store_rows::{RecordRole, RecordState};
 
 impl Actor {
-    pub(super) fn transfer(&mut self, text: &str, task: Task) -> Result<Reply> {
-        let result = self.transfer_checked(text, task);
+    pub(super) fn transfer(
+        &mut self,
+        text: &str,
+        task: Task,
+        epoch: Option<u64>,
+        background_active: Option<std::sync::Arc<std::sync::atomic::AtomicBool>>,
+    ) -> Result<Reply> {
+        let result = self.transfer_checked(text, task, epoch, background_active);
         if result.is_err() {
             self.file_sender = None;
         }
         result
     }
-    fn transfer_checked(&mut self, text: &str, task: Task) -> Result<Reply> {
+    fn transfer_checked(
+        &mut self,
+        text: &str,
+        task: Task,
+        epoch: Option<u64>,
+        background_active: Option<std::sync::Arc<std::sync::atomic::AtomicBool>>,
+    ) -> Result<Reply> {
+        let foreground = self.foreground.clone();
+        let check_foreground =
+            || foreground.check_transfer_cancel(epoch, background_active.as_deref());
+        check_foreground()?;
         self.guard()?;
         if !matches!(self.context.role, OwnerRole::Phone) {
             return Err(PairingError::NativeUnsupported);
@@ -43,6 +59,7 @@ impl Actor {
                 #[cfg(not(target_os = "android"))]
                 let route = crate::route::for_peer(hint)?;
                 route.check(hint.ip)?;
+                check_foreground()?;
                 let socket = route.connect(hint, Duration::from_millis(250))?;
                 let channel = self.file_transport.runtime().block_on(async {
                     tokio::time::timeout(
@@ -51,7 +68,10 @@ impl Actor {
                             socket,
                             self.installation.certified_key.clone(),
                             &record,
-                            || route.check(hint.ip),
+                            || {
+                                check_foreground()?;
+                                route.check(hint.ip)
+                            },
                         ),
                     )
                     .await
@@ -65,7 +85,10 @@ impl Actor {
         let reply = self.file_transport.runtime().block_on(async {
             tokio::time::timeout(
                 Duration::from_secs(30),
-                channel.transfer(task, || route.check(hint.ip)),
+                channel.transfer(task, || {
+                    check_foreground()?;
+                    route.check(hint.ip)
+                }),
             )
             .await
             .map_err(|_| PairingError::OutcomeUnknown)?
@@ -82,6 +105,7 @@ impl Actor {
         {
             return Err(PairingError::ContinuityLost);
         }
+        check_foreground()?;
         route.check(hint.ip)?;
         self.file_sender = Some((route, channel));
         Ok(reply)

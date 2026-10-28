@@ -20,8 +20,8 @@ internal class DirectoryPickerContract(
   override fun parseResult(input: DirectoryPickerInput, resultCode: Int, intent: Intent?): String? {
     if (resultCode != Activity.RESULT_OK) return null
     val uri = intent?.data ?: return null
-    val flags = intent.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION
-    requireNotNull(appContextProvider.appContext.reactContext).contentResolver.takePersistableUriPermission(uri, flags)
+    if (intent.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION == 0) return null
+    requireNotNull(appContextProvider.appContext.reactContext).contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
     return uri.toString()
   }
 }

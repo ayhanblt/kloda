@@ -1,0 +1,14 @@
+{
+  "utc": "2026-10-24T14:52:02.054720+00:00",
+  "exitCode": 0,
+  "seconds": 0.3978906249976717,
+  "sourceSha256": "632f5776a59a2ce90e6763291dbdfe27ea3549036aee34ea1249a65c12c7481f",
+  "executableSha256": "eba659a361906bd63b0d18bd9aec4f1140278cf9636e0a7f4b8ef3c7b5a65118",
+  "runtime": "iOS26.5/arm64",
+  "sdk": "27.1",
+  "minimumTarget": "16.4",
+  "output": "PASS simulator Network parameters: interface type and disabled peer-to-peer/multipath round-trip\nPASS simulator Network parameters: listener-local and proxy-preference flags round-trip\nPARAMETER_CHECKS_ONLY_NOT_DIRECT_ROUTE_OR_PROXY_EXCLUSION_PROOF\n",
+  "scope": "Network.framework parameter object construction/getter roundtrip only, no endpoints/connections/listeners/monitors or network proof",
+  "independentReview": "Read-only Sol review verified source/executable hashes and getter/setter-only logs. No endpoint/connection/listener/monitor in fixture; no privacy/falsePASS/policy-relaxation blocker. Local-only inbound and proxy fallback scope verified; reviewer did not run tests.",
+  "dedicatedSimulatorShutdownExitCode": 0
+}

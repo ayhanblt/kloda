@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-24T15:20:18.400437+00:00",
+  "head": "34dcbb8",
+  "scope": "Approved mobile execution list step1 only; Android work/source/PC/settings context binding. Existing unrelated uncommitted work preserved.",
+  "evidenceType": "Selected tool-result observations; not full raw terminal archive",
+  "sources": [
+    {
+      "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/FilesRunContext.kt",
+      "sha256": "744f88944d393f4ef09a58d0e6beb8fb960b6711249f7775947dbe3825010dbf"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/FilesRun.kt",
+      "sha256": "34808ba35323e1ccdbfb9500123949fcf145b04934ffa646c2a3bd7e12a6a948"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesRunJournal.kt",
+      "sha256": "d3f0e0621bded174000f29b58866448f16cc8a92a764519588533b27c32c1088"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesRunWorker.kt",
+      "sha256": "7f4b7229d3f312ba3ade54e436236e3c4d30a440965365b5aa604ebe70e6b024"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesQueue.kt",
+      "sha256": "31a463cc1a40c18c7e5e027b6a82e12a40f038305feadd04fe91c34982ac02c6"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSyncJournal.kt",
+      "sha256": "7b239450b61382c387406f126e9060cf775653b8051b116c415a523f0c2baa8b"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt",
+      "sha256": "2fb0aa5aed652ed955779fd70c1eb8a4a873f133ab9be8d14f0a77e53bd9f391"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt",
+      "sha256": "fd719dd714c8da19f1f194bd2b007005b62b540ec6ae6adecfba26fafcc3bc71"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaPairingModule.kt",
+      "sha256": "33025de3badd6c6dfbd40008d22e44e01267db884365d07aba711e24ef37e065"
+    },
+    {
+      "path": "tools/test-android-files-retry.py",
+      "sha256": "e04a5dd60bbebc21d855cbcd10b9df1822224080b53bd0b33c45429b7c3ebf99"
+    },
+    {
+      "path": "apps/mobile/src/features/file-transfer/model/use-file-transfer.ts",
+      "sha256": "6947a1409c5dc8457890478e8c8302f5e92c412c52d12466ed40c59380299dd3"
+    },
+    {
+      "path": "apps/mobile/src/shared/api/file-transfer.spec.ts",
+      "sha256": "a59aae5b69379e170c70627ffa835d705f92863d467dfde5febaf4c45187d722"
+    },
+    {
+      "path": "apps/mobile/src/pages/activity/ui/activity-page.spec.tsx",
+      "sha256": "66133ca37e3cb4965ba9f7cc493ff97270c4b150b25684ab5659a3eb2e643499"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Mobile Jest",
+      "status": "PASS",
+      "suites": 8,
+      "tests": 53,
+      "exit": 0
+    },
+    {
+      "name": "Mobile ESLint and TypeScript",
+      "status": "PASS",
+      "exit": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "Expo iOS and Android JS exports",
+      "status": "PASS",
+      "exit": 0,
+      "limit": "Not native iOS implementation or platform acceptance"
+    },
+    {
+      "name": "Android Kotlin main and instrumentation source compile",
+      "status": "PASS",
+      "exit": 0,
+      "limit": "Instrumentation not executed; initial native preBuild rebuilt four Android JNI ABIs with8 dead-code warnings, Gradle deprecation warnings retained"
+    },
+    {
+      "name": "Host production SQLite schema/reopen/retained receipt/context controls",
+      "status": "PASS",
+      "tests": 2,
+      "exit": 0,
+      "command": "python3 tools/test-android-files-retry.py",
+      "limit": "Host SQLite, not SQLiteOpenHelper Android runtime"
+    },
+    {
+      "name": "Actual Kotlin context/retry model and worker host checks",
+      "status": "PASS",
+      "workerCases": 8,
+      "exit": 0,
+      "command": "python3 docs/implementation/evidence/android-run-context-2026-10-24/run-worker-checks.py",
+      "limit": "Actual Kotlin context/worker; journal test double; Android.jar signatures and installed org.json host jar used, not Android OS preference runtime"
+    },
+    {
+      "name": "Diff whitespace",
+      "status": "PASS",
+      "exit": 0
+    }
+  ],
+  "review": "Independent Sol source review: UI regression Photos-status failure clearing valid Files controls fixed and regression added. Final no blocking source finding; immutable run/context, stale terminal CAS, final result fence and same-record retry retention reviewed. Reviewer did not run tests.",
+  "initialCorrections": [
+    "Host SQL test method inserted at wrong boundary initially failed; corrected test structure; final2PASS",
+    "Photos-failure UI test initially expected untranslated storage_failure key; used known queue_unavailable error; final53PASS"
+  ],
+  "notRun": [
+    "Android instrumentation/emulator/device/runtime preference or process race tests",
+    "Actual PC LAN transfer/revoke/settings mutation",
+    "Physical grouped acceptance",
+    "Android background/OS scheduler/retry budgets",
+    "iOS native pairing/transfer or LAN policy change"
+  ],
+  "preserved": [
+    "Completed/ACK/operation/snapshot recovery and suppression records",
+    "5 attempts /60 seconds access retry",
+    "V1 PC local authority and separate grant",
+    "User archive/key/pin/certificate/epoch/authority",
+    "Git add/commit/push/reset/clean/stash ban",
+    "Model and effort settings"
+  ],
+  "nextStep": "2 Android native owner/background execution; not started",
+  "independentResultReview": "Read-only Sol final review found no blocking/privacy/falsePASS issue;13 source hashes match current files and saved worker output supports8 cases. Instrumentation compile vs NOT_RUN, host/double, JS export, scheduler-only binding and physical/platform limits preserved. Reviewer did not rerun tests."
+}

@@ -11,7 +11,7 @@ pub(crate) fn unix_seconds() -> Result<u64> {
     Ok(seconds)
 }
 
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "ios"))]
 pub(crate) fn elapsed_ms() -> Result<u64> {
     #[repr(C)]
     struct Timebase {
@@ -22,7 +22,7 @@ pub(crate) fn elapsed_ms() -> Result<u64> {
         fn mach_continuous_time() -> u64;
         fn mach_timebase_info(info: *mut Timebase) -> libc::c_int;
     }
-    // SDK mach/mach_time.h: mach_continuous_time advances during sleep (macOS 10.12+).
+    // SDK mach/mach_time.h: advances during sleep (macOS 10.12+, iOS 10+).
     static TIMEBASE: std::sync::LazyLock<Option<(u32, u32)>> = std::sync::LazyLock::new(|| {
         let mut info = Timebase { numer: 0, denom: 0 };
         if unsafe { mach_timebase_info(&mut info) } != 0 || info.numer == 0 || info.denom == 0 {
@@ -68,10 +68,42 @@ pub(crate) fn elapsed_ms() -> Result<u64> {
 
 #[cfg(not(any(
     target_os = "macos",
+    target_os = "ios",
     target_os = "android",
     target_os = "linux",
     target_os = "windows"
 )))]
 pub(crate) fn elapsed_ms() -> Result<u64> {
     Err(PairingError::NativeUnsupported)
+}
+
+#[cfg(all(test, any(target_os = "macos", target_os = "ios")))]
+mod tests {
+    use super::elapsed_ms;
+
+    #[test]
+    fn apple_elapsed_time_advances_across_thread_sleep() {
+        let before = elapsed_ms().unwrap();
+        std::thread::sleep(std::time::Duration::from_millis(20));
+        assert!(elapsed_ms().unwrap() > before);
+    }
+
+    #[test]
+    fn apple_elapsed_time_is_monotonic_on_concurrent_callers() {
+        let workers: Vec<_> = (0..2)
+            .map(|_| {
+                std::thread::spawn(|| {
+                    let mut previous = elapsed_ms().unwrap();
+                    for _ in 0..128 {
+                        let current = elapsed_ms().unwrap();
+                        assert!(current >= previous);
+                        previous = current;
+                    }
+                })
+            })
+            .collect();
+        for worker in workers {
+            worker.join().unwrap();
+        }
+    }
 }

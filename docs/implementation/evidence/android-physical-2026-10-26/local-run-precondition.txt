@@ -1,0 +1,19 @@
+START native-library-load
+PASS native-library-load
+START files-runs
+PASS files-runs
+START scheduled-journal
+PASS scheduled-journal
+START files-recovery
+PASS files-recovery
+START foreground-service
+java.lang.IllegalStateException: Timed out waiting for lifecycle state
+	at com.kloda.sync.AndroidLifecycleChecks.eventually(AndroidLifecycleChecks.kt:62)
+	at com.kloda.sync.AndroidLifecycleChecks.run(AndroidLifecycleChecks.kt:39)
+	at com.kloda.sync.AndroidFilesQueueRecoveryInstrumentation.onStart$lambda$12(AndroidFilesQueueRecoveryInstrumentation.kt:54)
+	at com.kloda.sync.AndroidFilesQueueRecoveryInstrumentation.$r8$lambda$3RefTozGBjBWHVnZTmKdNUuOK4k(AndroidFilesQueueRecoveryInstrumentation.kt:0)
+	at com.kloda.sync.AndroidFilesQueueRecoveryInstrumentation$$ExternalSyntheticLambda8.invoke(D8$$SyntheticClass:0)
+	at com.kloda.sync.AndroidFilesQueueRecoveryInstrumentation.onStart$group(AndroidFilesQueueRecoveryInstrumentation.kt:46)
+	at com.kloda.sync.AndroidFilesQueueRecoveryInstrumentation.onStart(AndroidFilesQueueRecoveryInstrumentation.kt:54)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2683)
+

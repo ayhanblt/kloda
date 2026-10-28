@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-25T19:56:54.259245+00:00",
+  "head": "34dcbb8c204cb01e84583655651d10cb5baca8ec",
+  "scope": "Mobile list4 disposable host/static acceptance slice; existing dirty tree preserved",
+  "build": {
+    "command": "./gradlew :app:assembleDebug :my-module:assembleDebugAndroidTest :app:lintDebug :my-module:lintDebug --offline --console=plain -Pandroid.lint.useK2Uast=false",
+    "exitCode": 0,
+    "gradleSeconds": 15,
+    "actionableTasks": 927,
+    "executed": 97,
+    "upToDate": 830,
+    "lint": {
+      "app": {
+        "Warning": 30
+      },
+      "module": {
+        "Warning": 34
+      }
+    },
+    "instrumentation": "Compiled/packaged only; NOT_RUN"
+  },
+  "artifacts": {
+    "apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk": {
+      "sha256": "686d4ed709a79976969c1799c1151a30b0b6d314e677af8c8977732bb3f80675",
+      "bytes": 293764986
+    },
+    "apps/mobile/modules/my-module/android/build/outputs/apk/androidTest/debug/my-module-debug-androidTest.apk": {
+      "sha256": "dbb2c0c2953fb3835c33e2f4ce91c2589840700d94c50f064b2fb1808131a30a",
+      "bytes": 171112452
+    }
+  },
+  "packaging": {
+    "zipalignCommand": "zipalign -c -P 16 -v 4 <app-debug.apk>",
+    "zipalignExitCode": 0,
+    "signatureCommand": "apksigner verify <app-debug.apk>",
+    "signatureExitCode": 0,
+    "packagedManifest": {
+      "minSdk": 24,
+      "targetSdk": 36
+    },
+    "elf64": {
+      "count": 52,
+      "status": "PASS",
+      "alignedRelroEnds": 10,
+      "fullOwnLoadNoWritableOverlap": 42,
+      "limits": "Complete documented RELRO padding exception applied; modulo alone is insufficient. This does not run Android.32bit libraries are not a64bit16KB acceptance gate. All four Kloda ABI library alignment was separately checked in prior step."
+    }
+  },
+  "hostChecks": {
+    "safGroups": 15,
+    "picker": "PASS",
+    "sqlTests": 4,
+    "sqlScope": "Actual production schema/query/trigger extraction; separate readonly child SQLite reopen; duplicate SAME intent primary key rejection, not actual queue API idempotence acceptance. Actual FilesQueue/PhotosPublisher/JNI NOT_RUN.",
+    "resources": "Actual Kotlin scanner under provider doubles; production membership SQL with simplified base tables. Not Android power/time/production DB total."
+  },
+  "resourceMeasurements": {
+    "flatFiles": 8000,
+    "api24CursorVisitsBefore": 32012001,
+    "api24CursorVisitsAfter": 8001,
+    "api24ProviderQueriesBefore": 8001,
+    "api24ProviderQueriesAfter": 1,
+    "membership12Runs": {
+      "rows": 96000,
+      "growthBytes": 15073280
+    },
+    "remaining": "Snapshot/read independently rechecks membership; old API digest path may still be quadratic. Live bytes reread, OS/provider behavior, battery and metadata retention optimization not accepted."
+  },
+  "review": "Independent Sol source/security and saved-result review complete. Full documented RELRO own-LOAD/padding exception required and implemented; per-row grant/cancel and independent open checks preserved; no final blocker in this host/static slice. Reviewer ran no tests/build/device.",
+  "notRun": [
+    "Android emulator or physical device",
+    "Actual SAF/MediaStore/JobScheduler/FGS/permission/lock/boot/Doze/force-stop",
+    "Real queue explicit rebackup/Photos resource rebuild/native PC LAN ACL integration",
+    "Release APK/AAB/distribution acceptance",
+    "User archive/key/pin/authority access or cleanup",
+    "Git mutation"
+  ],
+  "runtimeApproval": "Explicit disposable emulator permission requested; pending. Physical pause unchanged.",
+  "sourceSha256": {
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSafSourceScanner.kt": "047f34d46f47a8b06c2e2d006d5d6f328691de3008d7e400ddc0154e31e73fd2",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSyncJournal.kt": "5c9858785776ab53fb4307a6d6be945ba023fed35af0e38b17ee8244e7da2e19",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesQueue.kt": "12619bad9c0da86ef32d67c56f1da5ee4a82cdcaef116564ab2bb58767b2be0e",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotoManifestPublisher.kt": "f3876fd7ea66ddd4b012bbb0ebbc6626682412edaa5f93622d900d2e92bccbd0",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidScheduleJournal.kt": "949a43916b00f328d584406e3cb743ce5ba825fb7917660fa9b3301c1a2c8370",
+    "tools/test-android-saf.py": "3c45101d60901982cd17d1eba2d4f36056da08351c0904c09de116c6e9fbe132",
+    "tools/test-android-files-retry.py": "5a5d70e636490b51df5e39504cf961df26ad2b1170660dd1aea133a09cfaad8a",
+    "tools/check-android-apk.py": "1ca4394a06cfb90bb73aa9a582e018b33a3900bd665b233d79f8542807a3c504",
+    "tools/check-android-resource-costs.py": "5053cd0af220244e3181de2e3725d63ad7ade6e64a609f1a6befb10e5d570f2d",
+    "tools/check-android-elf-alignment.py": "21b35fab8f2225eadeec00acde86e49dc47fdeb6b7f318c650a67fd19874a5f1"
+  }
+}

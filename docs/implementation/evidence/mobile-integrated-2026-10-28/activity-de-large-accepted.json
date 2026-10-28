@@ -1,0 +1,18 @@
+{
+  "capture": "activity-de-large-accepted",
+  "contentSize": "accessibility-extra-large",
+  "result": "READY",
+  "id": 12,
+  "stage": "activity-unknown",
+  "language": "de",
+  "dimensions": {
+    "fontScale": 2.643,
+    "width": 393,
+    "height": 852,
+    "scale": 3
+  },
+  "active": true,
+  "durableProbeWarning": true,
+  "scope": "UI fixtures only; no actual peer or file transfer",
+  "sha256": "90b9a3b9cc54215d23ad948d37af08df123ee0212b1352e86fcc299412c2c1b2"
+}

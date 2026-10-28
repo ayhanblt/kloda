@@ -95,14 +95,15 @@ internal class AndroidPhotosSources(private val context: Context) {
     sources.firstOrNull { it["reference"] == reference } ?: run {
       val source = mapOf("displayName" to name, "id" to UUID.randomUUID().toString(), "kind" to "photos", "reference" to reference)
       val values = JSONArray().apply { sources.forEach { put(JSONObject(it)) }; put(JSONObject(source)) }
-      if (!preferences.edit().putString("photoSources", values.toString()).commit()) throw FilesFailure("storage_failure")
+      if (!FilesRunContext.stamp(preferences.edit().putString("photoSources", values.toString())).commit()) throw FilesFailure("storage_failure")
       source
     }
   }
 
   fun remove(id: String) = synchronized(AndroidSyncJournal.sourceLock) {
-    val remaining = JSONArray().apply { load().filter { it["id"] != id }.forEach { put(JSONObject(it)) } }
-    if (!preferences.edit().putString("photoSources", remaining.toString()).commit()) throw FilesFailure("storage_failure")
+    val sources = load()
+    val remaining = JSONArray().apply { sources.filter { it["id"] != id }.forEach { put(JSONObject(it)) } }
+    if (sources.any { it["id"] == id } && !FilesRunContext.stamp(preferences.edit().putString("photoSources", remaining.toString())).commit()) throw FilesFailure("storage_failure")
     AndroidSyncJournal(context).use { it.removeSource(id) }
   }
 

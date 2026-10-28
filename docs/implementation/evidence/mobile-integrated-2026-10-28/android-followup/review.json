@@ -1,0 +1,8 @@
+{
+  "sourceReview": "no blocking finding; root/fixture same dark statusbar constant; trust scope preserved",
+  "savedResultReview": "no remaining blocking finding",
+  "finding": "initial unknown PNG overwritten by reopen image",
+  "resolution": "initial image unavailable/historical; separate reopen name/hash verified; original not fabricated",
+  "recordedChecks": "108 tests/11 suites, TS/lint/two exports0",
+  "limits": "reviewer performed no tests/build/device queries; fingerprint equality not independently re-queried"
+}

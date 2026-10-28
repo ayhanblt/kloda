@@ -1,0 +1,16 @@
+[
+  {
+    "image": "KlodaSecurePhotosSync.debug.dylib",
+    "symbols": [
+      "00000000009dc5f8 T _kloda_ios_request",
+      "00000000009dc658 T _kloda_ios_set_foreground",
+      "00000000011b2ebc T _sqlite3_open_v2"
+    ],
+    "sqliteSystemLinked": true
+  },
+  {
+    "image": "KlodaSecurePhotosSync",
+    "symbols": [],
+    "sqliteSystemLinked": false
+  }
+]

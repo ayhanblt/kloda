@@ -1,0 +1,12 @@
+START native-library-load
+PASS native-library-load
+START files-runs
+PASS files-runs
+START scheduled-journal
+PASS scheduled-journal
+START files-recovery
+PASS files-recovery
+START foreground-service
+PASS foreground-service
+Local Files/runtime checks passed; Photos/restore/transport NOT_RUN
+

@@ -103,3 +103,14 @@ Platform sınırları için framework değerlendirmesinde kontrol edilen resmi k
 ## Desktop WebDAV retry clarification — 2026-10-20
 
 Ayhan explicitly retained the existing WebDAV timeout behavior: total five access attempts, with each retry sixty seconds after an observed failure. No additional total timeout/deadline is introduced. An unanswered request is not an observed failure and this policy alone does not guarantee a bounded completion time. Existing native phone transport deadlines are separate and unchanged. The mobile OS deferral budget is not applied to the Desktop native receiver. Implementation/restart evidence is tracked in the [Desktop jobs handoff](../implementation/implementation-session-handoff.md#desktop-webdav-jobs-and-final-host-review--2026-10-20), separately from physical/platform acceptance.
+
+## 2026-10-25 — Mobil otomatik duraklatma onayı
+
+Kullanıcı: “Otomatik yedeklemeyi de durdursun; ben Devam diyene kadar başlamasın.”
+Duraklat mevcut işi güvenli noktada durdurur ve otomatik program/Live yürütmesini
+kalıcı olarak kapatır. Yeniden açılış/boot/kaynak olayı bunu kaldırmaz. Açık ön plan
+Devam eylemi yeniden etkinleştirir; Sync Now ayrı manuel işlem olarak kalır ve
+otomatik duruşu kaldırmaz. Erişim5/60 ve OS5/hedef5dk bütçeleri değişmez; pause
+OS başarısızlığı sayılmaz. Başarısız kalıcı kayıt başarı göstermez. Android kaynak
+uygulaması [liste3 kaydında](../implementation/android-scheduling-2026-10-25.md);
+iOS implementation/runtime kabulü ayrıca açıktır.

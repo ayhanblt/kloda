@@ -189,13 +189,15 @@ internal object AndroidPhotoManifestChecks {
     }
   }
 
-  private fun operation(job: FilesJob): JSONObject = JSONObject().put("id", job.operationId).put("requestId", job.id)
+  internal fun operation(job: FilesJob): JSONObject = JSONObject().put("id", job.operationId).put("requestId", job.id)
     .put("sourceId", job.wireSourceId).put("sourceRevision", job.sha256).put("name", job.name)
     .put("sha256", job.sha256).put("size", job.size).put("offset", job.size).put("state", "completed")
 
-  private class NativeFixture {
+  internal class NativeFixture {
     val operations = linkedMapOf<String, JSONObject>()
     val requests = linkedMapOf<String, String>()
+    val deletedOps = mutableSetOf<String>()
+    val rebackupRequests = linkedMapOf<String, String>()
     var lose: String? = null
     var staleScope = false
     var creates = 0; var chunks = 0; var finalizes = 0
@@ -207,9 +209,11 @@ internal object AndroidPhotoManifestChecks {
         val upload = command.getJSONObject("upload")
         check(upload.getString("name").startsWith(PhotoManifestCodec.prefix))
         val request = upload.getString("requestId")
+        upload.optString("rebackupOf").takeIf { it.isNotEmpty() }?.let { rebackupRequests[request] = it }
         val id = requests.getOrPut(request) { AndroidFilesSnapshots.randomId() }
-        operations.getOrPut(id) { JSONObject(upload.toString()).put("id", id).put("offset", 0).put("state", "receiving") }
+        operations.getOrPut(id) { JSONObject(upload.toString()).apply { remove("rebackupOf") }.put("id", id).put("offset", 0).put("state", "receiving") }
       } else operations[command.getString("id")] ?: return "{\"status\":404,\"errorCode\":\"not_found\"}"
+      if (kind != "create" && operation.getString("id") in deletedOps) return "{\"status\":410,\"errorCode\":\"owner_deleted\"}"
       if (kind == "chunk") {
         chunks++
         val length = command.getLong("length"); val offset = command.getLong("offset")

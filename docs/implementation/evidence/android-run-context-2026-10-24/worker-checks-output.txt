@@ -1,0 +1,10 @@
+PASS actual FilesRunContext: source/ref/schedule/revision binding, change-away/back, stable reopen, WebDAV separation, malformed input rejection
+PASS actual retry policy: monotonic wait, five attempts, absent boot, nonretryable states, paused view
+PASS worker unit: five
+PASS worker unit: pause
+PASS worker unit: success
+PASS worker unit: early
+PASS worker unit: attention
+PASS worker unit: waitFailure
+PASS worker unit: settingsAfter
+PASS worker unit: settingsWait

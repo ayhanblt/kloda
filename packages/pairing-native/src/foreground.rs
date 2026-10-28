@@ -1,27 +1,72 @@
 use crate::error::{PairingError, Result};
 use std::sync::{Mutex, MutexGuard};
 
-/// Orders Desktop UI suspension against durable trust/grant authorization.
+/// Orders UI suspension against durable trust/grant authorization.
 #[derive(Default)]
-pub(crate) struct Foreground(Mutex<u64>);
+pub(crate) struct Foreground(Mutex<State>);
+pub(crate) struct State {
+    epoch: u64,
+    active: bool,
+}
+impl Default for State {
+    fn default() -> Self {
+        Self {
+            epoch: 0,
+            active: !cfg!(any(target_os = "android", target_os = "ios")),
+        }
+    }
+}
 impl Foreground {
     pub(crate) fn capture(&self) -> Result<u64> {
-        self.0
-            .lock()
-            .map(|epoch| *epoch)
-            .map_err(|_| PairingError::OutcomeUnknown)
-    }
-    pub(crate) fn invalidate(&self) -> Result<()> {
-        let mut epoch = self.0.lock().map_err(|_| PairingError::OutcomeUnknown)?;
-        *epoch = epoch.checked_add(1).ok_or(PairingError::OutcomeUnknown)?;
-        Ok(())
-    }
-    pub(crate) fn authorize(&self, expected: Option<u64>) -> Result<MutexGuard<'_, u64>> {
-        let epoch = self.0.lock().map_err(|_| PairingError::OutcomeUnknown)?;
-        if expected.is_some_and(|expected| expected != *epoch) {
+        let state = self.0.lock().map_err(|_| PairingError::OutcomeUnknown)?;
+        if !state.active {
             return Err(PairingError::CandidateStale);
         }
-        Ok(epoch)
+        Ok(state.epoch)
+    }
+    pub(crate) fn invalidate(&self) -> Result<()> {
+        let mut state = self.0.lock().map_err(|_| PairingError::OutcomeUnknown)?;
+        state.epoch = state
+            .epoch
+            .checked_add(1)
+            .ok_or(PairingError::OutcomeUnknown)?;
+        Ok(())
+    }
+    #[cfg(any(target_os = "android", target_os = "ios", test))]
+    pub(crate) fn set_active(&self, active: bool) -> Result<()> {
+        let mut state = self.0.lock().map_err(|_| PairingError::OutcomeUnknown)?;
+        if !active || state.active != active {
+            state.active = false;
+            state.epoch = state
+                .epoch
+                .checked_add(1)
+                .ok_or(PairingError::OutcomeUnknown)?;
+        }
+        state.active = active;
+        Ok(())
+    }
+    pub(crate) fn check_transfer(&self, expected: Option<u64>) -> Result<()> {
+        if let Some(epoch) = expected {
+            drop(self.authorize(Some(epoch))?);
+        }
+        Ok(())
+    }
+    pub(crate) fn check_transfer_cancel(
+        &self,
+        expected: Option<u64>,
+        active: Option<&std::sync::atomic::AtomicBool>,
+    ) -> Result<()> {
+        if active.is_some_and(|active| !active.load(std::sync::atomic::Ordering::Acquire)) {
+            return Err(PairingError::Cancelled);
+        }
+        self.check_transfer(expected)
+    }
+    pub(crate) fn authorize(&self, expected: Option<u64>) -> Result<MutexGuard<'_, State>> {
+        let state = self.0.lock().map_err(|_| PairingError::OutcomeUnknown)?;
+        if !state.active || expected.is_some_and(|expected| expected != state.epoch) {
+            return Err(PairingError::CandidateStale);
+        }
+        Ok(state)
     }
 }
 
@@ -33,6 +78,7 @@ mod tests {
     #[test]
     fn delayed_foreground_tasks_cannot_authorize_after_synchronous_suspend() {
         let foreground = std::sync::Arc::new(Foreground::default());
+        foreground.set_active(true).unwrap();
         let old_epoch = foreground.capture().unwrap();
         let (start, delayed) = std::sync::mpsc::channel();
         let worker_foreground = foreground.clone();
@@ -56,6 +102,7 @@ mod tests {
     #[test]
     fn suspend_during_folder_validation_cannot_commit_backup_grant() {
         let foreground = Foreground::default();
+        foreground.set_active(true).unwrap();
         let epoch = foreground.capture().unwrap();
         let directory = Directory::new();
         let mut store = directory.store(key("pc"));
@@ -78,4 +125,22 @@ mod tests {
             .unwrap();
         assert!(store.backup_scope(&sid).unwrap().unwrap().approved);
     }
+    #[test]
+    fn optional_file_epoch_preserves_background_and_fences_stale_ui() {
+        let state = Foreground::default();
+        state.set_active(false).unwrap();
+        assert!(state.check_transfer(None).is_ok());
+        assert!(state.check_transfer(Some(0)).is_err());
+        state.set_active(true).unwrap();
+        let epoch = state.capture().unwrap();
+        assert!(state.check_transfer(Some(epoch)).is_ok());
+        state.set_active(false).unwrap();
+        state.set_active(true).unwrap();
+        assert!(state.check_transfer(Some(epoch)).is_err());
+        assert!(state.check_transfer(None).is_ok());
+    }
 }
+
+#[cfg(test)]
+#[path = "foreground_phone_tests.rs"]
+mod phone_tests;

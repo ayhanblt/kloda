@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "SHA256 exact bytes",
+  "files": {
+    "native-fresh-create.txt": "9aca3e077e9942b7b6aec4bfd6bf88d10f1d3b46d8e14c8fef74a7bc99f6861c",
+    "electron-fresh-create.txt": "2480a1c192a5ec583c97b84db7ac003d580495e50ae372e97a7bec89c4470462",
+    "result.json": "d6c3c8133299fc77e7198e6122027f780013e494079f7ccc342de3a3d674adf2",
+    "native-harness.rs.txt": "8a1ba09bc69e79c6ed8e35a5b7e2d9ab10d3500bf93105857fc520c9c19f6a8e",
+    "signing-project.pbxproj.txt": "25a807344a7fef4563e797e708c9d0acf35117ef50ee86117e5931f2c2b5d5d4",
+    "README.md": "f35a10ef3d1542955c28c0dde53a2ab3987aa337306ae669208e162cb82c445a",
+    "identity-tests.txt": "d3fb844a9a2781be22b876e26aa31e5b21f835ffd5d326deeb2ab9238a3e2dbe",
+    "readonly-lookup-diagnostic.txt": "561a85b88fefce9f31eddf43fc42e56acc919a62258f75faae29be4449c7fdd4",
+    "original-reopen-failure.txt": "a56086d848067b0cccd5a4863a4674358e5970823e7761fe2bd5598572638501",
+    "clippy.txt": "2abaffc98d9f81783ce05bb91f7a4e8c64f466ee6352b7958c67eb10400af75d",
+    "native-addon-build.txt": "aa31122a965f99507d8646ca00326080b2f9eff9a3aa59fc5882f775beb5eeb0",
+    "native-process-reopen.txt": "a091ac58586594706b0f36e845f106b9df25bc4a7446916956c3af07f281c86b",
+    "signing-template.entitlements": "52a4e43358171349aad26aa6d536f80ede3024082f52f6dabc717b829cb66690",
+    "electron-harness.cjs.txt": "a1dccb6c43fdce5c9533f217e3e9c0fa6007adcfe351b530fe2bfba7be76ac7e",
+    "same-state-fixed-reopen.txt": "a091ac58586594706b0f36e845f106b9df25bc4a7446916956c3af07f281c86b",
+    "electron-process-reopen.txt": "2480a1c192a5ec583c97b84db7ac003d580495e50ae372e97a7bec89c4470462"
+  }
+}

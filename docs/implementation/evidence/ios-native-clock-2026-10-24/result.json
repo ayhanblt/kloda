@@ -1,0 +1,76 @@
+{
+  "utc": "2026-10-24T13:28:49.884435+00:00",
+  "runtime": "iOS26.5/arm64",
+  "sdk": "27.1",
+  "toolchain": "Rust1.99.0",
+  "executable": "packages/pairing-native/target/ios-validation-1.99/aarch64-apple-ios-sim/debug/deps/kloda_pairing_native-de1dd8d3f9cd7b6e",
+  "executableSha256": "57e3280f75fa652f9a3458092631fc6c27d2dbf3c4725fec13aff314c1d2692c",
+  "tests": [
+    {
+      "name": "route::clock::tests::apple_elapsed_time_advances_across_thread_sleep",
+      "exitCode": 0,
+      "seconds": 0.37136158399516717,
+      "output": "\nrunning 1 test\ntest route::clock::tests::apple_elapsed_time_advances_across_thread_sleep ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 162 filtered out; finished in 0.03s\n\n"
+    },
+    {
+      "name": "route::clock::tests::apple_elapsed_time_is_monotonic_on_concurrent_callers",
+      "exitCode": 0,
+      "seconds": 0.3535521659941878,
+      "output": "\nrunning 1 test\ntest route::clock::tests::apple_elapsed_time_is_monotonic_on_concurrent_callers ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 162 filtered out; finished in 0.00s\n\n"
+    }
+  ],
+  "limits": "Thread sleep/concurrent calls only, not hardware suspend/reboot/clock rollback, authority or LAN acceptance",
+  "abiRegression": {
+    "exitCode": 0,
+    "seconds": 0.5152292499842588,
+    "output": "\nrunning 7 tests\ntest ios_bridge::tests::ios_abi_has_no_pc_authority_key_signing_or_context_override_commands ... ok\ntest ios_bridge::tests::ios_abi_open_never_opens_a_real_host_authority ... ok\ntest ios_bridge::tests::ios_abi_panics_are_sanitized_instead_of_crossing_c ... ok\ntest ios_bridge::tests::ios_abi_rejects_null_oversize_non_utf8_and_trailing_json_without_owner_access ... ok\ntest ios_bridge::tests::ios_abi_stale_or_closed_id_is_not_an_authority_and_free_null_is_safe ... ok\ntest ios_bridge::tests::ios_command_ids_and_generation_are_canonical_and_secrets_bounded ... ok\ntest ios_bridge::tests::ios_transfer_and_lifecycle_entry_reject_unknown_owner_before_descriptor_use ... ok\n\ntest result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 156 filtered out; finished in 0.02s\n\n",
+    "expectedTests": 7
+  },
+  "source": {
+    "path": "packages/pairing-native/src/route_clock.rs",
+    "sha256": "82c6ddb259e43af20d8b5c0dd25dc8ee00a35228b1ff3a2f3798d760268f25b5"
+  },
+  "checks": {
+    "hostClockTests": {
+      "exitCode": 0,
+      "passed": 2
+    },
+    "hostClippyLibTests": {
+      "exitCode": 0
+    },
+    "simulatorClippyLibTests": {
+      "exitCode": 0
+    },
+    "deviceCargoCheck": {
+      "exitCode": 0
+    },
+    "rustfmt": {
+      "exitCode": 0
+    },
+    "rustSourceSize": {
+      "exitCode": 0
+    },
+    "xcframeworkBuild": {
+      "exitCode": 0,
+      "scope": "Debug arm64 iOS device+simulator;5 C exports. Xcode cache/fs-event/CoreSimulator/Metal warnings present; package verified, no runtime acceptance",
+      "relativeOutput": "packages/pairing-native/target/ios-abi-nZmI50/KlodaPairingNative.xcframework"
+    }
+  },
+  "review": "Independent read-only Sol review: no blocking source finding; unchanged macOS implementation reused, storage/identity/route remain blocked, no owner/key/network enabled. Reviewer did not run tests.",
+  "sourceEvidence": [
+    {
+      "url": "https://developer.apple.com/documentation/kernel/1646199-mach_continuous_time",
+      "claim": "Monotonic tick clock includes sleep; not hardware sleep test evidence"
+    },
+    {
+      "url": "https://developer.apple.com/forums/thread/734293",
+      "claim": "Routing sockets not supported API on other Apple platforms; macOS declarations must not be copied. Does not prohibit all BSD sockets."
+    },
+    {
+      "url": "https://developer.apple.com/forums/thread/734359",
+      "claim": "Network.framework requiredInterface and BSD bound interface supported; not no-gateway proof"
+    }
+  ],
+  "independentResultReview": "Sol read-only final review verified source/executable hashes and saved2 exact simulator clock+7 ABI regression results; no blockers/private data/false PASS. Apple DTS conclusion limited to routing sockets, not all BSD/public APIs. No reruns by reviewer.",
+  "dedicatedSimulatorShutdownExitCode": 0
+}

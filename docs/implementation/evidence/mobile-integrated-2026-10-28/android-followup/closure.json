@@ -1,0 +1,13 @@
+{
+  "portsStillOpen": {
+    "5590": false,
+    "5591": false,
+    "5038": false,
+    "8087": false,
+    "18887": false
+  },
+  "sourceHashes": "match",
+  "gitDiffCheckExitCode": 0,
+  "userdataCleanup": false,
+  "hostConfigRestore": false
+}

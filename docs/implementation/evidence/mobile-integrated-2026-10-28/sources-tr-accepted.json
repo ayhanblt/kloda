@@ -1,0 +1,18 @@
+{
+  "capture": "sources-tr-accepted",
+  "contentSize": "large",
+  "result": "READY",
+  "id": 14,
+  "stage": "sources",
+  "language": "tr",
+  "dimensions": {
+    "scale": 3,
+    "width": 393,
+    "height": 852,
+    "fontScale": 1
+  },
+  "active": true,
+  "durableProbeWarning": true,
+  "scope": "UI fixtures only; no actual peer or file transfer",
+  "sha256": "cf33828906cc6bb177517f9de9b4eaad03c306c6a1b6d44171633ce75fa8d8c7"
+}

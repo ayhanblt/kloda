@@ -1,0 +1,9 @@
+{
+  "result": "PASS",
+  "checks": [
+    "module_methods",
+    "simulator_custody_refusal",
+    "empty_real_app_journal",
+    "empty_close"
+  ]
+}

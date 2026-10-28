@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-26T06:37:43.782417+00:00",
+  "head": "34dcbb8c204cb01e84583655651d10cb5baca8ec",
+  "scope": "User explicitly authorized one fresh disposable API36 emulator; physical pause retained",
+  "environment": {
+    "api": 36,
+    "abi": "arm64-v8a",
+    "pageBytes": 4096,
+    "emulator": "35.5.10",
+    "systemImage": "system-images;android-36;google_apis_playstore;arm64-v8a revision6",
+    "renderer": "software SwiftShader",
+    "isolation": "New private temporary AVD/user/emulator homes, no snapshots, dedicated ADB port5059 with --one-device unmatched USB serial; every device command explicit emulator-5588. Default ADB server untouched."
+  },
+  "artifacts": {
+    "apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk": {
+      "sha256": "295f66fcaab4ea1211466a53893b2cf86ced56616464780dcea7c1dd16ed51a4",
+      "bytes": 293764986
+    },
+    "apps/mobile/modules/my-module/android/build/outputs/apk/androidTest/debug/my-module-debug-androidTest.apk": {
+      "sha256": "60e963bed422fa6b4c039d5361df445c3b32b538cbfa197aa38dbf2f2ac90441",
+      "bytes": 171112452
+    }
+  },
+  "finalRuntime": {
+    "status": "PASS",
+    "adbExit": 0,
+    "seconds": 14.171143124985974,
+    "groups": [
+      "native-library-load",
+      "files-runs",
+      "scheduled-journal",
+      "files-recovery",
+      "photos-sources",
+      "own-restore",
+      "photos-manifest",
+      "photos-rebackup",
+      "photos-import",
+      "photos-catalog",
+      "foreground-service"
+    ],
+    "groupCount": 11,
+    "interpretation": "Runner group PASS markers and final success text verified; ADB exit0 alone is not success."
+  },
+  "restart": {
+    "status": "PASS",
+    "distinctProcessPidAsserted": true,
+    "forceStopVerifiedStopped": true,
+    "priorProcessPresent": false,
+    "scope": "Writer clean-closes DB and finishes; separate reader process checks IDs/context/offset/hash/tombstone/attempts/deadlines/preference. No active writer killed, in-flight upload crash or power loss proof."
+  },
+  "fix": {
+    "confirmedFailure": "Native fixture completed finalize but lost reply. Explicit Photos retry verified completed status and returned without persisting local finalizing state. Actual new Android test failed at recovered.state assertion before fix.",
+    "change": "Both early completed-status return paths now recheck caller, retain exact validated ACK durably, clear tombstone, discard own snapshot. Existing protocol/ACL/authority unchanged.",
+    "regression": "Photos rebackup group PASS: no automatic unchanged resurrection, shared resource retained, old completed receipt retained, lost reply same intent/op resumes; resource rebuild callback is simulated sender, not actual FilesQueue."
+  },
+  "failuresPreserved": [
+    {
+      "run": "baseline",
+      "status": "FAIL",
+      "cause": "Stale test expected schema3; production schema6. Updated test verifies6 + migration tables/preserved legacy records."
+    },
+    {
+      "run": "expanded",
+      "status": "FAIL",
+      "cause": "Confirmed production Photos local finalizing state after lost finalize reply."
+    }
+  ],
+  "builds": [
+    {
+      "command": ":my-module:assembleDebugAndroidTest :app:assembleDebug :app:lintDebug :my-module:lintDebug --offline -Pandroid.lint.useK2Uast=false",
+      "exitCode": 0,
+      "gradleSeconds": 11,
+      "tasks": 927,
+      "executed": 63
+    },
+    {
+      "command": ":my-module:assembleDebugAndroidTest :app:lintDebug :my-module:lintDebug --offline -Pandroid.lint.useK2Uast=false",
+      "exitCode": 0,
+      "gradleSeconds": 10,
+      "tasks": 883,
+      "executed": 63,
+      "scope": "Final test-only lifecycle/PID checks; production app unchanged."
+    }
+  ],
+  "lint": {
+    "errors": 0,
+    "warnings": {
+      "app": 30,
+      "module": 34
+    },
+    "engine": "Explicit K1; default K2 Worklets tooling limitation retained"
+  },
+  "notificationPermission": {
+    "testPackage": "com.kloda.sync.test",
+    "initiallyGranted": false,
+    "restored": true
+  },
+  "shutdown": {
+    "disposableEmulatorStopped": true,
+    "dedicatedAdbStopped": true,
+    "scope": "No other emulator/default ADB/physical device shutdown",
+    "ownTemporaryAvdRemoved": true,
+    "cleanupScope": "Only newly created token-private AVD/test directory removed after emulator exit and evidence selection; no existing AVD or project/user archive cleanup."
+  },
+  "sourceSha256": {
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotoManifestPublisher.kt": "b814a9ead1e3b0af145b566e94443a669b6b0fdc2a806199882a270f9e61cd69",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotoManifestJournal.kt": "2c09cda2d5967a9000d02419573d6f824019446dbb37727fd0c353aaf4099a0c",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesTransfer.kt": "ee81ec62087a5924c31a32e8a281747efbe460070510d40e49eba8be5a6be0f1",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt": "9af85217695db1d6d53049730aad3ac9fb992fb2c19b42f3144921b6449970bc",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryChecks.kt": "7ef792028e9130c903c9b008ec09ff29239570cbc0e0d32c8d11e32136f998d8",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidPhotoManifestChecks.kt": "99a7f49d43b46da5279749d339baf5baf9bff257c327826ec76742d7d705f5f9",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidScheduleChecks.kt": "02ba612a12fe812026eb06d4cc249b7a07de7068eac62ca463289637bf262573",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidRestartChecks.kt": "cb1495f3ea4e55d55700127eda5386a5f0b57c435c234368a7417378042af19d",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidPhotoRebackupChecks.kt": "564fc784e27b3e2edfcfc0dc06f4e4870487e5c7c27ef0fa4e508b12ac222e99",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidLifecycleChecks.kt": "048c23f8efd09450cbf6205ef5d487b32a8d227621a8a1c67ddfe034a7dceb9c",
+    "apps/mobile/modules/my-module/android/src/androidTest/AndroidManifest.xml": "72736ecb6518cec01e66e331abfb9ba62970d033b67cad8f58beb1b5f581f32c"
+  },
+  "review": "Independent Sol source/security and final public capsule review PASS:11source and2APK hashes/sizes match,11groups/final success and same-APK restart consistent, selected evidence privacy checked. Reviewer ran no tests/build/device.",
+  "notAccepted": [
+    "Real PC TLS/ACL/revoke/remote peer transfer; native protocol replies here fixtures",
+    "Real FilesQueue rebackup resource sender; callback is simulated",
+    "Actual Expo UI foreground grant boundary; FGS test uses plain test activity",
+    "OS JobService dispatch/boot/Doze/quota/lock; registration/cancel only, boot metadata injected in journal tests",
+    "API24/older OEM runtime,16KB runtime, release distribution and physical acceptance",
+    "Real archive IO/battery and metadata retention/cleanup policy; existing growth finding remains open",
+    "iOS native/provider/LAN/Files/Photos/background or Desktop platform acceptance"
+  ],
+  "preserved": [
+    "No Git add/commit/push/reset/clean/stash",
+    "No real archive/key/pin/certificate/epoch/authority reset/migration/cleanup",
+    "No fallback/security policy change or new dependency/model/effort change"
+  ]
+}

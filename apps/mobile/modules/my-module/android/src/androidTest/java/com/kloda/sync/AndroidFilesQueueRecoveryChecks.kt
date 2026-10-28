@@ -28,7 +28,10 @@ internal object AndroidFilesQueueRecoveryChecks {
     }
     var journal = AndroidSyncJournal(context)
     try {
-      check(journal.writableDatabase.version == 3)
+      check(journal.writableDatabase.version == 6)
+      for (table in listOf("files_run", "files_run_job", "scheduled_occurrence")) {
+        journal.readableDatabase.rawQuery("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", arrayOf(table)).use { check(it.moveToFirst()) }
+      }
       val legacy = journal.readableDatabase.rawQuery("SELECT status FROM queued_source_file ORDER BY reference", null).use { cursor ->
         buildList { while (cursor.moveToNext()) add(cursor.getString(0)) }
       }

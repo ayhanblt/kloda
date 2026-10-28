@@ -1,0 +1,19 @@
+[
+  "xcrun",
+  "--sdk",
+  "iphonesimulator",
+  "clang",
+  "-target",
+  "arm64-apple-ios16.4-simulator",
+  "-isysroot",
+  "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk",
+  "-fblocks",
+  "-Wall",
+  "-Wextra",
+  "-Werror",
+  "docs/implementation/evidence/ios-lan-design-2026-10-24/parameter-checks.c",
+  "-framework",
+  "Network",
+  "-o",
+  ".local-evidence/ios-lan-design-2026-10-24/parameter-checks"
+]

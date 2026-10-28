@@ -8,17 +8,28 @@
     "plugins": [
       "expo-dev-client",
       "expo-secure-store",
-      ["expo-camera", {
-        "cameraPermission": "Allow Kloda to scan your computer pairing QR.",
-        "microphonePermission": false,
-        "recordAudioAndroid": false,
-        "barcodeScannerEnabled": true
-      }]
+      "./plugins/with-optional-camera.cjs",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Kloda to scan your computer pairing QR.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": true
+        }
+      ]
     ],
     "ios": {
       "bundleIdentifier": "com.kloda.app",
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "Kloda needs access to selected photos and albums so it can back them up to your personal storage."
+        "NSPhotoLibraryUsageDescription": "Kloda needs access to selected photos and albums so it can back them up to your personal storage.",
+        "NSLocalNetworkUsageDescription": "Kloda connects to your computer on your local network for pairing and backup.",
+        "UIBackgroundModes": [
+          "processing"
+        ],
+        "BGTaskSchedulerPermittedIdentifiers": [
+          "com.kloda.app.backup.processing"
+        ]
       }
     },
     "android": {

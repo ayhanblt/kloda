@@ -10,18 +10,58 @@ import android.os.Bundle
 import java.io.File
 
 class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
-  override fun onCreate(arguments: Bundle?) { super.onCreate(arguments); start() }
+  private var restartPhase: String? = null
+  private var restartToken: String? = null
+  private var scope: String? = null
+  override fun onCreate(arguments: Bundle?) {
+    restartPhase = arguments?.getString("restartPhase")
+    restartToken = arguments?.getString("restartToken")
+    scope = arguments?.getString("scope")
+    super.onCreate(arguments); start()
+  }
 
   override fun onStart() {
+    if (scope !in listOf("local-files", "media-fixture")) {
+      finish(Activity.RESULT_CANCELED, Bundle().apply { putString("stream", "Explicit scope required: local-files or media-fixture\n") })
+      return
+    }
+    restartPhase?.let { phase ->
+      try {
+        check(phase in listOf("write", "read") && Regex("[0-9a-f]{32}").matches(restartToken.orEmpty()))
+        val root = File(targetContext.cacheDir, "kloda-restart-$restartToken")
+        if (phase == "write") check(!root.exists() && root.mkdirs()) else check(root.isDirectory)
+        AndroidRestartChecks.run(IsolatedContext(targetContext, root), phase)
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "PASS restart-$phase\n") })
+        if (phase == "read") root.deleteRecursively()
+      } catch (error: Throwable) {
+        finish(Activity.RESULT_CANCELED, Bundle().apply { putString("stream", error.stackTraceToString()) })
+      }
+      return
+    }
     val scratch = File(targetContext.cacheDir, "kloda-files-check-${AndroidFilesSnapshots.randomId()}")
     try {
       check(scratch.mkdirs())
-      AndroidFilesQueueRecoveryChecks.run(IsolatedContext(targetContext, scratch))
-      AndroidPhotosSourceChecks.run(this, IsolatedContext(targetContext, scratch))
-      AndroidOwnRestoreChecks.run(IsolatedContext(targetContext, scratch))
-      AndroidPhotoManifestChecks.run(this, IsolatedContext(targetContext, scratch))
-      AndroidPhotosImportChecks.run(this, IsolatedContext(targetContext, scratch))
-      AndroidPhotosCatalogChecks.run(IsolatedContext(targetContext, scratch))
+      fun group(name: String, check: () -> Unit) {
+        sendStatus(0, Bundle().apply { putString("stream", "START $name\n") })
+        check()
+        sendStatus(0, Bundle().apply { putString("stream", "PASS $name\n") })
+      }
+      group("native-library-load") { Class.forName("com.kloda.sync.KlodaPairingJni") }
+      group("files-runs") { AndroidFilesRunChecks.run(IsolatedContext(targetContext, File(scratch, "runs").also { check(it.mkdirs()) })) }
+      group("scheduled-journal") { AndroidScheduleChecks.run(IsolatedContext(targetContext, File(scratch, "schedule").also { check(it.mkdirs()) })) }
+      group("files-recovery") { AndroidFilesQueueRecoveryChecks.run(IsolatedContext(targetContext, scratch)) }
+      if (scope == "local-files") {
+        group("foreground-service") { AndroidLifecycleChecks.run(this, IsolatedContext(targetContext, scratch)) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Local Files/runtime checks passed; Photos/restore/transport NOT_RUN\n") })
+        return
+      }
+      group("photos-sources") { AndroidPhotosSourceChecks.run(this, IsolatedContext(targetContext, scratch)) }
+      group("own-restore") { AndroidOwnRestoreChecks.run(IsolatedContext(targetContext, scratch)) }
+      group("photos-manifest") { AndroidPhotoManifestChecks.run(this, IsolatedContext(targetContext, scratch)) }
+      group("photos-rebackup") { AndroidPhotoRebackupChecks.run(IsolatedContext(targetContext, File(scratch, "rebackup").also { check(it.mkdirs()) })) }
+      group("photos-import") { AndroidPhotosImportChecks.run(this, IsolatedContext(targetContext, scratch)) }
+      group("photos-catalog") { AndroidPhotosCatalogChecks.run(IsolatedContext(targetContext, scratch)) }
+      group("foreground-service") { AndroidLifecycleChecks.run(this, IsolatedContext(targetContext, scratch)) }
       finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Android Files recovery, Photos manifest publication, import crash reconciliation and latest-asset catalog checks passed\n") })
     } catch (error: Throwable) {
       finish(Activity.RESULT_CANCELED, Bundle().apply { putString("stream", error.stackTraceToString()) })

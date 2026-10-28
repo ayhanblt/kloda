@@ -22,7 +22,6 @@ pub(crate) struct NativeContext {
     pub(crate) platform: crate::android_context::AndroidContext,
 }
 pub(crate) enum Action {
-    #[cfg(not(target_os = "android"))]
     Foreground {
         epoch: u64,
         action: Box<Action>,
@@ -106,6 +105,8 @@ pub(crate) enum Command {
     Transfer {
         record: String,
         task: crate::file_sender_command::Task,
+        foreground_epoch: Option<u64>,
+        background_active: Option<std::sync::Arc<AtomicBool>>,
         reply: SyncSender<Result<String>>,
     },
 }
@@ -113,36 +114,28 @@ pub(crate) struct Handle {
     sender: Mutex<SyncSender<Command>>,
     worker: Mutex<Option<JoinHandle<()>>>,
     closing: AtomicBool,
-    #[cfg(not(target_os = "android"))]
     pub(crate) foreground: std::sync::Arc<crate::foreground::Foreground>,
+    #[cfg(any(target_os = "ios", all(test, feature = "ios-ffi")))]
+    background: crate::ios_background::Leases,
 }
 impl Handle {
     pub(crate) fn open(context: NativeContext) -> Result<Self> {
         let (sender, receiver): (SyncSender<Command>, Receiver<Command>) = mpsc::sync_channel(32);
         let (ready, ready_receiver) = mpsc::sync_channel(1);
-        #[cfg(not(target_os = "android"))]
         let foreground = std::sync::Arc::new(crate::foreground::Foreground::default());
-        #[cfg(not(target_os = "android"))]
         let worker_foreground = foreground.clone();
         let worker = thread::Builder::new()
             .name("kloda-pairing".into())
-            .spawn(move || {
-                crate::runtime::run(
-                    context,
-                    receiver,
-                    ready,
-                    #[cfg(not(target_os = "android"))]
-                    worker_foreground,
-                )
-            })
+            .spawn(move || crate::runtime::run(context, receiver, ready, worker_foreground))
             .map_err(|_| PairingError::NativeUnsupported)?;
         match ready_receiver.recv() {
             Ok(Ok(())) => Ok(Self {
                 sender: Mutex::new(sender),
                 worker: Mutex::new(Some(worker)),
                 closing: AtomicBool::new(false),
-                #[cfg(not(target_os = "android"))]
                 foreground,
+                #[cfg(any(target_os = "ios", all(test, feature = "ios-ffi")))]
+                background: crate::ios_background::Leases::default(),
             }),
             failed => {
                 let joined = worker.join();
@@ -231,26 +224,6 @@ impl Handle {
             .map_err(|_| PairingError::ConnectionClosed)?;
         receiver.recv().map_err(|_| PairingError::OutcomeUnknown)?
     }
-    pub(crate) fn transfer(
-        &self,
-        record: String,
-        task: crate::file_sender_command::Task,
-    ) -> Result<String> {
-        if self.closing.load(Ordering::Acquire) {
-            return Err(PairingError::Cancelled);
-        }
-        let (reply, receiver) = mpsc::sync_channel(1);
-        self.sender
-            .lock()
-            .map_err(|_| PairingError::OutcomeUnknown)?
-            .send(Command::Transfer {
-                record,
-                task,
-                reply,
-            })
-            .map_err(|_| PairingError::ConnectionClosed)?;
-        receiver.recv().map_err(|_| PairingError::OutcomeUnknown)?
-    }
     fn close(&self) -> Result<PairingStatus> {
         // The join lock spans close and join: concurrent close cannot resolve early.
         let mut worker = self
@@ -263,10 +236,14 @@ impl Handle {
             return Ok(PairingStatus::default());
         };
         self.closing.store(true, Ordering::Release);
+        #[cfg(any(target_os = "ios", all(test, feature = "ios-ffi")))]
+        let background_result = self.background.cancel_all();
         let result = self.enqueue(Action::Close);
         if join.join().is_err() {
             return Err(PairingError::OutcomeUnknown);
         }
+        #[cfg(any(target_os = "ios", all(test, feature = "ios-ffi")))]
+        background_result?;
         #[cfg(target_os = "windows")]
         crate::route::cleanup_check()?;
         result
@@ -281,3 +258,5 @@ impl Drop for Handle {
 #[cfg(not(target_os = "android"))]
 #[path = "handle_retention.rs"]
 mod retention;
+#[path = "handle_sender.rs"]
+mod sender;

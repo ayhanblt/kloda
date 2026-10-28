@@ -1,0 +1,21 @@
+{
+  "scope": "owned test processes only; no data cleanup",
+  "iosSimulatorShutdownExitCode": 0,
+  "ownedAndroidPortsClosed": [
+    5590,
+    5591,
+    5038
+  ],
+  "uiServerStopped": true,
+  "metroSessionEnded": true,
+  "gitDiffCheckExitCode": 0,
+  "notRun": [
+    "physical group11",
+    "actual Android UI due ADB unauthorized",
+    "LAN/normal PC receiver acceptance",
+    "VoiceOver/TalkBack full acceptance",
+    "concurrent retention-copy receiver latency",
+    "actual disk exhaustion"
+  ],
+  "configRestoreOrCleanup": false
+}

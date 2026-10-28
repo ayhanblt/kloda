@@ -2,7 +2,7 @@ use crate::error::{PairingError, Result};
 use ring::rand::{SecureRandom, SystemRandom};
 #[cfg(unix)]
 use std::os::unix::fs::OpenOptionsExt;
-#[cfg(any(target_os = "macos", target_os = "android"))]
+#[cfg(any(target_os = "macos", target_os = "ios", target_os = "android"))]
 use std::os::unix::{fs::PermissionsExt, io::AsRawFd};
 use std::{fs::File, io::Read, path::Path};
 #[cfg(not(target_os = "windows"))]
@@ -21,21 +21,30 @@ pub(super) use windows::{selected as select_generation, Selected};
 #[cfg(not(target_os = "windows"))]
 pub(crate) type OwnerLock = File;
 
-#[cfg(not(any(target_os = "macos", target_os = "android", target_os = "windows")))]
+#[cfg(not(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "android",
+    target_os = "windows"
+)))]
 pub(super) fn prepare(_: &Path) -> Result<OwnerLock> {
     // No authority files may be created before native custody and storage are supported.
     Err(PairingError::NativeUnsupported)
 }
 
-#[cfg(any(target_os = "macos", target_os = "android"))]
+#[cfg(any(target_os = "macos", target_os = "ios", target_os = "android"))]
 pub(super) fn prepare(directory: &Path) -> Result<File> {
+    // Simulator is not a Secure Enclave substitute; reject before creating authority files.
+    if cfg!(all(target_os = "ios", target_abi = "sim")) {
+        return Err(PairingError::NativeUnsupported);
+    }
     fs::create_dir_all(directory).map_err(storage)?;
     let metadata = fs::symlink_metadata(directory).map_err(storage)?;
     if !metadata.is_dir() || metadata.file_type().is_symlink() {
         return Err(PairingError::StorageFailure);
     }
     fs::set_permissions(directory, fs::Permissions::from_mode(0o700)).map_err(storage)?;
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
     crate::apple_cf::exclude_directory_from_backup(directory)?;
     // Android directory is Kotlin application noBackupFilesDir, not a JS path.
     let lock = open_file(&directory.join("owner.lock"), true)?;
@@ -148,7 +157,7 @@ fn open_file(path: &Path, create: bool) -> Result<File> {
 #[cfg(not(target_os = "windows"))]
 fn durable(file: &File) -> Result<()> {
     file.sync_all().map_err(storage)?;
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
     if unsafe { libc::fcntl(file.as_raw_fd(), libc::F_FULLFSYNC) } != 0 {
         return Err(PairingError::StorageFailure);
     }
@@ -168,7 +177,15 @@ fn storage(error: std::io::Error) -> PairingError {
 
 #[cfg(all(
     test,
-    not(any(target_os = "macos", target_os = "android", target_os = "windows"))
+    any(
+        all(target_os = "ios", target_abi = "sim"),
+        not(any(
+            target_os = "macos",
+            target_os = "ios",
+            target_os = "android",
+            target_os = "windows"
+        ))
+    )
 ))]
 mod tests {
     use super::*;

@@ -1,0 +1,5 @@
+java.lang.IllegalStateException: Check failed.
+	at com.kloda.sync.AndroidFilesQueueRecoveryChecks.run(AndroidFilesQueueRecoveryChecks.kt:31)
+	at com.kloda.sync.AndroidFilesQueueRecoveryInstrumentation.onStart(AndroidFilesQueueRecoveryInstrumentation.kt:20)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2597)
+

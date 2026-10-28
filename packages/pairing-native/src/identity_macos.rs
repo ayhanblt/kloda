@@ -16,6 +16,7 @@ unsafe extern "C" {
     fn SecKeyCopyPublicKey(key: Ref) -> Ref;
     fn SecKeyCopyExternalRepresentation(key: Ref, error: *mut Ref) -> Ref;
     fn SecKeyCreateSignature(key: Ref, algorithm: Ref, message: Ref, error: *mut Ref) -> Ref;
+    fn SecKeyIsAlgorithmSupported(key: Ref, operation: isize, algorithm: Ref) -> u8;
     fn SecAccessControlCreateWithFlags(
         allocator: Ref,
         protection: Ref,
@@ -34,7 +35,6 @@ unsafe extern "C" {
     static kSecAttrTokenID: Ref;
     static kSecAttrTokenIDSecureEnclave: Ref;
     static kSecAttrIsPermanent: Ref;
-    static kSecAttrCanSign: Ref;
     static kSecAttrSynchronizable: Ref;
     static kSecAttrAccessControl: Ref;
     static kSecAttrAccessibleWhenUnlockedThisDeviceOnly: Ref;
@@ -47,6 +47,7 @@ unsafe extern "C" {
     static kSecMatchLimitOne: Ref;
     static kSecKeyAlgorithmECDSASignatureMessageX962SHA256: Ref;
 }
+const SIGN_OPERATION: isize = 0;
 // SecKey is retained, immutable Security CFType. Security key operations are thread-safe;
 // the mutex additionally serializes every access/signature and destruction follows Arc drain.
 // No other CF objects cross threads. The pointer is never exposed beyond this module.
@@ -186,7 +187,6 @@ unsafe fn validate(key: &Owned) -> Result<()> {
             (kSecAttrKeyType, kSecAttrKeyTypeECSECPrimeRandom),
             (kSecAttrKeyClass, kSecAttrKeyClassPrivate),
             (kSecAttrTokenID, kSecAttrTokenIDSecureEnclave),
-            (kSecAttrCanSign, cf::kCFBooleanTrue),
         ]
     } {
         let value = unsafe { cf::CFDictionaryGetValue(attributes.0, name) };
@@ -202,8 +202,20 @@ unsafe fn validate(key: &Owned) -> Result<()> {
                 || cf::CFNumberGetValue(size, 3, (&mut bits as *mut i32).cast()) == 0
         }
         || bits != 256
+        // Reopened keys can encode CanSign as CFNumber; check the actual signing operation.
+        || unsafe {
+            SecKeyIsAlgorithmSupported(
+                key.0,
+                SIGN_OPERATION,
+                kSecKeyAlgorithmECDSASignatureMessageX962SHA256,
+            ) == 0
+        }
     {
         return Err(PairingError::NativeUnsupported);
     }
     Ok(())
 }
+
+#[cfg(test)]
+#[path = "identity_macos_tests.rs"]
+mod tests;

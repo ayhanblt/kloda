@@ -1,0 +1,32 @@
+[
+  {
+    "name": "mobile-final",
+    "exitCode": 0,
+    "seconds": 5.4667439460754395
+  },
+  {
+    "name": "typecheck-final",
+    "exitCode": 0,
+    "seconds": 2.7279460430145264
+  },
+  {
+    "name": "lint-final",
+    "exitCode": 0,
+    "seconds": 3.873487949371338
+  },
+  {
+    "name": "mobile-export",
+    "exitCode": 0,
+    "seconds": 17.62511110305786
+  },
+  {
+    "name": "rust-size",
+    "exitCode": 0,
+    "seconds": 0.06558990478515625
+  },
+  {
+    "name": "native-policy",
+    "exitCode": 0,
+    "seconds": 0.5078120231628418
+  }
+]

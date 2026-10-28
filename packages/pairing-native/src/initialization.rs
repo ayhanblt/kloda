@@ -167,7 +167,11 @@ fn certificate_for(
 }
 
 fn reuse_certificate(now: u64, before: u64, after: u64) -> Result<bool> {
-    if now >= before && after.checked_sub(now).is_some_and(|left| left >= 30 * 86_400) {
+    if now >= before
+        && after
+            .checked_sub(now)
+            .is_some_and(|left| left >= 30 * 86_400)
+    {
         return Ok(true);
     }
     // Only reached after persisted DER/key/profile validation, before signing or writes.

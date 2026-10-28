@@ -1,0 +1,24 @@
+START native-library-load
+PASS native-library-load
+START files-runs
+PASS files-runs
+START scheduled-journal
+PASS scheduled-journal
+START files-recovery
+PASS files-recovery
+START photos-sources
+PASS photos-sources
+START own-restore
+PASS own-restore
+START photos-manifest
+PASS photos-manifest
+START photos-rebackup
+java.lang.IllegalStateException: Check failed.
+	at com.kloda.sync.AndroidPhotoRebackupChecks.run(AndroidPhotoRebackupChecks.kt:67)
+	at com.kloda.sync.AndroidFilesQueueRecoveryInstrumentation.onStart$lambda$15(AndroidFilesQueueRecoveryInstrumentation.kt:50)
+	at com.kloda.sync.AndroidFilesQueueRecoveryInstrumentation.$r8$lambda$mVr1jkwyfNvVtK1N1O7aE6NRd2Y(Unknown Source:0)
+	at com.kloda.sync.AndroidFilesQueueRecoveryInstrumentation$$ExternalSyntheticLambda7.invoke(D8$$SyntheticClass:0)
+	at com.kloda.sync.AndroidFilesQueueRecoveryInstrumentation.onStart$group(AndroidFilesQueueRecoveryInstrumentation.kt:40)
+	at com.kloda.sync.AndroidFilesQueueRecoveryInstrumentation.onStart(AndroidFilesQueueRecoveryInstrumentation.kt:50)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2597)
+

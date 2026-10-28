@@ -1,5 +1,13 @@
 {
   "transfer": {
+    "osAttempt": "OS yürütme girişimi {{attempt}} / 5",
+    "osStates": {
+      "running": "Otomatik çalışma etkin",
+      "waiting": "OS kesintisi sonrası yürütme fırsatı bekleniyor",
+      "finished": "Otomatik çalışma sona erdi; dosya sonuçlarını kontrol edin",
+      "exhausted": "OS girişim bütçesi bitti; sonraki program fırsatı bekleniyor",
+      "paused": "Otomatik çalışma duraklatıldı"
+    },
     "title": "Yedekleme Aktivitesi",
     "description": "Seçili Files ve Photos kaynakları şifreli yerel ağ üzerinden doğrudan eşleşmiş PC'ye gider. PC'de yedekleme klasörü ayrıca onaylanmalıdır.",
     "running": "Dosyalar gönderiliyor",
@@ -12,8 +20,8 @@
     "syncNow": "Şimdi senkronize et",
     "backups": {
       "title": "PC'deki tamamlanmış yedekleriniz",
-      "description": "Yalnızca bu telefonun şu anda eşleşmiş PC'deki tamamlanmış yedekleri listelenir. Geri yükleme Android'de seçtiğiniz konumda yeni dosya oluşturur; mevcut dosyalar ve Photos orijinalleri değiştirilmez veya silinmez.",
-      "photosOpen": "Doğrulanmış Photos manifestleri Android Photos'a medya geri yükleyebilir. Dosya yedekleri yeni belgeye kaydedilir. Mevcut medyanın üzerine yazılmaz; belirsiz import inceleme bekler.",
+      "description": "Yalnız bu telefonun mevcut eşleşmiş PC’deki tamamlanmış yedekleri listelenir. Dosyalar telefonda seçtiğiniz yeni bir konuma kaydedilir; mevcut dosyalar ve Photos orijinalleri değiştirilmez veya silinmez.",
+      "photosOpen": "Doğrulanmış Photos kayıtları medyayı telefonun fotoğraf arşivine geri yükleyebilir. Dosya yedekleri ayrı belge olarak kaydedilir. Mevcut medyanın üzerine yazılmaz; belirsiz veya desteklenmeyen işlemler inceleme bekler.",
       "load": "Tamamlanmış yedekleri oku",
       "empty": "Bu PC tamamlanmış yedek döndürmedi.",
       "completed": "PC yedeği tamamlandı · Yerel şifreli LAN",
@@ -30,9 +38,9 @@
       "restoreAll": "Erişilebilir tüm Photos yedeklerini geri yükle",
       "idle": "Henüz Photos import işi yok.",
       "pending": "{{completed}} / {{total}} Photos öğesi doğrulandı; kalan işler kullanıcı başlatmalı tekrar denemeyi bekliyor.",
-      "completed": "{{completed}} / {{total}} Photos öğesi ve desteklenen albüm metadata'sı doğrulandı.",
+      "completed": "Son geri yükleme doğrulaması: {{completed}} / {{total}} Photos varlığı ve desteklenen albüm bilgileri doğrulandı. Tekrar geri yükleme hedefi yeniden kontrol eder.",
       "review_required": "{{review}} Photos işi inceleme gerektiriyor. Önceki import mevcut olabilir veya erişim belirsiz; otomatik ikinci kopya oluşturulmaz.",
-      "organization_review": "{{review}} Photos işi albüm/resource incelemesi gerektiriyor. Android klasörleri her Photos ilişkisini temsil edemez; tam geri yükleme varsayılmaz."
+      "organization_review": "{{review}} Medya veya albüm ilişkileri inceleme gerektiriyor; tam geri yükleme varsayılmaz."
     },
     "states": {
       "queued": "Kuyrukta",
@@ -46,7 +54,7 @@
     },
     "errors": {
       "pairing_required": "Dosya göndermeden önce PC ile eşleşin.",
-      "cancelled": "Geri yükleme iptal edildi. Başarı varsayılmıyor.",
+      "cancelled": "İşlem iptal edildi. Tamamlanmamış işler korunur; başarı varsayılmaz.",
       "manifest_invalid": "Photos manifesti eksik, desteklenmiyor veya tutarsız. İçeriği import edilmez.",
       "photo_permission_lost": "Mevcut öğeleri güvenle doğrulamak için tam Photos erişimi gerekiyor. İzin verip tekrar deneyin; mükerrer oluşturulmaz.",
       "photo_review_required": "Photos import inceleme bekliyor. Önceki kopya mevcut olabilir; otomatik ikinci import yapılmaz.",
@@ -54,6 +62,9 @@
       "destination_permission_lost": "Geri yükleme hedefi erişimi kayboldu. Yeni dosya seçip tekrar deneyin.",
       "destination_not_empty": "Hedef boş değil. Üzerine yazılmadı veya silinmedi; yeni dosya seçin.",
       "restore_cleanup_failed": "Geri yükleme tamamlanmadı ve yeni oluşturulan hedef silinemedi. Eksik dosya kalabilir; yeni dosyaya tekrar denemeden önce kendiniz silin.",
+      "os_interrupted": "İşletim sistemi işi durdurdu. İlerleme korunuyor; uygun yürütme fırsatı beklenecek.",
+      "automatic_pause_not_saved": "Otomatik duraklatma diske kaydedilemedi. Bu oturumda işler durduruldu; yeniden açılışta otomatik başlayabilir. Depolamayı kontrol edin.",
+      "background_unavailable": "İşletim sistemi arka plan yedekleme servisini başlatamadı. Uygulamayı açık tutup yeniden deneyin.",
       "native_unsupported": "Native LAN aktarımı bu platformda kullanılamıyor.",
       "source_permission_lost": "Kaynak erişimi kayboldu. Aynı klasörü yeniden seçin; bekleyen işler korunuyor.",
       "source_changed": "Kaynak değişti. Önceki sürüm eski hash ile devam etmeyecek.",
@@ -80,16 +91,45 @@
       "revoked": "Eşleşme iptal edildi. Eski eşleşme ile dosya gönderilmeyecek.",
       "outcome_unknown": "Sonuç doğrulanamadı. Bekleyen iş korunuyor; başarı varsayılmıyor.",
       "owner_deleted": "Bu kaynak sürümü bilgisayarda silindi. Otomatik olarak yeniden yüklenmez.",
-      "source_identity_unknown": "Kalıcı kaynak kimlikleri belirsiz. İnceleme gerekiyor; otomatik yükleme yapılmaz."
+      "source_identity_unknown": "Kalıcı kaynak kimlikleri belirsiz. İnceleme gerekiyor; otomatik yükleme yapılmaz.",
+      "retry_clock_unavailable": "Yeniden deneme için güvenilir bekleme süresi doğrulanamıyor. İş korundu; otomatik deneme durduruldu.",
+      "storage_failure": "Kalıcı kayıt okunamadı veya kaydedilemedi. Duraklatma ya da devam etme sonucu doğrulanmadı; tekrar kontrol edin.",
+      "automatic_unavailable": "İşletim sistemi otomatik yedekleme görevini kaydedemedi. Otomatik çalışacağı varsayılmıyor; Şimdi eşitle ile elle başlatabilirsiniz.",
+      "settings_changed": "Ayarlar değiştiği için durduruldu. Tamamlanan yedekler ve toparlanma kayıtları korundu. Yeni çalışma güncel kaynak, PC ve program ayarlarını kullanır.",
+      "source_unavailable": "Kaynağı Dosyalar’da kullanılabilir hâle getirin veya yeniden seçin; bekleyen işler korunur.",
+      "local_permission_lost": "Kloda bu telefondaki yerel dosya veya klasöre erişemiyor. Dosyalar erişim iznini kontrol edin.",
+      "local_path_rejected": "Yerel yol veya dosya güvenle doğrulanamadı. Hiçbir dosyanın üzerine yazılmadı.",
+      "interrupted": "Sonuç doğrulanmadan uygulama durdu. İlerleme güvenli devam için korundu.",
+      "photos_unavailable": "iOS Photos yedeklemesi henüz bağlı değil. Files sonuçları ayrı gösterilir.",
+      "review_required": "Photos geri yüklemesi inceleme gerektiriyor. Otomatik ikinci kopya oluşturulmaz.",
+      "organization_review": "Medya veya albüm ilişkileri inceleme gerektiriyor; tam geri yükleme varsayılmaz."
     },
     "rebackup": "Bu sürümü yeniden yedekle",
-    "rebackupConfirm": "Bu değişmemiş kaynak sürümü eşleşmiş bilgisayara açık isteğinizle yeniden gönderilsin mi? Bilgisayarda dosya erişimi onaylı olmalıdır."
+    "rebackupConfirm": "Bu değişmemiş kaynak sürümü eşleşmiş bilgisayara açık isteğinizle yeniden gönderilsin mi? Bilgisayarda dosya erişimi onaylı olmalıdır.",
+    "notificationsDisabled": "Bildirimler kapalı. Aktarım ve hata bildirimlerini göremeyebilirsiniz; yedekleme durumunu bu ekrandan takip edin.",
+    "automaticPaused": "Otomatik yedekleme duraklatıldı. Açıkça devam edene kadar yeniden başlamaz.",
+    "continueAutomatic": "Otomatik yedeklemeye devam et",
+    "pauseExplanation": "Duraklat, çalışan aktarımı ve otomatik yedeklemeyi durdurur. Şimdi eşitle yalnız tek bir çalışma başlatır; otomatik yedeklemeyi açmaz.",
+    "retryWaiting": "Yeniden deneme bekleniyor",
+    "runAttempt": "Erişim denemesi {{attempt}} / 5",
+    "retryAt": "Kloda aktifken en erken {{time}} tarihinde yeniden denenir.",
+    "runStates": {
+      "running": "Kaynaklar kontrol ediliyor, seçilen yedekler gönderiliyor.",
+      "paused": "Çalışma kesildi veya duraklatıldı; ilerleme ve deneme bütçesi korundu.",
+      "retry_wait": "Bağlantı başarısız. Yeniden denemek için 60 saniye bekleniyor.",
+      "finished": "Tarama bitti. Aşağıdaki yedek sonuçlarını kontrol edin.",
+      "needs_attention": "Tarama bitti; ilgilenilmesi gereken işler var. Yedekleme tamamen başarılı değil.",
+      "failed": "Çalışma durdu. Hatayı inceleyin; tamamlanmamış yedekler korundu."
+    }
   },
   "onboarding": {
+    "live": "Live — ilk uygun fırsatta",
+    "liveSelected": "Live — ilk uygun fırsatta (seçili)",
+    "liveDescription": "İşletim sistemi izin verdiğinde ilk fırsatta yedekler. Kesintisiz veya kesin saatli çalışma garantisi yoktur.",
     "step": "Adım {{current}} / {{total}}",
     "back": "Geri",
     "title": "Yedeklenecek klasörleri seçin",
-    "description": "Kaynaklarınızı seçin, ardından yerel otomatik senkronizasyon saatini belirleyin.",
+    "description": "Yedeklenecek klasörleri veya Photos kaynaklarını seç, ardından bilgisayarını eşleştir.",
     "chooseFolder": "Klasör seç",
     "choosePhotoLibrary": "Fotoğraf kitaplığını seç",
     "choosePhotoAlbum": "Fotoğraf albümü seç",
@@ -107,13 +147,25 @@
     "username": "Kullanıcı adı",
     "password": "Parola",
     "testConnection": "Bağlantıyı test et",
-    "storageTested": "Depolama erişimi ve yazma yeteneği doğrulandı.",
+    "webdavScope": "Yalnız gelişmiş WebDAV bağlantı ayarlarıdır. Otomatik WebDAV dosya aktarımı henüz bağlı değildir; PC yedekleri ayrı native alıcıyı kullanır.",
+    "webdavErrors": {
+      "webdav_fields": "HTTPS adresi, klasör, kullanıcı adı ve parola girin. Adreste gömülü kimlik bilgisi, sorgu/fragment ve noktalı yollar kabul edilmez.",
+      "webdav_connection": "WebDAV bağlantısı veya verilen kimlik bilgileri doğrulanamadı.",
+      "webdav_probe_incomplete": "Test veya temizliği tamamlanamadı. Geçici Kloda test verisi kalmış olabilir; başarı kaydedilmedi.",
+      "webdav_cancelled": "Test iptal edildi.",
+      "webdav_cancelled_probe": "Yazma başladıktan sonra test iptal edildi. Geçici Kloda test verisi kalmış olabilir.",
+      "webdav_storage": "Güvenli ayarlar okunamadı veya kaydedildiği doğrulanamadı. Test durumu doğrulanmış değildir.",
+      "webdav_busy": "Başka bir bağlantı testi zaten çalışıyor."
+    },
+    "storageTested": "Kaydedilen ayarlar önceki bağlantı testini geçti. Bu, güncel erişilebilirlik garantisi değildir.",
     "testError": "WebDAV bağlantısı doğrulanamadı.",
     "localStartTime": "Yerel başlangıç saati",
-    "saveSchedule": "Otomatik senkronizasyonu kaydet",
+    "saveSchedule": "Kaydet ve bilgisayara bağlan",
     "invalidTime": "Yerel başlangıç saati için SS:dd kullanın.",
     "runtimeUnavailable": "Kloda yerel çalışma zamanı kullanılamıyor. Geliştirme uygulamasını yeniden derleyin.",
-    "scheduleSaved": "Otomatik senkronizasyon programı kaydedildi."
+    "scheduleSaved": "Otomatik senkronizasyon programı kaydedildi.",
+    "saveError": "Tercihler kaydedilemedi. Yeniden dene.",
+    "testingConnection": "Bağlantı test ediliyor…"
   },
   "pairing": {
     "brand": "Kloda: Secure Photos & Sync",
@@ -223,5 +275,26 @@
       "cancelled": "Yerel işlem iptal edildi. Bu, bilgisayarın kaydının silindiği anlamına gelmez.",
       "revoked": "Yerel eşleştirme iptal edilmiş ve sürdürülemez."
     }
+  },
+  "computer": {
+    "title": "Bilgisayarına yedekle",
+    "description": "Seçtiğin dosya ve fotoğrafları yerel ağ üzerinden kendi bilgisayarına gönder.",
+    "paired": "1. Cihaz güveni kaydedildi",
+    "pairTitle": "1. Bilgisayarı QR ile eşleştir",
+    "pairDescription": "Bilgisayarında Kloda’yı aç ve eşleştirme QR kodunu telefondan tara.",
+    "managePairing": "Eşleşmeyi yönet",
+    "grantTitle": "2. Yedekleme alanını bilgisayarda onayla",
+    "grantDescription": "Bilgisayardaki Cihazlar ve izinler bölümünde bu telefonu seç. Ayrı bir yedek klasörü seçip dosya erişimini açıkça onayla. Bu izin telefondan verilemez.",
+    "transferTitle": "3. Aktarımı başlat ve sonucu izle",
+    "availability": "Eşleşme, bilgisayarın şu an erişilebilir veya alıcının hazır olduğunu doğrulamaz. Bilgisayar açık ve Kloda çalışıyor olmalı. Güncel erişim ve aktarım sonucu Yedekleme etkinliği ekranında gösterilir.",
+    "iosBackground": "iOS uygun yürütme fırsatı verdiğinde yetkili yedeklemeler çalışabilir. Kilitli korumalı veriler işi erteleyebilir. Yeni eşleştirme, onay ve geri yükleme için uygulama ön planda olmalıdır.",
+    "iosSchedulePreference": "iOS otomatik işlerin ne zaman çalışacağını belirler; kesin saat veya kesintisiz çalışma garantisi yoktur. Duraklat, Devam seçilene kadar otomatik yedeklemeyi durdurur.",
+    "androidBackground": "Yetkili yedekleme, Android izin verdiği sürece ekrandan ayrıldığınızda da sürer. Yeni eşleştirme, onay ve geri yükleme için uygulama açık olmalıdır. Sistem işi sonlandırırsa uygulamayı açıp devam edin.",
+    "foregroundOnly": "Eşleştirme, onay ve geri yükleme için uygulamayı önde tutun. Bu platformun native aktarım ve arka plan entegrasyonu henüz tamamlanmadı.",
+    "advanced": "Gelişmiş seçenek: WebDAV",
+    "continue": "Yedekleme etkinliğine geç",
+    "inactive": "Güncel durumu okumak için Kloda’yı ön plana getir.",
+    "androidSchedulePreference": "Android otomatik işleri uygun OS fırsatında yürütür; seçilen saat ve anlık çalışma garantisi yoktur. Duraklat, Devam seçilene kadar otomatik yedeklemeyi de durdurur.",
+    "schedulePreference": "Program tercihi saklanır; bu platformda otomatik yürütme henüz etkin değil."
   }
 }

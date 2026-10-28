@@ -1,0 +1,24 @@
+START native-library-load
+PASS native-library-load
+START files-runs
+PASS files-runs
+START scheduled-journal
+PASS scheduled-journal
+START files-recovery
+PASS files-recovery
+START photos-sources
+PASS photos-sources
+START own-restore
+PASS own-restore
+START photos-manifest
+PASS photos-manifest
+START photos-rebackup
+PASS photos-rebackup
+START photos-import
+PASS photos-import
+START photos-catalog
+PASS photos-catalog
+START foreground-service
+PASS foreground-service
+Android Files recovery, Photos manifest publication, import crash reconciliation and latest-asset catalog checks passed
+

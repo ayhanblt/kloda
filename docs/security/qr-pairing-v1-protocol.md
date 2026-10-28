@@ -35,6 +35,14 @@ IPv4 is four decimal octets0–255, no leading zero except `0`; accepted ranges 
 
 Native connection MUST have an OS-confirmed directly connected Wi-Fi/Ethernet route on a bound interface: no gateway, VPN, cellular, proxy, DNS, redirect or remote fallback. Unknown locality fails **before connect**; maintain the bound route/interface restriction through connection and fail on loss/change. Syntax alone is not locality or identity proof. No suitable address means visible unavailable invitation, not schema extension. This is bounded V1 LAN support, not remote connectivity.
 
+**iOS-only scoped override — 2026-10-26:** [ADR0020](../decisions/0020-ios-local-network-admission-and-native-pairing.md)
+permits native Wi-Fi/Ethernet interface evidence, same-prefix eligibility and
+interface/address-bound raw sockets without claiming pre-connect gateway/VPN-free
+direct-route proof or instantaneous change detection. Observed path changes and
+failed current interface/address checks reject. Android/macOS/Windows retain the
+paragraph above. Literal endpoint/no application proxy/DNS/redirect/fallback,
+TLS/SPKI/exporter/HMAC, durable trust and separate PC-local file authorization remain.
+
 No account/JWT/name/scope/phone-key/authority fields. Raw payload/secret MUST NOT enter logs, analytics, crash reports, URL query or DB; only transient scanner/display/native memory. Public fixtures contain labelled fake values, never actual configuration.
 
 ## Canonical fingerprint and TLS profile

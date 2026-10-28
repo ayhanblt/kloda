@@ -1,0 +1,49 @@
+[
+  {
+    "name": "jest",
+    "command": [
+      "npm",
+      "run",
+      "test",
+      "--workspace",
+      "@kloda/mobile",
+      "--",
+      "--runInBand"
+    ],
+    "exitCode": 0,
+    "seconds": 6.748079083976336
+  },
+  {
+    "name": "typecheck",
+    "command": [
+      "node_modules/.bin/tsc",
+      "--noEmit",
+      "-p",
+      "apps/mobile/tsconfig.json"
+    ],
+    "exitCode": 0,
+    "seconds": 1.677384709008038
+  },
+  {
+    "name": "lint",
+    "command": [
+      "npm",
+      "run",
+      "lint"
+    ],
+    "exitCode": 0,
+    "seconds": 3.444398000021465
+  },
+  {
+    "name": "export",
+    "command": [
+      "npm",
+      "run",
+      "build",
+      "--workspace",
+      "@kloda/mobile"
+    ],
+    "exitCode": 0,
+    "seconds": 18.32646516704699
+  }
+]

@@ -10,18 +10,29 @@ final class IosSourceScanner {
     defer { root.stopAccessingSecurityScopedResource() }
 
     let keys: [URLResourceKey] = [.contentModificationDateKey, .fileSizeKey, .isRegularFileKey, .isSymbolicLinkKey]
-    guard let enumerator = FileManager.default.enumerator(at: root, includingPropertiesForKeys: keys, options: [.skipsHiddenFiles]) else {
+    var enumerationError: Error?
+    guard let enumerator = FileManager.default.enumerator(at: root, includingPropertiesForKeys: keys,
+      options: [.skipsHiddenFiles], errorHandler: { _, error in enumerationError = error; return false }) else {
       throw sourceError("Could not enumerate the selected directory.")
     }
     var files: [IosQueuedSourceFile] = []
     for case let fileUrl as URL in enumerator {
       let values = try fileUrl.resourceValues(forKeys: Set(keys))
-      guard values.isRegularFile == true, values.isSymbolicLink != true else { continue }
-      let relativePath = String(fileUrl.path.dropFirst(root.path.count)).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-      let size = Int64(values.fileSize ?? 0)
-      let modified = Int64(values.contentModificationDate?.timeIntervalSince1970 ?? 0)
+      if values.isSymbolicLink == true { enumerator.skipDescendants(); continue }
+      guard values.isRegularFile == true else { continue }
+      let base = root.standardizedFileURL.pathComponents
+      let components = fileUrl.standardizedFileURL.pathComponents
+      guard components.starts(with: base), components.count > base.count,
+        let byteCount = values.fileSize, byteCount >= 0, let date = values.contentModificationDate else {
+        throw IosPairingFailure.native("source_unavailable")
+      }
+      let relativePath = components.dropFirst(base.count).joined(separator: "/")
+      _ = try IosFilesSource.components(relativePath)
+      let size = Int64(byteCount)
+      let modified = Int64(date.timeIntervalSince1970)
       files.append(IosQueuedSourceFile(reference: relativePath, relativePath: relativePath, revision: "\(size):\(modified)", size: size))
     }
+    if enumerationError != nil { throw IosPairingFailure.native("source_unavailable") }
     return files
   }
 
@@ -52,7 +63,7 @@ final class IosSourceScanner {
     return files
   }
 
-  private func sourceError(_ message: String) -> NSError {
-    NSError(domain: "KlodaSourceScanner", code: 1, userInfo: [NSLocalizedDescriptionKey: message])
+  private func sourceError(_ message: String) -> IosPairingFailure {
+    .native("source_unavailable")
   }
 }

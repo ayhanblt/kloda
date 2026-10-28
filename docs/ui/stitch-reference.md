@@ -1,5 +1,7 @@
 # Stitch UI Reference
 
+2026-10-24 **Mobile scoped adaptation approved and implemented:** Ayhan approved reuse of the existing Stitch visual language for source selection → native QR trust → separate PC-side folder/grant guidance → Activity/history, retaining WebDAV as advanced. [Mobile mapping and evidence](../implementation/mobile-pc-first-stitch-mapping.md). This supersedes the mobile mapping approval gap below only for these existing functions; it does not implement iOS native transport, background execution or grant/readiness APIs, and is not native/platform/physical acceptance.
+
 2026-10-17 approved scoped Desktop adaptation: Ayhan selected option1 in the [PC-first mapping](../implementation/desktop-pc-first-stitch-mapping.md#approved-mapping--2026-10-17). Existing visual language may be adapted to the already implemented native receiver/QR/separate ACL/devices/incoming/background settings. This closes the mapping decision for those functions only; the missing-state inventory below remains historical/design scope for other features. No new product/security behavior or physical/platform acceptance is approved by this visual adaptation.
 
 ## Design source

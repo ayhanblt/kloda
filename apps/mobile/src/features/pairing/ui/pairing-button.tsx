@@ -12,9 +12,12 @@ interface Props {
 }
 
 export function PairingButton({ label, onPress, disabled, secondary, icon }: Props) {
+  // Keep RN's pressed-style callback: this shared button already uses native StyleSheet styles.
   return (
     <Pressable
+      cssInterop={false}
       accessibilityRole="button"
+      accessibilityLabel={label}
       accessibilityState={{ disabled: !!disabled }}
       disabled={disabled}
       onPress={onPress}
@@ -27,9 +30,9 @@ export function PairingButton({ label, onPress, disabled, secondary, icon }: Pro
 }
 
 const styles = StyleSheet.create({
-  button: { minHeight: 48, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, backgroundColor: colors.primary, flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center' },
+  button: { flexShrink: 1, minWidth: 0, minHeight: 48, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, backgroundColor: colors.primary, flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center' },
   secondary: { backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.border },
   dimmed: { opacity: 0.5 },
-  label: { color: colors.elevated, fontSize: 16, fontWeight: '600', textAlign: 'center' },
+  label: { flexShrink: 1, minWidth: 0, color: colors.elevated, fontSize: 16, fontWeight: '600', textAlign: 'center' },
   secondaryLabel: { color: colors.ink },
 });

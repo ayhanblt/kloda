@@ -1,0 +1,35 @@
+use kloda_pairing_native::{PairingOwner};
+use std::{path::PathBuf, process};
+fn test() -> Result<(), String> {
+ let mode = std::env::args().nth(1).ok_or("mode")?;
+ let directory = PathBuf::from(STATE_DIRECTORY);
+ let initialized = directory.join("initialized").exists();
+ if (mode == "create" && initialized) || (mode == "reopen" && !initialized) || (mode != "create" && mode != "reopen") { return Err("state_precondition".into()); }
+ println!("NATIVE_OWNER_ATTEMPT {}", mode);
+ let owner = PairingOwner::open_pc(directory).map_err(|e| format!("owner_open:{}", e.code()))?;
+ println!("OWNER_OPEN_PASS");
+ let outcome = (|| -> Result<(), String> {
+  let raw = owner.status().map_err(|e| format!("status:{}",e.code()))?.json().map_err(|e| e.code().to_string())?;
+  let status: serde_json::Value = serde_json::from_str(raw.as_str()).map_err(|_| "status_json")?;
+  if status["hardwareClass"] != "secure_enclave" || status["repairRequired"] != false { return Err("hardware_status".into()); }
+  println!("SECURE_ENCLAVE_CLASS_PASS");
+  if status["qr"].is_string() || status["recordId"].is_string() { return Err("unexpected_trust_state".into()); }
+  println!("UNPAIRED_NO_QR_PASS");
+  let raw = owner.receiver_status().map_err(|e| e.code().to_string())?;
+  let receiver: serde_json::Value = serde_json::from_str(&raw).map_err(|_| "receiver_json")?;
+  if receiver["available"] != true || receiver["activeTransfers"] != 0 || receiver.get("errorCode").is_some() { return Err(format!("receiver_not_ready:{}",receiver["errorCode"].as_str().unwrap_or("unclassified"))); }
+  println!("NATIVE_RECEIVER_READY_PASS");
+  owner.suspend_pairing().map_err(|e| e.code().to_string())?;
+  let raw = owner.receiver_status().map_err(|e| e.code().to_string())?;
+  let receiver: serde_json::Value = serde_json::from_str(&raw).map_err(|_| "suspended_receiver_json")?;
+  if receiver["available"] != true || receiver.get("errorCode").is_some() { return Err("receiver_stopped_on_suspend".into()); }
+  println!("RECEIVER_AFTER_FOREGROUND_SUSPEND_PASS");
+  Ok(())
+ })();
+ let closed = owner.close().map_err(|e|format!("close:{}",e.code()));
+ outcome?; closed?;
+ println!("OWNER_CLOSE_PASS");
+ Ok(())
+}
+const STATE_DIRECTORY: &str = env!("KLODA_TEST_AUTHORITY");
+fn main() { if let Err(code) = test() { eprintln!("KLODA_MAC_VALIDATION_FAIL {}",code); process::exit(1); } }

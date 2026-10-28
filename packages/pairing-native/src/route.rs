@@ -7,7 +7,12 @@ use std::{
     time::Duration,
 };
 
-#[cfg(any(target_os = "macos", target_os = "android", target_os = "windows"))]
+#[cfg(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "android",
+    target_os = "windows"
+))]
 #[path = "route_address.rs"]
 mod address;
 #[path = "route_clock.rs"]
@@ -15,13 +20,21 @@ mod clock;
 #[cfg(target_os = "macos")]
 #[path = "route_macos.rs"]
 mod platform;
+#[cfg(target_os = "ios")]
+#[path = "route_ios.rs"]
+mod platform;
 #[cfg(target_os = "android")]
 #[path = "route_android.rs"]
 mod platform;
 #[cfg(target_os = "windows")]
 #[path = "route_windows.rs"]
 mod platform;
-#[cfg(any(target_os = "macos", target_os = "android", target_os = "windows"))]
+#[cfg(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "android",
+    target_os = "windows"
+))]
 #[path = "route_socket.rs"]
 mod socket;
 
@@ -35,7 +48,12 @@ pub(crate) fn cleanup_check() -> Result<()> {
 
 /// The platform evidence and socket restriction are native-owned, never caller claims.
 pub(crate) struct Route {
-    #[cfg(any(target_os = "macos", target_os = "android", target_os = "windows"))]
+    #[cfg(any(
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "android",
+        target_os = "windows"
+    ))]
     inner: platform::Route,
 }
 
@@ -67,7 +85,7 @@ pub(crate) fn listener(_: Option<u16>) -> Result<(Route, TcpListener, LanHint)> 
     Err(PairingError::NativeUnsupported)
 }
 
-#[cfg(any(target_os = "macos", target_os = "windows"))]
+#[cfg(any(target_os = "macos", target_os = "ios", target_os = "windows"))]
 pub(crate) fn for_peer(hint: &LanHint) -> Result<Route> {
     if hint.port == 0 {
         return Err(PairingError::LanUnavailable);
@@ -90,7 +108,12 @@ pub(crate) fn for_peer(
     })
 }
 
-#[cfg(not(any(target_os = "macos", target_os = "android", target_os = "windows")))]
+#[cfg(not(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "android",
+    target_os = "windows"
+)))]
 pub(crate) fn for_peer(_: &LanHint) -> Result<Route> {
     Err(PairingError::NativeUnsupported)
 }
@@ -131,11 +154,21 @@ fn listen(route: Route, port: Option<u16>) -> Result<(Route, TcpListener, LanHin
 impl Route {
     /// Called before every native socket I/O iteration, even while accepting.
     pub(crate) fn check_local(&self) -> Result<()> {
-        #[cfg(any(target_os = "macos", target_os = "android", target_os = "windows"))]
+        #[cfg(any(
+            target_os = "macos",
+            target_os = "ios",
+            target_os = "android",
+            target_os = "windows"
+        ))]
         {
             self.inner.check_local()
         }
-        #[cfg(not(any(target_os = "macos", target_os = "android", target_os = "windows")))]
+        #[cfg(not(any(
+            target_os = "macos",
+            target_os = "ios",
+            target_os = "android",
+            target_os = "windows"
+        )))]
         {
             Err(PairingError::NativeUnsupported)
         }
@@ -143,11 +176,21 @@ impl Route {
 
     /// Call with the actual socket peer address before TLS and on every I/O iteration.
     pub(crate) fn check(&self, peer: IpAddr) -> Result<()> {
-        #[cfg(any(target_os = "macos", target_os = "android", target_os = "windows"))]
+        #[cfg(any(
+            target_os = "macos",
+            target_os = "ios",
+            target_os = "android",
+            target_os = "windows"
+        ))]
         {
             self.inner.check(peer)
         }
-        #[cfg(not(any(target_os = "macos", target_os = "android", target_os = "windows")))]
+        #[cfg(not(any(
+            target_os = "macos",
+            target_os = "ios",
+            target_os = "android",
+            target_os = "windows"
+        )))]
         {
             let _ = peer;
             Err(PairingError::NativeUnsupported)
@@ -156,7 +199,12 @@ impl Route {
 
     /// Reapply platform binding to accepted sockets; no reliance on option inheritance.
     pub(crate) fn bind_accepted(&self, stream: &TcpStream) -> Result<()> {
-        #[cfg(any(target_os = "macos", target_os = "android", target_os = "windows"))]
+        #[cfg(any(
+            target_os = "macos",
+            target_os = "ios",
+            target_os = "android",
+            target_os = "windows"
+        ))]
         {
             let peer = stream
                 .peer_addr()
@@ -178,7 +226,12 @@ impl Route {
                 .map_err(|_| PairingError::LanUnavailable)?;
             self.check(peer.ip())
         }
-        #[cfg(not(any(target_os = "macos", target_os = "android", target_os = "windows")))]
+        #[cfg(not(any(
+            target_os = "macos",
+            target_os = "ios",
+            target_os = "android",
+            target_os = "windows"
+        )))]
         {
             let _ = stream;
             Err(PairingError::NativeUnsupported)
@@ -186,11 +239,21 @@ impl Route {
     }
 
     pub(crate) fn connect(&self, hint: &LanHint, timeout: Duration) -> Result<TcpStream> {
-        #[cfg(any(target_os = "macos", target_os = "android", target_os = "windows"))]
+        #[cfg(any(
+            target_os = "macos",
+            target_os = "ios",
+            target_os = "android",
+            target_os = "windows"
+        ))]
         {
             socket::connect(self, hint, timeout)
         }
-        #[cfg(not(any(target_os = "macos", target_os = "android", target_os = "windows")))]
+        #[cfg(not(any(
+            target_os = "macos",
+            target_os = "ios",
+            target_os = "android",
+            target_os = "windows"
+        )))]
         {
             let _ = (hint, timeout);
             Err(PairingError::NativeUnsupported)

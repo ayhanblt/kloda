@@ -1,0 +1,3 @@
+$REPO/apps/mobile/modules/my-module/ios/IosFilesRunner.swift:93:9: error: cannot find 'IosFilesUpload' in scope
+    |         `- error: cannot find 'IosFilesUpload' in scope
+** BUILD FAILED **

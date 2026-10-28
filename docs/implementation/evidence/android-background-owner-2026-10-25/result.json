@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "scope": "List2 source/host milestone plus final combined list2/3 regression; real Android runtime unperformed",
+  "finalCombinedEvidence": "../android-schedule-2026-10-25/result.json",
+  "foregroundTests": {
+    "status": "PASS",
+    "tests": 5
+  },
+  "serviceHost": {
+    "status": "PASS",
+    "groups": 4
+  },
+  "initialMobileCheckpoint": {
+    "status": "PASS",
+    "tests": 54,
+    "historicalWithinThisWorkGroup": true
+  },
+  "finalMobileRegression": {
+    "status": "PASS",
+    "tests": 64
+  },
+  "independentReview": "Reported source blockers fixed; no new blocker in last pass",
+  "runtime": "NOT_RUN; physical pause retained"
+}

@@ -1,0 +1,76 @@
+[
+  {
+    "result": "READY",
+    "id": 1,
+    "stage": "sources",
+    "language": "tr",
+    "platform": "android",
+    "dimensions": {
+      "width": 480,
+      "height": 800,
+      "scale": 1,
+      "fontScale": 1
+    },
+    "active": true,
+    "durableProbeWarning": true,
+    "scope": "UI fixtures only; no actual peer or file transfer",
+    "screenshot": "sources-tr.png",
+    "sha256": "ec0e57cfd0afee8a520e6902edba3a18d5ee0b976539b9adeee8015b4bba1979"
+  },
+  {
+    "result": "READY",
+    "id": 2,
+    "stage": "computer",
+    "language": "de",
+    "platform": "android",
+    "dimensions": {
+      "width": 480,
+      "height": 800,
+      "scale": 1,
+      "fontScale": 1
+    },
+    "active": true,
+    "durableProbeWarning": true,
+    "scope": "UI fixtures only; no actual peer or file transfer",
+    "screenshot": "computer-de.png",
+    "sha256": "bb307196a36b5cd0a7154e5ab42235674032d0dca3b554a1571df0e19595b7e0"
+  },
+  {
+    "result": "READY",
+    "id": 3,
+    "stage": "activity-progress",
+    "language": "tr",
+    "platform": "android",
+    "dimensions": {
+      "width": 480,
+      "height": 800,
+      "scale": 1,
+      "fontScale": 1
+    },
+    "active": true,
+    "durableProbeWarning": true,
+    "scope": "UI fixtures only; no actual peer or file transfer",
+    "screenshot": "activity-progress-tr.png",
+    "sha256": "f38b0ff69d88dfe700c3f3f1aaacd32ceb356892f72b914c67396f7b8f51c3f3"
+  },
+  {
+    "result": "READY",
+    "id": 4,
+    "stage": "activity-unknown",
+    "language": "en",
+    "platform": "android",
+    "dimensions": {
+      "width": 480,
+      "height": 800,
+      "scale": 1,
+      "fontScale": 1
+    },
+    "active": true,
+    "durableProbeWarning": true,
+    "scope": "UI fixtures only; no actual peer or file transfer",
+    "screenshot": null,
+    "sha256": "bab4fdf1e80dde4375f228fa970daaff98eca0e48ad5ba2e0f9bf63e95297c44",
+    "originalScreenshotName": "activity-unknown-en.png",
+    "screenshotStatus": "Original phase4 image was overwritten by later reopen capture; original bytes unavailable. Retained hash is historical/unverifiable; see separate reopen-capture.json for saved image."
+  }
+]

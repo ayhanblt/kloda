@@ -1,0 +1,104 @@
+{
+  "utc": "2026-10-24T13:09:52.612457+00:00",
+  "runtime": "iOS26.5",
+  "sdk": "27.1",
+  "deploymentMinimum": "16.4",
+  "architecture": "arm64",
+  "runs": [
+    {
+      "name": "decoder-checks",
+      "exitCode": 0,
+      "seconds": 0.5962001250009052,
+      "sha256": "e17806f563d91e948cadd7fa76a5e399f09d71ac3608da60c482aca9ad96a4c5",
+      "output": "PASS Swift native reply decoder: success, native error, strict envelope, bounds; no owner or network\n",
+      "command": [
+        "xcrun",
+        "simctl",
+        "spawn",
+        "<dedicated-device>",
+        ".local-evidence/ios-simulator-2026-10-24/decoder-checks"
+      ]
+    },
+    {
+      "name": "ownership-checks",
+      "exitCode": 0,
+      "seconds": 0.3563767920131795,
+      "sha256": "47b472e5bf747fb703c6b6ecb77eb4c8c481739e7f3b9f7a4e51de50fb7309f1",
+      "output": "PASS Swift C-reply ownership: exact-once free for valid, malformed, oversize and invalid UTF8; null safe. C stub, not owner runtime.\n",
+      "command": [
+        "xcrun",
+        "simctl",
+        "spawn",
+        "<dedicated-device>",
+        ".local-evidence/ios-simulator-2026-10-24/ownership-checks"
+      ]
+    },
+    {
+      "name": "native-checks",
+      "exitCode": 0,
+      "seconds": 0.3834205419989303,
+      "sha256": "f8a2422a6261143f7e1745bf2184897c959e8e72ef8845ec83fb8e51bb6bb89b",
+      "output": "PASS simulator ABI input pointer/length bounds\nPASS simulator ABI UTF8/JSON rejection\nPASS simulator phone command boundary\nPASS simulator stale owner and lifecycle rejection\nPASS simulator transfer rejects stale owner before descriptor use\nPASS simulator unsupported storage creates no authority directory\nPASS simulator real Rust reply consumption/free repeated 100 times\nIOS_ABI_SIMULATOR_CHECKS_COMPLETED_NOT_PRODUCT_ACCEPTANCE\n",
+      "command": [
+        "xcrun",
+        "simctl",
+        "spawn",
+        "<dedicated-device>",
+        ".local-evidence/ios-simulator-2026-10-24/native-checks"
+      ]
+    }
+  ],
+  "nativeRun": "Second separate process after earlier exit0; no completed owner/transfer or persistent journal exercised",
+  "initialFixtureLimit": "Initial native tests used a shorter backing buffer for oversized length. Review requested readable allocation; Swift/Rust fixtures corrected and final build/run exit0 in native-final-result.json. Initial results retained historically.",
+  "finalSourceSha256": [
+    {
+      "path": "packages/pairing-native/apple/tests/IosPairingSimulatorChecks.swift",
+      "sha256": "21cd8f80e576b96ef55adb65e08a88a82715da59085833432648a5c77f409ff4"
+    },
+    {
+      "path": "packages/pairing-native/src/ios_bridge_tests.rs",
+      "sha256": "da74edaba297a9ae6d0283e691b0112e5c4e4f9b99201ccc01b200e88eb2a469"
+    },
+    {
+      "path": "packages/pairing-native/apple/IosPairingNativeCall.swift",
+      "sha256": "0d1b1afd8dfc34c52e8f282aee086c6dc17f887adf56052c1727db84770a1dfc"
+    },
+    {
+      "path": "packages/pairing-native/apple/IosPairingReply.swift",
+      "sha256": "f61dffa0f0a338975ef9d544df6be9bc4b84330264bba8475ed77bfb8d6d4c5e"
+    },
+    {
+      "path": "packages/pairing-native/apple/include/KlodaPairingNative.h",
+      "sha256": "dd9bf7a671a17359c012c5f70e4d68a956a3a2f6dd2db7e0d7fd22725c460259"
+    },
+    {
+      "path": "packages/pairing-native/target/aarch64-apple-ios-sim/debug/libkloda_pairing_native.a",
+      "sha256": "ec82222fc4887220a02d03779a589ba0d5c7bca9e3cd3357e40e3086a8c5ea10"
+    }
+  ],
+  "review": "Independent Sol source review; no blocking safety finding. Readable oversized allocation suggestion applied to Swift/Rust and retested. Reviewer did not run tests.",
+  "hostChecksAfterFixtureCorrection": {
+    "rustAbiTests": {
+      "status": "PASS",
+      "count": 7,
+      "exit": 0
+    },
+    "fmt": {
+      "status": "PASS",
+      "exit": 0
+    },
+    "clippyHostLibTests": {
+      "status": "PASS",
+      "exit": 0
+    },
+    "rustSourceSize": {
+      "status": "PASS",
+      "exit": 0
+    }
+  },
+  "dedicatedSimulatorShutdown": {
+    "exitCode": 0,
+    "scope": "Only newly created Kloda-IosAbi-20261024; no erase/delete or existing simulator mutation"
+  },
+  "independentResultReview": "Final read-only Sol review verified Swift/Rust readable-buffer fix, saved final outputs and source/staticlib/executable SHA matches; no blocking finding, private data or false product-acceptance PASS. Reviewer did not rerun tests."
+}

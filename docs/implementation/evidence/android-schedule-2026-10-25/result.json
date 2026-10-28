@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-25T15:39:22.876125+00:00",
+  "head": "34dcbb8",
+  "scope": "Mobile execution list2 plus list3 Android source work; current combined uncommitted tree preserves prior work. Hash snapshot is final combined source, not a claim every preexisting edit belongs to this work group.",
+  "checks": [
+    {
+      "name": "Mobile Jest",
+      "status": "PASS",
+      "exitCode": 0,
+      "suites": 8,
+      "tests": 64,
+      "command": "npm run test --workspace @kloda/mobile -- --silent"
+    },
+    {
+      "name": "Mobile ESLint and TypeScript",
+      "status": "PASS",
+      "exitCode": 0,
+      "command": "npm run lint --workspace @kloda/mobile; npx tsc --noEmit -p apps/mobile/tsconfig.json"
+    },
+    {
+      "name": "Android Kotlin main and instrumentation compilation",
+      "status": "PASS",
+      "exitCode": 0,
+      "command": ":my-module:compileDebugKotlin :my-module:compileDebugAndroidTestKotlin --offline",
+      "limits": "Compilation only; instrumentation NOT_RUN. Native four-ABI sources compiled in this work group; final task reused current native cache."
+    },
+    {
+      "name": "Android lint",
+      "status": "BLOCKED",
+      "exitCode": 1,
+      "attempts": [
+        "offline full: pre-existing Expo test dependencies missing from cache",
+        "online full: react-native-worklets:lintAnalyzeDebug internal KaModule crash",
+        "offline module-only analysis: same dependency analysis crash"
+      ],
+      "error": "Cannot find a KaModule for the VirtualFile",
+      "limits": "No issue suppression, baseline or dependency/security setting change. Not PASS."
+    },
+    {
+      "name": "Foreground trust tests",
+      "status": "PASS",
+      "exitCode": 0,
+      "tests": 5,
+      "command": "cargo test --locked --offline --no-default-features --lib foreground"
+    },
+    {
+      "name": "Rust host clippy -D warnings",
+      "status": "PASS",
+      "exitCode": 0,
+      "limits": "Host lib only, not Android clippy"
+    },
+    {
+      "name": "Rust changed-files fmt",
+      "status": "PASS",
+      "exitCode": 0,
+      "limits": "Scoped ten changed Rust files with skip_children"
+    },
+    {
+      "name": "Rust crate-wide fmt",
+      "status": "FAIL",
+      "exitCode": 1,
+      "reason": "Pre-existing initialization/Windows source formatting differences; unrelated sources not reformatted"
+    },
+    {
+      "name": "Production Kotlin service/runtime host replay",
+      "status": "PASS",
+      "exitCode": 0,
+      "groups": 4,
+      "command": "python3 docs/implementation/evidence/android-background-owner-2026-10-25/service-checks.py",
+      "limits": "Android API doubles, not real OS"
+    },
+    {
+      "name": "Production Kotlin Scheduler/Job host replay",
+      "status": "PASS",
+      "exitCode": 0,
+      "groups": 10,
+      "command": "python3 docs/implementation/evidence/android-schedule-2026-10-25/host-job-checks.py",
+      "limits": "Android/storage/native doubles; real worker threads and actual Java Calendar; not Android scheduling/process death"
+    },
+    {
+      "name": "Occurrence model/production SQL and separate process reopen",
+      "status": "PASS",
+      "exitCode": 0,
+      "tests": 8,
+      "command": "python3 tools/test-android-schedule.py"
+    },
+    {
+      "name": "Existing transfer SQL regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "tests": 2,
+      "command": "python3 tools/test-android-files-retry.py"
+    },
+    {
+      "name": "Actual Kotlin worker/context/access retry regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "workerCases": 8,
+      "command": "python3 docs/implementation/evidence/android-schedule-2026-10-25/run-worker-checks.py",
+      "limits": "Host journal double; current source compiled; legacy hash and explicit mode also checked"
+    },
+    {
+      "name": "TR/EN/DE key parity and duplicate-key validation",
+      "status": "PASS",
+      "exitCode": 0
+    },
+    {
+      "name": "Mobile iOS and Android JS export",
+      "status": "PASS",
+      "exitCode": 0,
+      "command": "npm run build --workspace @kloda/mobile",
+      "limits": "JS bundles only, not iOS native sender or platform acceptance"
+    }
+  ],
+  "sourcesSha256": {
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaPairingModule.kt": "841d4a7b327926fd261d60d81f810d11819cf10f29af9d9561fbd58819927fc9",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPairingRuntime.kt": "202d1716e1922acb34710033afb404ca01a77465ad8810bd6ccfe91b8a320649",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesQueue.kt": "12619bad9c0da86ef32d67c56f1da5ee4a82cdcaef116564ab2bb58767b2be0e",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesService.kt": "d86de32e5591669679f5eca1267cf7edd260f23409299e6965b5df59541753f7",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/FilesRunContext.kt": "df9e6a6bb70472cb3a42f3a78ba0e644e5fd732daf892d6ce2e84a76504bcd85",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt": "df99d70937c9e6b4ec8c9c4b8eef221320296acc73c0fe7144414864b0f00293",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSyncJournal.kt": "5c9858785776ab53fb4307a6d6be945ba023fed35af0e38b17ee8244e7da2e19",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt": "30bf39cefc33342984db860fd06eee1c380db2e03c23fb0998a1fd1eae37c51b",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupJob.kt": "fc671e6eade1841e528e92d1302bcc02d66bcfdbf05501553b84b7e155cacac3",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupReceiver.kt": "57ef673a65f48e931a433e60c26e394d1e4fbd2815ee1427784c78d585af70ae",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupNotifications.kt": "ddd44d25b85a17613a972b6ace0a3917eae8a1caefd37565b5fe879a2adb784c",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidScheduleJournal.kt": "949a43916b00f328d584406e3cb743ce5ba825fb7917660fa9b3301c1a2c8370",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/ScheduledOccurrence.kt": "c41deb0ab8fe94d5cf94966602faafc86f23de9739d076156571c00c65c6a219",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/RestoreDestinationContract.kt": "7b95db6e823c7c53e4b86da8d22279d7944013e84c520ec06bb58284b89f0e8e",
+    "apps/mobile/modules/my-module/android/src/main/AndroidManifest.xml": "c3826ccea92329694f4f44a38bd18c4832cde2e9e8cba38806a9c83f43b0180e",
+    "apps/mobile/modules/my-module/src/KlodaSyncRuntimeModule.ts": "e0f2403705938fd0ca03e9f7843a8106118779537fafd29e84148babd6eb579f",
+    "apps/mobile/src/app/App.tsx": "7d167c64f6403760da790ebcde042f41604fef68bdfbcf5be57e5951aae6aa98",
+    "apps/mobile/src/app/App.spec.tsx": "3d6e3004f5d6440a0354b38de7d544cb6689a5ae648b8577670f7e79481c699d",
+    "apps/mobile/src/shared/api/file-transfer.ts": "bb622b63a60fb684dc8237561036a2811c8dc5921ab6ef6eede7e3a51f595502",
+    "apps/mobile/src/shared/api/file-transfer.spec.ts": "f4a4077572a25f9dcca086e8deb284c5eee5082b0c125bca7cb437c98d9d867a",
+    "apps/mobile/src/features/file-transfer/model/use-file-transfer.ts": "7d05d91e3e1f99968c7887811a085c758f3380a737e27caa15929fd7ccb16d66",
+    "apps/mobile/src/pages/activity/ui/activity-page.tsx": "16bc8abdd23b3bef62ea1bc64042336204b7852fa2f19594b91fe3e893c09de0",
+    "apps/mobile/src/pages/activity/ui/activity-page.spec.tsx": "04da721175841b6e80c957fc0048ac00238236c0e87817f8d634c67340af6774",
+    "apps/mobile/src/pages/computer/ui/computer-page.tsx": "8f2773f04d459d52b95b99de76d668b2176a669e95f53934be37cd76b440c16b",
+    "apps/mobile/src/shared/i18n/locales/tr.json": "989096d53c488b777a4e70825dbca6e48c0a58f96fdcc81cddcf9be837ef60e9",
+    "apps/mobile/src/shared/i18n/locales/en.json": "b8bb96bd2fe71c470a56ab9bb59756ab76c5e5e3d7deae24630d9302e63f8954",
+    "apps/mobile/src/shared/i18n/locales/de.json": "342f72acc63adc084ab95f9175e033e5f761b1ffdfda9573f819fa8bd1b3116f",
+    "packages/pairing-native/src/foreground.rs": "3c62f2e3b37917e2681c4188db7b3b8f019d0a303369caf18682a5591cfc6f01",
+    "packages/pairing-native/src/foreground_phone_tests.rs": "a9416da92e17aeb9929dafd92b49af6fad1bb2abf2eec1abd2ca50363384703b",
+    "packages/pairing-native/src/handle.rs": "2583bc7932c65266acf04347b00c9ea6a4dee357ae44132c3dab05fe919106f0",
+    "packages/pairing-native/src/owner.rs": "81abcc614576ace0495e41fbf6c756de216d2d4a253e7aaf43c8e0fd49a2024e",
+    "packages/pairing-native/src/jni_bridge.rs": "e718920fb3e45f367600e4cebcf711ae3b641d5b5c2252b87944ef9b106e584a",
+    "packages/pairing-native/src/runtime.rs": "10bbf18f6ab5f1adce461fd167737423869427b44802af86a86521080d35c792",
+    "packages/pairing-native/src/runtime_actor.rs": "5937ba08c8cd1ea0a2ffc7932e2fd615172aab0c544e39b8e8719d6b49af7da1",
+    "packages/pairing-native/src/runtime_actions.rs": "22f96afac5a400b70b56c3e78a9be050e9e5d09e96d3a647ae7d943e83f8084d",
+    "packages/pairing-native/src/runtime_phone.rs": "f4ff1d0ecd1181f1227b5fec44a7c0ef13d6ceeaf0bcb83c8ae032d65300908a",
+    "packages/pairing-native/src/runtime_phone_progress.rs": "ce9e9541a86d4300fa4022d542dd7f8db8301568befa4b2ea8bb61f047f7243e",
+    "tools/test-android-schedule.py": "2b9aec3b1945236cc032c6961c814443123102a74cec2fe01cfcb87c6e83d113",
+    "docs/implementation/evidence/android-schedule-2026-10-25/host-job-checks.py": "55b3581a8334ef897547c2be4243ede7010ac8163f567343bf35b21c5eb821ee"
+  },
+  "review": {
+    "kind": "Independent Sol read-only source/security review in multiple separate passes",
+    "outcome": "Blocking findings fixed; last narrow pass no new blocking finding",
+    "fixed": [
+      "retiring service reuse and old UI token",
+      "native delayed pending/pin/complete epoch writes",
+      "offline LAN network constraint",
+      "wall/elapsed clock and missed occurrence/manual time change",
+      "linked terminal crash recovery with immutable exact-run membership",
+      "stale dispatch finally/stop token and source binding",
+      "failed automatic resume commit memory state"
+    ],
+    "limits": "Reviewer did not rerun tests; actual Android lifecycle/OS gates not validated"
+  },
+  "notRun": [
+    "Android emulator/device/instrumentation runtime",
+    "real JobScheduler boot/Doze/quota/kill/timezone delivery",
+    "real offline LAN/TLS/ACL receiver end-to-end",
+    "real notification permission/channel/FGS lifecycle",
+    "locked device hardware signing/reconnect",
+    "iOS simulator or native implementation in this work group",
+    "physical or power-loss acceptance"
+  ],
+  "preserved": [
+    "Physical test pause",
+    "No Git add/commit/push/reset/clean/stash",
+    "No production archive/key/pin/certificate/epoch/authority reset or cleanup",
+    "No new dependency or main model/effort change",
+    "Existing access5/60 and separate OS5/target5min",
+    "ADR0016 local authority, ADR0017 Photos and ADR0019 suppression/rebackup"
+  ],
+  "next": "Resolve Android lint tooling failure; list4 Android runtime/compatibility gates remain unperformed, no physical pause lifted.",
+  "openFindings": [
+    "Android lint tool failure in existing Worklets dependency",
+    "Crate-wide formatting differences in pre-existing Windows/initialization sources",
+    "Live fallback scan IO/battery and per-run membership metadata growth not measured; evaluate/optimize before production, no implicit retention/cleanup policy",
+    "Real Android API24/current-OS scheduling, native lifecycle and device acceptance NOT_RUN"
+  ]
+}

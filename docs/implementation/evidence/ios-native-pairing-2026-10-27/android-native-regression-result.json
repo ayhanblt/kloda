@@ -1,0 +1,8 @@
+{
+  "exitCode": 0,
+  "seconds": 34.407,
+  "command": [
+    "node",
+    "tools/build-native-android.mjs"
+  ]
+}

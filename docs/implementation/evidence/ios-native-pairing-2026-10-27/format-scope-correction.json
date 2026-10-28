@@ -1,0 +1,20 @@
+{
+  "formatOnlyFilesRestored": [
+    "packages/pairing-native/src/initialization_windows_generation.rs",
+    "packages/pairing-native/src/installation_generation_chain.rs",
+    "packages/pairing-native/src/installation_generation_chain_tests.rs",
+    "packages/pairing-native/src/installation_generation_record.rs",
+    "packages/pairing-native/src/installation_generation_record_tests.rs",
+    "packages/pairing-native/src/installation_windows.rs",
+    "packages/pairing-native/src/installation_windows_candidate_context.rs",
+    "packages/pairing-native/src/installation_windows_path.rs",
+    "packages/pairing-native/src/installation_windows_publication.rs",
+    "packages/pairing-native/src/store_windows_vfs.rs",
+    "packages/pairing-native/src/store_windows_vfs_callbacks.rs",
+    "packages/pairing-native/src/store_windows_vfs_io.rs",
+    "packages/pairing-native/src/store_windows_vfs_native_tests.rs",
+    "packages/pairing-native/src/store_windows_vfs_tests.rs"
+  ],
+  "proof": "current bytes equalled pinned rustfmt output of HEAD; restored exact HEAD bytes through filesystem only",
+  "gitMutation": false
+}

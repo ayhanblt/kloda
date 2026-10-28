@@ -22,3 +22,11 @@ Album mapping uses source-device+album identity, never title alone. Repetition m
 - [MediaStore column ownership, pending state and relative path](https://developer.android.com/reference/android/provider/MediaStore.MediaColumns).
 
 Actual API36 execution observed indexed pending size zero before publication while original-byte count/hash matched; bounded original-byte verification is authoritative. Shared DCIM placement is supported for both image and video collections, including Android10's stricter video roots. These checks do not establish legacy/OEM/physical behavior.
+
+## Android emulator follow-up —2026-10-26
+
+[Authorized isolated API36 evidence](../implementation/android-runtime-step4-2026-10-26.md) confirms real MediaStore/SQLite Photos publication/import and explicit rebackup with simulated PC replies. A lost-finalize reply regression left local state finalizing despite a verified Completed status; both early return paths now retain the exact validated ACK before cleanup. No metadata/authority policy changed. Real PC/TLS/ACL, actual FilesQueue resource sender and physical acceptance remain open.
+
+## iOS implementation checkpoint —2026-10-27
+
+[Liste7 kaynak/izole PhotoKit kanıtı](../implementation/ios-photos-step7-2026-10-27.md) önceki iOS uygulama ertelemesini yerel foreground dilimi için supersede eder. Aynı Files journal/upload/status/own restore, strict v1 sidecar, source/target kimlik ayrımı, kalıcı creating/placeholder, album mapping ve review sınırı uygulandı. Bulk restore Android gibi latest verified revision seçer; preflight'ta hiç platform yazımı yoksa prepared intent ile explicit retry güvenlidir, creating/sonucu belirsiz iş yeni yaratım olarak tekrarlanmaz. Yeni authority/endpoint veya güvenlik kararı yok. iPhone/PC LAN ve çoklu-resource/iCloud/physical kabulü açık; Simulator fixture'da PC/session sahtedir.

@@ -5,9 +5,7 @@ use std::io::ErrorKind;
 impl Actor {
     pub(super) fn open(
         context: NativeContext,
-        #[cfg(not(target_os = "android"))] foreground: std::sync::Arc<
-            crate::foreground::Foreground,
-        >,
+        foreground: std::sync::Arc<crate::foreground::Foreground>,
     ) -> Result<Self> {
         let installation = crate::initialization::open(&context)?;
         installation.check()?;
@@ -22,9 +20,7 @@ impl Actor {
             crate::file_transport::Managed::new(!matches!(context.role, OwnerRole::Phone))?;
         let mut owner = Self {
             context,
-            #[cfg(not(target_os = "android"))]
             foreground,
-            #[cfg(not(target_os = "android"))]
             action_epoch: None,
             installation,
             listener: None,

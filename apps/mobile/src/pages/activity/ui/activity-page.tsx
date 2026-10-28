@@ -1,7 +1,7 @@
 import { ArrowLeft, Download, FolderSync, Pause, ShieldCheck } from 'lucide-react-native';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, BackHandler, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, BackHandler, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFileTransfer } from '../../../features/file-transfer/model/use-file-transfer';
 import { PairingButton } from '../../../features/pairing/ui/pairing-button';
@@ -10,24 +10,61 @@ import { colors } from '../../../shared/ui/tokens';
 
 export function ActivityPage({ onBack }: { onBack: () => void }) {
   const { t } = useTranslation();
-  const { queue, error, working, peer, run, pause, backups, restored, restoring, ownBackup, cancelRestore, photos } = useFileTransfer();
+  const { queue, error, working, peer, run, pause, resumeAutomatic, backups, restored, restoring, ownBackup, cancelRestore, photos } = useFileTransfer();
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => { onBack(); return true; });
     return () => subscription.remove();
   }, [onBack]);
+  const { fontScale, height } = useWindowDimensions();
+  const scrollChrome = fontScale > 1.3 || height < 600;
+  const header = (
+    <View style={[styles.header, scrollChrome && styles.stackedHeader]}>
+        <PairingButton label={t('pairing.back')} secondary icon={<ArrowLeft color={colors.ink} size={20} />} onPress={onBack} />
+        <Text style={[styles.brand, scrollChrome && styles.stackedBrand]}>{t('pairing.brand')}</Text>
+      </View>
+  );
+  const controls = (
+    <View style={[styles.controls, scrollChrome && styles.scrollingControls]}>
+        {restoring && <PairingButton label={t('transfer.backups.cancel')} secondary onPress={() => { void cancelRestore(); }} />}
+        {queue?.automaticPaused === true
+          ? <PairingButton label={t('transfer.continueAutomatic')} secondary disabled={working} onPress={() => { void resumeAutomatic(); }} />
+          : <PairingButton label={t('transfer.pause')} secondary disabled={working || !(queue?.running || queue?.automaticPaused === false)} icon={<Pause color={colors.ink} size={18} />} onPress={() => { void pause(); }} />}
+        {queue?.automaticPaused !== undefined && <Text style={styles.description}>{t('transfer.pauseExplanation')}</Text>}
+        <PairingButton label={t('transfer.syncNow')} disabled={working || !!queue?.running} icon={<FolderSync color={colors.elevated} size={18} />} onPress={() => { void run(); }} />
+      </View>
+  );
   return (
     <SafeAreaView style={styles.root}>
-      <View style={styles.header}>
-        <PairingButton label={t('pairing.back')} secondary icon={<ArrowLeft color={colors.ink} size={20} />} onPress={onBack} />
-        <Text style={styles.brand}>{t('pairing.brand')}</Text>
-      </View>
+      {!scrollChrome && header}
       <ScrollView contentContainerStyle={styles.body}>
+        {scrollChrome && header}
         <Text accessibilityRole="header" style={styles.title}>{t('transfer.title')}</Text>
         <Text style={styles.description}>{t('transfer.description')}</Text>
         <View style={styles.card}>
           <FolderSync color={colors.secure} size={28} />
-          <Text style={styles.heading}>{t(queue?.running ? 'transfer.running' : 'transfer.waiting')}</Text>
+          <Text style={styles.heading}>{t(queue?.run?.state === 'retry_wait' ? 'transfer.retryWaiting' : queue?.running ? 'transfer.running' : 'transfer.waiting')}</Text>
           {peer && <Text selectable style={styles.description}>{t('transfer.peer', { fingerprint: peer })}</Text>}
+          {queue?.run && <View accessibilityLiveRegion="polite">
+            <Text style={styles.description}>{t('transfer.runAttempt', { attempt: queue.run.attempts })}</Text>
+            <Text style={styles.description}>{t(`transfer.runStates.${queue.run.state}`)}</Text>
+            {queue.run.retryAt && <Text style={styles.description}>{t('transfer.retryAt', { time: new Date(Number(queue.run.retryAt)).toLocaleString() })}</Text>}
+            {queue.run.errorCode && <Text accessibilityRole="alert" style={styles.error}>
+              {t(`transfer.errors.${queue.run.errorCode}`, { defaultValue: t('transfer.errors.outcome_unknown') })}
+            </Text>}
+          </View>}
+          {queue?.automaticRun && <View accessibilityLiveRegion="polite">
+            <Text style={styles.description}>{t('transfer.osAttempt', { attempt: queue.automaticRun.attempts })}</Text>
+            {(queue.automaticRun.accessAttempts ?? 0) > 0 && <Text style={styles.description}>{t('transfer.runAttempt', { attempt: queue.automaticRun.accessAttempts })}</Text>}
+            <Text style={styles.description}>{t(queue.automaticRun.accessAttempts !== undefined && queue.automaticRun.state === 'exhausted'
+              ? 'transfer.runStates.needs_attention'
+              : queue.automaticRun.accessAttempts !== undefined && queue.automaticRun.state === 'waiting' && queue.automaticRun.errorCode !== 'os_interrupted'
+                ? 'transfer.retryWaiting' : `transfer.osStates.${queue.automaticRun.state}`)}</Text>
+            {queue.automaticRun.retryAt && <Text style={styles.description}>{t('transfer.retryAt', { time: new Date(Number(queue.automaticRun.retryAt)).toLocaleString() })}</Text>}
+            {queue.automaticRun.errorCode && <Text accessibilityRole="alert" style={styles.error}>{t(`transfer.errors.${queue.automaticRun.errorCode}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
+          </View>}
+          {queue?.notificationsEnabled === false && <Text accessibilityLiveRegion="polite" style={styles.description}>{t('transfer.notificationsDisabled')}</Text>}
+          {queue?.automaticPaused === true && <Text accessibilityLiveRegion="polite" style={styles.description}>{t('transfer.automaticPaused')}</Text>}
+          {queue?.automaticError && <Text accessibilityRole="alert" style={styles.error}>{t(`transfer.errors.${queue.automaticError}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
           {queue && <Text style={styles.description}>{t('transfer.count', { count: queue.totalJobs })}</Text>}
           {!queue && !error && <Text style={styles.description}>{t('pairing.loading')}</Text>}
           {error && <Text accessibilityRole="alert" style={styles.error}>{t(`transfer.errors.${error}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
@@ -82,18 +119,18 @@ export function ActivityPage({ onBack }: { onBack: () => void }) {
         {backups?.hasMore && <PairingButton label={t('transfer.backups.more')} secondary disabled={working} onPress={() => { void ownBackup(undefined, true); }} />}
         {restoring && <Text accessibilityLiveRegion="polite" style={styles.description}>{t('transfer.backups.restoring')}</Text>}
         {restored && <Text accessibilityLiveRegion="polite" style={styles.verified}>{t('transfer.backups.restored', { name: restored.name })}</Text>}
+        {scrollChrome && controls}
       </ScrollView>
-      <View style={styles.controls}>
-        {restoring && <PairingButton label={t('transfer.backups.cancel')} secondary onPress={() => { void cancelRestore(); }} />}
-        <PairingButton label={t('transfer.pause')} secondary disabled={working || !queue?.running} icon={<Pause color={colors.ink} size={18} />} onPress={() => { void pause(); }} />
-        <PairingButton label={t('transfer.syncNow')} disabled={working || !!queue?.running} icon={<FolderSync color={colors.elevated} size={18} />} onPress={() => { void run(); }} />
-      </View>
+      {!scrollChrome && controls}
     </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.surface },
   header: { padding: 20, gap: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  stackedHeader: { padding: 0, flexDirection: 'column', alignItems: 'stretch' },
+  stackedBrand: { textAlign: 'left' },
+  scrollingControls: { padding: 0, paddingTop: 20 },
   brand: { color: colors.ink, fontSize: 18, fontWeight: '700', flexShrink: 1, textAlign: 'right' },
   body: { padding: 24, gap: 16, paddingBottom: 32 },
   title: { color: colors.ink, fontSize: 30, fontWeight: '700' },
@@ -101,7 +138,7 @@ const styles = StyleSheet.create({
   description: { color: colors.muted, fontSize: 14, lineHeight: 21 },
   card: { padding: 20, borderRadius: 20, gap: 10, backgroundColor: colors.elevated, borderColor: colors.border, borderWidth: 1 },
   error: { color: colors.error, fontSize: 14, lineHeight: 21 },
-  verified: { color: colors.secure, fontSize: 14, fontWeight: '600', lineHeight: 21 },
+  verified: { color: colors.ink, fontSize: 14, fontWeight: '600', lineHeight: 21 },
   hash: { color: colors.muted, fontSize: 12, fontFamily: 'monospace', lineHeight: 18 },
   track: { height: 8, borderRadius: 4, overflow: 'hidden', backgroundColor: colors.border },
   progress: { height: 8, backgroundColor: colors.secure, borderRadius: 4 },

@@ -1,0 +1,17 @@
+
+> @kloda/mobile@0.0.0 test
+> jest --runInBand --no-watchman --silent
+
+PASS src/pages/activity/ui/activity-page.spec.tsx
+PASS src/app/App.spec.tsx
+PASS src/pages/pairing/ui/pairing-page.spec.tsx
+PASS src/pages/computer/ui/computer-page.spec.tsx
+PASS src/shared/api/file-transfer.spec.ts
+PASS src/features/pairing/model/use-pairing.spec.ts
+PASS src/features/pairing/model/pairing-controller.spec.ts
+PASS src/shared/api/pairing.spec.ts
+
+Test Suites: 8 passed, 8 total
+Tests:       64 passed, 64 total
+Snapshots:   0 total
+Time:        3.674 s, estimated 4 s

@@ -51,11 +51,21 @@ pub(crate) struct Reply {
 }
 impl Task {
     pub(crate) fn parse(json: &str, descriptor: i32) -> Result<Self> {
+        Self::parse_allowed(json, descriptor, false)
+    }
+    #[cfg(any(target_os = "ios", all(test, feature = "ios-ffi")))]
+    pub(crate) fn parse_background(json: &str, descriptor: i32) -> Result<Self> {
+        Self::parse_allowed(json, descriptor, true)
+    }
+    fn parse_allowed(json: &str, descriptor: i32, background: bool) -> Result<Self> {
         if json.len() > METADATA_LIMIT {
             return Err(PairingError::InvalidRequest);
         }
         let command: Command =
             serde_json::from_str(json).map_err(|_| PairingError::InvalidRequest)?;
+        if background && matches!(command, Command::List { .. } | Command::Restore { .. }) {
+            return Err(PairingError::InvalidRequest);
+        }
         match &command {
             Command::Create { upload } => validate_upload(upload)?,
             Command::Chunk { id, offset, length } => {

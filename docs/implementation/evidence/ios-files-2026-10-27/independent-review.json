@@ -1,0 +1,16 @@
+{
+  "kind": "Separate independent source/security review, reviewer ran no tests/build",
+  "fixed": [
+    "Retained restore attempts and exact-inode/prefix interruption recovery",
+    "Missing/changed sources retain pending jobs and needs_attention aggregation",
+    "Frozen cancellation ticket before pending picker and recheck after picker/worker entry",
+    "Completed target reverified after staging cleanup; missing target becomes new explicit attempt",
+    "Current complete native record required; old deletion reference checked through current native authority",
+    "Snapshot allocation/job creation stays within per-file error boundary; cancel/settings/journal failures stop the run"
+  ],
+  "final": "No blocking finding in final reviewed delta",
+  "open": [
+    "Real provider/iCloud and physical iPhone/PC LAN acceptance"
+  ],
+  "primaryFinalDelta": "Final source/root metadata guard is read-only and fail-closed for missing/changed directory IDs. Unknown non-journal errors remain outcome_unknown. Final app build includes current Swift sources; actual provider/runtime acceptance remains open."
+}

@@ -104,6 +104,7 @@ internal class AndroidOwnRestore(
       }
       if (error is FilesFailure) throw error
       if (error is SecurityException) throw FilesFailure("destination_permission_lost")
+      if (isLocalStorageFull(error)) throw FilesFailure("local_storage_full")
       throw FilesFailure("destination_unavailable")
     } finally { stage?.delete() }
   }

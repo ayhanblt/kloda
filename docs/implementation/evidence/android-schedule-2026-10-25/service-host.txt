@@ -1,0 +1,4 @@
+owner survives UI departure; stale UI token rejected
+retiring instance rejected; delayed old destroy cannot stop fresh service
+timeout pauses once; no automatic restart
+platform start rejection does not grant execution

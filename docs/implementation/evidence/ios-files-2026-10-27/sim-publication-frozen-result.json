@@ -1,0 +1,14 @@
+{
+  "compileExitCode": 0,
+  "runs": [
+    {
+      "mode": "seed",
+      "exitCode": 0
+    },
+    {
+      "mode": "reopen",
+      "exitCode": 0
+    }
+  ],
+  "shutdownExitCode": 0
+}

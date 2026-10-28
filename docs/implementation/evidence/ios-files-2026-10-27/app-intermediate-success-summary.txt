@@ -1,0 +1,3 @@
+$REPO/apps/mobile/modules/my-module/ios/IosFilesRunner.swift:93:29: error: overlapping accesses to 'job', but modification requires exclusive access; consider copying to a local variable [#ExclusivityViolation]
+    |                             `- error: overlapping accesses to 'job', but modification requires exclusive access; consider copying to a local variable [#ExclusivityViolation]
+** BUILD FAILED **

@@ -1,5 +1,13 @@
 {
   "transfer": {
+    "osAttempt": "OS-Ausführungsversuch {{attempt}} / 5",
+    "osStates": {
+      "running": "Automatische Ausführung aktiv",
+      "waiting": "Nach Unterbrechung auf OS-Ausführungsmöglichkeit warten",
+      "finished": "Automatische Ausführung beendet; Dateiergebnisse prüfen",
+      "exhausted": "OS-Versuche aufgebraucht; nächsten Zeitplan abwarten",
+      "paused": "Automatische Ausführung pausiert"
+    },
     "title": "Backup-Aktivität",
     "description": "Ausgewählte Dateien und Fotos werden über natives verschlüsseltes LAN direkt an den gekoppelten PC gesendet. Der PC muss den Backup-Ordner separat freigeben.",
     "running": "Dateien werden gesendet",
@@ -12,8 +20,8 @@
     "syncNow": "Jetzt synchronisieren",
     "backups": {
       "title": "Deine abgeschlossenen PC-Backups",
-      "description": "Nur abgeschlossene Backups dieses Telefons auf dem aktuell gekoppelten PC werden angezeigt. Die Wiederherstellung erstellt eine neue Datei an einem in Android gewählten Ort; vorhandene Dateien und Foto-Originale werden weder ersetzt noch gelöscht.",
-      "photosOpen": "Geprüfte Photos-Manifeste können Medien in Android Photos wiederherstellen. Datei-Backups werden als neue Dokumente gespeichert. Vorhandene Medien werden nicht überschrieben; unklare Imports warten auf Prüfung.",
+      "description": "Es werden nur abgeschlossene Sicherungen dieses Telefons auf dem aktuell gekoppelten PC angezeigt. Dateien werden an einem neuen gewählten Ort auf dem Telefon gespeichert; vorhandene Dateien und Photos-Originale werden nicht ersetzt oder gelöscht.",
+      "photosOpen": "Verifizierte Photos-Manifeste können Medien in die Fotomediathek des Telefons zurückladen. Dateisicherungen werden weiter als neues Dokument gespeichert. Vorhandene Medien werden nicht überschrieben; unklare oder nicht unterstützte Importe warten auf Prüfung.",
       "load": "Abgeschlossene Backups lesen",
       "empty": "Dieser PC hat keine abgeschlossenen Backups zurückgegeben.",
       "completed": "PC-Backup abgeschlossen · Lokales verschlüsseltes LAN",
@@ -30,9 +38,9 @@
       "restoreAll": "Alle zugänglichen Photos-Backups wiederherstellen",
       "idle": "Noch keine Photos-Importaufträge.",
       "pending": "{{completed}} / {{total}} Photos-Assets geprüft; übrige Aufträge warten auf einen manuell gestarteten Versuch.",
-      "completed": "{{completed}} / {{total}} Photos-Assets und unterstützte Album-Metadaten geprüft.",
+      "completed": "Letzte Importprüfung: {{completed}} / {{total}} Photos-Objekte und unterstützte Albumdaten verifiziert. Erneutes Wiederherstellen prüft das Ziel erneut.",
       "review_required": "{{review}} Photos-Aufträge müssen geprüft werden. Ein früherer Import kann bereits existieren oder der Zugriff ist unklar; keine automatische zweite Kopie.",
-      "organization_review": "{{review}} Photos-Aufträge benötigen Album-/Ressourcenprüfung. Android-Ordner können nicht jede Photos-Beziehung darstellen; vollständige Wiederherstellung wird nicht angenommen."
+      "organization_review": "{{review}} Medien- oder Albumbeziehungen müssen geprüft werden; eine vollständige Wiederherstellung wird nicht angenommen."
     },
     "states": {
       "queued": "Wartend",
@@ -46,7 +54,7 @@
     },
     "errors": {
       "pairing_required": "Kopple zuerst einen PC, bevor Dateien gesendet werden.",
-      "cancelled": "Wiederherstellung abgebrochen. Es wird kein Erfolg angenommen.",
+      "cancelled": "Vorgang abgebrochen. Unvollständige Aufträge bleiben erhalten; Erfolg wird nicht angenommen.",
       "manifest_invalid": "Das Photos-Manifest ist unvollständig, nicht unterstützt oder widersprüchlich. Es wird nicht importiert.",
       "photo_permission_lost": "Vollständiger Photos-Zugriff ist zur sicheren Prüfung vorhandener Assets erforderlich. Zugriff erlauben und erneut versuchen; keine doppelte Kopie.",
       "photo_review_required": "Photos-Import wartet auf Prüfung. Eine frühere Kopie kann bereits existieren; kein automatischer zweiter Import.",
@@ -54,6 +62,9 @@
       "destination_permission_lost": "Der Zugriff auf das Wiederherstellungsziel ging verloren. Wähle eine neue Datei und versuche es erneut.",
       "destination_not_empty": "Das Ziel ist nicht leer. Es wurde weder überschrieben noch gelöscht; wähle eine neue Datei.",
       "restore_cleanup_failed": "Die Wiederherstellung ist nicht abgeschlossen und das neu erstellte Ziel konnte nicht entfernt werden. Eine unvollständige Datei kann verbleiben; entferne sie selbst und wähle beim erneuten Versuch eine neue Datei.",
+      "os_interrupted": "Das Betriebssystem hat den Auftrag beendet. Der Fortschritt bleibt bis zur nächsten Ausführungsmöglichkeit erhalten.",
+      "automatic_pause_not_saved": "Die automatische Pause konnte nicht gespeichert werden. In dieser Sitzung gestoppt; nach Neustart kann die Sicherung beginnen. Speicher prüfen.",
+      "background_unavailable": "Das Betriebssystem konnte den Hintergrunddienst nicht starten. App geöffnet lassen und erneut versuchen.",
       "native_unsupported": "Native LAN-Übertragung ist auf dieser Plattform nicht verfügbar.",
       "source_permission_lost": "Der Quellenzugriff ging verloren. Wähle den ursprünglichen Ordner erneut; Aufträge bleiben erhalten.",
       "source_changed": "Die Quelle wurde geändert. Die alte Version wird nicht mit einem alten Hash fortgesetzt.",
@@ -80,16 +91,45 @@
       "revoked": "Die Kopplung wurde widerrufen. Unter der alten Kopplung werden keine Dateien gesendet.",
       "outcome_unknown": "Das Ergebnis konnte nicht bestätigt werden. Der Auftrag bleibt erhalten; Erfolg wird nicht angenommen.",
       "owner_deleted": "Diese Quellversion wurde am Computer gelöscht. Sie wird nicht automatisch erneut hochgeladen.",
-      "source_identity_unknown": "Gespeicherte Quellidentitäten sind mehrdeutig. Prüfung erforderlich; kein automatisches Hochladen."
+      "source_identity_unknown": "Gespeicherte Quellidentitäten sind mehrdeutig. Prüfung erforderlich; kein automatisches Hochladen.",
+      "retry_clock_unavailable": "Ein verlässlicher Wiederholungsabstand ist nicht prüfbar. Arbeit bleibt erhalten; automatische Wiederholung gestoppt.",
+      "storage_failure": "Der dauerhafte Eintrag konnte nicht gelesen oder gespeichert werden. Das Ergebnis von Pausieren oder Fortsetzen ist unbestätigt; bitte erneut prüfen.",
+      "automatic_unavailable": "Das Betriebssystem konnte die automatische Sicherung nicht planen. Die automatische Ausführung ist nicht bestätigt; du kannst mit Jetzt synchronisieren manuell starten.",
+      "settings_changed": "Wegen geänderter Einstellungen gestoppt. Abgeschlossene Sicherungen und Wiederherstellungsdaten bleiben erhalten. Neue Arbeit nutzt die aktuellen Quellen, den PC und die Zeitplaneinstellungen.",
+      "source_unavailable": "Die Quelle in Dateien verfügbar machen oder erneut auswählen; ausstehende Aufträge bleiben erhalten.",
+      "local_permission_lost": "Kloda kann auf eine lokale Datei oder einen Ordner auf diesem Telefon nicht zugreifen. Dateiberechtigung prüfen.",
+      "local_path_rejected": "Ein lokaler Pfad oder eine Datei konnte nicht sicher geprüft werden. Nichts wurde überschrieben.",
+      "interrupted": "Die App wurde vor der Ergebnisbestätigung beendet. Der Fortschritt bleibt zur geprüften Fortsetzung erhalten.",
+      "photos_unavailable": "iOS-Fotosicherung ist noch nicht angebunden. Dateiergebnisse werden getrennt angezeigt.",
+      "review_required": "Der Photos-Import muss geprüft werden. Es wird keine zweite Kopie automatisch erstellt.",
+      "organization_review": "Medien- oder Albumbeziehungen müssen geprüft werden; eine vollständige Wiederherstellung wird nicht angenommen."
     },
     "rebackup": "Diese Version erneut sichern",
-    "rebackupConfirm": "Diese unveränderte Quellversion ausdrücklich erneut an den gekoppelten Computer senden? Der Computer muss den Dateizugriff erlauben."
+    "rebackupConfirm": "Diese unveränderte Quellversion ausdrücklich erneut an den gekoppelten Computer senden? Der Computer muss den Dateizugriff erlauben.",
+    "notificationsDisabled": "Benachrichtigungen sind deaktiviert. Übertragungs- und Fehlermeldungen werden möglicherweise nicht angezeigt; prüfe den Sicherungsstatus auf diesem Bildschirm.",
+    "automaticPaused": "Die automatische Sicherung ist pausiert. Sie bleibt pausiert, bis du sie ausdrücklich fortsetzt.",
+    "continueAutomatic": "Automatische Sicherung fortsetzen",
+    "pauseExplanation": "Pausieren stoppt die laufende Übertragung und die automatische Sicherung. Jetzt synchronisieren startet nur einen Durchlauf und aktiviert die automatische Sicherung nicht.",
+    "retryWaiting": "Warten auf erneuten Versuch",
+    "runAttempt": "Zugriffsversuch {{attempt}} / 5",
+    "retryAt": "Frühestens {{time}} erneut, während Kloda aktiv ist.",
+    "runStates": {
+      "running": "Quellen werden geprüft und ausgewählte Sicherungen gesendet.",
+      "paused": "Arbeit unterbrochen oder pausiert; Fortschritt und Versuchszähler bleiben erhalten.",
+      "retry_wait": "Verbindung fehlgeschlagen. 60 Sekunden bis zum nächsten Versuch.",
+      "finished": "Scan beendet. Einzelne Sicherungsergebnisse unten prüfen.",
+      "needs_attention": "Scan beendet; einige Einträge benötigen Aufmerksamkeit. Keine vollständige Sicherung.",
+      "failed": "Arbeit gestoppt. Fehler prüfen; unvollständige Sicherungen bleiben erhalten."
+    }
   },
   "onboarding": {
+    "live": "Live — bei der ersten Gelegenheit",
+    "liveSelected": "Live — bei der ersten Gelegenheit (ausgewählt)",
+    "liveDescription": "Sichert bei der ersten vom Betriebssystem erlaubten Gelegenheit. Dauerbetrieb und eine genaue Startzeit sind nicht garantiert.",
     "step": "Schritt {{current}} von {{total}}",
     "back": "Zurück",
     "title": "Zu sichernde Ordner auswählen",
-    "description": "Wähle deine Quellen und lege dann eine lokale Zeit für die automatische Synchronisierung fest.",
+    "description": "Ordner oder Fotoquellen für die Sicherung auswählen und danach den Computer koppeln.",
     "chooseFolder": "Ordner auswählen",
     "choosePhotoLibrary": "Fotomediathek auswählen",
     "choosePhotoAlbum": "Fotoalbum auswählen",
@@ -107,13 +147,25 @@
     "username": "Benutzername",
     "password": "Passwort",
     "testConnection": "Verbindung testen",
-    "storageTested": "Speicherzugriff und Schreibfähigkeit bestätigt.",
+    "webdavScope": "Nur erweiterte WebDAV-Verbindungseinstellungen. Automatische WebDAV-Dateiübertragung ist noch nicht angebunden; PC-Sicherungen verwenden den separaten nativen Empfänger.",
+    "webdavErrors": {
+      "webdav_fields": "HTTPS-Adresse, Ordner, Benutzername und Passwort eingeben. Eingebettete Zugangsdaten, Abfrage/Fragment und Punktpfade sind nicht zulässig.",
+      "webdav_connection": "WebDAV-Verbindung oder angegebene Zugangsdaten konnten nicht geprüft werden.",
+      "webdav_probe_incomplete": "Test oder Bereinigung unvollständig. Temporäre Kloda-Testdaten können verbleiben; kein Erfolg gespeichert.",
+      "webdav_cancelled": "Der Test wurde abgebrochen.",
+      "webdav_cancelled_probe": "Test nach Schreibbeginn abgebrochen. Temporäre Kloda-Testdaten können verbleiben.",
+      "webdav_storage": "Sichere Einstellungen konnten nicht gelesen oder als gespeichert bestätigt werden. Teststatus unbestätigt.",
+      "webdav_busy": "Ein anderer Verbindungstest läuft bereits."
+    },
+    "storageTested": "Die gespeicherten Einstellungen bestanden einen früheren Verbindungstest. Das garantiert keine aktuelle Erreichbarkeit.",
     "testError": "Die WebDAV-Verbindung konnte nicht bestätigt werden.",
     "localStartTime": "Lokale Startzeit",
-    "saveSchedule": "Automatische Synchronisierung speichern",
+    "saveSchedule": "Speichern und mit Computer verbinden",
     "invalidTime": "Verwende HH:mm für die lokale Startzeit.",
     "runtimeUnavailable": "Die native Kloda-Laufzeit ist nicht verfügbar. Erstelle die Entwicklungs-App neu.",
-    "scheduleSaved": "Zeitplan für die automatische Synchronisierung gespeichert."
+    "scheduleSaved": "Zeitplan für die automatische Synchronisierung gespeichert.",
+    "saveError": "Einstellungen konnten nicht gespeichert werden. Erneut versuchen.",
+    "testingConnection": "Verbindung wird geprüft…"
   },
   "pairing": {
     "brand": "Kloda: Secure Photos & Sync",
@@ -223,5 +275,26 @@
       "cancelled": "Der lokale Vorgang wurde abgebrochen. Dies verspricht keine Löschung des Computerdatensatzes.",
       "revoked": "Die lokale Kopplung wurde widerrufen und kann nicht fortgesetzt werden."
     }
+  },
+  "computer": {
+    "title": "Auf dem Computer sichern",
+    "description": "Ausgewählte Dateien und Fotos über das lokale Netzwerk auf dem eigenen Computer sichern.",
+    "paired": "1. Gerätevertrauen gespeichert",
+    "pairTitle": "1. Computer per QR koppeln",
+    "pairDescription": "Kloda auf dem Computer öffnen und den Kopplungs-QR mit diesem Telefon scannen.",
+    "managePairing": "Kopplung verwalten",
+    "grantTitle": "2. Sicherungsordner am Computer freigeben",
+    "grantDescription": "Unter Geräte und Berechtigungen am Computer dieses Telefon auswählen. Einen separaten Sicherungsordner wählen und den Dateizugriff ausdrücklich erlauben. Das Telefon kann diese Berechtigung nicht erteilen.",
+    "transferTitle": "3. Übertragung starten und Ergebnisse prüfen",
+    "availability": "Eine Kopplung bestätigt weder die aktuelle Erreichbarkeit des Computers noch einen bereiten Empfänger. Der Computer muss wach sein und Kloda muss laufen. Die Sicherungsaktivität zeigt aktuelle Zugriffs- und Übertragungsergebnisse.",
+    "iosBackground": "iOS kann autorisierte Sicherungen bei einer Ausführungsmöglichkeit starten. Gesperrte geschützte Daten können Aufgaben verzögern. Neue Kopplungen, Bestätigungen und Wiederherstellung erfordern die App im Vordergrund.",
+    "iosSchedulePreference": "iOS bestimmt, wann automatische Aufgaben laufen; genaue Zeiten oder Dauerbetrieb sind nicht garantiert. Pause stoppt automatische Sicherungen bis zur Auswahl von Fortsetzen.",
+    "androidBackground": "Autorisierte Sicherungen laufen beim Verlassen dieses Bildschirms weiter, solange Android es erlaubt. Neue Kopplungen, Bestätigungen und Wiederherstellung erfordern die App im Vordergrund. Stoppt das System den Vorgang, die App zum Fortsetzen öffnen.",
+    "foregroundOnly": "Die App für Kopplung, Bestätigung und Wiederherstellung im Vordergrund halten. Native Übertragung und Hintergrundintegration sind auf dieser Plattform noch nicht abgeschlossen.",
+    "advanced": "Erweiterte Option: WebDAV",
+    "continue": "Zur Sicherungsaktivität",
+    "inactive": "Kloda in den Vordergrund bringen, um den aktuellen Status zu lesen.",
+    "androidSchedulePreference": "Android führt automatische Aufträge aus, wenn das Betriebssystem es erlaubt; genaue Zeiten oder Dauerbetrieb sind nicht garantiert. Pause stoppt automatische Sicherungen bis zur Auswahl von Fortsetzen.",
+    "schedulePreference": "Die Zeitplaneinstellung wird gespeichert; automatische Ausführung ist auf dieser Plattform noch nicht aktiv."
   }
 }

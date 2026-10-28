@@ -1,0 +1,51 @@
+[
+  {
+    "name": "host-foreground",
+    "exitCode": 0,
+    "seconds": 6.592,
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "packages/pairing-native/Cargo.toml",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "ios-ffi",
+      "--lib",
+      "foreground",
+      "--",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "name": "host-abi",
+    "exitCode": 0,
+    "seconds": 0.154,
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "packages/pairing-native/Cargo.toml",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "ios-ffi",
+      "--lib",
+      "ios_bridge::tests",
+      "--",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "name": "ios-package",
+    "exitCode": 0,
+    "seconds": 19.704,
+    "command": [
+      "node",
+      "tools/build-native-ios.mjs"
+    ]
+  }
+]

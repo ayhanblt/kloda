@@ -10,7 +10,7 @@ use rustls::{
 };
 use std::{path::Path, sync::Arc};
 
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "ios"))]
 #[path = "identity_macos.rs"]
 mod platform;
 #[cfg(target_os = "android")]
@@ -43,13 +43,18 @@ impl Identity {
     }
 }
 
-#[cfg(any(target_os = "macos", target_os = "android", target_os = "windows"))]
+#[cfg(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "android",
+    target_os = "windows"
+))]
 pub(crate) fn alias(directory: &Path, epoch: [u8; 16]) -> Result<String> {
     let path = directory
         .canonicalize()
         .map_err(|_| PairingError::IdentityUnavailable)?;
     let mut context = ring::digest::Context::new(&ring::digest::SHA256);
-    #[cfg(any(target_os = "macos", target_os = "android"))]
+    #[cfg(any(target_os = "macos", target_os = "ios", target_os = "android"))]
     {
         use std::os::unix::ffi::OsStrExt;
         context.update(path.as_os_str().as_bytes());
@@ -70,7 +75,7 @@ pub(crate) fn alias(directory: &Path, epoch: [u8; 16]) -> Result<String> {
     Ok(tag)
 }
 
-#[cfg(any(target_os = "macos", target_os = "windows"))]
+#[cfg(any(target_os = "macos", target_os = "ios", target_os = "windows"))]
 pub(crate) fn open(directory: &Path, epoch: [u8; 16], create: bool) -> Result<Identity> {
     platform::open(&alias(directory, epoch)?, create)
 }
@@ -83,7 +88,12 @@ pub(crate) fn open(
 ) -> Result<Identity> {
     platform::open(&alias(directory, epoch)?, create, context)
 }
-#[cfg(not(any(target_os = "macos", target_os = "android", target_os = "windows")))]
+#[cfg(not(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "android",
+    target_os = "windows"
+)))]
 pub(crate) fn open(_: &Path, _: [u8; 16], _: bool) -> Result<Identity> {
     Err(PairingError::NativeUnsupported)
 }
@@ -136,7 +146,12 @@ impl CertificateSigner for HardwareKey {
         self.provider.sign_native(tbs)
     }
 }
-#[cfg(any(target_os = "macos", target_os = "android", target_os = "windows"))]
+#[cfg(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "android",
+    target_os = "windows"
+))]
 fn identity(public: Spki, provider: Arc<dyn HardwareSigner>, class: &'static str) -> Identity {
     Identity {
         spki: public.clone(),

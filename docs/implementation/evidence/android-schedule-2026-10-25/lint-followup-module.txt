@@ -1,0 +1,208 @@
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt:26: Warning: Field requires API level 33 (current min is 24): android.Manifest.permission#READ_MEDIA_IMAGES [InlinedApi]
+        add(Manifest.permission.READ_MEDIA_IMAGES); add(Manifest.permission.READ_MEDIA_VIDEO)
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt:26: Warning: Field requires API level 33 (current min is 24): android.Manifest.permission#READ_MEDIA_VIDEO [InlinedApi]
+        add(Manifest.permission.READ_MEDIA_IMAGES); add(Manifest.permission.READ_MEDIA_VIDEO)
+                                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt:28: Warning: Field requires API level 29 (current min is 24): android.Manifest.permission#ACCESS_MEDIA_LOCATION [InlinedApi]
+      if (sdk >= 29) add(Manifest.permission.ACCESS_MEDIA_LOCATION)
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt:31: Warning: Field requires API level 34 (current min is 24): android.Manifest.permission#READ_MEDIA_VISUAL_USER_SELECTED [InlinedApi]
+      if (sdk >= 34) arrayOf(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED) else emptyArray()
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt:34: Warning: Field requires API level 33 (current min is 24): android.Manifest.permission#READ_MEDIA_IMAGES [InlinedApi]
+      val media = if (sdk >= 33) granted(Manifest.permission.READ_MEDIA_IMAGES) && granted(Manifest.permission.READ_MEDIA_VIDEO)
+                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt:34: Warning: Field requires API level 33 (current min is 24): android.Manifest.permission#READ_MEDIA_VIDEO [InlinedApi]
+      val media = if (sdk >= 33) granted(Manifest.permission.READ_MEDIA_IMAGES) && granted(Manifest.permission.READ_MEDIA_VIDEO)
+                                                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt:36: Warning: Field requires API level 29 (current min is 24): android.Manifest.permission#ACCESS_MEDIA_LOCATION [InlinedApi]
+      return media && (sdk < 29 || granted(Manifest.permission.ACCESS_MEDIA_LOCATION))
+                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "InlinedApi":
+   This check scans through all the Android API field references in the
+   application and flags certain constants, such as static final integers and
+   Strings, which were introduced in later versions. These will actually be
+   copied into the class files rather than being referenced, which means that
+   the value is available even when running on older devices. In some cases
+   that's fine, and in other cases it can result in a runtime crash or
+   incorrect behavior. It depends on the context, so consider the code
+   carefully and decide whether it's safe and can be suppressed or whether the
+   code needs to be guarded.
+
+   If you really want to use this API and don't need to support older devices
+   just set the minSdkVersion in your build.gradle or AndroidManifest.xml
+   files.
+
+   If your code is deliberately accessing newer APIs, and you have ensured
+   (e.g. with conditional execution) that this code will only ever be called
+   on a supported platform, then you can annotate your class or method with
+   the @TargetApi annotation specifying the local minimum SDK to apply, such
+   as @TargetApi(11), such that this check considers 11 rather than your
+   manifest file's minimum SDK as the required API level.
+
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/NativeLanRoutes.kt:87: Warning: Unnecessary; SDK_INT is always >= 24 [ObsoleteSdkInt]
+    if (Build.VERSION.SDK_INT >= 23) {
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/NativeLanRoutes.kt:103: Warning: Unnecessary; SDK_INT is never < 24 [ObsoleteSdkInt]
+    if (Build.VERSION.SDK_INT < 23) return "unsupported"
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "ObsoleteSdkInt":
+   This check flags version checks that are not necessary, because the
+   minSdkVersion (or surrounding known API level) is already at least as high
+   as the version checked for.
+
+   Similarly, it also looks for resources in -vNN folders, such as values-v14
+   where the version qualifier is less than or equal to the minSdkVersion,
+   where the contents should be merged into the best folder.
+
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPairingRuntime.kt:12: Warning: Do not place Android context classes in static fields (static reference to AndroidFilesQueue which has field context pointing to Context); this is a memory leak [StaticFieldLeak]
+  @Volatile var files: AndroidFilesQueue? = null
+  ^
+
+   Explanation for issues of type "StaticFieldLeak":
+   A static field will leak contexts.
+
+   Non-static inner classes have an implicit reference to their outer class.
+   If that outer class is for example a Fragment or Activity, then this
+   reference means that the long-running handler/loader/task will hold a
+   reference to the activity which prevents it from getting garbage
+   collected.
+
+   Similarly, direct field references to activities and fragments from these
+   longer running instances can cause leaks.
+
+   ViewModel classes should never point to Views or non-application Contexts.
+
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt:35: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+    if (!prefs(context).edit().remove("automaticExecutionError").remove("automaticExecutionBinding").commit()) runtimeError = "storage_failure"
+         ~~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt:68: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+    if (!prefs(context).edit().putBoolean("automaticPaused", false).commit()) throw FilesFailure("storage_failure")
+         ~~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt:122: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        if (!preferences.edit().putString("automaticDispatchToken", extras.getString("token")).commit()) throw FilesFailure("storage_failure")
+             ~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt:128: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+      if (!preferences.edit().remove("automaticError").commit()) runtimeError = "storage_failure"
+           ~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt:150: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+    if (!preferences.edit().putLong("automaticDue", due).putLong("automaticOccurrence", if (retry == null) due else occurrence)
+         ~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt:162: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+      if (!preferences.edit().putLong("automaticDue", now).putLong("automaticOccurrence", now).remove("automaticDueElapsed").remove("automaticDueBoot").commit()) throw FilesFailure("storage_failure")
+           ~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt:174: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+      else listOf(DocumentsContract.buildChildDocumentsUriUsingTree(Uri.parse(source), DocumentsContract.getTreeDocumentId(Uri.parse(source))))
+                                                                    ~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt:174: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+      else listOf(DocumentsContract.buildChildDocumentsUriUsingTree(Uri.parse(source), DocumentsContract.getTreeDocumentId(Uri.parse(source))))
+                                                                                                                           ~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosMedia.kt:76: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+    val uri = Uri.parse(intent.uri ?: return null)
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosRestore.kt:60: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+        val library = media.library(intent?.uri?.let { android.net.Uri.parse(it) })
+                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt:98: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+      if (!FilesRunContext.stamp(preferences.edit().putString("photoSources", values.toString())).commit()) throw FilesFailure("storage_failure")
+                                 ~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt:106: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+    if (sources.any { it["id"] == id } && !FilesRunContext.stamp(preferences.edit().putString("photoSources", remaining.toString())).commit()) throw FilesFailure("storage_failure")
+                                                                 ~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt:155: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+    val result = query(Uri.parse(reference), projection, null, null, null).use { cursor ->
+                       ~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt:186: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+    val uri = Uri.parse(reference)
+              ~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSafSourceScanner.kt:17: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+    val tree = Uri.parse(reference)
+               ~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSafSourceScanner.kt:28: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+    val document = Uri.parse(reference)
+                   ~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/FilesRunContext.kt:20: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+      if (!stamp(context.getSharedPreferences("kloda-sync", 0).edit()).commit()) throw FilesFailure("storage_failure")
+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt:99: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+      if (removedReference != null && !FilesRunContext.stamp(preferences().edit().putString("directorySources", remainingSources.toString())).commit()) {
+                                                             ~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt:106: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+            Uri.parse(reference),
+            ~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt:136: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+      if (!preferences().edit()
+           ~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt:151: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+          && !FilesRunContext.stamp(preferences.edit().putString("backupMode", "scheduled").putInt("intervalHours", intervalHours).putString("localTime", localTime)).commit()) {
+                                    ~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt:161: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+          && !FilesRunContext.stamp(preferences.edit().putString("backupMode", "live")).commit()) throw FilesFailure("storage_failure")
+                                    ~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt:199: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+    val documentId = DocumentsContract.getTreeDocumentId(Uri.parse(reference))
+                                                         ~~~~~~~~~~~~~~~~~~~~
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt:207: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+    if (!FilesRunContext.stamp(preferences().edit().putString("directorySources", sources.toString())).commit()) {
+                               ~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UseKtx":
+   The Android KTX libraries decorates the Android platform SDK as well as
+   various libraries with more convenient extension functions available from
+   Kotlin, allowing you to use default parameters, named parameters, and
+   more.
+
+   Available options:
+
+   **remove-defaults** (default is true):
+   Whether to skip arguments that match the defaults provided by the extension.
+
+   Extensions often provide default values for some of the parameters. For example:
+   ```kotlin
+   fun Path.readLines(charset: Charset = Charsets.UTF_8): List<String> { return Files.readAllLines(this, charset) }
+   ```
+   This lint check will by default automatically omit parameters that match the default, so if your code was calling
+
+   ```kotlin
+   Files.readAllLines(file, Charset.UTF_8)
+   ```
+   lint would replace this with
+   ```kotlin
+   file.readLines()
+   ```
+   rather than
+
+   ```kotlin
+   file.readLines(Charset.UTF_8
+   ```
+   You can turn this behavior off using this option.
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="remove-defaults" value="true" />
+       </issue>
+   </lint>
+   ```
+
+   **require-present** (default is true):
+   Whether to only offer extensions already available.
+
+   This option lets you only have lint suggest extension replacements if those extensions are already available on the class path (in other words, you're already depending on the library containing the extension method.)
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="require-present" value="true" />
+       </issue>
+   </lint>
+   ```
+
+0 errors, 34 warnings

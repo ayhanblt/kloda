@@ -1,0 +1,22 @@
+{
+  "exitCode": 0,
+  "command": [
+    "rustup",
+    "run",
+    "1.99.0",
+    "rustfmt",
+    "--edition",
+    "2021",
+    "--check",
+    "--config",
+    "skip_children=true",
+    "packages/pairing-native/src/foreground.rs",
+    "packages/pairing-native/src/handle.rs",
+    "packages/pairing-native/src/owner.rs",
+    "packages/pairing-native/src/runtime.rs",
+    "packages/pairing-native/src/runtime_sender.rs",
+    "packages/pairing-native/src/ios_bridge.rs",
+    "packages/pairing-native/src/ios_bridge_registry.rs",
+    "packages/pairing-native/src/ios_bridge_tests.rs"
+  ]
+}

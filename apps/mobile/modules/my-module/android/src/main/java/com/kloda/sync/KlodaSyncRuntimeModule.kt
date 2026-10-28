@@ -26,7 +26,7 @@ class KlodaSyncRuntimeModule : Module() {
 
     Name("KlodaSyncRuntime")
     AsyncFunction("pickDirectory") Coroutine { request: String ->
-      directoryPicker.launch(DirectoryPickerInput(request))?.let(::saveDirectorySource)
+      directoryPicker.launch(DirectoryPickerInput(request))?.let(::saveDirectorySource)?.also { reconcileSources() }
     }
 
     AsyncFunction("loadDirectorySources") {
@@ -57,15 +57,15 @@ class KlodaSyncRuntimeModule : Module() {
     }
 
     AsyncFunction("loadPhotoSources") { photos().load() }
-    AsyncFunction("removePhotoSource") { id: String -> photos().remove(id) }
+    AsyncFunction("removePhotoSource") { id: String -> photos().remove(id).also { reconcileSources() } }
     AsyncFunction("selectPhotoLibrary") Coroutine { ->
-      if (requestPhotoAccess()) photos().selectLibrary() else null
+      if (requestPhotoAccess()) photos().selectLibrary().also { reconcileSources() } else null
     }
     AsyncFunction("loadPhotoAlbums") Coroutine { ->
       if (requestPhotoAccess()) photos().albums() else emptyList<Map<String, String>>()
     }
     AsyncFunction("selectPhotoAlbum") Coroutine { id: String ->
-      if (requestPhotoAccess()) photos().selectAlbum(id) else null
+      if (requestPhotoAccess()) photos().selectAlbum(id).also { reconcileSources() } else null
     }
 
     AsyncFunction("prepareSourceJobs") {
@@ -96,7 +96,7 @@ class KlodaSyncRuntimeModule : Module() {
         if (source.getString("id") == id) removedReference = source.getString("reference")
         else remainingSources.put(source)
       }
-      if (!preferences().edit().putString("directorySources", remainingSources.toString()).commit()) {
+      if (removedReference != null && !FilesRunContext.stamp(preferences().edit().putString("directorySources", remainingSources.toString())).commit()) {
         throw IllegalStateException("Could not remove the source.")
       }
       AndroidSyncJournal(appContext.reactContext ?: throw IllegalStateException("Application context is unavailable.")).use { it.removeSource(id) }
@@ -109,11 +109,13 @@ class KlodaSyncRuntimeModule : Module() {
         }
       }
       }
+      reconcileSources()
     }
 
     AsyncFunction("loadSchedule") {
       val preferences = preferences()
       mapOf(
+        "backupMode" to AndroidBackupScheduler.mode(appContext.reactContext?.applicationContext ?: throw IllegalStateException("Application context is unavailable.")),
         "intervalHours" to preferences.getInt("intervalHours", 12),
         "localTime" to preferences.getString("localTime", "12:00")
       )
@@ -143,11 +145,26 @@ class KlodaSyncRuntimeModule : Module() {
     AsyncFunction("saveSchedule") { intervalHours: Int, localTime: String ->
       if (intervalHours != 12 && intervalHours != 24) throw IllegalArgumentException("Interval must be 12 or 24 hours.")
       if (!Regex("^([01]\\d|2[0-3]):[0-5]\\d$").matches(localTime)) throw IllegalArgumentException("Time must use HH:mm.")
-      if (!preferences().edit().putInt("intervalHours", intervalHours).putString("localTime", localTime).commit()) {
-        throw IllegalStateException("Could not persist the schedule.")
+      synchronized(AndroidSyncJournal.sourceLock) {
+        val preferences = preferences()
+        if ((preferences.getString("backupMode", null) != "scheduled" || preferences.getInt("intervalHours", 12) != intervalHours || preferences.getString("localTime", "12:00") != localTime)
+          && !FilesRunContext.stamp(preferences.edit().putString("backupMode", "scheduled").putInt("intervalHours", intervalHours).putString("localTime", localTime)).commit()) {
+          throw IllegalStateException("Could not persist the schedule.")
+        }
       }
+      AndroidBackupScheduler.reconcile(appContext.reactContext?.applicationContext ?: throw IllegalStateException("Application context is unavailable."))
+    }
+    AsyncFunction("saveLiveSchedule") {
+      synchronized(AndroidSyncJournal.sourceLock) {
+        val preferences = preferences()
+        if (preferences.getString("backupMode", null) != "live"
+          && !FilesRunContext.stamp(preferences.edit().putString("backupMode", "live")).commit()) throw FilesFailure("storage_failure")
+      }
+      AndroidBackupScheduler.reconcile(appContext.reactContext?.applicationContext ?: throw IllegalStateException("Application context is unavailable."))
     }
   }
+
+  private fun reconcileSources() { appContext.reactContext?.applicationContext?.let { AndroidBackupScheduler.reconcile(it) } }
 
   private fun preferences() = appContext.reactContext?.getSharedPreferences("kloda-sync", 0)
     ?: throw IllegalStateException("Application context is unavailable.")
@@ -166,12 +183,12 @@ class KlodaSyncRuntimeModule : Module() {
     return photos().hasAccess()
   }
 
-  private fun saveDirectorySource(reference: String): Map<String, String> {
+  private fun saveDirectorySource(reference: String): Map<String, String> = synchronized(AndroidSyncJournal.sourceLock) {
     val sources = JSONArray(preferences().getString("directorySources", "[]"))
     repeat(sources.length()) { index ->
       val existingSource = sources.getJSONObject(index)
       if (existingSource.getString("reference") == reference) {
-        return mapOf(
+        return@synchronized mapOf(
           "displayName" to existingSource.getString("displayName"),
           "id" to existingSource.getString("id"),
           "kind" to "directory",
@@ -187,9 +204,9 @@ class KlodaSyncRuntimeModule : Module() {
       "reference" to reference
     )
     sources.put(JSONObject(source))
-    if (!preferences().edit().putString("directorySources", sources.toString()).commit()) {
+    if (!FilesRunContext.stamp(preferences().edit().putString("directorySources", sources.toString())).commit()) {
       throw IllegalStateException("Could not persist the source.")
     }
-    return source
+    source
   }
 }

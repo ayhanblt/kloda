@@ -1,0 +1,18 @@
+{
+  "capture": "computer-de-final",
+  "contentSize": "large",
+  "result": "READY",
+  "id": 20,
+  "stage": "computer",
+  "language": "de",
+  "dimensions": {
+    "scale": 3,
+    "width": 393,
+    "height": 852,
+    "fontScale": 1
+  },
+  "active": true,
+  "durableProbeWarning": true,
+  "scope": "UI fixtures only; no actual peer or file transfer",
+  "sha256": "c1023950debecf12c8c9d9c2b78e8416bdbfddff3e6aedcaaca5d2dbb61f79f4"
+}

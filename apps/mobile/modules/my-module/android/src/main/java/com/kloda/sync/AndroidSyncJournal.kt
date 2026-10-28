@@ -13,7 +13,7 @@ internal data class FilesJob(
   val offset: Long, val state: String, val errorCode: String?, val rebackupOf: String? = null
 )
 
-internal class AndroidSyncJournal(context: Context) : SQLiteOpenHelper(context, "kloda-sync.sqlite", null, 3) {
+internal class AndroidSyncJournal(context: Context) : SQLiteOpenHelper(context, "kloda-sync.sqlite", null, 6) {
   companion object { val sourceLock = Any() }
   init { setWriteAheadLoggingEnabled(true) }
 
@@ -26,6 +26,8 @@ internal class AndroidSyncJournal(context: Context) : SQLiteOpenHelper(context, 
       PRIMARY KEY (source_id, reference))""")
     createTransfers(database)
     createDisposition(database)
+    AndroidFilesRunJournal.create(database)
+    AndroidScheduleJournal.create(database)
   }
 
   override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -34,7 +36,7 @@ internal class AndroidSyncJournal(context: Context) : SQLiteOpenHelper(context, 
       database.execSQL("ALTER TABLE queued_source_file ADD COLUMN tree_reference TEXT NOT NULL DEFAULT ''")
       createTransfers(database)
     }
-    if (oldVersion >= 2) {
+    if (oldVersion == 2) {
     database.execSQL("DROP TRIGGER retain_files_job")
     database.execSQL("DROP TRIGGER immutable_files_job")
     database.execSQL("ALTER TABLE files_job RENAME TO legacy_files_job")
@@ -42,7 +44,10 @@ internal class AndroidSyncJournal(context: Context) : SQLiteOpenHelper(context, 
     database.execSQL("INSERT INTO files_job SELECT *,'' FROM legacy_files_job")
     database.execSQL("DROP TABLE legacy_files_job")
     }
-    createDisposition(database)
+    if (oldVersion < 3) createDisposition(database)
+    if (oldVersion < 4) AndroidFilesRunJournal.create(database)
+    else if (oldVersion < 5) AndroidFilesRunJournal.upgradeContext(database)
+    if (oldVersion < 6) AndroidScheduleJournal.create(database)
   }
 
   private fun createTransfers(database: SQLiteDatabase) {

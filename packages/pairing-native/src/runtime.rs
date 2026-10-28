@@ -54,9 +54,7 @@ struct Listener {
 }
 struct Actor {
     context: NativeContext,
-    #[cfg(not(target_os = "android"))]
     foreground: std::sync::Arc<crate::foreground::Foreground>,
-    #[cfg(not(target_os = "android"))]
     action_epoch: Option<u64>,
     installation: Installation,
     listener: Option<Listener>,
@@ -116,6 +114,7 @@ enum PhoneSource {
     Resume,
 }
 struct PhoneWork {
+    foreground_epoch: Option<u64>,
     sid: [u8; 16],
     hint: LanHint,
     expected: [u8; 32],
@@ -138,17 +137,13 @@ pub(crate) fn run(
     context: NativeContext,
     receiver: Receiver<Command>,
     ready: SyncSender<Result<()>>,
-    #[cfg(not(target_os = "android"))] foreground: std::sync::Arc<crate::foreground::Foreground>,
+    foreground: std::sync::Arc<crate::foreground::Foreground>,
 ) {
     // Declared before the actor so panic unwinding drops every TLS/hardware owner
     // before the last JNI reference performs platform cleanup.
     #[cfg(target_os = "android")]
     let platform = context.platform.clone();
-    let mut owner = match Actor::open(
-        context,
-        #[cfg(not(target_os = "android"))]
-        foreground,
-    ) {
+    let mut owner = match Actor::open(context, foreground) {
         Ok(owner) => owner,
         Err(error) => {
             #[cfg(target_os = "android")]
@@ -220,9 +215,11 @@ pub(crate) fn run(
                 Command::Transfer {
                     record,
                     task,
+                    foreground_epoch,
+                    background_active,
                     reply,
                 } => {
-                    let result = owner.transfer(&record, task);
+                    let result = owner.transfer(&record, task, foreground_epoch, background_active);
                     let _ = reply.send(crate::file_sender_command::json(result));
                 }
             }

@@ -1,0 +1,31 @@
+{
+  "command": [
+    "rustup",
+    "run",
+    "1.99.0",
+    "rustfmt",
+    "--edition",
+    "2021",
+    "--check",
+    "--config",
+    "skip_children=true",
+    "packages/pairing-native/build.rs",
+    "packages/pairing-native/src/foreground.rs",
+    "packages/pairing-native/src/foreground_phone_tests.rs",
+    "packages/pairing-native/src/owner.rs",
+    "packages/pairing-native/src/runtime_actions.rs",
+    "packages/pairing-native/src/runtime_phone.rs",
+    "packages/pairing-native/src/identity.rs",
+    "packages/pairing-native/src/installation_files.rs",
+    "packages/pairing-native/src/lib.rs",
+    "packages/pairing-native/src/route.rs",
+    "packages/pairing-native/src/route_ios.rs",
+    "packages/pairing-native/src/route_ios_if.rs",
+    "packages/pairing-native/src/route_ios_query.rs",
+    "packages/pairing-native/src/ios_bridge.rs",
+    "packages/pairing-native/src/ios_bridge_command.rs",
+    "packages/pairing-native/src/ios_bridge_registry.rs",
+    "packages/pairing-native/src/ios_bridge_tests.rs"
+  ],
+  "exitCode": 0
+}

@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-26T06:57:00.051413+00:00",
+  "head": "34dcbb8c204cb01e84583655651d10cb5baca8ec",
+  "authorization": "User lifted physical pause for mobile step4, selected this Mac and daily phone profile; no personal archive/key/authority reset permitted",
+  "device": {
+    "id": "P1",
+    "model": "SM-S921B",
+    "api": 36,
+    "abi": "arm64-v8a",
+    "pageBytes": 4096,
+    "profile": "daily personal profile; no dedicated empty profile",
+    "serial": "REDACTED"
+  },
+  "testPackage": {
+    "name": "com.kloda.sync.test",
+    "newInstall": true,
+    "installed": true,
+    "sha256": "e83ca8043ff5d920da0dc375fa07a57a8c5b34cc3eab7f7cbe7ee2c3eccea4f1",
+    "bytes": 171112452,
+    "scope": "local-files only; noPhotos/restore/media/nativeowner/network. Existing keystoreTLS PoC not touched.",
+    "removedAfterTest": true
+  },
+  "build": {
+    "exitCode": 0,
+    "gradleSeconds": 8,
+    "tasks": 883,
+    "executed": 55,
+    "scope": "TestAPK and full explicitK1 lint; no production main source changes in this checkpoint"
+  },
+  "defaultScopeGuard": {
+    "adbExit": 0,
+    "output": "Explicit scope required: local-files or media-fixture\n\n",
+    "status": "PASS: intentional scope denial; no fixture started"
+  },
+  "localRun": {
+    "status": "PASS / scoped local-files only",
+    "adbExit": 0,
+    "seconds": 13.055672666989267,
+    "passedGroups": [
+      "native-library-load",
+      "files-runs",
+      "scheduled-journal",
+      "files-recovery",
+      "foreground-service"
+    ],
+    "foregroundService": "PASS: manually unlocked/resumed/focused test Activity, real FGS/notification persisted after Activity finish, explicitstop removed both. Not actual native file receiver or Expo UI grant test."
+  },
+  "restart": {
+    "scope": "Synthetic journal clean-close and different-PID reader only; no UI, media or native owner",
+    "phases": [
+      {
+        "phase": "write",
+        "adbExit": 0,
+        "seconds": 0.7268075000029057,
+        "output": "PASS restart-write\n\n"
+      },
+      {
+        "phase": "read",
+        "adbExit": 0,
+        "seconds": 0.5584238339797594,
+        "output": "PASS restart-read\n\n"
+      }
+    ],
+    "testApkSha256": "e83ca8043ff5d920da0dc375fa07a57a8c5b34cc3eab7f7cbe7ee2c3eccea4f1",
+    "priorProcessPresent": false,
+    "verifiedStopped": true,
+    "distinctPidAsserted": true
+  },
+  "notificationPermission": {
+    "initiallyGranted": false,
+    "restored": true,
+    "scope": "Only new test UID; no Photos permission granted"
+  },
+  "receiver": {
+    "chosen": "this Mac",
+    "status": "BLOCKED / readiness not established",
+    "readOnlyCodesign": {
+      "codesignExit": 0,
+      "metadataExit": 0,
+      "entitlementKeys": [],
+      "teamIdentifierPresent": false,
+      "bundleIdentifier": "Electron",
+      "embeddedProfilePresent": false
+    },
+    "nativeOwnerOpened": false,
+    "limits": "User confirmed no paid Apple Developer membership. Current approved Mac signing/provisioning readiness gate remains blocked; no owner/probe, key fallback, ad-hoc workaround or automatic enrollment.",
+    "paidAppleDeveloperMembership": false
+  },
+  "pendingInputs": [],
+  "review": "Independent Sol final read-only source/capsule review PASS:6source andAPK hash/size match;5groups+NOT_RUNscope andsameAPKcleanPIDreopen consistent; originalpreconditionrun retained; privacy/serialredaction/permissionrestore/packagecleanup/MacBLOCKED boundaries verified. Reviewer ran no ADB/test/build or file mutations.",
+  "notRun": [
+    "Physical Photos/restore/personal archive scan",
+    "ActualAndroid-PCQR/TLS/ACL/revoke/transfer",
+    "Existing hardware signer PoC repeat",
+    "API24/16KB/runtime battery and archive-scale acceptance"
+  ],
+  "sourceSha256": {
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt": "de8ce0a97a1ca10bbe7f713b93688f56e96257bd0827e071e37ecfeba08cb8a7",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesRunChecks.kt": "0cebc4fe8ccd357933d933ed5dc806837e18be5c475d1183e423c47570cd4e85",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidScheduleChecks.kt": "02ba612a12fe812026eb06d4cc249b7a07de7068eac62ca463289637bf262573",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryChecks.kt": "7ef792028e9130c903c9b008ec09ff29239570cbc0e0d32c8d11e32136f998d8",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidRestartChecks.kt": "cb1495f3ea4e55d55700127eda5386a5f0b57c435c234368a7417378042af19d",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidLifecycleChecks.kt": "048c23f8efd09450cbf6205ef5d487b32a8d227621a8a1c67ddfe034a7dceb9c"
+  },
+  "priorUiPreconditionRun": {
+    "status": "PARTIAL / UI PRECONDITION NOT MET",
+    "adbExit": 0,
+    "seconds": 16.32483445800608,
+    "passedGroups": [
+      "native-library-load",
+      "files-runs",
+      "scheduled-journal",
+      "files-recovery"
+    ],
+    "foregroundService": "NOT_RUN: timeout resumed&&focused before acquire; not evidence of an FGS start/persistence defect",
+    "postFailureUiObservation": {
+      "wakefulness": [
+        "Dozing",
+        "3"
+      ],
+      "keyguardPolicyFlags": {
+        "showing": [
+          "true"
+        ],
+        "inputRestricted": [
+          "false"
+        ],
+        "screenOnEarly": [],
+        "screenOnFully": [],
+        "keyguardOccluded": []
+      }
+    },
+    "causalLimit": "Observation is consistent with unavailable visible/active window; not proof of unique underlying cause"
+  },
+  "blockedDependencies": [
+    "Mac approved signing/provisioning and native receiver readiness; physical Android-Mac transfer cannot proceed. No alternate PC selected automatically."
+  ],
+  "existingPocPackageRetained": true
+}

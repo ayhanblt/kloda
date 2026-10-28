@@ -1,0 +1,239 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-26T20:04:58.615642+00:00",
+  "gitHead": "34dcbb8c204cb01e84583655651d10cb5baca8ec",
+  "workingTreeWasAlreadyDirty": true,
+  "platform": "physical macOS arm64",
+  "xcode": "27.1 / 27A9275",
+  "rust": "1.99.0",
+  "bundleIdentifier": "com.kloda.desktop.dev",
+  "signing": "Apple Development / user-confirmed free Personal Team",
+  "intermediate": {
+    "source": "https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer",
+    "sha256": "dcf21878c77f4198e4b4614f03d696d89c66c66008d4244e1b99161aac91601f",
+    "existingAppleRootVerificationExit": 0,
+    "addedAsPublicCertificateToLoginKeychain": true,
+    "trustOverrideAdded": false
+  },
+  "provisioning": {
+    "firstBuildExit": 65,
+    "firstError": "No registered destination Mac; no matching profile",
+    "registeredThisMacThroughXcode": true,
+    "automaticBuildExit": 0,
+    "profileContainsOneDevice": true
+  },
+  "metadata": {
+    "profileAppIdentifierAuthorized": true,
+    "profileKeychainGroupsAuthorized": true,
+    "mainAndNativeAddonSameTeam": true,
+    "libraryValidationDisabled": false,
+    "unsignedExecutableMemoryAllowed": false,
+    "jitAllowed": true,
+    "developmentDebugEntitlement": true,
+    "profileExpiresUtc": "2026-11-02T07:30:50Z",
+    "appleDevelopmentIdentityUsed": true
+  },
+  "nativeRuntime": {
+    "utc": "2026-10-26T20:00:07.054135+00:00",
+    "signExit": 0,
+    "strictVerifyExit": 0,
+    "runs": [
+      {
+        "mode": "create",
+        "exitCode": 0,
+        "pid": 69446,
+        "stdout": [
+          "NATIVE_OWNER_ATTEMPT create",
+          "OWNER_OPEN_PASS",
+          "SECURE_ENCLAVE_CLASS_PASS",
+          "UNPAIRED_NO_QR_PASS",
+          "NATIVE_RECEIVER_READY_PASS",
+          "RECEIVER_AFTER_FOREGROUND_SUSPEND_PASS",
+          "OWNER_CLOSE_PASS"
+        ],
+        "stderrEmpty": true
+      },
+      {
+        "mode": "reopen",
+        "exitCode": 0,
+        "pid": 69513,
+        "stdout": [
+          "NATIVE_OWNER_ATTEMPT reopen",
+          "OWNER_OPEN_PASS",
+          "SECURE_ENCLAVE_CLASS_PASS",
+          "UNPAIRED_NO_QR_PASS",
+          "NATIVE_RECEIVER_READY_PASS",
+          "RECEIVER_AFTER_FOREGROUND_SUSPEND_PASS",
+          "OWNER_CLOSE_PASS"
+        ],
+        "stderrEmpty": true,
+        "sameEpochCertificateInitialized": true
+      }
+    ]
+  },
+  "sameOriginalStateReopenAfterFix": {
+    "exitCode": 0,
+    "originalTestIdentityFilesUnchanged": true
+  },
+  "electronRuntime": {
+    "utc": "2026-10-26T20:03:13.608691+00:00",
+    "mode": "signed Electron RUN_AS_NODE NAPI smoke; no application UI",
+    "strictDeepVerifyExit": 0,
+    "runs": [
+      {
+        "mode": "create",
+        "exitCode": 0,
+        "pid": 72287,
+        "stdout": [
+          "ELECTRON_NAPI_SECURE_ENCLAVE_PASS",
+          "ELECTRON_NAPI_RECEIVER_READY_PASS",
+          "ELECTRON_NAPI_RECEIVER_AFTER_SUSPEND_PASS",
+          "ELECTRON_NAPI_OWNER_CLOSED"
+        ],
+        "stderrEmpty": true
+      },
+      {
+        "mode": "reopen",
+        "exitCode": 0,
+        "pid": 72312,
+        "stdout": [
+          "ELECTRON_NAPI_SECURE_ENCLAVE_PASS",
+          "ELECTRON_NAPI_RECEIVER_READY_PASS",
+          "ELECTRON_NAPI_RECEIVER_AFTER_SUSPEND_PASS",
+          "ELECTRON_NAPI_OWNER_CLOSED"
+        ],
+        "stderrEmpty": true,
+        "sameEpochCertificateInitialized": true
+      }
+    ]
+  },
+  "electronSignedObjectCount": 23,
+  "checks": [
+    {
+      "check": "identity-tests-final",
+      "exitCode": 0,
+      "seconds": 2.447,
+      "command": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "packages/pairing-native/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--target",
+        "aarch64-apple-darwin",
+        "--lib",
+        "identity::platform::tests",
+        "--",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "check": "desktop-native-build",
+      "exitCode": 0,
+      "seconds": 6.361,
+      "command": [
+        "node",
+        "tools/build-native-desktop.mjs"
+      ]
+    }
+  ],
+  "fmt": {
+    "tool": "rustfmt 1.10.0-stable / Rust1.99.0",
+    "finalExitCode": 0
+  },
+  "clippy": {
+    "tool": "Clippy0.1.99 / Rust1.99.0",
+    "finalExitCode": 0,
+    "warningsDenied": true,
+    "scope": "production library, no-default-features, aarch64-apple-darwin",
+    "isolatedTarget": true,
+    "compilerAndPluginPathPinned": true
+  },
+  "failureHistory": [
+    {
+      "stage": "tiny codesign",
+      "result": "FAIL",
+      "cause": "missing WWDR G3 intermediate; actual codesign chain warning; valid identities count0 before/1 after standard intermediate install"
+    },
+    {
+      "stage": "native initial reopen",
+      "result": "FAIL native_unsupported",
+      "cause": "exact query OSStatus0; CanSign CFNumber rather than CFBoolean; SecureEnclave/private/P256/size256 present; algorithm supported"
+    },
+    {
+      "stage": "manual helper link",
+      "result": "FAIL",
+      "cause": "mixed compiler/dependency discovery; replaced with offline temporary Cargo path-dependency helper; no repository dependency version change"
+    },
+    {
+      "stage": "temporary helper initial locked build",
+      "result": "FAIL",
+      "cause": "new temporary root requires its own lock; generated offline and asserted package versions subset of repository lock before locked build"
+    },
+    {
+      "stage": "memory-only key tests in restricted execution",
+      "result": "FAIL",
+      "cause": "Security key creation unavailable there; separately authorized normal host execution passes2 tests"
+    },
+    {
+      "stage": "fmt first check",
+      "result": "FAIL",
+      "cause": "test formatting; corrected then final check exit0"
+    },
+    {
+      "stage": "clippy initial attempts",
+      "result": "FAIL E0514",
+      "cause": "Cargo found mixed toolchain plugin through PATH; compiler+pluginPATH pinned; isolated final strictClippy exit0"
+    },
+    {
+      "stage": "final metadata first assertion",
+      "result": "FAIL",
+      "cause": "development debug entitlement incorrectly tested against release-only condition; reported actual development entitlement without changing profile or rerunning tests"
+    }
+  ],
+  "scopeLimits": [
+    "Electron RUN_AS_NODE tests native host/NAPI, not normal app boot/UI/initializeDesktopProfile/tray",
+    "No QR invitation or grant; no paired phone; no LAN file transfer or mutual TLS runtime acceptance",
+    "Fresh certificate creation includes real hardware TBS signing and cryptographic validation; reopen reuses validated persisted DER and is not a new-signature or TLS proof",
+    "No private key export requested",
+    "Only three newly created disposable authority directories/hardware test identities; preserved, no cleanup or key deletion",
+    "No existing development/production authority, archive, phone, Git mutation, membership purchase, software-key fallback or trust override",
+    "Free development profile expires; release signing/notarization/distribution remain separate gates"
+  ],
+  "sourceSha256": {
+    "packages/pairing-native/src/identity_macos.rs": "a344d4f960d7be65f6ab1a8abaeca08fcfc8606e6cdb7b9c4e0c086f6f922af8",
+    "packages/pairing-native/src/identity_macos_tests.rs": "b8905f2d7e3ec20542c22a754a3001d9ee5993bfdc060386524d9faac6b5a0af",
+    "packages/pairing-native/src/identity.rs": "b9797ac1d55bdfc6e1c8a028d621096d05619bf63a3f0b8c7d68163d284134e0",
+    "packages/pairing-native/src/initialization.rs": "14150716c631a9a05607361ed4a8254bcd0475ea2354b82b0a91bbd2a7dfd558",
+    "packages/pairing-native/src/certificate_create.rs": "58476eba0ce1b2956b5012ffa4fb21411709b7d21f48ab20011383a6acc05971",
+    "packages/pairing-native/src/owner.rs": "81abcc614576ace0495e41fbf6c756de216d2d4a253e7aaf43c8e0fd49a2024e",
+    "packages/pairing-native/src/node.rs": "8f2d9b73745b1eeedb297ef9d19c387766f0463f380ee3dc758d086d62ed8d29",
+    "packages/pairing-native/src/runtime_desktop.rs": "6f20fec237e4392db774a769600c3df4f424bee4a8e7aac68a580f2befa3f9a3",
+    "packages/pairing-native/Cargo.toml": "d77485a69f81952a04e525a51aec536b5e5e64f2ff6a1619840571e0c0a262fc",
+    "packages/pairing-native/Cargo.lock": "3018af056e687be5d50edf55a51a45c68aca8918121d619df0f7e4a0f69e8db5",
+    "tools/build-native-desktop.mjs": "b947fcb9111f656be727a5eab1bd745f1032522055d8e6a5e66216774add04f7",
+    "tools/native-build-common.mjs": "fc2addabb1727b35e41b739fe03af911cc904e9d0abb81860bba98ad7f717495"
+  },
+  "artifactSha256": {
+    "builtNativeAddon": "d510bfab4cd7a85ce530bf0563d62dda8a585a1822d7646b4b8cdaba32db83cd",
+    "signedElectronAddon": "791f6e00664909bda59bd7c1c26d1d32b3236f9cae58d18efbdd59641a6f0e9f"
+  },
+  "harnessProvenance": "Public harnesses replace private fixture paths with explicit configuration placeholders. They are replay templates, not byte-identical executed sources. Private profiles, signing identity, account metadata and authority directories are excluded.",
+  "sdkBasis": "Xcode27.1 macOS Security.framework/Headers/SecKey.h: CF_ENUM(CFIndex, SecKeyOperationType), kSecKeyOperationTypeSign=0; SecKeyIsAlgorithmSupported returns Boolean.",
+  "separateReview": {
+    "status": "No blocking source/security/evidence/privacy findings",
+    "performedBy": "independent reviewer pass; no tests/account/keychain actions rerun",
+    "sourceHashMatches": 12,
+    "limitsConfirmed": [
+      "development-only debug/profile expiry",
+      "RUN_AS_NODE is host/NAPI, not normal Kloda UI/tray or Android-Mac TLS transfer"
+    ],
+    "followupFindings": "Two stale current-signing statements in migration platform table and platform plan updated after review."
+  },
+  "rustSourceSizeCheck": {
+    "exitCode": 0,
+    "limit": "300 nonblank lines per Rust source file"
+  }
+}

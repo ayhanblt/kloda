@@ -12,7 +12,7 @@ import { PairingQuickPanel } from '../../../features/pairing/ui/pairing-quick-pa
 import { QrScanner } from '../../../features/pairing/ui/qr-scanner';
 import { colors } from '../../../shared/ui/tokens';
 
-export function PairingPage({ onBack }: { onBack: () => void }) {
+export function PairingPage({ onBack, onContinue }: { onBack: () => void; onContinue?: () => void }) {
   const { t } = useTranslation();
   const { snapshot, foreground, armScan, scan, stopScanning, cancel, resume, refresh, decide, removePairing } = usePairing();
   const [scanning, setScanning] = useState(false);
@@ -95,6 +95,9 @@ export function PairingPage({ onBack }: { onBack: () => void }) {
             </View>
           )}
           <Text style={styles.description}>{t('pairing.noFileGrant')}</Text>
+          {onContinue && foreground && !protectedDecision && !cameraVisible && !error && !uncertain
+            && status?.phase === 'complete' && status.recordId && status.peerFingerprint && !status.repairRequired
+            && <PairingButton label={t('computer.continue')} onPress={onContinue} />}
           <PairingButton label={t('pairing.helpTitle')} secondary icon={<Info color={colors.ink} size={20} />} disabled={protectedDecision || cameraVisible} onPress={() => setHelp(true)} />
         </ScrollView>
       </View>

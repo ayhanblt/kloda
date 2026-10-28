@@ -1,0 +1,173 @@
+{
+  "scope": "Host DOM approximation of actual RN test trees; native font/safe-area/keyboard/VoiceOver not validated",
+  "results": [
+    {
+      "locale": "tr",
+      "width": 320,
+      "image": "computer-tr-320.png",
+      "scroll": 305,
+      "buttons": [
+        {
+          "height": 48,
+          "text": "Geri"
+        },
+        {
+          "height": 48,
+          "text": "Eşleşmeyi yönet"
+        },
+        {
+          "height": 48,
+          "text": "Yerel durumu oku"
+        },
+        {
+          "height": 48,
+          "text": "Yedekleme Aktivitesi"
+        },
+        {
+          "height": 48,
+          "text": "Gelişmiş seçenek: WebDAV"
+        }
+      ]
+    },
+    {
+      "locale": "tr",
+      "width": 768,
+      "image": "computer-tr-768.png",
+      "scroll": 753,
+      "buttons": [
+        {
+          "height": 48,
+          "text": "Geri"
+        },
+        {
+          "height": 48,
+          "text": "Eşleşmeyi yönet"
+        },
+        {
+          "height": 48,
+          "text": "Yerel durumu oku"
+        },
+        {
+          "height": 48,
+          "text": "Yedekleme Aktivitesi"
+        },
+        {
+          "height": 48,
+          "text": "Gelişmiş seçenek: WebDAV"
+        }
+      ]
+    },
+    {
+      "locale": "en",
+      "width": 320,
+      "image": "computer-en-320.png",
+      "scroll": 305,
+      "buttons": [
+        {
+          "height": 48,
+          "text": "Back"
+        },
+        {
+          "height": 48,
+          "text": "Manage pairing"
+        },
+        {
+          "height": 48,
+          "text": "Read native status"
+        },
+        {
+          "height": 48,
+          "text": "Backup Activity"
+        },
+        {
+          "height": 48,
+          "text": "Advanced option: WebDAV"
+        }
+      ]
+    },
+    {
+      "locale": "en",
+      "width": 768,
+      "image": "computer-en-768.png",
+      "scroll": 768,
+      "buttons": [
+        {
+          "height": 48,
+          "text": "Back"
+        },
+        {
+          "height": 48,
+          "text": "Manage pairing"
+        },
+        {
+          "height": 48,
+          "text": "Read native status"
+        },
+        {
+          "height": 48,
+          "text": "Backup Activity"
+        },
+        {
+          "height": 48,
+          "text": "Advanced option: WebDAV"
+        }
+      ]
+    },
+    {
+      "locale": "de",
+      "width": 320,
+      "image": "computer-de-320.png",
+      "scroll": 305,
+      "buttons": [
+        {
+          "height": 48,
+          "text": "Zurück"
+        },
+        {
+          "height": 48,
+          "text": "Kopplung verwalten"
+        },
+        {
+          "height": 48,
+          "text": "Nativen Status lesen"
+        },
+        {
+          "height": 48,
+          "text": "Backup-Aktivität"
+        },
+        {
+          "height": 48,
+          "text": "Erweiterte Option: WebDAV"
+        }
+      ]
+    },
+    {
+      "locale": "de",
+      "width": 768,
+      "image": "computer-de-768.png",
+      "scroll": 753,
+      "buttons": [
+        {
+          "height": 48,
+          "text": "Zurück"
+        },
+        {
+          "height": 48,
+          "text": "Kopplung verwalten"
+        },
+        {
+          "height": 48,
+          "text": "Nativen Status lesen"
+        },
+        {
+          "height": 48,
+          "text": "Backup-Aktivität"
+        },
+        {
+          "height": 48,
+          "text": "Erweiterte Option: WebDAV"
+        }
+      ]
+    }
+  ]
+}

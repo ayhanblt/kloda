@@ -3,12 +3,12 @@ import UIKit
 import Photos
 import UniformTypeIdentifiers
 
-private struct DirectorySelection {
+struct DirectorySelection {
   let bookmark: String
   let displayName: String
 }
 
-private final class DirectoryPickerDelegate: NSObject, UIDocumentPickerDelegate, UIAdaptivePresentationControllerDelegate {
+final class DirectoryPickerDelegate: NSObject, UIDocumentPickerDelegate, UIAdaptivePresentationControllerDelegate {
   private var continuation: CheckedContinuation<DirectorySelection?, Never>?
 
   func pick(from viewController: UIViewController) async -> DirectorySelection? {
@@ -147,20 +147,28 @@ public class KlodaSyncRuntimeModule: Module {
     AsyncFunction("loadSchedule") { () -> [String: Any] in
       let defaults = UserDefaults.standard
       return [
-        "intervalHours": defaults.object(forKey: self.intervalKey) as? Int ?? 12,
+        "backupMode": defaults.string(forKey: "kloda.sync.backupMode") ?? (defaults.object(forKey: self.intervalKey) == nil ? "live" : "scheduled"),
+        "intervalHours": max(12, defaults.object(forKey: self.intervalKey) as? Int ?? 12),
         "localTime": defaults.string(forKey: self.timeKey) ?? "12:00"
       ]
     }
 
+    AsyncFunction("saveLiveSchedule") {
+      UserDefaults.standard.set("live", forKey: "kloda.sync.backupMode")
+      IosAutomaticCoordinator.shared.settingsChanged()
+    }
+
     AsyncFunction("saveSchedule") { (intervalHours: Int, localTime: String) in
-      guard intervalHours == 12 || intervalHours == 24 else {
-        throw NSError(domain: "KlodaSyncRuntime", code: 1, userInfo: [NSLocalizedDescriptionKey: "Interval must be 12 or 24 hours."])
+      guard intervalHours == 0 || intervalHours == 12 || intervalHours == 24 else {
+        throw NSError(domain: "KlodaSyncRuntime", code: 1, userInfo: [NSLocalizedDescriptionKey: "Interval must be Live, 12 or 24 hours."])
       }
       guard localTime.range(of: "^([01]\\d|2[0-3]):[0-5]\\d$", options: .regularExpression) != nil else {
         throw NSError(domain: "KlodaSyncRuntime", code: 2, userInfo: [NSLocalizedDescriptionKey: "Time must use HH:mm."])
       }
       UserDefaults.standard.set(intervalHours, forKey: self.intervalKey)
+      UserDefaults.standard.set(intervalHours == 0 ? "live" : "scheduled", forKey: "kloda.sync.backupMode")
       UserDefaults.standard.set(localTime, forKey: self.timeKey)
+      IosAutomaticCoordinator.shared.settingsChanged()
     }
   }
 
@@ -177,6 +185,7 @@ public class KlodaSyncRuntimeModule: Module {
     try IosSyncJournal().removeSource(sourceId: id)
     let sources = UserDefaults.standard.array(forKey: key) as? [[String: String]] ?? []
     UserDefaults.standard.set(sources.filter { $0["id"] != id }, forKey: key)
+    IosAutomaticCoordinator.shared.settingsChanged()
   }
 
   private func directorySourceAccess() -> [[String: Any]] {
@@ -207,6 +216,7 @@ public class KlodaSyncRuntimeModule: Module {
       "reference": selection.bookmark
     ]
     UserDefaults.standard.set(sources + [source], forKey: directorySourcesKey)
+    IosAutomaticCoordinator.shared.settingsChanged()
     return source
   }
 
@@ -236,6 +246,7 @@ public class KlodaSyncRuntimeModule: Module {
       "reference": reference
     ]
     UserDefaults.standard.set(sources + [source], forKey: photoSourcesKey)
+    IosAutomaticCoordinator.shared.settingsChanged()
     return source
   }
 

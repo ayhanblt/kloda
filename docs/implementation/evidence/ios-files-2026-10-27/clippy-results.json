@@ -1,0 +1,12 @@
+[
+  {
+    "target": "aarch64-apple-darwin",
+    "exitCode": 0,
+    "seconds": 4.0886712074279785
+  },
+  {
+    "target": "aarch64-apple-ios-sim",
+    "exitCode": 0,
+    "seconds": 13.176393270492554
+  }
+]

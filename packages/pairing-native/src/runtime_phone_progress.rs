@@ -25,6 +25,16 @@ impl Actor {
             {
                 self.terminal = Some((work.sid, Phase::Invalid));
             }
+            if error == PairingError::CandidateStale
+                && work.foreground_epoch.is_some()
+                && matches!(
+                    self.foreground.authorize(work.foreground_epoch),
+                    Err(PairingError::CandidateStale)
+                )
+            {
+                // UI departure drops transient pairing only; durable trust and Files remain.
+                return;
+            }
             if matches!(
                 error,
                 PairingError::StorageFailure
@@ -53,6 +63,8 @@ impl Actor {
     }
 
     fn phone_step(&mut self, work: &mut PhoneWork, _now: u64) -> Result<()> {
+        let foreground = self.foreground.clone();
+        drop(foreground.authorize(work.foreground_epoch)?);
         if work.io.is_none() {
             if work.source.is_none() {
                 return Ok(());
@@ -110,6 +122,7 @@ impl Actor {
                     return Ok(());
                 }
             }
+            let _authorization = foreground.authorize(work.foreground_epoch)?;
             let (engine, frame) = match work.source.take().ok_or(PairingError::CandidateStale)? {
                 PhoneSource::Scan(payload) => {
                     Phone::start(&mut self.installation.store, payload, channel)?
@@ -151,6 +164,7 @@ impl Actor {
         match &frame {
             Frame::Commit { .. } => {
                 let advances = !work.commit_seen;
+                let _authorization = foreground.authorize(work.foreground_epoch)?;
                 let ack = engine.commit(&mut self.installation.store, channel, &frame)?;
                 work.commit_seen = true;
                 work.approval_wait = false;
@@ -161,6 +175,7 @@ impl Actor {
             }
             Frame::Complete { .. } => {
                 let advances = !work.complete_seen;
+                let _authorization = foreground.authorize(work.foreground_epoch)?;
                 engine.complete(&mut self.installation.store, channel, &frame)?;
                 work.complete_seen = true;
                 if advances {

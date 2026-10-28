@@ -41,12 +41,31 @@ impl PairingOwner {
     pub(crate) fn invoke(&self, action: Action) -> Result<PairingSnapshot> {
         self.handle.request(action).map(PairingSnapshot)
     }
-    #[cfg(not(target_os = "android"))]
     pub(crate) fn foreground_action(&self, action: Action) -> Result<Action> {
         Ok(Action::Foreground {
             epoch: self.handle.foreground.capture()?,
             action: Box::new(action),
         })
+    }
+    #[cfg(any(target_os = "ios", all(test, feature = "ios-ffi")))]
+    pub(crate) fn foreground_epoch(&self) -> Result<u64> {
+        self.handle.foreground.capture()
+    }
+    #[cfg(any(target_os = "ios", all(test, feature = "ios-ffi")))]
+    pub(crate) fn foreground_action_at(&self, action: Action, expected: u64) -> Result<Action> {
+        let captured = self.foreground_action(action)?;
+        if !matches!(&captured, Action::Foreground { epoch, .. } if *epoch == expected) {
+            return Err(crate::error::PairingError::CandidateStale);
+        }
+        Ok(captured)
+    }
+    #[cfg(any(
+        target_os = "android",
+        target_os = "ios",
+        all(test, feature = "ios-ffi")
+    ))]
+    pub(crate) fn set_foreground(&self, active: bool) -> Result<()> {
+        self.handle.foreground.set_active(active)
     }
     #[cfg(not(target_os = "android"))]
     pub(crate) fn suspend_foreground(&self) -> Result<()> {
@@ -143,6 +162,42 @@ impl PairingOwner {
             Ok(json) => Ok(json),
             Err(error) => crate::file_sender_command::json(Err(error)),
         }
+    }
+    #[cfg(any(target_os = "ios", all(test, feature = "ios-ffi")))]
+    pub(crate) fn transfer_foreground(
+        &self,
+        record: String,
+        command: &str,
+        descriptor: i32,
+        epoch: u64,
+    ) -> Result<String> {
+        drop(self.handle.foreground.authorize(Some(epoch))?);
+        let task = crate::file_sender_command::Task::parse(command, descriptor)?;
+        self.handle.transfer_at(record, task, Some(epoch))
+    }
+    #[cfg(any(target_os = "ios", all(test, feature = "ios-ffi")))]
+    pub(crate) fn begin_background(&self, record: &str) -> Result<String> {
+        self.handle.begin_background(record)
+    }
+    #[cfg(any(target_os = "ios", all(test, feature = "ios-ffi")))]
+    pub(crate) fn end_background(&self, lease: &str) -> Result<()> {
+        self.handle.end_background(lease)
+    }
+    #[cfg(any(target_os = "ios", all(test, feature = "ios-ffi")))]
+    pub(crate) fn transfer_background(
+        &self,
+        record: String,
+        command: &str,
+        descriptor: i32,
+        lease: &str,
+    ) -> Result<String> {
+        let active = self.handle.background_guard(&record, lease)?;
+        self.handle
+            .foreground
+            .check_transfer_cancel(None, Some(&active))?;
+        let task = crate::file_sender_command::Task::parse_background(command, descriptor)?;
+        self.handle
+            .transfer_guarded(record, task, None, Some(active))
     }
     #[cfg(not(target_os = "android"))]
     pub fn approve_backup(

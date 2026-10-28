@@ -1,0 +1,18 @@
+{
+  "capture": "activity-tr-landscape",
+  "contentSize": "large",
+  "result": "READY",
+  "id": 18,
+  "stage": "activity-unknown",
+  "language": "tr",
+  "dimensions": {
+    "scale": 3,
+    "width": 852,
+    "height": 393,
+    "fontScale": 1
+  },
+  "active": true,
+  "durableProbeWarning": true,
+  "scope": "UI fixtures only; no actual peer or file transfer",
+  "sha256": "1d0e193ceb1c364715e3570f91c961f3cde9a3d2dadc986bde8b67de5f4bf13a"
+}

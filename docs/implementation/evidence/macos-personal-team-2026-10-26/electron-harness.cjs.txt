@@ -1,0 +1,24 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const binding = require(process.env.KLODA_TEST_ADDON);
+const directory = process.env.KLODA_TEST_AUTHORITY;
+const mode = process.argv[2];
+(async () => {
+ assert.ok(['create','reopen'].includes(mode));
+ assert.equal(fs.existsSync(directory + '/initialized'), mode === 'reopen');
+ const owner = await binding.openPairing(directory);
+ try {
+  const status = JSON.parse(await owner.status());
+  assert.equal(status.hardwareClass, 'secure_enclave');
+  assert.equal(status.repairRequired, false);
+  assert.equal(status.qr, undefined); assert.equal(status.recordId, undefined);
+  console.log('ELECTRON_NAPI_SECURE_ENCLAVE_PASS');
+  const first = JSON.parse(await owner.receiverStatus());
+  assert.equal(first.available, true); assert.equal(first.activeTransfers, 0); assert.equal(first.errorCode, undefined);
+  console.log('ELECTRON_NAPI_RECEIVER_READY_PASS');
+  await owner.suspendPairing();
+  const after = JSON.parse(await owner.receiverStatus());
+  assert.equal(after.available, true); assert.equal(after.errorCode, undefined);
+  console.log('ELECTRON_NAPI_RECEIVER_AFTER_SUSPEND_PASS');
+ } finally { await owner.close(); console.log('ELECTRON_NAPI_OWNER_CLOSED'); }
+})().catch(error => { console.error('ELECTRON_NAPI_VALIDATION_FAILED', error.code === 'ERR_ASSERTION' ? 'assertion' : 'native_error'); process.exitCode = 1; });

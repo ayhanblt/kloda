@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-23T19:32:41.017135+00:00",
+  "sourceBase": "34dcbb8",
+  "scope": "Android foreground queue durable access retry and truthful Activity; not full mobile delivery",
+  "checks": [
+    {
+      "check": "mobile Jest",
+      "command": "npm test --workspace @kloda/mobile",
+      "exitCode": 0,
+      "suites": 6,
+      "tests": 35
+    },
+    {
+      "check": "mobile lint",
+      "command": "npm run lint --workspace @kloda/mobile",
+      "exitCode": 0
+    },
+    {
+      "check": "mobile TypeScript",
+      "command": "npx tsc --noEmit -p apps/mobile/tsconfig.json",
+      "exitCode": 0
+    },
+    {
+      "check": "Android main and instrumentation Kotlin compile",
+      "command": "./gradlew :my-module:compileDebugKotlin :my-module:compileDebugAndroidTestKotlin --offline --console=plain",
+      "exitCode": 0,
+      "notes": "Final 3s build. Initial native preBuild rebuilt four Android JNI ABIs with 8 Rust dead-code warnings; Gradle deprecation warnings remain. One final sandbox attempt failed on external Gradle cache lock; approved external retry succeeded."
+    },
+    {
+      "check": "production retry model + real worker JVM units",
+      "exitCode": 0,
+      "scope": "Actual FilesRun/AndroidFilesRunWorker; journal test double, six worker cases plus actual policy assertions; not real Android SQLite/runtime",
+      "output": "worker-checks-output.txt"
+    },
+    {
+      "check": "production SQL disposable host SQLite",
+      "command": "python3 tools/test-android-files-retry.py",
+      "exitCode": 0,
+      "scope": "Schema3->4 additive SQL; reopen, activation selection, attempts bounds, immutable Completed + suppression preserved, terminal due cleanup; not SQLiteOpenHelper runtime migration"
+    },
+    {
+      "check": "Expo iOS and Android exports",
+      "command": "npm run build --workspace @kloda/mobile",
+      "exitCode": 0,
+      "scope": "JavaScript bundles only, not iOS native sender/build acceptance"
+    },
+    {
+      "check": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "review": {
+    "agent": "independent Codex reviewer, not Astra",
+    "findingsFixed": [
+      "active record/run selection and durable activation order",
+      "inactive retry_wait rendered paused",
+      "terminal finish clears retry metadata"
+    ],
+    "runtimeNotExecutedByReviewer": true,
+    "final": "Independent reviewer verified terminal retry cleanup and previous two fixes; no further blocking source finding. Reviewer ran no checks."
+  },
+  "notRun": [
+    "Android instrumentation/emulator/physical device",
+    "real LAN or production native owner",
+    "iOS native pairing/transfer/build",
+    "background/scheduled OS execution",
+    "Windows/macOS/Linux new acceptance/probes",
+    "clippy: Rust source unchanged"
+  ],
+  "limits": [
+    "Foreground only; leaving Activity or background pauses work; resume requires explicit Sync Now.",
+    "Only lan_unavailable/connection_closed retry automatically; denied/revoked/source/conflict/outcome_unknown and local/storage conditions retain work for manual resolution.",
+    "Reboot cannot reuse elapsedRealtime proof: retained budget, fresh minimum 60s wait. Missing boot counter disables automatic retry visibly.",
+    "Explicit Sync Now after terminal run creates a new run; unfinished run resumes its same budget/action.",
+    "Run finished means scan returned, never aggregate confirmed completion. Per-file native receipts stay authoritative.",
+    "No user archive or authority opened; no Git index/history mutation.",
+    "Existing single owner/queue lifecycle retained; worker doubles are not a concurrency/runtime proof."
+  ],
+  "sourceSha256": {
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt": "336f6561e420c06b3e8eb5a3773bc90889c741e759451c0eb429256b5d994392",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesRunChecks.kt": "2ff121878785f2f96e2778dba7ea75f9a215e4e36a4ae4fdcd15504ac0956790",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesQueue.kt": "d9863423ad114ac033e4376eba4ccd884babd979efd181b8dbf3e746af1b13ec",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesRunJournal.kt": "183802d349fe97e6c7e9ce6395e111f509a9cc25f094651867e5adc87ae4b3a5",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesRunWorker.kt": "6e5963df6a12003a4054ecd95378aed6ce156052539cf07f8efbfb6d8a231106",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSyncJournal.kt": "cf6bfa9da440ba8c8251b048afbd63445ae8b1edc4605e5dfafd7c2b36d7abde",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/FilesRun.kt": "8c36ccd24cfdf118cd5369c8f0fa2a228feda85015fbf2287cc36359e688fcb2",
+    "apps/mobile/src/pages/activity/ui/activity-page.spec.tsx": "f0de05014daa84556b9319e7ac73d314fe3470fca0211a21f9ee51b7ee84b4d0",
+    "apps/mobile/src/pages/activity/ui/activity-page.tsx": "1a8f2cb7fe1890ee94947e32d49ba45979cd51361495f1dbca145179627487a8",
+    "apps/mobile/src/shared/api/file-transfer.spec.ts": "9f2d769e599d32899c50b2451b7141acff98890966ee711f79f514891485224e",
+    "apps/mobile/src/shared/api/file-transfer.ts": "7f6cd46e9c9c45eaac1cf0bee09948e6da34b7790e87f7075772684dc458696a",
+    "apps/mobile/src/shared/i18n/locales/de.json": "0792b43d59cc006c6fef466d14661dca52821c35078a4eba9cd75f2fb9b78ab2",
+    "apps/mobile/src/shared/i18n/locales/en.json": "b4aa647ff405ee575ee2aa9c4b05424e34767e8a247ded9ff6ba1761d1e2a781",
+    "apps/mobile/src/shared/i18n/locales/tr.json": "4356db8723af711e65c5ec79bf82ae592acf8b00d8fe98861a92493f3a2d5897",
+    "tools/test-android-files-retry.py": "e5e7554846bc8dd6d755bb514c88d9673969076892860bd7125d171201acd3f2"
+  }
+}

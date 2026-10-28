@@ -1,0 +1,12 @@
+PASS pause durable across fresh Context/reconcile; no automatic unpause on opening
+PASS failed resume commit stays blocked even when preferences memory changed
+PASS stale finally token cannot cancel or replace newer same-occurrence dispatch
+PASS actual Calendar spring gap, fall overlap once, and timezone re-anchor
+PASS missed pending occurrence survives time change and backward-wall catch-up
+PASS timezone re-anchor during manual transfer leaves that transfer active
+PASS monotonic five-minute dispatch projection ignores forward/backward wall deadline hints
+PASS early pairing-not-complete retains future Live opportunity without trust resume or queue start
+PASS linked terminal run-A recovers without queue.start creating run-B
+PASS duplicate dispatch coalesced; delayed onStop token-A cannot interrupt token-B
+HOST ONLY: Android scheduling, persisted delivery, process death and device acceptance NOT RUN
+

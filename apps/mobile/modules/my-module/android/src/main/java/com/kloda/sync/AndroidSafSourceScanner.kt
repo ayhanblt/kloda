@@ -2,6 +2,7 @@ package com.kloda.sync
 
 import android.content.ContentResolver
 import android.net.Uri
+import android.os.Build
 import android.os.CancellationSignal
 import android.provider.DocumentsContract
 
@@ -21,7 +22,8 @@ internal class AndroidSafSourceScanner(private val contentResolver: ContentResol
     return tree
   }
 
-  fun checkedDocument(treeReference: String, reference: String): Uri {
+  fun checkedDocument(treeReference: String, reference: String, cancellation: CancellationSignal? = null, check: () -> Unit = {}): Uri {
+    cancellation?.throwIfCanceled(); check()
     val tree = permittedTree(treeReference)
     val document = Uri.parse(reference)
     if (document.scheme != "content" || document.authority != tree.authority ||
@@ -30,8 +32,32 @@ internal class AndroidSafSourceScanner(private val contentResolver: ContentResol
       throw FilesFailure("source_permission_lost")
     }
     val root = DocumentsContract.buildDocumentUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree))
-    if (!DocumentsContract.isChildDocument(contentResolver, root, document)) throw FilesFailure("source_changed")
+    val contained = if (Build.VERSION.SDK_INT >= 29) DocumentsContract.isChildDocument(contentResolver, root, document)
+      else listedDescendant(tree, DocumentsContract.getTreeDocumentId(tree), DocumentsContract.getDocumentId(document), emptySet(), cancellation, check)
+    cancellation?.throwIfCanceled(); check()
+    if (!contained) throw FilesFailure("source_changed")
     return document
+  }
+
+  // Document IDs are opaque: older APIs prove membership through provider children, never path prefixes.
+  private fun listedDescendant(tree: Uri, parent: String, target: String, ancestors: Set<String>, cancellation: CancellationSignal?, check: () -> Unit): Boolean {
+    cancellation?.throwIfCanceled(); check()
+    if (parent in ancestors || ancestors.size >= 256) throw FilesFailure("backup_path_rejected")
+    permittedTree(tree.toString())
+    val directories = mutableListOf<String>()
+    contentResolver.query(DocumentsContract.buildChildDocumentsUriUsingTree(tree, parent),
+      arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_MIME_TYPE), null, null, null, cancellation
+    )?.use { cursor ->
+      val id = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
+      val mime = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE)
+      while (cursor.moveToNext()) {
+        cancellation?.throwIfCanceled(); check()
+        val child = cursor.getString(id) ?: throw FilesFailure("source_changed")
+        if (child == target) return true
+        if (cursor.getString(mime) == DocumentsContract.Document.MIME_TYPE_DIR) directories.add(child)
+      }
+    } ?: throw FilesFailure("source_changed")
+    return directories.any { listedDescendant(tree, it, target, ancestors + parent, cancellation, check) }
   }
 
   private fun scanDirectory(treeUri: Uri, documentId: String, prefix: String, ancestors: Set<String>, cancellation: CancellationSignal?): Sequence<QueuedSourceFile> = sequence {
@@ -60,6 +86,7 @@ internal class AndroidSafSourceScanner(private val contentResolver: ContentResol
       val sizeIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_SIZE)
       while (cursor.moveToNext()) {
         cancellation?.throwIfCanceled()
+        permittedTree(treeUri.toString())
         val name = cursor.getString(displayNameIndex)
         val childId = cursor.getString(documentIdIndex)
         if (name.isNullOrEmpty() || name == "." || name == ".." || name.any { it == '/' || it == '\\' || it.isISOControl() }) {
@@ -68,13 +95,14 @@ internal class AndroidSafSourceScanner(private val contentResolver: ContentResol
         val relativePath = if (prefix.isEmpty()) name else "$prefix/$name"
         if (cursor.getString(mimeTypeIndex) == DocumentsContract.Document.MIME_TYPE_DIR) {
           val child = DocumentsContract.buildDocumentUriUsingTree(treeUri, childId).toString()
-          checkedDocument(treeUri.toString(), child)
+          // Pre29 discovery already traverses provider edges; actual opens revalidate independently.
+          if (Build.VERSION.SDK_INT >= 29) checkedDocument(treeUri.toString(), child, cancellation)
           yieldAll(scanDirectory(treeUri, childId, relativePath, ancestors + documentId, cancellation))
         } else {
           val size = if (cursor.isNull(sizeIndex)) 0L else cursor.getLong(sizeIndex)
           val modified = if (cursor.isNull(modifiedIndex)) 0L else cursor.getLong(modifiedIndex)
           val fileUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, childId).toString()
-          checkedDocument(treeUri.toString(), fileUri)
+          if (Build.VERSION.SDK_INT >= 29) checkedDocument(treeUri.toString(), fileUri, cancellation)
           yield(QueuedSourceFile(fileUri, relativePath, "$size:$modified", size))
         }
       }

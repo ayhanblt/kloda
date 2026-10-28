@@ -1,0 +1,61 @@
+{
+  "status": "BLOCKED",
+  "reason": "FreshAPI36 PlayStore guest ADB unauthorized with default and separate5038testhostkey; no furtherinfra investigation",
+  "apkBuild": {
+    "command": [
+      "./gradlew",
+      ":app:assembleDebug",
+      "--offline",
+      "--console=plain",
+      "-Pandroid.lint.useK2Uast=false"
+    ],
+    "exitCode": 0,
+    "gradleReportedSeconds": 23,
+    "apkSha256": "4a12486c56f7df3f771c0079f84e3334546fa11bda15e3f332feea35d7bca393",
+    "apkBytes": 293775546,
+    "scope": "Debug build only; no image/dependency updates"
+  },
+  "avdCreate": {
+    "command": [
+      "<installed-sdk>/cmdline-tools/latest/bin/avdmanager",
+      "create",
+      "avd",
+      "-n",
+      "Kloda-Step10-20261028",
+      "-k",
+      "system-images;android-36;google_apis_playstore;arm64-v8a",
+      "-d",
+      "5.1in WVGA"
+    ],
+    "name": "Kloda-Step10-20261028",
+    "exitCode": 0,
+    "seconds": 0.6991394169745035,
+    "avdHome": "/tmp/kloda-step10-android/avd",
+    "scope": "New isolatedAPI36 usingobservedbuiltin deviceprofile; no overwriteexistingAVD"
+  },
+  "privateBoot": {
+    "exitCode": 1,
+    "bootCompleted": false,
+    "seconds": 48.45586566597922,
+    "lastOutput": "adb: device unauthorized.\nThis adb server's $ADB_VENDOR_KEYS is /tmp/kloda-step10-android/adbkey\nTry 'adb kill-server' if that seems wrong.\nOtherwise check for a confirmation dialog on your device.\n"
+  },
+  "notRun": [
+    "APKinstall",
+    "appcoldlaunch",
+    "productionUIrender",
+    "screenshot",
+    "nativeowner/trust/Photos/media/probe"
+  ],
+  "ownedProcessPortsStillOpen": {
+    "5590": false,
+    "5591": false,
+    "5038": false
+  },
+  "incidentAfterIsolation": {
+    "originalExists": false,
+    "backupExists": true,
+    "backupHashUnchanged": true
+  },
+  "configRestoreOrCleanup": false,
+  "fixtureSourceSha256": "1cbb3bbd23483a658467f34397699838a76fc896b988ab81aed7a81564d59c02"
+}

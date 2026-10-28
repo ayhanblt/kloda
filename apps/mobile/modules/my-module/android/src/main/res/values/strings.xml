@@ -1,0 +1,6 @@
+<resources>
+  <string name="kloda_backup_channel">Backups</string>
+  <string name="kloda_backup_title">Kloda backup</string>
+  <string name="kloda_backup_body">Backup is active. Open Kloda to view progress or pause.</string>
+  <string name="kloda_backup_failure">Backup needs attention. Open Kloda for details.</string>
+</resources>

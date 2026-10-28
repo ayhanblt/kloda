@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "recordedUtc": "2026-10-24T13:04:22.609095+00:00",
+  "scope": "iOS C ABI/Swift foundation only; curated tool-result observations, not full raw console archive",
+  "sourceSha256": [
+    {
+      "path": "packages/pairing-native/Cargo.toml",
+      "sha256": "d77485a69f81952a04e525a51aec536b5e5e64f2ff6a1619840571e0c0a262fc"
+    },
+    {
+      "path": "packages/pairing-native/src/lib.rs",
+      "sha256": "7817e056b710ba90c35854107cbaa9e84b1937f39afa8788226ba7373df8961d"
+    },
+    {
+      "path": "packages/pairing-native/src/ios_bridge.rs",
+      "sha256": "64d3077c516baca0c70d0026276f477b107d17256a240e47992ee207152861b5"
+    },
+    {
+      "path": "packages/pairing-native/src/ios_bridge_command.rs",
+      "sha256": "de1bc43988d55c6316081a2ca305771047c98a0008c3e3a1668748be89af26ac"
+    },
+    {
+      "path": "packages/pairing-native/src/ios_bridge_registry.rs",
+      "sha256": "644bb5eb78c3fe9e1f39397180a45ecd8e4f0006a2052081736a9bd26e17eac6"
+    },
+    {
+      "path": "packages/pairing-native/src/ios_bridge_tests.rs",
+      "sha256": "0b1b562f073cc7a24b441cc5a27ef5f408117d2aaea68db4c18e75489fea9508"
+    },
+    {
+      "path": "packages/pairing-native/apple/include/KlodaPairingNative.h",
+      "sha256": "dd9bf7a671a17359c012c5f70e4d68a956a3a2f6dd2db7e0d7fd22725c460259"
+    },
+    {
+      "path": "packages/pairing-native/apple/IosPairingReply.swift",
+      "sha256": "f61dffa0f0a338975ef9d544df6be9bc4b84330264bba8475ed77bfb8d6d4c5e"
+    },
+    {
+      "path": "packages/pairing-native/apple/IosPairingNativeCall.swift",
+      "sha256": "0d1b1afd8dfc34c52e8f282aee086c6dc17f887adf56052c1727db84770a1dfc"
+    },
+    {
+      "path": "tools/build-native-ios.mjs",
+      "sha256": "8552b2d440832f1625f9961b02b9426b83a303c4812abbf8904ab1a7548bf7e8"
+    }
+  ],
+  "checks": [
+    {
+      "check": "Rust ABI pure host",
+      "status": "PASS",
+      "count": 7,
+      "exit": 0,
+      "scope": "No real owner; cfg(test) host open forced unsupported"
+    },
+    {
+      "check": "Rustfmt new four Rust files",
+      "status": "PASS",
+      "exit": 0
+    },
+    {
+      "check": "Clippy host lib+tests and arm64 iOS simulator lib",
+      "status": "PASS",
+      "exit": [
+        0,
+        0
+      ],
+      "flags": "--locked --offline --no-default-features --features ios-ffi -- -D warnings",
+      "toolchain": "1.99.0 explicit PATH/RUSTC/clippy-driver"
+    },
+    {
+      "check": "Swift decoder host",
+      "status": "PASS",
+      "exit": 0
+    },
+    {
+      "check": "Swift ownership host",
+      "status": "PASS",
+      "exit": 0,
+      "scope": "C test stub; exact-once free for valid/malformed/oversize/invalid UTF8, null safe"
+    },
+    {
+      "check": "Swift ABI+decoder+ownership iOS16.4 simulator typecheck",
+      "status": "PASS",
+      "exit": 0
+    },
+    {
+      "check": "Device+simulator C export link only",
+      "status": "PASS",
+      "exit": [
+        0,
+        0
+      ],
+      "scope": "No executable called; vtool confirms iOS and iOS simulator min16.4 SDK27.1"
+    },
+    {
+      "check": "Debug arm64 device+simulator XCFramework",
+      "status": "PASS",
+      "exit": 0,
+      "exports": [
+        "kloda_ios_open",
+        "kloda_ios_request",
+        "kloda_ios_suspend",
+        "kloda_ios_transfer",
+        "kloda_ios_reply_free"
+      ]
+    },
+    {
+      "check": "Rust source size",
+      "status": "PASS",
+      "exit": 0
+    },
+    {
+      "check": "Native dependency policy self-test",
+      "status": "PASS",
+      "exit": 0,
+      "negativeCases": 15
+    },
+    {
+      "check": "Legacy Network.framework property SDK compile",
+      "status": "PASS",
+      "exit": 0,
+      "scope": "API availability only; no invocation/network or route proof"
+    }
+  ],
+  "earlierFailures": [
+    "Clippy Homebrew1.98.1 vs Rust1.99 mixed compiler E0514/E0463: not PASS; resolved by explicit tool paths, isolated validation target",
+    "nm bitcode version and initial capture ENOBUFS: not PASS; final Mach-O --no-llvm-bc 8MiB verified package succeeds"
+  ],
+  "review": "Independent Sol source review; initial JSON suspend/decoder-size/malformed-error findings fixed, final no blocking source finding. No runtime executed by reviewer. Astra planning only.",
+  "notRun": [
+    "Expo registration/final application link",
+    "iOS actual identity/storage/route/clock owner",
+    "actual pairing/TLS/Files/Photos transfer",
+    "simulator boot/device/probe",
+    "physical acceptance/signing/distribution"
+  ],
+  "unchanged": [
+    "user archive",
+    "keys/pins/certificates/epoch/authority",
+    "iOS unsupported providers",
+    "Git index/commits/remotes/default model/effort/default Rust toolchain"
+  ]
+}

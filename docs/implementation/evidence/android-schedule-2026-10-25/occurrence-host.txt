@@ -1,0 +1,6 @@
+Actual Kotlin occurrence model PASS: 5-attempt OS cap, monotonic+boot deadline with wall-clock changes, pause, unknown clock, overflow
+........
+----------------------------------------------------------------------
+Ran 8 tests in 2.777s
+
+OK

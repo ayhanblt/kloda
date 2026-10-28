@@ -1,0 +1,90 @@
+[
+  {
+    "path": "apps/mobile/babel.config.cjs",
+    "sha256": "32e605ab4f1de11cf43b29c75d4bf7cd92429a7142fab533212780e627604c2b"
+  },
+  {
+    "path": "apps/mobile/src/shared/api/webdav.ts",
+    "sha256": "9864e8c1762f9e0fa34a6c17c5d1c75ad0bd9c4890f7e6e83d5ad9bbb05e6476"
+  },
+  {
+    "path": "apps/mobile/src/shared/api/webdav-settings.ts",
+    "sha256": "6763373354cd7afb12b7355b01a285f16e7bd18b87c507f888fb71c54b983178"
+  },
+  {
+    "path": "apps/mobile/src/shared/api/webdav-settings.spec.ts",
+    "sha256": "f109ba3923c2c0fb0669474f76662fd9b74285e1075086ae46a539821453883d"
+  },
+  {
+    "path": "apps/mobile/src/app/App.tsx",
+    "sha256": "cb02d0449b0feb7c8ad59b76f02edb4659b735639b5f68d17c8515c1e8df62d3"
+  },
+  {
+    "path": "apps/mobile/src/app/App.spec.tsx",
+    "sha256": "f2d9dcda95760c009bbdecb842ada04e696c0613c0660bc08bb03003e9af2037"
+  },
+  {
+    "path": "apps/mobile/src/features/pairing/ui/pairing-button.tsx",
+    "sha256": "e43f061b5daea578d9bf0ac640ca9ebf4c71a09b57bcf0d75317cc6fe379df34"
+  },
+  {
+    "path": "apps/mobile/src/features/pairing/ui/pairing-button.spec.tsx",
+    "sha256": "89bf0799165d8fea5a045d394026798530ba5ccf7b4cb094fec65b3c811d1aa7"
+  },
+  {
+    "path": "apps/mobile/src/pages/activity/ui/activity-page.tsx",
+    "sha256": "d1f40318d285002fb7e5937b92beb49f95bc568bd839e739ad7abeb3c4e77c62"
+  },
+  {
+    "path": "apps/mobile/src/pages/activity/ui/activity-page.spec.tsx",
+    "sha256": "2c98d010798713b042be9b3b102a7fca2a99f129bda8e1d3242b6bda8d57444d"
+  },
+  {
+    "path": "apps/mobile/src/pages/activity/ui/activity-automatic.spec.tsx",
+    "sha256": "bebdc9b24a55b5c985908e43d35d8047c23edc21584dc48e0c9af2f1d01d968c"
+  },
+  {
+    "path": "packages/pairing-native/apple/tests/IosSnapshotCostChecks.swift",
+    "sha256": "03271cd623b16af70b75e77b6d6e1ff59df3a5ea97ba9354f984b33cb8901b3f"
+  },
+  {
+    "path": "packages/pairing-native/apple/tests/IosIntegratedUiChecks.js",
+    "sha256": "1cbb3bbd23483a658467f34397699838a76fc896b988ab81aed7a81564d59c02"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosFilesSource.swift",
+    "sha256": "85cb96ff8b0e8ed1c4b29e9e91f085049877693245ddee53682cac88235d549c"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosFilesQueue.swift",
+    "sha256": "7c7cc5f37ce567c89062a2a8d21fe629c869b5ceac5fb738c8bac5b8cb09676f"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosPhotosImport.swift",
+    "sha256": "b1faddd18e05d7a6db209cb0953db61aaecb0f70f99abc2a8a5087f75b0232d9"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidStorageErrors.kt",
+    "sha256": "99fe7febc52c8df55b08e6403e264ddafe423c6296aecdfe6bf17ebe78671759"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesQueue.kt",
+    "sha256": "5deaffe58aec2aa1ad99011ab159a5679434e39b08aad9a285e6d23db9729d01"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidOwnRestore.kt",
+    "sha256": "8240ddd6fcc62185159aead5e2000dc41d88583853cfb8cdc25f2ec87daeb758"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosRestore.kt",
+    "sha256": "39881ef0c8e11a963fc686d0d8bc11cea2a147e519c5ddc95b31cae60763d30e"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidStorageErrorsChecks.kt",
+    "sha256": "2eabfe263899a74033e0ecd3ed35be57778c08eda004156f60b0ac926931547e"
+  },
+  {
+    "path": "packages/pairing-native/apple/tests/IosFilesSnapshotChecks.swift",
+    "sha256": "4305a2298e23b6e6801f33600a90987cdcdd7c1f9c8de65f110370e3ff220488"
+  }
+]

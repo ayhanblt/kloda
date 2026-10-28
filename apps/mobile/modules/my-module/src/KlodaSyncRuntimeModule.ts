@@ -32,6 +32,7 @@ export interface NativeSourceJobPreparation {
 }
 
 export interface NativeSchedule {
+  backupMode?: 'live' | 'scheduled';
   intervalHours: 12 | 24;
   localTime: string;
 }
@@ -56,6 +57,7 @@ declare class KlodaSyncRuntimeModule extends NativeModule<{}> {
   selectPhotoAlbum(id: string): Promise<NativePhotoSource | null>;
   selectPhotoLibrary(): Promise<NativePhotoSource | null>;
   saveSchedule(intervalHours: 12 | 24, localTime: string): Promise<void>;
+  saveLiveSchedule?(): Promise<void>;
   saveStorageConfig(endpoint: string, targetPath: string, username: string): Promise<void>;
 }
 

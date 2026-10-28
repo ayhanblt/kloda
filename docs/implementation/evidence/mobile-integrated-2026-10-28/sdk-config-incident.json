@@ -1,0 +1,21 @@
+{
+  "observed": {
+    "devices.xml": {
+      "exists": false
+    },
+    "devices.xml.old": {
+      "exists": true,
+      "size": 2909,
+      "sha256": "750f15c6ab081b2a2d735f7f9da60ef1472062860de7683553e3016cdf59bfab",
+      "mtimeUtc": "2026-07-01T06:18:15.313498+00:00",
+      "xmlWellFormed": true
+    }
+  },
+  "toolMessage": "Error parsing devices.xml, backing up to devices.xml.old",
+  "unknown": [
+    "pre-command existence/hash of either file",
+    "whether .old existed before command",
+    "SDK schema compatibility and previous history"
+  ],
+  "response": "No restore/reset/delete/content dump. All subsequent manager commands isolated to /tmp user/AVD roots."
+}

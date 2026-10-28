@@ -1,0 +1,520 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-10-27T19:15:03.786871+00:00",
+  "head": "34dcbb8c204cb01e84583655651d10cb5baca8ec",
+  "scope": "Mobile approved checklist step7, iOS Photos source/isolated validation only; current uncommitted source hashes below",
+  "environment": {
+    "sdk": "iPhoneSimulator27.1",
+    "runtime": "iOS26.5",
+    "architecture": "arm64",
+    "minimumCompileTarget": "iOS16.4",
+    "physical": false
+  },
+  "checks": [
+    {
+      "check": "tests",
+      "exitCode": 0,
+      "seconds": 7.213686943054199,
+      "command": [
+        "npm",
+        "run",
+        "test",
+        "--workspace",
+        "@kloda/mobile",
+        "--",
+        "--runInBand"
+      ]
+    },
+    {
+      "check": "typecheck",
+      "exitCode": 0,
+      "seconds": 1.6158509254455566,
+      "command": [
+        "node_modules/.bin/tsc",
+        "--noEmit",
+        "-p",
+        "apps/mobile/tsconfig.json"
+      ]
+    },
+    {
+      "check": "lint",
+      "exitCode": 0,
+      "seconds": 3.022829055786133,
+      "command": [
+        "npm",
+        "run",
+        "lint"
+      ]
+    },
+    {
+      "check": "policy",
+      "exitCode": 0,
+      "seconds": 0.39612317085266113,
+      "command": [
+        "node",
+        "tools/check-native-dependencies.mjs",
+        "--self-test"
+      ]
+    },
+    {
+      "check": "size",
+      "exitCode": 0,
+      "seconds": 0.06426811218261719,
+      "command": [
+        "node",
+        "tools/check-rust-size.mjs"
+      ]
+    }
+  ],
+  "mobileTestSummary": {
+    "suites": 8,
+    "tests": 68,
+    "failed": 0
+  },
+  "swiftHost": [
+    {
+      "check": "codec",
+      "compileExitCode": 0,
+      "compileSeconds": 2.6205081939697266,
+      "command": [
+        "xcrun",
+        "swiftc",
+        "-warnings-as-errors",
+        "-module-cache-path",
+        "/tmp/kloda-ios-step7/host-cache",
+        "packages/pairing-native/apple/IosPairingReply.swift",
+        "apps/mobile/modules/my-module/ios/IosPhotoJson.swift",
+        "apps/mobile/modules/my-module/ios/IosPhotoManifest.swift",
+        "packages/pairing-native/apple/tests/IosPhotoManifestChecks.swift",
+        "-lsqlite3",
+        "-o",
+        "/tmp/kloda-ios-step7/final-codec-checks"
+      ],
+      "runs": [
+        {
+          "phase": "codec",
+          "exitCode": 0,
+          "output": "IOS_PHOTO_MANIFEST_CHECKS_PASS invalid=26 vector=android-v1-contract bounds=strict"
+        }
+      ],
+      "executableSha256": "d484fd961acf291a77123fc8acdf8080a3c0ef004af77d753affd966aaf1516e"
+    },
+    {
+      "check": "journal",
+      "compileExitCode": 0,
+      "compileSeconds": 3.2802460193634033,
+      "command": [
+        "xcrun",
+        "swiftc",
+        "-warnings-as-errors",
+        "-module-cache-path",
+        "/tmp/kloda-ios-step7/host-cache",
+        "apps/mobile/modules/my-module/ios/IosSyncJournal.swift",
+        "apps/mobile/modules/my-module/ios/IosFilesJournal.swift",
+        "apps/mobile/modules/my-module/ios/IosFilesRestoreJournal.swift",
+        "apps/mobile/modules/my-module/ios/IosFilesRunJournal.swift",
+        "apps/mobile/modules/my-module/ios/IosFilesJob.swift",
+        "apps/mobile/modules/my-module/ios/IosFilesTransfer.swift",
+        "apps/mobile/modules/my-module/ios/IosPhotoJson.swift",
+        "apps/mobile/modules/my-module/ios/IosPhotoManifest.swift",
+        "apps/mobile/modules/my-module/ios/IosPhotosJournal.swift",
+        "packages/pairing-native/apple/IosPairingReply.swift",
+        "packages/pairing-native/apple/tests/IosPhotosJournalChecks.swift",
+        "-lsqlite3",
+        "-o",
+        "/tmp/kloda-ios-step7/final-journal-checks"
+      ],
+      "runs": [
+        {
+          "phase": "seed",
+          "exitCode": 0,
+          "output": "IOS_PHOTOS_JOURNAL_PASS phase=seed retained_identity=true uncertain_not_completed=true"
+        },
+        {
+          "phase": "reopen",
+          "exitCode": 0,
+          "output": "IOS_PHOTOS_JOURNAL_PASS phase=reopen retained_identity=true uncertain_not_completed=true"
+        }
+      ],
+      "executableSha256": "3d926c2b5495d564867de1e20f03f34b348d33f8cac6ac2680d1ea42b5c2c6c2"
+    }
+  ],
+  "photoKitFixtureBuild": {
+    "command": [
+      "xcrun",
+      "swiftc",
+      "-warnings-as-errors",
+      "-target",
+      "arm64-apple-ios16.4-simulator",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk",
+      "-module-cache-path",
+      "/tmp/kloda-ios-step7/cache",
+      "apps/mobile/modules/my-module/ios/IosPhotosImport.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesSnapshot.swift",
+      "apps/mobile/modules/my-module/ios/IosPhotosRestore.swift",
+      "apps/mobile/modules/my-module/ios/IosPhotoManifest.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesJob.swift",
+      "apps/mobile/modules/my-module/ios/IosSourceScanner.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesUpload.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesQueue.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesRunJournal.swift",
+      "apps/mobile/modules/my-module/ios/IosOwnRestore.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesRunner.swift",
+      "apps/mobile/modules/my-module/ios/IosRestoreDestination.swift",
+      "apps/mobile/modules/my-module/ios/IosPhotosRunner.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesTransfer.swift",
+      "apps/mobile/modules/my-module/ios/IosPhotosJournal.swift",
+      "apps/mobile/modules/my-module/ios/IosOwnBackups.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesRestoreJournal.swift",
+      "apps/mobile/modules/my-module/ios/IosPhotosSource.swift",
+      "apps/mobile/modules/my-module/ios/IosPhotoJson.swift",
+      "apps/mobile/modules/my-module/ios/IosSyncJournal.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesSource.swift",
+      "apps/mobile/modules/my-module/ios/IosFilesJournal.swift",
+      "packages/pairing-native/apple/IosPairingReply.swift",
+      "packages/pairing-native/apple/tests/IosPhotosSessionStub.swift",
+      "packages/pairing-native/apple/tests/IosPhotosLibraryChecks.swift",
+      "packages/pairing-native/apple/tests/IosPhotosVideoChecks.swift",
+      "-lsqlite3",
+      "-o",
+      "/tmp/kloda-ios-step7/PhotosChecks.app/PhotosChecks"
+    ],
+    "appInfo": {
+      "CFBundleExecutable": "PhotosChecks",
+      "CFBundleIdentifier": "com.kloda.tests.photosstep7",
+      "CFBundleName": "PhotosChecks",
+      "CFBundlePackageType": "APPL",
+      "CFBundleShortVersionString": "1.0",
+      "CFBundleVersion": "1",
+      "LSRequiresIPhoneOS": true,
+      "MinimumOSVersion": "16.4",
+      "NSPhotoLibraryAddUsageDescription": "Disposable synthetic Photos import checks.",
+      "NSPhotoLibraryUsageDescription": "Disposable synthetic Photos checks.",
+      "UIDeviceFamily": [
+        1,
+        2
+      ],
+      "UILaunchScreen": {}
+    }
+  },
+  "photoKitRuntime": [
+    {
+      "phase": "seed",
+      "state": "PASS",
+      "seconds": 3.303786039352417,
+      "executableSha256": "3aab20d3800bc7e77e885d940ffcdccdc8f8e76ff60c25317aad9c4c93aa959b"
+    },
+    {
+      "phase": "reopen",
+      "state": "PASS",
+      "seconds": 1.3578300476074219,
+      "executableSha256": "3aab20d3800bc7e77e885d940ffcdccdc8f8e76ff60c25317aad9c4c93aa959b"
+    },
+    {
+      "phase": "video",
+      "state": "PASS",
+      "seconds": 1.82173490524292,
+      "executableSha256": "3aab20d3800bc7e77e885d940ffcdccdc8f8e76ff60c25317aad9c4c93aa959b"
+    }
+  ],
+  "appBuild": {
+    "exitCode": 0,
+    "seconds": 21.23073410987854,
+    "command": [
+      "xcodebuild",
+      "-workspace",
+      "apps/mobile/ios/KlodaSecurePhotosSync.xcworkspace",
+      "-scheme",
+      "KlodaSecurePhotosSync",
+      "-configuration",
+      "Debug",
+      "-sdk",
+      "iphonesimulator",
+      "-destination",
+      "generic/platform=iOS Simulator",
+      "-derivedDataPath",
+      "/tmp/kloda-ios-step5/app-build",
+      "-disableAutomaticPackageResolution",
+      "CODE_SIGNING_ALLOWED=NO",
+      "COMPILER_INDEX_STORE_ENABLE=NO",
+      "LD_GENERATE_MAP_FILE=YES",
+      "LD_MAP_FILE_PATH=/tmp/kloda-ios-step5/$(TARGET_NAME)-$(CURRENT_ARCH).map",
+      "ARCHS=arm64",
+      "ONLY_ACTIVE_ARCH=YES",
+      "build"
+    ]
+  },
+  "jsExports": {
+    "exitCode": 0,
+    "seconds": 17.82765483856201,
+    "command": [
+      "npm",
+      "run",
+      "build",
+      "--workspace",
+      "@kloda/mobile"
+    ]
+  },
+  "artifacts": [
+    {
+      "kind": "Expo app",
+      "name": "KlodaSecurePhotosSync",
+      "sha256": "c5b40f73cddf413e44a4260309239590c616b1b6e38d4bfdcdc9359170a81eca"
+    },
+    {
+      "kind": "Expo app",
+      "name": "KlodaSecurePhotosSync.debug.dylib",
+      "sha256": "27a251689887753d06afe8e9d5bdb32c0ec37dcc133997113bcd3ce1e932d23c"
+    }
+  ],
+  "sources": [
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosFilesJob.swift",
+      "sha256": "f8f3ae6643b5fd54eed7279ae1307e326738f7e6b37471d58d28556c455092a7"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosFilesJournal.swift",
+      "sha256": "f2b9c65000b89a2c4fea783cbcdff90e4972a4276cc3e3afed44966dee981a39"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosFilesQueue.swift",
+      "sha256": "0b115f25c23a3c00759815dbeb74953326e9e24e75a81c582714c2617127b981"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosFilesRestoreJournal.swift",
+      "sha256": "0020ad9a232c5716e65c950fbaf256cb1204a36050bb85b5128eae586211c7de"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosFilesRunJournal.swift",
+      "sha256": "9bbd343c03f80776549ea4c3dd8737b927ae0d93a48571ce55b9dd2b80133aa8"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosFilesRunner.swift",
+      "sha256": "c5b460953fc10f66e1ca71dccca394cbb86d90ca47409a85dbc4083ab0874363"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosFilesSnapshot.swift",
+      "sha256": "6561cefdb7da4238bcd727f220f180d4b2869a86d54c2cfc067929fc05534c35"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosFilesSource.swift",
+      "sha256": "af403b208b3b26c275153a257a37000dd801fb929d1bef828aa90cab0a56e7e8"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosFilesTransfer.swift",
+      "sha256": "4c80b01b33a2bf9849e688972dd55d7fd821d5835271006eb43643bc575b25ec"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosFilesUpload.swift",
+      "sha256": "e18797e955ef8ba82f0b5ae7e36abd613ed53a1753eb25c8669dcdda25b191df"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosOwnBackups.swift",
+      "sha256": "c2e8ebf302ef241c0d1abd2c399efa35d256d9dcc76ff2d51a031664deea92f9"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosOwnRestore.swift",
+      "sha256": "ab5a78a6bc37fee60e0fb7d4c6214127ff9a60a78c08a80265d6dec7eea1c6e6"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosPhotoJson.swift",
+      "sha256": "fd9524ac05fc6351e0a4f875a4ca1785202d1d5fa68e5d5bc2a3d79fba10527c"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosPhotoManifest.swift",
+      "sha256": "34773b15eb32529fc7b366c26e7490291f589e02d9ad089b65aa3579382c7490"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosPhotosImport.swift",
+      "sha256": "8bfaf2e0b129e8c08337661256cf6e74186bb21ae66252be677e8356a8cf4708"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosPhotosJournal.swift",
+      "sha256": "b82385fcea5802ce38b24d8cd82900d72f5768108b11720399ecf9930a379c3f"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosPhotosRestore.swift",
+      "sha256": "c1d5e6051f2aba99bee37f21fe5dc603625cdf8c96fd83707f1a7a44596abd2d"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosPhotosRunner.swift",
+      "sha256": "4dbd5c539e72de65e2dd8f914e59b3d4b14465c7b8c06a0cd1cdd06ed5642690"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosPhotosSource.swift",
+      "sha256": "5016d1436e4def378a7f62f80adc8cd2fc29c8b4625919c4d757fbf0c2832648"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosRestoreDestination.swift",
+      "sha256": "3c7db292758c7e3cbad675724ec7fb9e3c18e345138daf2ec9d817ae055a2fa6"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosSourceScanner.swift",
+      "sha256": "bc9f2e051eaac2dd422203bc6c23afaf834067bbb0c162b212ea459163ef566b"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/IosSyncJournal.swift",
+      "sha256": "cca93c440b1b1555b92ed90c4fe5c0f999101eef528001c1b2057bb67e28413a"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/KlodaPairingModule.swift",
+      "sha256": "0d508db9ea89076e5155aff485e6b05d8d3cda24ed556989aefe892a2f9cf50f"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/KlodaPairingSession.swift",
+      "sha256": "ffa7022625b3ca8d2935b17578532040c13891b744b44157609fb17a9e3f9e79"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/KlodaSyncRuntimeModule.swift",
+      "sha256": "44132878765eb06fe54f9f1e7e779f065b8a86a26f59d3be6ccfd7d69c3d407d"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/NativePairing/IosPairingNativeCall.swift",
+      "sha256": "0d1b1afd8dfc34c52e8f282aee086c6dc17f887adf56052c1727db84770a1dfc"
+    },
+    {
+      "path": "apps/mobile/modules/my-module/ios/NativePairing/IosPairingReply.swift",
+      "sha256": "b92574fd6bab072d272a15f5d5ca2334ccc9e9aa801f317faa9a02bf43cccd3f"
+    },
+    {
+      "path": "apps/mobile/src/features/file-transfer/model/use-file-transfer.ts",
+      "sha256": "7d05d91e3e1f99968c7887811a085c758f3380a737e27caa15929fd7ccb16d66"
+    },
+    {
+      "path": "apps/mobile/src/pages/activity/ui/activity-page.spec.tsx",
+      "sha256": "238e5952db46a97cdf0f32fb0e751dadb36771336d071b4cb26ad31103e790d2"
+    },
+    {
+      "path": "apps/mobile/src/pages/activity/ui/activity-page.tsx",
+      "sha256": "16bc8abdd23b3bef62ea1bc64042336204b7852fa2f19594b91fe3e893c09de0"
+    },
+    {
+      "path": "apps/mobile/src/shared/api/file-transfer.ts",
+      "sha256": "6762818cc786faf7bf8e99f407cc8e3fa66f74fa0c7292510c1bf59da9ca4242"
+    },
+    {
+      "path": "apps/mobile/src/shared/i18n/locales/de.json",
+      "sha256": "1e144e3b48a90c44aae8c56216381d2890362cd47d8018a853b7085bee9db617"
+    },
+    {
+      "path": "apps/mobile/src/shared/i18n/locales/en.json",
+      "sha256": "038eaa56bd32fcf963fb362c6cf11422dddc2130eaf7ef82bd68a34f55a6caf5"
+    },
+    {
+      "path": "apps/mobile/src/shared/i18n/locales/tr.json",
+      "sha256": "be3fe08d59a9cc51b4f13e11e00f9951d1e8bc7a61f1d52743a288bc824d8897"
+    },
+    {
+      "path": "packages/pairing-native/apple/tests/IosPhotoManifestChecks.swift",
+      "sha256": "21753d96e983296d3af4937905a35caac15c207ab3c86287c823ab06069de61c"
+    },
+    {
+      "path": "packages/pairing-native/apple/tests/IosPhotosJournalChecks.swift",
+      "sha256": "17f948c1e699ec9cd5ff49ccf5a2ca46163f89b0c0e4a98caf28072d857eb17a"
+    },
+    {
+      "path": "packages/pairing-native/apple/tests/IosPhotosLibraryChecks.swift",
+      "sha256": "b53c499ec8b4f83f91938f787cc3f7f3411bcfd2b294283b6cef74d8c1efa4d2"
+    },
+    {
+      "path": "packages/pairing-native/apple/tests/IosPhotosSessionStub.swift",
+      "sha256": "5ace6efcc8c0a34c2e540a0061840929a514a80d8bb33d00baf1087b2b745ab2"
+    },
+    {
+      "path": "packages/pairing-native/apple/tests/IosPhotosVideoChecks.swift",
+      "sha256": "05ef136f0c203d934660670caa6eddd18b8974e79b0a03bcab6c2ae0e709810b"
+    }
+  ],
+  "runtimeCoverage": {
+    "seed": [
+      "real streamed original PNG bytes/hash/size",
+      "same Files upload journal and strict ACK state",
+      "lost finalize reply retained and reconciled",
+      "deleted version suppression",
+      "explicit rebackup reuses shared completed resource",
+      "metadata-only revision retains media",
+      "actual PhotoKit import/favorite/album identity separate from equal-title source",
+      "known-target lost receipt verified without duplicate",
+      "unknown-target creation remains review",
+      "own-download lost response retries same durable stage safely",
+      "bulk latest-version selection before creation",
+      "independent asset completes while old target manifest needs review",
+      "source selection change stops old operation at offset0 and creates new context work",
+      "missing or removed Photos source retains pending jobs and attention state"
+    ],
+    "reopen": [
+      "different PID, same durable DB and PhotoKit library",
+      "target bytes and album/favorite reverified",
+      "same source semantic signature/revision, zero new PC operations",
+      "unresolved history remains visible"
+    ],
+    "video": [
+      "real synthetic H264 video",
+      "streamed original resource bytes",
+      "Android single original role imported and verified on PhotoKit",
+      "repeat import no duplicate",
+      "unsupported role durable visible review without creation",
+      "known preflight failure retains prepared intent and explicit retry completes once"
+    ]
+  },
+  "earlierFindings": [
+    {
+      "kind": "test environment",
+      "result": "Photos authorization initially notDetermined despite CLI grant; real consent accepted through Device Hub only on owned test simulators; guard was not weakened"
+    },
+    {
+      "kind": "test environment",
+      "result": "Fresh Simulator includes six Apple sample photos; empty-library assertion stopped before touching them. Only newly created fixture assets/albums were exported or changed; seeded samples were not used"
+    },
+    {
+      "kind": "runtime bug, fixed",
+      "result": "Same synthetic PNG URL under .snapshot rejected with PHPhotosErrorInvalidResource3302; sibling .png accepted. Import now makes protected private extension copy and re-verifies exact bytes; original snapshot/journal retained"
+    },
+    {
+      "kind": "review findings, fixed",
+      "result": "Canonical source signature, unresolved source membership aggregation, new selection context progression, completed target invariant, no-write preflight retry, and bulk latest-version catalog checked"
+    },
+    {
+      "kind": "fixture isolation, fixed",
+      "result": "Reusing a fixed ambiguous asset key correctly hit immutable-manifest binding; fixture now uses a unique synthetic identity, without reset or cleanup of retained records"
+    }
+  ],
+  "separateReview": {
+    "mode": "independent read-only source/security review",
+    "result": "No blocking finding remaining in final deltas",
+    "testsRunByReviewer": false
+  },
+  "notRun": [
+    "real iPhone Secure Enclave/PC LAN/QR/ACL/revoke/end-to-end Photos",
+    "physical acceptance",
+    "actual old iOS16.4 runtime",
+    "LivePhoto/RAW/edited/large/iCloud positive runtime matrix",
+    "UI VoiceOver and full visual matrix, step10",
+    "iOS scheduling/background/automatic retry, step8",
+    "new Android native or Rust Clippy runs; those sources unchanged"
+  ],
+  "boundaries": [
+    "PC responses and session in PhotoKit fixture are fake; actual SQLite, snapshots, upload state machine and PhotoKit are real",
+    "Production Simulator still refuses Secure Enclave owner; no software key or native authority fallback",
+    "Source readWrite authorization must be full; local originals only, no implicit iCloud download",
+    "V1 covers original resource roles/name/MIME/hash/size, album IDs/names and favorite; not a full rich Photos-library metadata backup",
+    "Different retained manifest for an already imported source asset stays review; no automatic target overwrite/adoption/new duplicate",
+    "Ambiguous creation is never reset or retried as a fresh creation",
+    "Private extension-copy orphans after process death and staging capacity remain step10 work; no broad cleanup"
+  ],
+  "rawEvidence": "Private temporary directory /tmp/kloda-ios-step7; selected evidence only committed-capable docs, no entire .local-evidence export",
+  "gitMutation": false,
+  "productionAuthorityOpened": false,
+  "userArchiveUsed": false,
+  "ownedSimulatorShutdown": [
+    {
+      "ownedSimulator": "Photos step7",
+      "shutdownExitCode": 0
+    },
+    {
+      "ownedSimulator": "Files step6 reused",
+      "shutdownExitCode": 0
+    }
+  ]
+}

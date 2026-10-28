@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-24",
+  "sourceBase": "34dcbb8 plus uncommitted Android retry slice",
+  "scope": "Approved adaptation of existing mobile PC-first functions to Stitch visual language; no new native transfer/authority/provider",
+  "checks": {
+    "mobileJest": "exit0; 8 suites,50 tests",
+    "lint": "exit0",
+    "typescript": "exit0",
+    "expoIosAndroidExport": "exit0; JS bundles only, not iOS native build",
+    "hostVisual": "6/6 checks exit0, 3 locales x 320/768 CSS px; no horizontal overflow, buttons >=48px",
+    "independentReview": "No blocking source issue. Added direct PairingPage continuation regression coverage requested by reviewer.",
+    "gitDiffCheck": "exit0"
+  },
+  "notRun": [
+    "physical device or emulator",
+    "Android/iOS native runtime/LAN",
+    "iOS native pairing/sender implementation",
+    "native font/keyboard/safe area/VoiceOver/TalkBack and Dynamic Type acceptance",
+    "Windows/macOS/Linux platform acceptance",
+    "native build/clippy: no native source changed in this UI slice"
+  ],
+  "visualLimits": "Host DOM approximation of actual RNTL-rendered production ComputerPage trees; not native rendering or complete Stitch/native accessibility acceptance. Icons omitted; host Arial replaces native/system typography. Reviewer inspected TR/EN/DE screenshots and compared warm palette, cards, spacing, typography hierarchy and wrapping with approved Stitch reference.",
+  "issues": [
+    "Initial ComputerPage tests failed because default RN Jest AppState is not active; fixed fixture state and subscription isolation, not production foreground fences.",
+    "First Electron attempt SIGABRT under sandbox; approved isolated retry succeeded. Preview adapter originally omitted ScrollView contentContainerStyle; fixed and recaptured all six before visual inspection.",
+    "Existing WebDAV credentials/config atomicity remains open; WebDAV is advanced and does not prove PC-native readiness.",
+    "Mobile background/Live/scheduling and iOS native functions remain open."
+  ],
+  "sourceSha256": {
+    "apps/mobile/src/app/App.tsx": "325de5d3b89f6f139c810fe3b6d17b7c3201dc39fc965639be546ff14126e1dd",
+    "apps/mobile/src/app/App.spec.tsx": "db259d6ea55574fc73e2776361d065a92e3db40937d302237862373e89935f30",
+    "apps/mobile/src/pages/computer/ui/computer-page.tsx": "792eb160dffe5ff3b4f665aa28ae696405022ba5b4d4722bc32ec620e04b47e0",
+    "apps/mobile/src/pages/computer/ui/computer-page.spec.tsx": "a32ef7b89d87ee48849020b567aadd83ada8afa5760bfe3dfa987519ddb08d59",
+    "apps/mobile/src/pages/pairing/ui/pairing-page.tsx": "b9631c8b64842d50e46c6a10028bf058989ecc137f82b88e5ccf15e1863ee4ea",
+    "apps/mobile/src/pages/pairing/ui/pairing-page.spec.tsx": "47bb29cf468f5f669cde779e35d8a072115bfc9d531e024e084b995757932473",
+    "apps/mobile/src/shared/i18n/locales/tr.json": "c9db32fa0a7ab50a97a0c290ef48bda32bb61f189beb21793569aa02a2dddf47",
+    "apps/mobile/src/shared/i18n/locales/en.json": "7a0e8eb064dacbb4491345989b2dc7f9db49f1afdf02428e164d52397ed72221",
+    "apps/mobile/src/shared/i18n/locales/de.json": "23cad6e0c8f8152e7553387772139a0e6995a90cbe5af522873191a579a01e5f"
+  },
+  "artifactSha256": {
+    "computer-de-320.png": "e45ea3116de33f7a19a6e2146702a49a4ed455f2f1cae3d9984b29e23df36fd5",
+    "computer-de-768.png": "d527da3132f57a9e4f95d0e87929145575dae988e714fce2aa02c1468019ca8e",
+    "computer-de.json": "c8aaa83cfda000ca3e604931eeeb58b7f251579a5d177dc112cead2f1c80eea2",
+    "computer-en-320.png": "af1c077bb33718b4900045a715080670d1d7e5d11c9deb1a1b35f29387738626",
+    "computer-en-768.png": "bba2232cbbe3b135c2e2f283b7c42de45fedf07b28feb35dd1b69d22f65436af",
+    "computer-en.json": "0fc1634294844d5eb8f38495c03541e99637377881335940d4395d43fc2bcc62",
+    "computer-tr-320.png": "67392afcd915b11cb60fdc38ec4762a0865d97cdedd9963a5f9fda0b4f18748e",
+    "computer-tr-768.png": "1beb099168bb97987a2c7c1b3a79906810fedd5c8b24894f2d7ead6f5ac184a2",
+    "computer-tr.json": "dd0b37172c4e245af33ab5608ccec1c3cea46747935747bfa6128f1302666448",
+    "render-preview.py": "fa51bdd20a846993fdfecbbe1895b48f598ff89b635a5fdd0d56f48d222f5977",
+    "visual-result.json": "88ae0e3d916642aa821dcc3c8cab671b27b4a26dc51ff0dfd831cc0fc8d8d513",
+    "visual-smoke.cjs": "a6a36ffa6a8bc832ad421ca1919777d6fc7b03bf9a45e1782dcccd8fd3ed9fce"
+  }
+}

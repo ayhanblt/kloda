@@ -1,0 +1,9 @@
+Scanner sdk=24 files=128 queries=1 cursorVisits=129 membershipCalls=0
+Scanner sdk=24 files=1024 queries=1 cursorVisits=1025 membershipCalls=0
+Scanner sdk=24 files=8000 queries=1 cursorVisits=8001 membershipCalls=0
+Scanner sdk=29 files=128 queries=1 cursorVisits=129 membershipCalls=128
+Scanner sdk=29 files=1024 queries=1 cursorVisits=1025 membershipCalls=1024
+Scanner sdk=29 files=8000 queries=1 cursorVisits=8001 membershipCalls=8000
+{"files": 8000, "runs": 1, "membershipRows": 8000, "sqliteBytes": 1998848, "growthBytes": 1253376}
+{"files": 8000, "runs": 4, "membershipRows": 32000, "sqliteBytes": 5771264, "growthBytes": 5025792}
+{"files": 8000, "runs": 12, "membershipRows": 96000, "sqliteBytes": 15818752, "growthBytes": 15073280}

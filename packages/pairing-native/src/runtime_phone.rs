@@ -30,7 +30,12 @@ impl Actor {
         #[cfg(not(target_os = "android"))]
         let route = crate::route::for_peer(&payload.hint)?;
         route.check(payload.hint.ip)?;
+        #[cfg(any(target_os = "android", target_os = "ios"))]
+        let foreground_epoch = Some(self.action_epoch.ok_or(PairingError::CandidateStale)?);
+        #[cfg(not(any(target_os = "android", target_os = "ios")))]
+        let foreground_epoch = None;
         self.phone = Some(PhoneWork {
+            foreground_epoch,
             sid: payload.sid,
             hint: payload.hint.clone(),
             expected: payload.pc_fingerprint,
@@ -63,7 +68,12 @@ impl Actor {
         #[cfg(not(target_os = "android"))]
         let route = crate::route::for_peer(&hint)?;
         route.check(hint.ip)?;
+        #[cfg(any(target_os = "android", target_os = "ios"))]
+        let foreground_epoch = Some(self.action_epoch.ok_or(PairingError::CandidateStale)?);
+        #[cfg(not(any(target_os = "android", target_os = "ios")))]
+        let foreground_epoch = None;
         self.phone = Some(PhoneWork {
+            foreground_epoch,
             sid: record.sid,
             hint,
             expected: record.expected,
@@ -109,6 +119,8 @@ impl Actor {
                 return Err(PairingError::CandidateStale);
             };
             let old = work.repair.take().ok_or(PairingError::CandidateStale)?;
+            let foreground = self.foreground.clone();
+            let _authorization = foreground.authorize(work.foreground_epoch)?;
             let (engine, frame) =
                 Phone::start_repair(&mut self.installation.store, payload, channel, old)?;
             work.engine = Some(engine);
