@@ -1,0 +1,25 @@
+warning: type `rt::net::TcpStream` is more private than the item `TcpTransport::from_stream`
+   --> vendor/smb2/src/transport/tcp.rs:183:5
+    |
+183 |     pub fn from_stream(stream: TcpStream) -> Self {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ associated function `TcpTransport::from_stream` is reachable at visibility `pub`
+    |
+note: but type `rt::net::TcpStream` is only usable at visibility `pub(crate)`
+   --> vendor/smb2/src/rt/net.rs:33:1
+    |
+ 33 | pub(crate) struct TcpStream(TcpInner);
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: `#[warn(private_interfaces)]` on by default
+
+warning: `smb2` (lib) generated 1 warning
+   Compiling kloda_storage_native v0.1.0 (/Users/ayhanblt/Desktop/projects/kloda/packages/storage-native)
+error[E0277]: the trait bound `smb2::rt::net::TcpStream: From<tokio::net::TcpStream>` is not satisfied
+  --> tests/connected_constructor.rs:15:58
+   |
+15 |         let transport = TcpTransport::from_stream(socket.into());
+   |                                                          ^^^^ the trait `From<tokio::net::TcpStream>` is not implemented for `smb2::rt::net::TcpStream`
+   |
+   = note: required for `tokio::net::TcpStream` to implement `Into<smb2::rt::net::TcpStream>`
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `kloda_storage_native` (test "connected_constructor") due to 1 previous error

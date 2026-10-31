@@ -1,0 +1,54 @@
+//! Candidate-only SMB boundary (ADR0026). No mobile ABI or enabled product capability yet.
+use smb::connection::{AuthMethodsConfig, EncryptionMode, MultiChannelConfig};
+use smb::transport::TransportConfig;
+use smb::{ClientConfig, ConnectionConfig, Dialect};
+use std::time::Duration;
+
+/// The native owner supplies its existing remaining I/O budget; no new global timeout.
+pub fn strict_smb_config(remaining: Duration) -> Result<ClientConfig, &'static str> {
+    if remaining.is_zero() {
+        return Err("cancelled");
+    }
+    Ok(ClientConfig {
+        dfs: false,
+        connection: ConnectionConfig {
+            timeout: Some(remaining),
+            min_dialect: Some(Dialect::Smb030),
+            max_dialect: Some(Dialect::Smb0311),
+            encryption_mode: EncryptionMode::Required,
+            allow_unsigned_guest_access: false,
+            compression_enabled: false,
+            multichannel: MultiChannelConfig::Disabled,
+            disable_notifications: true,
+            smb2_only_negotiate: true,
+            transport: TransportConfig::Tcp,
+            auth_methods: AuthMethodsConfig {
+                ntlm: true,
+                kerberos: false,
+            },
+            ..Default::default()
+        },
+        ..Default::default()
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn strict_policy_does_not_inherit_transport_or_security_defaults() {
+        assert!(strict_smb_config(Duration::ZERO).is_err());
+        let budget = Duration::from_millis(1234);
+        let policy = strict_smb_config(budget).unwrap();
+        let c = policy.connection;
+        assert!(!policy.dfs);
+        assert_eq!(c.min_dialect, Some(Dialect::Smb030));
+        assert_eq!(c.max_dialect, Some(Dialect::Smb0311));
+        assert_eq!(c.encryption_mode, EncryptionMode::Required);
+        assert!(!c.allow_unsigned_guest_access && !c.compression_enabled);
+        assert_eq!(c.multichannel, MultiChannelConfig::Disabled);
+        assert_eq!(c.transport, TransportConfig::Tcp);
+        assert!(!c.auth_methods.kerberos && c.auth_methods.ntlm);
+        assert_eq!(c.timeout, Some(budget));
+    }
+}

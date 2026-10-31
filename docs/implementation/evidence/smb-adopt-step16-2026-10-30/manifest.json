@@ -1,0 +1,105 @@
+{
+  "date": "2026-10-30",
+  "scope": "D6A exact one-bit patch adopted; shared SMB Rust core only, no mobile ABI/product activation",
+  "checks": {
+    "sourceGate": "PASS all vendored file hashes during Cargo builds; modified-source negative test rejects without altering actual SDK",
+    "dependencyAudit": "Exact dependency name/version set matched prior71-package OSV query; reused captured result, not a fresh scan; RSA/SSPI/Picky removed",
+    "unit": "PASS3 security boundary tests; network test ignored in default suite",
+    "ownedHost": "PASS1 real1MiB/no-clobber/foreign-preserve/full-byte/auth and ciphertext fault fixture test",
+    "faultCounters": {
+      "unsigned_setup": 1,
+      "corrupt_encrypted": 1
+    },
+    "androidArm64": "PASS API24 cross-link",
+    "iosSimulator": "PASS iOS16.4 arm64 cross-link",
+    "clippy": "PASS all targets -Dwarnings",
+    "fullMatrix": "NOT_REPEATED; previous diagnostic six-target results retained as historical, not fresh adopted-crate proof",
+    "product": "NOT_IMPLEMENTED native admission/journal/bridge/restore/UI; SMB remains disabled",
+    "next": "D7 SMB native receipt/sidecar contract pending; no fake PC/DAV authority"
+  },
+  "sources": [
+    {
+      "path": "packages/storage-native/Cargo.toml",
+      "sha256": "8ef3671e5e3e468c5d2a185d6d75441af946757f8dcdba50c7af63a2b54abab7",
+      "bytes": 485
+    },
+    {
+      "path": "packages/storage-native/Cargo.lock",
+      "sha256": "e9bc08ca1226ef5d5a9a4cc2216435e87d0ca2ad56ca80b18da06f2cd4049e2e",
+      "bytes": 16407
+    },
+    {
+      "path": "packages/storage-native/build.rs",
+      "sha256": "23bec2856d5b9cbd5e519d64979a5ffe231c00d61168f60aa34ebd54a83f91da",
+      "bytes": 1148
+    },
+    {
+      "path": "packages/storage-native/src/lib.rs",
+      "sha256": "553eeaa4f2e60397eef4822ea7a79d3505fad89c4ec051439ba9fd50c827ab56",
+      "bytes": 5433
+    },
+    {
+      "path": "packages/storage-native/tests/smb_candidate.rs",
+      "sha256": "be31db22f3d61d749bf187bf8f1e774f8a6728f44ccf03068db016953a593909",
+      "bytes": 2932
+    },
+    {
+      "path": "packages/storage-native/vendor/smb2.sha256",
+      "sha256": "2cb84fc52962a11255bf582c7b0ed499cfc0cee503ab6893be8976348a07b59b",
+      "bytes": 15588
+    },
+    {
+      "path": "packages/storage-native/vendor/smb2-upstream.json",
+      "sha256": "6d27ef6e7d1284d8c8988203800bdab608d8ddfee917292b7d7ff7ec0606de11",
+      "bytes": 531
+    },
+    {
+      "path": "tools/test-storage-native.mjs",
+      "sha256": "220747ceacbd1dc2fbf4739de17a2d78397d6f79f47f1f68f7a3fa6c62c0ac2d",
+      "bytes": 1348
+    },
+    {
+      "path": "tools/test-storage-patch-gate.mjs",
+      "sha256": "43800a295790230b7b41bad039656b5897a3a8e2750032b4de3784da1215fb04",
+      "bytes": 1816
+    }
+  ],
+  "files": [
+    {
+      "path": "android-arm64.log",
+      "sha256": "3ea5400a589814858070e6cd272e01211d23c555c87262f0b29482ae82dc705a",
+      "bytes": 2271
+    },
+    {
+      "path": "clippy.log",
+      "sha256": "1aeaa7cc089f6381a0bbdcf96688d406763b6bd0f7bfe10a5a556819f0d7d070",
+      "bytes": 1592
+    },
+    {
+      "path": "host-check.log",
+      "sha256": "12cd3384f0339072b13ff96f472ee3f8d42b46a190238cee49a45c1c3d9d5795",
+      "bytes": 66163
+    },
+    {
+      "path": "host-runtime.log",
+      "sha256": "9ad889cf0202a1ec04157fd36893ae1e4f55a14a1eb54693af53e4b9c2dfb26f",
+      "bytes": 475
+    },
+    {
+      "path": "ios-simulator.log",
+      "sha256": "97eb33254a191ea8ae75bc82166dff11bb020b53b72fa9821b8b5b566ee5f303",
+      "bytes": 2271
+    },
+    {
+      "path": "negative-hash-gate.log",
+      "sha256": "0855e10f2628d533f75a7b08070648b212437982d140fae8ab667d12af9eb160",
+      "bytes": 65
+    },
+    {
+      "path": "reused-osv-result.json",
+      "sha256": "3daa3125750ef8d271d0bde6ff960d011fe00d5ec17e2f85e46dee0fe9c9e4b7",
+      "bytes": 226
+    }
+  ],
+  "review": "Separate same-main-agent review: exact SDK delta equals approved capability bit; source hash gate; early cipher/auth boundary, encrypted frame gate, no high-level DFS/reconnect and no app feature activation; not independent-agent review"
+}

@@ -21,7 +21,7 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
   }
 
   override fun onStart() {
-    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore")) {
+    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore", "smb-files", "smb-profile")) {
       finish(Activity.RESULT_CANCELED, Bundle().apply { putString("stream", "Explicit scope required: local-files, media-fixture or webdav-journal\n") })
       return
     }
@@ -45,6 +45,16 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
         sendStatus(0, Bundle().apply { putString("stream", "START $name\n") })
         check()
         sendStatus(0, Bundle().apply { putString("stream", "PASS $name\n") })
+      }
+      if (scope == "smb-profile") {
+        group("smb-profile-owner") { AndroidSmbProfileChecks.run(this, scratch) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "SMB profile generations/pending-ready/native Keystore/unreadable-custody PASS; OS route/source/product/iOS positive Keychain NOT_RUN\n") })
+        return
+      }
+      if (scope == "smb-files") {
+        group("smb-owned-files") { AndroidSmbFilesChecks.run(this, scratch) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Owned SMB JNI/SQLite Files publication and conservative recovery PASS; OS route/vault/product flow/Photos NOT_RUN\n") })
+        return
       }
       if (scope == "webdav-photos-restore") {
         group("webdav-owned-photos-restore") { AndroidWebDavPhotosRestoreChecks.run(this, IsolatedContext(targetContext, scratch)) }

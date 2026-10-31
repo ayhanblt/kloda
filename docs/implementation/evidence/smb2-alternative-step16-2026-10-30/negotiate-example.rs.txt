@@ -1,0 +1,10 @@
+fn main() -> Result<(),Box<dyn std::error::Error>> {
+ tokio::runtime::Builder::new_current_thread().enable_all().build()?.block_on(async {
+  let mut conn=smb2::client::Connection::connect("127.0.0.1:27450",std::time::Duration::from_secs(5)).await?;
+  conn.set_response_timeout(Some(std::time::Duration::from_secs(5)));
+  conn.negotiate().await?;
+  let p=conn.params().unwrap();
+  println!("NEGO_ONLY dialect={:?} cipher={:?} capabilities={:?}; no authentication API invoked",p.dialect,p.cipher,p.capabilities);
+  Ok(())
+ })
+}

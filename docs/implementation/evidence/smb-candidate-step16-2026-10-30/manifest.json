@@ -1,0 +1,285 @@
+{
+  "date": "2026-10-30",
+  "scope": "ADR0026 common Android/iOS Rust SMB candidate only; no app bridge/export/activation,16a incomplete",
+  "candidate": {
+    "crate": "smb",
+    "version": "0.12.1",
+    "registrySha256": "b60b8c4d8566c3cf19d17837958e67acc0534e68f331e898a642f4f57e9ecc4c",
+    "tagCommit": "7c7d4a60c930e3780e95208967aa13b6346eaa25",
+    "features": [
+      "async",
+      "sign",
+      "encrypt"
+    ],
+    "defaultFeatures": false,
+    "tokio": "1.54.1",
+    "compiler": "1.99.0",
+    "minimumIos": "16.4",
+    "androidApi": 24,
+    "ndk": "27.1.12297006"
+  },
+  "checks": {
+    "strictConfig": "PASS zero budget rejection, strict SMB3/encryption/guest/DFS/transport/auth config",
+    "ownedSamba": "PASS1MiB exclusive create/write/flush/no-clobber rename foreign-final preserve/final full byte equality",
+    "wireFaults": "PASS actual stripped final auth signature and corrupted encrypted response rejected; both mutation counters1->2 in final run",
+    "negativeProfiles": "PASS wrong password, SMB2-only and encryption-disabled reject",
+    "platformCrossLink": "PASS all four Android ABIs + iOS arm64 device/Simulator; no physical or mobile ABI runtime claim",
+    "blockBufferTrigger": "PASS locked0.10.4 eager-buffer caught-panic cursor remains valid; source uses separate pos; not Miri/upstream advisory clearance",
+    "clippy": "PASS all targets -Dwarnings",
+    "dependencyGate": "OPEN no patched RSA release; source shows NTLM/password-only and no RSA key input in tested path, no exploit demonstrated; no audit suppression or clean claim",
+    "product": "NOT_IMPLEMENTED native admission/bridge/journal/recovery/queue/restore/UI; provider stays blocked",
+    "desktop": "NOT_RUN product",
+    "physical": "NOT_RUN step21 separate permission"
+  },
+  "review": "separate same-main-agent pass, not independent agent; no native pairing/PC authority changes",
+  "nextDecision": "D5 alternative Rust candidate evaluation vs NTLM-only SSPI fork plan; neither adopted",
+  "formatNote": "Rustfmt and build-script allowlist/NDK-source validation tightened after cross-link; compiled Rust behavior/flags unchanged; source hashes reflect final reviewed formatting",
+  "artifacts": [
+    {
+      "target": "aarch64-linux-android",
+      "name": "libkloda_storage_native.a",
+      "sha256": "45dcc579bd0975a0dcf6dc1e25295026c69715040348230a2df40b2967a69499",
+      "bytes": 232272468
+    },
+    {
+      "target": "aarch64-linux-android",
+      "name": "libkloda_storage_native.so",
+      "sha256": "e357fc0bc68ebcf6dac462ea9ed0c5ee301d0adcd9d8e631f0b651d79d5da19d",
+      "bytes": 63195904
+    },
+    {
+      "target": "armv7-linux-androideabi",
+      "name": "libkloda_storage_native.a",
+      "sha256": "0b6fb0105661740f9564a55edff5db441bb451216af40dbe3aa823f2b3446de7",
+      "bytes": 181888122
+    },
+    {
+      "target": "armv7-linux-androideabi",
+      "name": "libkloda_storage_native.so",
+      "sha256": "f5ecb3e12167e8650ca8991353ea659e92263935313c86d8e06186ccf1ec126c",
+      "bytes": 57715264
+    },
+    {
+      "target": "x86_64-linux-android",
+      "name": "libkloda_storage_native.a",
+      "sha256": "0a502ea6efef68fc994812ee4f3f8cbcd3dc250649df07e70e532b87b3aaee19",
+      "bytes": 231977524
+    },
+    {
+      "target": "x86_64-linux-android",
+      "name": "libkloda_storage_native.so",
+      "sha256": "60d381f03278be28f53cbd590ab9f0816119be5f9bc63a4130a08bb756527041",
+      "bytes": 64031256
+    },
+    {
+      "target": "i686-linux-android",
+      "name": "libkloda_storage_native.a",
+      "sha256": "d264565cbb39d32f448f544c872ae1120b4f66b2ecdfc1406e7da226d056a724",
+      "bytes": 176368592
+    },
+    {
+      "target": "i686-linux-android",
+      "name": "libkloda_storage_native.so",
+      "sha256": "86b01c7ea51f304126d154890cc9d568a208c70aef5a88346d85628de939b817",
+      "bytes": 59090508
+    },
+    {
+      "target": "aarch64-apple-ios",
+      "name": "libkloda_storage_native.dylib",
+      "sha256": "cc21f7b98d437f70b7ed2043c181f18fc9a2535243af80bf4eb6b5d949d5c4d0",
+      "bytes": 16456
+    },
+    {
+      "target": "aarch64-apple-ios",
+      "name": "libkloda_storage_native.a",
+      "sha256": "030aabcb7571d099632031b4cce2ee135afbf9d27daa33893cec9209da7a16e3",
+      "bytes": 166115968
+    },
+    {
+      "target": "aarch64-apple-ios-sim",
+      "name": "libkloda_storage_native.dylib",
+      "sha256": "aeb35c4b223ab5c9d9e3a843d3597068afc49603a749b2c5ab0b2e4438051543",
+      "bytes": 16768
+    },
+    {
+      "target": "aarch64-apple-ios-sim",
+      "name": "libkloda_storage_native.a",
+      "sha256": "5980e1a4aa1f69639d677c971a816d9ef614d7979fd953be55d3232c1a89b863",
+      "bytes": 166135936
+    }
+  ],
+  "sources": [
+    {
+      "path": "packages/storage-native/Cargo.toml",
+      "sha256": "d9e015fe3776658331b1cb39de2b719e3a229cd099b154bc793bcbdb01a80a0a",
+      "bytes": 434
+    },
+    {
+      "path": "packages/storage-native/Cargo.lock",
+      "sha256": "72cc075d0ebb48f7bb141fd43bffc1d94375f44d3af6378ed492c29a5a2b35d1",
+      "bytes": 75407
+    },
+    {
+      "path": "packages/storage-native/src/lib.rs",
+      "sha256": "0f3e42927e044b352b69f342f9621dc7348265c956fc60abbcec76cf589a1d3c",
+      "bytes": 2130
+    },
+    {
+      "path": "packages/storage-native/tests/smb_candidate.rs",
+      "sha256": "6db8a3f87d47ff889b0cdfa2bab14df3199b31e6712311bda01c6965b1b305e0",
+      "bytes": 4865
+    },
+    {
+      "path": "packages/storage-native/tests/block_buffer_advisory.rs",
+      "sha256": "fcb63308a02ba3423d637e2a4ef86cb2bed443ae26367198e8a28c754685375a",
+      "bytes": 643
+    },
+    {
+      "path": "tools/check-storage-native.mjs",
+      "sha256": "0f0efb3edb7e81f5a0cd58b1e0a0f94e5341838675c18b9b4475c57e9168cf9d",
+      "bytes": 2921
+    },
+    {
+      "path": "tools/test-smb-wire-proxy.py",
+      "sha256": "e6b47dd6ba3095c3d5e737376c217e978af2317657110efb657d7bf03eecd712",
+      "bytes": 2851
+    },
+    {
+      "path": "tools/smb-fixture/strict.conf",
+      "sha256": "091b8ddea5d6bbdf3ee06e184cef18e5fc78b6b36234ce32b8c12ebeddefbd95",
+      "bytes": 410
+    },
+    {
+      "path": "tools/smb-fixture/no-encrypt.conf",
+      "sha256": "89059501b84c213043500d8af50aca3f1ecdeab9c50d7e1212dbf03ebc69fdcc",
+      "bytes": 405
+    },
+    {
+      "path": "tools/smb-fixture/Dockerfile",
+      "sha256": "9ec8ed5d138550bb3fb7b531cf7542f302887b7da70c575218c40e490be9ad73",
+      "bytes": 502
+    },
+    {
+      "path": "tools/smb-fixture/README.md",
+      "sha256": "5838958ae5226cfec3bbff87473e73c7b42b2c3b6a397584a64c1eeb0eac0d99",
+      "bytes": 2039
+    },
+    {
+      "path": "tools/smb-fixture/smb2.conf",
+      "sha256": "0fc02a0e116f220152419bc491545c9d3e1902a583adc73a0a29f81b2a240b02",
+      "bytes": 405
+    }
+  ],
+  "files": [
+    {
+      "path": "GHSA-qwgh-2vcv-g2f7.json",
+      "sha256": "a35c62683978eb74c07ee32a1a78c303ca81869fbd6856509e3f6dce68d11105",
+      "bytes": 3701
+    },
+    {
+      "path": "RUSTSEC-2023-0071.json",
+      "sha256": "b6f74ae6d76b10a8f528b5825eed9ec38a617f818b95f95a6ff2d6cbaf5cf401",
+      "bytes": 2731
+    },
+    {
+      "path": "context7-smb-docs.log",
+      "sha256": "201cd71cf3075789ba36fc0d0fffa5b29bbd5e611dc4c2d9623a607e44447733",
+      "bytes": 7350
+    },
+    {
+      "path": "context7-smb-library.log",
+      "sha256": "609c31eaa8519a02222223da4a01bf8e2473c80928e1e27c235fed2f879f67f0",
+      "bytes": 346
+    },
+    {
+      "path": "dependency-licenses.json",
+      "sha256": "05845afcac1e409885054b24f1722fbb2bcd3e11a40ceac108daf8c74bc7314e",
+      "bytes": 49303
+    },
+    {
+      "path": "invalid-target.log",
+      "sha256": "66ed2f6520a3cce7e9eb529109de28b763af4fdaadffb58a0eb1fd7120691766",
+      "bytes": 639
+    },
+    {
+      "path": "osv-query.json",
+      "sha256": "38f9c3f1bb5ba6c49af516316be60917d0cb49e84d85676c699b214073381e10",
+      "bytes": 25153
+    },
+    {
+      "path": "osv-result.json",
+      "sha256": "f38de37b4d2308dae0208053bd8f8ba044b6d08ebcfb53bbf228ec7ccc556824",
+      "bytes": 1069
+    },
+    {
+      "path": "owned-containers.json",
+      "sha256": "c0f54749520da7caa9b5be66cea0039abe225f99d828834b83f96a2733d10847",
+      "bytes": 1475
+    },
+    {
+      "path": "owned-samba-runtime.log",
+      "sha256": "8240d01411d97cde3fb3bd531d6b48edecc03718b58925b839ee63a6b4067e07",
+      "bytes": 1747
+    },
+    {
+      "path": "samba-no-encrypt.log",
+      "sha256": "0ae8444de97a7720183396182e71378fcef3229b3cab05d90e525a4174cb0fe7",
+      "bytes": 129
+    },
+    {
+      "path": "samba-packages.log",
+      "sha256": "42a81bd9ed88e02d5fafbd571a1b3b4c3ce022d239514acde3f4ee98ad725854",
+      "bytes": 153
+    },
+    {
+      "path": "samba-smb2.log",
+      "sha256": "0ae8444de97a7720183396182e71378fcef3229b3cab05d90e525a4174cb0fe7",
+      "bytes": 129
+    },
+    {
+      "path": "samba-strict.log",
+      "sha256": "0ae8444de97a7720183396182e71378fcef3229b3cab05d90e525a4174cb0fe7",
+      "bytes": 129
+    },
+    {
+      "path": "storage-android-arm64.log",
+      "sha256": "492d530b8859d6de2704cf5570685967318eaabcdaeca2681fb0e4f9d8f6a7d9",
+      "bytes": 6590
+    },
+    {
+      "path": "storage-android-armv7.log",
+      "sha256": "653d20e3c3049f268e2485c3400cd2c1410e3f1ebd73542cc49850e2c198ecfa",
+      "bytes": 6560
+    },
+    {
+      "path": "storage-android-x86.log",
+      "sha256": "495935d02faf50a16713fef690dc72ba5096175f48652bdd8a02b69500c093a3",
+      "bytes": 6587
+    },
+    {
+      "path": "storage-android-x86_64.log",
+      "sha256": "9b8d55114d613a00c3dfb8dccdec927436fff2e49bfb6d2f5e3d5f1f6f274ac9",
+      "bytes": 6633
+    },
+    {
+      "path": "storage-clippy.log",
+      "sha256": "c6f76bcb7440b3bc44c1c95721ab355c2a52e976d6064ff7ff2e18155a276845",
+      "bytes": 5418
+    },
+    {
+      "path": "storage-ios-device.log",
+      "sha256": "86e4a6f3000923c04ae627d328783f408bb4b590a7ac3bece244818379ceab2a",
+      "bytes": 6709
+    },
+    {
+      "path": "storage-ios-sim.log",
+      "sha256": "da82194b4452ea4ffb379208782d1a049050e24d27e3bc178bbfece5a7d44834",
+      "bytes": 6713
+    },
+    {
+      "path": "wire-mutations.json",
+      "sha256": "542c18a1c5decef062cea67384971e7fc00cc4103125c7517f42c0738b2d3f4a",
+      "bytes": 287
+    }
+  ]
+}

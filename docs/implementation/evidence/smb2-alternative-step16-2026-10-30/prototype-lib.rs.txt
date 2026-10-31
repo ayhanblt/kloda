@@ -1,0 +1,66 @@
+use async_trait::async_trait;
+use smb2::{client::{Connection, Session, Cipher}, transport::{TcpTransport, TransportSend, TransportReceive, ReceiveProgress}, types::Dialect};
+use std::{net::SocketAddr, sync::{Arc, atomic::{AtomicBool, Ordering}}, time::Duration};
+
+#[derive(Clone)]
+struct EncryptedWire {
+    tcp: Arc<TcpTransport>,
+    required: Arc<AtomicBool>,
+}
+impl EncryptedWire {
+    fn check(&self, frame: &[u8]) -> smb2::Result<()> {
+        if self.required.load(Ordering::Acquire) && !frame.starts_with(b"\xfdSMB") {
+            return Err(smb2::Error::invalid_data("encryption_required"));
+        }
+        Ok(())
+    }
+}
+#[async_trait]
+impl TransportSend for EncryptedWire {
+    async fn send(&self, frame: &[u8]) -> smb2::Result<()> { self.check(frame)?; self.tcp.send(frame).await }
+}
+#[async_trait]
+impl TransportReceive for EncryptedWire {
+    async fn receive(&self) -> smb2::Result<Vec<u8>> { let frame = self.tcp.receive().await?; self.check(&frame)?; Ok(frame) }
+    fn receive_progress(&self) -> Option<Arc<ReceiveProgress>> { self.tcp.receive_progress() }
+}
+
+pub struct NegotiatedSmb {
+    conn: Connection,
+    encrypted: Arc<AtomicBool>,
+    cipher: Cipher,
+}
+impl NegotiatedSmb {
+    // A numeric endpoint pins the address: native LAN-route admission is still a separate required gate.
+    pub async fn connect(address: SocketAddr, remaining: Duration) -> smb2::Result<Self> {
+        if remaining.is_zero() { return Err(smb2::Error::invalid_data("cancelled")); }
+        let tcp = Arc::new(TcpTransport::connect(address, remaining).await?);
+        let encrypted = Arc::new(AtomicBool::new(false));
+        let wire = EncryptedWire { tcp, required: encrypted.clone() };
+        let mut conn = Connection::from_transport(Box::new(wire.clone()), Box::new(wire), address.ip().to_string());
+        conn.set_compression_requested(false);
+        conn.set_response_timeout(Some(remaining));
+        conn.negotiate().await?;
+        let params = conn.params().ok_or_else(|| smb2::Error::invalid_data("negotiate_missing"))?;
+        eprintln!("OWNED params dialect={:?} cipher={:?} caps={:?}", params.dialect, params.cipher, params.capabilities);
+        if params.dialect < Dialect::Smb3_0 { return Err(smb2::Error::invalid_data("smb3_required")); }
+        let cipher = match params.dialect {
+            Dialect::Smb3_1_1 => params.cipher.ok_or_else(|| smb2::Error::invalid_data("encryption_required"))?,
+            _ if params.capabilities.contains(smb2::types::flags::Capabilities::ENCRYPTION) => Cipher::Aes128Ccm,
+            _ => return Err(smb2::Error::invalid_data("encryption_required")),
+        };
+        Ok(Self { conn, encrypted, cipher })
+    }
+    pub async fn authenticate(mut self, username: &str, password: &str, domain: &str) -> smb2::Result<Connection> {
+        if username.is_empty() || username.rsplit(['\\', '@']).any(|part| part.eq_ignore_ascii_case("guest")) {
+            return Err(smb2::Error::invalid_data("named_account_required"));
+        }
+        let session = Session::setup(&mut self.conn, username, password, domain).await?;
+        if !session.should_sign { return Err(smb2::Error::invalid_data("signing_required")); }
+        let enc = session.encryption_key.ok_or_else(|| smb2::Error::invalid_data("encryption_required"))?;
+        let dec = session.decryption_key.ok_or_else(|| smb2::Error::invalid_data("encryption_required"))?;
+        self.conn.activate_encryption(enc, dec, self.cipher);
+        self.encrypted.store(true, Ordering::Release);
+        Ok(self.conn)
+    }
+}

@@ -1,0 +1,14 @@
+// OSV GHSA-qwgh-2vcv-g2f7 reports all pre0.12.1 versions. Test its exact eager-buffer
+// panic/cursor precondition against the locked legacy0.10.4 implementation.
+use block_buffer::{EagerBuffer, generic_array::typenum::U4};
+
+#[test]
+fn caught_compression_panic_does_not_replace_legacy_cursor_with_input_byte() {
+    let mut buffer = EagerBuffer::<U4>::new(&[1, 2]);
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        buffer.digest_blocks(&[3, 0xff], |_| panic!("owned advisory regression"));
+    }));
+    assert!(result.is_err());
+    assert_eq!(buffer.get_pos(), 2);
+    assert_eq!(buffer.remaining(), 2);
+}

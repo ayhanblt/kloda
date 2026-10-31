@@ -1,0 +1,12 @@
+{
+  "requestCapabilities": 7,
+  "requestHasEncryptionCapability": false,
+  "responseDialect": 785,
+  "responseCapabilities": 7,
+  "responseContextTypes": [
+    1,
+    8
+  ],
+  "responseHasEncryptionContext": false,
+  "scope": "first NEGOTIATE only; no auth/payload/key recorded"
+}

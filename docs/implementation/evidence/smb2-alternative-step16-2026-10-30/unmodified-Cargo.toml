@@ -1,0 +1,11 @@
+[package]
+name = "kloda_smb2_candidate_probe"
+version = "0.0.0"
+edition = "2024"
+publish = false
+[lib]
+crate-type = ["rlib", "staticlib"]
+[dependencies]
+smb2 = { version = "=0.36.2", default-features = false, features = ["tokio"] }
+tokio = { version = "=1.54.1", default-features = false, features = ["rt", "net", "io-util", "time", "sync"] }
+async-trait = "=0.1.92"

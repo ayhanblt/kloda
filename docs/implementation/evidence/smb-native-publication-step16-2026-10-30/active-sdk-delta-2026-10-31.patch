@@ -1,0 +1,40 @@
+--- upstream/src/client/connection.rs
++++ vendor/src/client/connection.rs
+@@ -3011,7 +3011,7 @@
+         let request = NegotiateRequest {
+             security_mode: SecurityMode::new(SecurityMode::SIGNING_ENABLED),
+             capabilities: Capabilities::new(
+-                Capabilities::DFS | Capabilities::LEASING | Capabilities::LARGE_MTU,
++                Capabilities::DFS | Capabilities::LEASING | Capabilities::LARGE_MTU | Capabilities::ENCRYPTION,
+             ),
+             client_guid,
+             dialects: Dialect::ALL.to_vec(),
+--- upstream/src/rt/net.rs
++++ vendor/src/rt/net.rs
+@@ -41,6 +41,11 @@
+ }
+ 
+ impl TcpStream {
++    #[cfg(feature = "tokio")]
++    pub(crate) fn from_tokio(stream: tokio::net::TcpStream) -> Self {
++        Self(TcpInner::Tokio(stream))
++    }
++
+     /// Dial one address.
+     pub(crate) async fn connect(addr: SocketAddr) -> io::Result<Self> {
+         Ok(Self(match backend() {
+--- upstream/src/transport/tcp.rs
++++ vendor/src/transport/tcp.rs
+@@ -179,6 +179,12 @@
+         Ok(Self::from_stream(stream))
+     }
+ 
++    /// Wrap a connected Tokio socket supplied by the native route owner.
++    #[cfg(feature = "tokio")]
++    pub fn from_tokio_stream(stream: tokio::net::TcpStream) -> Self {
++        Self::from_stream(crate::rt::net::TcpStream::from_tokio(stream))
++    }
++
+     /// Wrap a connected socket.
+     fn from_stream(stream: TcpStream) -> Self {
+         let (reader, writer) = stream.into_split();

@@ -1,0 +1,52 @@
+{
+  "recordedAt": "2026-10-30T22:51:32.396449+00:00",
+  "status": "PASS scoped D8 typed SDK ingress and native connected-socket handoff; NOT product/OS-owner acceptance",
+  "approval": "User A explicitly approved corrected typed ingress and narrow native Kotlin/JNI/Swift socket bridge on2026-10-31; prior automatic review rejection resolved by this explicit scope approval",
+  "sdk": {
+    "version": "0.36.2 exact",
+    "activeDeltaFiles": [
+      "src/client/connection.rs",
+      "src/rt/net.rs",
+      "src/transport/tcp.rs"
+    ],
+    "delta": "active-sdk-delta-2026-10-31.patch",
+    "scope": "D6 ENCRYPTION bit plus public Tokio ingress and crate-private Tokio wrapper factory only; original internal constructor stays private; no auth/crypto/framing/dependency changes"
+  },
+  "checks": {
+    "rust": "PASS13 tests; new public-constructor external consumer, malformed/aliased FD close and wrong-peer/revoked admission zero-byte cases included",
+    "ownedPublication": "PASS7 cases through supplied Tokio socket:1MiB/empty publish, full byte verification, ACK failure/context fences, wrong hash, no-clobber and conservative repeat",
+    "swift": "PASS actual Rust C ABI + native SQLite on host seed and separate-process reopen through runBound; not iOS Simulator route/signing evidence",
+    "android": "PASS KlodaWebDavStep15/emulator5584 API36 com.kloda.sync.test, actual publishBound JNI + native SQLite/reopen + owned strict Samba; no media API mutation",
+    "kotlin": "PASS narrow module compile",
+    "crossLinks": "PASS Android aarch64 and iOS Simulator arm64 representative links; other4 historical, not rerun",
+    "hashGate": "PASS full current SDK manifest; deliberate changes to manifest-first, transport and runtime wrapper rejected separately",
+    "clippy": "PASS all targets/android-jni with Rust1.99.0 compiler+driver; initial PATH picked1.98 driver, corrected without clean/suppression",
+    "review": "Same main agent, connected code review; no independent-agent review"
+  },
+  "files": {
+    "packages/storage-native/src/lib.rs": "4b4fd5a5395a7abfd6ee3a97282809d19b24153e4f437bafa41a1e6e392b46e8",
+    "packages/storage-native/src/bridge.rs": "7df2e6a07ea5a55ffa26867d0b1c86401d2944dc590e83a71c5377f537fb8f31",
+    "packages/storage-native/src/bridge_socket.rs": "08a90300822ee1ab4fbcb41c5da6433847834ab1324182e82d64e8e75c6c9653",
+    "packages/storage-native/src/android_jni.rs": "70a53e24ce1ef60c13f51ee6d9870eae736053443c006753a80cb17ebc94630d",
+    "packages/storage-native/include/kloda_smb.h": "f103e18808e4b74fa41acbd12f506f81577081f8f8e142fa8b5764962d3743f6",
+    "packages/storage-native/tests/connected_constructor.rs": "1334d6810ecdd35a43edf8cb59cab1f08727ac9a781b11fb21b4c764b63f48c2",
+    "packages/storage-native/tests/publication_owned.rs": "d66ba401466e7530f11231ad1ced74812d9c9f6263fdfc09a35f173a565d1871",
+    "packages/storage-native/apple/tests/IosSmbPublicationChecks.swift": "1302deee70b38df7b2f333244cb25490ce9a3762c1e2bf43035232d8bced68c6",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSmbPublication.kt": "b26b8c357efc9934d8fc44bbe3005affa0c16dfc25d76566ed9aee3631035f8c",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidSmbFilesChecks.kt": "492e997114e2ea20574475fe9cd325848f82c0b84e3356af63ee5f11ce1c741b",
+    "apps/mobile/modules/my-module/ios/IosSmbPublication.swift": "da226e70c7d9ba8b985a54e7ebe7310a3a6f180e4408e2065a3ad99bcbafa0a7",
+    "tools/test-storage-patch-gate.mjs": "f0bf9ff7f2b9ff7550e6c34828428a7468c5e46facfac116eeaaefa8eaac6f71",
+    "packages/storage-native/vendor/smb2.sha256": "10be3c149b74dceeca04560dc85eebe00395f7a6e60be27015ac6c49fa3057e5",
+    "packages/storage-native/vendor/smb2-upstream.json": "f890accd3611953f642c3f36b00fd1cf5bb891f27bd919fc8e795707e16df5e9"
+  },
+  "rawLogs": "/Users/ayhanblt/Desktop/projects/kloda/.local-evidence/smb-bound-socket-2026-10-31",
+  "cleanup": "Only owned strict Samba started this turn and disposable KlodaWebDavStep15 stopped; layers/images retained; test-owned ADB reverse removed by harness; no reset/snapshot restore/prune/git mutations",
+  "notRun": [
+    "Actual OS Wi-Fi/Ethernet creation/binding/current route owner integration",
+    "Real profile/vault + selected Files source generation authority linked to immutable context",
+    "Product queue/schedule/restore/catalog/Photos integration",
+    "Fresh stripped-signature/corrupt-encryption proxy matrix and full6target matrix; run once at stable owner checkpoint",
+    "Native UI/production signing/physical acceptance11/12/13/15/20/21"
+  ],
+  "next": "Bind actual native profile/vault and OS LAN/current-selected-Files source owners/generations to runBound, fail closed on change; prove one selected Files source before own catalog/restore/restart/Photos. No new architectural decision pending."
+}

@@ -1,0 +1,11 @@
+{
+  "beforeFinalRuntime": {
+    "unsigned_setup": 1,
+    "corrupt_encrypted": 1
+  },
+  "afterFinalRuntime": {
+    "unsigned_setup": 2,
+    "corrupt_encrypted": 2
+  },
+  "observation": "actual proxy stdout; proxies stopped via own session Ctrl-C after final runtime; no payload logged"
+}

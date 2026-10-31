@@ -1,0 +1,21 @@
+{
+  "status": "D8A visibility-only approval acknowledged; external consumer fails; attempted hunk rolled back; corrected typed ingress/native bridge proposals NOT_APPLIED",
+  "proof": [
+    "rt::net is pub(crate)",
+    "rt::net::TcpStream is pub(crate)",
+    "From<tokio::net::TcpStream> exists only under cfg(all(test, feature=\"tokio\"))",
+    "External consumer emitted E0308, then E0277 and private_interfaces warning; a one-line visibility change cannot be consumed"
+  ],
+  "checks": {
+    "restoredRust": "PASS 10 tests; 2 owned-network tests ignored, not fresh PASS",
+    "restoredCargoCheck": "PASS Rust1.99.0 locked host check",
+    "sourceGate": "PASS intentional changes to manifest-first, transport and runtime-wrapper SDK files rejected",
+    "nativeBridge": "NOT_APPLIED automatic approval review rejected new native ABI/FD/networking scope beyond one-line approval",
+    "platformMatrix": "NOT_RUN no new bridge was applied"
+  },
+  "proposals": {
+    "typed-sdk-ingress-proposal.patch": "14f7cd443e3e83b1c11b9d97fd13908ccac32c516f270107e960bc241ddcf46b",
+    "native-bound-socket-proposal.patch": "d0111116eb7394a31f613a6e11f1f8ca5eb8c4f25794699732bd3ef00c21c3a9"
+  },
+  "next": "User approval for corrected Tokio ingress plus native bound-socket bridge scope; SMB stays disabled"
+}

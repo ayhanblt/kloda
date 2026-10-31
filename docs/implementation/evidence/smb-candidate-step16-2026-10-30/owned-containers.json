@@ -1,0 +1,46 @@
+{
+  "network": "kloda-smb16-9bae3f68-internal-loopback",
+  "image": "sha256:8fd37d1b7b68df805b33169d5df4570031236538b337037cfa8e89138e2ef354",
+  "containers": [
+    {
+      "id": "63eff62a8d712dc571a628623276be14efc90f6533c335d5cdc1dc168eaa8127",
+      "name": "kloda-smb16-9bae3f68-strict-loopback",
+      "mode": "strict",
+      "port": 27445
+    },
+    {
+      "id": "584ba3552926d5cb2254f505d83a392981ce9db21a1bec4e6a925600183ffe81",
+      "name": "kloda-smb16-9bae3f68-smb2-loopback",
+      "mode": "smb2",
+      "port": 27446
+    },
+    {
+      "id": "2e832f5e6ac049a2f0d174fdf4691a366d1ce6d73f593bf9ed222b338583de80",
+      "name": "kloda-smb16-9bae3f68-no-encrypt-loopback",
+      "mode": "no-encrypt",
+      "port": 27447
+    }
+  ],
+  "previousContainers": [
+    {
+      "id": "11f96fe9c18c00a7cb22d2de08d298c3a863bacdc98d5b78e41bf93c6989a386",
+      "name": "kloda-smb16-9bae3f68-strict",
+      "mode": "strict",
+      "port": 27445
+    },
+    {
+      "id": "b57dce611f93c9af055d2d04f22e40e358756278e6633ed203b202d3287e27c2",
+      "name": "kloda-smb16-9bae3f68-smb2",
+      "mode": "smb2",
+      "port": 27446
+    },
+    {
+      "id": "e0dbc4f5516386647460c73abb0848ececc02413634c6b1f7610bfe936e930f3",
+      "name": "kloda-smb16-9bae3f68-no-encrypt",
+      "mode": "no-encrypt",
+      "port": 27447
+    }
+  ],
+  "previousNetwork": "kloda-smb16-9bae3f68-internal",
+  "status": "all owned fixture containers stopped after tests; layers/images retained, no prune"
+}

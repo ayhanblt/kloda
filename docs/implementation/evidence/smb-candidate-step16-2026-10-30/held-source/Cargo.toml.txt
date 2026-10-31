@@ -1,0 +1,16 @@
+[package]
+name = "kloda_storage_native"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.89"
+publish = false
+
+[lib]
+crate-type = ["rlib", "staticlib", "cdylib"]
+
+[dependencies]
+smb = { version = "=0.12.1", default-features = false, features = ["async", "sign", "encrypt"] }
+tokio = { version = "=1.54.1", default-features = false, features = ["rt", "net", "io-util", "time", "sync"] }
+
+[dev-dependencies]
+block-buffer = "=0.10.4"

@@ -1,0 +1,26 @@
+{
+  "recordedAt": "2026-10-30T21:32:50.521125+00:00",
+  "scope": "Native-only SMB profile/vault foundation after UI interlude; no JS, native publication owner, route binding or product activation",
+  "files": {
+    "apps/mobile/modules/my-module/ios/IosSmbProfile.swift": "63f5dbcc3072985092e2693f29babf8715b95fa1fb728a5d0f1fea3501a21ea4",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSmbProfile.kt": "75c58a67b036bdc4ec237c2894dd0e0bdf8dd7c244939d815a6dfe3c263c828f",
+    "apps/mobile/modules/my-module/ios/IosSmbVault.swift": "2223590ab3f598bfed487feb6ee33f542f0a1a20baeefd69ad25651c84ab4686",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSmbVault.kt": "36a3894c30aff6c6bec55362984784cc4f7cfa2dcc2cf210fadcdb7c0144cc80",
+    "packages/storage-native/apple/tests/IosSmbProfileChecks.swift": "e61dd2da0814f984f3f1afe8250bfed27158f6c6407fec2cac6877acb9e86314"
+  },
+  "checks": {
+    "android": "PASS :my-module:compileDebugKotlin; 19s,2 tasks executed/62 up-to-date",
+    "swift": "PASS host compile including actual SMB profile/vault/journal sources; profile roundtrip,10 rejected field/target mutations,redacted normal/debug description",
+    "vaultRuntime": "NOT_RUN actual Android Keystore/iOS Keychain store/reopen/locked/corruption runtime",
+    "mobilePlatformMatrix": "NOT_RUN not justified for this isolated source slice",
+    "oldNativeSources": "299 pre-UI native files still byte-identical; 4 new native source files and1 Swift test added after UI completion"
+  },
+  "security": [
+    "Separate SMB Android AES-GCM key/AtomicFile no-backup namespace",
+    "Separate non-synchronizing when-unlocked-this-device-only iOS Keychain service",
+    "Unreadable custody refuses overwrite; no plaintext or identity-key fallback",
+    "Opaque profile/credential UUID generations stored with native profile; not yet wired to journal/context invalidation or selected-source owner"
+  ],
+  "next": "Resolve D8 transport-constructor maintenance boundary; then actual OS route/current source, profile/generation owner and selected Files runtime proof; product SMB disabled",
+  "logs": "Local .local-evidence/smb-profile-vault-2026-10-31; no credentials logged"
+}

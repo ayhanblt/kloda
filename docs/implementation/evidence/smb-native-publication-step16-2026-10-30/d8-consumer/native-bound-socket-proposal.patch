@@ -1,0 +1,157 @@
+--- a/packages/storage-native/src/lib.rs
++++ b/packages/storage-native/src/lib.rs
+@@ -3,6 +3,8 @@
+ mod android_jni;
+ #[cfg(unix)]
+ pub mod bridge;
++#[cfg(unix)]
++pub mod bridge_socket;
+ pub mod paths;
+ pub mod photo_manifest;
+ pub mod publication;
+@@ -62,7 +64,27 @@
+         if remaining.is_zero() {
+             return Err(smb2::Error::invalid_data("cancelled"));
+         }
+-        let tcp = Arc::new(TcpTransport::connect(address, remaining).await?);
++        let tcp = TcpTransport::connect(address, remaining).await?;
++        Self::negotiate(tcp, address, remaining).await
++    }
++    /// Wrap only a connected, exclusively owned socket supplied by the native route owner.
++    /// Peer equality is an additional fence, not proof of OS route/source admission.
++    pub async fn from_stream(
++        stream: tokio::net::TcpStream,
++        address: SocketAddr,
++        remaining: Duration,
++    ) -> smb2::Result<Self> {
++        if remaining.is_zero() {
++            return Err(smb2::Error::invalid_data("cancelled"));
++        }
++        if stream.peer_addr().map_err(smb2::Error::Io)? != address {
++            return Err(smb2::Error::invalid_data("socket_peer_mismatch"));
++        }
++        stream.set_nodelay(true).map_err(smb2::Error::Io)?;
++        Self::negotiate(TcpTransport::from_tokio_stream(stream), address, remaining).await
++    }
++    async fn negotiate(tcp: TcpTransport, address: SocketAddr, remaining: Duration) -> smb2::Result<Self> {
++        let tcp = Arc::new(tcp);
+         let encrypted = Arc::new(AtomicBool::new(false));
+         let wire = EncryptedWire {
+             tcp,
+--- a/packages/storage-native/src/bridge.rs
++++ b/packages/storage-native/src/bridge.rs
+@@ -102,6 +102,17 @@
+     callback: Option<ReceiptCallback>,
+     context: *mut c_void,
+ ) -> i32 {
++    unsafe { publish_with_socket(json, length, snapshot_fd, callback, context, None) }
++}
++
++pub(crate) unsafe fn publish_with_socket(
++    json: *const u8,
++    length: usize,
++    snapshot_fd: i32,
++    callback: Option<ReceiptCallback>,
++    context: *mut c_void,
++    socket: Option<std::net::TcpStream>,
++) -> i32 {
+     if snapshot_fd < 0 {
+         return 1;
+     }
+@@ -128,11 +139,15 @@
+             .enable_all()
+             .build()?;
+         runtime.block_on(async {
+-            let pending = NegotiatedSmb::connect(
+-                (request.address, request.port).into(),
+-                Duration::from_millis(request.response_timeout_ms.into()),
+-            )
+-            .await?;
++            let address = (request.address, request.port).into();
++            let remaining = Duration::from_millis(request.response_timeout_ms.into());
++            let pending = if let Some(socket) = socket {
++                socket.set_nonblocking(true)?;
++                let stream = tokio::net::TcpStream::from_std(socket)?;
++                NegotiatedSmb::from_stream(stream, address, remaining).await?
++            } else {
++                NegotiatedSmb::connect(address, remaining).await?
++            };
+             receipt.admit()?;
+             let mut conn = pending
+                 .authenticate(&request.username, &request.password, &request.domain)
+--- /dev/null
++++ b/packages/storage-native/src/bridge_socket.rs
+@@ -0,0 +1,60 @@
++//! Native connected-socket ABI. No socket creation, DNS or fallback in this entry.
++use crate::bridge::{ReceiptCallback, publish_with_socket};
++use std::{ffi::c_void, fs::File, net::TcpStream, os::fd::FromRawFd};
++
++/// Same receipt contract as kloda_smb_publish, with a native route-bound connected socket.
++/// Both descriptors are consumed on every return. Native route/source/credential fences
++/// remain mandatory before the call, in event 0 and at local Completed authorization.
++///
++/// # Safety
++/// Pointer/callback rules match kloda_smb_publish. Each nonnegative descriptor must
++/// be valid and exclusively transferred; socket_fd must be a connected TCP socket.
++/// The native owner must close other socket duplicates before transferring ownership.
++#[unsafe(no_mangle)]
++pub unsafe extern "C" fn kloda_smb_publish_bound(
++    json: *const u8,
++    length: usize,
++    snapshot_fd: i32,
++    socket_fd: i32,
++    callback: Option<ReceiptCallback>,
++    context: *mut c_void,
++) -> i32 {
++    if snapshot_fd == socket_fd {
++        if snapshot_fd >= 0 {
++            drop(unsafe { File::from_raw_fd(snapshot_fd) });
++        }
++        return 1;
++    }
++    let socket = if socket_fd >= 0 {
++        Some(unsafe { TcpStream::from_raw_fd(socket_fd) })
++    } else {
++        None
++    };
++    if snapshot_fd < 0 || socket.is_none() {
++        if snapshot_fd >= 0 {
++            drop(unsafe { File::from_raw_fd(snapshot_fd) });
++        }
++        return 1;
++    }
++    unsafe { publish_with_socket(json, length, snapshot_fd, callback, context, socket) }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    use std::{io::Read, net::TcpListener, os::fd::IntoRawFd, ptr, time::Duration};
++
++    #[test]
++    fn malformed_request_and_alias_consume_socket_without_sending_bytes() {
++        for alias in [false, true] {
++            let listener = TcpListener::bind("127.0.0.1:0").unwrap();
++            let stream = TcpStream::connect(listener.local_addr().unwrap()).unwrap();
++            let (mut peer, _) = listener.accept().unwrap();
++            peer.set_read_timeout(Some(Duration::from_secs(1))).unwrap();
++            let socket = stream.into_raw_fd();
++            let snapshot = if alias { socket } else { File::open("/dev/null").unwrap().into_raw_fd() };
++            assert_eq!(unsafe { kloda_smb_publish_bound(ptr::null(), 0, snapshot, socket, None, ptr::null_mut()) }, 1);
++            assert_eq!(peer.read(&mut [0u8; 1]).unwrap(), 0);
++        }
++    }
++}
+--- a/packages/storage-native/include/kloda_smb.h
++++ b/packages/storage-native/include/kloda_smb.h
+@@ -14,4 +14,10 @@
+ typedef int32_t (*kloda_smb_receipt)(void *context, int32_t event, uint64_t bytes);
+ int32_t kloda_smb_publish(const uint8_t *json, size_t length, int32_t snapshot_fd,
+     kloda_smb_receipt callback, void *context);
++/* Native route-bound path. Consumes both FDs on every return; no new connection,
++ * DNS or fallback. Socket must be connected to the exact request peer, exclusively
++ * transferred after native OS route admission; callbacks/Completed still recheck it.
++ * The legacy entry remains for the isolated wire fixture, not route admission proof. */
++int32_t kloda_smb_publish_bound(const uint8_t *json, size_t length,
++    int32_t snapshot_fd, int32_t socket_fd, kloda_smb_receipt callback, void *context);
+ #endif

@@ -1,0 +1,92 @@
+{
+  "recordedAt": "2026-10-30T12:17:21.767531+00:00",
+  "step": "16a foundation; product disabled",
+  "decisions": [
+    "ADR0026 D6A exact one-bit patch",
+    "ADR0026 D7A Files + separate SMB Photos receipts"
+  ],
+  "results": {
+    "rust": "7 unit + 3 codec integration PASS; 2 owned network cases ignored by default",
+    "ownedPublication": "PASS 7 cases: 1MiB/empty, create+rename context fences, receipt failure, snapshot hash mismatch, foreign conflict, retry refuses adoption",
+    "swift": "PASS host actual Swift SQLite FULL/WAL + C ABI + encrypted Samba; separate-process seed/reopen; ACK retained before admission fence; unknown rename receipt/collision/cancel/immutable-header fences",
+    "android": "PASS emulator-5584 KlodaWebDavStep15 API36, com.kloda.sync.test; actual JNI + SQLite FULL/WAL + owned encrypted Samba, DB reopen in same process and conservative failure fences",
+    "representativeLinks": "Android arm64 API24 with JNI + iOS arm64 Simulator16.4 with C ABI PASS; no repeated 6-target matrix",
+    "clippy": "all-targets including android-jni -D warnings PASS",
+    "review": "separate same-main-agent pass, not independent review"
+  },
+  "dependencyGraph": {
+    "registryVersions": 94,
+    "baseAudit": "../smb-adopt-step16-2026-10-30/manifest.json",
+    "newCodecVersions": 6,
+    "newJniVersions": 20,
+    "newVersionOsvMatches": 0,
+    "note": "OSV at capture, not a no-vulnerability guarantee. Python CA store error for JNI query corrected with system curl TLS verification; no verification bypass."
+  },
+  "scopeNotes": [
+    "Final extra Windows device aliases/private Unicode staging prefix checks ran in final host Rust tests and current Swift host fixture; mobile link + Android runtime preceded that portable validator-only hardening, not relabelled as rerun.",
+    "Swift bridge guarded by KLODA_SMB_NATIVE until native library packaging/owner integration; no new JS export. Android native owner loading/packaging not enabled in product; test library is an APK asset loaded only by owned fixture.",
+    "Known returned create/write+flush/close/rename ACKs persisted before subsequent admission checks. SDK errors with partial/unknown replies remain non-Completed; no hash-equality adoption.",
+    "Rust Photos codec validates syntax only, not local resource ownership; native same-target Completed resource validation/publish/restore is still required.",
+    "No new Photos library mutation, original Pixel_9_Pro access, physical test, signing change, remote deletion or external message."
+  ],
+  "open": [
+    "native profile/vault and real OS LAN/current-source admission owner integration",
+    "selection/queue/schedule and product activation gates",
+    "SMB own catalog/Files restore/restart review",
+    "Photos same-target own-resource binding, publish/metadata-only/catalog/restore",
+    "stable full ABI/recovery/security and independent/platform acceptance gates",
+    "preserved steps12/13/15/20/21; steps16b/16c not skipped"
+  ],
+  "sourceSha256": {
+    "apps/mobile/modules/my-module/android/build.gradle": "eb77e399274db8eaf90493a7217d726d42b5ee12623d8144f4e173e9ead032b4",
+    "apps/mobile/modules/my-module/android/consumer-rules.pro": "48295ccbddfea0a7ad561ea3180a166d658c4fe80561ba50b88287dbd3da46fb",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt": "1df0b7e122fb46943dd925c155499b13b95b664e7f18c079796b7129256f455f",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidSmbFilesChecks.kt": "54c272d5bbd166c864c181400d19b2327e1e0ff59150b734eebe3aeebefa349c",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSmbJournal.kt": "a9ded58ff55149494d160be91b22b0c37b2ba676c4ed710f1f9ebe562dd9fc99",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSmbPublication.kt": "4691d19731783044051dd97dcbb279892807865ddf24c87560835370e37762ea",
+    "apps/mobile/modules/my-module/ios/IosSmbJournal.swift": "f65cf652aeff1ac6197c7e02840a96177163a61cf38bc7cca7e194b8014845d4",
+    "apps/mobile/modules/my-module/ios/IosSmbPublication.swift": "1854cbce94f2dcb7c48d0f5f2f71cb1ab940dfea4e479400fc7bd0fc43ba4d6e",
+    "packages/storage-native/Cargo.lock": "345150d965799e21cf9c36f4226571fbd85de529b6cb75c9e52978dedd4dd095",
+    "packages/storage-native/Cargo.toml": "ef8744f40666df56a851e97ffd657057804b88ffcd4599994e1034e6155884d4",
+    "packages/storage-native/apple/tests/IosSmbPublicationChecks.swift": "e69a00db64c24177b21c214e5f7dac244ac593e77ffb1ec41f8c3ac83a8c88e9",
+    "packages/storage-native/fixtures/smb-photo-v1.json": "6a950cb6e0fdcde8a4a82a44ad60c84b22093847ca8c1cda104680fb5b097631",
+    "packages/storage-native/include/kloda_smb.h": "e4a44dd09c8786a26a8bb60216556deccd51264e1bea13b58be559b175c33fec",
+    "packages/storage-native/src/android_jni.rs": "f21d3e1089684986f078de538557b0273a18e66e9c9120c22c59df451c3d2444",
+    "packages/storage-native/src/bridge.rs": "d7d47e8b6e33ad9a41b5efa9d0fd73327f48ba863379b56e413eba713ff7b2db",
+    "packages/storage-native/src/lib.rs": "3a810a39fae01eda993c9fafc179bbb319f729bfa889cc2c83731b969e2ad518",
+    "packages/storage-native/src/paths.rs": "b1b9c6496f4d148ea4afdc99c4ff2c4d54817a932ab5e8c068857bf9f1875071",
+    "packages/storage-native/src/photo_manifest.rs": "af799040cd9ee138044c849dfdc6846069162eeed66403a33a2e7456521e047d",
+    "packages/storage-native/src/publication.rs": "7d9ef8c493fea7527b75acfb08f181f7996dc1f45c73e363bee0b0bd290a4bab",
+    "packages/storage-native/tests/photo_manifest.rs": "e1a382af3cc6275088e062b71598704e2e9b58ed6f2da3b249e68cc3cbe6f1ab",
+    "packages/storage-native/tests/publication_owned.rs": "fd56aabef3f358806968efa13f61ee17d5c7ca3db41f3439baefea9bdb9cb23a",
+    "tools/check-storage-native.mjs": "b05dca823ca78d83678580012647b73b641f2abbd092cdc6a5c0e57a11f22da4",
+    "tools/test-android-smb-publication.py": "ab9477b244656240400e06be8c95c55611da053fa1934cf60bb2d89e035a4fde",
+    "tools/test-ios-smb-publication.py": "29b89b626fa2ad13cf3892d10de0608dd76bd16d7b5b93c32ab2a389628e3ef8",
+    "tools/test-storage-native.mjs": "5397381fc5d46a8f397d1e8ec8baab182bd565eb3d4f7d21c81a9bbac74f7b9a"
+  },
+  "logSha256": {
+    "final-tests.log": "992bfb04908612bd195ee91fbf13f5f0127de404c1e9f3ac8cb19f9f804b226e",
+    "final-clippy.log": "91a5a1539f6e938fe7be37b3750b69a8cd73b8ffe7575bd18ffcc0da337ec209",
+    "publication-runtime.log": "d782a0db91cee0740d589eebcf893bcb1690e89fe8b59d29a1a9ce766dcdd2b6",
+    "swift-native-runtime.log": "c5761ee79c7b41b22b0ac9c075f505fe9d96c49d81ecf1086a02a6086bb73601",
+    "android-native-runtime.log": "84474d8f50f4d84ddfafcd64e39c4a64219cd5869cb670c94d8c7c2e21bd827c",
+    "android-native-bridge.log": "34b392803bf91c084a92eaf9d39993aea8d526697c924f282517db4a5792fe50",
+    "ios-native-bridge.log": "eb330aac0f23112c9f208d0e859d32347d8fe31f654efda8bd3fc99fd8ec1dd8",
+    "codec-delta-query.json": "8df193c4fa4efcd5e495dc959d9fed5d2ea1ef17ee01c613a0be91dc7ffef83b",
+    "codec-delta-result.json": "e7e00f5759742ba9322ec6db4bd44d79d245d9831a06655a80cdb93e39c27928",
+    "jni-delta-query.json": "69eec7e94462c1021e43cc889cd1651eb7907d79758f4430151ef05c7f30e0f7",
+    "jni-delta-result.json": "a97b693d2e180240c1eb2be03c1d7c4ce625e2823b9546dd25d1991f5d0d723e"
+  },
+  "androidTestLibrarySha256": "ed47af514a72f7bba6b199fae97b69cb6586d0f64eb58005fdfcc502fe0d9c9a",
+  "cleanup": {
+    "containers": [
+      "63eff62a8d712dc571a628623276be14efc90f6533c335d5cdc1dc168eaa8127",
+      "584ba3552926d5cb2254f505d83a392981ce9db21a1bec4e6a925600183ffe81",
+      "2e832f5e6ac049a2f0d174fdf4691a366d1ce6d73f593bf9ed222b338583de80"
+    ],
+    "stopped": true,
+    "layersRetained": true,
+    "emulator": "KlodaWebDavStep15/emulator-5584 stopped; images retained, no reset",
+    "localTestFiles": "Swift scratch removed by runner; Android owned scratch removed by instrumentation; generated ignored test library asset retained for reproducibility"
+  }
+}

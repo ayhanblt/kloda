@@ -1,0 +1,19 @@
+{
+  "version": "0.36.2",
+  "commit": "8a7bfc60a5119fd3d8c16d39a7ecefeea02fbb0e",
+  "registryChecksum": "5d07b2991986726d6e4d24467a3258fbeb1e59a3b39059e10420594a44c7c221",
+  "approved": "D6A 2026-10-30; D8 corrected typed ingress + native bridge A user 2026-10-31",
+  "patch": "ENCRYPTION capability bit + typed Tokio stream ingress (public transport and crate-private runtime factories only)",
+  "preimage": "d8ae8f30ef5fedd7dcd413dc2c7ebc00c9c40ab8c068f1b724fdb39491f29758",
+  "postimage": "42830f8f570954e93ed70e07702839a146b478f30319201e8ffe755ac6cdde8f",
+  "upgrade": "Exact version/source gate; remove each local hunk when upstream supplies the corresponding capability/constructor; no silent upgrade",
+  "D8": {
+    "approved": "Corrected typed SDK ingress and narrow native handoff A user 2026-10-31",
+    "active": true,
+    "failedVisibilityOnlyAttempt": "rolled back; private wrapper/test-only From proved insufficient",
+    "files": {
+      "src/rt/net.rs": "5c5c650e2052fc4834f552c92494ea98c6fa7aa86ac9e0d84d9c3b4c00e5ab4f",
+      "src/transport/tcp.rs": "a238ff6e70bc0116e2dbb7967c922199e7f2731207fc5e168212613410c46553"
+    }
+  }
+}

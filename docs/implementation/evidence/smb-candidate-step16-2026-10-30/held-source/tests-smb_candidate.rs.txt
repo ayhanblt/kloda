@@ -1,0 +1,109 @@
+use kloda_storage_native::strict_smb_config;
+use smb::{
+    Client, CreateOptions, File, FileAccessMask, FileAttributes, FileCreateArgs,
+    FileRenameInformation, ReadAt, UncPath, WriteAt,
+};
+use std::{
+    net::{Ipv4Addr, SocketAddr},
+    time::Duration,
+};
+
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+fn share() -> UncPath {
+    UncPath::new("127.0.0.1")
+        .unwrap()
+        .with_share("owned")
+        .unwrap()
+}
+async fn connect(port: u16, password: &str) -> Result<Client> {
+    assert!((27445..=27449).contains(&port));
+    let mut config = strict_smb_config(Duration::from_secs(5))?;
+    config.connection.port = Some(port);
+    let client = Client::new(config);
+    client
+        .connect_to_address("127.0.0.1", SocketAddr::from((Ipv4Addr::LOCALHOST, port)))
+        .await?;
+    client
+        .share_connect(&share(), "owned", password.to_string())
+        .await?;
+    Ok(client)
+}
+async fn create(client: &Client, name: &str) -> Result<File> {
+    let args = FileCreateArgs::make_create_new(
+        FileAttributes::new(),
+        CreateOptions::new().with_non_directory_file(true),
+    );
+    Ok(client
+        .create_file(&share().with_path(name), &args)
+        .await?
+        .unwrap_file())
+}
+async fn read(client: &Client, name: &str, expected: &[u8]) -> Result<()> {
+    let args = FileCreateArgs::make_open_existing(FileAccessMask::new().with_generic_read(true));
+    let file = client
+        .create_file(&share().with_path(name), &args)
+        .await?
+        .unwrap_file();
+    let mut actual = vec![0; expected.len() + 1];
+    let mut offset = 0;
+    while offset < actual.len() {
+        let count = file.read_at(&mut actual[offset..], offset as u64).await?;
+        if count == 0 {
+            break;
+        }
+        offset += count;
+    }
+    assert_eq!(&actual[..offset], expected);
+    file.close().await?;
+    Ok(())
+}
+async fn rename(file: &File, name: &str) -> Result<()> {
+    file.set_info(FileRenameInformation {
+        replace_if_exists: false.into(),
+        root_directory: 0,
+        file_name: name.into(),
+    })
+    .await?;
+    Ok(())
+}
+
+#[test]
+#[ignore = "requires only the recorded owned loopback Samba fixture"]
+fn owned_samba_candidate() -> Result<()> {
+    assert_eq!(
+        std::env::var("KLODA_SMB16_FIXTURE").as_deref(),
+        Ok("owned-loopback")
+    );
+    tokio::runtime::Builder::new_current_thread().enable_all().build()?.block_on(async {
+        let client = connect(27445, "owned-disposable-fixture").await?;
+        let stamp = format!("owned-{}-{}", std::process::id(), std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH)?.as_nanos());
+        let temp = format!("{stamp}.stage"); let final_name = format!("{stamp}.bin");
+        let foreign_name = format!("{stamp}.foreign");
+        let bytes: Vec<u8> = (0..1048576).map(|n| (n % 251) as u8).collect();
+        let file = create(&client, &temp).await?;
+        let mut offset = 0;
+        while offset < bytes.len() {
+            let end = (offset + 65536).min(bytes.len());
+            let count = file.write_at(&bytes[offset..end], offset as u64).await?;
+            assert!(count > 0 && count <= end - offset); offset += count;
+        }
+        file.flush().await?;
+        assert!(create(&client, &temp).await.is_err(), "exclusive create must not overwrite");
+        let foreign = create(&client, &foreign_name).await?;
+        assert_eq!(foreign.write_at(b"foreign", 0).await?, 7); foreign.flush().await?; foreign.close().await?;
+        assert!(rename(&file, &foreign_name).await.is_err(), "no-clobber rename must preserve foreign final");
+        read(&client, &foreign_name, b"foreign").await?;
+        rename(&file, &final_name).await?; file.flush().await?; file.close().await?;
+        read(&client, &final_name, &bytes).await?;
+        let conn = client.get_connection_ip(Ipv4Addr::LOCALHOST.into()).await?;
+        assert!(conn.conn_info().unwrap().negotiation.dialect_rev >= smb::Dialect::Smb030);
+        client.close().await?;
+        assert!(connect(27445, "wrong-owned-password").await.is_err());
+        assert!(connect(27446, "owned-disposable-fixture").await.is_err(), "SMB2-only must fail");
+        assert!(connect(27447, "owned-disposable-fixture").await.is_err(), "encryption-disabled must fail");
+        assert!(connect(27448, "owned-disposable-fixture").await.is_err(), "stripped final auth signature must fail");
+        assert!(connect(27449, "owned-disposable-fixture").await.is_err(), "corrupt encrypted response must fail");
+        println!("PASS actual owned Samba SMB3/encryption/signing, exclusive create, 1MiB write/flush, no-clobber rename+foreign preservation and full byte readback; wrong password/SMB2/encryption-off/stripped-signature/corrupt-encryption reject. Native LAN-route/bridge/journal/OS/UI/physical NOT_RUN");
+        Ok(())
+    })
+}

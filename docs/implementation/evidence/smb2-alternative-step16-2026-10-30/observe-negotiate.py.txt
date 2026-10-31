@@ -1,0 +1,35 @@
+import socket,struct,subprocess,threading,os,json
+from pathlib import Path
+root=Path('/tmp/kloda-smb2-16-evidence')
+def exact(s,n):
+ b=b''
+ while len(b)<n:
+  x=s.recv(n-len(b))
+  if not x:raise EOFError()
+  b+=x
+ return b
+def frame(s):
+ h=exact(s,4);n=int.from_bytes(h,'big');assert 64<=n<=65536
+ return h,exact(s,n)
+def relay(listener):
+ try:
+  with listener.accept()[0] as c, socket.create_connection(('127.0.0.1',27445),timeout=10) as upstream:
+   c.settimeout(10);h,q=frame(c);assert q[:4]==b'\xfeSMB' and struct.unpack_from('<H',q,12)[0]==0
+   upstream.sendall(h+q);h,r=frame(upstream);assert r[:4]==b'\xfeSMB'
+   count=struct.unpack_from('<H',r,70)[0];offset=struct.unpack_from('<I',r,124)[0];assert count<=32
+   contexts=[]
+   for _ in range(count):
+    assert offset+8<=len(r)
+    kind,size=struct.unpack_from('<HH',r,offset);assert offset+8+size<=len(r)
+    contexts.append(kind);offset=(offset+8+size+7)&~7
+   record={'requestCapabilities':struct.unpack_from('<I',q,72)[0],'requestHasEncryptionCapability':bool(struct.unpack_from('<I',q,72)[0]&0x40),'responseDialect':struct.unpack_from('<H',r,68)[0],'responseCapabilities':struct.unpack_from('<I',r,88)[0],'responseContextTypes':contexts,'responseHasEncryptionContext':2 in contexts,'scope':'first NEGOTIATE only; no auth/payload/key recorded'}
+   (root/'observed-negotiate.json').write_text(json.dumps(record,indent=2)+'\n')
+   c.sendall(h+r)
+ except Exception as e:(root/'observation-error.txt').write_text(repr(e));raise
+compiler=Path(subprocess.check_output(['rustup','which','--toolchain','1.99.0','rustc'],text=True).strip());env=dict(os.environ);env['PATH']=str(compiler.parent)+os.pathsep+env['PATH'];env['RUSTC']=str(compiler);env['RUSTDOC']=str(compiler.parent/'rustdoc')
+with socket.socket() as s:
+ s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1);s.bind(('127.0.0.1',27450));s.listen(1);s.settimeout(20)
+ t=threading.Thread(target=relay,args=(s,));t.start()
+ with (root/'negotiate-only.log').open('w') as out:p=subprocess.run([str(compiler.parent/'cargo'),'run','--locked','--manifest-path','/tmp/kloda-smb2-16-probe/Cargo.toml','--example','negotiate'],env=env,stdout=out,stderr=subprocess.STDOUT)
+ t.join(timeout=15);assert not t.is_alive()
+ print('negotiate-only exit',p.returncode);print((root/'observed-negotiate.json').read_text())

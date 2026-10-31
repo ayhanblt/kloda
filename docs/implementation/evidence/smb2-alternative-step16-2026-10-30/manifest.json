@@ -1,0 +1,201 @@
+{
+  "date": "2026-10-30",
+  "scope": "D5A alternative evaluation only; no product SDK switch/patch/activation,16a incomplete",
+  "candidate": {
+    "name": "smb2",
+    "version": "0.36.2",
+    "commit": "8a7bfc60a5119fd3d8c16d39a7ecefeea02fbb0e",
+    "checksum": "5d07b2991986726d6e4d24467a3258fbeb1e59a3b39059e10420594a44c7c221",
+    "license": "MIT OR Apache-2.0",
+    "defaultFeatures": false,
+    "features": [
+      "tokio"
+    ],
+    "rust": "1.99.0",
+    "androidApi": 24,
+    "ndk": "27.1.12297006",
+    "minimumIos": "16.4"
+  },
+  "checks": {
+    "dependencyInventory": "71 resolved registry versions, RSA/SSPI/Picky absent, OSV0 matches at captured query; not a no-vulnerability guarantee",
+    "unmodifiedSecurityInterop": "FAIL required-cipher admission before auth/media on owned Samba4.19.5; actual NEGOTIATE request caps0x7 lacks ENCRYPTION, response dialect0x0311 contexts1/8 lacks cipher",
+    "unmodifiedTransferFaults": "NOT_RUN positive matrix because first strict gate fails; never counted as PASS",
+    "unmodifiedCrossLink": "PASS four Android ABIs and iOS arm64 device/Simulator; no app ABI/runtime acceptance",
+    "diagnosticPatch": "Only ENCRYPTION bit in separate /tmp source copy, SDK cache/product/upstream untouched; not adopted",
+    "diagnosticRuntime": "PASS1MiB exclusive create/write/flush, no-clobber foreign-preserve rename ACK/full byte equality, wrong password, SMB2/encryption-off before auth, actual stripped-auth/corrupt-encrypted TreeConnect reject",
+    "diagnosticFaultCounters": {
+      "beforeFinalRun": {
+        "unsigned_setup": 1,
+        "corrupt_encrypted": 0
+      },
+      "afterFinalRun": {
+        "unsigned_setup": 2,
+        "corrupt_encrypted": 1
+      }
+    },
+    "diagnosticCrossLink": "PASS same six targets, recorded separately; not unmodified SDK proof",
+    "nativeProduct": "NOT_IMPLEMENTED admission/bridge/context/journal/restore/OS/UI; physical NOT_RUN",
+    "cleanup": "Own proxies and recorded own Samba containers stopped; no NAS/personal media/physical keys touched"
+  },
+  "patch": {
+    "path": "encryption-capability-only.patch",
+    "upstreamModule": "src/client/connection.rs",
+    "preimageSha256": "d8ae8f30ef5fedd7dcd413dc2c7ebc00c9c40ab8c068f1b724fdb39491f29758",
+    "diagnosticPostimageSha256": "42830f8f570954e93ed70e07702839a146b478f30319201e8ffe755ac6cdde8f",
+    "delta": "one added capability bit, one changed source line; no crypto/profile weakening"
+  },
+  "review": "Separate same-main-agent pass: published-vs-diagnostic distinction, early auth fence, actual wire evidence, source-supported cause and no product adoption. Not independent-agent review. Initial low-level fault helper omitted first TreeConnect, corrected before accepting ciphertext rejection result.",
+  "nextDecision": "D6 exact pinned narrow patch maintenance exception vs preserve fork-free restriction/SMB blocked; no issue/PR/message submitted",
+  "files": [
+    {
+      "path": "aarch64-apple-ios-build.log",
+      "sha256": "713d9d3f04f344306f5657fd3ddc26547843fe90581f379d793a885a3224f2be",
+      "bytes": 2054
+    },
+    {
+      "path": "aarch64-apple-ios-sim-build.log",
+      "sha256": "8d85c2909585ec01c475a8f6c146db8a68797cb1514a489fb4417c8449281252",
+      "bytes": 2158
+    },
+    {
+      "path": "aarch64-linux-android-build.log",
+      "sha256": "e491a96a0424bb904b895534c360c42f8541989a0403674178ee146943db4c96",
+      "bytes": 2210
+    },
+    {
+      "path": "armv7-linux-androideabi-build.log",
+      "sha256": "c3eb39b51114bff5cd10c85c68d7ae5bdd415ea88a2da64394713bbd453b9351",
+      "bytes": 2022
+    },
+    {
+      "path": "dependency-licenses.json",
+      "sha256": "111e96f1532c93beab080f89f8489899b1073bebff9de1b4108a131cc0b07aaf",
+      "bytes": 11781
+    },
+    {
+      "path": "diagnostic-Cargo.lock.txt",
+      "sha256": "b74a237ed0c465e4aa82d622d8fb7ab58687a367677b617084896fbcf681004f",
+      "bytes": 16404
+    },
+    {
+      "path": "diagnostic-Cargo.toml.txt",
+      "sha256": "2ff12743a9b75bbec17135031f8883bfaac2f9128a3991b8b9915d01030569ed",
+      "bytes": 443
+    },
+    {
+      "path": "diagnostic-aarch64-apple-ios-build.log",
+      "sha256": "71c339d012e56794d648e5d18ad9950483d44c8e53915981ac2d07949f9760c5",
+      "bytes": 211
+    },
+    {
+      "path": "diagnostic-aarch64-apple-ios-sim-build.log",
+      "sha256": "5afcc4605eca13d6ed78b17e27794d866d2cb182d8e2bf2f0ed52132e56210b5",
+      "bytes": 211
+    },
+    {
+      "path": "diagnostic-aarch64-linux-android-build.log",
+      "sha256": "d85c25db7392d62be280c4e7b4ef4fd11a7ef02e49c0455590dcf7a13ba3451f",
+      "bytes": 211
+    },
+    {
+      "path": "diagnostic-armv7-linux-androideabi-build.log",
+      "sha256": "db89c7febb0255658c14681d555cbb75b366ebd905c82daaf91dad571a19e9e7",
+      "bytes": 211
+    },
+    {
+      "path": "diagnostic-i686-linux-android-build.log",
+      "sha256": "b02df578020e11e14076fb80d78b30a63a51f3e6e6fe9cff9b3302fcb5a0d6e5",
+      "bytes": 211
+    },
+    {
+      "path": "diagnostic-one-bit-runtime.log",
+      "sha256": "37de5fe980b441aa1d4334a41310b19df2ab58201937ea1fed696011576c2201",
+      "bytes": 963
+    },
+    {
+      "path": "diagnostic-x86_64-linux-android-build.log",
+      "sha256": "71e081236fb89f268f5c8cd90c294f0a59797f8ec0fedb70fd4e797b131fd111",
+      "bytes": 211
+    },
+    {
+      "path": "encryption-capability-only.patch",
+      "sha256": "4bd15ccf24fe1b04c19ccb2b5e97214d31a56e953fa324aa37e53c74d3071a99",
+      "bytes": 537
+    },
+    {
+      "path": "host-build.log",
+      "sha256": "41505229ff866c9319e84941f6b7e8b7ac7ac0b3ed72537e0bb87e2f3e009016",
+      "bytes": 2053
+    },
+    {
+      "path": "i686-linux-android-build.log",
+      "sha256": "df028510b2dc3c68a1fe1a90eddfa2ee8bbe1ab7eabb8b2ac82f7d4beb2cb5df",
+      "bytes": 2054
+    },
+    {
+      "path": "negotiate-example.rs.txt",
+      "sha256": "7664d11d7926fb3c96e3f89c5c11e79d0ee4a7458896ab351c661a56ab98d6ca",
+      "bytes": 526
+    },
+    {
+      "path": "negotiate-only.log",
+      "sha256": "de765b7a45c423728faea2768dd37ce4a2ca277c14def81948599731b2325a78",
+      "bytes": 317
+    },
+    {
+      "path": "observe-negotiate.py.txt",
+      "sha256": "4c45a8090a33ff1c6b2e908fa526e836596636639d46495fea2666a8f4409caa",
+      "bytes": 2316
+    },
+    {
+      "path": "observed-negotiate.json",
+      "sha256": "836a8a8f2b2ae493c312a7886350fd2d11242ca6648d824085d888aee198d6f2",
+      "bytes": 281
+    },
+    {
+      "path": "osv-query.json",
+      "sha256": "980acd9fc4cb520ecff00d5a58e6060f95ac6176846a7c5f801c5665294fc7d1",
+      "bytes": 5848
+    },
+    {
+      "path": "osv-result.json",
+      "sha256": "3daa3125750ef8d271d0bde6ff960d011fe00d5ec17e2f85e46dee0fe9c9e4b7",
+      "bytes": 226
+    },
+    {
+      "path": "prototype-lib.rs.txt",
+      "sha256": "8525f85d7cb44d6e6c61298ed5e5a78cbb33f79323fcd16e6bd96e07b0cf572b",
+      "bytes": 3543
+    },
+    {
+      "path": "prototype-tests.rs.txt",
+      "sha256": "966fde46a2bf88eda522dcc65eb983c0970a348634f5f498ba250e1dbc6b8709",
+      "bytes": 2706
+    },
+    {
+      "path": "runtime-diagnostic.log",
+      "sha256": "5262f6be5299cb670e4c0e6aa9208f39d2f2675ef19ca3cd0c6be652e0034d24",
+      "bytes": 611
+    },
+    {
+      "path": "runtime.log",
+      "sha256": "7f79b717e992bc91153934446c15a4b6bf6477a00e5c9f0e534942b16b8a05ca",
+      "bytes": 784
+    },
+    {
+      "path": "unmodified-Cargo.lock",
+      "sha256": "7b102b32b9fd0cc9d942aa515e181c4b6847efceab863d8adcd8d278c4643396",
+      "bytes": 16547
+    },
+    {
+      "path": "unmodified-Cargo.toml",
+      "sha256": "61fe4ac6e0deab373c9b301333c257c4e3702e42baa9a8cbfbeec4508a6a13a4",
+      "bytes": 367
+    },
+    {
+      "path": "x86_64-linux-android-build.log",
+      "sha256": "11f1774fc4717bcfba39dfde7440243e494abec0bc0b8ac9e2228f2cba2a156b",
+      "bytes": 2054
+    }
+  ]
+}
