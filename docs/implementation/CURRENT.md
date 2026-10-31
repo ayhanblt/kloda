@@ -1,6 +1,6 @@
 # CURRENT — 31.10.2026
 
-Eski PASS taze kabul değildir.
+Tarihî PASS taze kabul değildir.
 
 ## Steps
 
@@ -30,10 +30,10 @@ Eski PASS taze kabul değildir.
 
 ## Active16a
 
-Tamam: SMB profil/vault temeli; D8 iki-wrapper SDK diff29/native diff157+Kotlin/JNI/Swift handoff. Rust13/Clippy, iki link, owned yayın, Swift host seed/reopen, Android JNI/SQLite makbuz testleri PASS.
-[Kanıt](evidence/smb-native-publication-step16-2026-10-30/bound-socket-2026-10-31.json).
-Açık: gerçek Keychain/Keystore, OS route/ağ sahibi, seçili Files yetki/generation, runtime/fault/catalog/restore/restart/Photos. SMB KAPALI.
-Devam: profil/vault, OS LAN ve seçili Files kaynağının yetki/generation bağlarını tamamlamak.
+D8 bağlı-socket handoff; profil değişimi eski işi yetkisiz kılar, yeni generation/pending→ready ve vault-okunamaz güvenli duruş. Android gerçek Keystore/tamper/reopen+eski iş; Swift host ayrı süreç testleri PASS.
+[Kanıt](evidence/smb-native-publication-step16-2026-10-30/profile-owner-2026-10-31.json).
+Açık: iOS pozitif Keychain/üretim custody, OS route/ağ sahibi, seçili Files yetki/generation, catalog/restore/restart/Photos. SMB KAPALI.
+Devam: yeni oturumda iOS custody, ardından OS LAN/seçili Files bağları. Profil diliminde duruldu.
 Okuma: [ADR26][a26] D6–D8; [ADR22][a22] transport/custody; [checkpoint](smb-native-publication-checkpoint-2026-10-30.md) “Sıradaki dar iş”. Hedefli: [D8][d8], [usage](resume-and-usage-plan-2026-10-30.md).16 kabul ölçütlerini raporlamadan17'ye geçme.
 
 ## Decisions
@@ -41,7 +41,7 @@ Okuma: [ADR26][a26] D6–D8; [ADR22][a22] transport/custody; [checkpoint](smb-na
 - D6A 30.10: exact ENCRYPTION bit patch; hash/versiyon/upstream kaldırma koşulu [ADR26][a26].
 - D7A 30.10: ayrı Files/SMB Photos makbuz/sidecar; kayıp ACK ile adoption yok [ADR26][a26].
 - D8 31.10: ilk tek-satır geri alındı; iki wrapper+native köprü AYRI açık A onaylı [D8][d8].
-- Mimari karar beklemiyor. SMB Photos yazma testi/21 fiziksel izni verilmedi; WebDAV istisnaları genişletilmez.
+- Karar beklemiyor. SMB Photos yazma testi/21 fiziksel izni verilmedi; WebDAV istisnaları genişletilmez.
 
 ## Gates
 
@@ -50,7 +50,7 @@ Roadmap dışı açık kapsam: hesap/MFA/recovery, public roots/deep-link, Inter
 
 ## ADRs
 
-[ADR dizini](../decisions/). Yalnız yazılı kapsam değişir.
+[ADR dizini](../decisions/). Yazılı kapsam değişir.
 - 01 framework/schedule; SAS ilk trust13 ile değişti.
 - 02 ilk slice; Files/Photos kapsamını05 genişletir.
 - 03 pairing/offline; LAN merkezî önkoşullarını16 kaldırır.
