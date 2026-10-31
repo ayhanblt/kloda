@@ -80,12 +80,16 @@ apps/mobile/.expo/dev/logs/export.log
 # Context simplification — raw output only, user-approved 2026-10-31
 /apps/mobile/.expo/dev/logs/
 *.log
-/docs/implementation/evidence/**/*.png
-/docs/implementation/evidence/**/*.jpg
-/docs/implementation/evidence/**/*.jpeg
-/docs/implementation/evidence/**/*.webp
 !**/fixture/**
 !**/fixtures/**
 !**/snapshot/**
 !**/snapshots/**
 !/docs/ui/lovable-reference/**
+
+# Existing manifest/document-referenced evidence remains searchable/tracked.
+!/docs/implementation/evidence/lovable-step12-2026-10-28/mobile-build-final.log
+!/docs/implementation/evidence/lovable-step12-2026-10-28/mobile-lint-final.log
+!/docs/implementation/evidence/lovable-step12-2026-10-28/mobile-native/android-boot.log
+!/docs/implementation/evidence/lovable-step12-2026-10-28/mobile-native/metro.log
+!/docs/implementation/evidence/lovable-step12-2026-10-28/mobile-suite-final.log
+!/docs/implementation/evidence/lovable-step12-2026-10-28/mobile-typecheck-final.log
