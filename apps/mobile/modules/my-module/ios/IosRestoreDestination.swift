@@ -20,6 +20,10 @@ enum IosRestoreDestination {
   }
   static func publish(_ intent: inout IosRestoreIntent, journal: IosSyncJournal,
     snapshots: IosFilesSnapshot, check: () throws -> Void) throws {
+    try publish(&intent, snapshots: snapshots, check: check, save: journal.saveRestoreIntent)
+  }
+  static func publish<T: IosLocalRestorePublication>(_ intent: inout T,
+    snapshots: IosFilesSnapshot, check: () throws -> Void, save: (T) throws -> Void) throws {
     guard let bookmark = intent.destination, let data = Data(base64Encoded: bookmark) else {
       throw IosPairingFailure.native("invalid_request")
     }
@@ -43,7 +47,7 @@ enum IosRestoreDestination {
     NSFileCoordinator().coordinate(writingItemAt: target, options: .forMerging, error: &coordinatorError) { actual in
       result = Result {
         guard actual.standardizedFileURL == target.standardizedFileURL else { throw IosPairingFailure.native("destination_permission_lost") }
-        try publishVerified(&updated, journal: journal, source: source, directory: directory, check: check)
+        try publishVerified(&updated, source: source, directory: directory, check: check, save: save)
 
       }
     }
@@ -51,7 +55,7 @@ enum IosRestoreDestination {
     guard coordinatorError == nil, let result else { throw IosPairingFailure.native("destination_unavailable") }
     try result.get()
   }
-  static func verifyCompleted(_ intent: IosRestoreIntent, directory: Int32, check: () throws -> Void) throws {
+  static func verifyCompleted<T: IosLocalRestorePublication>(_ intent: T, directory: Int32, check: () throws -> Void) throws {
     try check()
     let fd = openat(directory, intent.name, O_RDONLY | O_NOFOLLOW | O_CLOEXEC | O_NONBLOCK)
     guard fd >= 0 else { throw IosPairingFailure.native(errno == ENOENT ? "not_found" : "destination_unavailable") }
@@ -66,6 +70,10 @@ enum IosRestoreDestination {
 
   static func publishVerified(_ intent: inout IosRestoreIntent, journal: IosSyncJournal,
     source: FileHandle, directory: Int32, check: () throws -> Void) throws {
+    try publishVerified(&intent, source: source, directory: directory, check: check, save: journal.saveRestoreIntent)
+  }
+  static func publishVerified<T: IosLocalRestorePublication>(_ intent: inout T,
+    source: FileHandle, directory: Int32, check: () throws -> Void, save: (T) throws -> Void) throws {
     var updated = intent
     defer { intent = updated }
         try check()
@@ -79,7 +87,7 @@ enum IosRestoreDestination {
             Darwin.close(fd); throw IosPairingFailure.native("destination_not_empty")
           }
         } else {
-          updated.state = "publishing"; try journal.saveRestoreIntent(updated)
+          updated.state = "publishing"; try save(updated)
           fd = openat(directory, updated.name, O_RDWR | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0o600)
           guard fd >= 0 else { throw IosPairingFailure.native(errno == EEXIST ? "destination_not_empty" : IosFilesSource.ioFailure().code) }
           let info = try IosFilesSource.metadata(fd)
@@ -87,7 +95,7 @@ enum IosRestoreDestination {
             Darwin.close(fd); throw IosPairingFailure.native("local_path_rejected")
           }
           updated.device = UInt64(truncatingIfNeeded: info.st_dev); updated.inode = info.st_ino
-          do { try journal.saveRestoreIntent(updated) } catch { Darwin.close(fd); throw error }
+          do { try save(updated) } catch { Darwin.close(fd); throw error }
         }
         defer { Darwin.close(fd) }
         // Resume only our recorded inode after proving every existing byte is the expected prefix.
@@ -126,7 +134,7 @@ enum IosRestoreDestination {
         guard hash == updated.sha256, length == updated.size else { throw IosPairingFailure.native("hash_mismatch") }
         try check()
         updated.state = "completed"; updated.errorCode = nil
-        try journal.saveRestoreIntent(updated)
+        try save(updated)
   }
 
 }

@@ -10,10 +10,10 @@ import java.nio.ByteBuffer
 import java.nio.charset.CodingErrorAction
 import java.util.Collections
 
-internal data class PhotoResource(val operationId: String, val role: String, val name: String, val mimeType: String, val sha256: String, val size: Long)
+internal data class PhotoResource(val operationId: String, override val role: String, override val name: String, override val mimeType: String, override val sha256: String, override val size: Long) : PhotoMediaResource
 internal data class PhotoAlbum(val id: String, val name: String)
-internal data class PhotoManifest(val sourceDeviceId: String, val assetId: String, val revision: Long,
-  val resources: List<PhotoResource>, val albums: List<PhotoAlbum>, val favorite: Boolean?)
+internal data class PhotoManifest(override val sourceDeviceId: String, val assetId: String, val revision: Long,
+  val resources: List<PhotoResource>, override val albums: List<PhotoAlbum>, override val favorite: Boolean?) : PhotoMediaManifest
 
 internal object PhotoManifestCodec {
   const val prefix = "kloda-photo-v1-"
@@ -68,14 +68,8 @@ internal object PhotoManifestCodec {
 
   fun decode(bytes: ByteArray): PhotoManifest {
     try {
-      requireValue(bytes.isNotEmpty() && bytes.size <= maxBytes)
-      val text = Charsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
-        .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes)).toString()
-      strictStrings(text)
-      return JsonReader(StringReader(text)).use { reader ->
-        reader.isLenient = false
-        val root = objectValue(reader, 0)
-        requireValue(reader.peek() == JsonToken.END_DOCUMENT)
+      val root = parseObject(bytes)
+      return run {
         keys(root, setOf("version", "sourceDeviceId", "assetId", "revision", "resources", "albums", "favorite"))
         requireValue(root["version"] == 1L)
         val resources = list(root, "resources", 8).map { entry ->
@@ -97,14 +91,25 @@ internal object PhotoManifestCodec {
     catch (_: Exception) { throw FilesFailure("invalid_request") }
   }
 
-  private fun keys(value: Map<*, *>, expected: Set<String>) { requireValue(value.keys == expected) }
-  private fun string(value: Map<*, *>, key: String): String = value[key] as? String ?: throw FilesFailure("invalid_request")
-  private fun number(value: Map<*, *>, key: String): Long {
+  fun parseObject(bytes: ByteArray): Map<String, Any?> {
+    requireValue(bytes.isNotEmpty() && bytes.size <= maxBytes)
+    val text = Charsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
+      .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes)).toString()
+    strictStrings(text)
+    return JsonReader(StringReader(text)).use { reader ->
+      reader.isLenient = false
+      objectValue(reader, 0).also { requireValue(reader.peek() == JsonToken.END_DOCUMENT) }
+    }
+  }
+
+  fun keys(value: Map<*, *>, expected: Set<String>) { requireValue(value.keys == expected) }
+  fun string(value: Map<*, *>, key: String): String = value[key] as? String ?: throw FilesFailure("invalid_request")
+  fun number(value: Map<*, *>, key: String): Long {
     val text = string(value, key)
     requireValue(decimal.matches(text))
     return text.toLongOrNull() ?: throw FilesFailure("invalid_request")
   }
-  private fun list(value: Map<*, *>, key: String, limit: Int): List<*> =
+  fun list(value: Map<*, *>, key: String, limit: Int): List<*> =
     (value[key] as? List<*> ?: throw FilesFailure("invalid_request")).also { requireValue(it.size <= limit) }
 
   private fun strictStrings(text: String) {

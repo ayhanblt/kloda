@@ -9,12 +9,13 @@ import java.util.UUID
 import java.io.File
 
 internal data class PhotoImportIntent(
-  val key: String, val manifest: PhotoManifest, val token: String, val folder: String,
-  val library: String, val phase: String = "prepared", val uri: String? = null,
-  val owned: Boolean = true, val reason: String = ""
-) {
-  val resource get() = manifest.resources.single()
-  val name: String = manifest.resources.singleOrNull()?.let { resource ->
+  val key: String, override val manifest: PhotoManifest, val token: String, override val folder: String,
+  val library: String, override val phase: String = "prepared", override val uri: String? = null,
+  override val owned: Boolean = true, val reason: String = ""
+) : PhotoMediaIntent {
+  override val desiredFolder get() = AndroidPhotosImportJournal.folder(manifest)
+  override val resource get() = manifest.resources.single()
+  override val name: String = manifest.resources.singleOrNull()?.let { resource ->
     var start = maxOf(0, resource.name.length - 45)
     if (start > 0 && Character.isLowSurrogate(resource.name[start])) start++
     "kloda-$token-${resource.name.substring(start)}"

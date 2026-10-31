@@ -14,10 +14,16 @@ internal data class FilesRunContext(val binding: String, val sources: Map<String
   companion object {
     // The revision and changed values share one preferences commit, including change-away/back.
     fun stamp(editor: SharedPreferences.Editor): SharedPreferences.Editor =
-      editor.putString("filesContextRevision", UUID.randomUUID().toString())
+      editor.putString("filesContextRevision", UUID.randomUUID().toString()).putString("backupContextRevision", UUID.randomUUID().toString())
 
     fun invalidate(context: Context) = synchronized(AndroidSyncJournal.sourceLock) {
-      if (!stamp(context.getSharedPreferences("kloda-sync", 0).edit()).commit()) throw FilesFailure("storage_failure")
+      if (!context.getSharedPreferences("kloda-sync", 0).edit().putString("filesContextRevision", UUID.randomUUID().toString()).commit()) throw FilesFailure("storage_failure")
+    }
+
+    fun webdav(context: Context): FilesRunContext {
+      val values = context.getSharedPreferences("kloda-sync", 0).all.toMutableMap()
+      values["filesContextRevision"] = values["backupContextRevision"] ?: "legacy"
+      return from(values)
     }
 
     fun capture(context: Context): FilesRunContext = from(context.getSharedPreferences("kloda-sync", 0).all)

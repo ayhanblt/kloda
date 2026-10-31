@@ -60,14 +60,15 @@ internal object AndroidBackupScheduler {
     pauseBarrier = true
     AndroidPairingRuntime.files?.requestPause()
     val saved = prefs(context).edit().putBoolean("automaticPaused", true).commit()
-    context.getSystemService(JobScheduler::class.java).apply { cancel(JOB); cancel(WATCH) }
+    try { AndroidWebDavRuntime.pause() }
+    finally { context.getSystemService(JobScheduler::class.java).apply { cancel(JOB); cancel(WATCH) }; AndroidWebDavScheduler.cancel(context) }
     if (!saved) throw FilesFailure("automatic_pause_not_saved")
   }
   fun resume(context: Context) {
     pauseBarrier = true
     if (!prefs(context).edit().putBoolean("automaticPaused", false).commit()) throw FilesFailure("storage_failure")
     pauseBarrier = false
-    reconcile(context)
+    reconcile(context); AndroidWebDavScheduler.reconcile(context)
   }
   fun reconcileAsync(context: Context) { Thread({ reconcile(context.applicationContext) }, "kloda-backup-reconcile").start() }
 
@@ -75,7 +76,7 @@ internal object AndroidBackupScheduler {
     try {
       val scheduler = context.getSystemService(JobScheduler::class.java)
       val binding = FilesRunContext.capture(context)
-      if (paused(context) || binding.sources.isEmpty()) {
+      if (paused(context) || binding.sources.isEmpty() || !AndroidBackupDestinations.hasEnabledPc(context)) {
         scheduler.cancel(JOB); scheduler.cancel(WATCH)
         return@synchronized
       }
@@ -165,9 +166,10 @@ internal object AndroidBackupScheduler {
     reconcile(context)
   }
 
-  private fun watch(context: Context, sources: Set<String>, scheduler: JobScheduler) {
-    if (scheduler.getPendingJob(WATCH) != null) return
-    val job = JobInfo.Builder(WATCH, ComponentName(context, AndroidBackupJob::class.java))
+  internal fun watch(context: Context, sources: Set<String>, scheduler: JobScheduler, jobId: Int = WATCH,
+    service: Class<out android.app.job.JobService> = AndroidBackupJob::class.java) {
+    if (scheduler.getPendingJob(jobId) != null) return
+    val job = JobInfo.Builder(jobId, ComponentName(context, service))
       .setExtras(PersistableBundle().apply { putString("token", java.util.UUID.randomUUID().toString()) })
     val uris = sources.flatMap { source ->
       if (AndroidPhotosSources.isPhotos(source)) listOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, MediaStore.Video.Media.EXTERNAL_CONTENT_URI)

@@ -1,4 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
+import { backupDestinations, type WebDavBackupStatus } from './backup-destinations';
 import { testWebDavWriteAccess, validateWebDavForm, type MobileStorageForm } from './webdav';
 
 const key = 'kloda.webdav.profile.v1';
@@ -50,7 +51,21 @@ export async function testAndSaveWebDavSettings(storage: MobileStorageForm, curr
       check();
     }); check();
     const profile: Profile = { version: 1, storage: snapshot, testedAt: new Date().toISOString(), probeWarning: previous?.probeWarning === true };
+    // A saved replacement cannot silently keep the previous native destination active.
+    await backupDestinations.disable(); check();
     await write(profile); check();
     return metadata(profile);
+  } finally { busy = false; }
+}
+
+export async function enableSavedWebDavBackup(current: () => boolean): Promise<WebDavBackupStatus> {
+  if (busy) throw new Error('webdav_busy');
+  busy = true;
+  try {
+    if (!current()) throw new Error('webdav_cancelled');
+    const profile = await read();
+    if (!current()) throw new Error('webdav_cancelled');
+    if (!profile?.testedAt) throw new Error('webdav_test_required');
+    return await backupDestinations.enable(profile.storage);
   } finally { busy = false; }
 }

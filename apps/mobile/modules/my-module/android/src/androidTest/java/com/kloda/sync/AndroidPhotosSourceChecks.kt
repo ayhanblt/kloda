@@ -40,6 +40,20 @@ internal object AndroidPhotosSourceChecks {
       val source = selected.getValue("id")
       val reference = selected.getValue("reference")
       check(AndroidPhotosSources(context).load().single() == selected)
+      val gallery = AndroidGallery(context)
+      val galleryPage = gallery.page(source, 0)
+      check(galleryPage["permission"] == "granted")
+      @Suppress("UNCHECKED_CAST")
+      val galleryItems = galleryPage["items"] as List<Map<String, Any>>
+      check(galleryItems.size == 1 && galleryItems.single()["id"] == first.toString())
+      check(galleryPage["hasMore"] == false)
+      val preview = gallery.preview(source, first.toString(), false)!!
+      val jpeg = Base64.decode(preview.substringAfter(","), Base64.NO_WRAP)
+      val bitmap = android.graphics.BitmapFactory.decodeByteArray(jpeg, 0, jpeg.size)!!
+      check(maxOf(bitmap.width, bitmap.height) <= 256); bitmap.recycle()
+      check(runCatching { gallery.preview(source, second.toString(), true) }.isFailure)
+      check(runCatching { gallery.page("unselected-source", 0) }.isFailure)
+
       check(photos.selectAlbum(album.getValue("id")) == selected)
       val files = photos.scan(reference).toList()
       val file = files.single()

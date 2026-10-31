@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { fileTransfer, photoManifestPrefix, type CompletedBackup, type CompletedBackups, type FileQueue, type PhotosImportStatus } from '../../../shared/api/file-transfer';
+import { backupDestinations } from '../../../shared/api/backup-destinations';
 import { pairing } from '../../../shared/api/pairing';
 
 export function useFileTransfer() {
   const [queue, setQueue] = useState<FileQueue | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [webdavActionError, setWebdavActionError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
   const [peer, setPeer] = useState<string | null>(null);
@@ -76,14 +78,42 @@ export function useFileTransfer() {
     setWorking(true);
     setActionError(null);
     try {
-      const target = await pairing.status();
-      if (!mounted.current || !foreground.current || version !== epoch.current) return;
-      if (target.phase !== 'complete' || !target.recordId || !target.peerFingerprint) throw new Error('pairing_required');
-      setPeer(target.peerFingerprint);
       await requestNotifications();
       if (!mounted.current || !foreground.current || version !== epoch.current) return;
-      const observed = job ? await fileTransfer.rebackup(target.recordId, job.id) : await fileTransfer.run(target.recordId);
-      if (mounted.current && foreground.current && version === epoch.current) { setQueue(observed); setError(observed.errorCode ?? null); }
+      const current = () => mounted.current && foreground.current && version === epoch.current;
+      let selected = false, pcFailed = false, davFailed = false;
+      setWebdavActionError(null);
+      await Promise.allSettled([
+        (async () => {
+          try {
+            if (!job && !await backupDestinations.pcSelected()) return;
+            if (!current()) return;
+            const target = await pairing.status();
+            if (!current()) return;
+            if (target.phase !== 'complete' || !target.recordId || !target.peerFingerprint) throw new Error('pairing_required');
+            if (!job && !await backupDestinations.pcEnabled(target.recordId)) return;
+            if (!current()) return;
+            selected = true; setPeer(target.peerFingerprint);
+            const observed = job ? await fileTransfer.rebackup(target.recordId, job.id) : await fileTransfer.run(target.recordId);
+            if (current()) { setQueue(observed); setError(observed.errorCode ?? null); }
+          } catch (cause) {
+            pcFailed = true;
+            if (current()) setActionError(cause instanceof Error ? cause.message : 'outcome_unknown');
+          }
+        })(),
+        ...(job ? [] : [(async () => {
+          try {
+            const target = await backupDestinations.status();
+            if (!current() || !target.enabled) return;
+            selected = true;
+            if (!target.running) await backupDestinations.run();
+          } catch (cause) {
+            davFailed = true;
+            if (current()) setWebdavActionError(cause instanceof Error ? cause.message : 'outcome_unknown');
+          }
+        })()]),
+      ]);
+      if (current() && !selected && !pcFailed && !davFailed) setActionError('destination_required');
     } catch (cause) {
       if (mounted.current && version === epoch.current) setActionError(cause instanceof Error ? cause.message : 'outcome_unknown');
     } finally {
@@ -163,5 +193,5 @@ export function useFileTransfer() {
     try { await fileTransfer.cancelRestore(); }
     catch (cause) { if (mounted.current) setActionError(cause instanceof Error ? cause.message : 'outcome_unknown'); }
   }, []);
-  return { queue, error: error ?? actionError, working, peer, run, pause: () => automatic(false), resumeAutomatic: () => automatic(true), backups, restored, restoring, ownBackup, cancelRestore, photos };
+  return { queue, error: error ?? actionError, webdavActionError, working, peer, run, pause: () => automatic(false), resumeAutomatic: () => automatic(true), backups, restored, restoring, ownBackup, cancelRestore, photos };
 }

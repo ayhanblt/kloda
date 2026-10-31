@@ -17,6 +17,7 @@ import java.util.UUID
 
 
 class KlodaSyncRuntimeModule : Module() {
+  private fun gallery() = AndroidGallery(appContext.reactContext ?: throw FilesFailure("source_unavailable"))
   override fun definition() = ModuleDefinition {
     lateinit var directoryPicker: AppContextActivityResultLauncher<DirectoryPickerInput, String?>
 
@@ -56,6 +57,9 @@ class KlodaSyncRuntimeModule : Module() {
       }
     }
 
+    AsyncFunction("galleryPage") { source: String, offset: Int -> gallery().page(source, offset) }
+    AsyncFunction("galleryPreview") { source: String, asset: String, detail: Boolean -> gallery().preview(source, asset, detail) }
+    AsyncFunction("galleryHistory") { source: String, asset: String -> gallery().history(source, asset) }
     AsyncFunction("loadPhotoSources") { photos().load() }
     AsyncFunction("removePhotoSource") { id: String -> photos().remove(id).also { reconcileSources() } }
     AsyncFunction("selectPhotoLibrary") Coroutine { ->
@@ -152,7 +156,7 @@ class KlodaSyncRuntimeModule : Module() {
           throw IllegalStateException("Could not persist the schedule.")
         }
       }
-      AndroidBackupScheduler.reconcile(appContext.reactContext?.applicationContext ?: throw IllegalStateException("Application context is unavailable."))
+      reconcileSources()
     }
     AsyncFunction("saveLiveSchedule") {
       synchronized(AndroidSyncJournal.sourceLock) {
@@ -160,11 +164,13 @@ class KlodaSyncRuntimeModule : Module() {
         if (preferences.getString("backupMode", null) != "live"
           && !FilesRunContext.stamp(preferences.edit().putString("backupMode", "live")).commit()) throw FilesFailure("storage_failure")
       }
-      AndroidBackupScheduler.reconcile(appContext.reactContext?.applicationContext ?: throw IllegalStateException("Application context is unavailable."))
+      reconcileSources()
     }
   }
 
-  private fun reconcileSources() { appContext.reactContext?.applicationContext?.let { AndroidBackupScheduler.reconcile(it) } }
+  private fun reconcileSources() { appContext.reactContext?.applicationContext?.let {
+    AndroidWebDavRuntime.settingsChanged(); AndroidBackupScheduler.reconcile(it); AndroidWebDavScheduler.reconcile(it)
+  } }
 
   private fun preferences() = appContext.reactContext?.getSharedPreferences("kloda-sync", 0)
     ?: throw IllegalStateException("Application context is unavailable.")

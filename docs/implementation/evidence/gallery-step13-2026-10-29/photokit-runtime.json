@@ -1,0 +1,10 @@
+{
+  "checks" : [
+    "selected album: 24 + 2 page boundaries and no duplicates",
+    "real PhotoKit preview and detail JPEG decode, bounded dimensions",
+    "outside selected album: refused",
+    "history: missing DB stays absent; existing receipt read without DB mutation",
+    "removed source: refused"
+  ],
+  "status" : "PASS"
+}

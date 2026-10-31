@@ -21,8 +21,8 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
   }
 
   override fun onStart() {
-    if (scope !in listOf("local-files", "media-fixture")) {
-      finish(Activity.RESULT_CANCELED, Bundle().apply { putString("stream", "Explicit scope required: local-files or media-fixture\n") })
+    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore")) {
+      finish(Activity.RESULT_CANCELED, Bundle().apply { putString("stream", "Explicit scope required: local-files, media-fixture or webdav-journal\n") })
       return
     }
     restartPhase?.let { phase ->
@@ -45,6 +45,36 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
         sendStatus(0, Bundle().apply { putString("stream", "START $name\n") })
         check()
         sendStatus(0, Bundle().apply { putString("stream", "PASS $name\n") })
+      }
+      if (scope == "webdav-photos-restore") {
+        group("webdav-owned-photos-restore") { AndroidWebDavPhotosRestoreChecks.run(this, IsolatedContext(targetContext, scratch)) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Owned new MediaStore PNG, favorite-only DAV revision without media reupload, native receipt-bound Photos restore/metadata, same-process DB reopen/no duplicate, source-context and unknown-create fences PASS; Expo UI, fresh process, iOS, old APIs and physical hardware NOT_RUN\n") })
+        return
+      }
+      if (scope == "webdav-saf") {
+        group("webdav-owned-saf") { AndroidWebDavSafChecks.run(this, IsolatedContext(targetContext, scratch)) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Actual owned DocumentsProvider/persisted URI permissions, native source scanner/HTTPS conflict/keep-both, explicit current-context review and local Files restore/reverify passed; system picker, Expo product UI, Photos and physical hardware NOT_RUN\n") })
+        return
+      }
+      if (scope == "webdav-files") {
+        group("webdav-owned-files-download") { AndroidWebDavFilesChecks.run(IsolatedContext(targetContext, scratch)) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Owned private-byte HTTPS PUT/MOVE/GET and verified restore download, native vault/catalog without backup opt-in, unknown MOVE refusal PASS; SAF picker/provider, Photos import, UI and physical hardware NOT_RUN\n") })
+        return
+      }
+      if (scope == "webdav-os") {
+        group("webdav-real-jobservice") { AndroidWebDavOsChecks.run(this) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Actual native JobScheduler/JobService lease, MediaStore HTTPS backup without PC identity, durable next plan and global Pause passed; production cadence/physical hardware NOT_RUN\n") })
+        return
+      }
+      if (scope == "webdav-https") {
+        group("webdav-owned-https") { AndroidWebDavHttpsChecks.run(this, IsolatedContext(targetContext, scratch)) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Source/snapshot/HTTPS PUT-MOVE-GET, lost replies, strict hostname, cookie/redirect, conflict/disk/excess, Photos metadata-only sidecar and context completion fence passed; UI/background/restore NOT_RUN\n") })
+        return
+      }
+      if (scope == "webdav-journal") {
+        group("webdav-publication-journal") { AndroidWebDavChecks.run(IsolatedContext(targetContext, scratch)) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "WebDAV SQLite, native credential custody and sidecar checks passed; network/source/background/restore NOT_RUN\n") })
+        return
       }
       group("native-library-load") { Class.forName("com.kloda.sync.KlodaPairingJni") }
       group("files-runs") { AndroidFilesRunChecks.run(IsolatedContext(targetContext, File(scratch, "runs").also { check(it.mkdirs()) })) }

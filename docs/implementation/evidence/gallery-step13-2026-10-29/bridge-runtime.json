@@ -1,0 +1,71 @@
+[
+  {
+    "native": "PASS",
+    "source": "CF17A426-3F66-4682-AAF1-2EAC6A792931",
+    "firstCount": 24,
+    "nextCount": 2,
+    "previewLength": 1223,
+    "history": [],
+    "scope": "Real Expo bridge and PhotoKit; no PC/pairing/authority"
+  },
+  {
+    "ui": "READY",
+    "language": "tr"
+  },
+  {
+    "phase": 1,
+    "language": "tr",
+    "source": "library",
+    "ui": "PHASE_READY"
+  },
+  {
+    "error": "Error: Limited scope leaked or missing"
+  },
+  {
+    "phase": 1,
+    "language": "tr",
+    "source": "library",
+    "ui": "PHASE_READY"
+  },
+  {
+    "nativeLimitedObservation": {
+      "permission": "limited",
+      "count": 0,
+      "hasMore": false,
+      "albumScopeUnavailable": true
+    }
+  },
+  {
+    "error": "Error: Limited scope leaked or missing"
+  },
+  {
+    "phase": 1,
+    "language": "tr",
+    "source": "library",
+    "ui": "PHASE_READY"
+  },
+  {
+    "nativeLimitedObservation": {
+      "permission": "limited",
+      "count": 1,
+      "hasMore": false,
+      "albumScopeUnavailable": true
+    }
+  },
+  {
+    "nativeLimited": "PASS",
+    "albumScopeUnavailable": true,
+    "libraryCount": 1,
+    "previewLength": 1223
+  },
+  {
+    "ui": "READY",
+    "language": "tr"
+  },
+  {
+    "phase": 1,
+    "language": "tr",
+    "source": "library",
+    "ui": "PHASE_READY"
+  }
+]

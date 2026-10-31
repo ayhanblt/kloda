@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import java.io.File
 
 internal data class QueuedSourceFile(val reference: String, val relativePath: String, val revision: String, val size: Long)
 internal data class FilesJob(
@@ -13,11 +14,17 @@ internal data class FilesJob(
   val offset: Long, val state: String, val errorCode: String?, val rebackupOf: String? = null
 )
 
-internal class AndroidSyncJournal(context: Context) : SQLiteOpenHelper(context, "kloda-sync.sqlite", null, 6) {
-  companion object { val sourceLock = Any() }
+internal class AndroidSyncJournal(context: Context, databaseName: String = "kloda-sync.sqlite", private val deviceLocal: Boolean = false) : SQLiteOpenHelper(context, databaseName, null, 6) {
+  companion object {
+    val sourceLock = Any()
+    fun webdav(context: Context) = AndroidSyncJournal(context, File(context.noBackupFilesDir, "kloda-webdav.sqlite").absolutePath, deviceLocal = true)
+  }
   init { setWriteAheadLoggingEnabled(true) }
 
-  override fun onConfigure(database: SQLiteDatabase) { database.execSQL("PRAGMA synchronous=FULL") }
+  override fun onConfigure(database: SQLiteDatabase) {
+    database.execSQL("PRAGMA synchronous=FULL")
+    if (deviceLocal) database.setForeignKeyConstraintsEnabled(true)
+  }
   override fun onCreate(database: SQLiteDatabase) {
     database.execSQL("""CREATE TABLE queued_source_file (
       source_id TEXT NOT NULL, reference TEXT NOT NULL, relative_path TEXT NOT NULL,

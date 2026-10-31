@@ -21,12 +21,12 @@ internal class FilesFailure(val code: String) : Exception(code)
 internal data class FilesDigest(val sha256: String, val size: Long)
 internal data class FilesSnapshot(val id: String, val digest: FilesDigest)
 
-internal class AndroidFilesSnapshots(private val context: Context, private val checkPaused: () -> Unit) {
+internal class AndroidFilesSnapshots(private val context: Context, val webdav: Boolean = false, private val checkPaused: () -> Unit) {
   private val scanner = AndroidSafSourceScanner(context.contentResolver)
   private val photos = AndroidPhotosSources(context)
   private val signal = AtomicReference<CancellationSignal?>()
   private val input = AtomicReference<InputStream?>()
-  private val directory = File(context.noBackupFilesDir, "kloda-files")
+  private val directory = File(context.noBackupFilesDir, if (webdav) "kloda-webdav-snapshots" else "kloda-files")
 
   companion object {
     private val random = SecureRandom()
@@ -95,11 +95,7 @@ internal class AndroidFilesSnapshots(private val context: Context, private val c
 
   fun stage(tree: String, reference: String): FilesSnapshot {
     checkPaused()
-    if (!directory.isDirectory) {
-      Os.mkdir(directory.path, 448)
-      syncDirectory(context.noBackupFilesDir)
-    }
-    Os.chmod(directory.path, 448)
+    ensureDirectory()
     val id = randomId()
     val file = path(id)
     val descriptor = Os.open(file.path, OsConstants.O_CREAT or OsConstants.O_EXCL or OsConstants.O_WRONLY or OsConstants.O_NOFOLLOW, 384)
@@ -117,6 +113,46 @@ internal class AndroidFilesSnapshots(private val context: Context, private val c
     } catch (error: Throwable) { file.delete(); throw error }
   }
 
+  private fun ensureDirectory() {
+    if (!directory.isDirectory) {
+      Os.mkdir(directory.path, 448)
+      syncDirectory(context.noBackupFilesDir)
+    }
+    Os.chmod(directory.path, 448)
+  }
+
+  fun stageMetadata(bytes: ByteArray): FilesSnapshot {
+    checkPaused()
+    if (!webdav || bytes.size > 65536) throw FilesFailure("invalid_request")
+    ensureDirectory()
+    val id = randomId(); val file = path(id)
+    val descriptor = Os.open(file.path, OsConstants.O_CREAT or OsConstants.O_EXCL or OsConstants.O_WRONLY or OsConstants.O_NOFOLLOW, 384)
+    try {
+      FileOutputStream(descriptor).use { output -> output.write(bytes); Os.fchmod(output.fd, 256); output.fd.sync() }
+      syncDirectory(directory); checkPaused()
+      return FilesSnapshot(id, digest(java.io.ByteArrayInputStream(bytes), checkPaused))
+    } catch (error: Throwable) { file.delete(); throw error }
+  }
+
+  fun stageDownload(expected: FilesDigest, receive: (java.io.OutputStream) -> Unit): FilesSnapshot {
+    checkPaused()
+    if (!webdav || expected.size < 0 || !Regex("[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]").matches(expected.sha256)) throw FilesFailure("invalid_request")
+    ensureDirectory()
+    val id = randomId(); val file = path(id)
+    val descriptor = Os.open(file.path, OsConstants.O_CREAT or OsConstants.O_EXCL or OsConstants.O_WRONLY or OsConstants.O_NOFOLLOW, 384)
+    try {
+      FileOutputStream(descriptor).use { output -> receive(output); checkPaused(); output.flush(); output.fd.sync(); Os.fchmod(output.fd, 256) }
+      syncDirectory(directory); checkPaused()
+      open(id, expected.size).use { validate(expected, it) }
+      checkPaused(); return FilesSnapshot(id, expected)
+    } catch (error: Throwable) { file.delete(); throw error }
+  }
+
+  fun verifiedFile(snapshot: FilesSnapshot): File {
+    open(snapshot.id, snapshot.digest.size).use { validate(snapshot.digest, it) }
+    checkPaused(); return path(snapshot.id)
+  }
+
   fun discard(snapshot: FilesSnapshot) { path(snapshot.id).delete() }
 
   fun recover(journal: AndroidSyncJournal) = synchronized(AndroidSyncJournal.sourceLock) {
@@ -132,13 +168,15 @@ internal class AndroidFilesSnapshots(private val context: Context, private val c
     }
   }
 
-  fun open(job: FilesJob): ParcelFileDescriptor {
+  fun open(job: FilesJob): ParcelFileDescriptor = open(job.id, job.size)
+
+  fun open(snapshot: String, size: Long): ParcelFileDescriptor {
     try {
-      val descriptor = Os.open(path(job.id).path, OsConstants.O_RDONLY or OsConstants.O_NOFOLLOW, 0)
+      val descriptor = Os.open(path(snapshot).path, OsConstants.O_RDONLY or OsConstants.O_NOFOLLOW, 0)
       try {
         val info = Os.fstat(descriptor)
         if (!OsConstants.S_ISREG(info.st_mode) || info.st_nlink != 1L || info.st_uid != android.os.Process.myUid() ||
-          info.st_size != job.size || info.st_mode and 146 != 0) throw FilesFailure("snapshot_unavailable")
+          info.st_size != size || info.st_mode and 146 != 0) throw FilesFailure("snapshot_unavailable")
         return ParcelFileDescriptor.dup(descriptor)
       } finally { Os.close(descriptor) }
     } catch (error: FilesFailure) { throw error }
@@ -146,11 +184,15 @@ internal class AndroidFilesSnapshots(private val context: Context, private val c
   }
 
   fun validate(job: FilesJob, descriptor: ParcelFileDescriptor) {
+    validate(FilesDigest(job.sha256, job.size), descriptor)
+    validateSource(job)
+  }
+
+  fun validate(expected: FilesDigest, descriptor: ParcelFileDescriptor) {
     val own = ParcelFileDescriptor.dup(descriptor.fileDescriptor)
     Os.lseek(own.fileDescriptor, 0, OsConstants.SEEK_SET)
     val retained = ParcelFileDescriptor.AutoCloseInputStream(own).use { digest(it, checkPaused) }
-    if (retained != FilesDigest(job.sha256, job.size)) throw FilesFailure("snapshot_unavailable")
-    validateSource(job)
+    if (retained != expected) throw FilesFailure("snapshot_unavailable")
   }
 
   fun validateSource(job: FilesJob) {

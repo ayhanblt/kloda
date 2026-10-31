@@ -166,7 +166,8 @@ internal class NativeLanRoutes(context: Context) : AutoCloseable {
     }
   }
 
-  private fun transport(value: NetworkCapabilities): String? {
+  companion object {
+    fun transport(value: NetworkCapabilities): String? {
     if (!value.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)) return null
     // hasTransport safely returns false for unknown enum slots, including future non-LAN transports.
     if ((0..63).any { it != NetworkCapabilities.TRANSPORT_WIFI
@@ -175,6 +176,8 @@ internal class NativeLanRoutes(context: Context) : AutoCloseable {
     val ethernet = value.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
     if (wifi == ethernet) return null
     return if (wifi) "wifi" else "ethernet"
+  }
+
   }
 
   private fun supported(ip: InetAddress): Boolean {

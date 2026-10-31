@@ -1,5 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-  <application>
+  <uses-permission android:name="android.permission.INTERNET" />
+  <application android:networkSecurityConfig="@xml/kloda_dav_fixture_network">
+    <provider android:name="com.kloda.sync.AndroidWebDavDocumentsProvider" android:authorities="com.kloda.sync.test.webdav.documents"
+      android:exported="true" android:grantUriPermissions="true" android:permission="android.permission.MANAGE_DOCUMENTS">
+      <intent-filter><action android:name="android.content.action.DOCUMENTS_PROVIDER" /></intent-filter>
+    </provider>
     <activity android:name="com.kloda.sync.AndroidLifecycleActivity" android:exported="false"
       android:excludeFromRecents="true" android:theme="@android:style/Theme.Material.Light.NoActionBar" />
   </application>

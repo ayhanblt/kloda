@@ -77,6 +77,7 @@ class AndroidBackupJob : JobService() {
         if (peer.optString("phase") != "complete" || peer.optBoolean("repairRequired", true)) throw FilesFailure("pairing_required")
         if (!AndroidBackupScheduler.isCurrent(context, execution.parameters.extras.getString("token"))) return
         val record = peer.getString("recordId")
+        if (!AndroidBackupDestinations.pcEnabled(context, record)) return
         var old = schedules.get(binding, occurrence)
         if (old != null && old.record != record) throw FilesFailure("settings_changed")
         if (old != null && schedules.reconcileLinked(old.id, old.osAttempts)) return

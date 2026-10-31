@@ -1,0 +1,38 @@
+{
+  "checkedAt": "2026-10-29T07:26:29.114949+00:00",
+  "scope": "Step13 selected-source gallery; automated/isolated Simulator evidence, not physical/platform acceptance",
+  "checks": {
+    "mobileFullBeforeFinalGuards": "142 tests / 16 suites PASS",
+    "affectedFinal": "39 tests / 3 suites PASS; after that strict-native-boundary13 tests PASS",
+    "mobileLint": "PASS",
+    "mobileTypeScript": "PASS",
+    "mobileExports": "iOS + Android PASS after functional UI/limited change; final strict type guard subsequently tested/linted/typechecked",
+    "androidNative": "compileDebugKotlin + compileDebugAndroidTestKotlin PASS; explicit K1 lint PASS, 0 errors/34 warnings",
+    "iosApp": "arm64 Simulator Debug build PASS; no signing or hardware acceptance",
+    "iosPhotoKit": "real PhotoKit production gallery with fixture-only selection shim PASS; separate actual Expo bridge/native selections PASS",
+    "nativeLimited": "initial expected1 returned0; native picker confirmation + fresh process returned exactly1 + preview PASS; unavailable album membership explicit",
+    "review": "Separate pass by same main agent; no independent agent review claimed",
+    "cleanup": "Owned Metro18891/result server18892 stopped; temporary product fixture entry archived/removed; owned Simulator shutdown, not reset; existing unrelated device untouched",
+    "step12": "Android native visual, horizontal last-tab swipe, VoiceOver and landscape remain open; new native gallery/detail actions do not close full step12 acceptance"
+  },
+  "sources": {
+    "apps/mobile/modules/my-module/ios/IosGallery.swift": "3630959d737898b44430431da592a738174672b9a7d6602ffdd6bfd89ae6fae0",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidGallery.kt": "b6ff9741429d9e76ab1ad92bbf112db17bb53e2dfbafb51faecb7072bf568a1d",
+    "apps/mobile/src/shared/api/gallery.ts": "2d513099926c46fa6f965be5d476da3d77b4a28a349d119031de08767652e5fc",
+    "apps/mobile/src/features/gallery/model/use-gallery.ts": "e33bbe6b5c154a44c2db21f99e8477370f909f968bc7ec674cb150f35f8a3e28",
+    "apps/mobile/src/features/gallery/ui/gallery-panel.tsx": "073b9d5acbafb50b339d205bd68fbad51d89b37540b9f9ee75cda163aab8ac52",
+    "apps/mobile/src/pages/home/ui/home-page.tsx": "5e7f0f6db6aa2adf9fdc139edf0de89d0719d7f3b99369a92f02dbb7b2aa8ccd"
+  },
+  "artifacts": {
+    "photokit-runtime.json": "5c2143dd8ad7e1b662a56790c6172b812b89c9bee9237789d8698a40a057843a",
+    "photokit-denied.json": "36acb559bae3334f50c6340a6777cd4a4a75ffa20266482f75a58258ff89648f",
+    "bridge-runtime.json": "5b733fe76a7cbe45fbeda09bdd4dcff859f44c4642a15712d499cfd72da46517",
+    "gallery-tr-final.png": "f20db23e9cc391d043deb70e2f632868e5e4161298248bae31046547cda6214d",
+    "detail-tr-final.png": "229ca16fd1528303b5c1065d764345c75c47ad6da12da84224cb908bf77bcc12",
+    "detail-en-final.png": "eb25fa8ea8000632486f07e0bc1c0a2bff3d4549575b727f4e3950e346dff381",
+    "detail-de-final.png": "452ae20b171b533cc439675aec6339603f9b4f4dbc1860913f7f47e6824a1fde",
+    "limited-album-final.png": "ac6eb8a76d2ea65c8e128471a1765831ed03570865390a9eeb0ecc4f54e2ab73",
+    "limited-library-final.png": "cb7110cbf4a2cfa691195c92761342908453a1cc4e6c4fb49f4c53431b87a1c4"
+  },
+  "raw": "/tmp/kloda-step13 and .local-evidence/gallery-step13-2026-10-29"
+}

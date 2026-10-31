@@ -47,6 +47,11 @@ final class IosFilesSnapshot {
     rootURL = root
   }
 
+  var isWebDav: Bool { rootURL.lastPathComponent == "kloda-webdav-snapshots" }
+  static func webdav() throws -> IosFilesSnapshot {
+    let support = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+    return try IosFilesSnapshot(directoryURL: support.appendingPathComponent("kloda-webdav-snapshots", isDirectory: true))
+  }
   deinit { Darwin.close(directory) }
 
   func createStaging() throws -> (String, FileHandle) {

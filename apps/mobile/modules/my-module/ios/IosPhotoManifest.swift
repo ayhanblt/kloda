@@ -1,6 +1,14 @@
 import Foundation
 
-struct IosPhotoResource: Codable, Equatable {
+protocol IosPhotoMediaResource {
+  var role: String { get }
+  var name: String { get }
+  var mimeType: String { get }
+  var sha256: String { get }
+  var size: Int64 { get }
+}
+
+struct IosPhotoResource: Codable, Equatable, IosPhotoMediaResource {
   let operationId: String
   let role: String
   let name: String
@@ -66,23 +74,23 @@ enum IosPhotoManifestCodec {
       return result
     } catch { throw invalid }
   }
-  private static func object(_ value: IosPhotoJson, keys: Set<String>) throws -> [String: IosPhotoJson] {
+  static func object(_ value: IosPhotoJson, keys: Set<String>) throws -> [String: IosPhotoJson] {
     guard case .object(let row) = value, Set(row.keys) == keys else { throw invalid }
     return row
   }
-  private static func string(_ row: [String: IosPhotoJson], _ key: String) throws -> String {
+  static func string(_ row: [String: IosPhotoJson], _ key: String) throws -> String {
     guard case .string(let text) = row[key] else { throw invalid }
     return text
   }
-  private static func number(_ row: [String: IosPhotoJson], _ key: String) throws -> Int64 {
+  static func number(_ row: [String: IosPhotoJson], _ key: String) throws -> Int64 {
     let text = try string(row, key)
     guard matches(text, "0|[1-9][0-9]{0,18}"), let number = Int64(text) else { throw invalid }
     return number
   }
-  private static func matches(_ text: String, _ pattern: String) -> Bool {
+  static func matches(_ text: String, _ pattern: String) -> Bool {
     text.range(of: "\\A(?:" + pattern + ")\\z", options: .regularExpression) != nil
   }
-  private static func fixed(_ text: String, bytes: Int) -> Bool {
+  static func fixed(_ text: String, bytes: Int) -> Bool {
     guard text.utf8.count == (bytes * 8 + 5) / 6, matches(text, "[A-Za-z0-9_-]+") else { return false }
     let padded = text.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
       + String(repeating: "=", count: (4 - text.utf8.count % 4) % 4)
@@ -90,7 +98,7 @@ enum IosPhotoManifestCodec {
     return data.base64EncodedString().replacingOccurrences(of: "+", with: "-")
       .replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "") == text
   }
-  private static func name(_ text: String) -> Bool {
+  static func name(_ text: String) -> Bool {
     !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && text.utf16.count <= 255 && text != "." && text != ".."
       && !text.unicodeScalars.contains { $0 == "/" || $0 == "\\" || $0.value < 32 || (127...159).contains($0.value) }
   }

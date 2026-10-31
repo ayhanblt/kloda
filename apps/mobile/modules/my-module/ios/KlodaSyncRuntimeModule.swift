@@ -54,14 +54,14 @@ public class KlodaSyncRuntimeModule: Module {
   public func definition() -> ModuleDefinition {
     Name("KlodaSyncRuntime")
 
-    AsyncFunction("pickDirectory") { (_: String) async -> [String: String]? in
+    AsyncFunction("pickDirectory") { (_: String) async throws -> [String: String]? in
       guard let viewController = self.appContext?.utilities?.currentViewController() else {
         return nil
       }
       guard let selection = await self.directoryPicker.pick(from: viewController) else {
         return nil
       }
-      return self.saveDirectorySource(selection)
+      return try self.saveDirectorySource(selection)
     }
 
     AsyncFunction("loadDirectorySources") { () -> [[String: String]] in
@@ -93,11 +93,11 @@ public class KlodaSyncRuntimeModule: Module {
       try self.removeSource(id: id, forKey: self.directorySourcesKey)
     }
 
-    AsyncFunction("selectPhotoLibrary") { () async -> [String: String]? in
+    AsyncFunction("selectPhotoLibrary") { () async throws -> [String: String]? in
       guard await self.requestPhotoLibraryAuthorization() else {
         return nil
       }
-      return self.savePhotoSource(reference: "photos-library", displayName: "Photos library")
+      return try self.savePhotoSource(reference: "photos-library", displayName: "Photos library")
     }
 
     AsyncFunction("loadPhotoAlbums") { () async -> [[String: String]] in
@@ -107,13 +107,23 @@ public class KlodaSyncRuntimeModule: Module {
       return self.photoAlbums()
     }
 
-    AsyncFunction("selectPhotoAlbum") { (id: String) async -> [String: String]? in
+    AsyncFunction("selectPhotoAlbum") { (id: String) async throws -> [String: String]? in
       guard await self.requestPhotoLibraryAuthorization(),
             let album = PHAssetCollection.fetchAssetCollections(withLocalIdentifiers: [id], options: nil).firstObject,
             let displayName = album.localizedTitle else {
         return nil
       }
-      return self.savePhotoSource(reference: album.localIdentifier, displayName: displayName)
+      return try self.savePhotoSource(reference: album.localIdentifier, displayName: displayName)
+    }
+
+    AsyncFunction("galleryPage") { (source: String, offset: Int) throws -> [String: Any] in
+      try IosGallery.page(source, offset)
+    }
+    AsyncFunction("galleryPreview") { (source: String, asset: String, detail: Bool) throws -> String? in
+      try IosGallery.preview(source, asset, detail)
+    }
+    AsyncFunction("galleryHistory") { (source: String, asset: String) throws -> [[String: String]] in
+      try IosGallery.history(source, asset)
     }
 
     AsyncFunction("loadPhotoSources") { () -> [[String: String]] in
@@ -154,7 +164,7 @@ public class KlodaSyncRuntimeModule: Module {
     }
 
     AsyncFunction("saveLiveSchedule") {
-      UserDefaults.standard.set("live", forKey: "kloda.sync.backupMode")
+      try IosWebDavContext.mutate { UserDefaults.standard.set("live", forKey: "kloda.sync.backupMode") }
       IosAutomaticCoordinator.shared.settingsChanged()
     }
 
@@ -165,9 +175,11 @@ public class KlodaSyncRuntimeModule: Module {
       guard localTime.range(of: "^([01]\\d|2[0-3]):[0-5]\\d$", options: .regularExpression) != nil else {
         throw NSError(domain: "KlodaSyncRuntime", code: 2, userInfo: [NSLocalizedDescriptionKey: "Time must use HH:mm."])
       }
+      try IosWebDavContext.mutate {
       UserDefaults.standard.set(intervalHours, forKey: self.intervalKey)
       UserDefaults.standard.set(intervalHours == 0 ? "live" : "scheduled", forKey: "kloda.sync.backupMode")
       UserDefaults.standard.set(localTime, forKey: self.timeKey)
+      }
       IosAutomaticCoordinator.shared.settingsChanged()
     }
   }
@@ -184,7 +196,7 @@ public class KlodaSyncRuntimeModule: Module {
   private func removeSource(id: String, forKey key: String) throws {
     try IosSyncJournal().removeSource(sourceId: id)
     let sources = UserDefaults.standard.array(forKey: key) as? [[String: String]] ?? []
-    UserDefaults.standard.set(sources.filter { $0["id"] != id }, forKey: key)
+    try IosWebDavContext.mutate { UserDefaults.standard.set(sources.filter { $0["id"] != id }, forKey: key) }
     IosAutomaticCoordinator.shared.settingsChanged()
   }
 
@@ -203,7 +215,7 @@ public class KlodaSyncRuntimeModule: Module {
     }
   }
 
-  private func saveDirectorySource(_ selection: DirectorySelection) -> [String: String] {
+  private func saveDirectorySource(_ selection: DirectorySelection) throws -> [String: String] {
     let sources = UserDefaults.standard.array(forKey: directorySourcesKey) as? [[String: String]] ?? []
     if var existingSource = sources.first(where: { $0["reference"] == selection.bookmark }) {
       existingSource["kind"] = "directory"
@@ -215,7 +227,7 @@ public class KlodaSyncRuntimeModule: Module {
       "kind": "directory",
       "reference": selection.bookmark
     ]
-    UserDefaults.standard.set(sources + [source], forKey: directorySourcesKey)
+    try IosWebDavContext.mutate { UserDefaults.standard.set(sources + [source], forKey: directorySourcesKey) }
     IosAutomaticCoordinator.shared.settingsChanged()
     return source
   }
@@ -233,7 +245,7 @@ public class KlodaSyncRuntimeModule: Module {
     return resolvedStatus == .authorized || resolvedStatus == .limited
   }
 
-  private func savePhotoSource(reference: String, displayName: String) -> [String: String] {
+  private func savePhotoSource(reference: String, displayName: String) throws -> [String: String] {
     let sources = UserDefaults.standard.array(forKey: photoSourcesKey) as? [[String: String]] ?? []
     if var source = sources.first(where: { $0["reference"] == reference }) {
       source["kind"] = "photos"
@@ -245,7 +257,7 @@ public class KlodaSyncRuntimeModule: Module {
       "kind": "photos",
       "reference": reference
     ]
-    UserDefaults.standard.set(sources + [source], forKey: photoSourcesKey)
+    try IosWebDavContext.mutate { UserDefaults.standard.set(sources + [source], forKey: photoSourcesKey) }
     IosAutomaticCoordinator.shared.settingsChanged()
     return source
   }

@@ -28,7 +28,8 @@
           "processing"
         ],
         "BGTaskSchedulerPermittedIdentifiers": [
-          "com.kloda.app.backup.processing"
+          "com.kloda.app.backup.processing",
+          "com.kloda.app.webdav.processing"
         ]
       }
     },

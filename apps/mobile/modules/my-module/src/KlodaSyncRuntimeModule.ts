@@ -45,6 +45,9 @@ export interface NativeStorageConfig {
 
 declare class KlodaSyncRuntimeModule extends NativeModule<{}> {
   loadDirectorySources(): Promise<NativeDirectorySource[]>;
+  galleryPage(source: string, offset: number): Promise<unknown>;
+  galleryPreview(source: string, asset: string, detail: boolean): Promise<string | null>;
+  galleryHistory(source: string, asset: string): Promise<unknown>;
   loadPhotoSources(): Promise<NativePhotoSource[]>;
   loadSchedule(): Promise<NativeSchedule>;
   loadStorageConfig(): Promise<NativeStorageConfig | null>;

@@ -44,7 +44,7 @@ final class IosAutomaticCoordinator {
   }
   func reconcile() { worker.async { self.reconcileOnWorker() } }
   func pause() throws {
-    try worker.sync {
+    do { try worker.sync {
       pauseBarrier = true
       active?.lease?.cancel(); files.pause()
       timer?.cancel(); timer = nil
@@ -53,7 +53,9 @@ final class IosAutomaticCoordinator {
         let journal = try IosSyncJournal(); try journal.setAutomaticPaused(true)
         cancelActive(journal, userPause: true)
       } catch { end(false); lastError = "automatic_pause_not_saved"; throw IosAutomaticPolicy.error("automatic_pause_not_saved") }
-    }
+    } } catch { try? IosWebDavQueue.shared.pause(); throw error }
+    try IosWebDavQueue.shared.pause()
+    IosWebDavAutomaticCoordinator.shared.reconcile(allowForeground: false)
   }
   func resume() throws {
     try worker.sync {
@@ -62,6 +64,7 @@ final class IosAutomaticCoordinator {
       try journal.setAutomaticPaused(false); pauseBarrier = false
       try plan(journal, allowForeground: foreground)
     }
+    IosWebDavAutomaticCoordinator.shared.reconcile()
   }
   func status() throws -> [String: Any] {
     try worker.sync {
@@ -126,6 +129,7 @@ final class IosAutomaticCoordinator {
     guard active == nil else { return }
     timer?.cancel(); timer = nil
     guard try !pauseBarrier && !journal.automaticPaused(), let record = try journal.automaticRecord(),
+      try IosWebDavJournal.open().enabled(kind: "pc", id: record, revision: "v1"),
       try !IosFilesSelection.current().isEmpty || !IosPhotosSource.currentSelections().isEmpty else {
       BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: Self.identifier); return
     }
@@ -196,6 +200,7 @@ final class IosAutomaticCoordinator {
     do {
       let journal = try IosSyncJournal(), clock = try IosAutomaticClock.read()
       guard active == nil, !pauseBarrier, try !journal.automaticPaused(),
+        try IosWebDavJournal.open().enabled(kind: "pc", id: plan.recordId, revision: "v1"),
         try journal.automaticPlan() == plan, try journal.automaticBinding(IosFilesSelection.binding(), record: plan.recordId) == plan.binding, clock.now >= plan.due else {
         lease?.cancel(); task?.setTaskCompleted(success: false); return
       }

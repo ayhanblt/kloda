@@ -15,9 +15,12 @@
       android:foregroundServiceType="dataSync" android:stopWithTask="false" />
     <service android:name=".AndroidBackupJob" android:exported="true"
       android:permission="android.permission.BIND_JOB_SERVICE" />
+    <service android:name=".AndroidWebDavJob" android:exported="true"
+      android:permission="android.permission.BIND_JOB_SERVICE" />
     <receiver android:name=".AndroidBackupReceiver" android:exported="false">
       <intent-filter>
         <action android:name="android.intent.action.BOOT_COMPLETED" />
+        <action android:name="android.intent.action.USER_UNLOCKED" />
         <action android:name="android.intent.action.TIME_SET" />
         <action android:name="android.intent.action.TIMEZONE_CHANGED" />
       </intent-filter>

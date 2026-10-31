@@ -39,17 +39,17 @@ internal class AndroidPhotosMedia(private val context: Context, private val chec
     val version = if (Build.VERSION.SDK_INT >= 30) MediaStore.getVersion(context, volume) else MediaStore.getVersion(context)
     return "$volume:$version"
   }
-  fun collection(resource: PhotoResource, volume: String = if (Build.VERSION.SDK_INT >= 29) MediaStore.VOLUME_EXTERNAL_PRIMARY else "external"): Uri =
+  fun collection(resource: PhotoMediaResource, volume: String = if (Build.VERSION.SDK_INT >= 29) MediaStore.VOLUME_EXTERNAL_PRIMARY else "external"): Uri =
     if (resource.mimeType.startsWith("image/")) MediaStore.Images.Media.getContentUri(volume)
     else MediaStore.Video.Media.getContentUri(volume)
-  private fun path(intent: PhotoImportIntent) = File(Environment.getExternalStorageDirectory(), intent.folder + intent.name)
+  private fun path(intent: PhotoMediaIntent) = File(Environment.getExternalStorageDirectory(), intent.folder + intent.name)
   private fun columns(): Array<String> = arrayOf(MediaStore.MediaColumns._ID, MediaStore.MediaColumns.DISPLAY_NAME,
     MediaStore.MediaColumns.MIME_TYPE, MediaStore.MediaColumns.SIZE,
     if (Build.VERSION.SDK_INT >= 29) MediaStore.MediaColumns.RELATIVE_PATH else MediaStore.MediaColumns.DATA) +
     (if (Build.VERSION.SDK_INT >= 29) arrayOf(MediaStore.MediaColumns.OWNER_PACKAGE_NAME, MediaStore.MediaColumns.IS_PENDING) else emptyArray()) +
     (if (Build.VERSION.SDK_INT >= 30) arrayOf(MediaStore.MediaColumns.IS_TRASHED, MediaStore.MediaColumns.IS_FAVORITE) else emptyArray())
 
-  private fun query(resource: PhotoResource, uri: Uri, selection: String?, args: Array<String>?): List<PhotoTarget> {
+  private fun query(resource: PhotoMediaResource, uri: Uri, selection: String?, args: Array<String>?): List<PhotoTarget> {
     permission()
     val cursor = if (Build.VERSION.SDK_INT >= 30) resolver.query(uri, columns(), Bundle().apply {
       putString(android.content.ContentResolver.QUERY_ARG_SQL_SELECTION, selection)
@@ -72,7 +72,7 @@ internal class AndroidPhotosMedia(private val context: Context, private val chec
       permission(); result
     }
   }
-  fun receipt(intent: PhotoImportIntent): PhotoTarget? {
+  fun receipt(intent: PhotoMediaIntent): PhotoTarget? {
     val uri = Uri.parse(intent.uri ?: return null)
     val volume = uri.pathSegments.firstOrNull() ?: throw FilesFailure("outcome_unknown")
     val volumes = if (Build.VERSION.SDK_INT >= 29) MediaStore.getExternalVolumeNames(context) else setOf("external")
@@ -85,9 +85,9 @@ internal class AndroidPhotosMedia(private val context: Context, private val chec
     if (rows.size > 1) throw FilesFailure("outcome_unknown")
     return rows.singleOrNull()
   }
-  fun markers(intent: PhotoImportIntent): List<PhotoTarget> = query(intent.resource, collection(intent.resource),
+  fun markers(intent: PhotoMediaIntent): List<PhotoTarget> = query(intent.resource, collection(intent.resource),
     "${MediaStore.MediaColumns.DISPLAY_NAME}=?", arrayOf(intent.name))
-  fun existing(resource: PhotoResource): List<PhotoTarget> {
+  fun existing(resource: PhotoMediaResource): List<PhotoTarget> {
     val volumes = if (Build.VERSION.SDK_INT >= 29) MediaStore.getExternalVolumeNames(context) else setOf("external")
     val targets = mutableListOf<PhotoTarget>()
     for (volume in volumes) {
@@ -98,13 +98,13 @@ internal class AndroidPhotosMedia(private val context: Context, private val chec
     }
     return targets
   }
-  fun owned(intent: PhotoImportIntent, target: PhotoTarget): Boolean = target.name == intent.name &&
+  fun owned(intent: PhotoMediaIntent, target: PhotoTarget): Boolean = target.name == intent.name &&
     target.mime == intent.resource.mimeType && !target.trashed && if (Build.VERSION.SDK_INT >= 29)
       target.owner == context.packageName && (target.folder == intent.folder ||
-        intent.phase == "organizing" && target.folder == AndroidPhotosImportJournal.folder(intent.manifest))
+        intent.phase == "organizing" && target.folder == intent.desiredFolder)
       else target.folder == path(intent).absolutePath
 
-  fun insert(intent: PhotoImportIntent): Uri {
+  fun insert(intent: PhotoMediaIntent): Uri {
     permission()
     val values = ContentValues().apply {
       put(MediaStore.MediaColumns.DISPLAY_NAME, intent.name); put(MediaStore.MediaColumns.MIME_TYPE, intent.resource.mimeType)
@@ -119,7 +119,7 @@ internal class AndroidPhotosMedia(private val context: Context, private val chec
     }
     return resolver.insert(collection(intent.resource), values) ?: throw FilesFailure("destination_unavailable")
   }
-  fun verify(resource: PhotoResource, input: InputStream) {
+  fun verify(resource: PhotoMediaResource, input: InputStream) {
     var count = 0L
     val bounded = object : FilterInputStream(input) {
       override fun read(buffer: ByteArray, offset: Int, length: Int): Int {
@@ -131,7 +131,7 @@ internal class AndroidPhotosMedia(private val context: Context, private val chec
     }
     if (AndroidFilesSnapshots.digest(bounded, check) != FilesDigest(resource.sha256, resource.size)) throw FilesFailure("hash_mismatch")
   }
-  fun verify(resource: PhotoResource, target: PhotoTarget) {
+  fun verify(resource: PhotoMediaResource, target: PhotoTarget) {
     permission()
     // Pending MediaStore rows report size=0 until publication; verify size from the bounded original-byte stream.
     if (target.mime != resource.mimeType || target.trashed) throw FilesFailure("hash_mismatch")
@@ -139,7 +139,7 @@ internal class AndroidPhotosMedia(private val context: Context, private val chec
     (resolver.openInputStream(original) ?: throw FilesFailure("destination_unavailable")).use { verify(resource, it) }
     permission()
   }
-  fun write(intent: PhotoImportIntent, stage: File) {
+  fun write(intent: PhotoMediaIntent, stage: File) {
     permission()
     val target = receipt(intent) ?: throw FilesFailure("outcome_unknown")
     if (!owned(intent, target) || Build.VERSION.SDK_INT >= 29 && !target.pending) throw FilesFailure("outcome_unknown")
@@ -156,7 +156,7 @@ internal class AndroidPhotosMedia(private val context: Context, private val chec
     }
     verify(intent.resource, receipt(intent) ?: throw FilesFailure("outcome_unknown"))
   }
-  fun publish(intent: PhotoImportIntent) {
+  fun publish(intent: PhotoMediaIntent) {
     permission()
     val target = receipt(intent) ?: throw FilesFailure("outcome_unknown")
     if (!owned(intent, target)) throw FilesFailure("outcome_unknown")
@@ -165,14 +165,14 @@ internal class AndroidPhotosMedia(private val context: Context, private val chec
         ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) }, null, null) != 1) throw FilesFailure("outcome_unknown")
     permission()
   }
-  fun metadata(intent: PhotoImportIntent): Boolean {
+  fun metadata(intent: PhotoMediaIntent): Boolean {
     permission()
     val target = receipt(intent) ?: throw FilesFailure("outcome_unknown")
     val favorite = intent.manifest.favorite
     if (intent.manifest.albums.size > 1) return false
     if (!intent.owned) return intent.manifest.albums.isEmpty() && (favorite == null || favorite == target.favorite)
     if (!owned(intent, target)) throw FilesFailure("outcome_unknown")
-    val folder = AndroidPhotosImportJournal.folder(intent.manifest)
+    val folder = intent.desiredFolder
     if (folder != intent.folder || Build.VERSION.SDK_INT >= 29 && target.folder != folder) {
       if (Build.VERSION.SDK_INT < 29) return false
       if (target.folder != folder && resolver.update(target.uri,

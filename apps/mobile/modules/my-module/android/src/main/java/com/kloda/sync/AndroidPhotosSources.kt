@@ -46,7 +46,7 @@ internal class AndroidPhotosSources(private val context: Context) {
   private val collections = listOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
   fun hasAccess(): Boolean = hasFullAccess(Build.VERSION.SDK_INT) { context.checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED }
   private fun checkPermission() { if (!hasAccess()) throw FilesFailure("source_permission_lost") }
-  private fun albumScope(source: String): Pair<String?, Array<String>?> {
+  internal fun albumScope(source: String): Pair<String?, Array<String>?> {
     if (source == library) return null to null
     if (!source.startsWith(albumPrefix)) throw FilesFailure("source_permission_lost")
     val id = source.removePrefix(albumPrefix)

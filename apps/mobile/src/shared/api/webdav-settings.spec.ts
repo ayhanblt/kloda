@@ -1,8 +1,10 @@
 import { fetch as nativeFetch } from 'expo/fetch';
 import * as SecureStore from 'expo-secure-store';
 import { testWebDavWriteAccess } from './webdav';
-import { loadWebDavSettings, testAndSaveWebDavSettings } from './webdav-settings';
+import { backupDestinations } from './backup-destinations';
+import { loadWebDavSettings, testAndSaveWebDavSettings, enableSavedWebDavBackup } from './webdav-settings';
 
+jest.mock('./backup-destinations', () => ({ backupDestinations: { disable: jest.fn().mockResolvedValue({ configured: false, enabled: false, running: false }), enable: jest.fn().mockResolvedValue({ configured: true, enabled: true, running: false }) } }));
 jest.mock('expo/fetch', () => ({ fetch: jest.fn() }));
 jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn(), WHEN_UNLOCKED_THIS_DEVICE_ONLY: 7 }));
 const storage = { endpoint: 'https://fixture.example/dav/', targetPath: 'Kloda', username: 'fixture', password: 'public-test-secret' };
@@ -144,4 +146,14 @@ it('accepts the prior v1 profile without an automatic rewrite or a fabricated wa
   memory.set('kloda.webdav.profile.v1', JSON.stringify({ version: 1, storage, testedAt: null }));
   expect(await loadWebDavSettings()).toEqual({ config: { endpoint: storage.endpoint, targetPath: storage.targetPath, username: storage.username }, testedAt: null });
   expect(set).not.toHaveBeenCalled();
+});
+
+it('saved probe does not opt in; only explicit enable publishes saved credentials', async () => {
+  await expect(enableSavedWebDavBackup(() => true)).rejects.toThrow('webdav_test_required');
+  jest.mocked(backupDestinations.enable).mockClear();
+  await testAndSaveWebDavSettings(storage, () => true);
+  expect(backupDestinations.disable).toHaveBeenCalled();
+  expect(backupDestinations.enable).not.toHaveBeenCalled();
+  await enableSavedWebDavBackup(() => true);
+  expect(backupDestinations.enable).toHaveBeenCalledWith(storage);
 });

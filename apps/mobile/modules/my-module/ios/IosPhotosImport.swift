@@ -25,12 +25,12 @@ enum IosPhotosImport {
     var importFiles: [String: URL] = [:]
     defer { for url in importFiles.values { try? FileManager.default.removeItem(at: url) } }
     do {
-      types = try manifest.resources.map { try resourceType($0, single: manifest.resources.count == 1) }
+      types = try manifest.resources.map { try IosPhotosImportMedia.resourceType($0, single: manifest.resources.count == 1) }
       guard PHAssetCreationRequest.supportsAssetResourceTypes(types.map { NSNumber(value: $0.rawValue) }),
         Set(stages.keys) == Set(manifest.resources.map(\.operationId)) else { throw fail("review_required") }
       for resource in manifest.resources {
         guard let url = stages[resource.operationId], url.isFileURL else { throw fail("review_required") }
-        try verifyStage(url, resource: resource, check: check)
+        try IosPhotosImportMedia.verifyStage(url, resource: resource, check: check)
         guard let suffix = UTType(mimeType: resource.mimeType)?.preferredFilenameExtension,
           !suffix.isEmpty, suffix.utf8.count <= 32,
           suffix.utf8.allSatisfy({ (48...57).contains($0) || (65...90).contains($0) || (97...122).contains($0) }) else { throw fail("review_required") }
@@ -39,7 +39,7 @@ enum IosPhotosImport {
         try FileManager.default.copyItem(at: url, to: target)
         importFiles[resource.operationId] = target
         try FileManager.default.setAttributes([.posixPermissions: 0o600, .protectionKey: FileProtectionType.complete], ofItemAtPath: target.path)
-        try verifyStage(target, resource: resource, check: check)
+        try IosPhotosImportMedia.verifyStage(target, resource: resource, check: check)
       }
       albums = try prepareAlbums(manifest, journal: journal)
       try check(); try permission()
@@ -123,7 +123,7 @@ enum IosPhotosImport {
       defer { for value in exported { try? snapshots.discard(value.snapshot) } }
       guard exported.count == manifest.resources.count else { throw fail("review_required") }
       for expected in manifest.resources {
-        let type = try resourceType(expected, single: manifest.resources.count == 1)
+        let type = try IosPhotosImportMedia.resourceType(expected, single: manifest.resources.count == 1)
         guard let actual = exported.first(where: { $0.role == "resource-\(type.rawValue)" }),
           actual.name == expected.name, actual.mimeType == expected.mimeType,
           actual.sha256 == expected.sha256, actual.size == expected.size else { throw fail("review_required") }
@@ -173,41 +173,6 @@ enum IosPhotosImport {
       }
       return Album(key: key, title: album.name, target: target)
     }
-  }
-  private static func resourceType(_ resource: IosPhotoResource, single: Bool) throws -> PHAssetResourceType {
-    let raw: Int
-    if single && resource.role == "original" {
-      if resource.mimeType.hasPrefix("image/") { raw = 1 }
-      else if resource.mimeType.hasPrefix("video/") { raw = 2 }
-      else { throw fail("review_required") }
-    } else {
-      guard resource.role.hasPrefix("resource-"), let value = Int(resource.role.dropFirst(9)),
-        String(value) == resource.role.dropFirst(9), (1...12).contains(value) else { throw fail("review_required") }
-      raw = value
-    }
-    guard let type = PHAssetResourceType(rawValue: raw), UTType(mimeType: resource.mimeType) != nil else {
-      throw fail("review_required")
-    }
-    return type
-  }
-  private static func verifyStage(_ url: URL, resource: IosPhotoResource,
-    check: () throws -> Void) throws {
-    let fd = Darwin.open(url.path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK)
-    guard fd >= 0 else { throw fail("review_required") }
-    defer { Darwin.close(fd) }
-    let before = try IosFilesSource.metadata(fd)
-    guard before.st_uid == geteuid(), before.st_nlink == 1, before.st_mode & 0o077 == 0 else {
-      throw fail("review_required")
-    }
-    var interruption: Error?
-    let result: (String, Int64)
-    do {
-      result = try IosFilesSource.hash(fd, maxBytes: resource.size, cancelled: {
-        do { try check(); return false } catch { interruption = error; return true }
-      })
-    } catch { throw interruption ?? error }
-    guard result.0 == resource.sha256, result.1 == resource.size,
-      IosFilesSource.unchanged(before, try IosFilesSource.metadata(fd)) else { throw fail("review_required") }
   }
   private static func permission() throws {
     guard PHPhotoLibrary.authorizationStatus(for: .readWrite) == .authorized else { throw fail("photo_permission_lost") }

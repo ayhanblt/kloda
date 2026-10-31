@@ -1,0 +1,286 @@
+{
+  "date": "2026-10-30",
+  "scope": "step15 source/automated/isolated native pipeline implemented; Android SAF and Photos + iOS PhotoKit own restore proofs PASS; product/platform acceptance stays open for steps12/13/20/21",
+  "checks": {
+    "iosHostSqlite": "PASS real generic SQLite + DAV journal/parser/run policy, fresh-process reopen; HTTP closures mocked",
+    "iosSimulatorHttps": "PASS actual URLSession/private snapshot/SQLite against owned HTTPS, lost PUT/MOVE, strict hostname/auth, redirects, truncated diagnostic-body ACK and context-after-ACK; source bytes synthetic",
+    "androidRuntime": "PASS API36 disposable emulator: real MediaStore source/private snapshot/OkHttp HTTPS/native vault/Photos metadata-only/SQLite/native foreground queue/opt-out; independent policy budgets tested",
+    "iosArm64SimulatorAppBuild": "PASS final actual Expo app arm64 Simulator build including IosPhotosImportMedia, both restore domains, native modules and current pod source list; unsigned Simulator build is not production signing proof",
+    "androidModuleAndInstrumentationBuild": "PASS",
+    "apiBoundary": "PASS strict review boundary and lifecycle regression; existing backup API covered in full154",
+    "productUiAutomaticOsRestore": "NOT_RUN; not complete",
+    "hostUrlProtocol": "INCONCLUSIVE synthetic callback delivery; excluded from PASS, replaced by actual simulator HTTPS",
+    "iosActualNativeCoreHttps": "PASS current sourceHashdb9aa110c47401d50dea2d90dffe72e9536c43ed4bd46ce9803d313b36047fa9: actual core HTTPS, download/local publication, PhotoKit/native-vault source+restore; Expo product UI/system picker/actual BG delivery/physical NOT_RUN",
+    "iosForegroundPhotos": "PASS current sourceHashdb9aa110c47401d50dea2d90dffe72e9536c43ed4bd46ce9803d313b36047fa9: actual PhotoKit source, exact approved simulated Keychain group/native vault, metadata-only second sidecar and explicit cross-context known-ACK review. Fixture signing is not production custody proof",
+    "androidOsDispatch": "PASS actual naturally delivered JobScheduler2704/JobService run, no force command used; MediaStore/HTTPS, no PC session, next durable plan, global Pause; normal cadence/physical hardware NOT_RUN; captured before latest review alias extension",
+    "mobileUi": "PASS full22 suites/163 tests, TypeScript and full repo ESLint9; native picker/real Expo product flow NOT_RUN",
+    "reviewCore": "PASS current iOS host SQLite and actual iOS HTTPS with UTC/revision keep-both names; Android native test APK build and actual journal runtime PASS",
+    "productReviewRestore": "Source/API/UI connected for Files and Photos. Android real owned SAF provider restore and owned MediaStore Photos import PASS. iOS verified-download/local-publication component PASS; actual Photos import and product picker/Expo flow open. Step15 incomplete",
+    "reviewPolicy": "ADR0025 approved; separate immutable single-request authorization, current selected-source/bytes/metadata validation, original header/ACK retained. Android actual SAF source/context-authorize_keep_both and iOS own PhotoKit explicit authorize_recheck PASS; no lost-ACK/hash adoption",
+    "filesRestore": "PASS Android real persisted SAF permission/provider source->HTTPS->owned target, independent of released source grant, whole-byte validation and repeat without duplicate. iOS actual HTTPS->shared no-overwrite/inode publisher component PASS. System picker and Expo product flow NOT_RUN",
+    "photosRestore": "PASS both scoped native SDK paths: Android MediaStore own new URI bytes/favorite/folder/retry/context/unknown-create/target-library; iOS new recorded PhotoKit asset+album, full bytes/name/MIME/favorite/albums, automatic-backup-disabled explicit restore and same-process DB reopen/repeat without duplicate; exact current restored copy/album cleanup verified. Fresh-process SDK import/old APIs/physical NOT_RUN",
+    "sharedMediaChecks": "PC/DAV share neutral resource metadata/byte IO only; authority/operation IDs/codecs and import journals remain separate. iOS current SDK component and host journal PASS; Android module/instrumentation build and owned runtime PASS"
+  },
+  "incident": "Historical Pixel_9_Pro wipe disclosed; user says data disposable, recovery unnecessary; not reset/reopened. Current owned emulator-5584 uses separate /tmp registry/data.",
+  "files": [
+    {
+      "path": "android-files-restore-https-runtime.log",
+      "sha256": "8eb7468781b69ffcc929a66628d9f74fa21180e52fcc801c34cf9f93ac7c1074",
+      "bytes": 277
+    },
+    {
+      "path": "android-install.log",
+      "sha256": "a62aa63424308eb4e7fa8ce7fbb472a3cbcba1d8084a3e91567d71585a739cc2",
+      "bytes": 2318
+    },
+    {
+      "path": "android-journal-checks.log",
+      "sha256": "0233fd10f1a2128b66878b75a9623e2ab7cad46bb6b2e66b18246e2578716df9",
+      "bytes": 716
+    },
+    {
+      "path": "android-owned-photos-library-runtime.log",
+      "sha256": "6a5a79cd7b3628455a770738dc1f417ee88cb60f3a20dc9193388b1ff0600d47",
+      "bytes": 343
+    },
+    {
+      "path": "android-photos-library-fence-build.log",
+      "sha256": "1613c80ee0cb13bebd02ca2a654b346169f906006ac9a806fab3a2a6a1b37ebe",
+      "bytes": 15211
+    },
+    {
+      "path": "android-photos-restore-journal-runtime.log",
+      "sha256": "e11fee0fe4e1b985152c2bdaa54bfe2009f4dcbf911e4439142e4ef058e2bf5e",
+      "bytes": 176
+    },
+    {
+      "path": "android-webdav-saf-runtime.log",
+      "sha256": "4fabe23cdd2bf77a83740bca9b3995fe1637e1dd8d4ae6e88382dc8d2b3801ac",
+      "bytes": 294
+    },
+    {
+      "path": "current-android-os-runtime.log",
+      "sha256": "f02fd3fdc1a96da3681d44751af5deff55b013b8ec2ce659fb12d7c0c758b9d7",
+      "bytes": 312
+    },
+    {
+      "path": "current-android-policy-runtime.log",
+      "sha256": "e11fee0fe4e1b985152c2bdaa54bfe2009f4dcbf911e4439142e4ef058e2bf5e",
+      "bytes": 176
+    },
+    {
+      "path": "current-android-queue-runtime.log",
+      "sha256": "e1dc232c5cdd0a710f82388ecf219abca4c1947287899996eb87cd5e38bcd7f2",
+      "bytes": 252
+    },
+    {
+      "path": "current-backup-api-test.log",
+      "sha256": "4e1b52eb79c05f8760f5fdd4a764c42c4905fd6731deb2e6dcaf512706c53859",
+      "bytes": 429
+    },
+    {
+      "path": "current-build-summary.log",
+      "sha256": "c7c451eb2c3d4c41e600331671b9677d7256b872db2cf189c47536262a98dad8",
+      "bytes": 289
+    },
+    {
+      "path": "current-fanout-test.log",
+      "sha256": "23504bb90b7119992d65a26dc07f5295d56d7b12437c7e70bd31af858186a76b",
+      "bytes": 2334
+    },
+    {
+      "path": "current-ios-core-result.json",
+      "sha256": "4535ed979fd381a1fd20a06328b654ecda3fc3e55e888ff2ea7fd4244144787e",
+      "bytes": 382
+    },
+    {
+      "path": "current-ios-https-result.json",
+      "sha256": "3ef2f8a6789dc7d4e05601800d8bdcff18fae41fd68dd511a07102c08f902a76",
+      "bytes": 238
+    },
+    {
+      "path": "current-ios-https-source-fingerprint.txt",
+      "sha256": "211a5b3906216a9aac67196d1de5c5c72edabae9d7686c8c3d113b5e5d5a8daa",
+      "bytes": 65
+    },
+    {
+      "path": "current-ios-journal.log",
+      "sha256": "2544bffde2acac1153cfc2eaacf9d812abd2da7f54a6cbfe296af711eadb04ee",
+      "bytes": 712
+    },
+    {
+      "path": "current-ios-owned-photos-restore-result.json",
+      "sha256": "3f1efbd3f723cb4c15cd8168fb2faa29d75c5ffa824125ced088bf9977bdf6b9",
+      "bytes": 755
+    },
+    {
+      "path": "current-ios-owned-photos-result.json",
+      "sha256": "4ef08413d22146fde7912c59246535c418f36511ebc576bf86831b2cdf99328c",
+      "bytes": 453
+    },
+    {
+      "path": "current-mobile-all-tests.log",
+      "sha256": "4cad94cac6083e4698083d5e4eda54df321f3c220c7426f3b60765079d6f50fc",
+      "bytes": 981
+    },
+    {
+      "path": "current-mobile-lint.log",
+      "sha256": "83cf9ae340ebacdd36215c01ea0dc0729549ce08d39f375753533cdee2eb984d",
+      "bytes": 66
+    },
+    {
+      "path": "current-mobile-ts.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "earlier-ios-owned-photos-result.json",
+      "sha256": "102a41307e73589433795b1540a14d39f862fad2d47bc5cc0f9dc91ed3e987f2",
+      "bytes": 453
+    },
+    {
+      "path": "ios-import-helper-app-build.log",
+      "sha256": "1163bfce17d26bdc35dab4b2b65dce36dae56c7a5782653088d1f121521d0cca",
+      "bytes": 3056482
+    },
+    {
+      "path": "ios-import-helper-core.log",
+      "sha256": "1747f4d05d9ce8867ea3198f4f63a34fd2594f6a953eb8eed374e2823f9e037d",
+      "bytes": 520
+    },
+    {
+      "path": "ios-journal-checks.log",
+      "sha256": "5c3c827109af50d4f450ada9a8e564faa0af393432a9af337a6038fdcfb889f3",
+      "bytes": 194
+    },
+    {
+      "path": "ios-owned-photos-restore-build-run.log",
+      "sha256": "c31c6b09a167a46b9ef2745c4400440cbd673e55b94b295eec0f370895826f98",
+      "bytes": 520
+    },
+    {
+      "path": "ios-restore-prior-webdav-photos-restore-result.json",
+      "sha256": "64abc96e4b117e83baeee4b02038082e44574799e23577cab6119f4ea5970ba0",
+      "bytes": 511
+    },
+    {
+      "path": "ios-restore-prior-webdav-result.json",
+      "sha256": "db6bf70af081d540ce9a49f91a0a00a52df03e128a9899b9ddbce415d58133c6",
+      "bytes": 191
+    },
+    {
+      "path": "ios-webdav15-final-journal.log",
+      "sha256": "fd25f66db0f6d56173a35c5ab867f533d1cdea8b97537e319f92d541e57384a6",
+      "bytes": 813
+    },
+    {
+      "path": "mobile-webdav15-final-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mobile-webdav15-final-tests.log",
+      "sha256": "fc0db41f031cfaed10654d745fcccc7b379d3fe6de783a294321d8653f395c10",
+      "bytes": 1293
+    },
+    {
+      "path": "mobile-webdav15-final-ts.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "owned-keychain-experiment.log",
+      "sha256": "11096f203b3b197cf59be2259d303c11073ceeec7d974258450f3fd66c5d8565",
+      "bytes": 880
+    },
+    {
+      "path": "restore-ios-https-result.json",
+      "sha256": "c98be3d285c7ab59523b2a7581d13d0bb4669265686275b90994958c717f583c",
+      "bytes": 386
+    },
+    {
+      "path": "restore-ios-journal.log",
+      "sha256": "fd25f66db0f6d56173a35c5ab867f533d1cdea8b97537e319f92d541e57384a6",
+      "bytes": 813
+    },
+    {
+      "path": "restore-mobile-all-tests.log",
+      "sha256": "baabd555f3b3ed957a04a7c7b3214273b0ce99a32dfa36e89cdc4a61b4b48b12",
+      "bytes": 1236
+    },
+    {
+      "path": "restore-mobile-lifecycle-tests.log",
+      "sha256": "89bf4c033ad1c7628ae3318508604ec6abe8f2c0a361fae1306e4f1ac411c34d",
+      "bytes": 381
+    },
+    {
+      "path": "restore-mobile-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "restore-mobile-ts.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "review-android-journal-runtime.log",
+      "sha256": "e11fee0fe4e1b985152c2bdaa54bfe2009f4dcbf911e4439142e4ef058e2bf5e",
+      "bytes": 176
+    },
+    {
+      "path": "review-ios-https-result.json",
+      "sha256": "3bb1dae62e9f699b1ec8ee41afd602ab4083435b32ffa2aaf8b15f51fabf01b4",
+      "bytes": 238
+    },
+    {
+      "path": "review-ios-https-source-fingerprint.txt",
+      "sha256": "efd5ec6c358220b050510bc5f06a157e32a571ba5cae4de5767c90ca35b04c2f",
+      "bytes": 65
+    },
+    {
+      "path": "review-ios-journal.log",
+      "sha256": "2544bffde2acac1153cfc2eaacf9d812abd2da7f54a6cbfe296af711eadb04ee",
+      "bytes": 712
+    },
+    {
+      "path": "review-mobile-all-tests.log",
+      "sha256": "afb0876c42fd9fa0b1e9fa92a3b717788ef2b574fca4624580cd4029e7efcf19",
+      "bytes": 1193
+    },
+    {
+      "path": "review-mobile-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "review-mobile-listing-tests.log",
+      "sha256": "ad059bae0294b655f4ea1bc6affc5b78a9117f8d1d3c9e07753fc02a09e358a8",
+      "bytes": 617
+    },
+    {
+      "path": "review-mobile-ts.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ],
+  "historicalPrototype": {
+    "scope": "step15 native prototype, not integrated sender",
+    "checks": {
+      "iosHostSqlite": "PASS seed/fresh process reopen; mocked HTTP operations",
+      "androidNativeAndTestApkBuild": "PASS",
+      "iosArm64SimulatorBuild": "PASS; final SQL CAS additionally checked on host",
+      "androidRuntime": "NOT_RUN installation failed insufficient space",
+      "nativeHttpsSourceByteBackgroundRestore": "NOT_RUN"
+    }
+  },
+  "ownedRuntimes": {
+    "iosSimulator": "497AAA0F-967E-4781-9468-3F05CA2D3D5A Kloda-WebDAV15-Disposable iOS26.5",
+    "android": "emulator-5584 KlodaWebDavStep15 API36; isolated /tmp/kloda-step15 paths",
+    "https": "loopback 26443/26444/26445; public test-only CA, private keys only /tmp"
+  },
+  "iosSourceHash": "db9aa110c47401d50dea2d90dffe72e9536c43ed4bd46ce9803d313b36047fa9",
+  "approvalDecisions": "2026-10-30: ADR0025 A, exact iOS source/single simulated Keychain group, Android owned Photos restore and separate iOS own restore-copy explicitly approved. New separate flag requires approved group and is fingerprinted. No production group/team ID or credential fallback.",
+  "reviewPass": "Separate same-main-agent pass: restored payload requires this-target nonskipped locally Completed receipt; sidecar/resources revalidated, unknown SDK create retains review, cancellation/current-context fence guards final commit. Shared PC/DAV helpers contain only neutral media metadata/IO; PC codecs/authority IDs remain separate. Not independent-agent review. Product picker/Expo flow, iOS actual import and platform/hardware gates remain open.",
+  "fixtureRetainedReview": "Initial iOS test used backup-only check during independent restore verification and failed after recording a new imported asset/album; kept for review, no blind cleanup. Exact retained asset860F86F8-B8C4-431A-9DB9-43859FF63D71/L0/001, album53127287-F590-43B3-865B-9CD47ED9E910/L0/040, sourceHashee248876ffe70f1f1ad235f0b1a5c2b0bdff1ee4cce88c9801d4f0319cab2360; no personal media. A subsequent overlapping cleanup caused expected_settings_changed_got_cancelled; final fresh run10cf1a46-8305-41b0-8e9a-25296c644072 PASS. Synthetic source PNGs intentionally retained, no Recently Deleted purge."
+}
