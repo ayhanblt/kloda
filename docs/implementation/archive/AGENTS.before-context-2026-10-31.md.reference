@@ -1,0 +1,112 @@
+## Kloda project context
+
+Current UI source of truth is the user-approved [Lovable design](docs/ui/lovable-design-reference.md), superseding the legacy Stitch folder. Preserve strict visual mapping, TR/EN/DE translation keys for all static user-facing text, Tailwind/existing NativeWind with shared global CSS (no new inline/page styles), Lucide, FSD/component boundaries and the existing300-line ESLint limit excluding comments/blank lines. Native OS/SwiftUI exceptions require an explicit decision.
+
+Before development, read [.omp/AGENTS.md](.omp/AGENTS.md) and the [Codex migration handoff](docs/implementation/codex-migration-handoff.md). These are repository documents, not a dependency on the OMP runtime. ADR0016 is current V1 LAN authority; ADR0017 is current Photos metadata/import recovery. Preserve their scoped supersession of older central-authorization requirements.
+
+ADR0018 is the approved Windows/macOS/Linux Desktop background lifecycle: retain authorized native receipt across UI departure; separately invalidate foreground invitation/approval work. Never restore close-on-blur as the receiver lifecycle or bypass foreground grant fences. Linux requires a usable visible control before hiding; provider/signing/storage and physical gates remain open.
+
+OMP-only model/agent aliases (`@smol`, `@default`, `fast`, `good`), internal URIs and tool names below are not assumed configured in Codex CLI. Use available CLI capabilities; preserve the project/security workflow rather than inventing equivalent tools or silently changing model configuration.
+
+For documentation/audit-only requests, report and stop; the general execution flow below does not authorize starting development after that request.
+
+<!-- context7 -->
+Use the `ctx7` CLI to fetch current documentation whenever the user asks about a library, framework, SDK, API, CLI tool, or cloud service — even well-known ones like React, Next.js, Prisma, Express, Tailwind, Django, or Spring Boot. This includes API syntax, configuration, version migration, library-specific debugging, setup instructions, and CLI tool usage. Use even when you think you know the answer — your training data may not reflect recent changes. Prefer this over web search for library docs.
+
+Do not use for: refactoring, writing scripts from scratch, debugging business logic, code review, or general programming concepts.
+
+## Steps
+
+1. Resolve library: `npx ctx7@latest library <name> "<what to look up>"` — use the official library name with proper punctuation (e.g., "Next.js" not "nextjs", "Customer.io" not "customerio", "Three.js" not "threejs")
+2. Pick the best match (ID format: `/org/project`) by: exact name match, description relevance, code snippet count, source reputation (High/Medium preferred), and benchmark score (higher is better). If results don't look right, try alternate names or queries (e.g., "next.js" not "nextjs", or rephrase the question)
+3. Fetch docs: `npx ctx7@latest docs <libraryId> "<what to look up>"` — run a separate `docs` command per distinct concept if the question spans multiple topics, unless it's about how they interact
+4. Answer using the fetched documentation
+
+You MUST call `library` first to get a valid ID unless the user provides one directly in `/org/project` format. Be specific about what to look up in the library's documentation — specific and detailed queries return better results than vague single words, but keep each query to a single concept unless the question is about how concepts interact; combined multi-topic queries dilute ranking and return shallow results for each topic. Do not run more than 3 commands per question. Do not include sensitive information (API keys, passwords, credentials) in queries.
+
+For version-specific docs, use `/org/project/version` from the `library` output (e.g., `/vercel/next.js/v14.3.0`).
+
+If a command fails with a quota error, inform the user and suggest `npx ctx7@latest login` or setting `CONTEXT7_API_KEY` env var for higher limits. Do not silently fall back to training data.
+Run Context7 CLI requests outside Codex's default sandbox. If a Context7 CLI command fails with DNS or network errors such as ENOTFOUND, host resolution failures, or fetch failed, rerun it outside the sandbox instead of retrying inside the sandbox.
+<!-- context7 -->
+
+
+## Single-agent and usage policy — user decision, 2026-10-29
+
+- Work with the main agent only. Do not spawn, resume or delegate to subagents;
+  do not invoke Astra automatically. A new explicit user instruction is required
+  to change this rule. It supersedes older helper/model-routing instructions.
+- Keep the main model and effort unchanged.
+- Use Serena for targeted symbol/caller/reference discovery when useful; verify
+  project activation and available tools first. It does not replace ADRs.
+- Start from [the compact handoff](docs/implementation/new-chat-handoff-2026-10-29.md),
+  current handoff/status sections and relevant ADRs. Do not load the entire chat,
+  enumerate/read all repo documents, or replay historical evidence by default.
+- Reuse existing mechanisms/fixtures. State the smallest validation path before
+  substantial work; prove one representative path before broadening a matrix.
+- Batch routine checks; repeat only checks affected by a change or unresolved
+  failure. Do not redo full capture/build matrices after every cosmetic edit.
+- Perform a separate review pass after implementation. A same-agent review is
+  not an independent-agent review; report that distinction honestly. If a gate
+  truly requires independent review, report it instead of launching another agent.
+- Run the relevant tests/lint/typecheck/build and scoped isolated smoke; never
+  trade away security, recovery or accessibility to reduce usage.
+
+## Lower-usage execution policy — user-approved, 2026-10-30
+
+- Apply cheap elimination first: exact candidate/version, license/advisory and one
+  strict host path before expanding a platform matrix. A failed critical gate
+  blocks wider builds until its cause/direction is resolved.
+- After candidate acceptance, validate one Android arm64 and one iOS Simulator
+  target first. Run the required full matrix once at a stable checkpoint; repeat
+  only checks affected by semantic changes or an unresolved failure. Preserve all
+  security, recovery, accessibility and platform acceptance requirements.
+- Read only the current compact checkpoint and directly relevant symbols/callers.
+  Do not reload old histories, already-read manuals, whole files or broad web
+  pages when a targeted section suffices. Keep raw logs on disk; return status
+  and the relevant small error excerpt to context.
+- Reuse validated toolchain/fixture commands; check compiler/rustdoc/Clippy and
+  fixture readiness once before testing. Diagnose the current blocker before
+  opening another implementation branch.
+- Maintain one short current handoff pointer and one evidence manifest per work
+  group. Avoid duplicating long status histories across documents. Report actual
+  acceptance criteria completed; do not turn routine choices into approval gates.
+- Main-agent-only and unchanged model/effort remain binding. Never save usage by
+  dropping required validation or labelling old/diagnostic evidence as fresh PASS.
+
+## Execution flow
+Continue through roadmap steps without waiting for user confirmation.
+
+After completing a step:
+- verify it with tests/build/checks,
+- immediately continue to the next incomplete step,
+- do not ask for approval between steps.
+
+Stop only if:
+- a new architectural decision is required,
+- requirements conflict,
+- a destructive/irreversible action is needed,
+- progress is blocked by missing information or failing infrastructure.
+
+
+## Codex Development Workflow
+
+- Treat the current ADRs and implementation handoff as authoritative.
+- Read the relevant ADR before modifying security-sensitive code.
+- Preserve PC-first offline LAN behavior and PC-local ACL.
+- Never reintroduce JWT/KMS as a LAN prerequisite.
+- Do not change unresolved recovery or remote policies.
+- Prefer minimal changes and existing abstractions.
+- Use Serena for complex symbol-level exploration when useful.
+- Keep all work in the main agent under the single-agent policy above.
+- Review security-sensitive changes in a separate pass; disclose any unmet independent-review gate.
+- Run relevant automated tests during implementation.
+- Defer physical acceptance to the documented acceptance gate.
+- Never report unperformed tests as PASS.
+- Continue approved roadmap work without repeated confirmation.
+- Stop for genuine architectural or security-policy decisions.
+- Do not add, commit, push, reset, clean, or stash Git changes
+  unless explicitly instructed.
+- Update handoff documentation when completing a meaningful work group.
+
+

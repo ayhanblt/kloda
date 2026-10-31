@@ -1,0 +1,12 @@
+# Context simplification — raw output only, user-approved 2026-10-31
+/apps/mobile/.expo/dev/logs/
+*.log
+/docs/implementation/evidence/**/*.png
+/docs/implementation/evidence/**/*.jpg
+/docs/implementation/evidence/**/*.jpeg
+/docs/implementation/evidence/**/*.webp
+!**/fixture/**
+!**/fixtures/**
+!**/snapshot/**
+!**/snapshots/**
+!/docs/ui/lovable-reference/**
