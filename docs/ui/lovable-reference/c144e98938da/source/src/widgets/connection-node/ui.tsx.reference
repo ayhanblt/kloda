@@ -1,0 +1,75 @@
+import { Link } from "@tanstack/react-router";
+import { toast } from "sonner";
+import { useI18n } from "@/shared/i18n";
+import { DeviceGlyph } from "@/shared/ui/illustrations/glyph";
+import { Panel, StatusPill } from "@/shared/ui/kit";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
+import { getProvider, type Connection } from "@/entities/connection/model";
+import { cn } from "@/lib/utils";
+export function NodeCard({ c }: { c: Connection }) {
+  const { t } = useI18n();
+  const label = (c: Connection) => ({ok:t.status.online,offline:t.status.offline,reauth:t.states.reauth,full:t.states.full,paused:t.status.paused,noAccess:t.status.noAccess})[c.state];
+  const provider = c.providerId === "computer" ? null : getProvider(c.providerId);
+  const tone = c.state === "ok" ? "synced" : c.state === "offline" || c.state === "paused" ? "pending" : c.state === "full" ? "danger" : "review";
+  const ok = c.state === "ok";
+  const roleLabel = c.role === "primary" ? t.conn.primary : c.role === "mirror" ? t.conn.mirror : t.conn.standby;
+  return (
+    <Panel className="p-4">
+      <Link to="/m/connections/$id" params={{ id: c.id }} className="block">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-3">
+<DeviceGlyph kind={c.providerId === "computer" ? "laptop" : c.providerId === "webdav" ? "nas" : "cloud"} className="size-7 shrink-0"/>
+            <div className="min-w-0">
+              <p className="truncate text-callout font-semibold text-ink">{c.name}</p>
+              <p className="truncate text-xs text-muted-foreground">{provider ? provider.name : t.conn.computers}</p>
+            </div>
+          </div>
+          <StatusPill tone={tone}>{label(c)}</StatusPill>
+        </div>
+        <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-ink-soft">
+          <span className={cn("size-[7px] rounded-full", ok ? "bg-brand" : tone === "pending" ? "bg-tertiary-text" : "bg-attention-g")} aria-hidden />
+          {label(c)}
+          {c.speed ? ` • ${c.speed}` : ""}
+        </p>
+        <span className="mt-2 inline-block max-w-full truncate rounded-md bg-muted px-2 py-1 font-mono text-caption text-ink-soft">
+          {c.target}
+        </span>
+        {c.usage && (
+          <div className="mt-3">
+            <Progress
+              value={c.usage.used}
+              className={cn("h-1.5 bg-muted", ok ? "[&>div]:bg-brand" : "[&>div]:bg-attention-g")}
+              aria-label={t.conn.usage}
+            />
+            <div className="mt-1 flex items-center justify-between gap-2 text-caption text-muted-foreground">
+              <span>{c.usage.label}</span>
+              <span className="tabular-nums">{c.usage.used}%</span>
+            </div>
+          </div>
+        )}
+      </Link>
+      <div className="mt-3 flex items-center justify-between gap-2 border-t border-border pt-3">
+        <span className="truncate text-caption text-muted-foreground">
+          {t.conn.lastSync}: {c.lastSync}
+        </span>
+        {c.role !== "standby" ? (
+          <span className="flex shrink-0 items-center gap-2">
+            <span className="text-caption font-medium text-muted-foreground">{roleLabel}</span>
+            <Switch
+              defaultChecked={c.state === "ok"}
+              aria-label={roleLabel}
+              onCheckedChange={() => toast(t.conn.toggleToast)}
+            />
+          </span>
+        ) : (
+          <Button size="sm" variant="secondary" className="shrink-0" onClick={() => toast(t.activity.syncAllToast)}>
+            {t.conn.syncNow}
+          </Button>
+        )}
+      </div>
+    </Panel>
+  );
+}
+

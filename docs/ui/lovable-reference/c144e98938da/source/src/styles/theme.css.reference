@@ -1,0 +1,129 @@
+/*
+ * Kloda theme — the ONLY file allowed to contain hex/rgb color values.
+ * To change the accent, edit --brand-base and --on-brand (and --brand-text in light).
+ * Everything else derives.
+ */
+
+:root {
+  color-scheme: light;
+  /* Neutrals (Phase 1) */
+  --bg: #F7F8F9;
+  --surface-1: #FFFFFF;
+  --surface-2: #F0F2F4;
+  --border-subtle: #E2E5E9;
+  --border-strong: #CDD2D8;
+  --text-primary: #121417;
+  --text-secondary: #545B63;
+  --text-tertiary: #62686F;
+  --action: #121417;
+  --on-action: #FFFFFF;
+  /* Accents */
+  --brand-base: #1F9C8C;
+  --brand-text: #0F7266;
+  --on-brand: #FFFFFF;
+  --attention-base: #B7791F;
+  --attention-text: #8F5E0F;
+  --danger-base: #D2453A;
+  --danger-text: #B8372D;
+  /* Logo tile keeps its dark identity in both themes. */
+  --tile: #1B1C1E;
+  --tile-ring: #ECEEF0;
+  --tile-foreground: #ECEEF0;
+  --shadow-color: rgba(16, 20, 24, 0.08);
+  --highlight-color: rgba(255, 255, 255, 0);
+  --button-highlight: rgba(255, 255, 255, 0.18);
+  /* Illustration palette */
+  --illus-body: #FFFFFF;
+  --illus-screen: #E9ECEF;
+  --illus-line: #B9C0C8;
+  --illus-photo-1: #C9A27A;
+  --illus-photo-2: #7F9BAE;
+  --illus-photo-3: #8FA88A;
+  --illus-photo-4: #B98580;
+  --illus-photo-5: #9C8FB0;
+  --illus-photo-6: #A9A27E;
+}
+
+@media not (prefers-color-scheme: light) {
+  :root:not(.light) {
+    color-scheme: dark;
+    --bg: #111213;
+    --surface-1: #191A1C;
+    --surface-2: #222326;
+    --border-subtle: #2C2D30;
+    --border-strong: #3B3D41;
+    --text-primary: #ECEEF0;
+    --text-secondary: #A6A8AC;
+    --text-tertiary: #888A8E;
+    --action: #ECEEF0;
+    --on-action: #111213;
+    --brand-base: #3DBFAE;
+    --brand-text: var(--brand-base);
+    --on-brand: #06231F;
+    --attention-base: #E0A93B;
+    --attention-text: var(--attention-base);
+    --danger-base: #F06A5F;
+    --danger-text: var(--danger-base);
+    --tile: #222326;
+    --shadow-color: rgba(0, 0, 0, 0.35);
+    --highlight-color: rgba(255, 255, 255, 0.05);
+    --illus-body: #222326;
+    --illus-screen: #2E3034;
+    --illus-line: #55585E;
+    --illus-photo-1: #8A6E52;
+    --illus-photo-2: #4F6676;
+    --illus-photo-3: #56694F;
+    --illus-photo-4: #7A5552;
+    --illus-photo-5: #5F5670;
+    --illus-photo-6: #6E6A4F;
+  }
+}
+:root.dark {
+  color-scheme: dark;
+  --bg: #111213;
+  --surface-1: #191A1C;
+  --surface-2: #222326;
+  --border-subtle: #2C2D30;
+  --border-strong: #3B3D41;
+  --text-primary: #ECEEF0;
+  --text-secondary: #A6A8AC;
+  --text-tertiary: #888A8E;
+  --action: #ECEEF0;
+  --on-action: #111213;
+  --brand-base: #3DBFAE;
+  --brand-text: var(--brand-base);
+  --on-brand: #06231F;
+  --attention-base: #E0A93B;
+  --attention-text: var(--attention-base);
+  --danger-base: #F06A5F;
+  --danger-text: var(--danger-base);
+  --tile: #222326;
+  --shadow-color: rgba(0, 0, 0, 0.35);
+  --highlight-color: rgba(255, 255, 255, 0.05);
+  --illus-body: #222326;
+  --illus-screen: #2E3034;
+  --illus-line: #55585E;
+  --illus-photo-1: #8A6E52;
+  --illus-photo-2: #4F6676;
+  --illus-photo-3: #56694F;
+  --illus-photo-4: #7A5552;
+  --illus-photo-5: #5F5670;
+  --illus-photo-6: #6E6A4F;
+}
+
+/* Derived tokens — no new color values below this line. */
+:root {
+  --brand-g: var(--brand-base);
+  --attention-g: var(--attention-base);
+  --danger-g: var(--danger-base);
+  --brand-subtle: color-mix(in srgb, var(--brand-base) 14%, transparent);
+  --brand-line: color-mix(in srgb, var(--brand-base) 50%, transparent);
+  --brand-halo-1: color-mix(in srgb, var(--brand-base) 24%, transparent);
+  --brand-halo-2: color-mix(in srgb, var(--brand-base) 10%, transparent);
+  --focus-ring: color-mix(in srgb, var(--brand-base) 60%, transparent);
+  --button-brand: var(--brand-base);
+  --button-brand-bottom: color-mix(in srgb, var(--brand-base) 94%, var(--text-primary));
+  --button-on-brand: var(--on-brand);
+  --shadow-sheet: 0 8px 24px var(--shadow-color);
+  --card-highlight: inset 0 1px 0 var(--highlight-color);
+}

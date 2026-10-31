@@ -34,16 +34,16 @@ export function IncomingActivity() {
   }, [readPage, cursor, refresh]);
 
   const changePage = (next: string | undefined) => { setPage(null); setError(null); setCursor(next); };
-  return <main className="min-h-screen bg-surface p-6 text-ink">
+  return <main className="min-h-screen bg-background p-6 text-primary-text">
     <h1 className="text-3xl font-bold">{t('incoming.title')}</h1>
-    <p className="mt-2 text-muted">{t('incoming.description')}</p>
+    <p className="mt-2 text-secondary-text">{t('incoming.description')}</p>
     <p className="mt-2 text-sm">{t('incoming.noAuthority')}</p>
     <p className="mt-2 text-sm">{t('incoming.missingMetadata')}</p>
     <p className="mt-2 text-sm">{t('incoming.byteMeaning')}</p>
     <p className="mt-2 text-sm">{t('incoming.order')}</p>
-    {error && <p className="mt-4 text-red-600" role="alert">{t(`pairing.errors.${error}`)}</p>}
+    {error && <p className="mt-4 text-danger-text" role="alert">{t(`pairing.errors.${error}`)}</p>}
     {(error || (page && !page.receiverAvailable)) && <p className="mt-2" role="status">{t('incoming.unavailable')}</p>}
-    {!error && page?.errorCode && <p className="mt-2 text-red-600" role="alert">{t('incoming.receiverError')} {t(`pairing.errors.${page.errorCode}`)}</p>}
+    {!error && page?.errorCode && <p className="mt-2 text-danger-text" role="alert">{t('incoming.receiverError')} {t(`pairing.errors.${page.errorCode}`)}</p>}
     {loading && !page && <p className="mt-4" role="status">{t('incoming.loading')}</p>}
     {page && <>
       {!error && page.items.length === 0 && <p className="mt-4" role="status">{t('incoming.empty')}</p>}
@@ -71,7 +71,7 @@ function IncomingRow({ item, stale }: { item: IncomingTransfer; stale: boolean }
   const total = BigInt(item.totalBytes);
   const percentage = total === 0n ? (item.state === 'completed' ? 100 : 0) : Number(received * 10000n / total) / 100;
   const byteLabel = t('incoming.bytes', { received: item.receivedBytes, total: item.totalBytes });
-  return <li className="rounded-xl border border-border bg-white p-4">
+  return <li className="rounded-xl border border-border-subtle bg-surface-1 p-4">
     <h2 className="break-all font-semibold"><bdi>{item.name}</bdi></h2>
     <p className="mt-2 break-all">{t('incoming.device')} <code dir="ltr">{item.deviceFingerprint}</code></p>
     <p className="mt-2">{t(`incoming.states.${item.state}`)}</p>
@@ -79,6 +79,6 @@ function IncomingRow({ item, stale }: { item: IncomingTransfer; stale: boolean }
     <progress aria-label={t('incoming.progressLabel', { name: item.name })} aria-valuetext={byteLabel}
       className="mt-2 w-full" max={100} value={percentage} />
     <p className="mt-2 text-sm">{byteLabel}</p>
-    <p className="mt-2 break-all text-xs text-muted">{t('incoming.operation')} <code dir="ltr">{item.id}</code></p>
+    <p className="mt-2 break-all text-xs text-secondary-text">{t('incoming.operation')} <code dir="ltr">{item.id}</code></p>
   </li>;
 }

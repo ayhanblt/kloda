@@ -1,0 +1,146 @@
+import { Link } from "@tanstack/react-router";
+import { AlertTriangle, Check, ChevronRight, Clock, Cloud, HardDrive, History, Laptop, Lock, Pause, Play, RefreshCw, Server, XCircle } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { useI18n } from "@/shared/i18n";
+import { useDemo } from "@/shared/model/demo-store";
+import { setDevState, useDevAction, useDevScreen, useDevStates } from "@/shared/model/dev-panel";
+import { nextSetupStep, resolveHomeState } from "@/shared/model/status-home";
+import { destinationPresets, setDestinationPreset, useDestinationPreset, type DestinationKind } from "@/shared/model/destinations";
+import { StatusHero } from "@/shared/ui/status-hero";
+import { Group, GroupHeading } from "@/shared/ui/grouped";
+import { StatusPill } from "@/shared/ui/kit";
+import { photos } from "@/entities/photo/model";
+import { cn } from "@/lib/utils";
+
+const kindIcon: Record<DestinationKind, typeof Laptop> = { pc: Laptop, nas: Server, cloud: Cloud };
+const targetMeta: Record<DestinationKind, { id: string; name: string }> = { pc: { id: "macbook", name: "MacBook-Ayhan" }, nas: { id: "nas-webdav", name: "Ev NAS" }, cloud: { id: "drive", name: "Google Drive" } };
+
+export function MobileStatus() {
+  const { t } = useI18n();
+  const s = t.status3, h = t.homeStatus;
+  const { demo, set } = useDemo();
+  useDevScreen("M4");
+  const override = useDevStates(["setup", "syncing", "safe", "waiting", "attention", "error"]);
+  const preset = useDestinationPreset();
+  useDevAction("dest-pc", s.presetPc, () => setDestinationPreset("pc"));
+  useDevAction("dest-nas", s.presetNas, () => setDestinationPreset("nas"));
+  useDevAction("dest-cloud", s.presetCloud, () => setDestinationPreset("cloud"));
+  useDevAction("dest-multi", s.presetMulti, () => setDestinationPreset("multi"));
+  const state = resolveHomeState(demo, override);
+  const destinations = destinationPresets[preset];
+  const multi = destinations.length > 1;
+  const frontName = targetMeta[destinations[0]?.kind ?? "pc"].name;
+  const step = nextSetupStep(demo);
+  const paused = demo.paused || state === "waiting";
+  const togglePause = () => { set({ paused: !paused }); if (override !== "success") setDevState(paused ? "syncing" : "waiting"); };
+  const run = () => { set({ paused: false }); if (override !== "success") setDevState("syncing"); toast(t.activity3.toast); };
+
+  const headline = state === "setup" ? s.setupTitle : state === "safe" ? s.safe : h[state];
+  const subline = state === "setup" ? s.setupLine : state === "syncing" ? s.syncingLine : state === "safe" ? (multi ? s.multiLine : s.safeLine) : h[`${state}Line`];
+
+  const sub = subline.replace("MacBook-Ayhan", frontName).replace("MacBook", frontName);
+  return <div>
+    <div className="mb-2 mt-6 flex items-center justify-between">
+      <h1 className="text-[34px] font-bold leading-10">{h.title}</h1>
+      {state !== "setup" && <Link to="/m/activity" aria-label={s.history} className="grid size-11 place-items-center rounded-full border border-border-subtle bg-surface-1 text-primary-text"><History className="size-5" /></Link>}
+    </div>
+    <StatusHero key={state + preset} state={state} destinations={destinations} className="mt-2" />
+    <section className="mt-4 text-center" aria-live="polite">
+      <h2 className="text-[24px] font-bold leading-[30px]">{headline}</h2>
+      <p className="mx-auto mt-2 max-w-xs text-[15px] leading-5 text-secondary-text tabular-nums">{sub}</p>
+      {state === "syncing" && <div className="mx-auto mt-5 max-w-[280px]">
+        <div role="progressbar" aria-label={headline} aria-valuenow={16} aria-valuemin={0} aria-valuemax={24} className="h-1.5 overflow-hidden rounded-full bg-surface-2"><div className="h-full w-2/3 rounded-full bg-brand" /></div>
+        <div className="mt-2 flex justify-between text-caption text-tertiary-text tabular-nums"><span>{s.speed}</span><span>{s.eta}</span></div>
+      </div>}
+      {(state === "syncing" || state === "waiting") && <Button variant="secondary" className="mt-5" onClick={togglePause}>{paused ? <Play /> : <Pause />}{paused ? s.resume : s.pause}</Button>}
+      {state === "safe" && <Button variant="secondary" className="mt-5" onClick={run}><RefreshCw />{h.backupNow}</Button>}
+      {state === "error" && <Button variant="secondary" className="mt-5" onClick={run}><RefreshCw />{t.common.retry}</Button>}
+      {state === "attention" && <Button variant="secondary" className="mt-5" asChild><Link to="/m/activity"><AlertTriangle />{h.review}</Link></Button>}
+    </section>
+
+    {state === "setup" ? <SetupContent step={step} /> : <>
+      <GroupHeading action={<Link to="/m/connections" className="text-callout text-brand-text">{s.all}</Link>}>{s.targets}</GroupHeading>
+      <Group>
+        {destinations.map((d, i) => {
+          const meta = targetMeta[d.kind]; const Icon = kindIcon[d.kind];
+          const front = i === 0;
+          const [tone, label, time] = front
+            ? state === "syncing" ? ["syncing", s.rowTransferring, ""] as const
+              : state === "waiting" ? ["pending", s.rowAsleep, "—"] as const
+              : state === "error" ? ["danger", s.rowUnreachable, "—"] as const
+              : state === "attention" ? ["review", h.conflict, "13:22"] as const
+              : ["synced", s.rowUpToDate, "14:06"] as const
+            : d.kind === "cloud" ? ["pending", s.rowScheduled, ""] as const
+            : state === "syncing" ? ["pending", s.rowQueued, ""] as const : ["synced", s.rowUpToDate, "14:06"] as const;
+          return <Link key={d.kind} to="/m/connections/$id" params={{ id: meta.id }} className="flex min-h-[60px] items-center gap-3 px-4 py-2.5">
+            <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-surface-2"><Icon className="size-5 text-secondary-text" strokeWidth={1.5} /></span>
+            <span className="min-w-0 flex-1"><span className="block truncate text-body font-semibold">{meta.name}</span><StatusPill tone={tone}>{label}</StatusPill></span>
+            {time && <span className="text-caption tabular-nums text-tertiary-text">{time}</span>}
+            <ChevronRight className="size-4 text-tertiary-text" />
+          </Link>;
+        })}
+      </Group>
+      {(state === "attention" || state === "error") && <Group className="mt-3"><Link to="/m/activity" className="flex min-h-14 items-center gap-3 px-4">{state === "error" ? <XCircle className="size-5 text-danger-text" /> : <AlertTriangle className="size-5 text-attention-text" />}<span className="flex-1 text-callout">{state === "error" ? h.networkError : h.conflict}</span><ChevronRight className="size-4 text-tertiary-text" /></Link></Group>}
+
+      <GroupHeading action={<Link to="/m/photos" className="text-callout text-brand-text">{state === "syncing" ? s.details : s.all}</Link>}>{state === "syncing" ? s.sending : s.recent}</GroupHeading>
+      <div className="flex gap-2.5">
+        {photos.slice(0, 4).map((p, i) => {
+          const sending = state === "syncing";
+          const done = !sending || i < 2;
+          return <Link key={p.id} to="/m/photo/$id" params={{ id: p.id }} aria-label={p.name} className={cn("relative size-16 shrink-0 overflow-hidden rounded-[12px]", sending && i > 2 && "opacity-50")}>
+            <img src={p.src} alt="" className="size-full object-cover" />
+            {done && <span className="absolute bottom-1 right-1 grid size-4 place-items-center rounded-full bg-brand text-tile"><Check className="size-3" strokeWidth={3} /></span>}
+            {sending && i === 2 && <span className="absolute inset-x-0 bottom-0 h-[3px] bg-surface-2"><span className="block h-full w-1/2 bg-brand" /></span>}
+          </Link>;
+        })}
+        {state === "syncing" && <span className="grid size-16 shrink-0 place-items-center rounded-[12px] border border-border-subtle bg-surface-1 text-callout text-secondary-text">+6</span>}
+      </div>
+
+      {state !== "syncing" && <>
+        <GroupHeading action={<Link to="/m/activity" className="text-callout text-brand-text">{s.all}</Link>}>{s.recentActivity}</GroupHeading>
+        <Group>
+          {[{ label: h.finished, time: "14:06", icon: Check }, { label: h.started, time: "14:04", icon: RefreshCw }, { label: h.queued, time: "14:03", icon: Clock }].map(({ label, time, icon: Icon }) =>
+            <Link key={label} to="/m/activity" className="flex min-h-12 items-center gap-3 px-4"><Icon className="size-5 text-secondary-text" strokeWidth={1.5} /><span className="flex-1 text-callout">{label}</span><time className="text-caption tabular-nums text-tertiary-text">{time}</time></Link>)}
+        </Group>
+      </>}
+    </>}
+  </div>;
+}
+
+function SetupContent({ step }: { step: "sources" | "pair" | "access" }) {
+  const { t } = useI18n();
+  const s = t.status3;
+  const order = { sources: 0, pair: 1, access: 2 }[step];
+  const steps = [
+    { title: order > 0 ? s.step1 : s.step1Todo, sub: order > 0 ? s.step1Sub : s.step1TodoSub, to: "/m/sources" as const },
+    { title: s.step2, sub: s.step2Sub, to: "/m/pair-pc" as const },
+    { title: s.step3, sub: s.step3Sub, to: "/m/pair-pc" as const },
+  ];
+  return <>
+    <Button size="lg" className="mt-6 w-full" asChild><Link to={order === 0 ? "/m/sources" : "/m/pair-pc"}><Laptop />{order === 0 ? s.step1Todo : s.pairCta}</Link></Button>
+    <p className="mt-3 flex items-center justify-center gap-1.5 text-caption text-tertiary-text"><Lock className="size-3.5" />{s.lockLine}</p>
+    <GroupHeading>{s.setupList}</GroupHeading>
+    <Group>
+      {steps.map((st, i) => {
+        const done = i < order, current = i === order;
+        const inner = <>
+          <span className={cn("grid size-7 shrink-0 place-items-center rounded-full text-callout font-semibold", done ? "bg-brand text-tile" : current ? "border-2 border-brand text-brand-text" : "border border-border-strong text-tertiary-text")}>{done ? <Check className="size-4" strokeWidth={3} /> : i + 1}</span>
+          <span className={cn("min-w-0 flex-1", !done && !current && "opacity-60")}><span className="block text-body font-semibold">{st.title}</span><span className="block text-caption text-secondary-text">{st.sub}</span></span>
+          {(done || current) && <ChevronRight className="size-4 text-tertiary-text" />}
+        </>;
+        return done || current
+          ? <Link key={st.title} to={st.to} className="flex min-h-[60px] items-center gap-3 px-4 py-2.5">{inner}</Link>
+          : <div key={st.title} className="flex min-h-[60px] items-center gap-3 px-4 py-2.5">{inner}</div>;
+      })}
+    </Group>
+    <GroupHeading>{s.otherTargets}</GroupHeading>
+    <Group>
+      <Link to="/m/connections/new" className="flex min-h-[60px] items-center gap-3 px-4 py-2.5">
+        <span className="grid size-9 place-items-center rounded-[10px] bg-surface-2"><HardDrive className="size-5 text-secondary-text" strokeWidth={1.5} /></span>
+        <span className="flex-1"><span className="block text-body font-semibold">{s.addOther}</span><span className="block text-caption text-secondary-text">{s.addOtherSub}</span></span>
+        <ChevronRight className="size-4 text-tertiary-text" />
+      </Link>
+    </Group>
+  </>;
+}

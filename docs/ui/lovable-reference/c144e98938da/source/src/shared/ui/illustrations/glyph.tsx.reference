@@ -1,0 +1,17 @@
+import { cn } from "@/lib/utils";
+export type GlyphKind = "phone" | "laptop" | "monitor" | "nas" | "cloud" | "folder" | "photo" | "qr" | "ring" | "shield" | "documents";
+/** Shared two-tone device drawing; geometry stays identical in scenes and rows. */
+export function DeviceGlyph({ kind, className }: { kind: GlyphKind; className?: string }) {
+  return <svg viewBox="0 0 64 64" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={cn("fill-surface-1 stroke-border-strong", className)} aria-hidden>
+    {kind === "phone" && <><rect x="17" y="5" width="30" height="54" rx="8"/><rect x="22" y="13" width="20" height="34" rx="3" className="fill-surface-2"/><path d="M28 53h8M28 9h8"/></>}
+    {(kind === "laptop" || kind === "monitor") && <><rect x="7" y="11" width="50" height="34" rx="4"/><rect x="12" y="16" width="40" height="24" rx="2" className="fill-surface-2"/>{kind === "laptop" ? <path d="M3 49h58l-5 5H8z"/> : <path d="M29 45v9h-9 24-9V45"/>}<path d="M18 24h15M18 30h26"/></>}
+    {kind === "nas" && <><rect x="12" y="8" width="40" height="48" rx="6"/><rect x="18" y="14" width="11" height="29" rx="2" className="fill-surface-2"/><rect x="35" y="14" width="11" height="29" rx="2" className="fill-surface-2"/><path d="M22 49h3m14 0h3"/></>}
+    {kind === "cloud" && <><path d="M15 47h33a12 12 0 0 0 1-24 18 18 0 0 0-34-3 14 14 0 0 0 0 27z"/><path d="M23 37h18M27 31h10" className="stroke-border-subtle"/></>}
+    {kind === "folder" && <><path d="M6 18a4 4 0 0 1 4-4h16l6 7h22a4 4 0 0 1 4 4v25H6z"/><path d="M6 27h52v23H6z" className="fill-surface-2"/></>}
+    {kind === "photo" && <><rect x="9" y="9" width="46" height="46" rx="7"/><circle cx="23" cy="23" r="5" className="fill-surface-2"/><path d="m14 48 13-15 9 9 8-11 7 17z" className="fill-surface-2"/></>}
+    {kind === "qr" && <><rect x="8" y="8" width="48" height="48" rx="7"/><path d="M16 16h11v11H16zm21 0h11v11H37zM16 37h11v11H16zm21 0h5v5h6v6H37z" className="fill-border-strong"/></>}
+    {kind === "ring" && <><rect x="7" y="7" width="50" height="50" rx="13" className="fill-tile stroke-tile"/><circle cx="32" cy="32" r="13" strokeWidth="4.5" strokeDasharray="61 21" transform="rotate(-90 32 32)" className="stroke-tile-ring"/><circle cx="32" cy="32" r="3.5" stroke="none" className="fill-brand"/></>}
+    {kind === "shield" && <><path d="m32 7 21 8v16c0 13-21 26-21 26S11 44 11 31V15z"/><path d="m22 31 7 7 14-16"/></>}
+    {kind === "documents" && <><rect x="10" y="8" width="33" height="42" rx="4" className="fill-surface-2"/><rect x="21" y="15" width="33" height="42" rx="4"/><path d="M28 26h18M28 34h18M28 42h11"/></>}
+  </svg>;
+}

@@ -1,0 +1,44 @@
+import { AlertTriangle, Check, Clock, Image, Lock, Moon, Plus, X, type LucideIcon } from "lucide-react";
+import { DeviceGlyph, type GlyphKind } from "./glyph";
+import { cn } from "@/lib/utils";
+export type SceneName = "status-syncing" | "status-safe" | "status-waiting" | "status-attention" | "status-error" | "empty-no-target" | "pair-pc" | "permission-photos" | "permission-folder" | "trash-30-days";
+function Badge({ icon: Icon, x, y, tone = "neutral", label }: { icon: LucideIcon; x: number; y: number; tone?: "brand" | "attention" | "danger" | "neutral"; label?: string }) {
+  return <g transform={`translate(${x} ${y})`}><g className={cn(tone === "brand" && "scene-check")}>
+    <rect width="28" height="28" rx="8" className="fill-surface-1 stroke-border-strong" strokeWidth="1.5"/>
+    {label ? <text x="14" y="18" textAnchor="middle" stroke="none" className="fill-secondary-text text-caption">{label}</text> : <Icon x="6" y="6" width="16" height="16" strokeWidth="1.5" className={cn("fill-none", { brand: "stroke-brand", attention: "stroke-attention-g", danger: "stroke-danger-g", neutral: "stroke-secondary-text" }[tone])}/>}
+  </g></g>;
+}
+function ObjectGlyph({ kind, x, y, width = 80 }: { kind: GlyphKind; x: number; y: number; width?: number }) {
+  return <svg x={x} y={y} width={width} height={width} viewBox="0 0 64 64"><DeviceGlyph kind={kind}/></svg>;
+}
+export function IllustrationScene({ scene, className }: { scene: SceneName; className?: string }) {
+  const syncing = scene === "status-syncing";
+  const paired = scene === "pair-pc";
+  const empty = scene === "empty-no-target";
+  const wide = syncing || paired || empty;
+  const waiting = scene === "status-waiting";
+  const error = scene === "status-error";
+  const attention = scene === "status-attention";
+  const focal: GlyphKind = attention ? "documents" : scene === "permission-photos" ? "photo" : scene === "permission-folder" || scene === "trash-30-days" ? "folder" : "laptop";
+  return <svg viewBox="0 0 320 200" fill="none" className={cn("illustration-scene mx-auto w-full max-w-[320px]", className)} aria-hidden data-scene={scene}>
+    <circle cx="160" cy="101" r="82" strokeWidth="1.5" strokeDasharray="1 9" strokeLinecap="round" className="stroke-border-subtle"/>
+    <circle cx="160" cy="101" r="55" className={cn("fill-brand opacity-20", syncing && "scene-breathe")}/>
+    {wide ? <>
+      <path d="M57 124C89 40 237 39 266 123" strokeWidth="1.5" strokeLinecap="round" className={cn("fill-none", syncing ? "stroke-border-strong" : "stroke-border-subtle")} />
+      {syncing && <><circle r="3" className="fill-brand scene-travel"><animateMotion dur="1.6s" repeatCount="indefinite" path="M57 124C89 40 237 39 266 123"/></circle></>}
+      <ObjectGlyph kind="phone" x={20} y={88} width={74}/>
+      <ObjectGlyph kind={paired ? "qr" : "ring"} x={120} y={60} width={80}/>
+      <ObjectGlyph kind="laptop" x={220} y={88} width={86}/>
+      <Badge icon={empty ? Plus : paired ? Lock : Image} x={empty ? 245 : 91} y={empty ? 81 : 31}/>
+      {!empty && <Badge icon={paired ? Lock : Check} x={200} y={152} tone={syncing ? "brand" : "neutral"}/>}
+    </> : <>
+      {waiting && <path d="M52 126Q75 65 105 98" strokeWidth="1.5" strokeDasharray="4 5" className="stroke-border-strong"/>}
+      {error && <><path d="M49 122Q60 84 81 85M97 90l11 7" strokeWidth="1.5" className="stroke-border-strong"/><path d="m82 90 7-8m-7 0 7 8" className="stroke-danger-g"/></>}
+      <g className={cn(waiting && "opacity-50")}><ObjectGlyph kind={focal} x={103} y={50} width={114}/></g>
+      {scene === "status-safe" && <ObjectGlyph kind="ring" x={72} y={117} width={44}/>}
+      <Badge icon={waiting ? Moon : error ? X : attention ? AlertTriangle : scene.startsWith("permission") ? Lock : scene === "trash-30-days" ? Clock : Check} x={204} y={56} tone={error ? "danger" : attention ? "attention" : scene === "status-safe" ? "brand" : "neutral"}/>
+      {scene.startsWith("permission") && <ObjectGlyph kind="shield" x={76} y={117} width={48}/>}
+      {scene === "trash-30-days" && <Badge icon={Clock} x={94} y={137} label="30"/>}
+    </>}
+  </svg>;
+}

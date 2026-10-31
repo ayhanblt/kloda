@@ -4,6 +4,7 @@ import { ActivityPage } from './activity-page';
 import { fileTransfer } from '../../../shared/api/file-transfer';
 import { i18n } from '../../../shared/i18n';
 
+jest.mock('../../../shared/api/backup-destinations', () => ({ backupDestinations: { status: jest.fn().mockResolvedValue({ configured: false, enabled: false, running: false }), pcSelected: jest.fn().mockResolvedValue(true), pcEnabled: jest.fn().mockResolvedValue(true), run: jest.fn() } }));
 jest.mock('../../../shared/api/file-transfer', () => ({ photoManifestPrefix: 'kloda-photo-v1-', fileTransfer: {
   status: jest.fn(), list: jest.fn(), cancelRestore: jest.fn().mockResolvedValue(true),
   photoStatus: jest.fn().mockResolvedValue({ state: 'idle', total: '0', completed: '0', review: '0' }),

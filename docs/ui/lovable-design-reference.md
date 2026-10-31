@@ -1,18 +1,23 @@
 # Kloda — bağlayıcı Lovable tasarım referansı
 
-28 Ekim2026 kullanıcı kararı: Aşağıdaki Lovable projesi artık Kloda’nın geçerli
-ve bağlayıcı tasarım kaynağıdır. Stitch kaynakları tarihsel referanstır; yeni
-uygulama tasarımı için alternatif source of truth değildir.
+30 Ekim2026 UI ara paketi: kullanıcının güncel Lovable tasarımı bu revizyonla
+bağlayıcıdır. Roadmap sırası ve11/12/13/15/20/21 kabul kapıları değişmez.
 
-- Proje: https://lovable.dev/projects/222ef478-8826-4712-b3c4-9703a823f69d
-- MCP’de gözlenen ad: **Project Migration Hub**; Kloda ürün adı değişmez.
-- Doğrulanan revizyon: `cb1143d16f7365f9913285b27d4067084b65a304`.
-- Son düzenleme: `2026-10-28T17:05:31.002Z`; agentFinished=true, project ready.
-- Erişim MCP üzerinden doğrulandı: proje, iki sayfalık dosya envanteri ve
-  `src/shared/ui/logo.tsx`, `src/styles.css`, `src/views/lock-screen.tsx`,
-  `roadmap.md` içerikleri okundu. Bu metadata tasarım uygunluk/a11y testi değildir.
-- Proje yayınlanmış değil. Kaynak okumak için public deploy gerekmez; token/şifre
-  repoya eklenmez. Kullanıcı zaten Lovable bağlantısını kurdu; tekrar bağlamak gerekmez.
+- Proje UUID: `222ef478-8826-4712-b3c4-9703a823f69d`.
+- Yayın kimliği: `lovp_58pzgrcxca9eprfz8zt9sjhg5h`; MCP latest screenshot URL ve
+  yayındaki Edit with Lovable bağlantısı aynı kimliği doğrular. Ayrı proje değildir.
+- MCP adı: **Kloda Secure Photo & Sync**; ürün adı **Kloda: Secure Photos & Sync**.
+- Revizyon: `c144e98938da96f698f378972290ff3d1dd311eb`.
+- Yayın: https://kloda-secure-photo-sync.lovable.app
+- Dondurulmuş [manifest](lovable-reference/c144e98938da/manifest.json),
+  [rota haritası](lovable-reference/c144e98938da/page-map.json),
+  [ekran farkları](lovable-reference/c144e98938da/screen-diff.md),
+  [uyarlama bulguları](lovable-reference/c144e98938da/adaptation-findings.json).
+- Snapshot172kaynak dosyasıdır; script/install/build çalıştırılmaz. JPEG kaynakları
+  özgün browser byte'larıdır; görüntülerdeki demo state gerçek Kloda verisi değildir.
+- Önceki cb1143 snapshot Git dışı yerel ZIP’e hash/readback doğrulamasıyla arşivlenip
+  kaldırıldı: [emeklilik kaydı](lovable-reference/c144e98938da/lovable-retirement.json).
+  Bu ZIP bağımsız yedek değildir.
 
 ## Uygulama sözleşmesi
 
@@ -69,13 +74,13 @@ Remote push/APNs veya yeni backend bu tasarımdan otomatik türetilmez.
 ## Yerel snapshot ve eski Stitch klasörü
 
 [11. adım alım raporu](../implementation/lovable-design-intake-step11-2026-10-28.md)
-ve [yerel frozen kaynak/asset snapshot’ı](lovable-reference/cb1143d16f73/README.md)
+ve [yerel frozen kaynak/asset snapshot’ı](lovable-reference/c144e98938da/README.md)
 hazırdır:151 kaynak,7 doğrulanmış JPEG ve6 web önizleme capture. Kapsam/uyarlama
 bulguları ve native karşılıklar raporda; kaynaklar app içine taşınmadı.
 
 Kullanıcının kaldırma izniyle `stitch_private_photo_cloud/` kaldırıldı.15tasarım
 ve5Finder metadata önce Git-dışı yerel ZIP’e alınıp hash/readback doğrulandı;
-[geri dönüş/yedek kaydı](lovable-reference/cb1143d16f73/stitch-retirement.json).
+[geri dönüş/yedek kaydı](lovable-reference/c144e98938da/stitch-retirement.json).
 Yerel arşivin bağımsız yedeği yok; source-of-truth artık Lovable’dır. Tarihsel
 Stitch raporları geçmiş kanıt olarak korunur; yeni tasarım sayılmaz.
 

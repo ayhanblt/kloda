@@ -18,8 +18,8 @@ export function ByteProgress({ label, percent }: { label: string; percent: numbe
   const value = Math.max(0, Math.min(100, Math.floor(percent)));
   return (
     <View accessible accessibilityRole="progressbar" accessibilityLabel={label}
-      accessibilityValue={{ min: 0, max: 100, now: value }} className="h-1.5 overflow-hidden rounded-full bg-border">
-      <View className={`h-1.5 rounded-full bg-secure ${widths[value]}`} />
+      accessibilityValue={{ min: 0, max: 100, now: value }} className="h-1.5 overflow-hidden rounded-full bg-surface-2">
+      <View className={`h-1.5 rounded-full bg-brand ${widths[value]}`} />
     </View>
   );
 }

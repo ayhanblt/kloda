@@ -1,0 +1,17 @@
+import { cn } from "@/lib/utils";
+import type { Destination } from "@/shared/model/destinations";
+import type { HomeState } from "@/shared/model/status-home";
+import { Connectors, Halo, KlodaTile, Phone } from "./parts";
+import { DestinationSlot } from "./destination";
+
+/** Destination-aware status illustration (viewBox 358×200). Colors come only from theme tokens. */
+export function StatusHero({ state, destinations, className }: { state: HomeState; destinations: Destination[]; className?: string }) {
+  return <svg viewBox="0 0 358 200" className={cn("mx-auto block h-auto w-full max-w-[358px]", className)} aria-hidden data-state={state}>
+    <circle cx="179" cy="100" r="88" strokeWidth="1" strokeDasharray="1 5" strokeLinecap="round" className="fill-none stroke-illus-line" />
+    {state === "safe" && <Halo />}
+    <Connectors state={state} />
+    <Phone sending={state === "syncing"} />
+    <KlodaTile state={state} />
+    <DestinationSlot state={state} destinations={destinations} />
+  </svg>;
+}

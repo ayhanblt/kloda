@@ -94,18 +94,18 @@ export function BackupVersions({ initialTrash = false, onViewChange }: { initial
     setSelected(ids); setSelectionError(false);
   };
   const failureText = (code: string) => t(`backups.errors.${code}`, { defaultValue: t('backups.errors.outcome_unknown') });
-  return <main className="min-h-screen bg-surface p-6 text-ink">
+  return <main className="min-h-screen bg-background p-6 text-primary-text">
     <h1 className="text-3xl font-bold">{t('backups.title')}</h1>
-    <p className="mt-2 text-muted">{t('backups.description')}</p>
+    <p className="mt-2 text-secondary-text">{t('backups.description')}</p>
     <p className="mt-2 text-sm">{t('backups.retention')}</p>
     <p className="mt-2 text-sm">{t('backups.suppression')}</p>
     <div className="mt-4 flex flex-wrap gap-4" role="group" aria-label={t('backups.view')}>
       {[false, true].map((value) => <button className="pairing-button" key={String(value)} type="button" aria-pressed={trash === value}
         disabled={busy || trash === value} onClick={() => { reset(); setSelected([]); setPrevious([]); setTrash(value); onViewChange?.(value); }}>{t(value ? 'backups.trash' : 'backups.active')}</button>)}
     </div>
-    {error && <p className="mt-4 text-red-600" role="alert">{t('backups.unavailable')}</p>}
-    {selectionError && <p className="mt-4 text-red-600" role="alert">{t('backups.selectionError')}</p>}
-    {failures.map(({ id, code }) => <p className="mt-4 break-all text-red-600" key={id} role="alert"><code>{id}</code>: {failureText(code)}</p>)}
+    {error && <p className="mt-4 text-danger-text" role="alert">{t('backups.unavailable')}</p>}
+    {selectionError && <p className="mt-4 text-danger-text" role="alert">{t('backups.selectionError')}</p>}
+    {failures.map(({ id, code }) => <p className="mt-4 break-all text-danger-text" key={id} role="alert"><code>{id}</code>: {failureText(code)}</p>)}
     {busy && !page && <p className="mt-4" role="status">{t('backups.loading')}</p>}
     {page && <>
       {!error && page.items.length === 0 && <p className="mt-4" role="status">{t(trash ? 'backups.emptyTrash' : 'backups.empty')}</p>}
@@ -119,16 +119,16 @@ export function BackupVersions({ initialTrash = false, onViewChange }: { initial
       </div>
       <p className="mt-2 text-sm">{t('backups.selectionScope')}</p>
       <ul aria-label={t('backups.listLabel')} className="mt-4 grid gap-4">
-        {page.items.map((item) => <li className="rounded-xl border border-border bg-white p-4" key={item.id}>
+        {page.items.map((item) => <li className="rounded-xl border border-border-subtle bg-surface-1 p-4" key={item.id}>
           <label className="flex items-start gap-3"><input checked={selected.includes(item.id)} disabled={disabled || !eligible.includes(item.id)}
             onChange={(event) => select(event.target.checked ? [...selected, item.id] : selected.filter((id) => id !== item.id))}
             type="checkbox" /><span className="break-all font-semibold"><bdi>{item.name}</bdi></span></label>
           <p className="mt-2 break-all">{t('incoming.device')} <code dir="ltr">{item.deviceFingerprint}</code></p>
           <p className="mt-2">{t(`backups.kinds.${item.kind}`)} · {t(item.kind === 'photos' ? 'backups.manifestBytes' : 'backups.bytes', { bytes: item.size })}</p>
           <p className="mt-2 break-all">{t('backups.version')} <code dir="ltr">{item.sourceRevision}</code></p>
-          <p className="mt-2 break-all text-xs text-muted">{t('incoming.operation')} <code dir="ltr">{item.id}</code></p>
+          <p className="mt-2 break-all text-xs text-secondary-text">{t('incoming.operation')} <code dir="ltr">{item.id}</code></p>
           <p className="mt-2">{t(error ? 'backups.stale' : `backups.states.${item.state}`)}</p>
-          {item.errorCode && <p className="mt-2 text-red-600">{failureText(item.errorCode)}</p>}
+          {item.errorCode && <p className="mt-2 text-danger-text">{failureText(item.errorCode)}</p>}
           {trash && <BackupDeadline item={item} />}
           <button className="pairing-button mt-4" disabled={disabled || !eligible.includes(item.id)}
             onClick={() => controls.current?.change([item.id])} type="button">{t(trash ? 'backups.restoreOne' : 'backups.deleteOne')}</button>

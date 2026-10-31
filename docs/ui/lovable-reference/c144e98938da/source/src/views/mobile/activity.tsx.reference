@@ -1,0 +1,143 @@
+import { useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { Ban, Check, ChevronDown, ChevronLeft, Clock, Cloud, Copy, HelpCircle, Moon, PauseCircle, Play, Pause, Wifi, type LucideIcon } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useI18n } from "@/shared/i18n";
+import { useDemo } from "@/shared/model/demo-store";
+import { useDevScreen } from "@/shared/model/dev-panel";
+import { Group, GroupHeading } from "@/shared/ui/grouped";
+import { cn } from "@/lib/utils";
+
+export function MobileActivity() {
+  const { t } = useI18n();
+  const a = t.activity3;
+  useDevScreen("M11");
+  const [tab, setTab] = useState<"now" | "past">("now");
+  const [filter, setFilter] = useState<"all" | "done" | "issues">("all");
+  return <div>
+    <div className="mt-4 flex items-center justify-between">
+      <Link to="/m" className="-ml-1 flex min-h-11 items-center gap-1 text-body text-brand-text"><ChevronLeft className="size-5" />{a.back}</Link>
+      {tab === "past" && <DropdownMenu>
+        <DropdownMenuTrigger className="flex min-h-11 items-center gap-1 text-body text-brand-text">{{ all: a.filterAll, done: a.filterDone, issues: a.filterIssues }[filter]}<ChevronDown className="size-4" /></DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuRadioGroup value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
+            <DropdownMenuRadioItem value="all">{a.filterAll}</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="done">{a.filterDone}</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="issues">{a.filterIssues}</DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>}
+    </div>
+    <h1 className="mt-1 text-[34px] font-bold leading-10">{a.title}</h1>
+    <div role="tablist" className="mt-4 grid grid-cols-2 rounded-[12px] border border-border-subtle bg-surface-1 p-1">
+      {(["now", "past"] as const).map((k) => <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)} className={cn("min-h-9 rounded-[9px] text-callout font-semibold transition-colors", tab === k ? "bg-surface-2 text-primary-text" : "text-secondary-text")}>{k === "now" ? a.now : a.past}</button>)}
+    </div>
+    {tab === "now" ? <NowTab /> : <PastTab filter={filter} />}
+  </div>;
+}
+
+function NowTab() {
+  const { t } = useI18n();
+  const a = t.activity3;
+  const { demo, set } = useDemo();
+  const act = () => toast(a.toast);
+  const review: { icon: LucideIcon; tone: string; name: string; time: string; text: string; action: string }[] = [
+    { icon: Copy, tone: "text-attention-text", name: "IMG_2046.HEIC", time: "13:22", text: a.r1, action: a.r1a },
+    { icon: HelpCircle, tone: "text-attention-text", name: a.r2n, time: "12:58", text: a.r2, action: a.r2a },
+    { icon: PauseCircle, tone: "text-attention-text", name: a.r3n, time: "13:40", text: a.r3, action: a.r3a },
+    { icon: Ban, tone: "text-secondary-text", name: "IMG_2031.MOV", time: "11:12", text: a.r4, action: a.r4a },
+  ];
+  const queue: { icon: LucideIcon; name: string; text: string; size?: string }[] = [
+    { icon: Wifi, name: a.q1n, text: a.q1, size: "2,1 GB" },
+    { icon: Clock, name: "WhatsApp Images", text: a.q2, size: "3,8 MB" },
+    { icon: Cloud, name: "Google Drive", text: a.q3 },
+  ];
+  return <>
+    <section className="mt-5 rounded-2xl border border-border-subtle bg-surface-1 p-4 shadow-card">
+      <div className="flex items-center gap-3">
+        <svg viewBox="0 0 48 48" className="size-12 shrink-0" aria-hidden>
+          <circle cx="24" cy="24" r="19" strokeWidth="5" className="fill-none stroke-surface-2" />
+          <circle cx="24" cy="24" r="19" strokeWidth="5" strokeLinecap="round" strokeDasharray="79 120" transform="rotate(-90 24 24)" className="fill-none stroke-brand" />
+          <circle cx="24" cy="24" r="5" className="fill-brand" />
+        </svg>
+        <div className="min-w-0 flex-1"><p className="text-body font-semibold">{a.transferTo}</p><p className="text-caption text-secondary-text">{a.transferSub}</p></div>
+        <span className="text-body font-semibold tabular-nums">{a.percent}</span>
+      </div>
+      <div role="progressbar" aria-label={a.transferTo} aria-valuenow={66} aria-valuemin={0} aria-valuemax={100} className="mt-4 h-1.5 overflow-hidden rounded-full bg-surface-2"><div className="h-full w-2/3 rounded-full bg-brand" /></div>
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <span className="text-caption tabular-nums text-secondary-text">{a.meta}</span>
+        <Button size="sm" variant="secondary" onClick={() => set({ paused: !demo.paused })}>{demo.paused ? <Play /> : <Pause />}{demo.paused ? t.status3.resume : t.status3.pause}</Button>
+      </div>
+    </section>
+
+    <GroupHeading count={review.length}>{a.review}</GroupHeading>
+    <Group>
+      {review.map((r) => <div key={r.name} className="flex gap-3 px-4 py-3.5">
+        <r.icon className={cn("mt-0.5 size-5 shrink-0", r.tone)} strokeWidth={1.75} />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline justify-between gap-2"><p className="truncate text-body font-semibold">{r.name}</p><time className="text-caption tabular-nums text-tertiary-text">{r.time}</time></div>
+          <p className="mt-0.5 text-callout text-secondary-text">{r.text}</p>
+          <Button size="sm" variant="secondary" className="mt-2.5" onClick={act}>{r.action}</Button>
+        </div>
+      </div>)}
+    </Group>
+
+    <GroupHeading>{a.queue}</GroupHeading>
+    <Group>
+      {queue.map((q) => <div key={q.name} className="flex min-h-[60px] items-center gap-3 px-4 py-2.5">
+        <q.icon className="size-5 shrink-0 text-secondary-text" strokeWidth={1.5} />
+        <div className="min-w-0 flex-1"><p className="truncate text-body font-semibold">{q.name}</p><p className="text-caption text-secondary-text">{q.text}</p></div>
+        {q.size && <span className="text-caption tabular-nums text-secondary-text">{q.size}</span>}
+      </div>)}
+    </Group>
+
+    <GroupHeading>{a.unreachable}</GroupHeading>
+    <Group>
+      <div className="flex items-center gap-3 px-4 py-3">
+        <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-surface-2"><Moon className="size-5 text-secondary-text" strokeWidth={1.5} /></span>
+        <div className="min-w-0 flex-1"><p className="text-body font-semibold">Stüdyo Mac mini</p><p className="text-caption text-secondary-text">{a.u1}</p></div>
+        <span className="text-caption tabular-nums text-secondary-text">{a.u1t}</span>
+      </div>
+    </Group>
+  </>;
+}
+
+function PastTab({ filter }: { filter: "all" | "done" | "issues" }) {
+  const { t } = useI18n();
+  const a = t.activity3;
+  type Row = { ok: boolean; title: string; detail: string; time: string; skip?: boolean };
+  const days: { label: string; sum: string; rows: Row[] }[] = [
+    { label: a.today, sum: a.sumToday, rows: [
+      { ok: true, title: a.h1, detail: a.h1d, time: "14:06" },
+      { ok: false, title: a.h2, detail: a.h2d, time: "13:22" },
+      { ok: false, title: a.h3, detail: a.h3d, time: "12:58" },
+      { ok: true, title: a.h4, detail: a.h4d, time: "09:10" },
+    ] },
+    { label: a.yesterday, sum: a.sumYesterday, rows: [
+      { ok: true, title: a.h5, detail: a.h5d, time: "22:41" },
+      { ok: false, skip: true, title: a.h6, detail: a.h6d, time: "11:12" },
+    ] },
+    { label: a.oct28, sum: a.sumOct28, rows: [{ ok: true, title: a.h7, detail: a.h7d, time: "03:00" }] },
+  ];
+  return <>
+    {days.map((d) => {
+      const rows = d.rows.filter((r) => filter === "all" || (filter === "done" ? r.ok : !r.ok));
+      if (!rows.length) return null;
+      return <section key={d.label}>
+        <GroupHeading action={<span className="text-caption tabular-nums text-tertiary-text">{d.sum}</span>}>{d.label}</GroupHeading>
+        <Group>
+          {rows.map((r) => {
+            const Icon = r.ok ? Check : r.skip ? Ban : HelpCircle;
+            return <div key={r.title + r.time} className="flex min-h-[60px] items-center gap-3 px-4 py-2.5">
+              <Icon className={cn("size-5 shrink-0", r.ok ? "text-brand-text" : r.skip ? "text-secondary-text" : "text-attention-text")} strokeWidth={1.75} />
+              <div className="min-w-0 flex-1"><p className="truncate text-body font-semibold">{r.title}</p><p className="truncate text-caption text-secondary-text">{r.detail}</p></div>
+              <time className="text-caption tabular-nums text-tertiary-text">{r.time}</time>
+            </div>;
+          })}
+        </Group>
+      </section>;
+    })}
+  </>;
+}

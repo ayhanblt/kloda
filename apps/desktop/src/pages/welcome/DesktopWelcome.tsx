@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import { FolderLock, MonitorSmartphone, ShieldCheck } from 'lucide-react';
+import { FolderLock } from 'lucide-react';
 
+import { WelcomeIllustration } from '../../shared/ui/WelcomeIllustration';
 import { Brand } from '../../shared/ui/Brand';
 
 export function DesktopWelcome({ onStart, onSkip, onAccess }: { onStart(): void; onSkip(): void; onAccess(): void }) {
@@ -10,7 +11,7 @@ export function DesktopWelcome({ onStart, onSkip, onAccess }: { onStart(): void;
       <Brand large />
       <h1>{t('ui.welcomeTitle')}</h1>
       <p>{t('ui.welcomeDescription')}</p>
-      <div className="welcome-illustration" aria-hidden="true"><MonitorSmartphone size={76} strokeWidth={1.2} /><ShieldCheck size={42} /></div>
+      <WelcomeIllustration className="welcome-illustration" />
     </section>
     <section className="pairing-card welcome-actions" aria-label={t('ui.setup')}>
       <FolderLock size={28} aria-hidden="true" />

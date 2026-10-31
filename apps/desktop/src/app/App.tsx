@@ -15,8 +15,13 @@ import { ConnectionsPage } from '../pages/connections/ConnectionsPage';
 import { DesktopShell } from '../widgets/desktop-shell/DesktopShell';
 import { currentDesktopLocation, desktopHash, type DesktopLocation, type DesktopRoute } from '../shared/navigation/desktop-route';
 
+import { useAppearance } from '../shared/theme/use-appearance';
+import { AppearanceSettings } from '../features/desktop-background/AppearanceSettings';
+
 export function App() {
-  const { t } = useTranslation();
+  const appearance = useAppearance();
+  const { t, i18n } = useTranslation();
+  useEffect(() => { document.documentElement.lang = i18n.resolvedLanguage ?? 'tr'; }, [i18n.resolvedLanguage]);
   const [location, setLocation] = useState<DesktopLocation>(currentDesktopLocation);
   const route = location.page;
   const protectedDecision = useRef(false);
@@ -64,6 +69,7 @@ export function App() {
           <h1>{t('receiver.title')}</h1><p>{t('receiver.description')}</p>
         </header>}
         {route === 'settings' && <h1 className="receiver-settings-title">{t('receiver.settingsNavigation')}</h1>}
+        {route === 'settings' && <AppearanceSettings preference={appearance.preference} onChange={appearance.choose} />}
         <div hidden={route === 'welcome'}><DesktopBackground settings={route === 'settings'} /></div>
         {route === 'receiver' && <ReceiverHome onNavigate={navigate} />}
         {backupVisible && <p className="advanced-notice">{t('receiver.advancedDescription')}</p>}
@@ -73,10 +79,10 @@ export function App() {
         {route === 'devices' && <DeviceManagement />}
         {(route === 'backups' || route === 'trash') && <BackupVersions key={route} initialTrash={route === 'trash'} onViewChange={(trash) => navigate(trash ? 'trash' : 'backups')} />}
         {(route === 'connections' || route === 'connection-add' || route === 'connection-detail') && <ConnectionsPage location={location} onNavigate={navigateTo} />}
-        {route === 'tray' && <main className="pairing-card"><h1 className="text-3xl font-semibold">{t('ui.tray')}</h1><p className="mt-4 text-muted">{t('ui.trayDescription')}</p></main>}
+        {route === 'tray' && <main className="pairing-card"><h1 className="text-3xl font-semibold">{t('ui.tray')}</h1><p className="mt-4 text-secondary-text">{t('ui.trayDescription')}</p></main>}
       </div>
     </DesktopShell>
-    <Toaster closeButton containerAriaLabel={t('pairing.notificationsLabel')} hotkey={[]} position="bottom-right" theme="light"
+    <Toaster closeButton containerAriaLabel={t('pairing.notificationsLabel')} hotkey={[]} position="bottom-right" theme={appearance.mode}
       toastOptions={{ closeButtonAriaLabel: t('pairing.dismissNotification') }} />
   </>;
 }

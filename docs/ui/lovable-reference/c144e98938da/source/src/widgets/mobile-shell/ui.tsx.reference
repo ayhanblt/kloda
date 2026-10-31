@@ -1,0 +1,60 @@
+import type { ReactNode } from "react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { Images, Settings, Waypoints } from "lucide-react";
+import { useI18n } from "@/shared/i18n";
+import { Wordmark } from "@/shared/ui/logo";
+import { cn } from "@/lib/utils";
+import { RingIcon } from "@/shared/ui/grouped";
+
+export function MobileShell({ children }: { children: ReactNode }) {
+  const { t } = useI18n();
+  const path = useRouterState({ select: (s) => s.location.pathname });
+  const onboarding = path.startsWith("/m/welcome");
+  const bare = path === "/m" || path === "/m/" || path.startsWith("/m/activity");
+  const tabs = [
+    { to: "/m", label: t.homeStatus.title, icon: RingIcon, match: (p: string) => p === "/m" || p === "/m/" || p.startsWith("/m/activity") },
+    { to: "/m/photos", label: t.homeStatus.photos, icon: Images, match: (p: string) => p.startsWith("/m/photos") || p.startsWith("/m/photo/") },
+    { to: "/m/connections", label: t.homeStatus.targets, icon: Waypoints, match: (p: string) => p.startsWith("/m/connections") || p.startsWith("/m/pair") },
+    { to: "/m/settings", label: t.nav.settings, icon: Settings, match: (p: string) => p.startsWith("/m/settings") || p.startsWith("/m/sources") || p.startsWith("/m/schedule") || p.startsWith("/m/backups") },
+  ] as const;
+
+  return (
+    <div className="min-h-screen bg-surface md:py-6">
+      <div className="relative mx-auto flex min-h-screen w-full max-w-[440px] flex-col bg-background md:min-h-[860px] md:rounded-[28px] md:border md:border-border md:shadow-none">
+        {!bare && <header className="flex h-14 items-center gap-2 border-b border-border-subtle px-4">
+          <Link to="/" aria-label="Kloda" className="flex min-h-12 min-w-0 items-center">
+            <Wordmark size="sm" />
+          </Link>
+        </header>}
+        <main className={cn("min-w-0 flex-1 px-4 pt-5", onboarding ? "pb-8" : "pb-24")}>{children}</main>
+        {!onboarding && (
+          <nav
+            aria-label="Kloda"
+            className="fixed inset-x-0 bottom-0 z-30 mx-auto grid w-full max-w-[440px] grid-cols-4 gap-1 border-t border-border glass safe-bottom px-2 pt-1.5 md:rounded-b-[28px]"
+          >
+            {tabs.map(({ to, label, icon: Icon, match }) => {
+              const active = match(path);
+              
+              return (
+                <Link
+                  key={to}
+                  to={to}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "relative flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-[10px] text-caption transition-colors",
+                    active ? "text-brand-text" : "text-secondary-text hover:text-primary-text",
+                  )}
+                >
+                  <span className="relative">
+                    <Icon className="size-6" aria-hidden />
+                  </span>
+                  <span className="max-w-full truncate px-1">{label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        )}
+      </div>
+    </div>
+  );
+}

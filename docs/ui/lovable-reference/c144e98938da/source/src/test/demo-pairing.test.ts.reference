@@ -1,0 +1,21 @@
+import { describe, expect, it } from "vitest";
+import { demoAccessPatch, demoPairingPatch } from "@/shared/model/demo-pairing";
+import { resolveHomeState } from "@/shared/model/status-home";
+import type { DemoState } from "@/shared/model/demo-store";
+
+describe("QR demo progression", () => {
+  it("pairs the demo computer without silently granting folder access", () => {
+    expect(demoPairingPatch()).toEqual({ pcPaired: true, pcAccessGranted: false });
+  });
+  it("allows setup to progress after explicit demo access confirmation", () => {
+    const demo: DemoState = {
+      mobileSetupDone: true, photoPermission: "granted", sourcesSelected: true,
+      pcPaired: false, pcAccessGranted: false, connections: 0,
+      paused: false, desktopFolder: null,
+    };
+    const next = { ...demo, ...demoPairingPatch(), ...demoAccessPatch() };
+    expect(next.pcAccessGranted).toBe(true);
+    expect(next.desktopFolder).toBe("/Demo/Kloda");
+    expect(resolveHomeState(next, "success")).toBe("syncing");
+  });
+});

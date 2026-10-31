@@ -19,7 +19,8 @@ export function InvitationQr({ payload, remainingMs }: { payload: string; remain
     let active = true;
     void QRCode.toDataURL(payload, {
       errorCorrectionLevel: 'M', margin: 4, width: 360,
-      color: { dark: '#1c1917', light: '#ffffff' },
+      color: { dark: getComputedStyle(document.documentElement).getPropertyValue('--qr-ink').trim() || undefined,
+        light: getComputedStyle(document.documentElement).getPropertyValue('--qr-paper').trim() || undefined },
     }).then((url) => {
       if (active) setImage({ payload, url });
     }).catch(() => {

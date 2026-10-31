@@ -1,0 +1,12 @@
+import { describe, expect, it } from "vitest";
+import { nextSetupStep, resolveHomeState } from "@/shared/model/status-home";
+import type { DemoState } from "@/shared/model/demo-store";
+const ready: DemoState = {mobileSetupDone:true,photoPermission:"granted",sourcesSelected:true,pcPaired:true,pcAccessGranted:true,connections:0,paused:false,desktopFolder:null};
+describe("Status home rules", () => {
+ it("does not claim everything is backed up simply because setup is ready", () => { expect(resolveHomeState(ready,"success")).toBe("syncing"); });
+ it("shows setup when photo access is denied", () => { expect(resolveHomeState({...ready,photoPermission:"denied"},"success")).toBe("setup"); });
+ it("accepts the six specified preview states", () => { for(const state of ["setup","syncing","safe","waiting","attention","error"]) expect(resolveHomeState(ready,state)).toBe(state); });
+ it("stops syncing while paused", () => { expect(resolveHomeState({...ready,paused:true},"success")).toBe("waiting"); });
+ it("requires computer folder access independently of pairing", () => { const demo={...ready,pcAccessGranted:false};expect(resolveHomeState(demo,"success")).toBe("setup");expect(nextSetupStep(demo)).toBe("access"); });
+ it("allows a storage target instead of requiring a PC", () => { expect(resolveHomeState({...ready,pcPaired:false,pcAccessGranted:false,connections:1},"success")).toBe("syncing"); });
+});

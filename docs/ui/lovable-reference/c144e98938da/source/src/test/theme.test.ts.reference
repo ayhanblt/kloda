@@ -1,0 +1,37 @@
+import { describe, expect, it } from "vitest";
+import { followSystemAppearance, resolveAppearance, resolvePreference } from "@/shared/model/theme";
+
+describe("System appearance", () => {
+  it("uses light for a light system", () => {
+    expect(resolveAppearance(true)).toBe("light");
+  });
+  it("defaults to dark when the system is not light", () => {
+    expect(resolveAppearance(false)).toBe("dark");
+  });
+  it("system preference follows the OS appearance", () => {
+    expect(resolvePreference("system", true)).toBe("light");
+    expect(resolvePreference("system", false)).toBe("dark");
+  });
+  it("explicit preferences override the OS appearance", () => {
+    expect(resolvePreference("light", false)).toBe("light");
+    expect(resolvePreference("dark", true)).toBe("dark");
+  });
+  it("updates immediately on system changes and removes the listener on cleanup", () => {
+    const target = new EventTarget();
+    const media = Object.assign(target, { matches: false }) as unknown as MediaQueryList;
+    const root = document.createElement("html");
+    const stop = followSystemAppearance(media, root);
+    expect(root.classList.contains("dark")).toBe(true);
+    Object.assign(media, { matches: true });
+    target.dispatchEvent(new Event("change"));
+    expect(root.classList.contains("light")).toBe(true);
+    expect(root.classList.contains("dark")).toBe(false);
+    Object.assign(media, { matches: false });
+    target.dispatchEvent(new Event("change"));
+    expect(root.classList.contains("dark")).toBe(true);
+    stop();
+    Object.assign(media, { matches: true });
+    target.dispatchEvent(new Event("change"));
+    expect(root.classList.contains("dark")).toBe(true);
+  });
+});

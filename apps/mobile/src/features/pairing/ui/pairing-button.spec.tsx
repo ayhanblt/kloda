@@ -2,7 +2,7 @@ import { fireEvent, render } from '@testing-library/react-native';
 import { Text } from 'react-native';
 import { PairingButton } from './pairing-button';
 import { i18n } from '../../../shared/i18n';
-import { colors } from '../../../shared/ui/tokens';
+import { themeColors } from '../../../shared/theme/tokens';
 
 it.each(['tr', 'en', 'de'])('keeps an exact accessible label, wrapped uncapped text and a48px target in %s', async (language) => {
   await i18n.changeLanguage(language);
@@ -15,6 +15,8 @@ it.each(['tr', 'en', 'de'])('keeps an exact accessible label, wrapped uncapped t
     const text = view.getByText(label);
     expect(text.props.className).toContain('min-w-0');
     expect(text.props.className).toContain('shrink');
+    expect(text.props.className.split(/\s+/)).toContain('text-primary-text');
+    expect(text.props.className).not.toMatch(/[{}]/);
     expect(text.props.numberOfLines).toBeUndefined();
     expect(text.props.allowFontScaling).not.toBe(false);
     expect(text.props.maxFontSizeMultiplier).toBeUndefined();
@@ -31,15 +33,20 @@ it('exposes disabled state and does not invoke the action', async () => {
   await fireEvent.press(button); expect(pressed).not.toHaveBeenCalled();
 });
 
-it('keeps normal text colors at WCAG AA contrast on their existing Stitch backgrounds', () => {
+it('keeps normal text colors at WCAG AA contrast on both current themes', () => {
   const luminance = (hex: string) => {
     const rgb = [1, 3, 5].map((offset) => parseInt(hex.slice(offset, offset + 2), 16) / 255)
       .map((v) => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
     return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722;
   };
-  for (const [foreground, background] of [[colors.ink, colors.surface], [colors.muted, colors.surface],
-    [colors.ink, colors.elevated], [colors.error, colors.elevated], [colors.elevated, colors.primary]]) {
-    const values = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
-    expect((values[0] + 0.05) / (values[1] + 0.05)).toBeGreaterThanOrEqual(4.5);
+  for (const mode of ['light', 'dark'] as const) {
+    const c = themeColors(mode);
+    const focus = [luminance(c['focus-ring']), luminance(c.bg)].sort((a, b) => b - a);
+    expect((focus[0] + 0.05) / (focus[1] + 0.05)).toBeGreaterThanOrEqual(3);
+    for (const [foreground, background] of [[c['text-primary'], c.bg], [c['text-secondary'], c.bg],
+      [c['text-primary'], c['surface-1']], [c['danger-text'], c['surface-1']], [c['on-brand'], c['button-brand']]]) {
+      const values = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
+      expect((values[0] + 0.05) / (values[1] + 0.05)).toBeGreaterThanOrEqual(4.5);
+    }
   }
 });

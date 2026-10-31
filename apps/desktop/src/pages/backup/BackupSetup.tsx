@@ -125,33 +125,33 @@ export function BackupSetup({ visible, showActivity = false }: { visible: boolea
   if (step === 'activity') return <WebDavActivity visible={visible} error={error} onBack={() => setStep('sources')} onSync={startSync} progress={progress} />;
 
   return (
-    <main className="min-h-screen bg-surface p-6 text-ink">
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted">{t('onboarding.step', { current: step === 'sources' ? 1 : 2, total: 2 })}</p>
+    <main className="min-h-screen bg-background p-6 text-primary-text">
+      <p className="text-xs font-semibold uppercase tracking-wide text-secondary-text">{t('onboarding.step', { current: step === 'sources' ? 1 : 2, total: 2 })}</p>
       {step === 'sources' ? (
         <>
           <h1 className="mt-4 text-3xl font-bold">{t('onboarding.sourceTitle')}</h1>
-          <p className="mt-2 text-muted">{t('onboarding.sourceDescription')}</p>
-          <button className="mt-6 rounded-xl bg-ink px-4 py-3 font-semibold text-white" onClick={() => void selectSources()} type="button">{t('onboarding.chooseFolders')}</button>
+          <p className="mt-2 text-secondary-text">{t('onboarding.sourceDescription')}</p>
+          <button className="mt-6 rounded-xl bg-button-brand px-4 py-3 font-semibold text-on-brand" onClick={() => void selectSources()} type="button">{t('onboarding.chooseFolders')}</button>
           <ul className="mt-4 list-inside list-disc">{draft.sources.map((source) => <li key={source.id}>{source.displayName}</li>)}</ul>
           <fieldset aria-describedby="desktop-schedule-runtime-hint" className="mt-6 grid gap-2"><legend className="font-semibold">{t('onboarding.frequency')}</legend>
             {[12, 24].map((hours) => <label key={hours}><input checked={draft.intervalHours === hours} name="interval" onChange={() => setDraft((current) => ({ ...current, intervalHours: hours as 12 | 24 }))} type="radio" /> {t('onboarding.everyHours', { hours })}</label>)}
           </fieldset>
-          <label className="mt-4 grid gap-1">{t('onboarding.localStartTime')} <input aria-describedby="desktop-schedule-runtime-hint" aria-label={t('onboarding.localStartTime')} className="rounded-lg border border-border bg-white p-3" onChange={(event) => setDraft((current) => ({ ...current, localTime: event.target.value }))} type="time" value={draft.localTime} /></label>
+          <label className="mt-4 grid gap-1">{t('onboarding.localStartTime')} <input aria-describedby="desktop-schedule-runtime-hint" aria-label={t('onboarding.localStartTime')} className="rounded-lg border border-border-subtle bg-surface-1 p-3" onChange={(event) => setDraft((current) => ({ ...current, localTime: event.target.value }))} type="time" value={draft.localTime} /></label>
           <p className="mt-2 text-sm text-stone-700" id="desktop-schedule-runtime-hint">{t('onboarding.desktopBackgroundHint')}</p>
-          <button className="mt-6 rounded-xl bg-ink px-4 py-3 font-semibold text-white" onClick={() => void continueToStorage()} type="button">{t('onboarding.continue')}</button>
+          <button className="mt-6 rounded-xl bg-button-brand px-4 py-3 font-semibold text-on-brand" onClick={() => void continueToStorage()} type="button">{t('onboarding.continue')}</button>
         </>
       ) : (
         <>
           <h1 className="mt-4 text-3xl font-bold">{t('onboarding.storageTitle')}</h1>
-          <p className="mt-2 text-muted">{t('onboarding.storageDescription')}</p>
-          <div className="mt-6 grid gap-3">{(['endpoint', 'targetPath', 'username', 'password'] as const).map((field) => <label className="grid gap-1 capitalize" key={field}>{t(`onboarding.${field}`)}<input aria-label={t(`onboarding.${field}`)} className="rounded-lg border border-border bg-white p-3" onChange={(event) => editStorage(field, event.target.value)} type={field === 'password' ? 'password' : 'text'} value={storage[field]} /></label>)}</div>
-          <button className="mt-6 rounded-xl border border-border bg-white px-4 py-3 font-semibold" onClick={() => void testStorage()} type="button">{t('onboarding.testConnection')}</button>
+          <p className="mt-2 text-secondary-text">{t('onboarding.storageDescription')}</p>
+          <div className="mt-6 grid gap-3">{(['endpoint', 'targetPath', 'username', 'password'] as const).map((field) => <label className="grid gap-1 capitalize" key={field}>{t(`onboarding.${field}`)}<input aria-label={t(`onboarding.${field}`)} className="rounded-lg border border-border-subtle bg-surface-1 p-3" onChange={(event) => editStorage(field, event.target.value)} type={field === 'password' ? 'password' : 'text'} value={storage[field]} /></label>)}</div>
+          <button className="mt-6 rounded-xl border border-border-subtle bg-surface-1 px-4 py-3 font-semibold" onClick={() => void testStorage()} type="button">{t('onboarding.testConnection')}</button>
           {draft.storageTested && <p className="mt-3 text-emerald-700" role="status">{t('onboarding.verified')}</p>}
-          <button className="mt-3 rounded-xl bg-ink px-4 py-3 font-semibold text-white disabled:opacity-40" disabled={!draft.storageTested} onClick={() => void startSync()} type="button">{t('onboarding.startBackup')}</button>
-          <button className="mt-3 text-muted underline" onClick={() => setStep('sources')} type="button">{t('onboarding.back')}</button>
+          <button className="mt-3 rounded-xl bg-button-brand px-4 py-3 font-semibold text-on-brand disabled:opacity-40" disabled={!draft.storageTested} onClick={() => void startSync()} type="button">{t('onboarding.startBackup')}</button>
+          <button className="mt-3 text-secondary-text underline" onClick={() => setStep('sources')} type="button">{t('onboarding.back')}</button>
         </>
       )}
-      {error && <p className="mt-4 text-red-600" role="alert">{error}</p>}
+      {error && <p className="mt-4 text-danger-text" role="alert">{error}</p>}
     </main>
   );
 }

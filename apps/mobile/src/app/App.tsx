@@ -6,6 +6,7 @@ import type { MobilePage } from '../shared/model/mobile-navigation';
 import { useBackupSetup } from '../features/backup-setup/model/use-backup-setup';
 import { MobileShell } from '../widgets/mobile-shell/ui';
 import { WelcomePage } from '../pages/welcome/ui/welcome-page';
+import { PhotosPage } from '../pages/photos/ui/photos-page';
 import { HomePage } from '../pages/home/ui/home-page';
 import { SourcePage } from '../pages/setup/ui/source-page';
 import { SchedulePage } from '../pages/setup/ui/schedule-page';
@@ -23,7 +24,7 @@ export function App() {
   const [provider, setProvider] = useState<DestinationProviderId>('webdav');
   const navigate = (next: MobilePage) => { if (page === 'storage') model.leaveStorage(); setPage(next); };
   useEffect(() => {
-    if (page === 'pairing' || page === 'welcome' || page === 'home') return;
+    if (page === 'pairing' || page === 'welcome' || page === 'home' || page === 'photos') return;
     const listener = BackHandler.addEventListener('hardwareBackPress', () => { navigate('home'); return true; });
     return () => listener.remove();
   }, [page]);
@@ -34,6 +35,7 @@ export function App() {
   const openProvider = (id: DestinationProviderId) => { setProvider(id); navigate(id === 'webdav' ? 'storage' : 'provider'); };
   return <MobileShell page={page} navigate={navigate}>
     {page === 'home' && <HomePage sourceCount={model.sources.length} navigate={navigate} />}
+    {page === 'photos' && <PhotosPage navigate={navigate} />}
     {page === 'sources' && <SourcePage model={model} onBack={back} onNext={() => navigate('schedule')} />}
     {page === 'schedule' && <SchedulePage model={model} onBack={() => navigate('sources')} onSaved={() => navigate('computer')} />}
     {page === 'storage' && <WebDavPage model={model} onBack={() => navigate('connections')} />}

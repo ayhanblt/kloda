@@ -68,26 +68,26 @@ export function WebDavActivity({ error, onBack, onSync, progress, visible }: {
   const needsReview = (progress?.reviewCount ?? 0) > 0 || issues.length > 0;
   const status = progress?.status === 'completed' && needsReview ? 'needs_review' : progress?.status;
   const target = targetLabel(progress?.targetId);
-  return <main className="min-h-screen bg-surface p-6 text-ink">
+  return <main className="min-h-screen bg-background p-6 text-primary-text">
     <h1 className="text-3xl font-bold">{t('onboarding.activityTitle')}</h1>
-    {progress ? <section aria-label={t('activity.snapshot')} className="mt-4 rounded-2xl border border-border bg-white p-5">
-      <p className="text-muted" role="status">{t('activity.snapshot')}: {t(`activity.${status}`)}</p>
-      <p className="mt-2 text-muted">{t('onboarding.filesSynced', { completed: progress.completedFiles, total: progress.totalFiles })}</p>
+    {progress ? <section aria-label={t('activity.snapshot')} className="mt-4 rounded-2xl border border-border-subtle bg-surface-1 p-5">
+      <p className="text-secondary-text" role="status">{t('activity.snapshot')}: {t(`activity.${status}`)}</p>
+      <p className="mt-2 text-secondary-text">{t('onboarding.filesSynced', { completed: progress.completedFiles, total: progress.totalFiles })}</p>
       {progress.targetId && <p className="mt-2 break-all">{t('activity.target')}: {target ?? t('activity.contextUnknown')}</p>}
       {progress.sourceIds && <p className="mt-2 break-all">{t('activity.sources')}: {progress.sourceIds.join(', ')}</p>}
       {progress.startedAt !== undefined && <p className="mt-2">{t('activity.startedAt')}: {new Date(progress.startedAt).toLocaleString(i18n.language)}</p>}
       {progress.errorCode && <p className="mt-2 text-stone-700">{t(`activity.errors.${safeError(progress.errorCode)}`)}</p>}
       {progress.attempts !== undefined && <p className="mt-2">{t('activity.attempts', { count: progress.attempts, total: 5 })}</p>}
       {progress.retryAt !== undefined && <p className="mt-2">{t('activity.retryAt')}: {new Date(progress.retryAt).toLocaleString(i18n.language)}</p>}
-    </section> : <p className="mt-2 text-muted">{t('activity.unknown')}</p>}
-    {error && <p className="mt-4 text-red-700" role="alert">{t('activity.errors.unknown')}</p>}
-    <section aria-labelledby="webdav-review-title" className="mt-6 rounded-2xl border border-border bg-white p-5">
+    </section> : <p className="mt-2 text-secondary-text">{t('activity.unknown')}</p>}
+    {error && <p className="mt-4 text-danger-text" role="alert">{t('activity.errors.unknown')}</p>}
+    <section aria-labelledby="webdav-review-title" className="mt-6 rounded-2xl border border-border-subtle bg-surface-1 p-5">
       <h2 className="text-xl font-semibold" id="webdav-review-title">{t('activity.reviewTitle')}</h2>
       <p className="mt-2 text-sm text-stone-700">{t('activity.reviewHint')}</p>
-      {!verified && <p className="mt-3 text-red-700" role="alert">{t('activity.issuesUnavailable')}</p>}
-      {actionError && <p className="mt-3 text-red-700" role="alert">{t('activity.actionFailed')}</p>}
-      {verified && issues.length === 0 && <p className="mt-3 text-muted">{t('activity.noIssues')}</p>}
-      <ul aria-label={t('activity.reviewTitle')} className="mt-3 grid gap-3">{issues.map((issue) => <li className="rounded-xl border border-border p-4" key={issue.id}>
+      {!verified && <p className="mt-3 text-danger-text" role="alert">{t('activity.issuesUnavailable')}</p>}
+      {actionError && <p className="mt-3 text-danger-text" role="alert">{t('activity.actionFailed')}</p>}
+      {verified && issues.length === 0 && <p className="mt-3 text-secondary-text">{t('activity.noIssues')}</p>}
+      <ul aria-label={t('activity.reviewTitle')} className="mt-3 grid gap-3">{issues.map((issue) => <li className="rounded-xl border border-border-subtle p-4" key={issue.id}>
         <h3 className="break-all font-semibold">{issue.relativePath}</h3>
         <p className="mt-1 break-all text-sm">{t('activity.target')}: {targetLabel(issue.targetId) ?? t('activity.contextUnknown')}</p>
         <p className="mt-1 break-all text-sm">{t('activity.sources')}: {issue.sourceId}</p>
@@ -95,14 +95,14 @@ export function WebDavActivity({ error, onBack, onSync, progress, visible }: {
         {issue.skipped && <p className="mt-2">{t('activity.skipped')}</p>}
         {issue.publishedPath && <p className="mt-2 break-all">{t('activity.publishedPath')}: {issue.publishedPath}</p>}
         <div className="mt-3 flex flex-wrap gap-3">{(['recheck', 'keep_both', 'skip'] as const).map((action) => <button
-          className="rounded-xl border border-border bg-white px-4 py-3 font-semibold disabled:opacity-40"
+          className="rounded-xl border border-border-subtle bg-surface-1 px-4 py-3 font-semibold disabled:opacity-40"
           disabled={!visible || !verified || busy || (action === 'keep_both' && !issue.canKeepBoth)}
           key={action} onClick={() => void review(issue.id, action)} type="button">{t(`activity.actions.${action}`)}</button>)}</div>
       </li>)}</ul>
-      <button className="mt-4 rounded-xl border border-border px-4 py-3 font-semibold disabled:opacity-40" disabled={!visible || busy}
+      <button className="mt-4 rounded-xl border border-border-subtle px-4 py-3 font-semibold disabled:opacity-40" disabled={!visible || busy}
         onClick={() => void refresh()} type="button">{t('activity.refreshIssues')}</button>
     </section>
-    <button className="mt-6 rounded-xl bg-ink px-4 py-3 font-semibold text-white disabled:opacity-40" disabled={!visible || busy} onClick={() => void onSync()} type="button">{t('onboarding.syncNow')}</button>
+    <button className="mt-6 rounded-xl bg-button-brand px-4 py-3 font-semibold text-on-brand disabled:opacity-40" disabled={!visible || busy} onClick={() => void onSync()} type="button">{t('onboarding.syncNow')}</button>
     <button className="ml-4 text-stone-700" onClick={onBack} type="button">{t('onboarding.back')}</button>
   </main>;
 }

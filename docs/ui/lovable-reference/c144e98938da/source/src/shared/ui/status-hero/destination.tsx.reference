@@ -1,0 +1,57 @@
+import { cn } from "@/lib/utils";
+import type { Destination, DestinationKind } from "@/shared/model/destinations";
+import { layoutDestinations } from "@/shared/model/destinations";
+import type { HomeState } from "@/shared/model/status-home";
+
+/** Each device is drawn in a local box ~96×82 anchored at its top-left. */
+function Device({ kind, active }: { kind: DestinationKind; active: boolean }) {
+  const line = "fill-illus-body stroke-illus-line";
+  if (kind === "pc") return <g strokeWidth="1.5">
+    <rect x="10" y="6" width="76" height="52" rx="5" className={line} />
+    <rect x="15" y="11" width="66" height="42" rx="2" className="fill-illus-screen" />
+    <rect x="20" y="16" width="20" height="13" rx="2" className="fill-illus-photo-2" />
+    <path d="M46 19h22M46 25h14" className="stroke-illus-line" />
+    <rect x="20" y="34" width="11" height="9" rx="1.5" className="fill-illus-photo-1" />
+    <rect x="34" y="34" width="11" height="9" rx="1.5" className="fill-illus-photo-3" />
+    <path d="M2 62h92l-5 6H7z" className={line} />
+  </g>;
+  if (kind === "nas") return <g strokeWidth="1.5">
+    <rect x="25" y="8" width="46" height="58" rx="7" className={line} />
+    <rect x="32" y="15" width="32" height="12" rx="2" className="fill-illus-screen" />
+    <rect x="32" y="31" width="32" height="12" rx="2" className="fill-illus-screen" />
+    <circle cx="36" cy="56" r="2.5" className={cn("stroke-none", active ? "fill-brand" : "fill-illus-line")} />
+  </g>;
+  return <path d="M22 62h50a15 15 0 0 0 2-30 23 23 0 0 0-44-4 17 17 0 0 0-8 34z" strokeWidth="1.5" className={line} />;
+}
+
+function Badge({ state }: { state: HomeState }) {
+  const tone = state === "safe" ? "fill-brand" : state === "attention" ? "fill-attention-g" : state === "error" ? "fill-danger-g" : "fill-illus-line";
+  return <g className={cn(state === "safe" && "hero-pop")}>
+    <circle cx="82" cy="12" r="11" className={tone} />
+    {state === "safe" && <path d="m77 12 3.5 3.5L87 9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="fill-none stroke-tile" />}
+    {(state === "attention" || state === "error") && <path d={state === "error" ? "m78 8 8 8m0-8-8 8" : "M82 6v8m0 3v.5"} strokeWidth="2" strokeLinecap="round" className="fill-none stroke-tile" />}
+    {state === "waiting" && <path d="M85 8a5 5 0 1 0 2 7 4 4 0 0 1-2-7z" className="fill-surface-1 stroke-none" />}
+  </g>;
+}
+
+export function DestinationSlot({ state, destinations }: { state: HomeState; destinations: Destination[] }) {
+  if (state === "setup" || destinations.length === 0) return <g transform="translate(250 56)">
+    <rect x="6" y="2" width="80" height="54" rx="5" strokeWidth="1.5" strokeDasharray="4 4" className="fill-none stroke-illus-line" />
+    <path d="M0 62h92l-4 6H4z" strokeWidth="1.5" strokeDasharray="4 4" className="fill-none stroke-illus-line" />
+    <g className="hero-float">
+      <circle cx="46" cy="29" r="11" strokeWidth="1.5" className="fill-illus-body stroke-illus-line" />
+      <path d="M46 24v10m-5-5h10" strokeWidth="1.5" strokeLinecap="round" className="stroke-primary-text" />
+    </g>
+  </g>;
+  const { shown, extra } = layoutDestinations(destinations);
+  const [front, ...back] = shown;
+  if (!front) return null;
+  return <g className={cn(state === "waiting" && "opacity-50")}>
+    {back.map((d, i) => <g key={d.kind + i} transform={`translate(${282 + i * 18} ${38 - i * 8}) scale(${0.68 - i * 0.06})`}><Device kind={d.kind} active={d.active} /></g>).reverse()}
+    <g transform="translate(250 56)">
+      <Device kind={front.kind} active={front.active} />
+      {state !== "syncing" && <Badge state={state} />}
+    </g>
+    {extra > 0 && <g transform="translate(318 120)"><rect width="26" height="18" rx="9" className="fill-surface-2 stroke-illus-line" strokeWidth="1" /><text x="13" y="13" textAnchor="middle" className="fill-secondary-text text-caption">+{extra}</text></g>}
+  </g>;
+}

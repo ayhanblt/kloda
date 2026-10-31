@@ -1,0 +1,206 @@
+[
+  {
+    "route": "welcome",
+    "headings": [
+      "Bu bilgisayarı alıcı yap"
+    ],
+    "mode": "light",
+    "overflow": false
+  },
+  {
+    "route": "receiver",
+    "headings": [
+      "Ana sayfa"
+    ],
+    "mode": "light",
+    "overflow": false
+  },
+  {
+    "route": "pairing",
+    "headings": [
+      "Telefonunuzu eşleştirin"
+    ],
+    "mode": "light",
+    "overflow": false
+  },
+  {
+    "route": "devices",
+    "headings": [
+      "Eşleşmiş cihazlar ve yedekleme erişimi"
+    ],
+    "mode": "light",
+    "overflow": false
+  },
+  {
+    "route": "incoming",
+    "headings": [
+      "Gelen aktarımlar ve geçmiş"
+    ],
+    "mode": "light",
+    "overflow": false
+  },
+  {
+    "route": "backups",
+    "headings": [
+      "Yedek sürümleri"
+    ],
+    "mode": "light",
+    "overflow": false
+  },
+  {
+    "route": "trash",
+    "headings": [
+      "Yedek sürümleri"
+    ],
+    "mode": "light",
+    "overflow": false
+  },
+  {
+    "route": "connections",
+    "headings": [
+      "Bağlantılar"
+    ],
+    "mode": "light",
+    "overflow": false
+  },
+  {
+    "route": "backup",
+    "headings": [
+      "Yedeklenecek klasörleri seçin"
+    ],
+    "mode": "light",
+    "overflow": false
+  },
+  {
+    "route": "jobs",
+    "headings": [
+      "Yedekleme etkinliği"
+    ],
+    "mode": "light",
+    "overflow": false
+  },
+  {
+    "route": "tray",
+    "headings": [
+      "Tray menüsü"
+    ],
+    "mode": "light",
+    "overflow": false
+  },
+  {
+    "route": "welcome",
+    "headings": [
+      "Bu bilgisayarı alıcı yap"
+    ],
+    "mode": "dark",
+    "overflow": false
+  },
+  {
+    "route": "receiver",
+    "headings": [
+      "Ana sayfa"
+    ],
+    "mode": "dark",
+    "overflow": false
+  },
+  {
+    "route": "pairing",
+    "headings": [
+      "Telefonunuzu eşleştirin"
+    ],
+    "mode": "dark",
+    "overflow": false
+  },
+  {
+    "route": "devices",
+    "headings": [
+      "Eşleşmiş cihazlar ve yedekleme erişimi"
+    ],
+    "mode": "dark",
+    "overflow": false
+  },
+  {
+    "route": "incoming",
+    "headings": [
+      "Gelen aktarımlar ve geçmiş"
+    ],
+    "mode": "dark",
+    "overflow": false
+  },
+  {
+    "route": "backups",
+    "headings": [
+      "Yedek sürümleri"
+    ],
+    "mode": "dark",
+    "overflow": false
+  },
+  {
+    "route": "trash",
+    "headings": [
+      "Yedek sürümleri"
+    ],
+    "mode": "dark",
+    "overflow": false
+  },
+  {
+    "route": "connections",
+    "headings": [
+      "Bağlantılar"
+    ],
+    "mode": "dark",
+    "overflow": false
+  },
+  {
+    "route": "backup",
+    "headings": [
+      "Yedeklenecek klasörleri seçin"
+    ],
+    "mode": "dark",
+    "overflow": false
+  },
+  {
+    "route": "jobs",
+    "headings": [
+      "Yedekleme etkinliği"
+    ],
+    "mode": "dark",
+    "overflow": false
+  },
+  {
+    "route": "tray",
+    "headings": [
+      "Tray menüsü"
+    ],
+    "mode": "dark",
+    "overflow": false
+  },
+  {
+    "file": "connection-add",
+    "headings": [
+      "Bağlantı ekle"
+    ],
+    "mode": "dark"
+  },
+  {
+    "file": "blocked-provider",
+    "headings": [
+      "SMB"
+    ],
+    "mode": "dark"
+  },
+  {
+    "file": "connection-add",
+    "headings": [
+      "Bağlantı ekle"
+    ],
+    "mode": "light"
+  },
+  {
+    "file": "blocked-provider",
+    "headings": [
+      "SMB"
+    ],
+    "mode": "light"
+  }
+]

@@ -1,0 +1,13 @@
+import type { DemoState } from "./demo-store";
+export const homeStates = ["setup", "syncing", "safe", "waiting", "attention", "error"] as const;
+export type HomeState = typeof homeStates[number];
+export function resolveHomeState(demo: DemoState, override: string): HomeState {
+  if (homeStates.some(s => s === override)) return override as HomeState;
+  if (!demo.sourcesSelected || (demo.photoPermission !== "granted" && demo.photoPermission !== "limited") || (!demo.pcAccessGranted && demo.connections === 0)) return "setup";
+  return demo.paused ? "waiting" : "syncing";
+}
+export function nextSetupStep(demo: DemoState): "sources" | "pair" | "access" {
+  if (!demo.sourcesSelected || (demo.photoPermission !== "granted" && demo.photoPermission !== "limited")) return "sources";
+  if (!demo.pcPaired && demo.connections === 0) return "pair";
+  return "access";
+}

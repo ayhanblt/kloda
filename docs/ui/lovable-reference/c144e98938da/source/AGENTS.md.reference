@@ -1,0 +1,25 @@
+<!-- LOVABLE:BEGIN -->
+> [!IMPORTANT]
+> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
+> published git history — force pushing, or rebasing/amending/squashing commits
+> that are already pushed — as it rewrites history on Lovable's side and the
+> user will likely lose their project history.
+>
+> Commits you push to the connected branch sync back to Lovable and show up in
+> the editor, so keep the branch in a working state.
+<!-- LOVABLE:END -->
+
+## Architecture
+- Appearance is applied globally through shared semantic CSS palettes and a root media-query listener, with a CSS first-paint fallback; the Settings theme control (System/Light/Dark, persisted in localStorage via src/shared/model/theme.ts) can override the OS, and "System" keeps following live OS changes. Why: every platform stays consistent while honoring an explicit user choice.
+- Feature-Sliced layers under src: `shared` (ui kit, i18n, demo store) → `entities` (demo data) → `features` → `widgets` (shells, lists) → `views` (FSD "pages" layer; named views because src/pages is reserved). Routes in src/routes are thin wrappers that import one view. Why: brief requires FSD and no cross-page imports.
+- All UI strings live in src/shared/i18n/{tr,en,de}.ts (tr is the typed source); never hardcode copy in components. Why: TR default + EN/DE support.
+- No style props; dynamic visuals via Tailwind class maps and tokens in src/styles.css. Why: brief forbids inline styles.
+- Prototype only: no backend, no real auth/upload/pairing; demo state in sessionStorage via DemoProvider. Why: brief §8.
+- Share schedule controls through features and transfer overviews through widgets across mobile/desktop, with routes remaining thin. Why: avoid divergent controls while keeping desktop layouts distinct.
+- Native lock-screen concepts live in a standalone view with local demo states, never browser notifications or native integration. Why: present both platform designs without implying OS functionality in the web prototype.
+- Prototype scaffolding (screen codes, demo-state switchers, simulate actions) registers into src/shared/model/dev-panel.ts and renders only in the hidden Dev panel (?dev=1, sessionStorage flag); product screens never show it. Why: keep product UI clean while preserving demo states.
+- QR pairing alone exposes explicit demo pairing and folder-access confirmation actions outside Dev panel, using shared demo patches. Why: the clickable setup must remain traversable without a real camera or computer, while keeping pairing and access separate.
+- Every color value lives only in src/styles/theme.css (raw --brand-base/--attention-base/--danger-base/neutrals/--illus-*); all other accent tokens derive via color-mix; materials and button treatment live in src/styles.css. The StatusHero (src/shared/ui/status-hero) draws destinations from the configured targets. Previously: colors as shared semantic tokens (graphic `--X` vs text `--X-text`); legacy shadcn/app names are aliases to them. Status = 7px dot + secondary text, no tinted pills. Why: single neutral token system across both themes.
+
+- Mobile `/m` renders the Status view; `/m/photos` preserves gallery controls and `/m/activity` preserves full history. Why: separate backup health from photo browsing without breaking existing URLs.
+- Reuse shared SVG device glyphs and scenes across onboarding, status and state views; keep node cards in widgets rather than importing between views. Why: consistent visual vocabulary and Feature-Sliced boundaries.

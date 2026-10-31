@@ -1,0 +1,478 @@
+[
+  {
+    "family": "settings",
+    "mode": "dark",
+    "buttonText": [
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)"
+    ],
+    "headings": [
+      "Ayarlar",
+      "Görünüm",
+      "Dili değiştir"
+    ],
+    "radio": [
+      "Koyu",
+      "Türkçe"
+    ],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "settings",
+    "mode": "light",
+    "buttonText": [
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)"
+    ],
+    "headings": [
+      "Ayarlar",
+      "Görünüm",
+      "Dili değiştir"
+    ],
+    "radio": [
+      "Açık",
+      "Türkçe"
+    ],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "sources",
+    "mode": "dark",
+    "buttonText": [
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)"
+    ],
+    "headings": [
+      "Ne yedeklensin?"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "sources",
+    "mode": "light",
+    "buttonText": [
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)"
+    ],
+    "headings": [
+      "Ne yedeklensin?"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "schedule",
+    "mode": "dark",
+    "buttonText": [
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)"
+    ],
+    "headings": [
+      "Ne zaman yedeklensin?"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "schedule",
+    "mode": "light",
+    "buttonText": [
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)"
+    ],
+    "headings": [
+      "Ne zaman yedeklensin?"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "backups",
+    "mode": "dark",
+    "buttonText": [
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)"
+    ],
+    "headings": [
+      "PC'deki tamamlanmış yedekleriniz",
+      "WebDAV yedeklerim",
+      "PC'deki tamamlanmış yedekleriniz"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "backups",
+    "mode": "light",
+    "buttonText": [
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)"
+    ],
+    "headings": [
+      "PC'deki tamamlanmış yedekleriniz",
+      "WebDAV yedeklerim",
+      "PC'deki tamamlanmış yedekleriniz"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "activity",
+    "mode": "dark",
+    "buttonText": [
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)"
+    ],
+    "headings": [
+      "Yedekleme Aktivitesi",
+      "PC yedekleme hedefi"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "activity",
+    "mode": "light",
+    "buttonText": [
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)"
+    ],
+    "headings": [
+      "Yedekleme Aktivitesi",
+      "PC yedekleme hedefi"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "welcome",
+    "mode": "dark",
+    "buttonText": [],
+    "headings": [
+      "Fotoğrafların, senin bilgisayarında."
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "welcome",
+    "mode": "light",
+    "buttonText": [],
+    "headings": [
+      "Fotoğrafların, senin bilgisayarında."
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "photos",
+    "mode": "dark",
+    "buttonText": [
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)"
+    ],
+    "headings": [
+      "Galeri"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "photos",
+    "mode": "light",
+    "buttonText": [
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)"
+    ],
+    "headings": [
+      "Galeri"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "destinations",
+    "mode": "dark",
+    "buttonText": [
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)"
+    ],
+    "headings": [
+      "Bağlantılar"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "destinations",
+    "mode": "light",
+    "buttonText": [
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)"
+    ],
+    "headings": [
+      "Bağlantılar"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "computer",
+    "mode": "dark",
+    "buttonText": [
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)"
+    ],
+    "headings": [
+      "Bilgisayarına yedekle",
+      "1. Bilgisayarı QR ile eşleştir",
+      "2. Yedekleme alanını bilgisayarda onayla",
+      "3. Aktarımı başlat ve sonucu izle"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "computer",
+    "mode": "light",
+    "buttonText": [
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)"
+    ],
+    "headings": [
+      "Bilgisayarına yedekle",
+      "1. Bilgisayarı QR ile eşleştir",
+      "2. Yedekleme alanını bilgisayarda onayla",
+      "3. Aktarımı başlat ve sonucu izle"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "webdav",
+    "mode": "dark",
+    "buttonText": [
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)"
+    ],
+    "headings": [
+      "WebDAV depolama alanını bağlayın"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "webdav",
+    "mode": "light",
+    "buttonText": [
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)"
+    ],
+    "headings": [
+      "WebDAV depolama alanını bağlayın"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "provider-list",
+    "mode": "dark",
+    "buttonText": [
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)"
+    ],
+    "headings": [
+      "Bağlantı ekle",
+      "Dosya protokolleri",
+      "Bulut hizmetleri"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "provider-list",
+    "mode": "light",
+    "buttonText": [
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)"
+    ],
+    "headings": [
+      "Bağlantı ekle",
+      "Dosya protokolleri",
+      "Bulut hizmetleri"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "blocked-provider",
+    "mode": "dark",
+    "buttonText": [
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)"
+    ],
+    "headings": [
+      "SMB"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "blocked-provider",
+    "mode": "light",
+    "buttonText": [
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)"
+    ],
+    "headings": [
+      "SMB"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "pairing",
+    "mode": "dark",
+    "buttonText": [
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)"
+    ],
+    "headings": [
+      "Telefonunuzu eşleştirin"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "pairing",
+    "mode": "light",
+    "buttonText": [
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)"
+    ],
+    "headings": [
+      "Telefonunuzu eşleştirin"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "pairing-help",
+    "mode": "dark",
+    "buttonText": [
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)",
+      "rgb(236, 238, 240)"
+    ],
+    "headings": [
+      "Telefonunuzu eşleştirin",
+      "Yerel eşleştirme nasıl çalışır?"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  },
+  {
+    "family": "pairing-help",
+    "mode": "light",
+    "buttonText": [
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)",
+      "rgb(18, 20, 23)"
+    ],
+    "headings": [
+      "Telefonunuzu eşleştirin",
+      "Yerel eşleştirme nasıl çalışır?"
+    ],
+    "radio": [],
+    "scroll": 428,
+    "width": 428
+  }
+]

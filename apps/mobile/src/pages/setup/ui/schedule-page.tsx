@@ -10,15 +10,15 @@ export function SchedulePage({ model: m, onBack, onSaved }: { model: BackupSetup
   const save = async () => { if (await m.saveSchedule()) onSaved(); };
   return <MobileSurface title={t('ui.schedule.title')} onBack={onBack}>
     <MobilePanel>
-      <Text className="font-sans text-sm leading-5 text-muted">{t(m.supportsLive ? (Platform.OS === 'ios' ? 'computer.iosSchedulePreference' : 'computer.androidSchedulePreference') : 'computer.schedulePreference')}</Text>
-      {m.supportsLive && <PairingButton secondary={m.backupMode !== 'live'} onPress={() => m.setBackupMode('live')} label={t(m.backupMode === 'live' ? 'onboarding.liveSelected' : 'onboarding.live')} />}
-      {[12,24].map((hours) => <PairingButton key={hours} secondary={!(m.backupMode === 'scheduled' && m.intervalHours === hours)} onPress={() => { m.setBackupMode('scheduled'); m.setIntervalHours(hours as 12 | 24); }} label={t(m.backupMode === 'scheduled' && m.intervalHours === hours ? 'onboarding.everyHoursSelected' : 'onboarding.everyHours', { hours })} />)}
-      {m.backupMode === 'live' ? <Text className="font-sans text-sm text-muted">{t('onboarding.liveDescription')}</Text> : <View className="gap-2">
-        <Text className="text-sm font-inter-medium text-ink">{t('onboarding.localStartTime')}</Text>
-        <TextInput accessibilityLabel={t('onboarding.localStartTime')} className="font-sans min-h-[48px] rounded-xl border border-border bg-elevated px-3 text-base text-ink" onChangeText={m.setLocalTime} value={m.localTime} />
+      <Text className="font-sans text-sm leading-5 text-secondary-text">{t(m.supportsLive ? (Platform.OS === 'ios' ? 'computer.iosSchedulePreference' : 'computer.androidSchedulePreference') : 'computer.schedulePreference')}</Text>
+      {m.supportsLive && <PairingButton variant="secondary" onPress={() => m.setBackupMode('live')} label={t(m.backupMode === 'live' ? 'onboarding.liveSelected' : 'onboarding.live')} />}
+      {[12,24].map((hours) => <PairingButton key={hours} variant="secondary" onPress={() => { m.setBackupMode('scheduled'); m.setIntervalHours(hours as 12 | 24); }} label={t(m.backupMode === 'scheduled' && m.intervalHours === hours ? 'onboarding.everyHoursSelected' : 'onboarding.everyHours', { hours })} />)}
+      {m.backupMode === 'live' ? <Text className="font-sans text-sm text-secondary-text">{t('onboarding.liveDescription')}</Text> : <View className="gap-2">
+        <Text className="text-sm font-inter-medium text-primary-text">{t('onboarding.localStartTime')}</Text>
+        <TextInput accessibilityLabel={t('onboarding.localStartTime')} className="font-sans min-h-[48px] rounded-xl border border-border-subtle bg-surface-1 px-3 text-base text-primary-text" onChangeText={m.setLocalTime} value={m.localTime} />
       </View>}
     </MobilePanel>
-    {m.message && <Text accessibilityRole="alert" className="font-sans text-sm text-error">{m.message}</Text>}
-    <PairingButton label={t('onboarding.saveSchedule')} onPress={() => { void save(); }} />
+    {m.message && <Text accessibilityRole="alert" className="font-sans text-sm text-danger-text">{m.message}</Text>}
+    <PairingButton variant="primary" label={t('onboarding.saveSchedule')} onPress={() => { void save(); }} />
   </MobileSurface>;
 }

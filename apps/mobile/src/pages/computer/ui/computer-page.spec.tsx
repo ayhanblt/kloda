@@ -5,6 +5,7 @@ import { ComputerPage } from './computer-page';
 import { pairing } from '../../../shared/api/pairing';
 import { i18n } from '../../../shared/i18n';
 
+jest.mock('../../../shared/api/backup-destinations', () => ({ backupDestinations: { pcEnabled: jest.fn().mockResolvedValue(false), setPcEnabled: jest.fn().mockResolvedValue(true) } }));
 jest.mock('../../../shared/api/pairing', () => ({
   ...jest.requireActual('../../../shared/api/pairing'), pairing: { status: jest.fn() },
 }));

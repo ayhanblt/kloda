@@ -22,7 +22,7 @@ const groups = [
 export function DesktopShell({ location, blocked, onNavigate, children }: {
   location: DesktopLocation; blocked: boolean; onNavigate: (page: DesktopRoute) => void; children: ReactNode;
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const welcome = location.page === 'welcome';
   return <div className={`desktop-shell ${welcome ? 'desktop-shell-welcome' : ''}`}>
     {!welcome && <aside className="desktop-sidebar">
@@ -42,11 +42,6 @@ export function DesktopShell({ location, blocked, onNavigate, children }: {
         {welcome ? <Brand /> : <span className="desktop-profile-label">{t('ui.localComputer')}</span>}
         <div className="desktop-toolbar-controls">
           {!welcome && <button className="pairing-button" disabled={blocked} onClick={() => onNavigate('welcome')} type="button">{t('ui.setup')}</button>}
-          <label className="desktop-language"><span className="sr-only">{t('ui.language')}</span>
-            <select aria-label={t('ui.language')} value={i18n.resolvedLanguage?.split('-')[0] ?? 'tr'} onChange={(event) => { void i18n.changeLanguage(event.target.value); }}>
-              {(['tr', 'en', 'de'] as const).map((language) => <option key={language} value={language}>{t(`ui.languages.${language}`)}</option>)}
-            </select>
-          </label>
         </div>
       </header>
       {children}

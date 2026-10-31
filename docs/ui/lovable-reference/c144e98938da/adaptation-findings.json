@@ -1,0 +1,94 @@
+{
+  "sourceDiff": {
+    "added": [
+      "src/features/theme-switch/ui.tsx",
+      "src/routes/m.photos.tsx",
+      "src/shared/model/demo-pairing.ts",
+      "src/shared/model/destinations.ts",
+      "src/shared/model/dev-panel.ts",
+      "src/shared/model/status-home.ts",
+      "src/shared/model/theme.ts",
+      "src/shared/ui/grouped.tsx",
+      "src/shared/ui/illustrations/glyph.tsx",
+      "src/shared/ui/illustrations/scene.tsx",
+      "src/shared/ui/status-hero/destination.tsx",
+      "src/shared/ui/status-hero/index.tsx",
+      "src/shared/ui/status-hero/parts.tsx",
+      "src/styles/theme.css",
+      "src/test/demo-pairing.test.ts",
+      "src/test/status-home.test.ts",
+      "src/test/theme.test.ts",
+      "src/views/mobile/activity.tsx",
+      "src/views/mobile/status.tsx",
+      "src/widgets/connection-node/ui.tsx",
+      "src/widgets/dev-panel/ui.tsx"
+    ],
+    "removed": [],
+    "modified": [
+      "AGENTS.md",
+      "roadmap.md",
+      "src/components/ui/alert-dialog.tsx",
+      "src/components/ui/button.tsx",
+      "src/features/connection-form/ui.tsx",
+      "src/features/schedule/ui.tsx",
+      "src/lib/utils.ts",
+      "src/routeTree.gen.ts",
+      "src/routes/__root.tsx",
+      "src/routes/brand.tsx",
+      "src/routes/index.tsx",
+      "src/routes/m.activity.tsx",
+      "src/routes/m.index.tsx",
+      "src/shared/i18n/de.ts",
+      "src/shared/i18n/en.ts",
+      "src/shared/i18n/tr.ts",
+      "src/shared/ui/confirm-dialog.tsx",
+      "src/shared/ui/demo-qr.tsx",
+      "src/shared/ui/kit.tsx",
+      "src/shared/ui/logo.tsx",
+      "src/shared/ui/state-frame.tsx",
+      "src/shared/ui/welcome-illustration.tsx",
+      "src/styles.css",
+      "src/views/desktop/outgoing.tsx",
+      "src/views/desktop/receiver.tsx",
+      "src/views/lock-screen.tsx",
+      "src/views/mobile/activity-backups-settings.tsx",
+      "src/views/mobile/connections.tsx",
+      "src/views/mobile/gallery.tsx",
+      "src/views/mobile/onboarding.tsx",
+      "src/views/mobile/photo-detail.tsx",
+      "src/widgets/desktop-shell/ui.tsx",
+      "src/widgets/job-list/ui.tsx",
+      "src/widgets/mobile-shell/ui.tsx",
+      "src/widgets/transfer-overview/ui.tsx"
+    ]
+  },
+  "screens": {
+    "new": [
+      "/m/photos gallery tab",
+      "/m Status replaces gallery home"
+    ],
+    "retired": [
+      "Gallery as /m home",
+      "Activity as primary tab",
+      "inline demo selectors / language and status header controls in product UI"
+    ],
+    "changed": [
+      "All mobile and desktop families inherit new neutral/brand theme, buttons, grouped lists and default appearance",
+      "Mobile onboarding, status, gallery/detail, activity/history, targets/provider placeholders and settings",
+      "Desktop receiver, pairing/devices/incoming/backups/trash/outgoing/sources/jobs/settings/tray"
+    ]
+  },
+  "constraints": [
+    "Never execute reference scripts/install/build. .reference suffix prevents AGENTS/config interpretation.",
+    "Native modules, step16 sources and existing evidence excluded from UI edits/cleanup.",
+    "No demo data, times, percentages, names or global backup claims as observed product state.",
+    "Native svg/reanimated already installed; no new dependency authorized by this capture.",
+    "Snapshot lock-screen is design only; step19 feature remains gated."
+  ],
+  "pending": [
+    "First representative mobile visual proof blocked on existing native binary/JS mismatch; alternative path awaits user decision",
+    "Light primary text contrast source3.39:1; proposed existing brand-text5.80:1 awaits user decision",
+    "Remaining mobile/Desktop adaptation, global legacy cleanup and full requested checks"
+  ],
+  "oldSnapshotRetirement": "COMPLETE; lovable-retirement.json"
+}

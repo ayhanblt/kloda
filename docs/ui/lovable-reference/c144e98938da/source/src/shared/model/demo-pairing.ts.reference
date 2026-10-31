@@ -1,0 +1,14 @@
+import type { DemoState } from "./demo-store";
+
+/** Explicit prototype action only; never grants access to a real computer. */
+export function demoPairingPatch(): Partial<DemoState> {
+  return { pcPaired: true, pcAccessGranted: false };
+}
+
+export function demoAccessPatch(): Partial<DemoState> {
+  return {
+    pcPaired: true,
+    pcAccessGranted: true,
+    desktopFolder: "/Demo/Kloda",
+  };
+}

@@ -1,0 +1,6 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { MobileGallery } from "@/views/mobile/gallery";
+export const Route = createFileRoute("/m/photos")({
+ head: () => ({ meta: [ { title: "Fotoğraflar — Kloda" }, { name: "description", content: "Kloda fotoğrafları, albümleri ve seçili öğelerin yedekleme durumu." }, { property: "og:title", content: "Fotoğraflar — Kloda" }, { property: "og:description", content: "Fotoğrafları görüntüle, seç ve yedekleme durumunu incele." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" } ] }),
+ component: MobileGallery,
+});

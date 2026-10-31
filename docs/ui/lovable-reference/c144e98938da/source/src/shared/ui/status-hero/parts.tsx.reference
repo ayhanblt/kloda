@@ -1,0 +1,52 @@
+import { cn } from "@/lib/utils";
+import type { HomeState } from "@/shared/model/status-home";
+
+const photoFills = ["fill-illus-photo-1", "fill-illus-photo-2", "fill-illus-photo-3", "fill-illus-photo-4", "fill-illus-photo-5", "fill-illus-photo-6"];
+
+export function Phone({ sending }: { sending: boolean }) {
+  return <g>
+    <rect x="40" y="52" width="54" height="96" rx="11" strokeWidth="1.5" className="fill-illus-body stroke-illus-line" />
+    <rect x="45" y="60" width="44" height="80" rx="6" className="fill-illus-screen" />
+    {photoFills.map((f, i) => {
+      const x = 49 + (i % 2) * 19, y = 65 + Math.floor(i / 2) * 24;
+      const out = sending && i >= 4;
+      return <rect key={f} x={x} y={y} width="17" height="21" rx="3" strokeWidth="1.5" className={cn(f, out ? "stroke-brand" : "stroke-none")} />;
+    })}
+  </g>;
+}
+
+export function KlodaTile({ state }: { state: HomeState }) {
+  const syncing = state === "syncing";
+  return <g>
+    {syncing && <>
+      <circle cx="179" cy="100" r="44" strokeWidth="1" className="hero-ripple fill-none stroke-brand-line" />
+      <circle cx="179" cy="100" r="44" strokeWidth="1" className="hero-ripple hero-ripple-2 fill-none stroke-brand-line" />
+    </>}
+    <rect x="147" y="68" width="64" height="64" rx="18" strokeWidth="1.5" className="fill-tile stroke-illus-line" />
+    {syncing ? <>
+      <circle cx="179" cy="100" r="14" strokeWidth="5" className="fill-none stroke-tile-ring opacity-25" />
+      <circle cx="179" cy="100" r="14" strokeWidth="5" strokeLinecap="round" strokeDasharray="58 88" transform="rotate(-90 179 100)" className="fill-none stroke-brand" />
+    </> : <circle cx="179" cy="100" r="14" strokeWidth="5" strokeLinecap="round" strokeDasharray="64 24" transform="rotate(-90 179 100)" className="fill-none stroke-tile-ring" />}
+    <circle cx="179" cy="100" r="4.5" className={cn("fill-brand", syncing && "hero-pulse")} />
+  </g>;
+}
+
+export function Connectors({ state }: { state: HomeState }) {
+  const c1 = "M98 100 Q121 76 145 100";
+  const c2 = state === "error" ? "M213 100 Q220 91 227 89 M240 89 Q246 91 252 96" : "M213 100 Q233 76 252 96";
+  const style = state === "safe" ? "stroke-brand-line" : "stroke-illus-line";
+  const dash = state === "syncing" ? "1 6" : state === "waiting" || state === "setup" ? "4 5" : undefined;
+  return <g className="fill-none" strokeWidth="1.5" strokeLinecap="round">
+    <path d={c1} strokeDasharray={dash} className={style} />
+    <path d={c2} strokeDasharray={dash} className={style} />
+    {state === "syncing" && ["hero-c1", "hero-c2"].flatMap((c) => ["", "hero-d2", "hero-d3"].map((d) =>
+      <circle key={c + d} r="2.5" className={cn("hero-travel fill-brand stroke-none", c, d)} />))}
+  </g>;
+}
+
+export function Halo() {
+  return <g>
+    <circle cx="179" cy="100" r="70" className="fill-brand-halo-2" />
+    <circle cx="179" cy="100" r="50" className="fill-brand-halo-1" />
+  </g>;
+}

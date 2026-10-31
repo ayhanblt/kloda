@@ -1,0 +1,81 @@
+import { Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { Wrench, X } from "lucide-react";
+import { LANGS, useI18n } from "@/shared/i18n";
+import { useDemo } from "@/shared/model/demo-store";
+import { initDevFlag, setDevState, useDevSnapshot } from "@/shared/model/dev-panel";
+import { useThemePreference, type ThemePreference } from "@/shared/model/theme";
+import { cn } from "@/lib/utils";
+
+/** Prototype tooling only (labels intentionally untranslated). Visible with ?dev=1. */
+export function DevPanel() {
+  const dev = useDevSnapshot();
+  const [open, setOpen] = useState(false);
+  const { lang, setLang, t } = useI18n();
+  const { loadFull, reset } = useDemo();
+  const [theme, setTheme] = useThemePreference();
+  useEffect(() => initDevFlag(), []);
+  if (!dev.enabled) return null;
+
+  const chip = (on: boolean) =>
+    cn(
+      "min-h-8 rounded-[6px] border border-solid px-2 font-mono text-caption",
+      on ? "border-text-primary text-foreground" : "border-border-strong text-secondary-text",
+    );
+
+  return (
+    <div className="fixed bottom-4 left-4 z-[60] font-mono text-caption">
+      {open ? (
+        <div className="w-72 rounded-[10px] border border-solid border-border-strong bg-surface-1 p-3 text-foreground">
+          <div className="mb-2 flex items-center justify-between">
+            <span>DEV · {dev.code ?? "—"}</span>
+            <button aria-label="close dev panel" onClick={() => setOpen(false)} className="grid size-8 place-items-center"><X className="size-4" /></button>
+          </div>
+          {dev.states.length > 1 && (
+            <Group label="state">
+              {dev.states.map((s) => (
+                <button key={s} className={chip(dev.state === s)} onClick={() => setDevState(s)}>{t.homeStatus[s as keyof typeof t.homeStatus] as string ?? t.states[s as keyof typeof t.states] as string ?? s}</button>
+              ))}
+            </Group>
+          )}
+          <Group label="simulate">
+            {dev.actions.map((a) => (
+              <button key={a.id} className={chip(false)} onClick={a.run}>{a.label}</button>
+            ))}
+            <button className={chip(false)} onClick={loadFull}>demo: full</button>
+            <button className={chip(false)} onClick={reset}>demo: reset</button>
+          </Group>
+          <Button variant="tertiary" size="sm" asChild><Link to="/lock-screen">{t.lockScreen.title}</Link></Button>
+          <Group label="theme">
+            {(["system", "dark", "light"] as ThemePreference[]).map((p) => (
+              <button key={p} className={chip(theme === p)} onClick={() => setTheme(p)}>{p}</button>
+            ))}
+          </Group>
+          <Group label="lang">
+            {LANGS.map((l) => (
+              <button key={l.id} className={chip(lang === l.id)} onClick={() => setLang(l.id)}>{l.id}</button>
+            ))}
+          </Group>
+        </div>
+      ) : (
+        <button
+          aria-label="open dev panel"
+          onClick={() => setOpen(true)}
+          className="flex min-h-11 items-center gap-1.5 rounded-[10px] border border-solid border-border-strong bg-surface-1 px-3 text-foreground"
+        >
+          <Wrench className="size-4" /> DEV {dev.code && `· ${dev.code}`}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function Group({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="mt-2">
+      <p className="mb-1 text-tertiary-text">{label}</p>
+      <div className="flex flex-wrap gap-1">{children}</div>
+    </div>
+  );
+}

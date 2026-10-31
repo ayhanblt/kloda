@@ -1,0 +1,298 @@
+{
+  "projectId": "222ef478-8826-4712-b3c4-9703a823f69d",
+  "revision": "c144e98938da96f698f378972290ff3d1dd311eb",
+  "routes": [
+    {
+      "route": "/brand",
+      "source": "source/src/routes/brand.tsx.reference",
+      "imports": [
+        "@/shared/i18n",
+        "@/shared/ui/logo",
+        "@/shared/ui/kit",
+        "@/components/ui/button"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/d/backups",
+      "source": "source/src/routes/d.backups.tsx.reference",
+      "imports": [
+        "@/views/desktop/receiver"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/d/connections/$id",
+      "source": "source/src/routes/d.connections.$id.tsx.reference",
+      "imports": [
+        "@/views/desktop/outgoing"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/d/connections/",
+      "source": "source/src/routes/d.connections.index.tsx.reference",
+      "imports": [
+        "@/views/desktop/outgoing"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/d/connections/new/$provider",
+      "source": "source/src/routes/d.connections.new.$provider.tsx.reference",
+      "imports": [
+        "@/views/desktop/outgoing",
+        "@/entities/connection/model"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/d/connections/new/",
+      "source": "source/src/routes/d.connections.new.index.tsx.reference",
+      "imports": [
+        "@/views/desktop/outgoing"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/d/devices",
+      "source": "source/src/routes/d.devices.tsx.reference",
+      "imports": [
+        "@/views/desktop/receiver"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/d/incoming",
+      "source": "source/src/routes/d.incoming.tsx.reference",
+      "imports": [
+        "@/views/desktop/receiver"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/d/",
+      "source": "source/src/routes/d.index.tsx.reference",
+      "imports": [
+        "@/views/desktop/receiver"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/d/jobs",
+      "source": "source/src/routes/d.jobs.tsx.reference",
+      "imports": [
+        "@/views/desktop/outgoing"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/d/pair",
+      "source": "source/src/routes/d.pair.tsx.reference",
+      "imports": [
+        "@/views/desktop/receiver"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/d/settings",
+      "source": "source/src/routes/d.settings.tsx.reference",
+      "imports": [
+        "@/views/desktop/outgoing"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/d/sources",
+      "source": "source/src/routes/d.sources.tsx.reference",
+      "imports": [
+        "@/views/desktop/outgoing"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/d/trash",
+      "source": "source/src/routes/d.trash.tsx.reference",
+      "imports": [
+        "@/views/desktop/receiver"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/d/tray",
+      "source": "source/src/routes/d.tray.tsx.reference",
+      "imports": [
+        "@/views/desktop/outgoing"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/d",
+      "source": "source/src/routes/d.tsx.reference",
+      "imports": [
+        "@/widgets/desktop-shell/ui"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/d/welcome",
+      "source": "source/src/routes/d.welcome.tsx.reference",
+      "imports": [
+        "@/views/desktop/receiver"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/",
+      "source": "source/src/routes/index.tsx.reference",
+      "imports": [
+        "@/shared/i18n",
+        "@/shared/ui/logo",
+        "@/shared/ui/kit",
+        "@/features/lang-switch/ui",
+        "@/components/ui/button",
+        "@/entities/connection/model"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/lock-screen",
+      "source": "source/src/routes/lock-screen.tsx.reference",
+      "imports": [
+        "@/views/lock-screen"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/m/activity",
+      "source": "source/src/routes/m.activity.tsx.reference",
+      "imports": [
+        "@/views/mobile/activity"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/m/backups",
+      "source": "source/src/routes/m.backups.tsx.reference",
+      "imports": [
+        "@/views/mobile/activity-backups-settings"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/m/connections/$id",
+      "source": "source/src/routes/m.connections.$id.tsx.reference",
+      "imports": [
+        "@/views/mobile/connections",
+        "@/entities/connection/model"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/m/connections/",
+      "source": "source/src/routes/m.connections.index.tsx.reference",
+      "imports": [
+        "@/views/mobile/connections"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/m/connections/new/$provider",
+      "source": "source/src/routes/m.connections.new.$provider.tsx.reference",
+      "imports": [
+        "@/views/mobile/connections",
+        "@/entities/connection/model"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/m/connections/new/",
+      "source": "source/src/routes/m.connections.new.index.tsx.reference",
+      "imports": [
+        "@/views/mobile/connections"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/m/",
+      "source": "source/src/routes/m.index.tsx.reference",
+      "imports": [
+        "@/views/mobile/status"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/m/pair-pc",
+      "source": "source/src/routes/m.pair-pc.tsx.reference",
+      "imports": [
+        "@/views/mobile/connections"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/m/pair-qr",
+      "source": "source/src/routes/m.pair-qr.tsx.reference",
+      "imports": [
+        "@/views/mobile/connections"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/m/photo/$id",
+      "source": "source/src/routes/m.photo.$id.tsx.reference",
+      "imports": [
+        "@/views/mobile/photo-detail",
+        "@/entities/photo/model"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/m/photos",
+      "source": "source/src/routes/m.photos.tsx.reference",
+      "imports": [
+        "@/views/mobile/gallery"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/m/schedule",
+      "source": "source/src/routes/m.schedule.tsx.reference",
+      "imports": [
+        "@/views/mobile/onboarding"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/m/settings",
+      "source": "source/src/routes/m.settings.tsx.reference",
+      "imports": [
+        "@/views/mobile/activity-backups-settings"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/m/sources",
+      "source": "source/src/routes/m.sources.tsx.reference",
+      "imports": [
+        "@/views/mobile/onboarding"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/m",
+      "source": "source/src/routes/m.tsx.reference",
+      "imports": [
+        "@/widgets/mobile-shell/ui"
+      ],
+      "scope": "design reference; demo only"
+    },
+    {
+      "route": "/m/welcome",
+      "source": "source/src/routes/m.welcome.tsx.reference",
+      "imports": [
+        "@/views/mobile/onboarding"
+      ],
+      "scope": "design reference; demo only"
+    }
+  ]
+}

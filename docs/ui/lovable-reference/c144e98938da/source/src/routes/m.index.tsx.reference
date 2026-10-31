@@ -1,0 +1,16 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { MobileStatus } from "@/views/mobile/status";
+
+export const Route = createFileRoute("/m/")({
+  head: () => ({
+    meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { title: "Durum — Kloda" },
+      { name: "description", content: "Kloda yedekleme durumu, hedefler ve son etkinlikler." },
+      { property: "og:title", content: "Durum — Kloda" },
+      { property: "og:description", content: "Kloda yedekleme durumu, hedefler ve son etkinlikler." },
+    ],
+  }),
+  component: MobileStatus,
+});

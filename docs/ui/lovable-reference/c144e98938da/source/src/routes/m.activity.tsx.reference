@@ -1,0 +1,16 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { MobileActivity } from "@/views/mobile/activity";
+
+export const Route = createFileRoute("/m/activity")({
+  head: () => ({
+    meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { title: "Etkinlik — Kloda" },
+      { name: "description", content: "Kloda prototipi: Etkinlik." },
+      { property: "og:title", content: "Etkinlik — Kloda" },
+      { property: "og:description", content: "Kloda prototipi: Etkinlik." },
+    ],
+  }),
+  component: MobileActivity,
+});

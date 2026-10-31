@@ -1,0 +1,88 @@
+import { useEffect, useSyncExternalStore } from "react";
+
+export type Appearance = "light" | "dark";
+export type ThemePreference = "system" | "light" | "dark";
+
+const STORAGE_KEY = "kloda-theme";
+
+/** Explicit system light wins; dark is the fallback for an unspecified system. */
+export function resolveAppearance(systemLight: boolean): Appearance {
+  return systemLight ? "light" : "dark";
+}
+
+/** User preference: "system" follows the OS, explicit values override it. */
+export function resolvePreference(pref: ThemePreference, systemLight: boolean): Appearance {
+  return pref === "system" ? resolveAppearance(systemLight) : pref;
+}
+
+export function loadThemePreference(): ThemePreference {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (raw === "system" || raw === "light" || raw === "dark") return raw;
+  } catch {
+    /* storage unavailable */
+  }
+  return "system";
+}
+
+export function saveThemePreference(pref: ThemePreference): void {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, pref);
+  } catch {
+    /* storage unavailable */
+  }
+}
+
+export function applyAppearance(root: HTMLElement, appearance: Appearance): void {
+  root.classList.toggle("dark", appearance === "dark");
+  root.classList.toggle("light", appearance === "light");
+}
+
+export function followSystemAppearance(
+  media: MediaQueryList,
+  root: HTMLElement,
+): () => void {
+  const apply = () => applyAppearance(root, resolveAppearance(media.matches));
+  apply();
+  media.addEventListener("change", apply);
+  return () => media.removeEventListener("change", apply);
+}
+
+let current: ThemePreference = "system";
+let loaded = false;
+const subs = new Set<() => void>();
+function subscribePref(l: () => void) {
+  subs.add(l);
+  return () => subs.delete(l);
+}
+
+/**
+ * Shared theme preference applied to <html>: "system" re-follows live OS changes;
+ * explicit light/dark pins the theme. Every caller sees the same value.
+ */
+export function useThemePreference(): [ThemePreference, (pref: ThemePreference) => void] {
+  const pref = useSyncExternalStore(subscribePref, () => current, () => "system" as ThemePreference);
+
+  useEffect(() => {
+    if (loaded) return;
+    loaded = true;
+    current = loadThemePreference();
+    subs.forEach((l) => l());
+  }, []);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-color-scheme: light)");
+    const apply = () => applyAppearance(document.documentElement, resolvePreference(pref, media.matches));
+    apply();
+    if (pref !== "system") return;
+    media.addEventListener("change", apply);
+    return () => media.removeEventListener("change", apply);
+  }, [pref]);
+
+  const set = (next: ThemePreference) => {
+    saveThemePreference(next);
+    current = next;
+    subs.forEach((l) => l());
+  };
+  return [pref, set];
+}

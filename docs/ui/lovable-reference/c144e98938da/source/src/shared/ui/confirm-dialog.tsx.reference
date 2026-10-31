@@ -1,0 +1,62 @@
+import type { ReactNode } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { buttonVariants } from "@/components/ui/button";
+import { useI18n } from "@/shared/i18n";
+
+/** Shared confirmation dialog for all destructive / consent actions. */
+export function ConfirmDialog({
+  trigger,
+  title,
+  body,
+  confirm,
+  cancel,
+  destructive,
+  onConfirm,
+  extra,
+}: {
+  trigger: ReactNode;
+  title: string;
+  body: string;
+  confirm: string;
+  cancel?: string;
+  destructive?: boolean;
+  onConfirm?: () => void;
+  extra?: ReactNode;
+}) {
+  const { t } = useI18n();
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
+      <AlertDialogContent className="glass rounded-2xl border-border-subtle">
+        <AlertDialogHeader>
+          <div>
+          </div>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{body}</AlertDialogDescription>
+        </AlertDialogHeader>
+        {extra}
+        <AlertDialogFooter>
+          <AlertDialogCancel className={buttonVariants({ variant: "outline" })}>
+            {cancel ?? t.common.cancel}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={onConfirm}
+            className={buttonVariants({ variant: destructive ? "dangerConfirm" : "default" })}
+          >
+            {confirm}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}

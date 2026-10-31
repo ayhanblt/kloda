@@ -1,0 +1,363 @@
+{
+  "phase": "UI interlude implemented and reviewed; RN Web/desktop renderer visual evidence; native acceptance gates remain open",
+  "recordedAt": "2026-10-30T21:25:58.845588+00:00",
+  "reference": {
+    "project": "222ef478-8826-4712-b3c4-9703a823f69d",
+    "alias": "lovp_58pzgrcxca9eprfz8zt9sjhg5h",
+    "revision": "c144e98938da96f698f378972290ff3d1dd311eb",
+    "manifest": "../../../ui/lovable-reference/c144e98938da/manifest.json",
+    "oldSnapshotRetirement": "../../../ui/lovable-reference/c144e98938da/lovable-retirement.json"
+  },
+  "checks": {
+    "mobileJest": "PASS 168 tests / 24 suites",
+    "mobileReviewJest": "PASS 31 tests / 4 affected suites; subsequent shared-button class regression PASS 5 tests",
+    "mobileTypes": "PASS final real App restored",
+    "mobileLint": "PASS",
+    "desktopVitest": "PASS 325 tests / 31 suites with installed Node22.15.0; existing SQLite binding requires ABI127, default Node26 ABI147 was blocked",
+    "desktopFinalReview": "PASS 17 tests / 3 affected suites after final native HTML radio/document-language change",
+    "desktopLint": "PASS",
+    "desktopBuild": "PASS full existing build command",
+    "basePaletteParity": "PASS all 32 base values in both modes match between desktop/mobile",
+    "rawColorSweep": "PASS no raw palette values outside each shared/theme/tokens file; Tailwind references use variables",
+    "lineLimit": "PASS all production frontend source files <=300 lines",
+    "nativeProtection": "PASS all 299 pre-UI source hashes unchanged",
+    "dependencies": "PASS all 4 backed-up dependency manifests/lock files byte-identical; temporary web packages only, npm audit 0 vulnerabilities",
+    "sameAgentReview": "PASS scoped UI review by same main agent, not independent review; fixed missing-target false-safe, two nested row cards, malformed button color class, radio checked/keyboard behavior and document language; global native acceptance remains open",
+    "unusedExports": "Conservative named-declaration lexical audit across application source/tests: no single-occurrence named exported declaration. Not a cross-language/public API deletion proof."
+  },
+  "nativeVisualGate": {
+    "status": "BLOCKED, not PASS",
+    "simulator": "497AAA0F-967E-4781-9468-3F05CA2D3D5A Kloda-WebDAV15-Disposable",
+    "bundle": "com.kloda.app",
+    "artifact": "Previously built Xcode DerivedData app, no new signing/native build",
+    "failures": [
+      "Existing binary lacks RNGestureHandlerModule",
+      "Observed native Worklets0.13.0 vs mobile JS0.10.1; mobile Reanimated4.5.1 vs root4.7.0"
+    ],
+    "cleanup": "Real App.tsx restored byte-for-byte after isolated preview, Metro8087 stopped and test app terminated; no Photos mutation. Existing app installed in disposable Simulator only. Prior owned fixture app terminated to clear the test URL opening prompt; its data retained.",
+    "screenshot": "/Users/ayhanblt/Desktop/projects/kloda/.local-evidence/ui-lovable-2026-10-30/native-preview-blocked.png"
+  },
+  "notRun": [
+    "Fresh native layout/OS accessibility/production signing/background/physical acceptance; existing binary/JS mismatch remains BLOCKED",
+    "Physical device tests: step21 only with explicit permission",
+    "Independent-agent review (user requires main agent only)",
+    "Any closure of 11/12/13/15/20/21 gates; prior evidence remains historical"
+  ],
+  "sourceSha256": {
+    "apps/mobile/App.tsx": "5ab040906a655b41f328444b734415ad7a1a1561be6508e55cce110e7a69621d",
+    "apps/mobile/tailwind.config.js": "794560ae820034af42d9f00acc4e2cc61ff213e694d51c10117ec0c6f82e3bae",
+    "apps/mobile/src/app/App.tsx": "da106d5cc050028595122c58cf760aedba98ff17804e69a012f05872c9d88221",
+    "apps/mobile/src/app/App.spec.tsx": "aa904a53435de3941078d772e49c50e74af9b6d885f02c49a4cbbf66a7ff5d46",
+    "apps/mobile/src/pages/home/ui/home-page.tsx": "42b5cb0f0998cc39dc15d0ac12f3e76a9b95d572019e623694d503ba2ce33dc4",
+    "apps/mobile/src/pages/home/ui/home-page.spec.tsx": "8d7dc8b536cbe8388cfc71d26aff5c8f102a9c525b43a8956215df30018b69e8",
+    "apps/mobile/src/pages/home/model/home-status.ts": "e780e4d305145b7b66a3208b987ba3f0dfa93a14616b235fe4a559f7d690d6b0",
+    "apps/mobile/src/pages/home/model/home-status.spec.ts": "a6061296bbb825cc93cfd4660d148b2477327761ebc2a5efe97e7d2d1a0a014d",
+    "apps/mobile/src/pages/home/model/use-home-status.ts": "f0a96b117a15483221a840a1256a3a91394cc2f006b85ad355af4363a41f214e",
+    "apps/mobile/src/pages/photos/ui/photos-page.tsx": "8e70f422582bad35608e12d4644c92cf1df6c1ec47687992f006f88f46f0a1b3",
+    "apps/mobile/src/pages/settings/ui/settings-page.tsx": "40333c2c579cc33a7036c70b964dc55a33eee8d60cbd77dd406c4391d8067f4d",
+    "apps/mobile/src/widgets/mobile-shell/ui.tsx": "d1bad0d934c2c46287fe610658d77ccc2bed27ec73e4aaa1ac4c91f8d88babfa",
+    "apps/mobile/src/shared/model/home-status.ts": "a13c9059da10ce1acf98f5457d6aad7ffb897dcd650206334fc525a4e6c4d369",
+    "apps/mobile/src/shared/model/mobile-navigation.ts": "1ab55d2e96afc5302556d272ec572e5df8119ca5fd8fdc4b44fad9fe911e286a",
+    "apps/mobile/src/shared/ui/status-hero.tsx": "dcdbd2744119f82910f6adeaf525ecd7b08c60b713d97fcdbb6f9edd5dbf37f9",
+    "apps/mobile/src/shared/ui/byte-progress.tsx": "8791b2788f59b8e1b6a89ea6fed17edfa3a1008de8f30236e72772dbd19105f1",
+    "apps/mobile/src/shared/theme/tokens.ts": "e639d70dd8d6f9966b7ce3409af224a353770eb4fcb08682395db1173f687f35",
+    "apps/mobile/src/shared/theme/theme-provider.tsx": "46c5a318180d7048b84b9e3cb9009a8e5b7ae5194c7448d6acb53f0aee196c7d",
+    "apps/mobile/src/shared/i18n/locales/tr.json": "af7243bd5baa1e15d247b7ec6d739eef441b9d3cbcf694463375b0fecf22361d",
+    "apps/mobile/src/shared/i18n/locales/en.json": "fdecdb24ffae5a67a2f1879f8f5c10cec10e45ea6baa7c7e574ddc6454d9b80c",
+    "apps/mobile/src/shared/i18n/locales/de.json": "155c75a989024745ff7da7b6189a0d1df439a9e2dbc649e8cf0be5d05d152a6d"
+  },
+  "logsSha256": {
+    "status-tests.log": "25609950ecbac7fb1ca997f709450fa463eefda3c23531a7217b8d674d0d6d25",
+    "app-tests.log": "591b6c25c70a7ef95e7e9249712b5a53e0a70c6bd724c5a7839de6e4064ff7f3",
+    "mobile-types.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mobile-scoped-lint.log": "6839ad0642096b6f1a8168fd8940098422a34c6d80129b85dfe7eb3ae24b0942",
+    "last-test-lint.log": "6839ad0642096b6f1a8168fd8940098422a34c6d80129b85dfe7eb3ae24b0942",
+    "native-preview-blocked.log": "c3e8c9fde0fa6616d4be4e1d3f9b350193a0a44fd3f49b74f0c986a9c6f6316e"
+  },
+  "deletedProductFiles": [],
+  "nativeResumeAfterUi": "16a: native profile/vault + real OS LAN/current-source owner binding/generation; one selected Files source; then own catalog/restore/restart review and Photos own-resource binding/publication/restore.",
+  "cleanup": {
+    "deletedProductionFiles": [
+      "apps/mobile/src/shared/ui/tokens.ts"
+    ],
+    "oldReferenceRetirement": "Prior cb1143 snapshot retirement already recorded separately in lovable-retirement.json; not repeated",
+    "removedTranslationLeafKeys": {
+      "mobile": 449,
+      "desktop": 2
+    },
+    "dynamicTranslationFamilies": "Retained conservatively; exact removed keys and prefixes in translation-cleanup.json",
+    "legacyPalette": "Removed mobile old Tailwind hex block and desktop old palette; removed global language control/legacy navigation CSS",
+    "safety": "No git mutations, new product dependency, native rebuild, camera/Photos mutation, credentials entry or backup/restore invoked by the visual fixture"
+  },
+  "approvedDecisions": {
+    "contrast": {
+      "source": "light primary #1F9C8C + white text, 14px, ratio3.39",
+      "proposal": "use existing #0F7266 light primary, ratio5.80; dark unchanged",
+      "status": "APPROVED A 2026-10-30; light primary uses existing brand-text",
+      "authority": "https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html",
+      "proposalScreenshot": "screenshots/contrast-proposal.jpg"
+    },
+    "visualPath": {
+      "proposal": "Isolated temporary RN Web fixture environment; react-native-web0.21.4 and @expo/metro-runtime57.0.17, both MIT, no existing product/native dependency edits. Explicit web-only evidence, no native acceptance claim.",
+      "alternative": "Evaluate one isolated iOS build without touching original protected source",
+      "status": "APPROVED A 2026-10-30; isolated temporary web packages only"
+    },
+    "focus": {
+      "status": "APPROVED A user reply 2026-10-31",
+      "light": "solid existing brand-base, ratio3.19; dark unchanged"
+    }
+  },
+  "webVisualGate": {
+    "status": "PASS scoped web evidence only",
+    "mobile": "4 Status safe/syncing × dark/light + 28 representative family/theme frames, 428×844 layout capture; no native bridge, real current UI with explicit ignored fixture controls",
+    "desktop": "28 renderer browser frames; native bridge unavailable state is shown honestly",
+    "measurements": [
+      "mobile-web-measurements.json",
+      "desktop-web-measurements.json"
+    ],
+    "limitations": "Viewport images show current visible region, not every scrolled row or live OS/native behavior. Gallery has no personal-media previews in web. Native pending/permission/restore/error modal branches retain unit/old scoped evidence, not newly native accepted.",
+    "screenshots": [
+      {
+        "path": "screenshots/mobile-web/activity-dark.jpg",
+        "sha256": "f8f7ccf22684c1eabd31ef0396ebdbbbb5ff254631fd13b833c32dd4e61836fc"
+      },
+      {
+        "path": "screenshots/mobile-web/activity-light.jpg",
+        "sha256": "d34f9a65843849ec4c55e13aeaa3c03214c9dfbd38d9c06a38f272a0fa0016c1"
+      },
+      {
+        "path": "screenshots/mobile-web/backups-dark.jpg",
+        "sha256": "348b2d7039df9be9a93955760fd3b1fe5f1ce8f78d823ba6b60c304d4f73cbc3"
+      },
+      {
+        "path": "screenshots/mobile-web/backups-light.jpg",
+        "sha256": "e96e25de79a2e35986a7b8bb87ff7ba6c518a063a0c3f9b7c3abd5a07505cc56"
+      },
+      {
+        "path": "screenshots/mobile-web/blocked-provider-dark.jpg",
+        "sha256": "fa7a4fe79a2f321d9887d2396d3bd56cb4170717046750938da17e70cbede72c"
+      },
+      {
+        "path": "screenshots/mobile-web/blocked-provider-light.jpg",
+        "sha256": "a8e70fa69058bfc824b186f4ff761bc31e77774c1fa81a36db0a54806d76cf72"
+      },
+      {
+        "path": "screenshots/mobile-web/computer-dark.jpg",
+        "sha256": "7fd48b7647631b62e5f4d0973e803e5cb621bc5262465b68aface3c5b00c2855"
+      },
+      {
+        "path": "screenshots/mobile-web/computer-light.jpg",
+        "sha256": "c38b08c04ba20c546dad2c0711c098f44ac489e55e1f8470b4b8eef967226e02"
+      },
+      {
+        "path": "screenshots/mobile-web/destinations-dark.jpg",
+        "sha256": "6ecfdd6e34d8d6141ca647167c58f1361ef0af8028ae139d23e151cc8d853c0c"
+      },
+      {
+        "path": "screenshots/mobile-web/destinations-light.jpg",
+        "sha256": "7d276b1b622d6bf797e60f6c45c9f70ad396295d9d74cc7cfdac75a6ff7d2529"
+      },
+      {
+        "path": "screenshots/mobile-web/mobile-safe-dark.jpg",
+        "sha256": "b631ed90d10ace573cde5a9e92222353b80ae97c2431eed42fc79cf9bcf85888"
+      },
+      {
+        "path": "screenshots/mobile-web/mobile-safe-light.jpg",
+        "sha256": "082e308c0b4960147d07a2f9a80abe08b4a43758695bfc96f42f866f759ec542"
+      },
+      {
+        "path": "screenshots/mobile-web/mobile-syncing-dark.jpg",
+        "sha256": "20965f4a0c892225187ff48d554f080da7e2dd9617ccccabbc24182503beef87"
+      },
+      {
+        "path": "screenshots/mobile-web/mobile-syncing-light.jpg",
+        "sha256": "79c6958c095ae0b98605e06bb325e17e48f7463eae1e77f8329df6549acc6a02"
+      },
+      {
+        "path": "screenshots/mobile-web/pairing-dark.jpg",
+        "sha256": "602726305e25ee05e93bfcf3ce5b82c7931194aa5870e3a6e5d76b539a760ca8"
+      },
+      {
+        "path": "screenshots/mobile-web/pairing-help-dark.jpg",
+        "sha256": "e5d4cfaa30e8666e4189b8964b1992a0338573cfa009621229ab38d6a24314fe"
+      },
+      {
+        "path": "screenshots/mobile-web/pairing-help-light.jpg",
+        "sha256": "1d2f71f3e8aa7605bf1e9b565de6fc18bf24f4a2771d1aea0974d6ac014d3a05"
+      },
+      {
+        "path": "screenshots/mobile-web/pairing-light.jpg",
+        "sha256": "5c6c848709eb510336ed5eb49e6934d4adeeb0a50873fe9d163f94dd1c669dca"
+      },
+      {
+        "path": "screenshots/mobile-web/photos-dark.jpg",
+        "sha256": "d4cf3800458fc361391fd490909a650283b8be7980f3290930466ed903c2676a"
+      },
+      {
+        "path": "screenshots/mobile-web/photos-light.jpg",
+        "sha256": "c35a89781abe1298f7e7ef3e4b3470acee5e4d52277d71ccbd36d03468ed9619"
+      },
+      {
+        "path": "screenshots/mobile-web/provider-list-dark.jpg",
+        "sha256": "7d97f2ac949c1d2db7794dd9cb827ae6a54610b74058ff81847a96531c7d8bcf"
+      },
+      {
+        "path": "screenshots/mobile-web/provider-list-light.jpg",
+        "sha256": "c0fa6a8cef1e8332a0a99cc379ce36d28133848efaed48847a1def39f3002913"
+      },
+      {
+        "path": "screenshots/mobile-web/schedule-dark.jpg",
+        "sha256": "d857467790be78d940910396d0d0e4b6802b2319f78db73d38184c6ceae80672"
+      },
+      {
+        "path": "screenshots/mobile-web/schedule-light.jpg",
+        "sha256": "58b5f59dbc3ae39e60de6e8e94d22b119d44c4dce237bb43e277fd88eddb22ff"
+      },
+      {
+        "path": "screenshots/mobile-web/settings-dark.jpg",
+        "sha256": "553d123c45edc93941652cf00d1c1e6330fb32c5234ec468245cdd6e7a3eb5e5"
+      },
+      {
+        "path": "screenshots/mobile-web/settings-light.jpg",
+        "sha256": "98e1fe40bd280970707bebf699c020b6c4ad0f9c2e666ca30a9f0ad229839200"
+      },
+      {
+        "path": "screenshots/mobile-web/sources-dark.jpg",
+        "sha256": "17a0fa13f4ca4d68a71d122f1a6fdce04577a5e2889264cd005123a02ff18a3c"
+      },
+      {
+        "path": "screenshots/mobile-web/sources-light.jpg",
+        "sha256": "c28ad144b944aa84e4894a3a93fc9ad1315d466438dcad44913ee59e4c4e36a7"
+      },
+      {
+        "path": "screenshots/mobile-web/webdav-dark.jpg",
+        "sha256": "a570a177d06100c14b44a13ddf5d80b02ea4c3f9b73d4d869258626084504031"
+      },
+      {
+        "path": "screenshots/mobile-web/webdav-light.jpg",
+        "sha256": "9e57cc9b9c5a1a1fbf937e11e73ee3afa444acc54c15293200feec4aeb18796e"
+      },
+      {
+        "path": "screenshots/mobile-web/welcome-dark.jpg",
+        "sha256": "8edd8a5b3d0b4435ab267d8e1d4f03072e6d42442be760e9fb00b3c5a86699aa"
+      },
+      {
+        "path": "screenshots/mobile-web/welcome-light.jpg",
+        "sha256": "6203b0cdce0669dd9807c40822c4c4ce332ed080a0760bf7c2b23a8e36b86571"
+      },
+      {
+        "path": "screenshots/desktop-web/backup-dark.jpg",
+        "sha256": "44bdb205e78e69a56ae46a127003320f4e5f82577a0fb1cf2cdbe6dd8d9cc84c"
+      },
+      {
+        "path": "screenshots/desktop-web/backup-light.jpg",
+        "sha256": "9683996105ee12a39be64dd0a8e0f069e6c3c98e0b4dd29230e65f134baf84b7"
+      },
+      {
+        "path": "screenshots/desktop-web/backups-dark.jpg",
+        "sha256": "2908bc50efd660d5f632d4af874221ad7872a3cde76bb9ba4acdc86cec1bf1ac"
+      },
+      {
+        "path": "screenshots/desktop-web/backups-light.jpg",
+        "sha256": "0bc27a0457b9cbb2cf2872a132fc2aa683b025bbafde8ab6f42a6197e7898a7a"
+      },
+      {
+        "path": "screenshots/desktop-web/blocked-provider-dark.jpg",
+        "sha256": "765e668e832514713434a1ee9dd5a17a628eeb85c04dd633318071c68240878d"
+      },
+      {
+        "path": "screenshots/desktop-web/blocked-provider-light.jpg",
+        "sha256": "44aeaad7745ac32f5a65b06297655cfa00a8f8b564114f537f3a66f7b56a2eac"
+      },
+      {
+        "path": "screenshots/desktop-web/connection-add-dark.jpg",
+        "sha256": "ceb5c8c2b4c0ecae7a7625aacf4bba92f917cf52aa10b62a2a861c7944a59d81"
+      },
+      {
+        "path": "screenshots/desktop-web/connection-add-light.jpg",
+        "sha256": "6a5dce6ff7607ad660b27a1f2e7242a5e0a3d183240de6711248783f363ace06"
+      },
+      {
+        "path": "screenshots/desktop-web/connections-dark.jpg",
+        "sha256": "2908bc50efd660d5f632d4af874221ad7872a3cde76bb9ba4acdc86cec1bf1ac"
+      },
+      {
+        "path": "screenshots/desktop-web/connections-light.jpg",
+        "sha256": "0bc27a0457b9cbb2cf2872a132fc2aa683b025bbafde8ab6f42a6197e7898a7a"
+      },
+      {
+        "path": "screenshots/desktop-web/devices-dark.jpg",
+        "sha256": "2408d3354d17db757723db7cf7053070c9df2c3b56601301c0117774cfa03137"
+      },
+      {
+        "path": "screenshots/desktop-web/devices-light.jpg",
+        "sha256": "9283ba3fdc7e228fd8c33c6ca71fad2d64a26fde98340852a3d2a4b91796fb9d"
+      },
+      {
+        "path": "screenshots/desktop-web/incoming-dark.jpg",
+        "sha256": "2408d3354d17db757723db7cf7053070c9df2c3b56601301c0117774cfa03137"
+      },
+      {
+        "path": "screenshots/desktop-web/incoming-light.jpg",
+        "sha256": "8569f7870bf9de242f083b588b2ca3f4d5dbcb2fa5c9bff4b844f80518733745"
+      },
+      {
+        "path": "screenshots/desktop-web/jobs-dark.jpg",
+        "sha256": "739a86891d32d971c93d12ef70293da6e27221c9fefdd7406e35f7ae98d136be"
+      },
+      {
+        "path": "screenshots/desktop-web/jobs-light.jpg",
+        "sha256": "ba38c15efb005c6dbb419419a9a04fe78417821a21c94d692d20dadf95d3d763"
+      },
+      {
+        "path": "screenshots/desktop-web/pairing-dark.jpg",
+        "sha256": "f5587c4b69a951f469337019fefe145d11d58699457e31cd662952c41325c841"
+      },
+      {
+        "path": "screenshots/desktop-web/pairing-light.jpg",
+        "sha256": "23843b813aa1c1fe52ab4d0fe32a5fe17dc8604e0b979a4c7e63c27b7953df03"
+      },
+      {
+        "path": "screenshots/desktop-web/receiver-dark.jpg",
+        "sha256": "d91ce29cb9d473a184131b8e5b39527b627bac836869d5a3fffe96344c2a994b"
+      },
+      {
+        "path": "screenshots/desktop-web/receiver-light.jpg",
+        "sha256": "573cc38d45044914892ebb13917d607239563f81076e7e6a49063494e929aef6"
+      },
+      {
+        "path": "screenshots/desktop-web/settings-dark.jpg",
+        "sha256": "71830a862b0324f63a59150c173694fd077dead7b1a1d7be50f8aa1f2184f500"
+      },
+      {
+        "path": "screenshots/desktop-web/settings-light.jpg",
+        "sha256": "386211f246962327b8ae495e7240f7c5fdf60391f6a936586a1d4853a8f09235"
+      },
+      {
+        "path": "screenshots/desktop-web/trash-dark.jpg",
+        "sha256": "2908bc50efd660d5f632d4af874221ad7872a3cde76bb9ba4acdc86cec1bf1ac"
+      },
+      {
+        "path": "screenshots/desktop-web/trash-light.jpg",
+        "sha256": "0bc27a0457b9cbb2cf2872a132fc2aa683b025bbafde8ab6f42a6197e7898a7a"
+      },
+      {
+        "path": "screenshots/desktop-web/tray-dark.jpg",
+        "sha256": "6353ceb5a71814c9fc90acb36bbd50a73ff19386858e974d07215cf8b8b4f053"
+      },
+      {
+        "path": "screenshots/desktop-web/tray-light.jpg",
+        "sha256": "506e436513c73ff4d6ef8c69dd370a7f2bb8ad116ff959f4fec10b13b7678f68"
+      },
+      {
+        "path": "screenshots/desktop-web/welcome-dark.jpg",
+        "sha256": "9fa5d1491fdef284baff2226c59c19e753ed1acd20630fd8bcae767ff4157d35"
+      },
+      {
+        "path": "screenshots/desktop-web/welcome-light.jpg",
+        "sha256": "d51cc5f042a6c3403c71d7c3720ec570ea4d4c18220020500e90f9827e38d860"
+      }
+    ]
+  },
+  "next": "Resume step16a exact saved native profile/vault + OS LAN/current-source owner/generation binding; SMB remains disabled until gates pass."
+}

@@ -1,0 +1,83 @@
+import { useEffect, useRef, useSyncExternalStore } from "react";
+
+/**
+ * Prototype-only tooling store. Screens register their screen code, demo states and
+ * simulate actions here; the hidden Dev panel (?dev=1) renders them. Product UI never does.
+ */
+export type DevAction = { id: string; label: string; run: () => void };
+
+type DevSnapshot = {
+  enabled: boolean;
+  code: string | null;
+  states: string[];
+  state: string;
+  actions: DevAction[];
+};
+
+const FLAG = "kloda-dev";
+let snap: DevSnapshot = { enabled: false, code: null, states: [], state: "success", actions: [] };
+const listeners = new Set<() => void>();
+
+function update(patch: Partial<DevSnapshot>) {
+  snap = { ...snap, ...patch };
+  listeners.forEach((l) => l());
+}
+function subscribe(l: () => void) {
+  listeners.add(l);
+  return () => listeners.delete(l);
+}
+const server: DevSnapshot = snap;
+
+export function useDevSnapshot(): DevSnapshot {
+  return useSyncExternalStore(subscribe, () => snap, () => server);
+}
+
+/** Reads ?dev=1 once on the client and persists it for the session. */
+export function initDevFlag() {
+  try {
+    const q = new URLSearchParams(window.location.search).get("dev");
+    if (q === "1") sessionStorage.setItem(FLAG, "1");
+    if (q === "0") sessionStorage.removeItem(FLAG);
+    update({ enabled: sessionStorage.getItem(FLAG) === "1" });
+  } catch {
+    /* storage unavailable */
+  }
+}
+
+export function setDevState(state: string) {
+  update({ state });
+}
+
+/** Registers the current screen code (shown only in the Dev panel). */
+export function useDevScreen(code: string | undefined) {
+  useEffect(() => {
+    if (!code) return;
+    update({ code });
+    return () => {
+      if (snap.code === code) update({ code: null });
+    };
+  }, [code]);
+}
+
+/** Registers demo states for the current screen and returns the active one. */
+export function useDevStates(states: string[]): string {
+  const key = states.join("|");
+  useEffect(() => {
+    update({ states: ["success", ...states.filter((s) => s !== "success")], state: "success" });
+    return () => update({ states: [], state: "success" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  return useDevSnapshot().state;
+}
+
+/** Registers a simulate action while `active` is true. */
+export function useDevAction(id: string, label: string, run: () => void, active = true) {
+  const ref = useRef(run);
+  ref.current = run;
+  useEffect(() => {
+    if (!active) return;
+    const action: DevAction = { id, label, run: () => ref.current() };
+    update({ actions: [...snap.actions.filter((a) => a.id !== id), action] });
+    return () => update({ actions: snap.actions.filter((a) => a.id !== id) });
+  }, [id, label, active]);
+}

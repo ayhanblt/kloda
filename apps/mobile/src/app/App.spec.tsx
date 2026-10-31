@@ -184,15 +184,17 @@ describe('App', () => {
     await i18n.changeLanguage(language);
     const surface = await render(<App />);
     await fireEvent.press(surface.getByText(i18n.t('ui.common.skip')));
-    expect(surface.getByRole('tab', { name: i18n.t('ui.nav.gallery') }).props.accessibilityState.selected).toBe(true);
-    expect(surface.getByText(i18n.t('ui.galleryNotLoaded'))).toBeTruthy();
-    expect(surface.getByText(i18n.t('ui.observedUnknown'))).toBeTruthy();
+    expect(surface.getByRole('tab', { name: i18n.t('statusUi.title') }).props.accessibilityState.selected).toBe(true);
+    await waitFor(() => expect(surface.getByRole('header', { name: i18n.t('statusUi.states.setup') })).toBeTruthy());
+    await fireEvent.press(surface.getByRole('tab', { name: i18n.t('statusUi.photos') }));
+    await waitFor(() => expect(surface.getByText(i18n.t('ui.gallery.noSource'))).toBeTruthy());
+    expect(surface.queryByText(i18n.t('ui.observedUnknown'))).toBeNull();
     expect(nativeRuntime.saveSchedule).not.toHaveBeenCalled();
     expect(nativeRuntime.saveLiveSchedule).not.toHaveBeenCalled();
     expect(nativeRuntime.saveStorageConfig).not.toHaveBeenCalled();
     expect(nativeRuntime.selectPhotoLibrary).not.toHaveBeenCalled();
     expect(testAndSaveWebDavSettings).not.toHaveBeenCalled();
-    await fireEvent.press(surface.getByRole('tab', { name: i18n.t('ui.nav.connections') }));
+    await fireEvent.press(surface.getByRole('tab', { name: i18n.t('statusUi.targets') }));
     await fireEvent.press(surface.getByText(i18n.t('ui.conn.add')));
     for (const id of ['webdav','smb','ftp','sftp','s3-compatible','amazon-s3','box','cloudme','dropbox','google-drive','google-cloud-storage','kolab-now','mega','onedrive','nextcloud','yandex-disk']) {
       expect(surface.getByRole('button', { name: i18n.t(`ui.providers.${id}`) })).toBeTruthy();
@@ -221,7 +223,7 @@ describe('App', () => {
     const surface = await render(<App />);
     await fireEvent.press(surface.getByText(i18n.t('ui.common.skip')));
     expect(surface.getAllByRole('tab')).toHaveLength(4);
-    await fireEvent.press(surface.getByRole('tab', { name: i18n.t('ui.nav.connections') }));
+    await fireEvent.press(surface.getByRole('tab', { name: i18n.t('statusUi.targets') }));
     expect(surface.getByText(i18n.t('ui.pcInspect'))).toBeTruthy();
     fontScale = 1;
     await surface.rerender(<App />);

@@ -1,0 +1,82 @@
+import type { ReactNode } from "react";
+import { useDevStates } from "@/shared/model/dev-panel";
+import {
+  AlertTriangle,
+  Ban,
+  CircleSlash,
+  CloudOff,
+  HardDrive,
+  Inbox,
+  KeyRound,
+  Loader2,
+  ShieldX,
+  SplitSquareHorizontal,
+  type LucideIcon,
+} from "lucide-react";
+import { useI18n } from "@/shared/i18n";
+import { EmptyState } from "./kit";
+import { Skeleton } from "@/components/ui/skeleton";
+
+export type ViewState =
+  | "success"
+  | "empty"
+  | "loading"
+  | "offline"
+  | "denied"
+  | "reauth"
+  | "full"
+  | "interrupted"
+  | "partial"
+  | "unsupported";
+
+const icons: Record<Exclude<ViewState, "success" | "loading">, LucideIcon> = {
+  empty: Inbox,
+  offline: CloudOff,
+  denied: ShieldX,
+  reauth: KeyRound,
+  full: HardDrive,
+  interrupted: AlertTriangle,
+  partial: SplitSquareHorizontal,
+  unsupported: Ban,
+};
+
+/**
+ * Wraps a page body; reviewers switch the required states (brief §7) from the Dev panel.
+ * Success renders children; other states render the shared state block.
+ */
+export function StateFrame({
+  states,
+  children,
+  emptyAction,
+}: {
+  states: ViewState[];
+  children: ReactNode;
+  emptyAction?: ReactNode;
+}) {
+  const { t } = useI18n();
+  const state = useDevStates(states) as ViewState;
+  return (
+    <div>
+      {state === "success" && children}
+      {state === "loading" && (
+        <div className="space-y-3" aria-busy="true" aria-label={t.states.loadingTitle}>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="size-4 animate-spin" /> {t.states.loadingTitle}
+          </div>
+          <Skeleton className="h-20 rounded-2xl" />
+          <Skeleton className="h-14 rounded-2xl" />
+          <Skeleton className="h-14 rounded-2xl" />
+        </div>
+      )}
+      {state !== "success" && state !== "loading" && (
+        <EmptyState
+          scene={state === "denied" ? "permission-folder" : state === "offline" ? "status-waiting" : state === "partial" || state === "interrupted" ? "status-attention" : state === "empty" ? "empty-no-target" : "status-error"}
+          icon={icons[state] ?? CircleSlash}
+          title={t.states[`${state}Title` as keyof typeof t.states] as string}
+          body={t.states[`${state}Body` as keyof typeof t.states] as string}
+          action={state === "empty" ? emptyAction : undefined}
+        />
+      )}
+    </div>
+  );
+}

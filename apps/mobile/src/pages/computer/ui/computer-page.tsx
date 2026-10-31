@@ -1,3 +1,4 @@
+import { usePcDestination } from '../../../features/backup-setup/model/use-pc-destination';
 import { ArrowLeft, FolderSync, Monitor, ScanQrCode } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,11 +7,12 @@ import { Text } from '../../../shared/ui/text';
 import { NativeSafeArea } from '../../../shared/ui/native-safe-area';
 import { PairingButton } from '../../../features/pairing/ui/pairing-button';
 import { pairing, pairingErrorCode, type PairingErrorCode, type PairingStatus } from '../../../shared/api/pairing';
-import { colors } from '../../../shared/ui/tokens';
+import { useThemeColors } from '../../../shared/theme/theme-provider';
 
 export function ComputerPage({ onBack, onPair, onActivity, onAdvanced, embedded = false }: {
   onBack: () => void; onPair: () => void; onActivity: () => void; onAdvanced: () => void; embedded?: boolean;
 }) {
+  const colors = useThemeColors();
   const { t } = useTranslation();
   const Surface = embedded ? View : NativeSafeArea;
   const [status, setStatus] = useState<PairingStatus | null>(null);
@@ -49,38 +51,46 @@ export function ComputerPage({ onBack, onPair, onActivity, onAdvanced, embedded 
     return () => listener.remove();
   }, [onBack]);
   const paired = active && status?.phase === 'complete' && !status.repairRequired;
+  const destination = usePcDestination(paired ? status.recordId : undefined);
   return (
-    <Surface className="flex-1 bg-surface">
+    <Surface className="flex-1 bg-background">
       <ScrollView contentContainerClassName="gap-4 px-4 pt-5 pb-8">
-        <PairingButton label={t('onboarding.back')} secondary icon={<ArrowLeft color={colors.ink} size={20} />} onPress={onBack} />
-        {!embedded && <Text className="shrink text-lg font-inter-semibold text-ink">{t('pairing.brand')}</Text>}
-        <Text accessibilityRole="header" className="text-[28px] font-inter-semibold leading-9 text-ink">{t('computer.title')}</Text>
-        <Text className="font-sans text-sm leading-5 text-muted">{t('computer.description')}</Text>
-        <View className="gap-3 rounded-3xl border border-border bg-white p-5">
-          <Monitor color={colors.ink} size={28} />
-          <Text accessibilityRole="header" className="text-lg font-inter-semibold text-ink">{t(paired ? 'computer.paired' : 'computer.pairTitle')}</Text>
-          <Text className="font-sans text-sm leading-5 text-muted">{t('computer.pairDescription')}</Text>
-          {!status && !error && <Text accessibilityLiveRegion="polite" className="font-sans text-sm leading-5 text-muted">{t(active ? 'pairing.loading' : 'computer.inactive')}</Text>}
-          {status && !paired && <Text className="font-sans text-sm leading-5 text-muted">{t(`pairing.phases.${status.phase}.description`)}</Text>}
-          {status?.repairRequired && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-error">{t('pairing.repairDescription')}</Text>}
-          {status?.peerFingerprint && <Text selectable className="font-sans text-xs leading-5 text-muted">{t('transfer.peer', { fingerprint: status.peerFingerprint })}</Text>}
-          {error && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-error">{t(`pairing.errors.${error}`)}</Text>}
+        <PairingButton label={t('onboarding.back')} variant="secondary" icon={<ArrowLeft color={colors['text-primary']} size={20} />} onPress={onBack} />
+        {!embedded && <Text className="shrink text-lg font-inter-semibold text-primary-text">{t('pairing.brand')}</Text>}
+        <Text accessibilityRole="header" className="text-[28px] font-inter-semibold leading-9 text-primary-text">{t('computer.title')}</Text>
+        <Text className="font-sans text-sm leading-5 text-secondary-text">{t('computer.description')}</Text>
+        <View className="gap-3 rounded-2xl border border-border-subtle bg-surface-1 p-5">
+          <Monitor color={colors['text-primary']} size={28} />
+          <Text accessibilityRole="header" className="text-lg font-inter-semibold text-primary-text">{t(paired ? 'computer.paired' : 'computer.pairTitle')}</Text>
+          <Text className="font-sans text-sm leading-5 text-secondary-text">{t('computer.pairDescription')}</Text>
+          {paired && <>
+            <Text className="font-sans text-sm leading-5 text-secondary-text">{t('destinations.pcOptInHint')}</Text>
+            {destination.enabled !== null && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-secondary-text">{t(destination.enabled ? 'destinations.enabled' : 'destinations.disabled')}</Text>}
+            <PairingButton variant="secondary" label={t(destination.enabled ? 'destinations.disablePc' : 'destinations.enablePc')}
+              disabled={destination.working || destination.enabled === null} onPress={() => { void destination.toggle(); }} />
+            {destination.error && <Text accessibilityRole="alert" className="font-sans text-sm text-danger-text">{t(`transfer.errors.${destination.error}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
+          </>}
+          {!status && !error && <Text accessibilityLiveRegion="polite" className="font-sans text-sm leading-5 text-secondary-text">{t(active ? 'pairing.loading' : 'computer.inactive')}</Text>}
+          {status && !paired && <Text className="font-sans text-sm leading-5 text-secondary-text">{t(`pairing.phases.${status.phase}.description`)}</Text>}
+          {status?.repairRequired && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-danger-text">{t('pairing.repairDescription')}</Text>}
+          {status?.peerFingerprint && <Text selectable className="font-sans text-xs leading-5 text-secondary-text">{t('transfer.peer', { fingerprint: status.peerFingerprint })}</Text>}
+          {error && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-danger-text">{t(`pairing.errors.${error}`)}</Text>}
           <PairingButton label={t(paired ? 'computer.managePairing' : 'pairing.open')} disabled={!active}
-            icon={<ScanQrCode color={colors.elevated} size={20} />} onPress={onPair} />
-          <PairingButton label={t('pairing.refresh')} secondary disabled={!active} onPress={() => refresh.current()} />
+            icon={<ScanQrCode color={colors['surface-1']} size={20} />} onPress={onPair} />
+          <PairingButton label={t('pairing.refresh')} variant="secondary" disabled={!active} onPress={() => refresh.current()} />
         </View>
-        <View className="gap-3 rounded-3xl border border-border bg-white p-5">
-          <Text accessibilityRole="header" className="text-lg font-inter-semibold text-ink">{t('computer.grantTitle')}</Text>
-          <Text className="font-sans text-sm leading-5 text-muted">{t('computer.grantDescription')}</Text>
-          <Text className="font-sans text-sm leading-5 text-muted">{t('pairing.noFileGrant')}</Text>
+        <View className="gap-3 rounded-2xl border border-border-subtle bg-surface-1 p-5">
+          <Text accessibilityRole="header" className="text-lg font-inter-semibold text-primary-text">{t('computer.grantTitle')}</Text>
+          <Text className="font-sans text-sm leading-5 text-secondary-text">{t('computer.grantDescription')}</Text>
+          <Text className="font-sans text-sm leading-5 text-secondary-text">{t('pairing.noFileGrant')}</Text>
         </View>
-        <View className="gap-3 rounded-3xl border border-border bg-white p-5">
-          <Text accessibilityRole="header" className="text-lg font-inter-semibold text-ink">{t('computer.transferTitle')}</Text>
-          <Text className="font-sans text-sm leading-5 text-muted">{t('computer.availability')}</Text>
-          <PairingButton label={t('transfer.title')} secondary icon={<FolderSync color={colors.ink} size={20} />} onPress={onActivity} />
+        <View className="gap-3 rounded-2xl border border-border-subtle bg-surface-1 p-5">
+          <Text accessibilityRole="header" className="text-lg font-inter-semibold text-primary-text">{t('computer.transferTitle')}</Text>
+          <Text className="font-sans text-sm leading-5 text-secondary-text">{t('computer.availability')}</Text>
+          <PairingButton label={t('transfer.title')} variant="secondary" icon={<FolderSync color={colors['text-primary']} size={20} />} onPress={onActivity} />
         </View>
-        <Text className="font-sans text-sm leading-5 text-muted">{t(Platform.OS === 'android' ? 'computer.androidBackground' : Platform.OS === 'ios' ? 'computer.iosBackground' : 'computer.foregroundOnly')}</Text>
-        <PairingButton label={t('computer.advanced')} secondary onPress={onAdvanced} />
+        <Text className="font-sans text-sm leading-5 text-secondary-text">{t(Platform.OS === 'android' ? 'computer.androidBackground' : Platform.OS === 'ios' ? 'computer.iosBackground' : 'computer.foregroundOnly')}</Text>
+        <PairingButton label={t('computer.advanced')} variant="secondary" onPress={onAdvanced} />
       </ScrollView>
     </Surface>
   );

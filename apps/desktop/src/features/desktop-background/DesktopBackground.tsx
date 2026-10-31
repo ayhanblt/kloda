@@ -55,7 +55,7 @@ export function DesktopBackground({ settings = true }: { settings?: boolean }) {
       <p>{t(status.backup.active || status.receiver.activeTransfers > 0 ? 'background.active' : 'background.idle')}</p>
       {status.backup.failed && <p role="alert">{t('background.backupFailed')}</p>}
       {status.shutdownError && <p role="alert">{t('background.shutdownFailed')}</p>}
-      <p className="text-sm text-muted">{t('background.sleepHint')}</p>
+      <p className="text-sm text-secondary-text">{t('background.sleepHint')}</p>
       {status.environmentLimited && <p role="status">{t('background.environmentLimited')}</p>}
       {(settings || status.autostartChoice === null) && <>
         {status.autostartChoice === null && <p className="mt-2 font-semibold">{t('background.loginQuestion')}</p>}

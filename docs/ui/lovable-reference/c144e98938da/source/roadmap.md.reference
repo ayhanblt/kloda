@@ -1,0 +1,23 @@
+# Design review
+- [x] Review all supplied references against mobile and desktop screens.
+- [x] Complete source selection, schedule, provider setup and photo-detail controls while preserving all connection types.
+- [x] Align desktop storage, transfers and shells with the shared visual language.
+- [x] Correct overflow and sticky action placement; verify mobile and desktop flows and tests.
+# Lock-screen design
+- [x] Add iOS and Android lock-screen previews with demo transfer states.
+- [x] Verify both previews, controls and narrow-screen layout.
+
+# System appearance
+- [x] Add shared dark palette and system-light override across all platforms.
+- [x] Verify live system changes, core screens, and theme rules.
+
+# Redesign Phase 1
+- [x] Move screen codes, demo badges, state switchers and simulate buttons into the ?dev=1 Dev panel.
+- [x] Replace palette/type/radii with neutral tokens (dark + light), dot-based status, no orange.
+
+# Redesign Phase 2
+- [x] Remove header controls, leftover labels/claims and move lock-screen access into Dev panel.
+- [x] Apply shared materials/buttons and remove nested cards, icon tiles and dashed empty states.
+- [x] Create reusable illustration scenes for status, empty, permissions, pairing, conflicts and trash.
+- [x] Rebuild mobile home as Status, preserve Photos and activity routes, translate all new strings.
+- [x] Verify six states, actions, themes, reduced motion, desktop/mobile layouts and tests.

@@ -1,0 +1,361 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+@import "./styles/theme.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Kloda design tokens (Redesign Phase 1). This file is the ONLY place hex colors live.
+ * Accents have a graphic token (--X: dots, icons, rings, bars) and a text token (--X-text).
+ * Legacy shadcn/app names below are aliases of the new tokens so every screen re-themes.
+ */
+
+
+:root {
+  --dur-fast: 150ms;
+  --dur-base: 240ms;
+  --dur-slow: 400ms;
+  --dur-pulse: 2400ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --radius: 10px;
+
+  /* Legacy aliases → new tokens (no tinted backgrounds, no orange, no success green). */
+  --background: var(--bg);
+  --foreground: var(--text-primary);
+  --surface: var(--surface-2);
+  --surface-raised: var(--surface-1);
+  --ink: var(--text-primary);
+  --ink-soft: var(--text-secondary);
+  --card: var(--surface-1);
+  --card-foreground: var(--text-primary);
+  --popover: var(--surface-1);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--action);
+  --primary-foreground: var(--on-action);
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--surface-2);
+  --muted-foreground: var(--text-secondary);
+  --accent: var(--surface-2);
+  --accent-foreground: var(--text-primary);
+  --destructive: var(--danger-g);
+  --destructive-foreground: var(--on-action);
+  --border: var(--border-subtle);
+  --input: var(--border-strong);
+  --ring: var(--focus-ring);
+  /* Status aliases use the -text tokens so they stay AA-legible when used as text. */
+  --synced: var(--brand-text);
+  --syncing: var(--brand-text);
+  --pending: var(--text-tertiary);
+  --danger: var(--danger-text);
+  --review: var(--attention-text);
+  --attention: var(--attention-text);
+  --synced-soft: var(--surface-2);
+  --syncing-soft: var(--surface-2);
+  --pending-soft: var(--surface-2);
+  --danger-soft: var(--surface-2);
+  --review-soft: var(--surface-2);
+  --attention-soft: var(--surface-2);
+  --warn-soft: var(--surface-2);
+  --lock-card: var(--tile);
+  --lock-text: var(--tile-foreground);
+  --lock-muted: color-mix(in oklab, var(--tile-foreground) 72%, var(--tile));
+  --lock-track: color-mix(in oklab, var(--tile-foreground) 22%, var(--tile));
+  --lock-accent: var(--brand-g);
+  --chart-1: var(--brand-g);
+  --chart-2: var(--text-secondary);
+  --chart-3: var(--text-tertiary);
+  --chart-4: var(--attention-g);
+  --chart-5: var(--border-strong);
+  --sidebar: var(--surface-1);
+  --sidebar-foreground: var(--text-primary);
+  --sidebar-primary: var(--action);
+  --sidebar-primary-foreground: var(--on-action);
+  --sidebar-accent: var(--surface-2);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border: var(--border-subtle);
+  --sidebar-ring: var(--focus-ring);
+}
+
+@theme inline {
+  --font-sans: -apple-system, "SF Pro Text", Roboto, "Segoe UI", system-ui, sans-serif;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 10px;
+  --radius-2xl: 16px;
+  --radius-3xl: 16px;
+  --radius-4xl: 16px;
+  /* New token utilities */
+  --color-bg: var(--bg);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-text-primary: var(--text-primary);
+  --color-primary-text: var(--text-primary);
+  --color-secondary-text: var(--text-secondary);
+  --color-tertiary-text: var(--text-tertiary);
+  --color-action: var(--action);
+  --color-on-action: var(--on-action);
+  --color-brand: var(--brand-g);
+  --color-brand-text: var(--brand-text);
+  --color-brand-subtle: var(--brand-subtle);
+  --color-attention-g: var(--attention-g);
+  --color-attention-text: var(--attention-text);
+  --color-danger-g: var(--danger-g);
+  --color-danger-text: var(--danger-text);
+  --color-tile: var(--tile);
+  --color-tile-ring: var(--tile-ring);
+  --color-tile-foreground: var(--tile-foreground);
+  /* Legacy names */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-synced: var(--synced);
+  --color-synced-soft: var(--synced-soft);
+  --color-syncing: var(--syncing);
+  --color-syncing-soft: var(--syncing-soft);
+  --color-pending: var(--pending);
+  --color-pending-soft: var(--pending-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-review: var(--review);
+  --color-review-soft: var(--review-soft);
+  --color-attention: var(--attention);
+  --color-attention-soft: var(--attention-soft);
+  --color-warn-soft: var(--warn-soft);
+  --color-lock-card: var(--lock-card);
+  --color-lock-text: var(--lock-text);
+  --color-lock-muted: var(--lock-muted);
+  --color-lock-track: var(--lock-track);
+  --color-lock-accent: var(--lock-accent);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  /* No colored shadows; dark mode separates surfaces with borders only. */
+  --shadow-card: var(--card-highlight);
+  --shadow-float: var(--shadow-sheet);
+  --shadow-icon: none;
+  --ease-out-soft: var(--ease-standard);
+}
+
+/* Typography: exactly five styles. */
+@utility text-large-title { font-size: 30px; line-height: 36px; font-weight: 600; letter-spacing: 0; }
+@utility text-title { font-size: 20px; line-height: 26px; font-weight: 600; }
+@utility text-body { font-size: 16px; line-height: 22px; font-weight: 400; }
+@utility text-callout { font-size: 14px; line-height: 20px; font-weight: 400; }
+@utility text-caption { font-size: 12px; line-height: 16px; font-weight: 500; }
+
+/* Status dot: 7px; in-progress pulses (static under reduced motion). */
+@keyframes kloda-status-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+@utility status-pulse {
+  animation: kloda-status-pulse var(--dur-pulse) var(--ease-standard) infinite;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: 0;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+  button, a, input, h1, h2, h3, p, span, label { letter-spacing: 0; }
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------- Motion ---------- */
+@keyframes kloda-ring-draw {
+  from { stroke-dashoffset: 163; opacity: 0; }
+  to { stroke-dashoffset: 0; opacity: 1; }
+}
+@keyframes kloda-dot-pop {
+  0% { transform: scale(0); }
+  70% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+@keyframes kloda-ring-turn {
+  from { transform: rotate(-90deg); }
+  to { transform: rotate(270deg); }
+}
+@keyframes kloda-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes kloda-intro-out {
+  to { opacity: 0; visibility: hidden; }
+}
+
+@utility logo-ring-draw {
+  stroke-dasharray: 122 41;
+  animation: kloda-ring-draw 700ms var(--ease-out-soft) both;
+}
+@utility logo-dot-pop {
+  transform-origin: 60px 60px;
+  animation: kloda-dot-pop 420ms var(--ease-out-soft) 520ms both;
+}
+@utility logo-ring-spin {
+  transform-origin: 60px 60px;
+  animation: kloda-ring-turn 1.6s linear infinite;
+}
+/* Mount fade removed (Phase 1): content never starts dimmed. */
+@utility animate-rise {
+  animation: none;
+}
+@utility intro-fade {
+  animation: kloda-intro-out 300ms ease 1300ms forwards;
+}
+@utility glass {
+  background-color: color-mix(in oklab, var(--surface-1) 82%, transparent);
+  backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: var(--shadow-sheet);
+}
+@utility safe-bottom {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-pulse { animation: none !important; }
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+/* Welcome / hero motion */
+@keyframes kloda-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes kloda-dash {
+  to { stroke-dashoffset: -24; }
+}
+@keyframes kloda-orbit {
+  to { transform: rotate(360deg); }
+}
+@keyframes kloda-halo {
+  0%, 100% { opacity: 0.14; transform: scale(1); }
+  50% { opacity: 0.26; transform: scale(1.06); }
+}
+@utility animate-float {
+  animation: kloda-float 5s ease-in-out infinite;
+}
+@utility animate-float-slow {
+  animation: kloda-float 7s ease-in-out 1s infinite;
+}
+@utility animate-dash {
+  stroke-dasharray: 4 8;
+  animation: kloda-dash 1.4s linear infinite;
+}
+@utility animate-orbit {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: kloda-orbit 24s linear infinite;
+}
+@utility animate-halo {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: kloda-halo 4s ease-in-out infinite;
+}
+@utility bg-hero-glow {
+  background-image: none;
+}
+
+/* Phase 2 native material and shared button treatment. */
+@utility hero-material { background-image: linear-gradient(180deg, var(--surface-1), color-mix(in oklab, var(--surface-1) 70%, var(--bg))); box-shadow: var(--card-highlight); }
+@utility button-primary { background-image: linear-gradient(180deg, var(--button-brand), var(--button-brand-bottom)); color: var(--button-on-brand); box-shadow: inset 0 1px 0 var(--button-highlight); }
+@utility button-danger-confirm { background: var(--danger-g); color: var(--button-on-brand); }
+@keyframes scene-breathe { 0%,100% { opacity: .18; transform: scale(1); } 50% { opacity: .22; transform: scale(1.03); } }
+@keyframes scene-check { from { opacity: 0; transform: scale(.8); } to { opacity: 1; transform: scale(1); } }
+.scene-breathe { transform-origin: 160px 101px; animation: scene-breathe 4s ease-in-out infinite; }
+.scene-check { transform-box: fill-box; transform-origin: center; animation: scene-check var(--dur-slow) cubic-bezier(.2,1.5,.5,1) both; }
+.illustration-scene { animation: kloda-rise var(--dur-slow) ease both; }
+/* Shared containers have one level; nested notices and selectors become inset rows. */
+.kloda-panel .kloda-panel, .kloda-panel .kloda-notice { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.kloda-panel .kloda-notice { border-top: 1px solid var(--border-subtle); padding-inline: 0; }
+.kloda-panel .kloda-row + .kloda-row { border-top: 1px solid var(--border-subtle); }
+@media (prefers-reduced-motion: reduce) { .scene-breathe, .scene-check, .illustration-scene { animation: none; } .scene-travel { display: none; } }
+
+
+/* Phase 3 StatusHero motion */
+@keyframes hero-travel { from { offset-distance: 0%; opacity: 0; } 15%, 85% { opacity: 1; } to { offset-distance: 100%; opacity: 0; } }
+@keyframes hero-ripple { from { transform: scale(.72); opacity: .6; } to { transform: scale(1.45); opacity: 0; } }
+@keyframes hero-pulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+@keyframes hero-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes hero-pop { from { transform: scale(.4); opacity: 0; } 70% { transform: scale(1.1); opacity: 1; } to { transform: scale(1); } }
+.hero-travel { animation: hero-travel 1.6s linear infinite; }
+.hero-c1 { offset-path: path("M98 100 Q121 76 145 100"); }
+.hero-c2 { offset-path: path("M213 100 Q233 76 252 96"); }
+.hero-d2 { animation-delay: -.53s; }
+.hero-d3 { animation-delay: -1.06s; }
+.hero-ripple { transform-box: fill-box; transform-origin: center; animation: hero-ripple 2.8s ease-out infinite; }
+.hero-ripple-2 { animation-delay: -1.4s; }
+.hero-pulse { animation: hero-pulse 1.6s ease-in-out infinite; }
+.hero-float { animation: hero-float 3.2s ease-in-out infinite; }
+.hero-pop { transform-box: fill-box; transform-origin: center; animation: hero-pop .6s cubic-bezier(.2,1.5,.5,1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-travel { display: none; }
+  .hero-ripple, .hero-pulse, .hero-float, .hero-pop { animation: none !important; }
+}
+@utility fill-illus-body { fill: var(--illus-body); }
+@utility fill-illus-screen { fill: var(--illus-screen); }
+@utility stroke-illus-line { stroke: var(--illus-line); }
+@utility fill-illus-line { fill: var(--illus-line); }
+@utility stroke-brand-line { stroke: var(--brand-line); }
+@utility fill-brand-halo-1 { fill: var(--brand-halo-1); }
+@utility fill-brand-halo-2 { fill: var(--brand-halo-2); }
+@utility fill-illus-photo-1 { fill: var(--illus-photo-1); }
+@utility fill-illus-photo-2 { fill: var(--illus-photo-2); }
+@utility fill-illus-photo-3 { fill: var(--illus-photo-3); }
+@utility fill-illus-photo-4 { fill: var(--illus-photo-4); }
+@utility fill-illus-photo-5 { fill: var(--illus-photo-5); }
+@utility fill-illus-photo-6 { fill: var(--illus-photo-6); }
+@utility bg-illus-photo-1 { background-color: var(--illus-photo-1); }
+@utility bg-illus-photo-2 { background-color: var(--illus-photo-2); }
+@utility bg-illus-photo-3 { background-color: var(--illus-photo-3); }

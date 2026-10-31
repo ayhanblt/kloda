@@ -56,15 +56,15 @@ export function DeviceManagement() {
   }, [bridge, cursor, confirmationLanguage]);
 
   const changePage = (after: string | undefined) => { setPage(null); setError(null); setActionError(null); setBusy(true); setCursor(after); };
-  return <main className="min-h-screen bg-surface p-6 text-ink">
+  return <main className="min-h-screen bg-background p-6 text-primary-text">
     <h1 className="text-3xl font-bold">{t('devices.title')}</h1>
-    <p className="mt-2 text-muted">{t('devices.description')}</p>
+    <p className="mt-2 text-secondary-text">{t('devices.description')}</p>
     <p className="mt-2 text-sm">{t('devices.revokeMeaning')}</p>
     <p className="mt-2 text-sm">{t('devices.removeMeaning')}</p>
     <p className="mt-2 text-sm">{t('devices.order')}</p>
-    {error && <><p className="mt-4 text-red-600" role="alert">{t(`pairing.errors.${error}`)}</p>
+    {error && <><p className="mt-4 text-danger-text" role="alert">{t(`pairing.errors.${error}`)}</p>
       <p className="mt-2" role="status">{t('devices.unavailable')}</p></>}
-    {actionError && <p className="mt-4 text-red-600" role="alert">{t(`pairing.errors.${actionError}`)}</p>}
+    {actionError && <p className="mt-4 text-danger-text" role="alert">{t(`pairing.errors.${actionError}`)}</p>}
     {busy && !page && <p className="mt-4" role="status">{t('devices.loading')}</p>}
     {page && <>
       {!error && page.items.length === 0 && <p className="mt-4" role="status">{t('devices.empty')}</p>}
@@ -92,18 +92,18 @@ function DeviceRow({ item, stale, disabled, canRemove, onChange }: {
   const { t } = useTranslation();
   const scope = item.backupScope;
   const scopeState = stale ? 'unavailable' : scope?.state ?? 'unavailable';
-  return <li className="rounded-xl border border-border bg-white p-4">
+  return <li className="rounded-xl border border-border-subtle bg-surface-1 p-4">
     <h2 className="break-all font-semibold"><code dir="ltr">{item.peerFingerprint}</code></h2>
     <p className="mt-2">{t('devices.trustLabel')} {t(stale ? 'devices.trust.unknown' : `devices.trust.${item.trust}`)}</p>
     <p className="mt-2">{t('devices.permissionLabel')} {t(`devices.permission.${scopeState}`)}</p>
     <p className="mt-2 break-all">{t('devices.folderLabel')} <bdi>{stale ? t('devices.unknownFolder') : scope?.folder ?? t(scopeState === 'unavailable' ? 'devices.unknownFolder' : 'devices.noFolder')}</bdi></p>
-    {!stale && scope?.errorCode && <p className="mt-2 text-red-600" role="alert">{t(`pairing.errors.${scope.errorCode}`)}</p>}
+    {!stale && scope?.errorCode && <p className="mt-2 text-danger-text" role="alert">{t(`pairing.errors.${scope.errorCode}`)}</p>}
     <div className="mt-4 flex flex-wrap gap-4">
       <button className="underline disabled:opacity-40" disabled={disabled || item.trust !== 'complete'}
         onClick={() => onChange('grant')} type="button">{t('devices.grant')}</button>
       <button className="underline disabled:opacity-40" disabled={disabled || item.trust !== 'complete' || !(scopeState === 'approved' || (scopeState === 'unavailable' && Boolean(scope?.revision)))}
         onClick={() => onChange('revoke')} type="button">{t('devices.revoke')}</button>
-      <button className="text-red-600 underline disabled:opacity-40" disabled={disabled || !canRemove || item.trust === 'revoked'}
+      <button className="text-danger-text underline disabled:opacity-40" disabled={disabled || !canRemove || item.trust === 'revoked'}
         onClick={() => onChange('remove')} type="button">{t('devices.remove')}</button>
     </div>
   </li>;

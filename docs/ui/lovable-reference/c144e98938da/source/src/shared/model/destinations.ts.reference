@@ -1,0 +1,33 @@
+import { useSyncExternalStore } from "react";
+
+/** Demo destination presets (Dev panel). The hero draws only what the user configured. */
+export type DestinationKind = "pc" | "nas" | "cloud";
+export type Destination = { kind: DestinationKind; active: boolean };
+export type DestinationPreset = "pc" | "nas" | "cloud" | "multi";
+
+export const destinationPresets: Record<DestinationPreset, Destination[]> = {
+  pc: [{ kind: "pc", active: true }],
+  nas: [{ kind: "nas", active: true }],
+  cloud: [{ kind: "cloud", active: true }],
+  multi: [{ kind: "pc", active: true }, { kind: "nas", active: false }, { kind: "cloud", active: false }],
+};
+
+/** Up to three drawn destinations, active first; the rest become a "+N" count. */
+export function layoutDestinations(list: Destination[]): { shown: Destination[]; extra: number } {
+  const sorted = [...list].sort((a, b) => Number(b.active) - Number(a.active));
+  return { shown: sorted.slice(0, 3), extra: Math.max(0, sorted.length - 3) };
+}
+
+let preset: DestinationPreset = "multi";
+const listeners = new Set<() => void>();
+export function setDestinationPreset(p: DestinationPreset) {
+  preset = p;
+  listeners.forEach((l) => l());
+}
+export function useDestinationPreset(): DestinationPreset {
+  return useSyncExternalStore(
+    (l) => { listeners.add(l); return () => listeners.delete(l); },
+    () => preset,
+    () => "multi" as DestinationPreset,
+  );
+}

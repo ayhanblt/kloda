@@ -1,0 +1,28 @@
+import { SunMoon } from "lucide-react";
+import { useI18n } from "@/shared/i18n";
+import { useThemePreference } from "@/shared/model/theme";
+import { Panel, Segmented } from "@/shared/ui/kit";
+
+/** Theme preference control: System / Light / Dark. Shared by mobile and desktop settings. */
+export function ThemeSwitch() {
+  const { t } = useI18n();
+  const [pref, setPref] = useThemePreference();
+  return (
+    <Panel className="p-3">
+      <p className="mb-2 flex items-center gap-2 text-sm font-medium text-ink">
+        <SunMoon className="size-4" aria-hidden /> {t.settings.theme}
+      </p>
+      <Segmented
+        label={t.settings.theme}
+        value={pref}
+        onChange={setPref}
+        options={[
+          { id: "system", label: t.settings.themeSystem },
+          { id: "light", label: t.settings.themeLight },
+          { id: "dark", label: t.settings.themeDark },
+        ]}
+      />
+      <p className="mt-2 text-xs text-muted-foreground">{t.settings.themeHint}</p>
+    </Panel>
+  );
+}

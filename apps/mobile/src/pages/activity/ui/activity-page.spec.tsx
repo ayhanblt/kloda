@@ -5,6 +5,7 @@ import { fileTransfer, photoManifestPrefix } from '../../../shared/api/file-tran
 import { pairing } from '../../../shared/api/pairing';
 import { i18n } from '../../../shared/i18n';
 
+jest.mock('../../../shared/api/backup-destinations', () => ({ backupDestinations: { status: jest.fn().mockResolvedValue({ configured: false, enabled: false, running: false }), pcSelected: jest.fn().mockResolvedValue(true), pcEnabled: jest.fn().mockResolvedValue(true), run: jest.fn() } }));
 jest.mock('../../../shared/api/file-transfer', () => ({ photoManifestPrefix: 'kloda-photo-v1-', fileTransfer: {
   requestNotifications: jest.fn().mockResolvedValue(true), status: jest.fn(), run: jest.fn(), rebackup: jest.fn(), pause: jest.fn().mockResolvedValue({ running: false, jobs: [], totalJobs: '0', hasMore: false }),
   resumeAutomatic: jest.fn(), list: jest.fn(), restore: jest.fn(), cancelRestore: jest.fn().mockResolvedValue(true),
@@ -46,7 +47,7 @@ it('uses only own completed list results for explicit destination restore; cance
   jest.mocked(fileTransfer.restore).mockResolvedValueOnce(backup);
   await fireEvent.press(surface.getByText(restoreLabel));
   await waitFor(() => expect(surface.getByText(i18n.t('transfer.backups.restored', { name: backup.name }))).toBeTruthy());
-  expect(surface.getByText(i18n.t('transfer.backups.restored', { name: backup.name })).props.className).toContain('text-ink');
+  expect(surface.getByText(i18n.t('transfer.backups.restored', { name: backup.name })).props.className).toContain('text-primary-text');
   await surface.unmount();
 });
 
@@ -147,10 +148,11 @@ it('keeps valid Files controls usable when the independent Photos status query f
 
 
 it('retains native uploads across background and page departure, then reads current state on reopen', async () => {
-  let change: ((state: AppStateStatus) => void) | undefined;
+  const listeners: ((state: AppStateStatus) => void)[] = [];
+  const change = (state: AppStateStatus) => listeners.forEach((listener) => listener(state));
   const subscription = jest.spyOn(AppState, 'addEventListener').mockImplementation((_, listener) => {
-    change = listener;
-    return { remove: jest.fn() };
+    listeners.push(listener);
+    return { remove: jest.fn(() => { const index = listeners.indexOf(listener); if (index >= 0) listeners.splice(index, 1); }) };
   });
   jest.mocked(fileTransfer.pause).mockClear();
   jest.mocked(fileTransfer.cancelRestore).mockClear();
@@ -221,10 +223,11 @@ it('keeps automatic backup paused on failed Continue and shows a scheduling erro
 
 
 it('continues Sync now and automatic Continue after notification denial without a fake backup failure', async () => {
-  let change: ((state: AppStateStatus) => void) | undefined;
+  const listeners: ((state: AppStateStatus) => void)[] = [];
+  const change = (state: AppStateStatus) => listeners.forEach((listener) => listener(state));
   jest.spyOn(AppState, 'addEventListener').mockImplementation((_, listener) => {
-    change = listener;
-    return { remove: jest.fn() };
+    listeners.push(listener);
+    return { remove: jest.fn(() => { const index = listeners.indexOf(listener); if (index >= 0) listeners.splice(index, 1); }) };
   });
   const paused = { running: false, jobs: [], totalJobs: '0', hasMore: false,
     automaticPaused: true, notificationsEnabled: false };
@@ -250,10 +253,11 @@ it('continues Sync now and automatic Continue after notification denial without 
 });
 
 it('does not start backup if the app leaves the foreground during its notification request', async () => {
-  let change: ((state: AppStateStatus) => void) | undefined;
+  const listeners: ((state: AppStateStatus) => void)[] = [];
+  const change = (state: AppStateStatus) => listeners.forEach((listener) => listener(state));
   jest.spyOn(AppState, 'addEventListener').mockImplementation((_, listener) => {
-    change = listener;
-    return { remove: jest.fn() };
+    listeners.push(listener);
+    return { remove: jest.fn(() => { const index = listeners.indexOf(listener); if (index >= 0) listeners.splice(index, 1); }) };
   });
   jest.mocked(fileTransfer.status).mockResolvedValue({ running: false, jobs: [], totalJobs: '0', hasMore: false });
   jest.mocked(fileTransfer.requestNotifications).mockImplementationOnce(async () => { change?.('background'); return false; });

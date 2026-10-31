@@ -1,0 +1,277 @@
+import { useState, type ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
+import { ChevronRight, Info, Laptop, Smartphone, Server, HardDrive, Cloud, type LucideIcon } from "lucide-react";
+import { useDevScreen } from "@/shared/model/dev-panel";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
+import { useI18n } from "@/shared/i18n";
+import { Button } from "@/components/ui/button";
+import { IllustrationScene, type SceneName } from "./illustrations/scene";
+import { DeviceGlyph } from "./illustrations/glyph";
+
+/* ---------- Status: 7px dot + secondary text (no colored pills) ---------- */
+export type Tone = "synced" | "syncing" | "pending" | "danger" | "review" | "neutral";
+
+const pip: Record<Tone, string> = {
+  synced: "bg-brand",
+  syncing: "bg-brand status-pulse",
+  pending: "bg-tertiary-text",
+  danger: "bg-danger-g",
+  review: "bg-attention-g",
+  neutral: "bg-tertiary-text",
+};
+
+export function StatusDot({ tone, className }: { tone: Tone; className?: string }) {
+  return <span className={cn("size-[7px] shrink-0 rounded-full", pip[tone], className)} aria-hidden />;
+}
+
+export function StatusPill({
+  tone,
+  children,
+  className,
+}: { children: ReactNode; className?: string; tone: Tone }) {
+  return (
+    <span className={cn("inline-flex max-w-full items-center gap-1.5 text-caption text-secondary-text", className)}>
+      <StatusDot tone={tone} />
+      <span className="truncate">{children}</span>
+    </span>
+  );
+}
+
+/* ---------- Card ---------- */
+export function Panel({
+  children,
+  className,
+  as: As = "section",
+}: {
+  children: ReactNode;
+  className?: string;
+  as?: "section" | "div" | "article";
+}) {
+  return (
+    <As className={cn("kloda-panel min-w-0 rounded-2xl border border-border-subtle bg-card p-4 shadow-card", className)}>
+      {children}
+    </As>
+  );
+}
+
+export function SectionTitle({ children, action }: { children: ReactNode; action?: ReactNode }) {
+  return (
+    <div className="mb-2 mt-6 flex items-center justify-between gap-2 px-1 first:mt-0">
+      <h2 className="text-callout font-medium text-secondary-text">
+        {children}
+      </h2>
+      {action}
+    </div>
+  );
+}
+
+/* ---------- Page header ---------- */
+export function PageHeader({
+  title,
+  body,
+  code,
+  actions,
+}: {
+  title: string;
+  body?: string;
+  code?: string;
+  actions?: ReactNode;
+}) {
+  useDevScreen(code);
+  return (
+    <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
+      <div className="min-w-0 flex-1 basis-48">
+        <h1 className="text-large-title text-ink [overflow-wrap:anywhere]">{title}</h1>
+        {body && <p className="mt-1 max-w-2xl text-callout text-secondary-text">{body}</p>}
+      </div>
+      {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+    </header>
+  );
+}
+
+/* ---------- List row (link or static) ---------- */
+export function Row({
+  icon: Icon,
+  title,
+  meta,
+  trailing,
+  to,
+  params,
+  className,
+}: {
+  icon?: LucideIcon;
+  title: ReactNode;
+  meta?: ReactNode;
+  trailing?: ReactNode;
+  to?: string;
+  params?: Record<string, string>;
+  className?: string;
+}) {
+  const inner = (
+    <>
+      {Icon && ([Laptop, Smartphone, Server, HardDrive, Cloud].includes(Icon) ? <DeviceGlyph kind={Icon === Laptop ? "laptop" : Icon === Smartphone ? "phone" : Icon === Cloud ? "cloud" : "nas"} className="size-7 shrink-0"/> : <Icon className="size-5 shrink-0 text-secondary-text" strokeWidth={1.5} aria-hidden />)}
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-medium text-ink">{title}</span>
+        {meta && <span className="block truncate text-xs text-muted-foreground">{meta}</span>}
+      </span>
+      {trailing}
+      {to && <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />}
+    </>
+  );
+  const base = cn(
+    "kloda-row flex min-h-14 items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors",
+    to && "hover:bg-accent",
+    className,
+  );
+  if (to)
+    return (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      <Link to={to as any} params={params as any} className={base}>
+        {inner}
+      </Link>
+    );
+  return <div className={base}>{inner}</div>;
+}
+
+/* ---------- Notice ---------- */
+const notice = cva("kloda-notice flex gap-3 rounded-[10px] border border-border p-3 text-callout text-secondary-text [&>svg]:text-tertiary-text", {
+  variants: {
+    tone: {
+      info: "",
+      warn: "[&>svg]:text-attention-g",
+      danger: "[&>svg]:text-danger-g",
+      ok: "[&>svg]:text-brand",
+    },
+  },
+  defaultVariants: { tone: "info" },
+});
+export function Notice({
+  children,
+  tone,
+  icon: Icon = Info,
+  className,
+}: { children: ReactNode; icon?: LucideIcon; className?: string } & VariantProps<typeof notice>) {
+  return (
+    <div className={cn(notice({ tone }), className)} role="note">
+      <Icon className="mt-0.5 size-4 shrink-0" aria-hidden />
+      <div className="min-w-0 [overflow-wrap:anywhere]">{children}</div>
+    </div>
+  );
+}
+
+/* ---------- Empty / state block ---------- */
+export function EmptyState({
+  icon: Icon,
+  title,
+  body,
+  action,
+  scene = "empty-no-target",
+}: {
+  icon: LucideIcon;
+  scene?: SceneName;
+  title: string;
+  body?: string;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-3 px-5 py-6 text-center">
+      <IllustrationScene scene={scene}/>
+      <div>
+        <p className="font-semibold text-ink">{title}</p>
+        {body && <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">{body}</p>}
+      </div>
+      {action}
+    </div>
+  );
+}
+
+/* ---------- Segmented control ---------- */
+export function Segmented<T extends string>({
+  value,
+  onChange,
+  options,
+  label,
+}: {
+  value: T;
+  onChange: (v: T) => void;
+  options: { id: T; label: string }[];
+  label: string;
+}) {
+  return (
+    <div role="tablist" aria-label={label} className="flex w-full flex-wrap gap-1 rounded-[10px] bg-muted p-1">
+      {options.map((o) => (
+        <Button variant="ghost"
+          key={o.id}
+          role="tab"
+          aria-selected={value === o.id}
+          onClick={() => onChange(o.id)}
+          className={cn(
+            "min-h-11 min-w-0 flex-1 rounded-[8px] px-3 text-callout font-medium transition-colors",
+            value === o.id ? "bg-card text-ink hover:bg-card hover:text-ink" : "text-muted-foreground hover:text-ink",
+          )}
+        >
+          {o.label}
+        </Button>
+      ))}
+    </div>
+  );
+}
+
+/* ---------- Filter chips (wrapping, never scrolls horizontally) ---------- */
+export function FilterChips<T extends string>({
+  value,
+  onChange,
+  options,
+  label,
+  className,
+}: {
+  value: T;
+  onChange: (v: T) => void;
+  options: { id: T; label: string; icon?: LucideIcon; dot?: string }[];
+  label: string;
+  className?: string;
+}) {
+  return (
+    <div role="tablist" aria-label={label} className={cn("flex flex-wrap gap-1.5", className)}>
+      {options.map((o) => {
+        const Icon = o.icon;
+        const active = value === o.id;
+        return (
+          <Button variant="ghost"
+            key={o.id}
+            role="tab"
+            aria-selected={active}
+            onClick={() => onChange(o.id)}
+            className={cn(
+              "inline-flex min-h-12 items-center gap-1.5 rounded-[10px] border px-3 text-callout font-medium transition-colors",
+              active
+                ? "border-ink bg-ink text-background hover:bg-ink hover:text-background"
+                : "border-border bg-card text-muted-foreground hover:text-ink",
+            )}
+          >
+            {Icon && <Icon className="size-3.5" aria-hidden />}
+            {o.dot && <span className={cn("size-2 rounded-full", o.dot)} aria-hidden />}
+            {o.label}
+          </Button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ---------- Section label (callout 500, sentence case) ---------- */
+export function Eyebrow({ children, action }: { children: ReactNode; action?: ReactNode }) {
+  return (
+    <div className="mb-2 flex items-center justify-between gap-2">
+      <p className="text-callout font-medium text-secondary-text">{children}</p>
+      {action}
+    </div>
+  );
+}
+
+/* ---------- Hook for simple toggles ---------- */
+export function useToggle(init = false) {
+  const [v, setV] = useState(init);
+  return [v, () => setV((x) => !x), setV] as const;
+}

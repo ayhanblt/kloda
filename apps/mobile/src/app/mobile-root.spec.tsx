@@ -6,6 +6,8 @@ import MobileApp from '../../App';
 jest.mock('react-native-safe-area-context', () => jest.requireActual('react-native-safe-area-context/jest/mock').default);
 jest.mock('../../global.css', () => ({}));
 jest.mock('react-native-gesture-handler', () => ({ GestureHandlerRootView: jest.requireActual('react-native').View }));
+jest.mock('nativewind', () => ({ ...jest.requireActual('nativewind'), useColorScheme: () => ({ setColorScheme: jest.fn() }) }));
+jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(async () => null), setItemAsync: jest.fn(async () => undefined) }));
 jest.mock('expo-font', () => ({ useFonts: jest.fn() }));
 jest.mock('./App', () => ({ App: () => null }));
 jest.mock('sonner-native', () => ({ Toaster: () => null }));
