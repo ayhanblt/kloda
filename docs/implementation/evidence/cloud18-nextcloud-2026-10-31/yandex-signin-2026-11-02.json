@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-02",
+  "scope": "Step18B/3 Yandex Disk sign-in (code + PKCE, app-folder scope from the Yandex registration) on the shared OAuth code, ADR0028; no screen, no upload",
+  "registration": "user added a Web services platform with Redirect URI yxc50f110fd8ab48debcabb20f8b1474f0://authorize (accepted by the console)",
+  "docs": "Context7 /websites/yandex_dev_id_doc_en: PKCE exchange needs no secret; /revoke_token needs client_secret; refresh pages disagree on client_secret",
+  "firstRun": "iOS real account FAIL at stage refresh (oauth_login): exchange, account ID and Keychain save succeeded; refresh without client_secret refused. The saved test token was cleared from the check app's Keychain; Yandex keeps it valid until the user removes access",
+  "decision": "user 2026-11-02: store Yandex's long-lived access token with its expiry instead of a refresh token (ADR0028 §2 exception); expired -> oauth_expired, new sign-in",
+  "checks": {
+    "jest": "PASS 27 suites / 182 tests (after adding yandex to the JS provider list)",
+    "typecheck": "PASS", "eslint": "PASS changed cloud-destination files",
+    "iosBuild": "PASS", "androidBuild": "PASS compile + lint + assembleDebugAndroidTest"
+  },
+  "realAccount": {
+    "iosYandex": "PASS tools/test-ios-oauth.py <UDID> yandex: PKCE exchange, login.yandex.ru account ID, Keychain round trip with expiry, expired token refused, expiry > 1 day, custody deleted; revoke not offered",
+    "androidYandex": "PASS tools/test-android-oauth.py yandex: Custom Tab, yx redirect activity, same checks with Keystore",
+    "tokensRecorded": false
+  },
+  "regression": "Dropbox and OneDrive offline checks rerun on iOS and Android after the expiry field was added: PASS (stopped at the sign-in sheet, no real-account rerun)",
+  "notRun": [
+    "KlodaCloud module glue and JS bridge at runtime",
+    "expiry shown on screen (destination screen 18A/4b)",
+    "Android tab-closed cancel detection",
+    "physical devices"
+  ],
+  "review": "same-agent separate pass only; no independent review"
+}

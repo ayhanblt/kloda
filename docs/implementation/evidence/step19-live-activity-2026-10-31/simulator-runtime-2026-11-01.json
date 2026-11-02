@@ -1,0 +1,99 @@
+{
+  "recordedAt": "2026-11-01",
+  "scope": "Step19 slice 1 runtime check: real WebDAV photo backup to the owned local Nextcloud fixture, observed on the iOS Simulator lock screen and Dynamic Island.",
+  "environment": {
+    "simulator": "Kloda-Cloud18-Disposable (iOS 26.5, 402x874 pt), Turkish, dark appearance",
+    "build": "Debug, ad-hoc signed (CODE_SIGN_IDENTITY=-) so SecureStore can write; Metro dev client on port 8091",
+    "server": "owned Nextcloud fixture https://127.0.0.1:18443, fixture user 'kloda', target folder 'Kloda' (password kept in a 0600 file, never printed)"
+  },
+  "prerequisiteFix": {
+    "problem": "WebDAV connection test stopped after PROPFIND 207; MKCOL was never sent. crypto.randomUUID() does not exist in the Hermes runtime and the app has no polyfill.",
+    "change": "crypto.randomUUID() -> uuid.v4() from expo-modules-core (already installed through expo; native uuidv4 on iOS/Android) in apps/mobile/src/shared/api/webdav.ts, features/file-transfer/model/use-webdav-review.ts, use-webdav-restore.ts",
+    "codexCheck": "The three files are byte-identical in Codex's checkout; no test mocks crypto. Codex's uncommitted use-smb-items.ts has the same call and was not touched.",
+    "checks": { "tsc": "PASS", "eslint (3 files)": "PASS", "jest apps/mobile": "PASS 24 suites / 168 tests" },
+    "runtime": "PASS: PROPFIND 207, MKCOL 201, PUT 201, MOVE 201, GET 200, DELETE 204, DELETE 204 in the Nextcloud log"
+  },
+  "results": {
+    "lockScreenRunning": { "result": "PASS", "observed": "Yedekleniyor, 75%, 3 / 4 işlem tamamlandı, WebDAV, Duraklat + Kloda'yı aç", "file": "lock-screen-running-dark-tr.png" },
+    "lockScreenWaiting": { "result": "PASS", "observed": "Bekleniyor after the OS stopped the job on lock; only Kloda'yı aç", "file": "lock-screen-waiting-dark-tr.png" },
+    "dynamicIslandCompact": { "result": "PASS", "observed": "logo + 85%", "file": "dynamic-island-compact-tr.png" },
+    "dynamicIslandExpanded": { "result": "PASS", "observed": "Bekleniyor, track, WebDAV", "file": "dynamic-island-expanded-waiting-tr.png" },
+    "openIntent": { "result": "PASS", "observed": "Kloda'yı aç opened the app" },
+    "pauseIntent": { "result": "PARTIAL", "observed": "KlodaPauseBackupIntent.perform() ran in the app process and set the automatic pause; app and island show Duraklatıldı; lock screen shows Devam et. Corrected 2026-11-01: the run was a manual 'Şimdi yedekle' run that iOS had already stopped (os_interrupted) when the app left the foreground, so stopping an active run from the lock screen was not shown.", "file": "lock-screen-paused-dark-tr.png" },
+    "resumeIntent": {
+      "result": "PARTIAL",
+      "observed": "KlodaResumeBackupIntent.perform() ran and opened Kloda, but the WebDAV run stayed Duraklatıldı and no new requests reached the server.",
+      "comparison": "The in-app Devam et on the Durum page gives the same result (no requests, Yedekleme durdu).",
+      "cause": "Proven from the Simulator journal copy: latest webdav_run is automatic=0, phase waiting, error os_interrupted. IosWebDavQueue.status() reports a non-active manual waiting run as 'paused'; home-status/IosLiveActivityStatus then show Devam et, which calls resumeAutomatic / IosAutomaticCoordinator.resume(). That path only clears the automatic pause and replans automatic runs, so nothing ever restarts a manual run. Pre-existing in shared code, not caused by the Live Activity."
+    },
+    "resumeFix": {
+      "decision": "User 2026-11-01: Resume on a paused manual run starts it again (same as Back up now).",
+      "change": "home-page.tsx: when the automatic pause is off and the WebDAV run is a paused manual run, Resume calls transfer.run(); otherwise resumeAutomatic() as before. Never both. IosLiveActivityStatus: a paused manual WebDAV run (without the automatic pause) maps to 'waiting', so the lock screen offers only Open.",
+      "firstAttempt": "Calling resumeAutomatic() and then run() was tried on the Simulator: the manual run restarted (new run 0f99a1f4, 14 GET 200 on the server, ended needs_attention/review_required because the photos already exist), but the automatic run started at the same time failed with backup_busy (new run 0bb96303, needs_attention). Hence the never-both rule. The race between IosWebDavAutomaticCoordinator.begin()'s available() check and IosWebDavQueue.start() is pre-existing shared native code (Codex is editing these files) and was not changed.",
+      "checks": { "tsc": "PASS", "eslint": "PASS", "jest apps/mobile": "PASS 25 suites / 171 tests (3 new in home-page-resume.spec.tsx)", "tools/test-ios-live-activity.py": "PASS Swift 5 and 6 (3 new cases)" },
+      "notRun": "The corrected never-both version was not re-run on the Simulator; the native Live Activity change was not rebuilt or seen on the lock screen.",
+      "rerun": {
+        "build": "Debug ad-hoc signed Simulator build PASS (twice: resume fix, then ended-card fix)",
+        "devamEt": "PASS: manual run 87ec216f stopped by iOS (waiting/os_interrupted, shown Duraklatıldı / Devam et). Devam et created manual run b85494d7, server 65 GET 200, ended needs_attention/review_required like earlier runs (photos already exist). No new automatic run and no backup_busy.",
+        "lockScreen": "The card kept the ended 'İnceleme gerekiyor' content after later runs. Cause in IosLiveActivity.tick(): Activity.activities still lists an ended card, so no new card was requested or updated. Fixed (only active/stale cards count; ended ones are dismissed before a new request) and rebuilt.",
+        "endedCardFix": "PASS: after the fix the old card was dismissed; a first manual run left the app after ~1-2 s (shorter than the 2 s poll), so no card. Next foreground started automatic run 6b049da9 (needs_attention/review_required); a new card opened and ended as 'İnceleme gerekiyor', matching the app. The earlier automatic_unavailable suspicion is withdrawn: native status does not include that error.",
+        "endedCardFile": "lock-screen-new-card-after-end-tr.png",
+        "safeCard": { "result": "PASS", "observed": "Son çalışma tamamlandı, 100%, WebDAV, only Kloda'yı aç (automatic run finished)", "file": "lock-screen-safe-dark-tr.png" },
+        "statusMismatchFix": "Found: the card read IosWebDavQueue.status() without the WebDAV automaticError that KlodaBackupModule.webDavStatus adds, so the card said 'safe' while the home screen said 'Yedekleme durdu' (automatic_unavailable). IosLiveActivity.observe() now adds IosWebDavAutomaticCoordinator.error(); new host case; tools/test-ios-live-activity.py PASS Swift 5/6; Simulator build PASS. Not observed at runtime. Consequence on this Simulator: automatic_unavailable never clears (BGTaskScheduler submit fails), so the mirrored state is 'error' and no new card opens; the home screen shows the same error.",
+        "lightTheme": "NOT_RUN: after switching to light, the only card on screen was an ended dark-rendered card and the lock screen did not unlock for a new one; restored dark.",
+        "manualPausedCard": "NOT_SHOWN on the lock screen: every foreground also starts the due automatic run, which ends the card first. Covered only by tools/test-ios-live-activity.py."
+      }
+    },
+    "privacy": "PASS: no file, photo, device or server names on the lock screen or island; destination shown only as WebDAV"
+  },
+  "scriptedCapture": {
+    "command": "python3 -I tools/capture-ios-live-activity.py <simulator UDID> <output dir> (needs the apps/mobile/ios prebuild output)",
+    "how": "Compiles the production KlodaLockCard views, copy, intents, attributes and the generated theme with packages/pairing-native/apple/tests/IosLiveActivityCapture.swift for the iOS Simulator, compiles the generated icon catalog with actool, and runs it with simctl spawn once per language (-AppleLanguages). ImageRenderer draws every phase (syncing with operations, syncing PC+WebDAV, paused, stale, waiting, safe, attention, error) per sheet. The card background stands in for activityBackgroundTint; the system lock screen chrome and Dynamic Island are not drawn.",
+    "result": "PASS on Kloda-Cloud18-Disposable: 12 sheets (tr/en/de x dark, light, dark-xxxl, dark-ax2) in captures/.",
+    "findings": [
+      "TR/EN/DE: every string present; nothing truncated at the default size or at xxxLarge (German is the longest).",
+      "Light appearance: the card stays on the dark tile token in both themes; only the Open button changes (brand-text). Matches the plugin's lockColors mapping.",
+      "Accessibility size AX2 (first run): button labels and long titles truncated ('Pausier…', 'Kloda ö…', 'Letzter Lauf abges…'); icons are fixed size.",
+      "Stale card: the title says Bekleniyor/Wartet while the Pause button stays (phase is still syncing). Not changed."
+    ],
+    "review": "Same-agent review pass of the script and renderer; no independent review.",
+    "accessibilityStackFix": {
+      "decision": "User 2026-11-01: stack the buttons at accessibility sizes.",
+      "change": "KlodaLiveActivityViews.swift: at dynamicTypeSize.isAccessibilitySize KlodaButtons uses a VStackLayout instead of an HStackLayout, and the state title may wrap to 2 lines. Default and xxxLarge sizes are unchanged.",
+      "result": "PASS in the re-run capture (all 12 sheets regenerated): at AX2 no button label or title truncates in TR/EN/DE.",
+      "remaining": [
+        "The operation count still truncates at AX2 ('3 / 4 Vorgänge abges…'); icons stay fixed size. Not changed.",
+        "At AX2 the cards are taller than the 160 pt Live Activity limit; how iOS clips them on a real lock screen was not observed."
+      ],
+      "checks": { "tools/test-ios-live-activity.py": "PASS Swift 5 and 6", "Simulator app build with the extension": "PASS (views copied into the generated ios/KlodaLiveActivity; a new prebuild copies the same file)" },
+      "notRun": "Not seen on the system lock screen at an accessibility size."
+    },
+    "staleCardFix": "User 2026-11-01: a card that reads Waiting must not offer Pause. KlodaButtons hides Pause when the card is stale. Re-run capture shows the stale card with only Open; mapping checks Swift 5/6 and Simulator build PASS."
+  },
+  "physicalRehearsal": {
+    "purpose": "Rehearse gate 21 items on the Simulator to reduce physical-test errors. Gate 21 stays open; nothing here counts as the physical PASS.",
+    "setup": "Simulator BGTaskScheduler submit always fails, so automatic_unavailable is present and (after the observe() fix) the card mirrors it as error and never opens. Rehearsal workaround: pause automatic backup in the app and relaunch, which clears the in-memory error, then start a manual run.",
+    "automaticErrorMirrored": "PASS at runtime: with automatic_unavailable present no card opened, matching the home screen 'Yedekleme durdu'.",
+    "pausedCard": { "result": "PASS", "observed": "Manual run 704de659 started, locked; card Duraklatıldı with Devam et + Kloda'yı aç (automatic pause set).", "file": "lock-screen-paused-rehearsal-tr.png" },
+    "lockScreenResume": { "result": "PASS", "observed": "Devam et on the lock screen opened Kloda, cleared the automatic pause and started automatic run d3b296ce (48 GET 200 on the server)." },
+    "pauseRunningRun": "NOT_SHOWN: runs over the 6 selected photos finish in seconds; 150 generated photos were added to the disposable Simulator but are outside the app's photo selection. The pause path itself (IosAutomaticCoordinator.pause -> IosWebDavQueue.pause) is the same as the in-app Pause.",
+    "accessibilityLockScreen": { "result": "PASS", "observed": "Content size accessibility-large and accessibility-extra-extra-extra-large: the system lock screen caps the card text size; nothing truncated or clipped; buttons stacked. The renderer height measurement (179 pt at default) does not match the system (~154 pt), so it was removed from the capture tool.", "file": "lock-screen-ax2-paused-tr.png" },
+    "manualPausedCard": "NOT_SHOWN: without the automatic pause the Simulator always reports automatic_unavailable; host test only.",
+    "appFindings": "Outside the Live Activity, at accessibility sizes the app's onboarding title breaks mid-word ('Fotoğrafları-n') and the tab bar truncates ('Hedefle', Ayarlar off-screen). Not changed.",
+    "pauseQuirk": "Pausing automatic backup does not clear a previously reported WebDAV automaticError until the app restarts (reconcile returns before report). Pre-existing, Codex-owned file; not changed.",
+    "iOS16": "NOT_RUN: deployment target is 16.4 but only the iOS 26.5 Simulator runtime is installed.",
+    "checklist": "../../step19-physical-test-checklist.md"
+  },
+  "observations": [
+    "Second connection test once ended with cleanup DELETE 412 and the 'Test veya temizliği tamamlanamadı' message; an immediate retry was clean. Not related to the UUID change; not investigated.",
+    "Locking the device stops the job (iOS gives no background time on the Simulator); the card correctly falls back to Bekleniyor."
+  ],
+  "notRun": [
+    "Light appearance and EN/DE captures",
+    "VoiceOver / Dynamic Type check",
+    "Physical device (gate 21)",
+    "iOS 16 (no buttons) path",
+    "Android (step19 is iOS only)"
+  ],
+  "review": "Same-agent observation only; no independent review."
+}

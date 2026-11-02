@@ -13,15 +13,17 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
   private var restartPhase: String? = null
   private var restartToken: String? = null
   private var scope: String? = null
+  private var provider: String? = null
   override fun onCreate(arguments: Bundle?) {
     restartPhase = arguments?.getString("restartPhase")
     restartToken = arguments?.getString("restartToken")
     scope = arguments?.getString("scope")
+    provider = arguments?.getString("provider")
     super.onCreate(arguments); start()
   }
 
   override fun onStart() {
-    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore", "smb-files", "smb-profile")) {
+    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore", "smb-files", "smb-profile", "cloud18-nextcloud", "cloud18-destination", "cloud18-oauth")) {
       finish(Activity.RESULT_CANCELED, Bundle().apply { putString("stream", "Explicit scope required: local-files, media-fixture or webdav-journal\n") })
       return
     }
@@ -45,6 +47,29 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
         sendStatus(0, Bundle().apply { putString("stream", "START $name\n") })
         check()
         sendStatus(0, Bundle().apply { putString("stream", "PASS $name\n") })
+      }
+      if (scope == "cloud18-destination") {
+        group("cloud18-destination-migration") { AndroidDestinationMigrationChecks.run(scratch) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "backup_destination shared kind migration: rows kept, new kinds accepted, unknown refused, idempotent, fresh create, rollback PASS; production upgrade on device, queue wiring and iOS NOT_RUN here\n") })
+        return
+      }
+      if (scope == "cloud18-oauth") {
+        val provider = this.provider.orEmpty()
+        group("cloud18-own-$provider") {
+          AndroidOAuthChecks.run(IsolatedContext(targetContext, scratch), provider, {
+            startActivitySync(android.content.Intent(targetContext, AndroidLifecycleActivity::class.java)
+              .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) as Activity
+          }) { sendStatus(0, Bundle().apply { putString("stream", "$it\n") }) }
+        }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "$provider code+PKCE, Keystore custody, refresh and revoke where offered PASS; KlodaCloud module glue, product UI and physical hardware NOT_RUN\n") })
+        return
+      }
+      if (scope == "cloud18-nextcloud") {
+        group("cloud18-owned-nextcloud") {
+          AndroidNextcloudChecks.run(IsolatedContext(targetContext, scratch)) { sendStatus(0, Bundle().apply { putString("stream", "$it\n") }) }
+        }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Nextcloud Login Flow v2 grant/expiry/cancel, origin guards, per-destination Keystore custody/limit and owned DAV no-overwrite/revoke PASS; multi-destination queue, product UI, iOS and physical hardware NOT_RUN\n") })
+        return
       }
       if (scope == "smb-profile") {
         group("smb-profile-owner") { AndroidSmbProfileChecks.run(this, scratch) }

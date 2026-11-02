@@ -3,15 +3,18 @@ import CryptoKit
 
 enum IosWebDavFailure: Error { case code(String) }
 
+// provider == nil is the original single WebDAV destination; its targetId formula never changes (ADR0027).
 struct IosWebDavProfile: Codable, Equatable {
+  static let providers: Set<String> = ["nextcloud", "cloudme", "kolab-now"]
   let revision: String
   let endpoint: String
   let targetPath: String
   let username: String
   let password: String
+  var provider: String? = nil
 
   func validate() throws {
-    guard UUID(uuidString: revision) != nil,
+    guard provider.map(Self.providers.contains) ?? true, UUID(uuidString: revision) != nil,
       let url = URLComponents(string: endpoint), url.scheme == "https", url.host?.isEmpty == false,
       url.user == nil, url.password == nil, url.query == nil, url.fragment == nil,
       !username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, !username.contains(":"), !password.isEmpty,
@@ -37,7 +40,9 @@ struct IosWebDavProfile: Codable, Equatable {
     return parts
   }
   func targetId() throws -> String {
-    let bytes = try JSONSerialization.data(withJSONObject: [url().absoluteString, username])
+    let legacy = [try url().absoluteString, username]
+    let identity = provider.map { [$0] + legacy } ?? legacy
+    let bytes = try JSONSerialization.data(withJSONObject: identity)
     return Data(SHA256.hash(data: bytes)).base64EncodedString().replacingOccurrences(of: "+", with: "-")
       .replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
   }

@@ -77,12 +77,46 @@ final class IosWebDavJournal {
     try database.execute("CREATE TRIGGER IF NOT EXISTS retain_webdav_upload BEFORE DELETE ON webdav_upload BEGIN SELECT RAISE(ABORT,'retained'); END")
     try database.execute("CREATE INDEX IF NOT EXISTS webdav_upload_locator ON webdav_upload(target,source,reference)")
     try database.execute("CREATE INDEX IF NOT EXISTS webdav_upload_unfinished ON webdav_upload(id) WHERE phase!='completed'")
-    try database.execute("""
-      CREATE TABLE IF NOT EXISTS backup_destination (
-        kind TEXT NOT NULL CHECK(kind IN ('pc','webdav')), id TEXT NOT NULL,
-        enabled INTEGER NOT NULL CHECK(enabled IN (0,1)), revision TEXT NOT NULL, PRIMARY KEY(kind,id))
-      """)
+    try destinations()
     try createRuns(); try createPlan(); try createPublicationPaths(); try createWebDavRestores()
+  }
+  static let destinationKinds = "'pc','webdav','nextcloud','cloudme','kolab-now','smb'"
+  static func destinationTable(_ name: String) -> String {
+    """
+    CREATE TABLE \(name) (
+      kind TEXT NOT NULL CHECK(kind IN (\(destinationKinds))), id TEXT NOT NULL,
+      enabled INTEGER NOT NULL CHECK(enabled IN (0,1)), revision TEXT NOT NULL, PRIMARY KEY(kind,id))
+    """
+  }
+  // ADR0027: one shared kind list; an existing table with the original CHECK is rebuilt once, rows unchanged, all or nothing.
+  private func destinationSql() throws -> String? {
+    try database.statement("SELECT sql FROM sqlite_master WHERE type='table' AND name='backup_destination'") { row -> String? in
+      let step = sqlite3_step(row)
+      if step == SQLITE_DONE { return nil }
+      guard step == SQLITE_ROW, let text = sqlite3_column_text(row, 0) else { throw IosWebDavFailure.code("storage_failure") }
+      return String(cString: text)
+    }
+  }
+  private func destinations() throws {
+    if try destinationSql()?.contains(Self.destinationKinds) == true { return }
+    try database.execute("BEGIN IMMEDIATE")
+    do {
+      // Re-read under the write lock: another opener may have created or rebuilt the table meanwhile.
+      if let sql = try destinationSql() {
+        if !sql.contains(Self.destinationKinds) {
+          try database.execute(Self.destinationTable("backup_destination_next"))
+          try database.execute("INSERT INTO backup_destination_next(kind,id,enabled,revision) SELECT kind,id,enabled,revision FROM backup_destination")
+          try database.execute("DROP TABLE backup_destination")
+          try database.execute("ALTER TABLE backup_destination_next RENAME TO backup_destination")
+        }
+      } else {
+        try database.execute(Self.destinationTable("backup_destination"))
+      }
+      try database.execute("COMMIT")
+    } catch {
+      try? database.execute("ROLLBACK")
+      throw error
+    }
   }
   func setEnabled(kind: String, id: String, enabled: Bool, revision: String) throws {
     let pattern = kind == "pc" ? "\\A[A-Za-z0-9_-]{21}[AQgw]\\z" : "\\A[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]\\z"

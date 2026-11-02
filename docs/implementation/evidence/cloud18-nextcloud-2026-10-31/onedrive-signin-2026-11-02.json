@@ -1,0 +1,35 @@
+{
+  "date": "2026-11-02",
+  "scope": "Step18B/2 OneDrive sign-in (code + PKCE, Entra common, Files.ReadWrite.AppFolder) and shared OAuth login code for Dropbox and OneDrive, ADR0028; no screen, no upload",
+  "refactor": "IosDropboxLogin/AndroidDropboxLogin replaced by provider-configured IosOAuthLogin/AndroidOAuthLogin; JS signInDropbox(folder) replaced by signInOAuth(provider, folder); error code dropbox_login renamed oauth_login",
+  "checks": {
+    "jest": "PASS 27 suites / 182 tests",
+    "typecheck": "PASS npx tsc --noEmit -p apps/mobile",
+    "eslint": "PASS changed cloud-destination files",
+    "iosBuild": "PASS xcodebuild Debug iphonesimulator after pod install",
+    "androidBuild": "PASS :my-module:compileDebugKotlin :my-module:lintDebug :my-module:assembleDebugAndroidTest"
+  },
+  "defectFound": {
+    "symptom": "first iOS OneDrive real-account run FAIL oauth_login after a successful sign-in",
+    "triage": "diagnose mode (no token values kept): callback, token exchange (200) and Graph /me (200) all succeeded; token lengths 417-1464 bytes and printable; the product callback check failed",
+    "cause": "Microsoft returns to msauth.com.kloda.app://auth/ (trailing slash) for the registered msauth.com.kloda.app://auth; the callback path was compared exactly",
+    "fix": "trailing slash ignored on both platforms; scheme, host, other paths and state still enforced; offline checks added for both cases"
+  },
+  "realAccount": {
+    "approval": "user approved the real-account tests 2026-11-02 and signed in themself each time",
+    "iosOneDrive": "PASS tools/test-ios-oauth.py <UDID> onedrive: PKCE exchange, Graph account ID, Keychain round trip, refresh, custody deleted; revoke not offered by Microsoft",
+    "iosDropboxAfterRefactor": "PASS tools/test-ios-oauth.py <UDID> dropbox: PKCE exchange, account ID, Keychain, refresh, revoke invalidates refresh, custody deleted",
+    "androidOneDrive": "PASS tools/test-android-oauth.py onedrive (KlodaCloud18): Custom Tab, msauth redirect activity, PKCE, Graph account ID, Keystore, refresh, custody deleted; revoke not offered",
+    "androidDropboxAfterRefactor": "PASS tools/test-android-oauth.py dropbox: Custom Tab, redirect activity, PKCE, account ID, Keystore, refresh, revoke invalidates refresh, custody deleted",
+    "tokensRecorded": false
+  },
+  "emulatorChange": "KlodaCloud18 AVD hw.keyboard set to yes at the user's request (test device only)",
+  "notRun": [
+    "KlodaCloud module glue and JS bridge at runtime (Metro inspector did not answer)",
+    "Android tab-closed cancel detection",
+    "release-key OneDrive redirect (debug signature hash only)",
+    "refresh-token rotation persistence (needed by upload adapters)",
+    "physical devices"
+  ],
+  "review": "same-agent separate pass only; no independent review"
+}

@@ -146,7 +146,13 @@ public final class KlodaPairingModule: Module {
     let active = UIApplication.shared.applicationState == .active && visible
     let wasActive = session.isForegroundActive
     session.updateActive(active)
-    if active && !wasActive { IosAutomaticCoordinator.shared.uiActive() }
+    if active && !wasActive {
+      IosAutomaticCoordinator.shared.uiActive()
+      #if canImport(ActivityKit)
+      // A lock-screen Resume only opens Kloda; it is performed here, behind the same foreground fence as Resume in the app.
+      IosLiveActivity.shared.uiActive()
+      #endif
+    }
   }
 
   private func queueStatus() throws -> [String: Any] {

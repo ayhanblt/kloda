@@ -115,7 +115,12 @@
       "credential_locked": "Secure credentials are currently locked. Unlock the device.",
       "user_pause": "This run was paused by the user.",
       "webdav_fields": "Enter a valid HTTPS endpoint, destination folder, username and password.",
-      "wifi_required": "WebDAV transfers require a suitable Wi-Fi or Ethernet connection."
+      "wifi_required": "WebDAV transfers require a suitable Wi-Fi or Ethernet connection.",
+      "nextcloud_login": "Nextcloud sign-in could not be completed. Check the server address and try again.",
+      "nextcloud_server_mismatch": "The server answered for a different address than the one entered. Sign-in was stopped.",
+      "nextcloud_login_expired": "Sign-in was not confirmed within 20 minutes. Start again.",
+      "destination_limit": "This device already has 8 cloud destinations. Remove one before adding another.",
+      "destination_exists": "This destination is already saved on this device."
     },
     "rebackup": "Back up this version again",
     "rebackupConfirm": "Explicitly send this unchanged source version again to the currently paired computer? The computer must approve file access.",
@@ -312,7 +317,12 @@
     "schedulePreference": "The schedule preference is saved; automatic execution is not enabled on this platform yet."
   },
   "ui": {
-    "lockScreen": {},
+    "lockScreen": {
+      "live": "Live backup",
+      "open": "Open Kloda",
+      "paused": "Paused",
+      "pc": "Computer"
+    },
     "common": {
       "back": "Back",
       "next": "Next",

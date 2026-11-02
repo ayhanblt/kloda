@@ -19,6 +19,12 @@ class AndroidLifecycleActivity : Activity() {
   override fun onResume() { super.onResume(); resumed = true }
   override fun onPause() { resumed = false; super.onPause() }
   override fun onWindowFocusChanged(hasFocus: Boolean) { super.onWindowFocusChanged(hasFocus); focused = hasFocus }
+  // Google Drive checks: Play services consent must be started for a result from an activity.
+  @Deprecated("Activity result API of the platform Activity")
+  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    super.onActivityResult(requestCode, resultCode, data)
+    AndroidGoogleDrive.delivered(requestCode, resultCode, data)
+  }
 }
 
 /** FGS primitive only. The host grants/restores POST_NOTIFICATIONS outside this self-instrumented process. */

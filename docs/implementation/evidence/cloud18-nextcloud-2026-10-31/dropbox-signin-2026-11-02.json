@@ -1,0 +1,42 @@
+{
+  "date": "2026-11-02",
+  "scope": "Step18B/1 Dropbox sign-in (code + PKCE) and per-destination OAuth custody, ADR0028; no screen, no upload",
+  "checks": {
+    "jest": "PASS 27 suites / 182 tests (npm test -w apps/mobile -- --watchman=false)",
+    "typecheck": "PASS npx tsc --noEmit -p apps/mobile",
+    "eslint": "PASS changed cloud-destination files",
+    "iosBuild": "PASS xcodebuild Debug iphonesimulator after pod install; no warnings in IosOAuthVault/IosDropboxLogin/KlodaCloudModule",
+    "androidBuild": "PASS :my-module:compileDebugKotlin :my-module:lintDebug (react-native-worklets lint task excluded: lint tool crash)"
+  },
+  "providerProbe": {
+    "method": "anonymous GET of the authorize URL, no credentials or tokens",
+    "registeredRedirect": "db-5435jnh71fcmfck://oauth -> 200 login page",
+    "unregisteredRedirect": "db-5435jnh71fcmfck://wrong -> 302 authorize_error invalid_redirect_uri",
+    "result": "App Console redirect registration matches the code"
+  },
+  "iosRealAccount": {
+    "status": "PASS",
+    "approval": "user approved the real-account test 2026-11-02 and signed in themself in the sheet",
+    "command": "python3 -I tools/test-ios-dropbox.py <Kloda-Cloud18-Disposable UDID>",
+    "covers": "IosDropboxLogin + IosOAuthVault compiled into an owned check app (packages/pairing-native/apple/tests/IosDropboxApp.swift): authorize URL/state/callback checks, Keychain add/duplicate/delete, ASWebAuthenticationSession sign-in, PKCE code exchange without secret, Keychain round trip of the grant, refresh, revoke, refresh refused after revoke, custody deleted",
+    "result": {"pkceExchange": true, "accountIdPrefix": "dbid:", "keychainRoundTrip": true, "refresh": true, "revokeInvalidatesRefresh": true, "custodyDeleted": true},
+    "tokensRecorded": false,
+    "notCovered": "KlodaCloudModule glue and JS bridge at runtime (Metro inspector did not answer), Kloda app bundle ID"
+  },
+  "androidRealAccount": {
+    "status": "PASS",
+    "approval": "user approved 2026-11-02, continued Chrome's first-run screen and signed in themself",
+    "command": "python3 -I tools/test-android-dropbox.py (emulator-5590, KlodaCloud18), instrumentation scope cloud18-dropbox",
+    "covers": "AndroidDropboxLogin + AndroidOAuthVault + KlodaOAuthRedirectActivity in the module test APK: authorize URL/state/callback checks, Keystore add/duplicate/mismatch/delete, Custom Tab sign-in, redirect delivered through the activity, PKCE exchange without secret, Keystore round trip, refresh, revoke, refresh refused after revoke, custody deleted",
+    "tokensRecorded": false,
+    "notCovered": "tab-closed cancel detection (KlodaCloud module foreground hook), KlodaCloud module glue and JS bridge at runtime"
+  },
+  "afterTests": "refresh() extracted on both platforms before the Android run; iOS app rebuilt afterwards: PASS",
+  "notRun": [
+    "Android tab-closed cancel detection at runtime",
+    "bridge at runtime (no screen wired, 18A/4b)",
+    "upload adapter (waits for 18A/3 and the provider-kind migration)",
+    "physical devices"
+  ],
+  "review": "same-agent separate pass only; no independent review"
+}

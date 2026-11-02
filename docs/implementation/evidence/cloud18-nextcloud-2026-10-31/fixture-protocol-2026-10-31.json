@@ -1,0 +1,27 @@
+{
+  "recordedAt": "2026-10-31",
+  "scope": "Step18 group A: owned loopback Nextcloud fixture protocol probe (host side, before native code). ADR0027.",
+  "fixture": {
+    "image": "nextcloud@sha256:07ec73cc816e58d6f45a162cd53ef886462c29271a23fc68d0124cec276e3767",
+    "tag": "nextcloud:31-apache",
+    "version": "31.0.14",
+    "tls": "step15 disposable fixture CA, SAN IP:127.0.0.1,IP:10.0.2.2, port 18443 loopback only",
+    "scripts": ["tools/nextcloud-fixture.py", "tools/nextcloud-login-driver.py"]
+  },
+  "checks": {
+    "loginFlowV2": "POST /index.php/login/v2 -> login + poll on the same origin; poll 404 before grant; 200 once with server/loginName/appPassword (72 chars); later poll 404 (single use)",
+    "loginOriginGuard": "browser login POST without same-origin Origin header is refused (loginErrors invalidOrigin); fixture driver sends it",
+    "davNoOverwrite": {
+      "MKCOL": 201,
+      "PUT If-None-Match:* new .kloda-upload-*": 201,
+      "PUT If-None-Match:* existing": 412,
+      "MOVE Overwrite:F free target": 201,
+      "MOVE Overwrite:F existing target": 412,
+      "GET after refused overwrite": "200, original bytes kept"
+    },
+    "revoke": "DELETE /ocs/v2.php/core/apppassword with OCS-APIREQUEST:true -> 200; same app password then PROPFIND -> 401",
+    "forbiddenNames": "capabilities list forbidden extensions .part/.filepart and basename .htaccess; PUT to x.part -> 412, MOVE -> 500. Kloda temporary names .kloda-upload-* are not affected; source files with these names must surface a visible per-file error."
+  },
+  "limits": "Host-side protocol probe only. No native code, no device, no real provider account, not a working-provider claim.",
+  "next": "Android/iOS Login Flow v2 + per-destination vault against this fixture on owned KlodaCloud18 / Kloda-Cloud18-Disposable."
+}

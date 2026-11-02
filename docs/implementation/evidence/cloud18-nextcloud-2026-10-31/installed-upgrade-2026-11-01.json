@@ -1,0 +1,27 @@
+{
+  "date": "2026-11-01",
+  "scope": "Step18A/2 backup_destination.kind migration on a real installed-app upgrade (data container kept)",
+  "ios": {
+    "status": "PASS",
+    "device": "Kloda-Cloud18-Disposable (iOS 26.5 Simulator, owned disposable)",
+    "oldBuild": "/private/tmp/kloda-smb-product-ios-build Debug-iphonesimulator, binary contains CHECK kind IN ('pc','webdav') and not the new list",
+    "newBuild": "/tmp/kloda-step18/dd Debug-iphonesimulator from this worktree (debug dylib contains the new list)",
+    "steps": [
+      "uninstall, install old build, launch via dev client, skip onboarding: old binary created Application Support/kloda-webdav-state/journal.sqlite",
+      "old schema observed: CHECK(kind IN ('pc','webdav'))",
+      "app stopped; one row seeded: ('webdav','upgrade-check',0,'rev-upgrade')",
+      "simctl install of the new build over the old one (data kept, container moved), launch, skip onboarding"
+    ],
+    "result": {
+      "schema": "CHECK(kind IN ('pc','webdav','nextcloud','cloudme','kolab-now','smb'))",
+      "rows": [["webdav", "upgrade-check", 0, "rev-upgrade"]],
+      "integrityCheck": "ok",
+      "otherTablesPresent": true
+    }
+  },
+  "android": {
+    "status": "NOT_RUN",
+    "reason": "Only available pre-migration APK (main checkout, 2026-10-29) runs, but its native API does not match the current JS bundle; the WebDAV journal (no_backup/kloda-webdav.sqlite) was never opened on Durum or Hedefler. Migration itself is covered by instrumentation scope cloud18-destination on KlodaCloud18 (destination-migration-2026-10-31.json)."
+  },
+  "notCovered": ["Android installed-app upgrade", "physical devices", "downgrade (refused by design)"]
+}

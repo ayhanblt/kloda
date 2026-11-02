@@ -9,6 +9,7 @@
       "expo-dev-client",
       "expo-secure-store",
       "./plugins/with-optional-camera.cjs",
+      "./plugins/with-live-activity.cjs",
       [
         "expo-camera",
         {

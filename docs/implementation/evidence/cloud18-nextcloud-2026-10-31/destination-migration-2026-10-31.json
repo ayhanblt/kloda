@@ -1,0 +1,45 @@
+{
+  "recordedAt": "2026-10-31",
+  "scope": "Step18 group A slice 2: shared backup_destination.kind migration ('pc','webdav','nextcloud','cloudme','kolab-now','smb'), Android and iOS. ADR0027; user approval 2026-10-31; Codex confirmed it does not touch this table.",
+  "files": {
+    "changed": [
+      "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidWebDavJournal.kt",
+      "apps/mobile/modules/my-module/ios/IosWebDavJournal.swift",
+      "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt"
+    ],
+    "added": [
+      "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidDestinationMigrationChecks.kt",
+      "packages/pairing-native/apple/tests/IosDestinationMigrationChecks.swift",
+      "tools/test-android-destination-migration.py",
+      "tools/test-ios-destination-migration.py"
+    ]
+  },
+  "checks": {
+    "androidInstrumentation": "PASS scope cloud18-destination on owned KlodaCloud18 (API35 arm64, emulator-5590)",
+    "androidRegression": "PASS scope webdav-journal on the same owned emulator",
+    "iosHost": "PASS tools/test-ios-destination-migration.py (Swift 5, production journal sources)",
+    "iosRegression": "PASS tools/test-ios-webdav-journal.py",
+    "covered": [
+      "table created by the exact earlier statement is rebuilt once; pc/webdav rows kept byte for byte; lookups unchanged",
+      "nextcloud/cloudme/kolab-now/smb accepted; unknown kind, enabled=2 and duplicate (kind,id) refused",
+      "journal setEnabled still limited to pc/webdav",
+      "second open leaves schema and rows unchanged; fresh database gets the shared list directly",
+      "a row the new CHECK refuses rolls the whole rebuild back; original schema and rows left as they were"
+    ]
+  },
+  "logHashes": {
+    "/tmp/kloda-step18/android-destination.log": "3f29099c126aa6c42b820d6dace4759553c1d5c450c2df3a07a44c6503d07728",
+    "/tmp/kloda-step18/ios-destination.log": "8de27ce5ca7c8f91b9d81e6205f6145f2c55ca67de215815ab4ada4180875a23",
+    "/tmp/kloda-step18/ios-webdav-journal.log": "fd25f66db0f6d56173a35c5ab867f533d1cdea8b97537e319f92d541e57384a6"
+  },
+  "notRun": [
+    "upgrade of a real installed app's journal on a device or Simulator",
+    "Swift 6 build of the host checks (existing IosWebDavPublication.swift is not Swift 6 clean; unrelated to this slice)",
+    "other webdav-* scopes (need the step15 fixture used by Codex)"
+  ],
+  "limits": [
+    "A table holding a kind added by a newer release makes an older release refuse the rebuild and the journal does not open (fail closed; downgrade unsupported).",
+    "SMB still uses Codex's temporary smb_enabled table; binding SMB to backup_destination is a separate user decision."
+  ],
+  "review": "Same-agent separate pass: no index, trigger or foreign key depends on backup_destination; not an independent review."
+}

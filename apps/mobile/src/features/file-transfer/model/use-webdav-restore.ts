@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
+import { uuid } from 'expo-modules-core';
 import { webDavBackups, type WebDavBackups, type WebDavBackup } from '../../../shared/api/webdav-backups';
 
 export function useWebDavRestore() {
@@ -31,7 +32,7 @@ export function useWebDavRestore() {
   };
   const restore = async (item: WebDavBackup) => {
     if (busy.current || !active.current || !page || (item.kind === 'file' ? !page.canRestoreFiles : !page.canRestorePhotos)) return;
-    const nonce = crypto.randomUUID(), version = ++epoch.current;
+    const nonce = uuid.v4(), version = ++epoch.current;
     request.current = nonce; busy.current = true; setWorking(true); setRestored(null); setError(null);
     try {
       const result = await (item.kind === 'file' ? webDavBackups.restoreFile(item.id, nonce) : webDavBackups.restorePhotos(item.id, nonce));

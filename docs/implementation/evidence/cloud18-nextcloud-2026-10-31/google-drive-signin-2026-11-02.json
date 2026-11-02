@@ -1,0 +1,36 @@
+{
+  "date": "2026-11-02",
+  "scope": "Step18B/4 Google Drive sign-in (drive.file) on the shared OAuth code, ADR0028; no screen, no upload",
+  "registration": {
+    "ios": "iOS OAuth client 169708313293-8ddls2ek..., redirect com.googleusercontent.apps.<id>:/oauthredirect",
+    "android": "Android client for com.kloda.app (app debug SHA-1 5E:8F:16...); a second test-only Android client for com.kloda.sync.test (SHA-1 74:A8:85..., ~/.android debug key) added by the user",
+    "api": "Google Drive API enabled by the user in the Cloud project (was off: Drive about returned 403 accessNotConfigured)"
+  },
+  "dependency": "com.google.android.gms:play-services-auth:22.0.0, Android SDK License, about 195 KB AAR",
+  "decision": "user 2026-11-02: Android Drive grant held by Play services; vault keeps account ID + account name, no token (ADR0028 §2 note)",
+  "attempts": [
+    "iOS and Android timed out twice: no sign-in within 10 minutes; nothing stored",
+    "iOS FAIL exchange: oauth_login; diagnose mode: token 200 with refresh token and drive.file granted, Drive about 403 accessNotConfigured -> API enabled",
+    "Android consent from the instrumentation context ended with Play services error; moved to startIntentSenderForResult over a test activity (product consent() path)",
+    "Android Play services 'Unknown error [8]' after account choice: test package com.kloda.sync.test not registered -> test-only Android client added",
+    "Android revokeAccess never answered on Play services 24.23.35 (test hung); revoke now bounded with a timeout and CancellationException rethrown in AndroidGoogleDrive.authorize/revoke"
+  ],
+  "checks": {
+    "jest": "PASS 27 suites / 182 tests (earlier in 18B/4)", "typecheck": "PASS", "eslint": "PASS changed cloud-destination files",
+    "iosBuild": "PASS", "androidBuild": "PASS compile + lint + assembleDebugAndroidTest after the revoke change"
+  },
+  "realAccount": {
+    "iosDrive": "PASS tools/test-ios-oauth.py <UDID> google-drive: PKCE exchange, Drive permissionId, Keychain round trip, refresh, revoke invalidates refresh, custody deleted",
+    "androidDrive": "PASS tools/test-android-oauth.py google-drive: Play services consent, Drive identity, Keystore account-only profile, silent token for stored account, custody deleted",
+    "androidRevoke": "OPEN: revokeAccess gave no answer within 30 s on Play services 24.23.35; the grant may remain in the user's Google account",
+    "tokensRecorded": false
+  },
+  "notRun": [
+    "Android revoke on a current Play services",
+    "KlodaCloud module glue and JS bridge at runtime (including com.kloda.app matching its own Android client)",
+    "Android tab-closed cancel detection",
+    "release signing SHA-1 registration",
+    "physical devices"
+  ],
+  "review": "same-agent separate pass only; no independent review"
+}

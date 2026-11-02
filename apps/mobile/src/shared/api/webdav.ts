@@ -1,4 +1,5 @@
 import { fetch as nativeFetch } from 'expo/fetch';
+import { uuid } from 'expo-modules-core';
 
 export interface MobileStorageForm {
   endpoint: string;
@@ -33,7 +34,7 @@ export async function testWebDavWriteAccess(storage: MobileStorageForm, signal?:
   };
   try { await request(target, 'PROPFIND', [207], { headers: { Depth: '0' } }); }
   catch { throw new Error(signal?.aborted ? 'webdav_cancelled' : 'webdav_connection'); }
-  const directory = new URL(`.kloda-connection-test-${crypto.randomUUID()}/`, target);
+  const directory = new URL(`.kloda-connection-test-${uuid.v4()}/`, target);
   const upload = new URL('upload', directory), final = new URL('final', directory);
   const marker = 'kloda-connection-test';
   await beforeMutation?.();

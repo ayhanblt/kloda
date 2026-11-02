@@ -8,6 +8,10 @@ version = '0.1.0'
 
 dependencies {
   implementation('com.facebook.react:react-android')
+  // Nextcloud Login Flow v2 opens in a Custom Tab (ADR0027); same version expo-dev-menu already resolves.
+  implementation('androidx.browser:browser:1.9.0')
+  // Google Drive authorization through Play services (ADR0028 §1): 22.0.0, Android SDK License, checked 2026-11-02.
+  implementation('com.google.android.gms:play-services-auth:22.0.0')
 }
 
 android {

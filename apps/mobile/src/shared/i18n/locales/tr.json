@@ -115,7 +115,12 @@
       "credential_locked": "Güvenli kimlik bilgileri şu anda kilitli. Cihazın kilidini aç.",
       "user_pause": "Bu çalışma kullanıcı tarafından duraklatıldı.",
       "webdav_fields": "Geçerli HTTPS adresi, hedef klasör, kullanıcı adı ve parola gir.",
-      "wifi_required": "WebDAV gönderimi için uygun Wi-Fi veya Ethernet bağlantısı gerekiyor."
+      "wifi_required": "WebDAV gönderimi için uygun Wi-Fi veya Ethernet bağlantısı gerekiyor.",
+      "nextcloud_login": "Nextcloud girişi tamamlanamadı. Sunucu adresini kontrol edip yeniden dene.",
+      "nextcloud_server_mismatch": "Sunucu, girilen adresten farklı bir adres için yanıt verdi. Giriş durduruldu.",
+      "nextcloud_login_expired": "Giriş 20 dakika içinde onaylanmadı. Yeniden başlat.",
+      "destination_limit": "Bu cihazda zaten 8 bulut hedefi var. Yenisini eklemeden önce birini kaldır.",
+      "destination_exists": "Bu hedef bu cihazda zaten kayıtlı."
     },
     "rebackup": "Bu sürümü yeniden yedekle",
     "rebackupConfirm": "Bu değişmemiş kaynak sürümü eşleşmiş bilgisayara açık isteğinizle yeniden gönderilsin mi? Bilgisayarda dosya erişimi onaylı olmalıdır.",
@@ -312,7 +317,12 @@
     "schedulePreference": "Program tercihi saklanır; bu platformda otomatik yürütme henüz etkin değil."
   },
   "ui": {
-    "lockScreen": {},
+    "lockScreen": {
+      "live": "Canlı yedekleme",
+      "open": "Kloda’yı aç",
+      "paused": "Duraklatıldı",
+      "pc": "Bilgisayar"
+    },
     "common": {
       "back": "Geri",
       "next": "İleri",

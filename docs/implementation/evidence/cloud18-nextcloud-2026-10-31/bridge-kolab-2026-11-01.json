@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-01",
+  "scope": "Step18A/4a KlodaCloud bridge, 18A/5 mismatch revoke, 18A/6 Kolab Now adapter / CloudMe blocked",
+  "checks": {
+    "jest": "PASS 27 suites / 180 tests (npm test -w apps/mobile -- --watchman=false)",
+    "typecheck": "PASS npx tsc --noEmit -p apps/mobile",
+    "eslint": "PASS changed cloud-destination files",
+    "iosBuild": "PASS xcodebuild Debug iphonesimulator, KlodaCloudModule registered",
+    "androidBuild": "PASS :my-module:compileDebugKotlin :my-module:lintDebug (react-native-worklets lint task excluded: lint tool crash)",
+    "iosNextcloud": "PASS tools/test-ios-nextcloud.py on Kloda-Cloud18-Disposable against the owned fixture (regression)",
+    "androidNextcloud": "PASS tools/test-android-nextcloud.py on recreated KlodaCloud18 (API35 google_apis arm64, emulator-5590) against the owned fixture (regression)"
+  },
+  "providerProbe": {
+    "method": "anonymous PROPFIND Depth 0, no credentials sent",
+    "cloudme": "https://webdav.cloudme.com/ -> 401 WWW-Authenticate: Digest algorithm=MD5 only -> blocked (ADR0027 section 6)",
+    "kolabNow": "https://apps.kolabnow.com/files -> 401 WWW-Authenticate: Basic realm=sabre/dav -> adapter with fixed endpoint"
+  },
+  "notRun": [
+    "bridge at runtime (no screen wired, 18A/4b)",
+    "mismatch-revoke end to end (needs a server returning a different origin)",
+    "Kolab Now real account (separate user approval): root /files vs /files/Files, conditional create, Overwrite: F MOVE",
+    "multi-destination queue (18A/3)",
+    "physical devices"
+  ],
+  "review": "same-agent separate pass only; no independent review"
+}

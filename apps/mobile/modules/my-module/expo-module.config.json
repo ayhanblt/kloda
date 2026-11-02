@@ -7,17 +7,20 @@
     "modules": [
       "KlodaSyncRuntimeModule",
       "KlodaPairingModule",
-      "KlodaBackupModule"
+      "KlodaBackupModule",
+      "KlodaCloudModule"
     ],
     "appDelegateSubscribers": [
-      "IosAutomaticSubscriber"
+      "IosAutomaticSubscriber",
+      "IosLiveActivitySubscriber"
     ]
   },
   "android": {
     "modules": [
       "com.kloda.sync.KlodaSyncRuntimeModule",
       "com.kloda.sync.KlodaPairingModule",
-      "com.kloda.sync.KlodaBackupModule"
+      "com.kloda.sync.KlodaBackupModule",
+      "com.kloda.sync.KlodaCloudModule"
     ]
   }
 }

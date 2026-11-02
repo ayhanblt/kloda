@@ -18,6 +18,10 @@ export function HomePage({ sourceCount, navigate }: { sourceCount: number; navig
   const { t } = useTranslation();
   const model = useHomeStatus(sourceCount);
   const { transfer, webdav, pcSelected } = model;
+  // Resume only restarts automatic runs; a paused manual WebDAV run is started again like "Back up now".
+  // Never both at once: the automatic run would then fail with backup_busy.
+  const manualPaused = transfer.queue?.automaticPaused !== true && webdav.status?.run?.state === 'paused' && !webdav.status.run.automatic;
+  const resume = () => manualPaused ? transfer.run() : transfer.resumeAutomatic();
   const targets: StatusTarget[] = [];
   if (pcSelected) targets.push({ id: 'pc', label: t('computer.title'), kind: 'pc', page: 'computer',
     state: homeStatus({ sourceCount, pcSelected, queue: transfer.queue, webdav: { configured: false, enabled: false, running: false }, pcError: transfer.error }).state });
@@ -25,7 +29,7 @@ export function HomePage({ sourceCount, navigate }: { sourceCount: number; navig
     state: webdav.status.enabled ? homeStatus({ sourceCount, pcSelected: false, queue: null, webdav: webdav.status, webdavError: webdav.error ?? transfer.webdavActionError }).state : 'disabled' });
   return <StatusView state={model.state} progress={model.progress} targets={targets} sourceCount={sourceCount}
     paused={transfer.queue?.automaticPaused === true || webdav.status?.run?.state === 'paused'} working={transfer.working || webdav.working}
-    navigate={navigate} run={() => { void transfer.run(); }} pause={() => { void transfer.pause(); }} resume={() => { void transfer.resumeAutomatic(); }} />;
+    navigate={navigate} run={() => { void transfer.run(); }} pause={() => { void transfer.pause(); }} resume={() => { void resume(); }} />;
 }
 
 export function StatusView({ state, progress, targets, sourceCount, paused, working, navigate, run, pause, resume }: StatusViewProps) {

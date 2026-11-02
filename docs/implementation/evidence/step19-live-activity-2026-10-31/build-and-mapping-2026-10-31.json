@@ -1,0 +1,53 @@
+{
+  "recordedAt": "2026-10-31",
+  "scope": "Step19 slice 1: iOS Live Activity (lock screen + Dynamic Island) driven only by native status in the app process; in-app updates, no push. User decisions 2026-10-31: SwiftUI exception, own Expo config plugin (no new dependency), Pause/Resume in v1 with Resume opening Kloda behind the existing foreground fence, lock screen shows only destination kinds/percent/operation counts.",
+  "files": {
+    "added": [
+      "apps/mobile/plugins/with-live-activity.cjs",
+      "apps/mobile/plugins/live-activity-xcode.cjs",
+      "apps/mobile/targets/live-activity/KlodaLiveActivityWidget.swift",
+      "apps/mobile/targets/live-activity/KlodaLiveActivityViews.swift",
+      "apps/mobile/targets/live-activity/KlodaLiveActivityCopy.swift",
+      "apps/mobile/targets/live-activity/KlodaLiveActivityIntents.swift",
+      "apps/mobile/modules/my-module/ios/KlodaBackupAttributes.swift",
+      "apps/mobile/modules/my-module/ios/IosLiveActivity.swift",
+      "apps/mobile/modules/my-module/ios/IosLiveActivityStatus.swift",
+      "apps/mobile/modules/my-module/ios/IosLiveActivitySubscriber.swift",
+      "packages/pairing-native/apple/tests/IosLiveActivityStatusChecks.swift",
+      "tools/test-ios-live-activity.py"
+    ],
+    "changed": [
+      "apps/mobile/app.json (plugin registered)",
+      "apps/mobile/modules/my-module/expo-module.config.json (IosLiveActivitySubscriber)",
+      "apps/mobile/modules/my-module/ios/KlodaPairingModule.swift (pending lock-screen Resume runs on foreground activation)",
+      "apps/mobile/src/shared/i18n/locales/{en,tr,de}.json (ui.lockScreen.live/open/paused/pc from the Lovable reference)"
+    ]
+  },
+  "checks": {
+    "mapping": "PASS tools/test-ios-live-activity.py, Swift 5 and 6: state mirrors homeStatus (syncing bytes/operations, attention, error, paused, waiting, safe), disabled destinations ignored, payload < 4 KB with no names",
+    "prebuild": "PASS CI=1 npx expo prebuild --platform ios --clean --no-install: extension target, theme from tokens.ts, TR/EN/DE strings, Lucide template SVGs, Inter fonts",
+    "simulatorBuild": "PASS xcodebuild Debug iphonesimulator (Kloda-Cloud18-Disposable), CODE_SIGNING_ALLOWED=NO; KlodaLiveActivity.appex embedded with NSExtensionPointIdentifier widgetkit, bundle com.kloda.app.LiveActivity; app Info.plist NSSupportsLiveActivities",
+    "intentsMetadata": "PASS KlodaPauseBackupIntent/KlodaResumeBackupIntent/KlodaOpenAppIntent registered in both the app and the extension",
+    "launchSmoke": "PASS app installs and keeps running on the owned Simulator after launch (native start only, no Metro)",
+    "js": "PASS jest 24 suites / 168 tests (App.spec needed npm run build -w @kloda/sync-core first, environment only), eslint, tsc --noEmit"
+  },
+  "logHashes": {
+    "/tmp/kloda-step18/xcodebuild.log": "e0914cdf7920ee747ab5bdd7231576e27caea5cf72c8ffa5f68b5c965ca47e3d",
+    "/tmp/kloda-step18/prebuild-ios.log": "0a16cfcc425270741603d8ad89f3697550575b829c057ff089f2a33e03e4fe41",
+    "/tmp/kloda-step18/jest.log": "a1cf0a8e2f4410ce506933baf4bf72635bb3ef414cdbd67698e1f52da410e715",
+    "/tmp/kloda-step18/jest-app.log": "57420dac8ec9125bb4153a698fe90d2878c7f01d050981a2bc62dd25553b0ef1"
+  },
+  "notRun": [
+    "Live Activity shown on the Simulator lock screen/Dynamic Island from a real run; visual comparison with the Lovable card, light/dark, Dynamic Type/VoiceOver",
+    "lock-screen Pause/Resume/Open intents executed end to end",
+    "free personal team signing of the extension on a physical iPhone (step21)"
+  ],
+  "limits": [
+    "Updates only while the Kloda process runs (foreground or OS-granted background time); staleDate marks a syncing card stale after 120 s without updates.",
+    "Extension text follows the device language, not the in-app language choice.",
+    "Error/attention states and the circle-alert icon are not in the Lovable card design; they reuse the app's statusUi copy.",
+    "Status is read every 2 s while Kloda is in the foreground or an activity exists.",
+    "SMB and the ADR0027 DAV providers are not shown until their queues are wired."
+  ],
+  "review": "Same-agent separate pass fixed a main-thread wait (uiActive used queue.sync behind a status read). Not an independent review."
+}

@@ -17,6 +17,28 @@
       android:permission="android.permission.BIND_JOB_SERVICE" />
     <service android:name=".AndroidWebDavJob" android:exported="true"
       android:permission="android.permission.BIND_JOB_SERVICE" />
+    <!-- ADR0028: Dropbox, OneDrive and Yandex PKCE redirects; the code is useless without the verifier held by the waiting sign-in. -->
+    <activity android:name=".KlodaOAuthRedirectActivity" android:exported="true" android:noHistory="true"
+      android:excludeFromRecents="true" android:theme="@android:style/Theme.Translucent.NoTitleBar">
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="db-5435jnh71fcmfck" android:host="oauth" />
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="msauth" android:host="com.kloda.app" android:path="/Xo8WBi6jzSxKDVR4drqm84yr9iU=" />
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="yxc50f110fd8ab48debcabb20f8b1474f0" android:host="authorize" />
+      </intent-filter>
+    </activity>
     <receiver android:name=".AndroidBackupReceiver" android:exported="false">
       <intent-filter>
         <action android:name="android.intent.action.BOOT_COMPLETED" />

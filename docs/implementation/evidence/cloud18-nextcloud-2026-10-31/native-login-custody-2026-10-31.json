@@ -1,0 +1,56 @@
+{
+  "recordedAt": "2026-10-31",
+  "scope": "Step18 group A slice 1: Nextcloud Login Flow v2 + per-destination DAV custody, Android and iOS native, against the owned loopback Nextcloud 31.0.14 fixture. ADR0027.",
+  "previousEvidence": "fixture-protocol-2026-10-31.json",
+  "files": {
+    "changed": [
+      "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidWebDavProfile.kt",
+      "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidWebDavVault.kt",
+      "apps/mobile/modules/my-module/ios/IosWebDavProfile.swift",
+      "apps/mobile/modules/my-module/ios/IosWebDavVault.swift",
+      "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt"
+    ],
+    "added": [
+      "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidNextcloudLogin.kt",
+      "apps/mobile/modules/my-module/ios/IosNextcloudLogin.swift",
+      "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidNextcloudChecks.kt",
+      "packages/pairing-native/apple/tests/IosNextcloudApp.swift",
+      "tools/nextcloud-fixture.py",
+      "tools/nextcloud-login-driver.py",
+      "tools/test-android-nextcloud.py",
+      "tools/test-ios-nextcloud.py"
+    ]
+  },
+  "checks": {
+    "androidCompile": "PASS :my-module:compileDebugKotlin + compileDebugAndroidTestKotlin, no warnings in changed files",
+    "iosTypecheck": "PASS swiftc -typecheck Swift 5 and Swift 6 modes for profile/vault/client/login",
+    "androidInstrumentation": "PASS scope cloud18-nextcloud on owned KlodaCloud18 (API35 arm64, emulator-5590)",
+    "androidRegression": "PASS scope webdav-journal (original WebDAV SQLite/custody/sidecar) on the same owned emulator",
+    "iosFixture": "PASS owned Kloda-Cloud18-Disposable (iOS 26.5), unsigned fixture with only com.kloda.fixture.cloud18 Keychain group",
+    "covered": [
+      "server normalisation; http/credentials/query/fragment refused; login/poll URLs off the entered origin refused before use",
+      "real grant: credential returned once, later poll 404; denied flow expires; cancel stops polling and later calls",
+      "server mismatch guard observed against the real server (grant made under another host) before the driver sent the device host",
+      "original WebDAV targetId formula and encoding unchanged; provider-bound ids differ per provider",
+      "per-destination vault round trip, cross-slot/legacy misuse refused, rotation, delete, original entry kept",
+      "limit 8 counts the original entry; ninth slot and a new original entry at the limit are refused",
+      "DAV with the Login Flow app password: MKCOL, PUT If-None-Match 201/412, MOVE Overwrite:F 201/412, GET bytes kept",
+      "revoke then 401 with the same app password; local custody deleted"
+    ]
+  },
+  "logHashes": {
+    "/tmp/kloda-step18/android-nextcloud.log": "a5da7976f3c1255749f6f122cac18942fb233532083432e6389ed0dbb935f68f",
+    "/tmp/kloda-step18/ios-nextcloud.log": "f2590903775951fe979b016908c21187e3c8038b9872a885605bbb27e5809d75",
+    "/tmp/kloda-step18/gradle-compile.log": "3e700ffeb80cc9eedd16836816d46e1ee2d1cd4e1c27a2553130498c860f6392"
+  },
+  "notRun": [
+    "existing webdav-https/webdav-files/webdav-saf/webdav-os scopes (need the step15 DAV fixture on 26443 used by Codex)",
+    "existing iOS WebDAV journal/HTTPS fixtures (need gitignored NativePairing artefacts)",
+    "Expo bridge, product UI, multi-destination queue/scheduler, schema migration, physical devices"
+  ],
+  "limits": [
+    "Not a working provider: no queue/runner wiring, no UI, SMB and DAV kind migration not done.",
+    "On a server mismatch the app password Nextcloud issued is discarded but not revoked server side; user can revoke it in Nextcloud. Open.",
+    "Login and polling are Wi-Fi/Ethernet only, like the existing DAV client; cellular is not used."
+  ]
+}

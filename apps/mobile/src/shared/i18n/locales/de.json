@@ -115,7 +115,12 @@
       "credential_locked": "Sichere Zugangsdaten sind derzeit gesperrt. Entsperre das Gerät.",
       "user_pause": "Dieser Lauf wurde vom Benutzer pausiert.",
       "webdav_fields": "Gib eine gültige HTTPS-Adresse, einen Zielordner, Benutzernamen und Passwort ein.",
-      "wifi_required": "WebDAV-Übertragungen benötigen eine geeignete WLAN- oder Ethernet-Verbindung."
+      "wifi_required": "WebDAV-Übertragungen benötigen eine geeignete WLAN- oder Ethernet-Verbindung.",
+      "nextcloud_login": "Die Nextcloud-Anmeldung konnte nicht abgeschlossen werden. Prüfe die Serveradresse und versuche es erneut.",
+      "nextcloud_server_mismatch": "Der Server hat für eine andere als die eingegebene Adresse geantwortet. Die Anmeldung wurde abgebrochen.",
+      "nextcloud_login_expired": "Die Anmeldung wurde nicht innerhalb von 20 Minuten bestätigt. Starte sie erneut.",
+      "destination_limit": "Auf diesem Gerät gibt es bereits 8 Cloud-Ziele. Entferne eines, bevor du ein weiteres hinzufügst.",
+      "destination_exists": "Dieses Ziel ist auf diesem Gerät bereits gespeichert."
     },
     "rebackup": "Diese Version erneut sichern",
     "rebackupConfirm": "Diese unveränderte Quellversion ausdrücklich erneut an den gekoppelten Computer senden? Der Computer muss den Dateizugriff erlauben.",
@@ -312,7 +317,12 @@
     "schedulePreference": "Die Zeitplaneinstellung wird gespeichert; automatische Ausführung ist auf dieser Plattform noch nicht aktiv."
   },
   "ui": {
-    "lockScreen": {},
+    "lockScreen": {
+      "live": "Live-Sicherung",
+      "open": "Kloda öffnen",
+      "paused": "Pausiert",
+      "pc": "Computer"
+    },
     "common": {
       "back": "Zurück",
       "next": "Weiter",

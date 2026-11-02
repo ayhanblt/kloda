@@ -46,9 +46,7 @@ internal class AndroidWebDavJournal(private val database: SQLiteDatabase) {
     database.execSQL("CREATE TRIGGER IF NOT EXISTS retain_webdav_upload BEFORE DELETE ON webdav_upload BEGIN SELECT RAISE(ABORT,'retained'); END")
     database.execSQL("CREATE INDEX IF NOT EXISTS webdav_upload_locator ON webdav_upload(target,source,reference)")
     database.execSQL("CREATE INDEX IF NOT EXISTS webdav_upload_unfinished ON webdav_upload(id) WHERE phase!='completed'")
-    database.execSQL("""CREATE TABLE IF NOT EXISTS backup_destination (
-      kind TEXT NOT NULL CHECK(kind IN ('pc','webdav')),id TEXT NOT NULL,
-      enabled INTEGER NOT NULL CHECK(enabled IN (0,1)),revision TEXT NOT NULL,PRIMARY KEY(kind,id))""")
+    destinations()
     runs = AndroidWebDavRuns(database)
     schedule = AndroidWebDavSchedule(database)
     publications = AndroidWebDavPublicationPaths(database)
@@ -69,6 +67,25 @@ internal class AndroidWebDavJournal(private val database: SQLiteDatabase) {
         put("asset", asset); put("signature", signature); put("revision", revision)
       }, SQLiteDatabase.CONFLICT_REPLACE).also { if (it == -1L) throw FilesFailure("storage_failure") }
       database.setTransactionSuccessful(); return revision
+    } finally { database.endTransaction() }
+  }
+  // ADR0027: one shared kind list; an existing table with the original CHECK is rebuilt once, rows unchanged, all or nothing.
+  private fun destinationSql(): String? = database.rawQuery("SELECT sql FROM sqlite_master WHERE type='table' AND name='backup_destination'", null)
+    .use { if (it.moveToFirst()) it.getString(0) else null }
+  private fun destinations() {
+    if (destinationSql()?.contains(DESTINATION_KINDS) == true) return
+    database.beginTransaction()
+    try {
+      // Re-read under the write lock: another opener may have created or rebuilt the table meanwhile.
+      val sql = destinationSql()
+      if (sql == null) database.execSQL(destinationTable("backup_destination"))
+      else if (!sql.contains(DESTINATION_KINDS)) {
+        database.execSQL(destinationTable("backup_destination_next"))
+        database.execSQL("INSERT INTO backup_destination_next(kind,id,enabled,revision) SELECT kind,id,enabled,revision FROM backup_destination")
+        database.execSQL("DROP TABLE backup_destination")
+        database.execSQL("ALTER TABLE backup_destination_next RENAME TO backup_destination")
+      }
+      database.setTransactionSuccessful()
     } finally { database.endTransaction() }
   }
   data class Header(val target: String, val revision: String)
@@ -138,5 +155,11 @@ internal class AndroidWebDavJournal(private val database: SQLiteDatabase) {
     val changes = database.update("webdav_upload", ContentValues().apply { put("issue", code); put("skipped", if (skipped) 1 else 0) },
       "id=? AND target=? AND phase=?", arrayOf(value.id, value.target, value.phase))
     if (changes != 1) throw FilesFailure("outcome_unknown")
+  }
+  companion object {
+    const val DESTINATION_KINDS = "'pc','webdav','nextcloud','cloudme','kolab-now','smb'"
+    fun destinationTable(name: String) = """CREATE TABLE $name (
+      kind TEXT NOT NULL CHECK(kind IN ($DESTINATION_KINDS)),id TEXT NOT NULL,
+      enabled INTEGER NOT NULL CHECK(enabled IN (0,1)),revision TEXT NOT NULL,PRIMARY KEY(kind,id))"""
   }
 }

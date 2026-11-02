@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
+import { uuid } from 'expo-modules-core';
 import { webDavReview, type WebDavIssue, type WebDavIssues } from '../../../shared/api/webdav-review';
 
 export function useWebDavReview() {
@@ -45,7 +46,7 @@ export function useWebDavReview() {
   }, []);
   const act = async (item: WebDavIssue, action: 'recheck' | 'keep_both' | 'skip') => {
     if (!active.current || !verified || busy.current || item.skipped || (action === 'recheck' && !item.canRecheck) || (action === 'keep_both' && !item.canKeepBoth)) return;
-    const nonce = crypto.randomUUID(), version = ++epoch.current;
+    const nonce = uuid.v4(), version = ++epoch.current;
     request.current = nonce; busy.current = true; setWorking(true); setNotice(null); setActionError(null); setVerified(false);
     try {
       const requested = item.requiresAuthorization && action !== 'skip' ? action === 'recheck' ? 'authorize_recheck' : 'authorize_keep_both' : action;
