@@ -61,6 +61,11 @@ final class IosWebDavQueue {
     let token = IosWebDavContext.synchronized { active?.run.id == id ? active?.token : nil }
     if let token { try pause(code: code, expected: token) }
   }
+  // A destination disabled or removed (ADR0027 §4) ends only its own run.
+  func pauseTarget(_ target: String, code: String = "settings_changed") throws {
+    let token = IosWebDavContext.synchronized { active?.run.target == target ? active?.token : nil }
+    if let token { try pause(code: code, expected: token) }
+  }
   func pause(code: String = "user_pause", expected: UUID? = nil) throws {
     var ended: Execution?
     do { ended = try IosWebDavContext.synchronized { try stopLocked(code: code, expected: expected) } }
@@ -100,8 +105,9 @@ final class IosWebDavQueue {
     } catch { if let ended { ended.onFinish?(ended.run) }; throw error }
     if let ended { ended.onFinish?(ended.run) }
   }
+  // target == nil (and no prior run) is the original WebDAV destination's manual start.
   @discardableResult func start(automatic: Bool = false, lease: IosBackgroundLease? = nil,
-    prior: IosWebDavRun? = nil, onFinish: ((IosWebDavRun) -> Void)? = nil) throws -> [String: Any] {
+    prior: IosWebDavRun? = nil, target: String? = nil, onFinish: ((IosWebDavRun) -> Void)? = nil) throws -> [String: Any] {
     let execution: Execution = try IosWebDavContext.synchronized {
       guard active == nil else { throw IosWebDavFailure.code("backup_busy") }
       guard foreground || lease != nil else { throw IosWebDavFailure.code("candidate_stale") }
@@ -109,7 +115,15 @@ final class IosWebDavQueue {
       if automatic, try (IosAutomaticPause.requested || IosSyncJournal().automaticPaused()) { throw IosWebDavFailure.code("user_pause") }
       try lease?.check()
       let journal = try IosWebDavJournal.open()
-      guard let profile = try IosWebDavVault.read() else { throw IosWebDavFailure.code("webdav_missing") }
+      let profile: IosWebDavProfile
+      if let target = prior?.target ?? target {
+        guard let header = try journal.destination(target: target) else { throw IosWebDavFailure.code("destination_disabled") }
+        guard let stored = try IosWebDavContext.stored(kind: header.kind, target: target) else { throw IosWebDavFailure.code("webdav_missing") }
+        profile = stored
+      } else {
+        guard let stored = try IosWebDavVault.read() else { throw IosWebDavFailure.code("webdav_missing") }
+        profile = stored
+      }
       let binding = try IosWebDavContext.capture(profile, journal: journal)
       try IosWebDavContext.check(profile, binding: binding, journal: journal)
       guard try !IosFilesSelection.current().isEmpty || !IosPhotosSource.currentSelections().isEmpty else { throw IosWebDavFailure.code("source_unavailable") }

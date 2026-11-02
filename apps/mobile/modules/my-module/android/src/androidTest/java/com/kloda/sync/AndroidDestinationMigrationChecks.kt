@@ -4,11 +4,15 @@ import android.database.sqlite.SQLiteConstraintException
 import android.database.sqlite.SQLiteDatabase
 import java.io.File
 
-// ADR0027 shared backup_destination kind migration, on scratch databases only.
+// ADR0027/0028 shared backup_destination kind migration and the per-destination plan move (18A/3), on scratch databases only.
 internal object AndroidDestinationMigrationChecks {
   // The exact statement every earlier release ran.
   private const val ORIGINAL = """CREATE TABLE IF NOT EXISTS backup_destination (
       kind TEXT NOT NULL CHECK(kind IN ('pc','webdav')),id TEXT NOT NULL,
+      enabled INTEGER NOT NULL CHECK(enabled IN (0,1)),revision TEXT NOT NULL,PRIMARY KEY(kind,id))"""
+  // The 18A/2 table (DAV kinds and SMB, before the OAuth kinds).
+  private const val DAV_ERA = """CREATE TABLE backup_destination (
+      kind TEXT NOT NULL CHECK(kind IN ('pc','webdav','nextcloud','cloudme','kolab-now','smb')),id TEXT NOT NULL,
       enabled INTEGER NOT NULL CHECK(enabled IN (0,1)),revision TEXT NOT NULL,PRIMARY KEY(kind,id))"""
   private const val PC = "AAAAAAAAAAAAAAAAAAAAAg"
   private const val DAV = "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBw"
@@ -37,19 +41,47 @@ internal object AndroidDestinationMigrationChecks {
       check(migrated.size == 1 && migrated[0].second.contains(AndroidWebDavJournal.DESTINATION_KINDS)) { "not migrated: $migrated" }
       check(rows(database) == before) { "rows changed" }
       check(journal.enabled("pc", PC, "v1") && !journal.enabled("webdav", DAV))
-      listOf("nextcloud", "cloudme", "kolab-now", "smb").forEach {
+      listOf("nextcloud", "cloudme", "kolab-now", "smb", "dropbox", "onedrive", "yandex", "google-drive").forEach {
         database.execSQL("INSERT INTO backup_destination VALUES(?,?,0,'r')", arrayOf(it, DAV))
       }
-      refused(database, "dropbox", DAV)
+      refused(database, "box", DAV)
       refused(database, "nextcloud", PC, enabled = 2)
       refused(database, "nextcloud", DAV)
-      // Writing the new kinds through the journal stays closed until the multi-destination queue slice.
-      var closed = false
-      try { journal.setEnabled("nextcloud", DAV, true, "r") } catch (error: FilesFailure) { closed = error.code == "invalid_request" }
-      check(closed) { "setEnabled widened" }
+      // The journal enables only the DAV kinds the queue uploads to (18A/3); CloudMe and the OAuth kinds stay closed.
+      journal.setEnabled("nextcloud", DAV, true, "r")
+      check(journal.enabled("nextcloud", DAV, "r"))
+      listOf("cloudme", "dropbox", "google-drive").forEach { kind ->
+        var closed = false
+        try { journal.setEnabled(kind, DAV, true, "r") } catch (error: FilesFailure) { closed = error.code == "invalid_request" }
+        check(closed) { "setEnabled widened to $kind" }
+      }
+      journal.setEnabled("nextcloud", DAV, false, "r")
       val after = rows(database)
       AndroidWebDavJournal(database)
       check(schema(database) == migrated && rows(database) == after) { "second open changed the table" }
+    }
+    open(root, "destination-dav-era.sqlite").use { database ->
+      database.execSQL(DAV_ERA)
+      database.execSQL("INSERT INTO backup_destination VALUES('pc',?,1,'v1'),('nextcloud',?,1,'r'),('smb',?,0,'s')", arrayOf(PC, DAV, DAV))
+      val before = rows(database)
+      AndroidWebDavJournal(database)
+      val migrated = schema(database)
+      check(migrated.size == 1 && migrated[0].second.contains(AndroidWebDavJournal.DESTINATION_KINDS) && rows(database) == before) { "18A/2 table: $migrated" }
+    }
+    // The former single plan row moves once into the per-destination table; an older build finds webdav_plan empty.
+    open(root, "plan-singleton.sqlite").use { database ->
+      database.execSQL("CREATE TABLE webdav_plan(id INTEGER PRIMARY KEY CHECK(id=1),target TEXT NOT NULL,binding TEXT NOT NULL,occurrence INTEGER NOT NULL,due INTEGER NOT NULL,run TEXT)")
+      database.execSQL("INSERT INTO webdav_plan VALUES(1,?,'owned-binding',1000,2000,NULL)", arrayOf(DAV))
+      val journal = AndroidWebDavJournal(database)
+      check(journal.schedule.all() == listOf(WebDavPlan(DAV, "owned-binding", 1000, 2000))) { "plan not moved" }
+      database.rawQuery("SELECT COUNT(*) FROM webdav_plan", null).use { check(it.moveToFirst() && it.getInt(0) == 0) }
+      val other = DAV.dropLast(1) + "A"
+      journal.schedule.save(WebDavPlan(other, "other-binding", 5, 6))
+      AndroidWebDavJournal(database)
+      check(journal.schedule.read(DAV) == WebDavPlan(DAV, "owned-binding", 1000, 2000) && journal.schedule.all().size == 2) { "reopen changed plans" }
+      var refused = false
+      try { journal.schedule.save(WebDavPlan(other, "x", 7, 8), WebDavPlan(DAV, "owned-binding", 1000, 2000)) } catch (error: FilesFailure) { refused = error.code == "invalid_request" }
+      check(refused) { "plan CAS crossed targets" }
     }
     open(root, "destination-fresh.sqlite").use { database ->
       AndroidWebDavJournal(database)
@@ -59,7 +91,7 @@ internal object AndroidDestinationMigrationChecks {
     // A row the new CHECK refuses rolls the whole rebuild back; the original table is left as it was.
     open(root, "destination-unknown.sqlite").use { database ->
       database.execSQL("CREATE TABLE backup_destination (kind TEXT NOT NULL,id TEXT NOT NULL,enabled INTEGER NOT NULL,revision TEXT NOT NULL,PRIMARY KEY(kind,id))")
-      database.execSQL("INSERT INTO backup_destination VALUES('pc',?,1,'v1'),('dropbox',?,1,'r')", arrayOf(PC, DAV))
+      database.execSQL("INSERT INTO backup_destination VALUES('pc',?,1,'v1'),('box',?,1,'r')", arrayOf(PC, DAV))
       val before = schema(database) to rows(database)
       var failed = false
       try { AndroidWebDavJournal(database) } catch (_: SQLiteConstraintException) { failed = true }

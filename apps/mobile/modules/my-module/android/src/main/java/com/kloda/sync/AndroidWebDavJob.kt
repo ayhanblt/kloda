@@ -50,16 +50,16 @@ class AndroidWebDavJob : JobService() {
   private fun current(execution: Execution): Boolean = !execution.stopped.get() && !AndroidBackupScheduler.paused(applicationContext) &&
     AndroidWebDavScheduler.current(applicationContext, execution.parameters.extras.getString("token"))
   private fun matches(journal: AndroidWebDavJournal, plan: WebDavPlan): Boolean {
-    val header = journal.destination() ?: return false
-    return header.target == plan.target && AndroidWebDavContext.binding(header.target, header.revision, FilesRunContext.webdav(applicationContext).binding) == plan.binding
+    val header = journal.destination(plan.target) ?: return false
+    return AndroidWebDavContext.binding(header.target, header.revision, FilesRunContext.webdav(applicationContext).binding) == plan.binding
   }
   private fun execute(execution: Execution) {
     val context = applicationContext
     AndroidSyncJournal.webdav(context).use { owner ->
       val journal = AndroidWebDavJournal(owner.writableDatabase)
       val prepared = synchronized(AndroidSyncJournal.sourceLock) {
-        val plan = journal.schedule.read() ?: return
         val extras = execution.parameters.extras
+        val plan = journal.schedule.read(extras.getString("target") ?: return) ?: return
         if (!current(execution) || plan.binding != extras.getString("binding") || plan.target != extras.getString("target") ||
           plan.occurrence != extras.getLong("occurrence", -1) || plan.due != extras.getLong("dispatch", -1) || !matches(journal, plan)) return
         val clock = WebDavRun.clock(context)
@@ -89,7 +89,7 @@ class AndroidWebDavJob : JobService() {
       }
       try {
         synchronized(AndroidSyncJournal.sourceLock) {
-          if (!current(execution) || journal.schedule.read() != expected || !matches(journal, expected)) throw FilesFailure("settings_changed")
+          if (!current(execution) || journal.schedule.read(expected.target) != expected || !matches(journal, expected)) throw FilesFailure("settings_changed")
           val claimed = expected.copy(run = candidate.id)
           journal.schedule.save(claimed, expected); execution.plan = claimed
           journal.runs.save(candidate)

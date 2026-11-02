@@ -31,7 +31,7 @@ import CryptoKit
     var updatedPlan = originalPlan; updatedPlan.due = 3000
     try journal.savePlan(updatedPlan, expected: originalPlan)
     rejects { try journal.savePlan(originalPlan, expected: originalPlan) }
-    let retainedPlan = try journal.plan(); precondition(retainedPlan == updatedPlan)
+    let retainedPlan = try journal.plan(target: target); precondition(retainedPlan == updatedPlan)
     print("PASS stale schedule callback cannot overwrite a newer target plan")
     var run = IosWebDavRun(id: UUID().uuidString, target: target, binding: "run-context", automatic: false, occurrence: 1000)
     try journal.saveRun(run)

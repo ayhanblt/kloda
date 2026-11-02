@@ -79,7 +79,7 @@ internal object AndroidWebDavChecks {
       val updatedPlan = originalPlan.copy(due = 3000)
       journal.schedule.save(updatedPlan, originalPlan)
       rejects { journal.schedule.save(originalPlan, originalPlan) }
-      check(journal.schedule.read() == updatedPlan)
+      check(journal.schedule.read(target) == updatedPlan)
       for ((code, delay) in listOf("connection_unavailable" to 60000L, "os_interrupted" to 300000L)) {
         var run = WebDavRun(UUID.randomUUID().toString(), target, "owned-retry", false, 1000)
         journal.runs.save(run)

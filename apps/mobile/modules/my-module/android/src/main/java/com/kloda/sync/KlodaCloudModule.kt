@@ -18,8 +18,8 @@ import kotlinx.coroutines.withTimeoutOrNull
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
 
-// Step18A/4 (ADR0027): add, list and remove DAV destinations. Saving custody is not enabling (ADR0023);
-// added destinations stay out of the queue until 18A/3 keys it by targetId. The original WebDAV entry is managed by KlodaBackup.
+// Step18A/4 (ADR0027): add, list, enable and remove DAV destinations. Saving custody is not enabling (ADR0023);
+// an enabled DAV destination gets its own queue plan (18A/3). The original WebDAV entry is managed by KlodaBackup.
 class KlodaCloudModule : Module() {
   private val login = AtomicReference<AndroidNextcloudLogin?>()
   private val oauth = AtomicReference<AndroidOAuthLogin?>()
@@ -55,6 +55,7 @@ class KlodaCloudModule : Module() {
         val profile = vault.read()
         // Best effort (ADR0027/0028): no network must not keep local custody alive.
         if (profile != null) {
+          AndroidWebDavDestinations.forget(context(), targetId)
           if (profile.provider == "nextcloud") runCatching { AndroidNextcloudLogin(context()) }.getOrNull()?.revoke(profile)
           vault.delete()
         } else {
@@ -63,6 +64,14 @@ class KlodaCloudModule : Module() {
           else runCatching { AndroidOAuthLogin(context(), OAuthProvider.named(grant.provider)) }.getOrNull()?.revoke(grant.refreshToken)
           saved.delete()
         }
+        mapOf("destinations" to summaries())
+      } }
+    }
+    // Explicit, foreground-only opt-in (ADR0023); OAuth destinations stay unsupported until their adapters exist.
+    AsyncFunction("setDestinationEnabled") Coroutine { targetId: String, enabled: Boolean ->
+      if (!resumed()) throw CodedException("candidate_stale", "candidate_stale", null)
+      withContext(Dispatchers.IO) { guarded {
+        AndroidWebDavDestinations.setEnabled(context(), targetId, enabled)
         mapOf("destinations" to summaries())
       } }
     }
@@ -180,11 +189,14 @@ class KlodaCloudModule : Module() {
   private fun total(): Int = AndroidWebDavVault.count(context()) + AndroidOAuthVault.slots(context()).size
 
   // Display metadata only: never the password.
+  // `enabled` is the destination's queue opt-in (the original WebDAV entry's lives in KlodaBackup, so it reads false here).
   private fun summary(profile: AndroidWebDavProfile): Map<String, Any> = mapOf("targetId" to profile.targetId(),
-    "provider" to (profile.provider ?: "webdav"), "endpoint" to profile.endpoint, "targetPath" to profile.targetPath, "username" to profile.username)
+    "provider" to (profile.provider ?: "webdav"), "endpoint" to profile.endpoint, "targetPath" to profile.targetPath, "username" to profile.username,
+    "enabled" to (profile.provider != null && AndroidWebDavDestinations.enabled(context(), profile.targetId())))
   // Display metadata only: never the refresh token. The account ID stands in for the user name.
   private fun summary(profile: AndroidOAuthProfile): Map<String, Any> = mapOf("targetId" to profile.targetId(),
-    "provider" to profile.provider, "endpoint" to OAuthProvider.named(profile.provider).api, "targetPath" to profile.targetPath, "username" to profile.accountId)
+    "provider" to profile.provider, "endpoint" to OAuthProvider.named(profile.provider).api, "targetPath" to profile.targetPath, "username" to profile.accountId,
+    "enabled" to false)
   private fun summaries(): List<Map<String, Any>> {
     val context = context()
     val legacy = AndroidWebDavVault(context).read()?.let { listOf(summary(it)) } ?: emptyList()

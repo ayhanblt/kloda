@@ -23,7 +23,7 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
   }
 
   override fun onStart() {
-    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore", "smb-files", "smb-product", "smb-photos-owned", "smb-profile", "sftp-files", "sftp-sources", "sftp-photos-owned", "sftp-product", "cloud18-nextcloud", "cloud18-destination", "cloud18-oauth")) {
+    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore", "smb-files", "smb-product", "smb-photos-owned", "smb-profile", "sftp-files", "sftp-sources", "sftp-photos-owned", "sftp-product", "cloud18-nextcloud", "cloud18-destination", "cloud18-oauth", "cloud18-targets")) {
       finish(Activity.RESULT_CANCELED, Bundle().apply { putString("stream", "Explicit scope required: local-files, media-fixture or webdav-journal\n") })
       return
     }
@@ -125,6 +125,11 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
       if (scope == "webdav-files") {
         group("webdav-owned-files-download") { AndroidWebDavFilesChecks.run(IsolatedContext(targetContext, scratch)) }
         finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Owned private-byte HTTPS PUT/MOVE/GET and verified restore download, native vault/catalog without backup opt-in, unknown MOVE refusal PASS; SAF picker/provider, Photos import, UI and physical hardware NOT_RUN\n") })
+        return
+      }
+      if (scope == "cloud18-targets") {
+        group("cloud18-dav-targets") { AndroidWebDavOsChecks.run(this, targets = true) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Per-destination DAV plans through the real JobService: original WebDAV plus two added destinations, sequential, failure isolated; product UI, iOS and physical hardware NOT_RUN\n") })
         return
       }
       if (scope == "webdav-os") {

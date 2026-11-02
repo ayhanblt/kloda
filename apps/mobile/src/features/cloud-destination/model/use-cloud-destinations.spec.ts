@@ -4,10 +4,10 @@ import { useCloudDestinations } from './use-cloud-destinations';
 
 jest.mock('../../../shared/api/cloud-destinations', () => ({
   destinationLimit: 8,
-  cloudDestinations: { list: jest.fn(), signInNextcloud: jest.fn(), signInOAuth: jest.fn(), addKolabNow: jest.fn(), cancelSignIn: jest.fn(), remove: jest.fn() },
+  cloudDestinations: { list: jest.fn(), signInNextcloud: jest.fn(), signInOAuth: jest.fn(), addKolabNow: jest.fn(), cancelSignIn: jest.fn(), remove: jest.fn(), setEnabled: jest.fn() },
 }));
 const api = jest.mocked(cloudDestinations);
-const row = (n: number) => ({ targetId: String(n).padStart(42, 'A') + 'E', provider: 'nextcloud' as const, endpoint: 'https://c.example/remote.php/dav/files/k', targetPath: 'Kloda', username: 'k' });
+const row = (n: number) => ({ targetId: String(n).padStart(42, 'A') + 'E', provider: 'nextcloud' as const, endpoint: 'https://c.example/remote.php/dav/files/k', targetPath: 'Kloda', username: 'k', enabled: false });
 beforeEach(() => { jest.clearAllMocks(); api.list.mockResolvedValue([row(1)]); api.cancelSignIn.mockResolvedValue(); });
 
 it('lists, adds a signed-in destination and reports the limit', async () => {
@@ -35,6 +35,18 @@ it('shows the native code and allows one action at a time', async () => {
   await act(async () => { finish(undefined as never); await first; });
   expect(hook.result.current.error).toBe('nextcloud_server_mismatch');
   expect(hook.result.current.action).toBe('idle');
+});
+
+it('switches the opt-in through native and shows its answer', async () => {
+  const hook = await renderHook(() => useCloudDestinations());
+  await waitFor(() => expect(hook.result.current.destinations).toEqual([row(1)]));
+  api.setEnabled.mockResolvedValueOnce([{ ...row(1), enabled: true }]);
+  await act(async () => { await hook.result.current.setEnabled(row(1).targetId, true); });
+  expect(api.setEnabled).toHaveBeenCalledWith(row(1).targetId, true);
+  expect(hook.result.current.destinations).toEqual([{ ...row(1), enabled: true }]);
+  api.setEnabled.mockRejectedValueOnce(new Error('destination_unsupported'));
+  await act(async () => { await hook.result.current.setEnabled(row(1).targetId, false); });
+  expect(hook.result.current.error).toBe('destination_unsupported');
 });
 
 it('cancels a pending sign-in on unmount', async () => {

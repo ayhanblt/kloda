@@ -77,10 +77,13 @@ final class IosWebDavJournal {
     try database.execute("CREATE TRIGGER IF NOT EXISTS retain_webdav_upload BEFORE DELETE ON webdav_upload BEGIN SELECT RAISE(ABORT,'retained'); END")
     try database.execute("CREATE INDEX IF NOT EXISTS webdav_upload_locator ON webdav_upload(target,source,reference)")
     try database.execute("CREATE INDEX IF NOT EXISTS webdav_upload_unfinished ON webdav_upload(id) WHERE phase!='completed'")
-    try destinations()
+    try migrateDestinations()
     try createRuns(); try createPlan(); try createPublicationPaths(); try createWebDavRestores()
   }
-  static let destinationKinds = "'pc','webdav','nextcloud','cloudme','kolab-now','smb'"
+  // ADR0028 adds the OAuth kinds; they stay disabled until their upload adapters exist (user decision 2026-11-02).
+  static let destinationKinds = "'pc','webdav','nextcloud','cloudme','kolab-now','smb','dropbox','onedrive','yandex','google-drive'"
+  // DAV kinds the WebDAV queue uploads to; CloudMe stays blocked (Digest only).
+  static let davKinds = ["webdav", "nextcloud", "kolab-now"]
   static func destinationTable(_ name: String) -> String {
     """
     CREATE TABLE \(name) (
@@ -97,7 +100,7 @@ final class IosWebDavJournal {
       return String(cString: text)
     }
   }
-  private func destinations() throws {
+  private func migrateDestinations() throws {
     if try destinationSql()?.contains(Self.destinationKinds) == true { return }
     try database.execute("BEGIN IMMEDIATE")
     do {
@@ -120,13 +123,34 @@ final class IosWebDavJournal {
   }
   func setEnabled(kind: String, id: String, enabled: Bool, revision: String) throws {
     let pattern = kind == "pc" ? "\\A[A-Za-z0-9_-]{21}[AQgw]\\z" : "\\A[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]\\z"
-    guard ["pc", "webdav"].contains(kind), id.range(of: pattern, options: .regularExpression) != nil,
+    guard kind == "pc" || Self.davKinds.contains(kind), id.range(of: pattern, options: .regularExpression) != nil,
       !revision.isEmpty, revision.utf8.count <= 128, !revision.utf8.contains(0) else { throw IosWebDavFailure.code("invalid_request") }
     try database.execute("""
       INSERT INTO backup_destination(kind,id,enabled,revision) VALUES(?,?,?,?)
       ON CONFLICT(kind,id) DO UPDATE SET enabled=excluded.enabled,revision=excluded.revision
       """, values: [kind, id, Int64(enabled ? 1 : 0), revision])
   }
+  struct Header: Equatable { let target: String; let revision: String; let kind: String }
+  // ADR0027 §4: every enabled DAV destination, each with its own opportunity; at most one original WebDAV row.
+  func destinations() throws -> [Header] {
+    let kinds = Self.davKinds.map { "'\($0)'" }.joined(separator: ",")
+    let values = try database.statement("SELECT id,revision,kind FROM backup_destination WHERE kind IN (\(kinds)) AND enabled=1 ORDER BY kind,id") { row -> [Header] in
+      var result: [Header] = []
+      while true {
+        let step = sqlite3_step(row)
+        if step == SQLITE_DONE { return result }
+        guard step == SQLITE_ROW, let id = sqlite3_column_text(row, 0), let revision = sqlite3_column_text(row, 1), let kind = sqlite3_column_text(row, 2)
+        else { throw IosWebDavFailure.code("storage_failure") }
+        result.append(Header(target: String(cString: id), revision: String(cString: revision), kind: String(cString: kind)))
+      }
+    }
+    // The vault enforces the destination limit; the journal stays independent of Keychain code.
+    guard values.filter({ $0.kind == "webdav" }).count <= 1, values.allSatisfy({
+      $0.target.range(of: "\\A[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]\\z", options: .regularExpression) != nil && UUID(uuidString: $0.revision) != nil
+    }) else { throw IosWebDavFailure.code("outcome_unknown") }
+    return values
+  }
+  func destination(target: String) throws -> Header? { try destinations().first { $0.target == target } }
   func hasEnabledPc() throws -> Bool {
     try database.statement("SELECT 1 FROM backup_destination WHERE kind='pc' AND enabled=1 LIMIT 1") { row in
       let step = sqlite3_step(row)

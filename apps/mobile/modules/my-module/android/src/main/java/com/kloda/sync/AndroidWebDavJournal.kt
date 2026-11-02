@@ -46,7 +46,7 @@ internal class AndroidWebDavJournal(private val database: SQLiteDatabase) {
     database.execSQL("CREATE TRIGGER IF NOT EXISTS retain_webdav_upload BEFORE DELETE ON webdav_upload BEGIN SELECT RAISE(ABORT,'retained'); END")
     database.execSQL("CREATE INDEX IF NOT EXISTS webdav_upload_locator ON webdav_upload(target,source,reference)")
     database.execSQL("CREATE INDEX IF NOT EXISTS webdav_upload_unfinished ON webdav_upload(id) WHERE phase!='completed'")
-    destinations()
+    migrateDestinations()
     runs = AndroidWebDavRuns(database)
     schedule = AndroidWebDavSchedule(database)
     publications = AndroidWebDavPublicationPaths(database)
@@ -72,7 +72,7 @@ internal class AndroidWebDavJournal(private val database: SQLiteDatabase) {
   // ADR0027: one shared kind list; an existing table with the original CHECK is rebuilt once, rows unchanged, all or nothing.
   private fun destinationSql(): String? = database.rawQuery("SELECT sql FROM sqlite_master WHERE type='table' AND name='backup_destination'", null)
     .use { if (it.moveToFirst()) it.getString(0) else null }
-  private fun destinations() {
+  private fun migrateDestinations() {
     if (destinationSql()?.contains(DESTINATION_KINDS) == true) return
     database.beginTransaction()
     try {
@@ -88,16 +88,21 @@ internal class AndroidWebDavJournal(private val database: SQLiteDatabase) {
       database.setTransactionSuccessful()
     } finally { database.endTransaction() }
   }
-  data class Header(val target: String, val revision: String)
-  fun destination(): Header? = database.rawQuery("SELECT id,revision FROM backup_destination WHERE kind='webdav' AND enabled=1 LIMIT 2", null).use {
-    if (!it.moveToFirst()) return@use null
-    val value = Header(it.getString(0), it.getString(1))
-    if (!Regex("[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]").matches(value.target) || runCatching { UUID.fromString(value.revision) }.isFailure || it.moveToNext()) throw FilesFailure("outcome_unknown")
-    value
+  data class Header(val target: String, val revision: String, val kind: String = "webdav")
+  // ADR0027 §4: every enabled DAV destination, each with its own opportunity; at most one legacy WebDAV row.
+  fun destinations(): List<Header> = database.rawQuery(
+    "SELECT id,revision,kind FROM backup_destination WHERE kind IN ($DAV_SQL) AND enabled=1 ORDER BY kind,id", null
+  ).use {
+    val values = buildList { while (it.moveToNext()) add(Header(it.getString(0), it.getString(1), it.getString(2))) }
+    if (values.size > AndroidWebDavVault.LIMIT || values.count { value -> value.kind == "webdav" } > 1 || values.any { value ->
+        !Regex("[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]").matches(value.target) || runCatching { UUID.fromString(value.revision) }.isFailure
+      }) throw FilesFailure("outcome_unknown")
+    values
   }
+  fun destination(target: String): Header? = destinations().firstOrNull { it.target == target }
   fun setEnabled(kind: String, id: String, enabled: Boolean, revision: String) {
     val pattern = if (kind == "pc") Regex("[A-Za-z0-9_-]{21}[AQgw]") else Regex("[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]")
-    if (kind !in setOf("pc", "webdav") || !pattern.matches(id) || revision.isEmpty() || revision.toByteArray().size > 128 || revision.contains('\u0000')) throw FilesFailure("invalid_request")
+    if (kind != "pc" && kind !in DAV_KINDS || !pattern.matches(id) || revision.isEmpty() || revision.toByteArray().size > 128 || revision.contains('\u0000')) throw FilesFailure("invalid_request")
     database.beginTransaction()
     try {
       val values = ContentValues().apply { put("enabled", if (enabled) 1 else 0); put("revision", revision) }
@@ -157,7 +162,11 @@ internal class AndroidWebDavJournal(private val database: SQLiteDatabase) {
     if (changes != 1) throw FilesFailure("outcome_unknown")
   }
   companion object {
-    const val DESTINATION_KINDS = "'pc','webdav','nextcloud','cloudme','kolab-now','smb'"
+    // ADR0028 adds the OAuth kinds; they stay disabled until their upload adapters exist (user decision 2026-11-02).
+    const val DESTINATION_KINDS = "'pc','webdav','nextcloud','cloudme','kolab-now','smb','dropbox','onedrive','yandex','google-drive'"
+    // DAV kinds the WebDAV queue uploads to; CloudMe stays blocked (Digest only).
+    val DAV_KINDS = setOf("webdav", "nextcloud", "kolab-now")
+    private val DAV_SQL = DAV_KINDS.joinToString(",") { "'$it'" }
     fun destinationTable(name: String) = """CREATE TABLE $name (
       kind TEXT NOT NULL CHECK(kind IN ($DESTINATION_KINDS)),id TEXT NOT NULL,
       enabled INTEGER NOT NULL CHECK(enabled IN (0,1)),revision TEXT NOT NULL,PRIMARY KEY(kind,id))"""

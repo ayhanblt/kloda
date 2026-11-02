@@ -1,12 +1,13 @@
 import { requireOptionalNativeModule } from 'expo';
 
-// Step18A/4 (ADR0027) and 18B/1 (ADR0028): saved DAV and OAuth destinations. Saving is not enabling; the queue opens added ones in 18A/3.
+// Step18A/4 (ADR0027) and 18B/1 (ADR0028): saved DAV and OAuth destinations. Saving is not enabling (ADR0023); an enabled
+// DAV destination gets its own queue plan (18A/3). OAuth destinations cannot be enabled until their upload adapters exist.
 // For an OAuth destination `username` carries the provider's account ID and `endpoint` the fixed API origin.
 export const cloudProviders = ['webdav', 'nextcloud', 'cloudme', 'kolab-now', 'dropbox', 'onedrive', 'yandex', 'google-drive'] as const;
 export const oauthProviders = ['dropbox', 'onedrive', 'yandex', 'google-drive'] as const;
 export type OAuthProvider = typeof oauthProviders[number];
 export type CloudProvider = typeof cloudProviders[number];
-export interface CloudDestination { targetId: string; provider: CloudProvider; endpoint: string; targetPath: string; username: string }
+export interface CloudDestination { targetId: string; provider: CloudProvider; endpoint: string; targetPath: string; username: string; enabled: boolean }
 interface NativeCloud {
   destinations(): Promise<unknown>;
   signInNextcloud(server: string, folder: string): Promise<unknown>;
@@ -14,12 +15,15 @@ interface NativeCloud {
   cancelSignIn(): Promise<void>;
   addKolabNow(username: string, password: string, folder: string): Promise<unknown>;
   removeDestination(targetId: string): Promise<unknown>;
+  setDestinationEnabled(targetId: string, enabled: boolean): Promise<unknown>;
 }
 export const destinationLimit = 8;
 // ADR0027 §6: CloudMe answers only with Digest (probed 2026-11-01); no auth downgrade, so it has no add path.
 export const blockedProviders: readonly CloudProvider[] = ['cloudme'];
 const targetPattern = /^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/;
-const keys = ['targetId', 'provider', 'endpoint', 'targetPath', 'username'];
+const keys = ['targetId', 'provider', 'endpoint', 'targetPath', 'username', 'enabled'];
+// The DAV providers the queue uploads to; the original WebDAV entry is enabled from its own screen.
+export const enableableProviders: readonly CloudProvider[] = ['nextcloud', 'kolab-now'];
 function invalid(): never { throw new Error('outcome_unknown'); }
 function native(): NativeCloud {
   const value = requireOptionalNativeModule<NativeCloud>('KlodaCloud');
@@ -39,7 +43,8 @@ export function cloudDestinationFromNative(value: unknown): CloudDestination {
   if (!endpoint.startsWith('https://')) return invalid();
   const targetId = text(row.targetId, 43);
   if (!targetPattern.test(targetId)) return invalid();
-  return { targetId, provider, endpoint, targetPath: text(row.targetPath), username: text(row.username) };
+  if (typeof row.enabled !== 'boolean' || (row.enabled && !enableableProviders.includes(provider))) return invalid();
+  return { targetId, provider, endpoint, targetPath: text(row.targetPath), username: text(row.username), enabled: row.enabled };
 }
 function list(value: unknown): CloudDestination[] {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return invalid();
@@ -83,5 +88,10 @@ export const cloudDestinations = {
   async remove(targetId: string): Promise<CloudDestination[]> {
     if (!targetPattern.test(targetId)) throw new Error('invalid_request');
     return list(await native().removeDestination(targetId));
+  },
+  async setEnabled(targetId: string, enabled: boolean): Promise<CloudDestination[]> {
+    if (!targetPattern.test(targetId) || typeof enabled !== 'boolean') throw new Error('invalid_request');
+    const value = list(await native().setDestinationEnabled(targetId, enabled));
+    return value.find((item) => item.targetId === targetId)?.enabled === enabled ? value : invalid();
   },
 };

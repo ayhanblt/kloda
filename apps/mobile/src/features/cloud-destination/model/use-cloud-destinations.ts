@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { cloudDestinations, destinationLimit, type CloudDestination, type OAuthProvider } from '../../../shared/api/cloud-destinations';
 
-type Action = 'idle' | 'signing-in' | 'adding' | 'removing';
+type Action = 'idle' | 'signing-in' | 'adding' | 'removing' | 'switching';
 function code(cause: unknown): string { return cause instanceof Error ? cause.message : 'outcome_unknown'; }
 
-// Saved destinations, Nextcloud and OAuth (Dropbox, OneDrive) sign-in and Kolab Now credentials; one action at a time, results ignored after unmount.
+// Saved destinations, Nextcloud and OAuth sign-in, Kolab Now credentials and the explicit per-destination opt-in;
+// one action at a time, results ignored after unmount.
 export function useCloudDestinations() {
   const [destinations, setDestinations] = useState<CloudDestination[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +40,11 @@ export function useCloudDestinations() {
     const value = await cloudDestinations.remove(targetId);
     if (mounted.current) setDestinations(value);
   });
+  const setEnabled = (targetId: string, enabled: boolean) => run('switching', async () => {
+    const value = await cloudDestinations.setEnabled(targetId, enabled);
+    if (mounted.current) setDestinations(value);
+  });
   const cancel = () => { void cloudDestinations.cancelSignIn().catch(() => undefined); };
   const full = (destinations?.length ?? 0) >= destinationLimit;
-  return { destinations, error, action, full, signIn, signInOAuth, addKolabNow, remove, cancel, refresh };
+  return { destinations, error, action, full, signIn, signInOAuth, addKolabNow, remove, setEnabled, cancel, refresh };
 }

@@ -66,16 +66,21 @@ internal class AndroidWebDavQueue(private val context: Context, private val mayR
     val token = locked { active?.takeIf { it.run.id == id }?.token }
     if (token != null) pause(code, token)
   }
+  // A destination disabled or removed (ADR0027 §4) ends only its own run.
+  fun pauseTarget(target: String, code: String = "settings_changed") {
+    val token = locked { active?.takeIf { it.run.target == target }?.token }
+    if (token != null) pause(code, token)
+  }
   fun foregroundLost() {
     val token = locked { active?.takeUnless { it.run.automatic }?.token }
     if (token != null) pause("os_interrupted", token)
   }
   fun available() = locked { active == null }
-  fun start(automatic: Boolean = false, prior: WebDavRun? = null, finished: ((WebDavRun) -> Unit)? = null): Map<String, Any> {
+  fun start(automatic: Boolean = false, prior: WebDavRun? = null, target: String? = null, finished: ((WebDavRun) -> Unit)? = null): Map<String, Any> {
     val execution = locked {
       if (active != null) throw FilesFailure("backup_busy")
       if (automatic && AndroidBackupScheduler.paused(context)) throw FilesFailure("user_pause")
-      val captured = AndroidWebDavContext.capture(context, journal)
+      val captured = AndroidWebDavContext.capture(context, journal, prior?.target ?: target)
       val run = prior ?: WebDavRun(UUID.randomUUID().toString(), captured.profile.targetId(), captured.binding, automatic, WebDavRun.clock(context).now)
       if (run.target != captured.profile.targetId() || run.binding != captured.binding || run.automatic != automatic || run.phase != "running") throw FilesFailure("settings_changed")
       if (!mayRun(run)) throw FilesFailure("candidate_stale")

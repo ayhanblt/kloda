@@ -1,0 +1,35 @@
+{
+  "date": "2026-11-02",
+  "scope": "Step18A/3 per-destination DAV queue (ADR0027 §4) after merging main 3efe578/053d411 into the branch (0a32874); no product UI (18A/4b)",
+  "decisions": "user 2026-11-02: sequential execution under the existing admission lock and begin() order; only DAV destinations upload in 18A/3; OAuth kinds accepted by backup_destination but not enableable",
+  "changes": [
+    "backup_destination kinds + dropbox/onedrive/yandex/google-drive (rebuild migration, rows kept); setEnabled accepts webdav/nextcloud/kolab-now only",
+    "webdav_target_plan(target PK) per destination; the former single webdav_plan row moved once and emptied in one transaction",
+    "Android scheduler/job and iOS coordinator settle every enabled DAV destination's plan and dispatch the earliest due; finished/defer/changed update only that target",
+    "queue start resolves the run's target (original vault entry or the destination's own slot); pauseTarget ends only that destination's run",
+    "KlodaCloud setDestinationEnabled (foreground only) and enabled flag in summaries; removal disables the row, drops the plan and ends its run before custody is deleted",
+    "JS cloudDestinations.setEnabled with strict enabled validation; TR/EN/DE destination_unsupported"
+  ],
+  "checks": {
+    "jest": "PASS 33 suites / 198 tests", "typecheck": "PASS", "eslint": "PASS changed cloud-destination files",
+    "androidBuild": "PASS compile + lint + assembleDebugAndroidTest",
+    "androidMigration": "PASS tools/test-android-destination-migration.py: OAuth kinds, 18A/2-era table, plan singleton move, cross-target CAS refused, webdav-journal regression",
+    "androidEndToEnd": "PASS tools/test-android-dav-targets.py (scope cloud18-targets, owned HTTPS fixture, real JobScheduler/JobService): original WebDAV run, then two added destinations; saved not enabled until explicit enable; wrong-password destination failed alone (webdav_auth); the other finished 2/2 operations; each kept its own plan; original plan unchanged; disable keeps plan, forget drops it",
+    "iosBuild": "PASS arm64 Simulator app build",
+    "iosMigration": "PASS tools/test-ios-destination-migration.py: same journal/plan checks plus destinations listing",
+    "iosJournal": "PASS tools/test-ios-webdav-journal.py (plan read by target)",
+    "iosAdmission": "PASS tools/test-ios-automatic-admission.py (WebDav/Smb/Sftp control+fixed; harness gained plan(target:))"
+  },
+  "notRun": [
+    "iOS runtime multi-destination run (the HTTPS app harness is bound to Codex's WebDAV15 simulator; not touched)",
+    "manual start of an added destination and its status on screen (18A/4b)",
+    "restore/browse from an added destination (original WebDAV only)",
+    "OAuth upload adapters (18B/5)",
+    "physical devices"
+  ],
+  "knownLimits": [
+    "reconfiguring the original WebDAV entry renews the shared backup context and re-plans the other DAV destinations (Codex-owned fence, unchanged)",
+    "a corrupt plan or destination row stops automatic DAV work for all destinations (fail closed)"
+  ],
+  "review": "same-agent separate pass only (found missing TR/EN/DE for destination_unsupported, fixed); no independent review"
+}

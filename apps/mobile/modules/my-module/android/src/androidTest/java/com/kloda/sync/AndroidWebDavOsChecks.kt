@@ -10,7 +10,7 @@ import java.io.File
 import java.util.UUID
 
 internal object AndroidWebDavOsChecks {
-  fun run(instrumentation: Instrumentation) {
+  fun run(instrumentation: Instrumentation, targets: Boolean = false) {
     val context = instrumentation.targetContext.applicationContext
     check(context.packageName == "com.kloda.sync.test") // Never run against a product application container.
     val preferences = context.getSharedPreferences("kloda-sync", 0)
@@ -50,16 +50,17 @@ internal object AndroidWebDavOsChecks {
         val journal = AndroidWebDavJournal(owner.writableDatabase)
         while (android.os.SystemClock.elapsedRealtime() < deadline) {
           run = journal.runs.read(target = profile.targetId(), automatic = true)
-          if (run?.phase == "finished" && journal.schedule.read()?.run == null && !AndroidWebDavRuntime.hasAutomatic(run!!.id)) break
+          if (run?.phase == "finished" && journal.schedule.read(profile.targetId())?.run == null && !AndroidWebDavRuntime.hasAutomatic(run!!.id)) break
           Thread.sleep(100)
         }
         check(run?.phase == "finished") { "OS fixture did not complete: ${run?.phase}:${run?.error}:${AndroidWebDavScheduler.error(context)}" }
         check(run!!.automatic && run!!.attempts == 1 && run!!.osAttempts == 1)
         val counts = journal.runs.counts(run!!.id)
         check(counts["photos"] == "1" && counts["completedPhotos"] == "1" && counts["operations"] == "2" && counts["completedOperations"] == "2")
-        check(journal.schedule.read()!!.due > System.currentTimeMillis())
+        check(journal.schedule.read(profile.targetId())!!.due > System.currentTimeMillis())
         check(AndroidPairingRuntime.owner == null) // No PC session/identity or LAN grant was needed.
       }
+      if (targets) AndroidWebDavTargetChecks.run(context, profile) { instrumentation.sendStatus(0, Bundle().apply { putString("stream", "$it\n") }) }
       AndroidBackupScheduler.pause(context); AndroidWebDavScheduler.reconcile(context)
       check(AndroidBackupScheduler.paused(context))
       check(context.getSystemService(JobScheduler::class.java).getPendingJob(AndroidWebDavScheduler.JOB) == null)

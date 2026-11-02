@@ -70,6 +70,14 @@ retention policy. A provider is not "working" until isolated fixture evidence
   still allows `kind='smb'`; moving SMB onto `backup_destination` (for example when several
   SMB destinations are added) is a separate later decision. This narrows, for SMB only, the
   item above that both sides wire products through this table.
+- 2026-11-02 user decision (18A/3): enabled DAV destinations run **sequentially**: one
+  upload at a time under the existing admission lock and `begin()` order; each destination
+  has its own plan (`webdav_target_plan`, the former single `webdav_plan` row moved once),
+  run and retry budget, and the earliest due plan is dispatched. Only DAV destinations
+  (original WebDAV, Nextcloud, Kolab Now) upload in 18A/3; the ADR0028 OAuth kinds are
+  accepted by the table but cannot be enabled until their upload adapters exist.
+  Known limit: reconfiguring the original WebDAV entry still renews the shared backup
+  context (Codex-owned fence), which re-plans the other DAV destinations too.
 
 Sources: [Nextcloud Login Flow](https://docs.nextcloud.com/server/latest/developer_manual/client_apis/LoginFlow/index.html),
 [step14 matrix](../implementation/provider-decision-matrix-step14-2026-10-29.md).

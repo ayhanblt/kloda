@@ -50,47 +50,61 @@ final class IosWebDavAutomaticCoordinator {
     return try IosAutomaticPlan.nextOccurrence(now: max(now, occurrence ?? now), intervalHours: UserDefaults.standard.object(forKey: "kloda.sync.intervalHours") as? Int ?? 12,
       localTime: UserDefaults.standard.string(forKey: "kloda.sync.localTime") ?? "12:00")
   }
-  private func reconcileOnWorker(allowForeground: Bool, clockChanged: Bool = false) {
-    guard active == nil else { return }
+  @discardableResult
+  private func reconcileOnWorker(allowForeground: Bool, clockChanged: Bool = false) -> (IosWebDavPlan, IosWebDavProfile)? {
+    guard active == nil else { return nil }
     timer?.cancel(); timer = nil
     do {
-      guard !IosAutomaticPause.requested, let profile = try IosWebDavVault.read() else { cancelRequest(); return }
-      guard try !IosSyncJournal().automaticPaused() else { cancelRequest(); return }
-      let journal = try IosWebDavJournal.open(), target = try profile.targetId()
-      guard try journal.enabled(kind: "webdav", id: target, revision: profile.revision),
-        try !IosFilesSelection.current().isEmpty || !IosPhotosSource.currentSelections().isEmpty else { cancelRequest(); return }
-      let binding = try IosWebDavContext.capture(profile, journal: journal), clock = try IosAutomaticClock.read()
-      var plan: IosWebDavPlan
-      if let old = try journal.plan(), old.target == target && old.binding == binding { plan = old }
-      else {
-        let due = try next(clock.now); plan = IosWebDavPlan(target: target, binding: binding, occurrence: due, due: due)
-        try journal.savePlan(plan)
+      guard !IosAutomaticPause.requested, try !IosSyncJournal().automaticPaused() else { cancelRequest(); return nil }
+      let journal = try IosWebDavJournal.open()
+      guard try !IosFilesSelection.current().isEmpty || !IosPhotosSource.currentSelections().isEmpty else { cancelRequest(); return nil }
+      // ADR0027 §4, sequential (user decision 2026-11-02): each enabled DAV destination keeps its own plan and the earliest
+      // due one is dispatched; the others wait for the next opportunity without spending theirs.
+      var candidates: [(IosWebDavPlan, IosWebDavProfile)] = []
+      for header in try journal.destinations() {
+        guard let profile = try IosWebDavContext.stored(kind: header.kind, target: header.target), profile.revision == header.revision else { continue }
+        candidates.append((try settle(profile, journal: journal, clockChanged: clockChanged), profile))
       }
-      if let id = plan.run, var run = try journal.run(id: id) {
-        guard run.target == plan.target, run.binding == plan.binding, run.automatic, run.occurrence == plan.occurrence else { throw IosWebDavFailure.code("outcome_unknown") }
-        if run.phase == "running" { run = try run.failed("os_interrupted", clock: clock); try journal.saveRun(run) }
-        if run.phase == "waiting" {
-          let transition = try run.retried(clock: clock)
-          if let transition, transition.phase != "running" { run = transition; try journal.saveRun(run) }
-          if run.phase == "waiting" {
-            let due = clock.now.addingReportingOverflow(max(0, run.retryUptime! - clock.uptime))
-            guard !due.overflow else { throw IosWebDavFailure.code("retry_clock_unavailable") }
-            let old = plan; plan.due = due.partialValue; try journal.savePlan(plan, expected: old)
-          }
-        }
-        if ["finished", "needs_attention", "exhausted"].contains(run.phase) || (run.phase == "paused" && run.error != "user_pause") {
-          let old = plan, due = try next(clock.now, after: plan.occurrence)
-          plan = IosWebDavPlan(target: target, binding: binding, occurrence: due, due: due)
-          try journal.savePlan(plan, expected: old)
-        }
-      } else if clockChanged, plan.due > clock.now {
-        let old = plan, due = try next(clock.now); plan.occurrence = due; plan.due = due
-        try journal.savePlan(plan, expected: old)
-      }
+      guard let (plan, profile) = candidates.min(by: { ($0.0.due, $0.0.target) < ($1.0.due, $1.0.target) }) else { cancelRequest(); return nil }
+      let clock = try IosAutomaticClock.read()
       do { try submit(plan); report(nil) } catch { report(IosWebDavFilesRunner.code(error)) }
       if allowForeground && foreground && plan.due <= clock.now { begin(plan, profile: profile, task: nil, lease: nil) }
       else if foreground && plan.due > clock.now && (!live() || plan.run != nil) { arm(plan) }
-    } catch { cancelRequest(); report(IosWebDavFilesRunner.code(error)) }
+      return (plan, profile)
+    } catch { cancelRequest(); report(IosWebDavFilesRunner.code(error)); return nil }
+  }
+  // One destination's plan, settled exactly as the former single plan was.
+  private func settle(_ profile: IosWebDavProfile, journal: IosWebDavJournal, clockChanged: Bool) throws -> IosWebDavPlan {
+    let target = try profile.targetId()
+    let binding = try IosWebDavContext.capture(profile, journal: journal), clock = try IosAutomaticClock.read()
+    var plan: IosWebDavPlan
+    if let old = try journal.plan(target: target), old.binding == binding { plan = old }
+    else {
+      let due = try next(clock.now); plan = IosWebDavPlan(target: target, binding: binding, occurrence: due, due: due)
+      try journal.savePlan(plan)
+    }
+    if let id = plan.run, var run = try journal.run(id: id) {
+      guard run.target == plan.target, run.binding == plan.binding, run.automatic, run.occurrence == plan.occurrence else { throw IosWebDavFailure.code("outcome_unknown") }
+      if run.phase == "running" { run = try run.failed("os_interrupted", clock: clock); try journal.saveRun(run) }
+      if run.phase == "waiting" {
+        let transition = try run.retried(clock: clock)
+        if let transition, transition.phase != "running" { run = transition; try journal.saveRun(run) }
+        if run.phase == "waiting" {
+          let due = clock.now.addingReportingOverflow(max(0, run.retryUptime! - clock.uptime))
+          guard !due.overflow else { throw IosWebDavFailure.code("retry_clock_unavailable") }
+          let old = plan; plan.due = due.partialValue; try journal.savePlan(plan, expected: old)
+        }
+      }
+      if ["finished", "needs_attention", "exhausted"].contains(run.phase) || (run.phase == "paused" && run.error != "user_pause") {
+        let old = plan, due = try next(clock.now, after: plan.occurrence)
+        plan = IosWebDavPlan(target: target, binding: binding, occurrence: due, due: due)
+        try journal.savePlan(plan, expected: old)
+      }
+    } else if clockChanged, plan.due > clock.now {
+      let old = plan, due = try next(clock.now); plan.occurrence = due; plan.due = due
+      try journal.savePlan(plan, expected: old)
+    }
+    return plan
   }
   private func cancelRequest() { BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: Self.identifier) }
   private func submit(_ plan: IosWebDavPlan) throws {
@@ -118,14 +132,10 @@ final class IosWebDavAutomaticCoordinator {
       }
     }
     worker.async {
-      do {
-        self.reconcileOnWorker(allowForeground: false)
-        let journal = try IosWebDavJournal.open()
-        guard self.active == nil, let plan = try journal.plan(), let profile = try IosWebDavVault.read() else {
-          lease.cancel(); task.setTaskCompleted(success: false); return
-        }
-        self.begin(plan, profile: profile, task: task, lease: lease, token: token)
-      } catch { lease.cancel(); task.setTaskCompleted(success: false); self.report(IosWebDavFilesRunner.code(error)) }
+      guard let (plan, profile) = self.reconcileOnWorker(allowForeground: false), self.active == nil else {
+        lease.cancel(); task.setTaskCompleted(success: false); return
+      }
+      self.begin(plan, profile: profile, task: task, lease: lease, token: token)
     }
   }
   private func begin(_ expected: IosWebDavPlan, profile: IosWebDavProfile, task: BGProcessingTask?, lease: IosBackgroundLease?, token: UUID = UUID()) {
@@ -133,7 +143,7 @@ final class IosWebDavAutomaticCoordinator {
     // Retain the manual-start fence from availability through journal setup and queue admission.
     do { try IosWebDavContext.synchronized {
       let journal = try IosWebDavJournal.open(), clock = try IosAutomaticClock.read()
-      guard active == nil, try !(IosAutomaticPause.requested || IosSyncJournal().automaticPaused()), try journal.plan() == expected,
+      guard active == nil, try !(IosAutomaticPause.requested || IosSyncJournal().automaticPaused()), try journal.plan(target: expected.target) == expected,
         try IosWebDavContext.capture(profile, journal: journal) == expected.binding, try profile.targetId() == expected.target,
         clock.now >= expected.due else { lease?.cancel(); task?.setTaskCompleted(success: false); return }
       try IosWebDavContext.check(profile, binding: expected.binding, journal: journal)
@@ -183,7 +193,7 @@ final class IosWebDavAutomaticCoordinator {
     do {
       let journal = try IosWebDavJournal.open()
       guard try journal.run(id: result.id) == result else { throw IosWebDavFailure.code("storage_failure") }
-      if try journal.plan() == execution.plan,
+      if try journal.plan(target: execution.plan.target) == execution.plan,
         try IosWebDavContext.capture(execution.profile, journal: journal) == execution.plan.binding {
         try IosWebDavContext.check(execution.profile, binding: execution.plan.binding, journal: journal)
         let clock = try IosAutomaticClock.read()

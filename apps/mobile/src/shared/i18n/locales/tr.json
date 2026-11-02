@@ -120,7 +120,8 @@
       "nextcloud_server_mismatch": "Sunucu, girilen adresten farklı bir adres için yanıt verdi. Giriş durduruldu.",
       "nextcloud_login_expired": "Giriş 20 dakika içinde onaylanmadı. Yeniden başlat.",
       "destination_limit": "Bu cihazda zaten 8 bulut hedefi var. Yenisini eklemeden önce birini kaldır.",
-      "destination_exists": "Bu hedef bu cihazda zaten kayıtlı."
+      "destination_exists": "Bu hedef bu cihazda zaten kayıtlı.",
+      "destination_unsupported": "Bu hedef için yedekleme henüz açılamıyor."
     },
     "rebackup": "Bu sürümü yeniden yedekle",
     "rebackupConfirm": "Bu değişmemiş kaynak sürümü eşleşmiş bilgisayara açık isteğinizle yeniden gönderilsin mi? Bilgisayarda dosya erişimi onaylı olmalıdır.",

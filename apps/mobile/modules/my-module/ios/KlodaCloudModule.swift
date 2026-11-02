@@ -2,8 +2,8 @@ import AuthenticationServices
 import ExpoModulesCore
 import UIKit
 
-// Step18A/4 (ADR0027): add, list and remove DAV destinations. Saving custody is not enabling (ADR0023);
-// added destinations stay out of the queue until 18A/3 keys it by targetId. The original WebDAV entry is managed by KlodaBackup.
+// Step18A/4 (ADR0027): add, list, enable and remove DAV destinations. Saving custody is not enabling (ADR0023);
+// an enabled DAV destination gets its own queue plan (18A/3). The original WebDAV entry is managed by KlodaBackup.
 public final class KlodaCloudModule: Module {
   private let worker = DispatchQueue(label: "com.kloda.cloud-destinations")
   private let anchor = CloudPresentationAnchor()
@@ -37,6 +37,7 @@ public final class KlodaCloudModule: Module {
       guard UIApplication.shared.applicationState == .active else { return promise.reject("candidate_stale", "candidate_stale") }
       self.background(promise) {
         if let profile = try IosWebDavVault.read(slot: targetId) {
+          try IosWebDavDestinations.forget(targetId)
           if profile.provider == "nextcloud" { try IosNextcloudLogin().revoke(profile) }
           try IosWebDavVault.delete(slot: targetId)
         } else if let profile = try IosOAuthVault.read(slot: targetId) {
@@ -44,6 +45,14 @@ public final class KlodaCloudModule: Module {
           IosOAuthLogin(try IosOAuthProvider.named(profile.provider)).revoke(refreshToken: profile.refreshToken)
           try IosOAuthVault.delete(slot: targetId)
         } else { throw IosWebDavFailure.code("not_found") }
+        return ["destinations": try Self.summaries()]
+      }
+    }.runOnQueue(.main)
+    // Explicit, foreground-only opt-in (ADR0023); OAuth destinations stay unsupported until their adapters exist.
+    AsyncFunction("setDestinationEnabled") { (targetId: String, enabled: Bool, promise: Promise) in
+      guard UIApplication.shared.applicationState == .active else { return promise.reject("candidate_stale", "candidate_stale") }
+      self.background(promise) {
+        try IosWebDavDestinations.setEnabled(targetId, enabled: enabled)
         return ["destinations": try Self.summaries()]
       }
     }.runOnQueue(.main)
@@ -168,15 +177,18 @@ public final class KlodaCloudModule: Module {
   // ADR0028 §7: DAV and OAuth destinations share one limit.
   static func total() throws -> Int { try IosWebDavVault.count() + IosOAuthVault.slots().count }
 
-  // Display metadata only: never the password.
+  // Display metadata only: never the password. `enabled` is the destination's queue opt-in (the original WebDAV
+  // entry's lives in KlodaBackup, so it reads false here).
   static func summary(_ profile: IosWebDavProfile) throws -> [String: Any] {
-    ["targetId": try profile.targetId(), "provider": profile.provider ?? "webdav", "endpoint": profile.endpoint,
-      "targetPath": profile.targetPath, "username": profile.username]
+    let target = try profile.targetId()
+    return ["targetId": target, "provider": profile.provider ?? "webdav", "endpoint": profile.endpoint,
+      "targetPath": profile.targetPath, "username": profile.username,
+      "enabled": profile.provider != nil ? try IosWebDavDestinations.enabled(target) : false]
   }
   // Display metadata only: never the refresh token. The account ID stands in for the user name.
   static func summary(_ profile: IosOAuthProfile) throws -> [String: Any] {
     ["targetId": try profile.targetId(), "provider": profile.provider, "endpoint": try IosOAuthProvider.named(profile.provider).api,
-      "targetPath": profile.targetPath, "username": profile.accountId]
+      "targetPath": profile.targetPath, "username": profile.accountId, "enabled": false]
   }
   static func summaries() throws -> [[String: Any]] {
     var rows = try IosWebDavVault.read().map { [try summary($0)] } ?? []

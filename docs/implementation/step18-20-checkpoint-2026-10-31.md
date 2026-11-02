@@ -243,12 +243,35 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
   alınır. 18'in çoklu DAV kuyruğu bu kilit kapsamını korumalı. Gerçek düğme yarışı yeniden oynatılmadı.
 - Yapılmadı: açık tema, EN/DE, VoiceOver, fiziksel cihaz.
 
+## Dilim 18A/3 — hedef başına DAV kuyruğu (2.11, commit edilmedi)
+
+- Kullanıcı kararı 2.11: hedefler **sırayla** (tek yükleme, mevcut kilit ve `begin()` sırası); 18A/3'te yalnız DAV
+  (özgün WebDAV, Nextcloud, Kolab Now) yükler; OAuth türleri tabloya eklendi ama yükleyicileri (18B/5) gelene kadar
+  etkinleştirilemez. ADR0027 "Decided with approval" bölümüne yazıldı.
+- Hedef başına plan (`webdav_target_plan`; eski tek satır bir kez taşınır), her etkin hedef kendi plan/run/retry'ını
+  tutar, vadesi en erken olan çalışır. `setDestinationEnabled` (yalnız ön planda), özetlerde `enabled`, kaldırmada
+  satır kapatılır + plan silinir + yalnız o hedefin işi durur. JS `setEnabled`, TR/EN/DE `destination_unsupported`.
+- Android uçtan uca (gerçek JobService, owned HTTPS fixture): yanlış parolalı hedef tek başına `webdav_auth`, diğeri
+  tamamlandı, özgün planı değişmedi — PASS. iOS: derleme, migration/plan, journal, admission PASS; iOS çalışma
+  zamanı çok hedefli koşu NOT_RUN (HTTPS düzeneği Codex'in WebDAV15 simülatörüne bağlı).
+  [Kanıt](evidence/cloud18-nextcloud-2026-10-31/multi-target-queue-2026-11-02.json). Bağımsız review yok.
+- Bilinen sınır: özgün WebDAV yeniden yapılandırılınca ortak bağlam yenilenir, diğer DAV hedefleri yeniden planlanır.
+- Açık: ekran (4b: hedef listesi, aç/kapa, elle başlat, durum), eklenen hedeften geri yükleme, iOS çalışma zamanı testi.
+
 ## Sıradaki (kullanıcı 1.11: açık işler sırayla)
 
 19, bu listede 18'in 1.–3. maddelerinden sonra gelmesine rağmen önce yapıldı; sıra artık buna göre.
 
-1. 18A/3 — kuyruk/runner/schedule/review/sidecar'ı `targetId` ile çoklu hedefe açmak (ADR0027 §4); Codex'in
-   `begin()` kilit kapsamı korunur. Codex'e hizalama isteği: [codex-request-18A3](codex-request-18A3-2026-11-02.md).
+1. 18A/3 — yapıldı (yukarıdaki dilim). Kuyruk/runner/schedule/review/sidecar'ı `targetId` ile çoklu hedefe açmak (ADR0027 §4); Codex'in
+   `begin()` kilit kapsamı korunur. Codex'e hizalama isteği: [codex-request-18A3](codex-request-18A3-2026-11-02.md);
+   Codex yanıtı main'de `docs/implementation/codex-response-18A3-2026-11-02.md` (kuyruk sözleşmesi, kilit sırası, ekran yeri).
+   Hizalama 2.11 (kullanıcı onayı): dal işi `a8b3cd5`, yerel main (`3efe578`, `053d411`, push yok) `0a32874` ile
+   birleştirildi. Çakışmalar (manifest, `expo-module.config.json`, instrumentation scope listesi) iki tarafın
+   eklemeleri korunarak çözüldü. Sonrası: Jest 33/196, tsc, ESLint, Android compile+lint+androidTest APK, iOS arm64
+   Simulator derlemesi PASS (worktree'de `sync-core` dist yeniden derlendi; genel simülatör hedefi x86_64 pairing
+   dilimi olmadığı için link etmez). Birleşik kodla çalışma zamanı testi koşulmadı. Not: Codex "4 yeni tür
+   migration'ı tamam" diyor; 18A/2 yalnız DAV türlerini ekledi, OAuth türleri (dropbox/onedrive/yandex/google-drive)
+   için `backup_destination` migration'ı hâlâ 18A/3 ile yapılacak.
 2. 18A/4 — Expo köprüsü (4a tamam, yukarıda) + Lovable bağlantı ekranı (4b, Codex commit'ini bekliyor).
 3. 18A/5 — uygulama parolası iptali: tamam (Android fixture testi 1.11'de PASS).
 4. 18A/6 — yapıldı: Kolab Now adaptörü, CloudMe Digest-only olduğu için engelli; gerçek Kolab Now hesap testi ayrı kullanıcı izni ister.

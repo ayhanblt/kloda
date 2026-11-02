@@ -36,46 +36,18 @@ internal object AndroidWebDavScheduler {
       AndroidSyncJournal.webdav(context).use { owner ->
         val journal = AndroidWebDavJournal(owner.writableDatabase)
         val plan = synchronized(AndroidSyncJournal.sourceLock) source@{
-          val header = journal.destination() ?: run { cancel(context); return@source null }
+          val headers = journal.destinations()
           val sources = FilesRunContext.webdav(context)
-          if (sources.sources.isEmpty()) { cancel(context); return@source null }
-          val binding = AndroidWebDavContext.binding(header.target, header.revision, sources.binding)
-          val clock = WebDavRun.clock(context)
-          var plan = journal.schedule.read()?.takeIf { it.target == header.target && it.binding == binding }
-          if (plan == null) {
-            val due = next(context, clock.now); plan = WebDavPlan(header.target, binding, due, due)
-            journal.schedule.save(plan)
-          }
-          val id = plan.run
-          if (id != null) {
-            var run = journal.runs.read(id = id)
-            if (run != null) {
-              if (run.target != plan.target || run.binding != plan.binding || !run.automatic || run.occurrence != plan.occurrence) throw FilesFailure("outcome_unknown")
-              if (AndroidWebDavRuntime.hasAutomatic(id)) return@source null
-              if (run.phase == "running") { run = run.failed("os_interrupted", clock); journal.runs.save(run) }
-              if (run.phase == "waiting") {
-                val transition = run.retried(clock)
-                if (transition != null && transition.phase != "running") { run = transition; journal.runs.save(run) }
-                if (run.phase == "waiting") {
-                  val revised = plan.copy(due = Math.addExact(clock.now, maxOf(0, run.retryElapsed!! - clock.elapsed)))
-                  journal.schedule.save(revised, plan); plan = revised
-                }
-              }
-              if (run.phase in setOf("finished", "needs_attention", "exhausted") || (run.phase == "paused" && run.error != "user_pause")) {
-                val due = next(context, clock.now, plan.occurrence)
-                val revised = WebDavPlan(plan.target, plan.binding, due, due)
-                journal.schedule.save(revised, plan); plan = revised
-              }
-            }
-          } else if (clockChanged && plan.due > clock.now) {
-            val due = next(context, clock.now); val revised = plan.copy(occurrence = due, due = due)
-            journal.schedule.save(revised, plan); plan = revised
-          }
-          plan
+          if (headers.isEmpty() || sources.sources.isEmpty()) { cancel(context); return@source null }
+          // ADR0027 §4, sequential (user decision 2026-11-02): each destination keeps its own plan and the earliest due one
+          // is dispatched. While an automatic run holds the lease nothing is rescheduled; its job reconciles when it ends.
+          val plans = headers.map { header -> settle(context, journal, header, sources.binding, clockChanged) ?: return@source null }
+          plans.minWith(compareBy<WebDavPlan>({ it.due }, { it.target }))
         } ?: return@use
         val scheduler = context.getSystemService(JobScheduler::class.java)
         val pending = scheduler.getPendingJob(JOB)
-        if (pending?.extras?.getString("binding") != plan.binding || pending.extras.getLong("dispatch") != plan.due ||
+        if (pending?.extras?.getString("binding") != plan.binding || pending.extras.getString("target") != plan.target ||
+          pending.extras.getLong("dispatch") != plan.due ||
           pending.extras.getString("token") != prefs(context).getString("webdavDispatchToken", null)) {
           val token = UUID.randomUUID().toString()
           val extras = PersistableBundle().apply {
@@ -96,11 +68,49 @@ internal object AndroidWebDavScheduler {
       runCatching { report(context, (failure as? FilesFailure)?.code ?: "automatic_unavailable") }
     }
   }
+  // One destination's plan, settled exactly as the former single plan was; null while its automatic run is active.
+  private fun settle(context: Context, journal: AndroidWebDavJournal, header: AndroidWebDavJournal.Header, sources: String,
+    clockChanged: Boolean): WebDavPlan? {
+    val binding = AndroidWebDavContext.binding(header.target, header.revision, sources)
+    val clock = WebDavRun.clock(context)
+    var plan = journal.schedule.read(header.target)?.takeIf { it.binding == binding }
+    if (plan == null) {
+      val due = next(context, clock.now); plan = WebDavPlan(header.target, binding, due, due)
+      journal.schedule.save(plan)
+    }
+    val id = plan.run
+    if (id != null) {
+      var run = journal.runs.read(id = id)
+      if (run != null) {
+        if (run.target != plan.target || run.binding != plan.binding || !run.automatic || run.occurrence != plan.occurrence) throw FilesFailure("outcome_unknown")
+        if (AndroidWebDavRuntime.hasAutomatic(id)) return null
+        if (run.phase == "running") { run = run.failed("os_interrupted", clock); journal.runs.save(run) }
+        if (run.phase == "waiting") {
+          val transition = run.retried(clock)
+          if (transition != null && transition.phase != "running") { run = transition; journal.runs.save(run) }
+          if (run.phase == "waiting") {
+            val revised = plan.copy(due = Math.addExact(clock.now, maxOf(0, run.retryElapsed!! - clock.elapsed)))
+            journal.schedule.save(revised, plan); plan = revised
+          }
+        }
+        if (run.phase in setOf("finished", "needs_attention", "exhausted") || (run.phase == "paused" && run.error != "user_pause")) {
+          val due = next(context, clock.now, plan.occurrence)
+          val revised = WebDavPlan(plan.target, plan.binding, due, due)
+          journal.schedule.save(revised, plan); plan = revised
+        }
+      }
+    } else if (clockChanged && plan.due > clock.now) {
+      val due = next(context, clock.now); val revised = plan.copy(occurrence = due, due = due)
+      journal.schedule.save(revised, plan); plan = revised
+    }
+    return plan
+  }
   fun changed(context: Context) = synchronized(lock) {
     if (AndroidBackupScheduler.paused(context) || AndroidBackupScheduler.mode(context) != "live") return@synchronized
     AndroidSyncJournal.webdav(context).use { owner ->
       val journal = AndroidWebDavJournal(owner.writableDatabase)
-      journal.schedule.read()?.takeIf { it.run == null }?.let {
+      val enabled = journal.destinations().map { it.target }.toSet()
+      journal.schedule.all().filter { it.run == null && it.target in enabled }.forEach {
         val now = System.currentTimeMillis(); journal.schedule.save(it.copy(occurrence = now, due = now), it)
       }
     }
@@ -117,7 +127,7 @@ internal object AndroidWebDavScheduler {
     AndroidSyncJournal.webdav(context).use { owner ->
       val journal = AndroidWebDavJournal(owner.writableDatabase)
       if (journal.runs.read(id = result.id) != result) throw FilesFailure("storage_failure")
-      val header = journal.destination() ?: return@use
+      val header = journal.destination(expected.target) ?: return@use
       if (header.target != expected.target || AndroidWebDavContext.binding(header.target, header.revision, FilesRunContext.webdav(context).binding) != expected.binding) return@use
       val clock = WebDavRun.clock(context)
       val plan = when (result.phase) {

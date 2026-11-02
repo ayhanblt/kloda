@@ -120,7 +120,8 @@
       "nextcloud_server_mismatch": "The server answered for a different address than the one entered. Sign-in was stopped.",
       "nextcloud_login_expired": "Sign-in was not confirmed within 20 minutes. Start again.",
       "destination_limit": "This device already has 8 cloud destinations. Remove one before adding another.",
-      "destination_exists": "This destination is already saved on this device."
+      "destination_exists": "This destination is already saved on this device.",
+      "destination_unsupported": "Backups to this destination cannot be turned on yet."
     },
     "rebackup": "Back up this version again",
     "rebackupConfirm": "Explicitly send this unchanged source version again to the currently paired computer? The computer must approve file access.",

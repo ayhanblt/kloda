@@ -40,10 +40,17 @@ enum IosWebDavContext {
       return IosWebDavClient.encode(Data(SHA256.hash(data: bytes)))
     }
   }
+  // The original WebDAV entry or the destination's own Keychain slot (ADR0027 §3); a slot must hold the same provider and target.
+  static func stored(kind: String, target: String) throws -> IosWebDavProfile? {
+    if kind == "webdav" { return try IosWebDavVault.read() }
+    guard let profile = try IosWebDavVault.read(slot: target), profile.provider == kind, try profile.targetId() == target else { return nil }
+    return profile
+  }
   static func check(_ profile: IosWebDavProfile, binding: String, journal: IosWebDavJournal) throws {
     try synchronized {
-      guard try IosWebDavVault.read() == profile,
-        try journal.enabled(kind: "webdav", id: profile.targetId(), revision: profile.revision),
+      let kind = profile.provider ?? "webdav"
+      guard try stored(kind: kind, target: profile.targetId()) == profile,
+        try journal.enabled(kind: kind, id: profile.targetId(), revision: profile.revision),
         try capture(profile, journal: journal) == binding else { throw IosWebDavFailure.code("settings_changed") }
     }
   }

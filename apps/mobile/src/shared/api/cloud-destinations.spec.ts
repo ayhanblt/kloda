@@ -3,8 +3,8 @@ import { blockedProviders, cloudDestinationFromNative, cloudDestinations, valida
 
 jest.mock('expo', () => ({ requireOptionalNativeModule: jest.fn() }));
 const target = 'A'.repeat(42) + 'E';
-const row = { targetId: target, provider: 'nextcloud', endpoint: 'https://cloud.example/remote.php/dav/files/kloda', targetPath: 'Kloda', username: 'kloda' };
-const native = { destinations: jest.fn(), signInNextcloud: jest.fn(), signInOAuth: jest.fn(), cancelSignIn: jest.fn(), addKolabNow: jest.fn(), removeDestination: jest.fn() };
+const row = { targetId: target, provider: 'nextcloud', endpoint: 'https://cloud.example/remote.php/dav/files/kloda', targetPath: 'Kloda', username: 'kloda', enabled: false };
+const native = { destinations: jest.fn(), signInNextcloud: jest.fn(), signInOAuth: jest.fn(), cancelSignIn: jest.fn(), addKolabNow: jest.fn(), removeDestination: jest.fn(), setDestinationEnabled: jest.fn() };
 beforeEach(() => { jest.clearAllMocks(); jest.mocked(requireOptionalNativeModule).mockReturnValue(native); });
 
 it('accepts display metadata only and rejects a password or unknown field', () => {
@@ -14,6 +14,21 @@ it('accepts display metadata only and rejects a password or unknown field', () =
   expect(() => cloudDestinationFromNative({ ...row, provider: 'dropbox', refreshToken: 'x' })).toThrow('outcome_unknown');
   expect(() => cloudDestinationFromNative({ ...row, endpoint: 'http://cloud.example/dav' })).toThrow('outcome_unknown');
   expect(() => cloudDestinationFromNative({ ...row, targetId: 'short' })).toThrow('outcome_unknown');
+  const missing: Record<string, unknown> = { ...row }; delete missing.enabled;
+  expect(() => cloudDestinationFromNative(missing)).toThrow('outcome_unknown');
+  expect(() => cloudDestinationFromNative({ ...row, enabled: 'yes' })).toThrow('outcome_unknown');
+  expect(() => cloudDestinationFromNative({ ...row, provider: 'dropbox', enabled: true })).toThrow('outcome_unknown');
+});
+
+it('enables a DAV destination explicitly and checks the native answer', async () => {
+  await expect(cloudDestinations.setEnabled('bad', true)).rejects.toThrow('invalid_request');
+  native.setDestinationEnabled.mockResolvedValueOnce({ destinations: [{ ...row, enabled: true }] });
+  await expect(cloudDestinations.setEnabled(target, true)).resolves.toEqual([{ ...row, enabled: true }]);
+  expect(native.setDestinationEnabled).toHaveBeenCalledWith(target, true);
+  native.setDestinationEnabled.mockResolvedValueOnce({ destinations: [row] });
+  await expect(cloudDestinations.setEnabled(target, true)).rejects.toThrow('outcome_unknown');
+  native.setDestinationEnabled.mockResolvedValueOnce({ destinations: [] });
+  await expect(cloudDestinations.setEnabled(target, false)).rejects.toThrow('outcome_unknown');
 });
 
 it('rejects duplicate or more than eight destinations from native', async () => {

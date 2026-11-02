@@ -35,6 +35,8 @@ final class FixtureJournal {
   var runWrites = 0
   static func open() throws -> FixtureJournal { shared }
   func plan() throws -> FixturePlan? { stored }
+  // WebDAV reads its per-destination plan (18A/3); the fixture holds one destination.
+  func plan(target: String) throws -> FixturePlan? { stored.target == target ? stored : nil }
   func savePlan(_ next: FixturePlan, expected: FixturePlan) throws {
     guard stored == expected else { throw FixtureFailure.code("settings_changed") }; stored = next
   }
