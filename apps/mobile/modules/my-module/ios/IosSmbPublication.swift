@@ -33,19 +33,14 @@ private final class IosSmbReceiptOwner {
 enum IosSmbPublication {
   static func run(journal: IosSmbJournal, job: IosSmbUpload, snapshot: Int32, password: String,
     current: @escaping () throws -> Bool) throws {
-    try execute(journal: journal, job: job, snapshot: snapshot, password: password, socket: nil, current: current)
+    try execute(journal: journal, job: job, snapshot: snapshot, password: password, socket: nil, current: current, completed: current)
   }
   // Consumes the native route owner's exclusive socket on every return.
   static func runBound(journal: IosSmbJournal, job: IosSmbUpload, snapshot: Int32, password: String,
-    socket: Int32, current: @escaping () throws -> Bool) throws {
-    try execute(journal: journal, job: job, snapshot: snapshot, password: password, socket: socket, current: current)
+    socket: Int32, current: @escaping () throws -> Bool, completed: (() throws -> Bool)? = nil) throws {
+    try execute(journal: journal, job: job, snapshot: snapshot, password: password, socket: socket, current: current, completed: completed ?? current)
   }
-  private static func execute(journal: IosSmbJournal, job: IosSmbUpload, snapshot: Int32, password: String,
-    socket: Int32?, current: @escaping () throws -> Bool) throws {
-    var ownedSocket = socket
-    defer { if let fd = ownedSocket, fd >= 0 { Darwin.close(fd) } }
-    if let socket, socket < 0 || socket == snapshot { throw IosSmbFailure(code: "invalid_request") }
-    guard !Thread.isMainThread else { throw IosSmbFailure(code: "worker_required") }
+  static func request(job: IosSmbUpload, password: String) throws -> Data {
     try job.validate()
     guard password.utf8.count <= 4096, !password.utf8.contains(0),
       let hash = Data(base64Encoded: job.sha256.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/") + "="),
@@ -54,7 +49,15 @@ enum IosSmbPublication {
     let request: [String: Any] = ["address": job.target.address, "port": job.target.port, "share": job.target.share,
       "username": job.target.username, "password": password, "domain": job.target.domain,
       "operationId": job.id, "finalPath": path, "size": String(job.size), "sha256": hash.map { Int($0) }, "responseTimeoutMs": 5000]
-    let data = try JSONSerialization.data(withJSONObject: request)
+    return try JSONSerialization.data(withJSONObject: request)
+  }
+  private static func execute(journal: IosSmbJournal, job: IosSmbUpload, snapshot: Int32, password: String,
+    socket: Int32?, current: @escaping () throws -> Bool, completed: @escaping () throws -> Bool) throws {
+    var ownedSocket = socket
+    defer { if let fd = ownedSocket, fd >= 0 { Darwin.close(fd) } }
+    if let socket, socket < 0 || socket == snapshot { throw IosSmbFailure(code: "invalid_request") }
+    guard !Thread.isMainThread else { throw IosSmbFailure(code: "worker_required") }
+    let data = try request(job: job, password: password)
     try journal.insert(job)
     let transferred = Darwin.dup(snapshot)
     guard transferred >= 0 else { try? journal.markIssue(job, code: 2); throw IosSmbFailure(code: "snapshot_io_failed") }
@@ -75,7 +78,7 @@ enum IosSmbPublication {
       try? journal.markIssue(job, code: result)
       throw IosSmbFailure(code: "native_" + String(result))
     }
-    do { try journal.complete(job, current: current) }
+    do { try journal.complete(job, current: completed) }
     catch { try? journal.markIssue(job, code: 4); throw error }
   }
 }

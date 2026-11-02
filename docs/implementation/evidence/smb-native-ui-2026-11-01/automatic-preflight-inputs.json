@@ -1,0 +1,5 @@
+{
+  "apps/mobile/modules/my-module/ios/IosSmbAutomaticCoordinator.swift": "d641f96803b04287f9a2485a2a0c6f62ab92c0ec0636336f5926a76cb8c3453d",
+  "apps/mobile/modules/my-module/ios/IosWebDavAutomaticCoordinator.swift": "81a31ab872ed62422431cc17936ee6ffa21a724ab0e48568ada0d0608f518976",
+  "tools/test-ios-automatic-unconfigured.py": "bdfbd82c1d9f427b5d4d153a85a0b8e6b230264fd44568cc4312c3b2b63ecf05"
+}

@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-01",
+  "scope": "One actual TR SMB empty-screen diagnostic, isolated new Simulator bundle; no configure/action/source/media/SMB calls",
+  "result": "BLOCKED_SUPPORTED_PATH",
+  "observed": {
+    "nativeModuleReached": true,
+    "nativeStatusError": "storage_failure",
+    "rendered": "Real SmbPage, disabled form / integration unavailable",
+    "journalQuickCheck": "ok",
+    "journalCounts": {
+      "smb_profile": 0,
+      "smb_upload": 0,
+      "smb_run": 0,
+      "smb_enabled": 0
+    },
+    "initialMetroTimeout": "12-second cold bundle exceeded native client timeout; same owned app relaunched after cached bundle",
+    "authorityChanges": false
+  },
+  "notAccepted": [
+    "supported empty form",
+    "TR/EN/DE native matrix",
+    "AX/VoiceOver/keyboard/large text",
+    "production signing/Keychain",
+    "LAN Files/Photos chain",
+    "independent security review"
+  ],
+  "cleanup": {
+    "testAppTerminated": true,
+    "ownedSimulatorShutdown": true,
+    "temporaryEntryRemoved": true,
+    "noMediaOrProfileCreated": true
+  },
+  "runtimeRoot": "/var/folders/cm/fsyld6dn5xl1p74jcds8tc640000gn/T/kloda-smb-ui16a-ouoe4kcy",
+  "inputs": {
+    "apps/mobile/src/pages/connections/ui/smb-page.tsx": "c4b61b5cd31ec4181846babf30cfc78ab79176e6c39c1f31b5ad4824436bfe71",
+    "apps/mobile/src/features/backup-setup/model/use-smb-backup.ts": "130eb6a746f94322a67f5a9ef84a0d0e4740379fca47045a9927059cf10694a0",
+    "apps/mobile/src/shared/api/smb.ts": "e6a59b2187eac03234d02438e7ce8d9b429cc3b42298adcca4797f2da831a7fa",
+    "apps/mobile/modules/my-module/ios/IosSmbQueue.swift": "3238413f56e94ca020d0ce0664e705e54725a4ab5f72db411da9eeeadba943f5",
+    "apps/mobile/modules/my-module/ios/IosSmbVault.swift": "2223590ab3f598bfed487feb6ee33f542f0a1a20baeefd69ad25651c84ab4686"
+  },
+  "artifacts": {
+    "runtime.json": "66015c3b6dd591525abf2b36f25ef07a2fcdec37f0a0e59aba6503ef2c9786cb",
+    "ownership.json": "6e4efb78f4ae6274a8d7b8fcfa5b8d39c959f8007664c04b0b35fdb36537f858",
+    "kloda-smb-ui-pilot.py.gz": "0113373249f17171ceb37d89169cdac1bc67c34a2b2d2375fe657337ceb96845",
+    "journal-check.json": "8ec92b413e436d2a3ee2767556c66cbd6949a2123a00faedb74332615ca1860e",
+    "tr-unavailable.png": "170f7f0ec9bc7862598019af352b092e9dcd2750bb2de064bbc7e5806d95a241",
+    "kloda-smb-ui-entry.js.gz": "fcd2400240fc346e9f5e4999d616c12a35b2f464d23e0c4b03b65375efff6d49",
+    "metro.log": "8f6c6c6819847fea692687bba84db10712c60e225d7e88605d3a95282c6726eb",
+    "native-errors.log": "f1ed28065ba6de05c603550804d675af55f5e60a43317065b297c36f5940e850",
+    "pilot.log": "d7b453a8bcf3126d5e76b1ddadf6ed51ac3763796866584db4fcd8c6c448055f"
+  }
+}

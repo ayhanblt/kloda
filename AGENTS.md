@@ -65,6 +65,14 @@ When this policy applies, read the [targeted Context7 command reference](docs/im
   group. Avoid duplicating long status histories across documents. Report actual
   acceptance criteria completed; do not turn routine choices into approval gates.
 
+## Task boundaries and lower usage — user decision, 2026-11-02
+
+- This user decision supersedes automatic continuation and older repeat-check defaults.
+- Batch independent checks and reads in one tool call. Keep raw logs on disk; return only status and a small relevant error excerpt.
+- Verify fixture/server/permissions and one representative path before expanding a build or platform matrix.
+- Do not repeat successful tests. Reuse their recorded source/variant hashes and results; identify any changed or uncovered behavior explicitly rather than silently treating old evidence as current.
+- At every task boundary, write one compact checkpoint, provide the exact next-chat prompt, and stop. Do not reload the previous transcript into the new chat.
+
 ## Scope and capture discipline
 
 - If implementation expands an approved decision (more files/lines, a new ABI,
@@ -81,10 +89,10 @@ Stay within16 until its acceptance criteria are reported before17. Record new
 UI/documentation work as pending in CURRENT and interrupt only on explicit user
 request. Update CURRENT, not a growing history, after a meaningful work group.
 
-After completing a step:
-- verify it with tests/build/checks,
-- immediately continue to the next incomplete step,
-- do not ask for approval between steps.
+After completing a task:
+- report its acceptance using existing successful evidence without rerunning it,
+- write one short checkpoint with exact next scope and remaining gates,
+- direct the user to a new conversation and stop; do not start the next task here.
 
 Stop only if:
 - a new architectural/security-policy decision is required,

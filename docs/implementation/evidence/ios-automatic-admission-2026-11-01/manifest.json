@@ -1,0 +1,52 @@
+{
+  "recordedAt": "2026-11-01T00:15:59.323563+00:00",
+  "scope": "Fix future iOS WebDAV and SMB automatic admission TOCTOU with manual start; no UI behavior/migration/credential/receipt policy change.",
+  "reportedEvidence": {
+    "path": ".claude/worktrees/step18-20/docs/implementation/evidence/step19-live-activity-2026-10-31/simulator-runtime-2026-11-01.json",
+    "readOnly": true,
+    "sha256": "0c46963597741a6d30e1e1e3baaf8746824c735bf51b8ee1b3be7e0b53ce7815",
+    "runPrefix": "0bb96303",
+    "note": "Claude observed intermediate resumeAutomatic()+run() collision on Simulator. Corrected UI scenario was not re-run; native manual-vs-automatic race was inferred there. No writes to Claude worktree or existing run repair."
+  },
+  "fix": "Retain existing IosWebDavContext recursive fence across availability, journal plan/run setup and queue.start for both protocols. Queue manual start/review admission already uses the same fence. Existing occupied path defers300000ms without creating or changing an automatic run/budget. No blanket backup_busy retry classification.",
+  "checks": {
+    "regression": "PASS actual source-derived begin bodies executed with deterministic Foundation scheduling/journal/queue/OS doubles: unprotected negative controls reproduce manual-wins backup_busy->needs_attention in both protocols; fixed auto-wins path admits automatic once and rejects concurrent manual normally; occupied path writes no run; prior waiting run and attempts/osAttempts unchanged; existing plan occurrence/run retained while due defers300000ms; fake lease/task completion assertions PASS.",
+    "sourceEquivalence": "PASS current executable begin bodies equal tested bodies after names normalized and standalone comments removed; only explanatory comment added after host run. Original tested input hashes and generated Swift retained.",
+    "productBuild": "PASS current real Expo/Pods SMB-enabled arm64 Simulator application compilation/link, signingdisabled. No app launch or real race UI replay performed.",
+    "review": "Separate same-agent lock/caller/reentrancy review: availability/start and shared NSRecursiveLock confirmed, worker callback remains asynchronous; no independent review."
+  },
+  "limits": [
+    "Host deterministic doubles are not actual Simulator/Nextcloud/SMB network or OS BG delivery proof.",
+    "Existing needs_attention run0bb96303 is immutable evidence; not rewritten/retried/rebound.",
+    "No Photos writes, credential changes, common backup_destination schema/CHECK/user_version edits or Claude worktree writes.",
+    "16a full LAN/independent/platform gates remain open;16b held."
+  ],
+  "sourceSha256": {
+    "apps/mobile/modules/my-module/ios/IosWebDavAutomaticCoordinator.swift": "139342ae98b1c03e37a6a3ee65d702e2cd1935b3a1b539fc53d6272ca4998e35",
+    "apps/mobile/modules/my-module/ios/IosSmbAutomaticCoordinator.swift": "7d3e210feaccffb8200fa172e537f9e5cf72d46cdabe3901f371cc7e4326c5a3",
+    "apps/mobile/modules/my-module/ios/IosWebDavQueue.swift": "687c2eca9061f8097e744cf0af050d56e5a8f27c8adc0560e58da978f79339a2",
+    "apps/mobile/modules/my-module/ios/IosSmbQueue.swift": "3238413f56e94ca020d0ce0664e705e54725a4ab5f72db411da9eeeadba943f5",
+    "apps/mobile/modules/my-module/ios/IosWebDavContext.swift": "c48f096f2b753dbff06dc503c7dd4765093f6a336346b0c08f9d8adabb63887e",
+    "apps/mobile/modules/my-module/ios/IosSmbJournal.swift": "432b48e73eae1ed472738fc1ed68a3dd67d2d8a46f0935ace0791e107a4ede75",
+    "packages/storage-native/apple/tests/IosAutomaticAdmissionChecks.swift": "ecb3946fe7bb7a0b29277a0f1a784973d0daa292dbef0958258023b14d44b9d6",
+    "tools/test-ios-automatic-admission.py": "36da544c1196909fd75825eee0f71149820de2fbd2bf737d2057a9d6a90a0d88"
+  },
+  "evidenceSha256": {
+    "kloda-ios-automatic-admission.log.gz": "134823d524ad192c74ca3497ab5d8b2ac014d91d59151e5f9570836c0d53f55a",
+    "kloda-ios-automatic-admission-build.log.gz": "5fb36226fe3f037b3ff211a7cf2182c1da83f76404567efd54b80611f5829669",
+    "Smb-fixed-build.log.gz": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "WebDav-fixed-build.log.gz": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "WebDav-fixed-run.log.gz": "68e293671d0439698d01c52e023dbc97ccd7832601c372e9a5159bb8a3c7a331",
+    "WebDav-control-run.log.gz": "bce4f86668eb552cac416e10fec97885daf3016475573773603d558817343e46",
+    "Smb-fixed-run.log.gz": "68e293671d0439698d01c52e023dbc97ccd7832601c372e9a5159bb8a3c7a331",
+    "Smb-control-run.log.gz": "bce4f86668eb552cac416e10fec97885daf3016475573773603d558817343e46",
+    "WebDav-control-build.log.gz": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "Smb-control-build.log.gz": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "Smb-control.swift.gz": "96b6394272f8933a9ee538e64e1ae56ef1b2a5ed355d304ef72a57bee2307e5c",
+    "WebDav-control.swift.gz": "e7568bf00a74f16de9b313704f507381a6ce744b355bb4ff4ddc868b0e4de107",
+    "WebDav-fixed.swift.gz": "8875ca92c920f4e4dc03de7c36674c41a129339e59000953fd8b550fd552bb11",
+    "Smb-fixed.swift.gz": "3e6ccb6cb98ae4c9756ee3f3ef219a036bc98b221db6722ad9d7f54e35029b09",
+    "inputs.json.gz": "5d481fc172e6cf7362a8e9955100cf1a577d924516504e2e12762b6b9aeaaa56",
+    "reported-resumeFix.json": "e5a91df1f8505f101e640a44a18cbe9a6399725753038461077cb00817a364e9"
+  }
+}

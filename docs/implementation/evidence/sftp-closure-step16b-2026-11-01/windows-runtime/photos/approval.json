@@ -1,0 +1,12 @@
+{
+  "approvedAt": "2026-11-02T13:32:06.274001+00:00",
+  "userAnswer": "Bu sınırlı iOS SFTP Photos testini onaylıyorum",
+  "document": "docs/implementation/sftp-ios-windows-photos-owned-fixture-2026-11-02.md",
+  "documentSha256": "7bd4dda8e80fad1eabf1b57fa2bd9620c9b625cf90e94591f4c93f0ffdc2e2e0",
+  "expectedAssets": 2,
+  "expectedAlbums": 2,
+  "maxAssets": 4,
+  "maxAlbums": 4,
+  "preMediaFixtureTimingFix": true,
+  "priorAttemptCreatedMedia": false
+}

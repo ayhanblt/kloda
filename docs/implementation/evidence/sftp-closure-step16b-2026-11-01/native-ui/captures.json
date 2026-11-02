@@ -1,0 +1,112 @@
+[
+  {
+    "image": "tr-large.png",
+    "report": {
+      "id": 1,
+      "language": "tr",
+      "fontsLoaded": true,
+      "fontError": false,
+      "dimensions": {
+        "fontScale": 1,
+        "width": 402,
+        "height": 874,
+        "scale": 3
+      },
+      "status": {
+        "supported": true,
+        "configured": false,
+        "enabled": false,
+        "running": false
+      },
+      "appState": "active"
+    }
+  },
+  {
+    "image": "en-large.png",
+    "report": {
+      "id": 2,
+      "language": "en",
+      "fontsLoaded": true,
+      "fontError": false,
+      "dimensions": {
+        "fontScale": 1,
+        "width": 402,
+        "height": 874,
+        "scale": 3
+      },
+      "status": {
+        "supported": true,
+        "configured": false,
+        "enabled": false,
+        "running": false
+      },
+      "appState": "active"
+    }
+  },
+  {
+    "image": "de-large.png",
+    "report": {
+      "id": 3,
+      "language": "de",
+      "fontsLoaded": true,
+      "fontError": false,
+      "dimensions": {
+        "fontScale": 1,
+        "width": 402,
+        "height": 874,
+        "scale": 3
+      },
+      "status": {
+        "supported": true,
+        "configured": false,
+        "enabled": false,
+        "running": false
+      },
+      "appState": "active"
+    }
+  },
+  {
+    "image": "de-accessibility-extra-extra-extra-large.png",
+    "report": {
+      "id": 4,
+      "language": "de",
+      "fontsLoaded": true,
+      "fontError": false,
+      "dimensions": {
+        "scale": 3,
+        "width": 402,
+        "height": 874,
+        "fontScale": 3.571
+      },
+      "status": {
+        "supported": true,
+        "configured": false,
+        "enabled": false,
+        "running": false
+      },
+      "appState": "active"
+    }
+  },
+  {
+    "image": "tr-large.png",
+    "report": {
+      "id": 5,
+      "language": "tr",
+      "fontsLoaded": true,
+      "fontError": false,
+      "dimensions": {
+        "scale": 3,
+        "width": 402,
+        "height": 874,
+        "fontScale": 1
+      },
+      "status": {
+        "supported": true,
+        "configured": false,
+        "enabled": false,
+        "running": false
+      },
+      "appState": "active"
+    }
+  }
+]

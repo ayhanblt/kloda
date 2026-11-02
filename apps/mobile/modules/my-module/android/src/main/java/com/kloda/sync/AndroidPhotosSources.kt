@@ -147,7 +147,10 @@ internal class AndroidPhotosSources(private val context: Context) {
     checkPermission()
   }
 
-  fun metadata(source: String, reference: String, journal: AndroidPhotoManifestJournal): PhotoSourceMetadata {
+  fun metadata(source: String, reference: String, journal: AndroidPhotoManifestJournal): PhotoSourceMetadata =
+    metadata(source, reference, journal.sourceDeviceId(), journal::identity)
+
+  fun metadata(source: String, reference: String, device: String, identity: (String, String) -> String): PhotoSourceMetadata {
     checkedMedia(source, reference)
     val projection = folderColumns() + arrayOf(MediaStore.MediaColumns.DISPLAY_NAME, MediaStore.MediaColumns.MIME_TYPE,
       MediaStore.Images.Media.BUCKET_DISPLAY_NAME, MediaStore.MediaColumns.DATE_ADDED) +
@@ -163,7 +166,7 @@ internal class AndroidPhotosSources(private val context: Context) {
       val albums = if (folder == null) emptyList() else {
         val title = text(MediaStore.Images.Media.BUCKET_DISPLAY_NAME) ?: throw FilesFailure("source_changed")
         if (!PhotoManifestCodec.validName(title)) throw FilesFailure("backup_path_rejected")
-        listOf(PhotoAlbum(journal.identity("album", folder), title))
+        listOf(PhotoAlbum(identity("album", folder), title))
       }
       val birth = number(MediaStore.MediaColumns.DATE_ADDED).toString() +
         if (Build.VERSION.SDK_INT >= 30) ":${number(MediaStore.MediaColumns.GENERATION_ADDED)}" else ""
@@ -173,7 +176,7 @@ internal class AndroidPhotosSources(private val context: Context) {
         0L -> false; 1L -> true; else -> throw FilesFailure("source_changed")
       } else null
       // Local database birth/version avoids treating a reused MediaStore row ID as a portable identity.
-      PhotoSourceMetadata(journal.sourceDeviceId(), journal.identity("asset", "$version|$volume|$reference|$birth"),
+      PhotoSourceMetadata(device, identity("asset", "$version|$volume|$reference|$birth"),
         name, mime, albums, favorite)
     }
     checkedMedia(source, reference)

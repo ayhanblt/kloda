@@ -1,0 +1,20 @@
+{
+  "decision": "User 2026-11-01: Resume on a paused manual run starts it again (same as Back up now).",
+  "change": "home-page.tsx: when the automatic pause is off and the WebDAV run is a paused manual run, Resume calls transfer.run(); otherwise resumeAutomatic() as before. Never both. IosLiveActivityStatus: a paused manual WebDAV run (without the automatic pause) maps to 'waiting', so the lock screen offers only Open.",
+  "firstAttempt": "Calling resumeAutomatic() and then run() was tried on the Simulator: the manual run restarted (new run 0f99a1f4, 14 GET 200 on the server, ended needs_attention/review_required because the photos already exist), but the automatic run started at the same time failed with backup_busy (new run 0bb96303, needs_attention). Hence the never-both rule. The race between IosWebDavAutomaticCoordinator.begin()'s available() check and IosWebDavQueue.start() is pre-existing shared native code (Codex is editing these files) and was not changed.",
+  "checks": {
+    "tsc": "PASS",
+    "eslint": "PASS",
+    "jest apps/mobile": "PASS 25 suites / 171 tests (3 new in home-page-resume.spec.tsx)",
+    "tools/test-ios-live-activity.py": "PASS Swift 5 and 6 (3 new cases)"
+  },
+  "notRun": "The corrected never-both version was not re-run on the Simulator; the native Live Activity change was not rebuilt or seen on the lock screen.",
+  "rerun": {
+    "build": "Debug ad-hoc signed Simulator build PASS (twice: resume fix, then ended-card fix)",
+    "devamEt": "PASS: manual run 87ec216f stopped by iOS (waiting/os_interrupted, shown Duraklatıldı / Devam et). Devam et created manual run b85494d7, server 65 GET 200, ended needs_attention/review_required like earlier runs (photos already exist). No new automatic run and no backup_busy.",
+    "lockScreen": "The card kept the ended 'İnceleme gerekiyor' content after later runs. Cause in IosLiveActivity.tick(): Activity.activities still lists an ended card, so no new card was requested or updated. Fixed (only active/stale cards count; ended ones are dismissed before a new request) and rebuilt.",
+    "endedCardFix": "PASS: after the fix the old card was dismissed; a first manual run left the app after ~1-2 s (shorter than the 2 s poll), so no card. Next foreground started automatic run 6b049da9 (needs_attention/review_required); a new card opened and ended as 'İnceleme gerekiyor', matching the app. The earlier automatic_unavailable suspicion is withdrawn: native status does not include that error.",
+    "endedCardFile": "lock-screen-new-card-after-end-tr.png",
+    "manualPausedCard": "NOT_SHOWN on the lock screen: every foreground also starts the due automatic run, which ends the card first. Covered only by tools/test-ios-live-activity.py."
+  }
+}

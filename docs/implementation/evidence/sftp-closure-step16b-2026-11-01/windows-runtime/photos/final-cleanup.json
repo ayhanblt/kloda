@@ -1,0 +1,9 @@
+{
+  "photosPermissionReset": true,
+  "originalPrivatePasswordFileDeleted": true,
+  "originalEmptyPasswordDirectoryDeleted": true,
+  "ownedSimulatorShutdown": true,
+  "ownedAndroidAvdStopped": true,
+  "windowsServerStopPendingUser": true,
+  "remoteTestEvidenceRetained": true
+}

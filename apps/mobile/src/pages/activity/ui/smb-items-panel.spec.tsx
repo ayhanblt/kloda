@@ -1,0 +1,30 @@
+import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
+import { AppState, type AppStateStatus } from 'react-native';
+import { SmbItemsPanel } from './smb-items-panel';
+import { smb } from '../../../shared/api/smb';
+import { smbBackups } from '../../../shared/api/smb-backups';
+import { i18n } from '../../../shared/i18n';
+jest.mock('../../../shared/api/smb',() => ({ smb:{ status:jest.fn() } }));
+jest.mock('../../../shared/api/smb-backups',() => ({ smbBackups:{ list:jest.fn(),restore:jest.fn(),copy:jest.fn(),cancel:jest.fn().mockResolvedValue(undefined) } }));
+const id = '11111111-1111-4111-8111-111111111111';
+const item = { id,name:'owned.json',path:'source/owned.json',kind:'photo_manifest' as const,sha256:'A'.repeat(43),size:'1' };
+beforeEach(() => {
+  jest.clearAllMocks(); jest.mocked(smb.status).mockResolvedValue({ supported:true,configured:true,enabled:true,running:false });
+  jest.mocked(smbBackups.list).mockResolvedValue({ targetId:'A'.repeat(43),items:[item],hasMore:false,canRestoreFiles:true,canRestorePhotos:true });
+});
+it('cancels a Photos restore on foreground loss and ignores its late success',async () => {
+  let listener: (state: AppStateStatus) => void = () => undefined;
+  const spy = jest.spyOn(AppState,'addEventListener').mockImplementation((_event,callback) => { listener = callback; return { remove:jest.fn() }; });
+  let finish: (value: string) => void = () => undefined;
+  jest.mocked(smbBackups.restore).mockImplementation(() => new Promise(resolve => { finish = resolve; }));
+  const view = await render(<SmbItemsPanel />);
+  await waitFor(() => expect(view.getByText(i18n.t('destinations.smb.backupsTitle'))).toBeTruthy());
+  await fireEvent.press(view.getByRole('button',{ name:i18n.t('destinations.review.refresh') }));
+  await waitFor(() => expect(view.getByText(item.name)).toBeTruthy());
+  await fireEvent.press(view.getByRole('button',{ name:i18n.t('transfer.photos.restore',{ name:item.name }) }));
+  await act(async () => { listener('background'); });
+  expect(smbBackups.cancel).toHaveBeenCalledWith(expect.any(String),false);
+  await act(async () => { finish(item.name); });
+  expect(view.queryByText(i18n.t('transfer.backups.restored',{ name:item.name }))).toBeNull();
+  await view.unmount(); spy.mockRestore();
+});

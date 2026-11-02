@@ -46,26 +46,24 @@ Profil değişimi eski işin bağlamını geçersiz kılar; her kayıtta yeni pr
 
 Android gerçek Keystore/tamper/reopen ve Swift host ayrı süreç prepare/confirm/reopen testleri PASS. iOS pozitif Keychain/üretim custody doğrulaması açık; host vault-unavailable kanıtı bunları kapatmaz. [Taze dar kanıt](evidence/smb-native-publication-step16-2026-10-30/profile-owner-2026-10-31.json). SDK/ABI değişmediği için eski matris tekrarlanmadı. Owned AVD durduruldu; yeni dilim başlatılmadı.
 
-## Sıradaki dar iş
+## Sıradaki iş / güncel devam
 
-Yeni oturum: önce iOS pozitif Keychain/üretim custody kanıtı; ardından kaynak ve gerçek OS LAN admission sahiplerine SMB binding/generation bağla, tek seçili Files kaynağıyla ürün sahibini kanıtla. Profil sahibinin dar Android/host testleri tamam; platform kabulü değildir.
-Sonra kendi Completed catalog/Files restore ve restart/unknown-ACK review yolu;
-Photos için aynı hedefte yalnız kendi Completed kaynaklarını bağlayan sidecar
-publication/metadata-only/restore. Ürün UI/queue/schedule ancak bu sahiplik ve
-recovery kapıları geçince açılır. Yeni Photos mutation testi önce kendi somut
-fixture sınırlarını hazırlamalı; eski WebDAV istisnası SMB’ye genişletilmez.
+01.11 kullanıcı sırası: önce16a kapanışı, sonra16b;16b bekletildi. Güncel [somut kapanış listesi](smb-acceptance-checklist-2026-11-01.md) ve [yeni dar fixture/review kanıtı](evidence/smb-closure-step16a-2026-11-01/manifest.json) esas alınır. Kullanıcı ayrı owned LAN sunucusu olmadığını bildirdi. Üretim LAN fence'i gevşetilmez; loopback testi admitted LAN PASS sayılmaz.
 
-Tam altı ABI matrisi stabil native checkpointte bir kez; sıradaki küçük değişimde
-yalnız etkilenen kontrol. Düzeltilmiş D8 onaylıdır; yeni karar yoksa tekrar onay isteme. 16b SFTP ve16c FTPS,
-12/13/15/20/21 platform/görsel/a11y/signing/fiziksel kapıları açık kalır.
+İlk route/Keychain diliminden sonra Files generation, own catalog/readonly staging, Android Files restore/keep-both ve ayrı Photos publication/import katmanı eklendi. Açıkça onaylanan exact Android Photos fixture metadata-only/no-reupload ve restore/no duplicate/recovery testinde PASS. Ayrı native queue/run/schedule sınıfları ve kalıcı retry/CAS kanıtı; altı release ABI export/Android16KB hizalama ve geçici iOS XCFramework paketi hazır. Ayrıntılı gerçek kapsam ve sınırlar [tek grup kanıtında](evidence/smb-native-publication-step16-2026-10-30/sources-catalog-read-2026-10-31.json).
 
-## Dar tekrar komutları
+**Ürün bağlantısı uygulandı;16a tam kabul/varsayılan aktivasyon açık.** 31.10 kullanıcı kararıyla SMB kendi `smb_enabled` opt-in tablosunda kalır; generation/job fence aynı SMB veritabanındadır. Claude'un dalındaki ortak `backup_destination` migration'ı beklenmez/kullanılmaz; bu dal tablo/CHECK/user_version değiştirmez. Ortak tabloya taşıma ayrı kullanıcı kararıdır.
 
-Owned Samba ledger/container doğrulanmış ve çalışıyor olmalı. Android runner
-yalnız zaten açık KlodaWebDavStep15/emulator-5584 kabul eder; AVD oluşturmaz veya
-sıfırlamaz. `tools/check-storage-native.mjs aarch64-linux-android` çıktısı
-`KLODA_STORAGE_CHECK_OUTPUT=/tmp/kloda-smb16-adopt-cross` altında hazırlanır.
-`tools/test-android-smb-publication.py` bu kütüphaneyi yalnız test APK asset'ine
-kopyalar; ürün kütüphane yüklemesi değildir. iOS runner host Swift'tir, Simulator
-veya üretim signing kanıtı değildir. Araçlar: `tools/test-storage-native.mjs`,
-`tools/test-ios-smb-publication.py`, `tools/test-android-smb-publication.py`.
+Native Expo/JS hedef formu ve kayıtlı hedef yönetimi, run/pause/sayaç/retry, own katalog/restore/review, Android JobService2706/2707+boot/settings/global pause ve iOS BG kaydı bağlıdır. Varsayılan build desteği kapalı; yalnız açık native build opt-in etkinleştirir. Kullanıcı ayrıca hedefi kaydedip etkinleştirmeden yedek işi oluşmaz. Profil/opt-in açma kontrolü ve generation/opt-in kapatma tek SMB transaction içindedir.
+
+Mobil27 paket/175test+tsc+lint PASS. Paketlenmiş release Rust üzerinden disposable Android gerçek OS JobService/lease+SAF+SMB Files/sayaç/sonraki dispatch/disable PASS. Kapatma UPDATE'ine SQLite hata enjeksiyonu generation+enabled atomik rollback'i doğruladı. Gerçek Expo/Pods ile SMB etkin arm64 Simulator uygulama derleme+link PASS. iOS host source/restore/Photos/run/CAS/foreground concurrency PASS; ortak pause politikası ilk iki işlem hata verse de tüm durdurma işlemlerini çağırır ve yeni otomatik işleri geçici fence ile engeller. Son ayrı aynı-agent inceleme bağımsız review değildir. Native Rust davranışı değişmediği için altı release ABI matrisi tekrarlanmadı.
+
+Gerçek iOS admitted LAN/bookmark/PhotoKit runtime, üretim signing/device custody, bağımsız review ve12/20/21 görsel/a11y/perf/fiziksel kapıları açık. Android exact Photos onayı iOS'a/fiziksele genişlemez. Sonraki kabul fixture'ı bu sınırlar içinde hazırlanmalıdır; geçmiş host/derleme kanıtı gerçek iOS aktarım kabulü sayılmaz.16b/16c başlatılmadı. Owned AVD+Samba durduruldu; veriler/katmanlar retained.
+
+## Opt-in paketleme ve dar tekrar komutları
+
+Varsayılan Android `BuildConfig.KLODA_SMB_NATIVE=false`; iOS flag yokken yalnız desteklenmiyor durumu döner. Android Gradle için `-PklodaSmbNative=true`, `buildStorageNative` ile dört doğrulanmış release ABI'yi paketler. iOS önce repo kökünde `node tools/build-storage-native.mjs ios`, ardından `apps/mobile/ios` altında `KLODA_SMB_NATIVE=1 pod install --no-repo-update`: doğrulanmış device+arm64 Simulator XCFramework ve compilation flag bağlanır. `KLODA_STORAGE_CHECK_OUTPUT=/tmp/kloda-smb16-release` mevcut doğrulanmış build cache'ini kullanır. Generated paketler Git'e eklenmez. Bu opt-in üretim kabulü veya signing izni değildir.
+
+Owned Samba ledger/container doğrulanmış ve çalışıyor olmalı; Android runner yalnız zaten açık KlodaWebDavStep15/emulator-5584 kabul eder, AVD oluşturmaz/sıfırlamaz. `JAVA_HOME=/Library/Java/JavaVirtualMachines/openjdk-17.jdk/Contents/Home KLODA_STORAGE_CHECK_OUTPUT=/tmp/kloda-smb16-release python3 tools/test-android-smb-publication.py --product-native --release-candidate` gerçek paketlenmiş kütüphane/factory/OS Files yolunu kullanır; Photos mutate etmez. Photos yalnız ayrı açık onaylı `--photos-owned-fixture` kapsamındadır.
+
+`python3 tools/test-ios-smb-sources.py --contracts-only` host kaynak/restore/Photos/run/CAS/pause testleri; `--expo-modules` ayrıca gerçek kurulu Expo/Pods üzerinden tam Swift typecheck'tir. Bunlar gerçek iOS bookmark/PhotoKit runtime kabulü değildir. SMB etkin Pods kurulumundan sonra `apps/mobile/ios` altında `xcodebuild -workspace KlodaSecurePhotosSync.xcworkspace -scheme KlodaSecurePhotosSync -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/kloda-smb-product-ios-build ARCHS=arm64 ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO` gerçek ürün derleme/link komutudur; uygulama başlatmaz veya cihazı imzalamaz. Kalıcı toplu native UI capture script'i hâlâ bekler.

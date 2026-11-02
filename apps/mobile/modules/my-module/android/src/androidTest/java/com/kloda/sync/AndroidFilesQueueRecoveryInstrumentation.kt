@@ -23,7 +23,7 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
   }
 
   override fun onStart() {
-    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore", "smb-files", "smb-profile", "cloud18-nextcloud", "cloud18-destination", "cloud18-oauth")) {
+    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore", "smb-files", "smb-product", "smb-photos-owned", "smb-profile", "sftp-files", "sftp-sources", "sftp-photos-owned", "sftp-product", "cloud18-nextcloud", "cloud18-destination", "cloud18-oauth")) {
       finish(Activity.RESULT_CANCELED, Bundle().apply { putString("stream", "Explicit scope required: local-files, media-fixture or webdav-journal\n") })
       return
     }
@@ -47,6 +47,27 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
         sendStatus(0, Bundle().apply { putString("stream", "START $name\n") })
         check()
         sendStatus(0, Bundle().apply { putString("stream", "PASS $name\n") })
+      }
+      if (scope == "sftp-files" || scope == "sftp-sources") {
+        if (scope == "sftp-files") {
+          group("sftp-owned-files") { AndroidSftpFilesChecks.run(this, scratch) }
+          group("sftp-profile-owner") { AndroidSftpProfileChecks.run(this, scratch) }
+        } else { System.loadLibrary("kloda_sftp_native") }
+        group("sftp-owned-sources") { AndroidSftpSourceChecks.run(this, scratch) }
+        group("sftp-photos-codec-authority") { AndroidSftpPhotosChecks.run(scratch) }
+        group("sftp-product-factory-service") { AndroidSftpProductChecks.run(this) }
+        group("sftp-owned-os-files") { AndroidSftpOsChecks.run(this) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "SFTP owned Files/profile/source/codec PASS\n") }); return
+      }
+      if (scope == "sftp-product") {
+        group("sftp-product-factory-service") { AndroidSftpProductChecks.run(this) }
+        group("sftp-owned-os-files") { AndroidSftpOsChecks.run(this) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "SFTP owned product/OS PASS\n") }); return
+      }
+      if (scope == "sftp-photos-owned") {
+        System.loadLibrary("kloda_sftp_native")
+        group("sftp-owned-photos-restore") { AndroidSftpPhotosRestoreChecks.run(this, IsolatedContext(targetContext, scratch)) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "SFTP owned Photos source/publication/download/restore/reopen PASS\n") }); return
       }
       if (scope == "cloud18-destination") {
         group("cloud18-destination-migration") { AndroidDestinationMigrationChecks.run(scratch) }
@@ -76,9 +97,19 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
         finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "SMB profile generations/pending-ready/native Keystore/unreadable-custody PASS; OS route/source/product/iOS positive Keychain NOT_RUN\n") })
         return
       }
-      if (scope == "smb-files") {
-        group("smb-owned-files") { AndroidSmbFilesChecks.run(this, scratch) }
-        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Owned SMB JNI/SQLite Files publication and conservative recovery PASS; OS route/vault/product flow/Photos NOT_RUN\n") })
+      if (scope == "smb-files" || scope == "smb-product") {
+        if (scope == "smb-product") group("smb-product-factory-service") { AndroidSmbProductChecks.run(this) }
+        group("smb-owned-files") { if (scope != "smb-product") AndroidSmbFilesChecks.run(this, scratch) }
+        group("smb-owned-sources") { AndroidSmbSourceChecks.run(this, scratch) }
+        group("smb-photos-codec-authority") { AndroidSmbPhotosChecks.run(scratch) }
+        if (scope == "smb-product") group("smb-owned-os-files") { AndroidSmbOsChecks.run(this) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Owned SMB JNI/SQLite/SAF/source-generation/OS-bound Files publication/reuse/keep-both/local restore and Photos codec authority PASS; media Photos/product flow/iOS/physical NOT_RUN\n") })
+        return
+      }
+      if (scope == "smb-photos-owned") {
+        group("smb-native-loader") { AndroidSmbFilesChecks.run(this, scratch) }
+        group("smb-owned-photos-restore") { AndroidSmbPhotosRestoreChecks.run(this, IsolatedContext(targetContext, scratch)) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Owned SMB MediaStore source/publication/metadata-only/receipt-bound restore/no duplicate/recovery checks PASS; iOS/product/physical NOT_RUN\n") })
         return
       }
       if (scope == "webdav-photos-restore") {

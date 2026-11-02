@@ -105,6 +105,26 @@ pub async fn publish(
     }
     snapshot.seek(SeekFrom::Start(0))?;
     receipt.admit()?;
+    if let Some((parent, _)) = job.final_path.rsplit_once('/') {
+        let mut prefix = String::new();
+        for component in parent.split('/') {
+            if !prefix.is_empty() {
+                prefix.push('/');
+            }
+            prefix.push_str(component);
+            receipt.admit()?;
+            match tree.create_directory(conn, &prefix).await {
+                Ok(()) => {}
+                Err(error) if error.kind() == smb2::ErrorKind::AlreadyExists => {}
+                Err(error) => return Err(error.into()),
+            }
+            receipt.admit()?;
+            let info = tree.stat(conn, &prefix).await?;
+            if !info.is_directory || info.attributes.0 & smb2::FileAttributes::REPARSE_POINT != 0 {
+                return Err(PublishError::InvalidInput);
+            }
+        }
+    }
     let mut writer = tree
         .create_file_writer_exclusive(conn.clone(), &staged)
         .await?;

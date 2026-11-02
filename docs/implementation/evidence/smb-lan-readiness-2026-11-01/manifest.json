@@ -1,0 +1,128 @@
+{
+  "recordedAt": "2026-11-01T00:31:09.130770+00:00",
+  "scope": "Investigate16a LAN blocker using actual production iOS route modules/native witness on owned Simulator. Metadata-only: never creates a TCP/SMB socket, releases credentials or touches Files/Photos.",
+  "status": "BLOCKED_NO_ADMITTED_CURRENT_OWNED_ENDPOINT",
+  "probe": {
+    "sourceSha256": {
+      "tools/check-ios-smb-lan-readiness.py": "33da0408bc925673f31a1d181ee21aa83ba7ad7a7a8b07cebae893b4b006c1ed",
+      "packages/pairing-native/apple/tests/IosLanReadinessMain.rs": "1fb5f7c852d52e95a94c1573d1cb67751aef35176e4e76873642db28827b1d36",
+      "packages/pairing-native/apple/IosRouteWitness.m": "877025e426a8bddb67a2a17fc22393d5902942dfa8b57aca59c2085826c8ddd0",
+      "packages/pairing-native/src/route_address.rs": "74f686a48142be65e54d5dbd1af158dc4d3f3b8d1b8e22907095eac924447034",
+      "packages/pairing-native/src/route_ios.rs": "114f5c272e692a5166c3e09b69741e888c1f8d3c00a76bad4d52d31f4affeb0a",
+      "packages/pairing-native/src/route_ios_if.rs": "9b3f764230b8ff7bd8859fb584e1d4ed7905261c6cbf40396d1acf00c86ba3ca",
+      "packages/pairing-native/src/route_ios_query.rs": "bb3eb2bfcb13a4f18229006445d74663ffad7fe91dd5b4c0994b41fe71b5db10"
+    },
+    "topology": {
+      "container": "63eff62a8d712dc571a628623276be14efc90f6533c335d5cdc1dc168eaa8127",
+      "running": true,
+      "hostMounts": false,
+      "publishedEndpoint": "127.0.0.1:27445",
+      "network": "8672723162f0b0a4f9ae611d4d3d3bcddb0db605ab0442b130307c4f3f321d11",
+      "subnet": "172.21.0.0/16",
+      "note": "Gateway is a routing metadata target, not an asserted SMB endpoint; no connection is attempted."
+    },
+    "cases": [
+      {
+        "kind": "published-loopback",
+        "peer": "127.0.0.1",
+        "livePeerClaim": false,
+        "addressSupported": false,
+        "routeOpened": false,
+        "source": null,
+        "socketOpened": false,
+        "credentialsReleased": false
+      },
+      {
+        "kind": "docker-vm-network-gateway-metadata",
+        "peer": "172.21.0.1",
+        "livePeerClaim": false,
+        "addressSupported": true,
+        "routeOpened": false,
+        "source": null,
+        "socketOpened": false,
+        "credentialsReleased": false
+      },
+      {
+        "kind": "owned-container-private-address",
+        "peer": "172.21.0.2",
+        "livePeerClaim": false,
+        "addressSupported": true,
+        "routeOpened": false,
+        "source": null,
+        "socketOpened": false,
+        "credentialsReleased": false
+      }
+    ],
+    "scope": "Production route metadata only; no SMB socket/auth, Files/Photos, OS job, network/alias/interface configuration or physical acceptance.",
+    "nativeBinarySha256": "11d634025e96aa1357ab164191256d7453ec0350b3143abb3bb3fed8099be87a"
+  },
+  "checks": {
+    "productionRoute": "Actual unmodified route_address/route_ios/route_ios_if/route_ios_query and IosRouteWitness compiled for arm64 iOS Simulator; calls Route::open/check, no connection or auth. All3 measured targets denied before any SMB socket.",
+    "targets": "Published loopback, Docker VM gateway metadata address and the actual temporarily-running owned container private address. Gateway is not asserted to be a live server. No scan or arbitrary server contact.",
+    "prefixSelfCheck": "PASS actual production prefix accepts a distinct same-prefix host and rejects loopback/self/other-subnet/network/broadcast vectors. Synthetic host vector is not real LAN acceptance.",
+    "toolchain": "PinnedRust1.99 + parent exact socket2=0.6.1/libc=0.2.177, offline resolution/build; no shipping dependency or public ABI change.",
+    "cleanup": {
+      "stoppedAt": "2026-11-01T00:29:52.308024+00:00",
+      "ownedContainer": "63eff62a8d712dc571a628623276be14efc90f6533c335d5cdc1dc168eaa8127",
+      "containerRunning": false,
+      "simulator": "497AAA0F-967E-4781-9468-3F05CA2D3D5A",
+      "simulatorState": "Shutdown",
+      "hostNetworkConfigurationChanged": false,
+      "mediaOrCredentialsUsed": false
+    },
+    "review": "Separate same-agent scope/source pass only; not independent review."
+  },
+  "virtualMachineFeasibility": {
+    "localToolsChecked": [
+      "prlctl",
+      "tart",
+      "limactl",
+      "qemu-system-aarch64",
+      "vfkit"
+    ],
+    "installedCliFound": false,
+    "appleBridgedDocs": "https://developer.apple.com/documentation/virtualization/vzbridgednetworkdeviceattachment",
+    "appleRequirement": "VZBridgedNetworkDeviceAttachment requires com.apple.vm.networking entitlement. No conclusion made about obtaining that entitlement; no bridge/VM/helper entitlement created.",
+    "status": "NOT_PROVISIONED_NOT_RUN; a legitimate separate owned bridged guest is an infrastructure option, not permission to fake route/interface metadata."
+  },
+  "limits": [
+    "This proves rejection for the current measured topology only; not universal impossibility of all Docker/VM layouts.",
+    "Does not prove SMB server reachability, encrypted upload/download, selected bookmark/provider or Photos end-to-end.",
+    "No IP alias, fake interface class/witness, host firewall/DNS/VPN/route change or LAN bind was used. Existing loopback publication preserved.",
+    "No new VM/hypervisor/signing entitlement or physical test performed; independent review remains open.",
+    "16a not complete; default SMB capability disabled and16b held."
+  ],
+  "sourceSha256": {
+    "tools/check-ios-smb-lan-readiness.py": "33da0408bc925673f31a1d181ee21aa83ba7ad7a7a8b07cebae893b4b006c1ed",
+    "packages/pairing-native/apple/tests/IosLanReadinessMain.rs": "1fb5f7c852d52e95a94c1573d1cb67751aef35176e4e76873642db28827b1d36",
+    "packages/pairing-native/apple/IosRouteWitness.m": "877025e426a8bddb67a2a17fc22393d5902942dfa8b57aca59c2085826c8ddd0",
+    "packages/pairing-native/src/route_address.rs": "74f686a48142be65e54d5dbd1af158dc4d3f3b8d1b8e22907095eac924447034",
+    "packages/pairing-native/src/route_ios.rs": "114f5c272e692a5166c3e09b69741e888c1f8d3c00a76bad4d52d31f4affeb0a",
+    "packages/pairing-native/src/route_ios_if.rs": "9b3f764230b8ff7bd8859fb584e1d4ed7905261c6cbf40396d1acf00c86ba3ca",
+    "packages/pairing-native/src/route_ios_query.rs": "bb3eb2bfcb13a4f18229006445d74663ffad7fe91dd5b4c0994b41fe71b5db10"
+  },
+  "evidenceSha256": {
+    "readiness-final.log.gz": "48209c6443885076768da6aeaf436734dea3284cfdbee27b97b7e1539c5b1bdb",
+    "readiness-result.json.gz": "11935db2884ebf720708d85faa765a0598e2fe9def0ff84d92e4534b1ead1dd3",
+    "cleanup.json.gz": "e967b768205e57f665f58bcae1b489e73da548fa3cbdc5b5de94a8ee2379fcab",
+    "owned-topology.json.gz": "77bc709db72d80e4a4737593663aeb56542839838d9e44d6491113d51d5eea1a",
+    "probe-Cargo.toml.gz": "0372bf5de1b9da6fe94168b9c5e9de402163470234a4ffc30a22426242ecf172",
+    "probe-Cargo.lock.gz": "ccb9dd85502eb6a175eec7f83b00e42a205cf9bcf1ec678908b03d9f90609aa2",
+    "probe-main.rs.gz": "e8a7b052c4bb9b224668a47e83f99bdbb9e390dde231df9b867b95562b4ee463",
+    "apple-vm-docs.log.gz": "0faed1f6a4d2ac29ebf1d926c27fb1aaa52c4adabcf0467d0f5c22404c6e5873",
+    "boot.log.gz": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "published-loopback.log.gz": "2b9fdc6f3be1bc90dcae4b20ecc3133a05b8b022c0a88ae15398bccf4501e832",
+    "simulator-sign.log.gz": "6420cd6aab445cfafdd9b8692b3cf03a43363438d3726cf8968282d15a13b52c",
+    "shutdown.log.gz": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "prefix-self-check.log.gz": "57decec1c5f565ea1f3b74d33e7dc1930302985e15a8a32743741b9664ceab74",
+    "docker-vm-network-gateway-metadata.log.gz": "26c68955c4c315dc4b2293cfe946fc8fa0edb3e068aa761735e98c7aba0b8c12",
+    "prefix-contract.log.gz": "7ab0e082ecaf795faf7e1e00cc17e5d30ded45aadc693ddfb9a21178ccf67d46",
+    "owned-container-private-address.log.gz": "26c68955c4c315dc4b2293cfe946fc8fa0edb3e068aa761735e98c7aba0b8c12",
+    "native-witness-build.log.gz": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "boot-ready.log.gz": "65d9b8343a8d4e69ef7013fbdcbde548ae9afab9761ede6286cc09497e1ea1f0",
+    "simulator-build.log.gz": "29bec50afea2716ba9c130d8a794342468a5e9c683285c3ae574a69a127d06d6",
+    "lock.log.gz": "53204cf456a4567288689e5ba0622b23919a62459298fe6a4d2496cd1580ff51",
+    "initial-fixture-error.log.gz": "4e5e7d1ccdf22ed3b7357a55973cc0bb9d4fb0693ce5da4cfea295c745d6d559",
+    "initial-fixture-build-error.log.gz": "b077641405cb3c88f0f099fc19e837ff1f8fd4179dfa6bd0902f5860574766fd"
+  }
+}

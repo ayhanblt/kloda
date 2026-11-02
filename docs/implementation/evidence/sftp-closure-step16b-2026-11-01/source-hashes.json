@@ -1,0 +1,526 @@
+[
+  {
+    "path": ".gitignore",
+    "sha256": "62898ad88505e95360ba093f63c45ce5bdba296a638b9d239123aa612721a6fc"
+  },
+  {
+    "path": "apps/mobile/app.json",
+    "sha256": "dbb6614654c6d26e82fdda954434164ac24b5cdef2c0bb0101de91576a4cbb6b"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/build.gradle",
+    "sha256": "e816cf75ace5e5a30223a87bfae39e46e5482f961104c58f7b02b21c51d4fac9"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/consumer-rules.pro",
+    "sha256": "7c8edd49ececcda493140d30d928fbfe15ac586b911c606aff929ead347043b3"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt",
+    "sha256": "dbe711d454307339c4acca95bf3c7be1c07cb9d284120917e9b93c3bfb5d7de4"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidSftpFilesChecks.kt",
+    "sha256": "3e850c1621e0fcd7daa2c39fa24d2c870d9263bbeec4ef87e6e381f9434741e0"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidSftpOsChecks.kt",
+    "sha256": "e005ada9743efe8ae6d3c37bb3bb419bcfc8d13ed02f4132c886c4c3614c5e80"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidSftpPhotosChecks.kt",
+    "sha256": "99295b8b0e058ce92c402e5924a137e1bbabe0751c42e386df84c9ac9432d847"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidSftpPhotosRestoreChecks.kt",
+    "sha256": "5ae59c79d9dcf7cc9d19163bae2e073182b8e0e6600b1f022d6b46ecc8ff219b"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidSftpProductChecks.kt",
+    "sha256": "1559f9cb3fc6f4f7500d67c499248222420b4de2fd2a6116fa5eeaf8f0a763be"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidSftpProfileChecks.kt",
+    "sha256": "e3df56170f23af048c07090f5537ae1d354d95291e839b7dfd4ac70cfc3383f5"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidSftpSourceChecks.kt",
+    "sha256": "176154cf705067ad914e28e65d72991706d514f942bb43f60d9e57b3572b980c"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/AndroidManifest.xml",
+    "sha256": "57e713c12b0a81b51b7de6b346aae0d731334f555bea6eeb08e63603d4aa19ce"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupReceiver.kt",
+    "sha256": "c505142aa29f076d1d2f1d06fbdf211858d3283975a2595cc3c0c99fdec13ea1"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt",
+    "sha256": "f452150f59ece6342dd2166ce7591d192204b2c2b7edc9e8de632ba8f25ad53e"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesSnapshots.kt",
+    "sha256": "fc2f6fe10f253a133ce60fcb19a84bf15228ba53da8b45133276f8ba5d64cf4f"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpBackups.kt",
+    "sha256": "79f507b11c772e2c933fc2e1d9240dc3dfc420a2ff657eb45c02e55bfa9e3ef6"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpCopyRequests.kt",
+    "sha256": "3dcec4beb61f6462996ba693bbca1b4f401c996cd925c998832f461ed1f79d2d"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpDownload.kt",
+    "sha256": "a886988f68eb8525d3d53991433e91ebf9f67e035acd07af2a4c78ebe1fb8298"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpFiles.kt",
+    "sha256": "5be7564621957a7c8a9c099e883fa29be07bab4bc755b95618a3713fadcc6bbc"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpFilesRestore.kt",
+    "sha256": "8754f1c2a490b4994c8fdc06aa61dca64328f76257e6feba14317a7a1a492bfa"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpJob.kt",
+    "sha256": "2ea3775dc7362915950cd890990a58d16633e5d00bbb9e8750ae7e7fac53a782"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpJournal.kt",
+    "sha256": "1920d12fc6f669860a147028312f35b7c30deac4deda191e3704a230f8910ba1"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpLan.kt",
+    "sha256": "73c4c73040e5c1686d01e66d66eb90ee626a8132b6e4f0d4f3241c9e48e05c8a"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpPhotos.kt",
+    "sha256": "7d8dcf8e8ffe5f76237ac9fcca939b6365e6f61dad0ba06cbe3c2ae3d1ae9bbe"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpPhotosImport.kt",
+    "sha256": "8586a6b5c24b5ac5f3abba86ecce37f6ecade14161e7c880fa9ed4f205716733"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpPhotosJournal.kt",
+    "sha256": "a8b2fa44fc7e40d0d87e83831a0d4c127715b173515428969148c8312caed631"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpPhotosRestore.kt",
+    "sha256": "cb3f458cdea50adc93d74c3e49607a8d0eda4736aa92522abb9e90d459e49872"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpPhotosState.kt",
+    "sha256": "719fe53ab038c11eb712a8fa136e1174b683405c5984a9b05726dd217b9b673f"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpProfile.kt",
+    "sha256": "3cad676ad7c557802f198101208f711f0c646e4eb615d24b78cab8e260445d1c"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpProfiles.kt",
+    "sha256": "e1906cb6477141807c4bc032e981e80df67cd41b3c922fa49b2244581ed24c4c"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpPublication.kt",
+    "sha256": "6f46bb24907e60ae0f56097362a2500b09c0af99e62b7eb156dbdfd5b3305e89"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpPublisher.kt",
+    "sha256": "69917dfb068f61edc1486787e9c99d96e06d2b623da496d85026600556369484"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpQueue.kt",
+    "sha256": "efe66493d8fdda854e291f39f67f5cc114bdf1ac9bc893a6a2a1f7357084a425"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpRestoreJournal.kt",
+    "sha256": "03a6a7eaea5736c42f8bbe9852683d814e7590e6aed7b673e757507a76bb4a2f"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpRestoreTask.kt",
+    "sha256": "749a4cfa14bcf50396ed1fab79165cd5dc69f62234fa88eee28f157149b591a7"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpReview.kt",
+    "sha256": "f26e64390f8d08056eae5d6445894947c356d45b10f383412a09f3a1b0a44dd6"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpReviewEntries.kt",
+    "sha256": "ecba9b516893b01b28219181c066c55d6f6162207fbdacdef15d1f9f95ca9df3"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpRuns.kt",
+    "sha256": "6bf5bbc89a3de76f9b4813ced07f98d5580df000afc07dd5a346bf37e63e028e"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpRuntime.kt",
+    "sha256": "af8372832d0811d5bbe20346a66f3bba93d813fc09ca1a5c4722901cd53d0682"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpSchedule.kt",
+    "sha256": "7877fcaaad77acd9e0e4cd0fe18a0ac6283d3286d75ebb7e800650f922455503"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpScheduler.kt",
+    "sha256": "313d22006104d0b5655d31de74d137a443de5390fa1c2feba53194c4ff1678db"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpSources.kt",
+    "sha256": "d7b9532f9e48102dcebf0c75a595f90bc679137856ffa98ab0862f27cfe69f4c"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpVault.kt",
+    "sha256": "736381f2fe6adac4ee6873e5e00469334b6c35a7fb47c7729d8c732f18ce3293"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSftpModule.kt",
+    "sha256": "941b957c94dddae99d765a129c926ff87756d4581c4c3d9083b80d94003fcd9c"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt",
+    "sha256": "5fbdbbfa35b958ad5cc41b73b1abfcad4100d371d824ed1fbe4d3f4f44c706b0"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/SftpPhotoManifestCodec.kt",
+    "sha256": "3441689fc35ad12931968adf5fc57b83a151434fd99f70d4e5cb48cdb13e6c29"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/SftpRun.kt",
+    "sha256": "2e9d03ee0f3e1baae3e9693f5535f382ed6cb8c8b99e478c5bcf7927663a12b2"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/expo-module.config.json",
+    "sha256": "beb4a65c08c0f481e3c96bca67b19cf4ff93321151e6762beec95834cc754787"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosAutomaticCoordinator.swift",
+    "sha256": "24b189c9e74aeeb6507d77aafebb8e792293abf83cb439aed3260bd21686a3d1"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosAutomaticSubscriber.swift",
+    "sha256": "c203a27f2174b0f5cd5c706c8444ccbd3324c0533fae76abf843db9fa69fb029"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosFilesSnapshot.swift",
+    "sha256": "055ac7e386b12b73226da3559d969d53a62067cf8a2fba44f17908b4fa412542"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpAutomaticCoordinator.swift",
+    "sha256": "b4966089837499d820284b22c5e04c193cca68ace9c33683230c0430eb4a71c9"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpBackups.swift",
+    "sha256": "f2e3e388ea0928e730c8bae950c07ace72770e834a36323ebd9da351d985b329"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpContext.swift",
+    "sha256": "609013c37b645e2f773b4a93089c5a9442f27ba4a9d3479b220dff661bb8f1d7"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpCopyRequests.swift",
+    "sha256": "2b66411e95a57178f1ca448f94557686f4e83331ac6ecb4fe93d63cdca972940"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpDownload.swift",
+    "sha256": "97a2806ee4d1d0b4ae1e593c4507880b3a9e2b4601a371da8480b753b28bd1e2"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpFiles.swift",
+    "sha256": "cabd09b185cb16ee3a2d893cc9820792fba497784f033a1659325fcfd71638e6"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpFilesRestore.swift",
+    "sha256": "7d0bcd9a7f2c8dc1091380034207ba7b59a015d9661e6c39392a493c4f1a377d"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpIssues.swift",
+    "sha256": "bd3861b08b5d37043d9eb99d834d0a83294c22b789f1a50d3eb2b86a66323713"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpJournal.swift",
+    "sha256": "7bea5d8029b9a79e9a803a72ecce97d0b87adee83aef8860be908f5ae6b4c792"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpLan.swift",
+    "sha256": "1813efcb3abd589882e5f50555dccdaf21465dafed5feed5f71ecb56618ab3c6"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpPhotoManifest.swift",
+    "sha256": "b79540779189524d3f19c647b06108d16471ecea19d99fe0e0b1ad0f70966a93"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpPhotos.swift",
+    "sha256": "2cabb706e5945835223e8aa6a330c37074731292153aafc528c9f8c3e7beac7f"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpPhotosImport.swift",
+    "sha256": "8619b3ee8b97d34a99592973f5a91aab2ef84b8b875b23428a52ad6823a1bd09"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpPhotosJournal.swift",
+    "sha256": "5039a33f2177b6b22b84403945582523aa832daa2a095733f4eed45e0fedfb3c"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpPhotosRestore.swift",
+    "sha256": "70ef99c6f3061eac3b6645e580d424dfab91c3a9db44f0e26ecb94d7f4b694af"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpPhotosState.swift",
+    "sha256": "7703e9922f5de13ea5826668c0604fdf284804311bb526440e4ec7bb4fdc9aed"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpProfile.swift",
+    "sha256": "47725080855fb41464e4b163e1c2ddd037ad08277280170b0671089215c82373"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpProfiles.swift",
+    "sha256": "9e24cde7643295965e797432ee93732b78ab1b03623f222628797afc301ada85"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpPublication.swift",
+    "sha256": "179019a3a917044ff4aed562932e99785a518c3424c0316d0564ab91cd88abe4"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpPublisher.swift",
+    "sha256": "313d4a4f624ff0dcc50bd6ad799645b493160630677bba9365322d4be66e5f01"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpQueue.swift",
+    "sha256": "c17e2ce35b1a0d15d5790c1da2240ebf991dd9af69a609d137a0fd86c2795dde"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpRestoreJournal.swift",
+    "sha256": "50ee7c0073ebb69e71fe2436a374b5e8ba10ba1819da34381a1399e0ca22ede3"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpReview.swift",
+    "sha256": "adeb76515183d458d23748dcf66936df451a06b03bcdb8c3931099d997feadbb"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpReviewEntries.swift",
+    "sha256": "25a214daf0ba9b9560c84bfb027a6fb3bcc0ce83a9a67640f8f5cc679b0d51b7"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpRuns.swift",
+    "sha256": "4bc781a05db32366fb318382b53189c657fd08bd044c728e6364fca546a6c269"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpSchedule.swift",
+    "sha256": "6d96272d22bdda520affd5d95eba7648ca7b95aeb518607f6289b4574979a0ef"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpSources.swift",
+    "sha256": "143e7f2e8f71cf2e8d0428aea1de99b112b989a0db480bff5e0d7aa8a5f83d94"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpUi.swift",
+    "sha256": "26b6ed4b4de63cca2d19b946815e5d6270028a08ca1c2b728b7cb4791092c8e2"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosSftpVault.swift",
+    "sha256": "f0cadd2cc6af4b1a1e07c4778ba6f45b524ba728270b5933d661c3aeeaa671c6"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/IosWebDavContext.swift",
+    "sha256": "8684db57c7782dda2de591468bfd663d58ac460264d8fe0313ac633248be5e67"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/KlodaSftpModule.swift",
+    "sha256": "63244f6dea7d99033b5fefc93f44467a73aac133203c00c6e26a771aa0511ec6"
+  },
+  {
+    "path": "apps/mobile/modules/my-module/ios/KlodaSyncRuntime.podspec",
+    "sha256": "1d3f4b116851815ec26d7107e66cc76b0668e3c2d0b7151c19566631e62b08fa"
+  },
+  {
+    "path": "apps/mobile/src/app/App.spec.tsx",
+    "sha256": "25468e39659272d815bf55482e93cbb1e2df76c81eb643de47836df815b6ba9d"
+  },
+  {
+    "path": "apps/mobile/src/app/App.tsx",
+    "sha256": "f724e6c89b5aae210cebcecdbf9e949c0d1d738f8c6da071c908599b3b03b43d"
+  },
+  {
+    "path": "apps/mobile/src/features/backup-setup/model/use-sftp-backup.ts",
+    "sha256": "2d673e73d38d06d106df29dcc4ee1dcdf40fa11743da46bf0df8c513a9fafd0f"
+  },
+  {
+    "path": "apps/mobile/src/features/file-transfer/model/use-sftp-items.ts",
+    "sha256": "9cf429208c24ef9aa5c1da44075c4ebca3646246c8a5f07cf383d6504c97bc05"
+  },
+  {
+    "path": "apps/mobile/src/pages/activity/ui/activity-page.tsx",
+    "sha256": "40b962235ab61ee2a958494409eb5869e13c62abc159ece39877595968c50c45"
+  },
+  {
+    "path": "apps/mobile/src/pages/activity/ui/sftp-items-panel.spec.tsx",
+    "sha256": "1812c9c35ca988f263b26360258de620537d0d4e255721a0263f0d6cc92c293a"
+  },
+  {
+    "path": "apps/mobile/src/pages/activity/ui/sftp-items-panel.tsx",
+    "sha256": "fdb046b37f3166cdfbbcf4070ced63bb5cfbf5a2f9ff87ea5e0243e4e7a60107"
+  },
+  {
+    "path": "apps/mobile/src/pages/connections/ui/connections-page.tsx",
+    "sha256": "18f00923c1f28ddb106fbb184a6372bb14f940e6035c4e6861633e72b8ca3554"
+  },
+  {
+    "path": "apps/mobile/src/pages/connections/ui/provider-page.tsx",
+    "sha256": "3741c3618da628b79243f34857b941f11447af4f495fb2dcd7d7a62bee096855"
+  },
+  {
+    "path": "apps/mobile/src/pages/connections/ui/sftp-page.spec.tsx",
+    "sha256": "65ff03ed2ceeee3095bfb68e178a5bd502251d5b4f307904b6be1ba418234e3b"
+  },
+  {
+    "path": "apps/mobile/src/pages/connections/ui/sftp-page.tsx",
+    "sha256": "6276db21abf46ce1e25b81e2a91139b99234287ffc0683863c1935c08d4cef64"
+  },
+  {
+    "path": "apps/mobile/src/shared/api/sftp-backups.ts",
+    "sha256": "87ea905d0cfd3b12fa29b0643fc55ed2317e036296caeb83efc1bdb2da43e4bb"
+  },
+  {
+    "path": "apps/mobile/src/shared/api/sftp.spec.ts",
+    "sha256": "08edab901c3ca245a554e8d8d50c42be9eefe1a2e032c2dff31941f4736d4624"
+  },
+  {
+    "path": "apps/mobile/src/shared/api/sftp.ts",
+    "sha256": "5095bd59e67454ca69ca0668e6dc82d55d5fcd84a52949bfe6c8fcce7f5b2226"
+  },
+  {
+    "path": "apps/mobile/src/shared/i18n/locales/de.json",
+    "sha256": "9ed624538f78105a210152c54da51f73b3c52043f86e359b80aa4f4377ec6636"
+  },
+  {
+    "path": "apps/mobile/src/shared/i18n/locales/en.json",
+    "sha256": "7acd8781e0e496f67d5d6665bdf41550a8250071a30faab1b940e004e9c5e520"
+  },
+  {
+    "path": "apps/mobile/src/shared/i18n/locales/tr.json",
+    "sha256": "8b0d5f2b68940d310dfd78dd4fd7ad125fd385763aeaf487d822f512ecc7ca7e"
+  },
+  {
+    "path": "packages/sftp-native/Cargo.lock",
+    "sha256": "e7adefb42880618f0e03aa07f97c52fabac8bbd1f9a4186d13d887bcfe951389"
+  },
+  {
+    "path": "packages/sftp-native/Cargo.toml",
+    "sha256": "1ac5723070799c56ee1127e62e666f6c1488f2cd7c5b6abc6736e09359130b09"
+  },
+  {
+    "path": "packages/sftp-native/README.md",
+    "sha256": "f630dd04a0d69d67753d498eb1d816d2016c98555088f000ef8f5f69da286341"
+  },
+  {
+    "path": "packages/sftp-native/THIRD_PARTY_NOTICES.md",
+    "sha256": "e35179d6192ab058f6117d603463eaf6b87fe803354b1386caee9a3d3cfb60aa"
+  },
+  {
+    "path": "packages/sftp-native/apple/tests/IosSftpPhotosChecks.swift",
+    "sha256": "a5d62989aaefa5aa70146cab95085e374f53bf7577be6ba2caf8219b0d0b0301"
+  },
+  {
+    "path": "packages/sftp-native/apple/tests/IosSftpProfileChecks.swift",
+    "sha256": "5e26529a6a9fbed94533091846a256a1746b706979c37172558a667dd18ddaf9"
+  },
+  {
+    "path": "packages/sftp-native/apple/tests/IosSftpPublicationChecks.swift",
+    "sha256": "328f6fdf7a1907566d0c41c8b03b4c58cdefb282f78fd0255cf5b5986b4e2265"
+  },
+  {
+    "path": "packages/sftp-native/apple/tests/IosSftpRestoreChecks.swift",
+    "sha256": "426e452c840417e33eb4f21af16619e9c7f2fd573544c93ebc6681babeb1c5db"
+  },
+  {
+    "path": "packages/sftp-native/apple/tests/IosSftpSourcesChecks.swift",
+    "sha256": "4b5ef3ed43f49b045710a6912ce7073ab93e186cedfb29f8bab8e6afa35613ab"
+  },
+  {
+    "path": "packages/sftp-native/apple/tests/IosSftpWindowsFilesApp.swift",
+    "sha256": "500435ecd1a327fd4ea04ed80a31e8a39076cde93a5dd96b4447de2a2bb96a54"
+  },
+  {
+    "path": "packages/sftp-native/apple/tests/IosSftpWindowsPhotosApp.swift",
+    "sha256": "da2b588474ca04368330c17d79d06c0db6c1566ea178ba5b421afad06f74f65b"
+  },
+  {
+    "path": "packages/sftp-native/build.rs",
+    "sha256": "81b27e03f076d0fad70fd1a2facd2afaeb08bedd562f4ff7fb96ba0445b40f2e"
+  },
+  {
+    "path": "packages/sftp-native/dependency-inventory.json",
+    "sha256": "d439d50b2e5ad4c56fbd383daca4bd091091269a4400e85f9de014c856a3a675"
+  },
+  {
+    "path": "packages/sftp-native/fixtures/sftp-photo-v1.json",
+    "sha256": "88b11db76936d1b17228a84c1d75dbb21fe811aaebd3c316bcc3fa2d67e807e5"
+  },
+  {
+    "path": "packages/sftp-native/include/kloda_sftp.h",
+    "sha256": "74707a256ec6a93ab7fb7757ae09b5fc25832328aecad6edfc726391d27c186a"
+  },
+  {
+    "path": "packages/sftp-native/src/android_jni.rs",
+    "sha256": "957bbdcbb34a8c6d6ef778bfeadaef5a9f696b26d4caee900bc7b2956fe2627f"
+  },
+  {
+    "path": "packages/sftp-native/src/bridge.rs",
+    "sha256": "38b665d7680d8620eb264611694a1ebfa6a56c5636de5cd04d8468764d85f971"
+  },
+  {
+    "path": "packages/sftp-native/src/lib.rs",
+    "sha256": "c0e84308c128dcb2d6da3cc1a6aa9365d35ed38fc040e5ff34b2f5eb2676a9ad"
+  },
+  {
+    "path": "packages/sftp-native/src/publication.rs",
+    "sha256": "aaa62fe76efc96dbb4fd0afe80bb7395c404b3bb30016255c857adec29812741"
+  },
+  {
+    "path": "packages/sftp-native/src/request.rs",
+    "sha256": "9f380bb25215640a75d8283d5a4a74ed7d5aceb9f863c63c612d522a6b1a29aa"
+  },
+  {
+    "path": "packages/sftp-native/src/session.rs",
+    "sha256": "81fe0e25b7058ec884d6bbd146471d64655e6b5624e4dbe0b01d1225869b36d5"
+  },
+  {
+    "path": "tools/build-ios-sftp-windows-fixture.py",
+    "sha256": "12329252fc40f4f4d476f6231444d005e2d4a80a63b18deaefab4b1a5bb91e76"
+  },
+  {
+    "path": "tools/build-sftp-native.mjs",
+    "sha256": "2dbb7cc4803df4cf382857a4fb4d378026911d01b53eabf6edd821dabec5eb9e"
+  },
+  {
+    "path": "tools/check-sftp-native.mjs",
+    "sha256": "0c42e0b4c14c2608906cebf0c57b7e5cb26c22f8e7c4dd26990813abe80ffff0"
+  },
+  {
+    "path": "tools/cleanup-ios-sftp-fixture.py",
+    "sha256": "4c70f9a776614dc0b491050f9726cbdbece9c3aef95c0b8e39ee8da3752fa8c6"
+  },
+  {
+    "path": "tools/test-android-sftp.py",
+    "sha256": "f3d5ca1f38ebdd4e753d1a21194f7713aeffb33ce162c95212d3eda792ef9a1e"
+  },
+  {
+    "path": "tools/test-ios-automatic-admission.py",
+    "sha256": "051ee13e507e0265f4ec16d9135607d72e93b34381f3e8beeae4519a151a667c"
+  },
+  {
+    "path": "tools/test-ios-automatic-unconfigured.py",
+    "sha256": "dcb79c38d524849edc1abc54d00d9bb5790eb6272b918d053438c31d70bdfd27"
+  },
+  {
+    "path": "tools/test-ios-sftp-contracts.py",
+    "sha256": "5a7e03850819d3ba534f2d40ff6fc5c202b35b02dafb6cd16b17474fb0d29a5f"
+  },
+  {
+    "path": "tools/test-sftp-bound.py",
+    "sha256": "e545cb4cf7748a48ffe6553f6a5f7d2ffc310a600e59ac55f1f07bcf231b2ad4"
+  }
+]

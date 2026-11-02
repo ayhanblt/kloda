@@ -1,0 +1,4 @@
+FROM kloda-smb16-owned:probe
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends openssh-server && rm -rf /var/lib/apt/lists/* /etc/ssh/ssh_host_* && useradd -m -s /bin/sh owned-sftp && echo "owned-sftp:owned-disposable-fixture" | chpasswd && mkdir -p /run/sshd
+COPY sshd_config /etc/ssh/sshd_config
+CMD ["/bin/sh", "-c", "ssh-keygen -q -t ed25519 -N '' -f /etc/ssh/ssh_host_ed25519_key && exec /usr/sbin/sshd -D -e"]

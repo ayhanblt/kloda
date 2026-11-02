@@ -1,0 +1,34 @@
+{
+  "framework": "/tmp/kloda-smb16-release/package-43rs7b91/KlodaStorageNative.xcframework",
+  "slices": [
+    {
+      "BinaryPath": "libkloda_storage_native.a",
+      "HeadersPath": "Headers",
+      "LibraryIdentifier": "ios-arm64",
+      "LibraryPath": "libkloda_storage_native.a",
+      "SupportedArchitectures": [
+        "arm64"
+      ],
+      "SupportedPlatform": "ios"
+    },
+    {
+      "BinaryPath": "libkloda_storage_native.a",
+      "HeadersPath": "Headers",
+      "LibraryIdentifier": "ios-arm64-simulator",
+      "LibraryPath": "libkloda_storage_native.a",
+      "SupportedArchitectures": [
+        "arm64"
+      ],
+      "SupportedPlatform": "ios",
+      "SupportedPlatformVariant": "simulator"
+    }
+  ],
+  "files": {
+    "Info.plist": "94a4b3bedc8491866a6d94b5b955f733421c1ab0301110baf66aa6093875f976",
+    "ios-arm64-simulator/libkloda_storage_native.a": "bd2b9dfeb992a7bc8a0688d83629c3904ab8c54d4756340966c3213faad984e2",
+    "ios-arm64/libkloda_storage_native.a": "aed0e9b1b37cd9c273300de762af617c7e181f0673193960a2d6fe0956435b66",
+    "ios-arm64/Headers/kloda_smb.h": "a3f7b739b016b5a39abeb49717f70632e31ecebb594250cd20921ecb6150dac4",
+    "ios-arm64-simulator/Headers/kloda_smb.h": "a3f7b739b016b5a39abeb49717f70632e31ecebb594250cd20921ecb6150dac4"
+  },
+  "productWiring": "NOT_APPLIED; shared ADR0027 migration + SMB binding decision pending"
+}

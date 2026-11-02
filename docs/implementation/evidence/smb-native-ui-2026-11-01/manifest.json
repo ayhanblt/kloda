@@ -1,0 +1,90 @@
+{
+  "date": "2026-11-01",
+  "scope": "Actual SMB blank product component+MobileShell/theme/fonts/native module in isolated Simulator bundle; no configure/action/media/network transfer",
+  "result": "PASS_SCOPED",
+  "ui": {
+    "supported": true,
+    "configured": false,
+    "enabled": false,
+    "running": false,
+    "automaticErrorAbsent": true,
+    "locales": [
+      "tr",
+      "en",
+      "de"
+    ],
+    "fontLoaded": true,
+    "deLargeFontScale": 3.571,
+    "keyboardServerEditable": true,
+    "keyboardPasswordVisible": true,
+    "passwordSecureRoleAndMaskedSyntheticValue": true,
+    "nativeAxSevenFieldLabelsAndHeaderAndSaveButton": true,
+    "savePressed": false,
+    "realPasswordUsed": false
+  },
+  "automaticPreflight": {
+    "oldControl": "Both protocols touch shared journal and expose its failure before testing absent profile",
+    "fix": "Memory pause and native profile preflight precede unrelated shared journal paused read; configured pause/journal failure and vault failure still stop",
+    "sourceDerivedHostTests": [
+      "Smb-control",
+      "Smb-fixed",
+      "WebDav-control",
+      "WebDav-fixed"
+    ],
+    "realAppBuildLink": "PASS"
+  },
+  "ownJournal": {
+    "quickCheck": "ok",
+    "counts": {
+      "smb_profile": 0,
+      "smb_upload": 0,
+      "smb_run": 0,
+      "smb_enabled": 0
+    }
+  },
+  "cleanup": {
+    "appTerminated": true,
+    "simulatorShutdown": true,
+    "originalContentSize": "large",
+    "contentSizeRestored": true,
+    "temporaryEntryRemoved": true,
+    "ownedMetroGroupTerminated": true
+  },
+  "notAccepted": [
+    "VoiceOver spoken order/focus and complete accessibility audit",
+    "all screens/locales/large-text UI acceptance",
+    "production signing/custody/device/OS delivery/performance",
+    "Claude final review"
+  ],
+  "inputs": {
+    "apps/mobile/modules/my-module/ios/IosSmbAutomaticCoordinator.swift": "d641f96803b04287f9a2485a2a0c6f62ab92c0ec0636336f5926a76cb8c3453d",
+    "apps/mobile/modules/my-module/ios/IosWebDavAutomaticCoordinator.swift": "81a31ab872ed62422431cc17936ee6ffa21a724ab0e48568ada0d0608f518976",
+    "tools/test-ios-automatic-unconfigured.py": "bdfbd82c1d9f427b5d4d153a85a0b8e6b230264fd44568cc4312c3b2b63ecf05",
+    "apps/mobile/src/pages/connections/ui/smb-page.tsx": "c4b61b5cd31ec4181846babf30cfc78ab79176e6c39c1f31b5ad4824436bfe71",
+    "apps/mobile/src/features/backup-setup/model/use-smb-backup.ts": "130eb6a746f94322a67f5a9ef84a0d0e4740379fca47045a9927059cf10694a0",
+    "apps/mobile/src/shared/api/smb.ts": "e6a59b2187eac03234d02438e7ce8d9b429cc3b42298adcca4797f2da831a7fa",
+    "apps/mobile/src/widgets/mobile-shell/ui.tsx": "adc09bba17a93e15c04bf407904d6c06bb1b8f3936ea4050b5e4f797237fabf7"
+  },
+  "artifacts": {
+    "de-large.png": "f11cd0bdd0a470f9fbdad07174d0252e96b5a19c53164acad0b32b97126f7adc",
+    "runtime.json": "21b2edb7b44ef8cbc452b74e8b7f60fddf35aee074e5991b4c73e18fbe03cfb6",
+    "captures.json": "b042aadd6b2ec0ebca25d10168f39ece1dfc766dbf36c34be9c5efd1d3d9da03",
+    "kloda-smb-ui-linked-entry.js.gz": "65d60da3cb13aa55575a8b2447b4d8014dc475cf6fd7925c4aa593b7d46b9b8f",
+    "automatic-preflight-inputs.json": "5dc892114d9a0b3b827d2a4de7cb0272fca2153aed13fbd5ec8f977814206e70",
+    "kloda-smb-ui-linked-run-fixed.py.gz": "b7ced2841d8ba18ce0dab60cf94c3c3f04435a7f9502d0ec282cc321fe15a649",
+    "de-accessibility-extra-extra-extra-large.png": "b34be028e1b6d897c9e20cd995f56dd2ffeeebdae410947539d3f515c3bada38",
+    "tr-large.png": "779c7e6e43f9b5407280e27f5ede40eb4a64b8b451e90447229013cf2cd21c51",
+    "password-keyboard.png": "bd16ef09b09711d481aab6ad021876b51ad8a6a15649da276f6d98b83d3fd089",
+    "keyboard-captures.json": "b2806f3f4c8809e6adec3a5fe2954e5b8f6216cbcb8586ff6775a549f4fdb973",
+    "cleanup.json": "9de82b7d767d50d09bce0da96f01f955e1aed17da888e3ab6d27fced5e52fcea",
+    "en-large.png": "2c52bf38359f0356a7ce333ae57a205419f4df2bb92cebc031e4692d26f0b67a",
+    "app-build-tail.log": "f1a175542f1a0285eba3b2f26a84d4445c4a543c752e4ced921b753caa00653f",
+    "WebDav-fixed-run.log": "a02ac936cd161c919d3eade7562033635b182d4280d7cc8fa012b2928a3f0a44",
+    "WebDav-control-run.log": "c71ba31803c8d02d4b09b4b1b44717f5a8624d6031072f8d8fdd72f0c01efd76",
+    "keyboard-runtime.json": "e3c3f68a1932580444bc2971296ef5aee5ccbb56ca8366869035bf09fdcca8eb",
+    "Smb-fixed-run.log": "a02ac936cd161c919d3eade7562033635b182d4280d7cc8fa012b2928a3f0a44",
+    "Smb-control-run.log": "c71ba31803c8d02d4b09b4b1b44717f5a8624d6031072f8d8fdd72f0c01efd76",
+    "kloda-smb-ui-keyboard-run.py.gz": "316872b110fe5da91e8d4604fba8d8a36eac56eaf67416b21a9d0da56a491964"
+  },
+  "runtimeRoot": "/var/folders/cm/fsyld6dn5xl1p74jcds8tc640000gn/T/kloda-smb-ui16a-linked-q_aebewt"
+}

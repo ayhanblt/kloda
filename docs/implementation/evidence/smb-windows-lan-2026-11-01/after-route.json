@@ -1,0 +1,54 @@
+{
+  "sourceSha256": {
+    "tools/check-ios-smb-lan-readiness.py": "50472c626142ced5814e8d57ee3653a361b62119332d6e4597e31269f5b45e0d",
+    "packages/pairing-native/apple/tests/IosLanReadinessMain.rs": "72a254c33c5a10e9a6b8ad9a4cbbacee98757917bc8ad14394af1d5a58703733",
+    "packages/pairing-native/apple/IosRouteWitness.m": "877025e426a8bddb67a2a17fc22393d5902942dfa8b57aca59c2085826c8ddd0",
+    "packages/pairing-native/src/route_address.rs": "74f686a48142be65e54d5dbd1af158dc4d3f3b8d1b8e22907095eac924447034",
+    "packages/pairing-native/src/route_ios.rs": "114f5c272e692a5166c3e09b69741e888c1f8d3c00a76bad4d52d31f4affeb0a",
+    "packages/pairing-native/src/route_ios_if.rs": "73ad9e0cc2562d207e3f9c7dd488feab9eb2307605fd0903b29e4e194a05593b",
+    "packages/pairing-native/src/route_ios_query.rs": "bb3eb2bfcb13a4f18229006445d74663ffad7fe91dd5b4c0994b41fe71b5db10"
+  },
+  "topology": {
+    "container": "63eff62a8d712dc571a628623276be14efc90f6533c335d5cdc1dc168eaa8127",
+    "running": false,
+    "hostMounts": false,
+    "publishedEndpoint": "127.0.0.1:27445",
+    "network": "8672723162f0b0a4f9ae611d4d3d3bcddb0db605ab0442b130307c4f3f321d11",
+    "subnet": "172.21.0.0/16",
+    "note": "Gateway is a routing metadata target, not an asserted SMB endpoint; no connection is attempted."
+  },
+  "cases": [
+    {
+      "kind": "published-loopback",
+      "peer": "127.0.0.1",
+      "livePeerClaim": false,
+      "addressSupported": false,
+      "routeOpened": false,
+      "source": null,
+      "socketOpened": false,
+      "credentialsReleased": false
+    },
+    {
+      "kind": "docker-vm-network-gateway-metadata",
+      "peer": "172.21.0.1",
+      "livePeerClaim": false,
+      "addressSupported": true,
+      "routeOpened": false,
+      "source": null,
+      "socketOpened": false,
+      "credentialsReleased": false
+    },
+    {
+      "kind": "explicit-owned-lan-peer",
+      "peer": "192.168.1.54",
+      "livePeerClaim": false,
+      "addressSupported": true,
+      "routeOpened": true,
+      "source": "192.168.1.91",
+      "socketOpened": false,
+      "credentialsReleased": false
+    }
+  ],
+  "scope": "Production route metadata only; no SMB socket/auth, Files/Photos, OS job, network/alias/interface configuration or physical acceptance.",
+  "nativeBinarySha256": "c7ccac9355fba7dbb4ac4d12e77b5472294bcac239067c9af0231903223cf8f5"
+}

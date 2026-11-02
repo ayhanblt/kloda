@@ -1,0 +1,72 @@
+{
+  "date": "2026-11-01",
+  "scope": "Windows owned empty share preparation + TCP and actual iOS metadata admission; no SMB auth/share access",
+  "server": {
+    "address": "192.168.1.54",
+    "port": 445,
+    "share": "KlodaTest16a",
+    "account": "MMHA/kloda16a",
+    "windows": "11 Pro 10.0.26300",
+    "configurationEvidence": "User-reported PowerShell output: EncryptData=True; signing/reject-unencrypted already True",
+    "passwordCollected": false
+  },
+  "results": {
+    "hostTcpConnected": true,
+    "source": "192.168.1.91",
+    "beforeRouteOpened": false,
+    "diagnosis": "Darwin AF_INET netmask sa_len=7; old shared address parser required 16 bytes",
+    "fix": "Only netmask reader zero-extends omitted IPv4 bytes and reads no bytes past sa_len; regular address parser and prefix/interface/current-route policy unchanged",
+    "hostTests": 4,
+    "negativeControl": "Old full-length reader fails short-mask regression",
+    "afterRouteOpened": true,
+    "loopbackStillRejected": true,
+    "dockerGatewayStillRejected": true,
+    "productionIosClippy": "PASS -D warnings",
+    "deviceAndSimulatorNativePackage": "PASS existing ABI symbols",
+    "smbEnabledSimulatorAppBuild": "PASS"
+  },
+  "notRun": [
+    "SMB authentication/encryption negotiation",
+    "Files selected bookmark/publication/catalog/restore/restart",
+    "full Photos source/LAN/download chain",
+    "supported product UI / production signing",
+    "Claude final security review"
+  ],
+  "cleanup": {
+    "ownedSimulatorShutdown": true,
+    "windowsShareRetainedForNextTests": true,
+    "noPasswordsOrShareWrites": true,
+    "dockerStateUnchanged": true
+  },
+  "inputs": {
+    "packages/pairing-native/src/route_ios_if.rs": "73ad9e0cc2562d207e3f9c7dd488feab9eb2307605fd0903b29e4e194a05593b",
+    "packages/pairing-native/apple/tests/IosLanReadinessMain.rs": "72a254c33c5a10e9a6b8ad9a4cbbacee98757917bc8ad14394af1d5a58703733",
+    "tools/check-ios-smb-lan-readiness.py": "50472c626142ced5814e8d57ee3653a361b62119332d6e4597e31269f5b45e0d"
+  },
+  "nativeLibraries": {
+    "apps/mobile/modules/my-module/ios/NativePairing/KlodaPairingNative.xcframework/ios-arm64-simulator/libkloda_pairing_native.a": "f25fa378af74c5f2cc302b6f2a2d9717a2abd409fcb9c62a2120d90a7069bd33",
+    "apps/mobile/modules/my-module/ios/NativePairing/KlodaPairingNative.xcframework/ios-arm64/libkloda_pairing_native.a": "8714227849981b1eef8b2da5a5cedb845057c3d1c249ab2d6fe276bf24fbe1e8"
+  },
+  "artifacts": {
+    "failure-stage-excerpt.log": "d3fc62596daa295535fe595aab74f73a1dc2f0c493e8b41df67cd0bdf096e828",
+    "production-clippy.log": "4eccb4ce5138499a7a76f1470c76e8a11ce41af55102a25fbee6bedee2be13d0",
+    "native-witness.log": "aba3ed03701d158fbe4a9eaf13aba4b68b30340180b3a8d7a5f9f390e961de35",
+    "before-route-repeat.json": "b69e95c353db14752662dcb80c688f9170f72f7ac02dcfd4c6ce26bc78d84418",
+    "host-route-tests.log": "d719f3ba9a86cf2be0132ffc43881adf458b245dbf84507f4ee5944271737709",
+    "tcp.json": "ef4f419d5b6a4d35921eae43d75b2e34100e9803933b19a93ebe6fc6ffb454c5",
+    "native-package.log": "3ba516d6f51df672f60124f129584ddbdf65b8bcc70b45461d27824652b17db9",
+    "app-build-tail.log": "41d56d0500fe0a6339fb06048b0a5f944d25562236ab126bb25b55b7a25aa8a9",
+    "netmask.patch": "107240dcaa7ed1c6a227959266f59ccca60fec1288dfba09881dbdb10d83e0bd",
+    "after-route.json": "3442f9e83310f41996006c2aafb4132f7b5600c3b70d187e306f629c4054644e",
+    "before-route.json": "fe963efa633641071f9b84488f478abc6ca27131b14243a1e85893d34596b958",
+    "negative-control.log": "53877e203b2247914fc98c5a72ecd4bf73cf76db12a699dd16a3312e099abf2d"
+  },
+  "logs": {
+    "fullAppBuild": "/tmp/kloda-windows-smb16a-app-build.log",
+    "earlierClippyAttempts": [
+      "/tmp/kloda-windows-smb16a-clippy.log",
+      "/tmp/kloda-windows-smb16a-clippy2.log"
+    ],
+    "earlierHostProbeCompileFailure": "/tmp/kloda-windows-smb16a-netmask-check.log"
+  }
+}

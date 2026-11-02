@@ -1,0 +1,13 @@
+{
+  "target": "aarch64-apple-ios-sim",
+  "release": true,
+  "artifact": "/tmp/kloda-smb16-release/aarch64-apple-ios-sim/aarch64-apple-ios-sim/release/libkloda_storage_native.a",
+  "sha256": "bd2b9dfeb992a7bc8a0688d83629c3904ab8c54d4756340966c3213faad984e2",
+  "bytes": 24138712,
+  "exports": [
+    "kloda_smb_publish",
+    "kloda_smb_publish_bound",
+    "kloda_smb_read_bound"
+  ],
+  "alignments": []
+}

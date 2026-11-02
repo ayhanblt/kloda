@@ -1,0 +1,10 @@
+[package]
+name = "kloda_sftp16b_candidate"
+version = "0.1.0"
+edition = "2024"
+publish = false
+[dependencies]
+russh = { version = "=0.65.0", default-features = false, features = ["ring"] }
+russh-sftp = "=3.0.1"
+tokio = { version = "=1.54.1", features = ["macros", "rt-multi-thread", "net", "time", "io-util"] }
+sha2 = "=0.11.1"

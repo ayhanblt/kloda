@@ -20,7 +20,7 @@ internal class AndroidWebDavPhotosRestore(private val context: Context, private 
   fun restore(id: String): Map<String, String> = AndroidSyncJournal.webdav(context).use { database ->
     check()
     val journal = AndroidWebDavJournal(database.writableDatabase)
-    val snapshots = AndroidFilesSnapshots(context, true, ::check)
+    val snapshots = AndroidFilesSnapshots(context, true, checkPaused = ::check)
     val reader = AndroidWebDavDownload(context, profile, journal, snapshots, ::check)
     download = reader
     val staged = mutableMapOf<String, FilesSnapshot>()

@@ -8,7 +8,10 @@ final class IosAutomaticCoordinator {
   private let worker = DispatchQueue(label: "com.kloda.automatic.ios")
   private var timer: DispatchSourceTimer?
   private var foreground = false
-  private var pauseBarrier = false
+  private var pauseBarrier: Bool {
+    get { IosAutomaticPause.requested }
+    set { IosAutomaticPause.requested = newValue }
+  }
   private var lastError: String?
   private var active: Execution?
   private struct Execution {
@@ -44,8 +47,7 @@ final class IosAutomaticCoordinator {
   }
   func reconcile() { worker.async { self.reconcileOnWorker() } }
   func pause() throws {
-    do { try worker.sync {
-      pauseBarrier = true
+    var actions: [() throws -> Void] = [{ [self] in try worker.sync {
       active?.lease?.cancel(); files.pause()
       timer?.cancel(); timer = nil
       BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: Self.identifier)
@@ -53,9 +55,15 @@ final class IosAutomaticCoordinator {
         let journal = try IosSyncJournal(); try journal.setAutomaticPaused(true)
         cancelActive(journal, userPause: true)
       } catch { end(false); lastError = "automatic_pause_not_saved"; throw IosAutomaticPolicy.error("automatic_pause_not_saved") }
-    } } catch { try? IosWebDavQueue.shared.pause(); throw error }
-    try IosWebDavQueue.shared.pause()
-    IosWebDavAutomaticCoordinator.shared.reconcile(allowForeground: false)
+    } }]
+#if KLODA_SMB_NATIVE
+    actions.append { defer { IosSmbAutomaticCoordinator.shared.reconcile(allowForeground: false) }; try IosSmbQueue.shared.pause() }
+#endif
+#if KLODA_SFTP_NATIVE
+    actions.append { defer { IosSftpAutomaticCoordinator.shared.reconcile(allowForeground: false) }; try IosSftpQueue.shared.pause() }
+#endif
+    actions.append { defer { IosWebDavAutomaticCoordinator.shared.reconcile(allowForeground: false) }; try IosWebDavQueue.shared.pause() }
+    try IosAutomaticPause.stop(actions)
   }
   func resume() throws {
     try worker.sync {
@@ -65,6 +73,12 @@ final class IosAutomaticCoordinator {
       try plan(journal, allowForeground: foreground)
     }
     IosWebDavAutomaticCoordinator.shared.reconcile()
+#if KLODA_SMB_NATIVE
+    IosSmbAutomaticCoordinator.shared.reconcile()
+#endif
+#if KLODA_SFTP_NATIVE
+    IosSftpAutomaticCoordinator.shared.reconcile()
+#endif
   }
   func status() throws -> [String: Any] {
     try worker.sync {

@@ -1,0 +1,8 @@
+{
+  "testProfileKeychainDeleted": true,
+  "appTerminated": true,
+  "privateAppPasswordInputRemoved": true,
+  "simulatorShutdown": true,
+  "remoteFixtureRetained": true,
+  "sourceCredentialRetainedMode600ForNextAuthorizedSmbTest": true
+}

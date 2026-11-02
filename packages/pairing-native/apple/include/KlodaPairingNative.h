@@ -28,6 +28,16 @@ char *kloda_ios_background_end(uint64_t owner, const uint8_t *lease, size_t leas
 char *kloda_ios_background_transfer(uint64_t owner, const uint8_t *record, size_t record_length,
                                    const uint8_t *json, size_t json_length, int32_t descriptor,
                                    const uint8_t *lease, size_t lease_length);
+/* Native synchronous SMB worker only; never expose to JS.
+ * Buffer, context, borrowed socket and borrowed lease remain valid only during
+ * the call. The worker must dup before handing a socket to a consuming ABI.
+ * Callback must not unwind or retain the lease. Return 0 for success.
+ * Open retains actual OS route observation until worker returns; no DNS,
+ * fallback or pairing/PC authority. Nonzero current blocks auth/Completed. */
+typedef int32_t (*KlodaIosLanWorker)(void *context, int32_t borrowed_socket, const void *borrowed_lease);
+int32_t kloda_ios_lan_with_socket(const uint8_t *address, size_t length, uint16_t port,
+                                KlodaIosLanWorker worker, void *context);
+int32_t kloda_ios_lan_current(const void *borrowed_lease);
 void kloda_ios_reply_free(char *reply);
 #ifdef __cplusplus
 }

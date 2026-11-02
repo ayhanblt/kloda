@@ -157,3 +157,19 @@ enum IosAutomaticPolicy {
     return value
   }
 }
+
+// A failed pause write must still stop every destination and fence new automatic work.
+enum IosAutomaticPause {
+  private static let lock = NSLock()
+  private static var value = false
+  static var requested: Bool {
+    get { lock.lock(); defer { lock.unlock() }; return value }
+    set { lock.lock(); value = newValue; lock.unlock() }
+  }
+  static func stop(_ actions: [() throws -> Void]) throws {
+    requested = true
+    var failure: Error?
+    for action in actions { do { try action() } catch { failure = failure ?? error } }
+    if let failure { throw failure }
+  }
+}

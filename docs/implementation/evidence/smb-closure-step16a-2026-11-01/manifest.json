@@ -1,0 +1,57 @@
+{
+  "recordedAt": "2026-11-01T00:08:48.287951+00:00",
+  "scope": "Return to16a;16b held. Exact iOS PhotoKit importer component explicitly approved and executed PASS, with separate-process reopen and receipt-owned cleanup; full16a/LAN/product activation not accepted.",
+  "userReadiness": "User explicitly reports only current Simulator/Docker; separate owned LAN SMB endpoint not available. No LAN scan or external/personal endpoint contacted.",
+  "checks": {
+    "localSimulator": "PASS actual production codec, owned private stage hash/permissions/cancellation, SMB import SQLite prepared-intent persistence. Media flag=false, no PhotoKit authorization grant or media mutation. Actual production sources linked to verified native Simulator libraries.",
+    "fixturePreparation": "PASS actual current Swift fixture/native libraries compiled and exact media component executed using recorded runtimeSourceHash; test-only requestAuthorization/assert diagnostics fix, no native engine/ABI change.",
+    "review": "Separate same-agent test-harness review/diagnosis only. Review patch/source hashes refreshed for test-only authorization/assert changes. Independent review NOT_PERFORMED.",
+    "sharedSchema": "PASS common backup_destination schema owner files unchanged; no migration/user_version modification.",
+    "fixtureCleanup": "PASS same owned bundle Photos permission reset and app terminated by continuation finally; only its asset/album cleaned; no global library reset/purge. Owned Simulator Shutdown verified.",
+    "iosPhotosComponent": "PASS actual PhotoKit one new PNG/one album; production name/MIME/byte size/hash/favorite/membership validation; identical repeat retains same receipt and no duplicate; stale-context and unknown-create rejected; actual process terminate/reopen verify PASS; exact receipt-owned IDs cleaned and both post-delete fetch counts0.0 upload rows; no fabricated SMB Completed.",
+    "permissionDiagnosis": "Initial attempts failed before importer with0 import/album/upload rows. Source diagnostics + native requestAuthorization pattern corrected test harness only; actual OS Photos prompt confirmed for exact owned bundle. Same bundle resumed only after zero-create proof, resetting only2 owned private staging inputs; exactly4 importer invocations total. Initial failures retained. System album/photo cleanup prompts explicitly approved within exact user scope."
+  },
+  "approval": {
+    "iosPhotos": "APPROVED exact component scope by user “evet testi çalıştır”01.11.2026; executed PASS within4 importer invocation bound; no full LAN/physical approval inferred.",
+    "requiredBy": "docs/implementation/smb-receipt-sidecar-decision-2026-10-30.md",
+    "exactScope": "docs/implementation/smb-ios-photo-import-owned-fixture-2026-11-01.md",
+    "physical": "NOT_AUTHORIZED; deferred21"
+  },
+  "openGates": [
+    "Actual iOS selected-bookmark/admitted LAN publication+own restore, no suitable separate endpoint available",
+    "Actual OS BG delivery, production signing/device custody",
+    "Independent security review, main-agent-only policy preserved",
+    "Native UI/a11y/performance and deferred12/20/21 physical acceptance",
+    "Full SMB Photos source publication/receipt-bound network download/import chain still lacks real admitted iOS LAN proof; component PASS is narrower."
+  ],
+  "sourceSha256": {
+    "packages/storage-native/apple/tests/IosSmbPhotoImportApp.swift": "05ba51c10710cd96ecca01261b5de5f944d052034db57626f4ee85b2b09895f8",
+    "tools/test-ios-smb-photo-import.py": "cad91b08452a8d3dace12697e18c3e41af12688495c0d64e40c26c987f20c582",
+    "docs/implementation/smb-ios-photo-import-owned-fixture-2026-11-01.md": "076057e6660c700bb6b28e055e5f01c12c532141ea483a523be944c8f8bf7045"
+  },
+  "evidenceSha256": {
+    "local-run-final.log.gz": "204dba34f76a25f675c93288bff69f31e6b5934a81e93aba4f56267f6ce23508",
+    "local-build-final.log.gz": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "local-owned-inputs.json.gz": "162f8d0029b6a99ca1d1e74181a7ba85728e11645fd8c3336e8805ba1312f969",
+    "local-result.json.gz": "3f04585111788c738e18dd952e9d70d16857cb02260af99e2f5c4e4006fd3b73",
+    "local-run-initial.log.gz": "1799ba3ee62140162c9d99136d9500d27922c94d8c9f85c3f89abd07fe6faeef",
+    "media-build-only-initial.log.gz": "54fbd311f1afc6ee60eb53987599bb99b0218b59738ead41c5448cbe698ae792",
+    "review-source-index.json": "67aec7a9aa55447a6d8ca5f5ff473667ec60a92040cac311bad5b11a1f80ef0a",
+    "review.patch.gz": "8bdb831736ee35130045f77f89c4fdac7c1bed6e2a530d968f797f7e0848d323",
+    "README.md": "8286cafc0d916e9cc0d295ea555511c6370e389ea3b3f8a32fbf081542fb6af0",
+    "media-initial-run.log.gz": "c6f9a90a8a131e9f19302e78c3936991ba5ce892e9b17a5e80c8ad3dcf214266",
+    "media-request-run.log.gz": "ee347ea33774d784161d464b05449e1b50fe940616ee2ad5a05c6a0e6510e032",
+    "media-approved-continuation.log.gz": "f5cd81bc44e88a171de18a04f82b0a06dc8b652f67d7141b36ed3a6a2a29c69f",
+    "media-permission-diagnostic.log.gz": "12526e2d8dfbeb28c19950adcf164920daee97f1586d830d9cd8a79449463fd7",
+    "media-bounded-continuation.py.gz": "e888ebc3a61a196a16da57a786777317a883aec25c404e07dba89d9b1d41aacb",
+    "media-build.log.gz": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "media-owned-inputs.json.gz": "efc0845826b9a3419391f074c9324350cefcedbd802658a962a74c036c47d733",
+    "media-approved-summary.json.gz": "70013962827a6dceb8b6983ddb4f1509daef48f7dc72dcefd1d4b9a18fa02de4",
+    "media-tcc-grant-rows.json.gz": "a3d1c191e83221a5d3cc05978e8bb04edb4847bfd1c47f840a824ee0c4352d47",
+    "media-seed-approved-result.json.gz": "a429fc1c6a8225f9fb4bc051433d43791899a44f75dbab348c7ea3ad29ccbc07",
+    "media-reopen-approved-result.json.gz": "276e69c1226fc4cfabeca34a4da5ba440181eca44fc1046d56a9b80202a3e359",
+    "media-cleanup-approved-result.json.gz": "5f1863f85637fc064862e1b9a1e600476c6d47328b828a847356001bc47f26ae",
+    "media-first-no-create-proof.json.gz": "ba3a99d85d462e85a7f207774811982dc9b89f09188e20e02947e8a7800c5a0e"
+  },
+  "runtimeSourceHash": "bed05cada4e8777f640b5f2777239b6f266da55003e66549cb6cfda2c576411f"
+}

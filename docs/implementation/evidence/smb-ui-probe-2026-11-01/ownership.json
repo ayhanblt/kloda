@@ -1,0 +1,12 @@
+{
+  "bundle": "com.kloda.fixture.smb16.ui.rebcfc3f802e046069bbe204a82a54123",
+  "simulator": "497AAA0F-967E-4781-9468-3F05CA2D3D5A",
+  "source": "/tmp/kloda-smb-product-ios-build/Build/Products/Debug-iphonesimulator/KlodaSecurePhotosSync.app",
+  "actions": [
+    "status only"
+  ],
+  "ports": [
+    18891,
+    18892
+  ]
+}

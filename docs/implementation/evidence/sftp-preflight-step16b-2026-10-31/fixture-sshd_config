@@ -1,0 +1,14 @@
+Port 22
+ListenAddress 0.0.0.0
+HostKey /etc/ssh/ssh_host_ed25519_key
+PasswordAuthentication yes
+KbdInteractiveAuthentication no
+UsePAM no
+PermitRootLogin no
+AllowUsers owned-sftp
+AllowTcpForwarding no
+X11Forwarding no
+PermitTTY no
+ForceCommand internal-sftp
+Subsystem sftp internal-sftp
+LogLevel VERBOSE

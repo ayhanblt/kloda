@@ -8,6 +8,8 @@ pub mod bridge_socket;
 pub mod paths;
 pub mod photo_manifest;
 pub mod publication;
+#[cfg(unix)]
+pub mod read_bound;
 
 use async_trait::async_trait;
 use smb2::{

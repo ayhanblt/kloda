@@ -1,0 +1,11 @@
+{
+  "manifest": "0f32f9a4-8266-4252-bbc8-859d4050b194",
+  "manifestCount": 1,
+  "mode": "seed",
+  "remoteRoot": "kloda16a-photos-58e751d5-ce03-476c-97a1-720b6b20078b",
+  "resourceCount": 1,
+  "restoreNoDuplicate": true,
+  "sourceAndImportedAssets": 2,
+  "status": "PASS",
+  "unchangedReuse": true
+}

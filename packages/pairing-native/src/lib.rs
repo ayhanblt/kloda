@@ -92,3 +92,6 @@ mod windows_publication_name;
 mod ios_background;
 #[cfg(all(feature = "ios-ffi", any(target_os = "ios", test)))]
 mod ios_bridge;
+
+#[cfg(all(feature = "ios-ffi", target_os = "ios"))]
+mod ios_lan_socket;

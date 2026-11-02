@@ -1,0 +1,21 @@
+{
+  "target": "armv7-linux-androideabi",
+  "release": true,
+  "artifact": "/tmp/kloda-smb16-release/armv7-linux-androideabi/armv7-linux-androideabi/release/libkloda_storage_native.so",
+  "sha256": "f14feed4d99c3f2cdf499a42556e55a1302bc7144184d7860a55f4aacdcb8352",
+  "bytes": 1898092,
+  "exports": [
+    "kloda_smb_publish",
+    "kloda_smb_publish_bound",
+    "kloda_smb_read_bound",
+    "Java_com_kloda_sync_SmbNativeEngine_publish",
+    "Java_com_kloda_sync_SmbNativeEngine_publishBound",
+    "Java_com_kloda_sync_SmbNativeEngine_readBound"
+  ],
+  "alignments": [
+    16384,
+    16384,
+    16384,
+    16384
+  ]
+}

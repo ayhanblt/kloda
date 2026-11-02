@@ -1,0 +1,44 @@
+{
+  "recordedAt": "2026-10-31T02:13:24.424489+00:00",
+  "scope": "Real production Swift SMB vault/profile/journal code in an isolated Simulator app; unrelated PC/DAV tables omitted exactly as in the host fixture. Product SMB remains disabled.",
+  "previousEvidence": "profile-owner-2026-10-31.json",
+  "inputs": {
+    "bundle": "com.kloda.fixture.smb16.rc0bcc833e1464c718e4e107fabb7fd1a",
+    "simulator": "497AAA0F-967E-4781-9468-3F05CA2D3D5A",
+    "inputs": {
+      "apps/mobile/modules/my-module/ios/IosSyncJournal.swift": "2aaba689218fba631dceb1a63155d143bef41cf341a18d4528836dd05b23d0e3",
+      "apps/mobile/modules/my-module/ios/IosSmbJournal.swift": "8d42dada4ab985988f7410c4eb5da3aa841e01815b3007ce712316e89b9a6fca",
+      "apps/mobile/modules/my-module/ios/IosSmbProfile.swift": "63f5dbcc3072985092e2693f29babf8715b95fa1fb728a5d0f1fea3501a21ea4",
+      "apps/mobile/modules/my-module/ios/IosSmbVault.swift": "2223590ab3f598bfed487feb6ee33f542f0a1a20baeefd69ad25651c84ab4686",
+      "apps/mobile/modules/my-module/ios/IosSmbProfiles.swift": "29c50691399a6ef14657504d71b16cfe71572f44e5ab4fbbb906cd2fd5de63b6",
+      "packages/storage-native/apple/tests/IosSmbCustodyApp.swift": "dd18bfbbc461a39cdfdb849c06be8ce32132660c46b4f9a950cc25bc74ccc0c2",
+      "tools/test-ios-smb-custody.py": "0762819eef5b0d9ecc91404c9cb78cdf99f668245a34b88fbb77e501f9fb1c59"
+    }
+  },
+  "command": "python3 tools/test-ios-smb-custody.py 497AAA0F-967E-4781-9468-3F05CA2D3D5A",
+  "checks": {
+    "build": "PASS arm64 iOS Simulator, actual production vault/profile/SQLite sources, no warnings in final build",
+    "seed": "PASS empty custody, save/capture/current, exact profile/password roundtrip, WhenUnlockedThisDeviceOnly and non-synchronizable attributes",
+    "reopen": "PASS separate process Keychain+SQLite reopen, fresh profile/credential generations, old fully-ACKed job cannot Complete, pending-before-vault crash window fails closed and explicit save recovers",
+    "tamper": "PASS malformed actual Keychain bytes block capture/save; bytes and journal context unchanged",
+    "missing": "PASS deleted only this random fixture service item; existing journal cannot capture missing custody; context unchanged",
+    "cleanup": "PASS owned Simulator booted and shut down by runner; random fixture app retained, fixture Keychain item deleted in final phase",
+    "review": "PASS separate same-agent review of the two test files and production caller/custody paths; NOT independent review"
+  },
+  "artifacts": {
+    "ios-custody-2026-10-31/tamper-result.json": "aa4d8e7eacfc0fbc674209dbcabddec4fcdd1d9ff7a23c64ae69091444eebdb4",
+    "ios-custody-2026-10-31/ownership.json": "6295909e199aa9a5f2390fd63b6c9b822a9929af83a49908aa29b83007d945c6",
+    "ios-custody-2026-10-31/reopen-result.json": "8623b5cd83f6280c0baa5cda63e0fa96b420b1a8c7178d0654e33fd6c8235918",
+    "ios-custody-2026-10-31/run.log": "82db904eef299faafc377a9fd4d30c2e17e63b475c7d5c014fc7a0e2a422250c",
+    "ios-custody-2026-10-31/seed-result.json": "62380e6a68019de2549e9caa8a2343d459577122a63bd4eaca8ae93d6507e04e",
+    "ios-custody-2026-10-31/missing-result.json": "52b952a84cf386adc969a0ff87050653763a57ab4e81043de21d2111645dcd30",
+    "ios-custody-2026-10-31/build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "limits": [
+    "Simulator-only iOS entitlement sections and unentitled host ad-hoc signature; no product signing or physical lock/device security proof",
+    "No network, Photos, production feature activation, SDK/dependency/ABI change or Git index mutation",
+    "Full ABI/Android/Rust/product UI checks not repeated: production code unchanged",
+    "Real OS LAN + selected Files ownership/generation, catalog/restore/restart/Photos and independent review remain open"
+  ],
+  "next": "Review proposed iOS native route ABI expansion before applying it; see ios-lan-owner-proposal.patch and ../../smb-ios-lan-owner-decision-2026-10-31.md"
+}

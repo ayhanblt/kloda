@@ -37,7 +37,7 @@ internal class AndroidWebDavFilesRestore(private val context: Context, private v
     return AndroidSyncJournal.webdav(context).use { database ->
       val journal = AndroidWebDavJournal(database.writableDatabase)
       val history = AndroidWebDavRestoreJournal(database.writableDatabase)
-      val snapshots = AndroidFilesSnapshots(context, true, ::check)
+      val snapshots = AndroidFilesSnapshots(context, true, checkPaused = ::check)
       val download = AndroidWebDavDownload(context, profile, journal, snapshots, ::check)
       transfer = download
       val receipt = download.receipt(id)

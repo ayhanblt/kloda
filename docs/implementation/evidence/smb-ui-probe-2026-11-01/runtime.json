@@ -1,0 +1,7 @@
+[
+  {
+    "id": 1,
+    "language": "tr",
+    "error": "Error: storage_failure: storage_failure (at ExpoModulesCore/Promise.swift:65)"
+  }
+]

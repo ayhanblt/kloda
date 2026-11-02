@@ -41,7 +41,7 @@ pub extern "system" fn Java_com_kloda_sync_SmbNativeEngine_publish<'local>(
     snapshot: jint,
     callback: JObject<'local>,
 ) -> jint {
-    publish_native(env, json, snapshot, None, callback)
+    publish_native(env, json, snapshot, None, callback, false)
 }
 
 #[unsafe(no_mangle)]
@@ -53,7 +53,19 @@ pub extern "system" fn Java_com_kloda_sync_SmbNativeEngine_publishBound<'local>(
     socket: jint,
     callback: JObject<'local>,
 ) -> jint {
-    publish_native(env, json, snapshot, Some(socket), callback)
+    publish_native(env, json, snapshot, Some(socket), callback, false)
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_kloda_sync_SmbNativeEngine_readBound<'local>(
+    env: JNIEnv<'local>,
+    _: JClass<'local>,
+    json: JString<'local>,
+    output: jint,
+    socket: jint,
+    callback: JObject<'local>,
+) -> jint {
+    publish_native(env, json, output, Some(socket), callback, true)
 }
 
 fn publish_native<'local>(
@@ -62,6 +74,7 @@ fn publish_native<'local>(
     snapshot: jint,
     socket: Option<jint>,
     callback: JObject<'local>,
+    reading: bool,
 ) -> jint {
     if snapshot < 0 {
         if let Some(fd) = socket.filter(|fd| *fd >= 0) {
@@ -89,7 +102,12 @@ fn publish_native<'local>(
     unsafe {
         let context = (&mut owner as *mut Receipt<'_>).cast();
         if let Some(wire) = wire {
-            crate::bridge_socket::kloda_smb_publish_bound(
+            let operation = if reading {
+                crate::read_bound::kloda_smb_read_bound
+            } else {
+                crate::bridge_socket::kloda_smb_publish_bound
+            };
+            operation(
                 json.as_ptr(),
                 json.len(),
                 file.into_raw_fd(),

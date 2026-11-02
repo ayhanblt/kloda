@@ -21,12 +21,15 @@ internal class FilesFailure(val code: String) : Exception(code)
 internal data class FilesDigest(val sha256: String, val size: Long)
 internal data class FilesSnapshot(val id: String, val digest: FilesDigest)
 
-internal class AndroidFilesSnapshots(private val context: Context, val webdav: Boolean = false, private val checkPaused: () -> Unit) {
+internal class AndroidFilesSnapshots(private val context: Context, val webdav: Boolean = false, val smb: Boolean = false, val sftp: Boolean = false, private val checkPaused: () -> Unit) {
   private val scanner = AndroidSafSourceScanner(context.contentResolver)
   private val photos = AndroidPhotosSources(context)
   private val signal = AtomicReference<CancellationSignal?>()
   private val input = AtomicReference<InputStream?>()
-  private val directory = File(context.noBackupFilesDir, if (webdav) "kloda-webdav-snapshots" else "kloda-files")
+  private val directory = File(context.noBackupFilesDir, if (sftp) "kloda-sftp-snapshots" else if (smb) "kloda-smb-snapshots" else if (webdav) "kloda-webdav-snapshots" else "kloda-files")
+
+  init { require(listOf(webdav, smb, sftp).count { it } <= 1) { "invalid_snapshot_namespace" } }
+  private fun snapshotId() = if (smb || sftp) java.util.UUID.randomUUID().toString() else randomId()
 
   companion object {
     private val random = SecureRandom()
@@ -96,7 +99,7 @@ internal class AndroidFilesSnapshots(private val context: Context, val webdav: B
   fun stage(tree: String, reference: String): FilesSnapshot {
     checkPaused()
     ensureDirectory()
-    val id = randomId()
+    val id = snapshotId()
     val file = path(id)
     val descriptor = Os.open(file.path, OsConstants.O_CREAT or OsConstants.O_EXCL or OsConstants.O_WRONLY or OsConstants.O_NOFOLLOW, 384)
     try {
@@ -123,9 +126,9 @@ internal class AndroidFilesSnapshots(private val context: Context, val webdav: B
 
   fun stageMetadata(bytes: ByteArray): FilesSnapshot {
     checkPaused()
-    if (!webdav || bytes.size > 65536) throw FilesFailure("invalid_request")
+    if ((!webdav && !smb && !sftp) || bytes.size > 65536) throw FilesFailure("invalid_request")
     ensureDirectory()
-    val id = randomId(); val file = path(id)
+    val id = snapshotId(); val file = path(id)
     val descriptor = Os.open(file.path, OsConstants.O_CREAT or OsConstants.O_EXCL or OsConstants.O_WRONLY or OsConstants.O_NOFOLLOW, 384)
     try {
       FileOutputStream(descriptor).use { output -> output.write(bytes); Os.fchmod(output.fd, 256); output.fd.sync() }
@@ -134,11 +137,11 @@ internal class AndroidFilesSnapshots(private val context: Context, val webdav: B
     } catch (error: Throwable) { file.delete(); throw error }
   }
 
-  fun stageDownload(expected: FilesDigest, receive: (java.io.OutputStream) -> Unit): FilesSnapshot {
+  fun stageDownload(expected: FilesDigest, receive: (FileOutputStream) -> Unit): FilesSnapshot {
     checkPaused()
-    if (!webdav || expected.size < 0 || !Regex("[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]").matches(expected.sha256)) throw FilesFailure("invalid_request")
+    if ((!webdav && !smb && !sftp) || expected.size < 0 || !Regex("[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]").matches(expected.sha256)) throw FilesFailure("invalid_request")
     ensureDirectory()
-    val id = randomId(); val file = path(id)
+    val id = snapshotId(); val file = path(id)
     val descriptor = Os.open(file.path, OsConstants.O_CREAT or OsConstants.O_EXCL or OsConstants.O_WRONLY or OsConstants.O_NOFOLLOW, 384)
     try {
       FileOutputStream(descriptor).use { output -> receive(output); checkPaused(); output.flush(); output.fd.sync(); Os.fchmod(output.fd, 256) }
@@ -156,6 +159,7 @@ internal class AndroidFilesSnapshots(private val context: Context, val webdav: B
   fun discard(snapshot: FilesSnapshot) { path(snapshot.id).delete() }
 
   fun recover(journal: AndroidSyncJournal) = synchronized(AndroidSyncJournal.sourceLock) {
+    if (smb || sftp) throw FilesFailure("invalid_request")
     if (directory.exists()) {
       val files = directory.listFiles() ?: throw FilesFailure("queue_unavailable")
       for (file in files) {
@@ -200,7 +204,8 @@ internal class AndroidFilesSnapshots(private val context: Context, val webdav: B
   }
 
   private fun path(id: String): File {
-    if (id.length != 22 || id.any { !(it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' || it == '-' || it == '_') }) {
+    if ((smb || sftp) && runCatching { java.util.UUID.fromString(id).toString() == id }.getOrDefault(false).not() ||
+      !(smb || sftp) && (id.length != 22 || id.any { !(it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' || it == '-' || it == '_') })) {
       throw FilesFailure("snapshot_unavailable")
     }
     return File(directory, "$id.snapshot")

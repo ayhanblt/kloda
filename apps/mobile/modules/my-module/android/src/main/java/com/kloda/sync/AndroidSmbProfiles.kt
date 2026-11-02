@@ -32,11 +32,11 @@ internal class AndroidSmbProfiles(context: Context, private val journal: Android
     journal.context() == value.context && journal.profileCurrent(value.profile.target) && vault.read() == value.profile
   }
   fun publishBound(job: SmbUpload, snapshot: ParcelFileDescriptor, socket: ParcelFileDescriptor,
-    currentSourceAndRoute: () -> Boolean) = socket.use {
+    currentSourceAndRoute: () -> Boolean, completedSource: () -> Boolean = currentSourceAndRoute) = socket.use {
     val captured = capture() ?: throw SmbFailure("profile_missing")
     if (job.target != captured.profile.target || job.context != captured.context) throw SmbFailure("context_changed")
-    AndroidSmbPublication.runBound(journal, job, snapshot, captured.profile.password, it) {
-      current(captured) && currentSourceAndRoute()
-    }
+    AndroidSmbPublication.runBound(journal, job, snapshot, captured.profile.password, it,
+      current = { current(captured) && currentSourceAndRoute() },
+      completed = { current(captured) && completedSource() })
   }
 }
