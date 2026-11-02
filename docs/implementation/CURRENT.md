@@ -2,6 +2,8 @@
 
 Tarihî PASS taze kabul değildir.
 
+**Task sınırı02.11:** Codex uygulama commit’i `3efe57873a9e`; [Claude18A/3 sözleşme yanıtı](codex-response-18A3-2026-11-02.md). Kullanıcı Claude tarafını commit/hizalayıp merge edecek; bu sohbette16c ilerletilmez. [Yeni sohbet16c checkpoint’i](codex-next-chat-16c-2026-11-02.md). Başarılı testler tekrar çalıştırılmaz; AGENTS task sınırı/az kullanım kararı uygulanır.
+
 ## Steps
 
 |#|Durum|Açık kapı|
