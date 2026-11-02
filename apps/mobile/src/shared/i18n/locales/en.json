@@ -121,7 +121,9 @@
       "nextcloud_login_expired": "Sign-in was not confirmed within 20 minutes. Start again.",
       "destination_limit": "This device already has 8 cloud destinations. Remove one before adding another.",
       "destination_exists": "This destination is already saved on this device.",
-      "destination_unsupported": "Backups to this destination cannot be turned on yet."
+      "destination_unsupported": "Backups to this destination cannot be turned on yet.",
+      "oauth_login": "Sign-in could not be completed. Try again.",
+      "oauth_expired": "The sign-in has expired. Remove the destination and sign in again."
     },
     "rebackup": "Back up this version again",
     "rebackupConfirm": "Explicitly send this unchanged source version again to the currently paired computer? The computer must approve file access.",
@@ -390,7 +392,17 @@
       "protocols": "File protocols",
       "clouds": "Cloud services",
       "test": "Test connection",
-      "fields": {}
+      "fields": {},
+      "remove": "Remove destination",
+      "removeTitle": "Remove this destination?",
+      "removeBody": "The saved sign-in is deleted from this device and backups to this destination stop. Files already on the server are not deleted. Access is also revoked at the service when it answers.",
+      "cancel": "Cancel",
+      "addHint": "Saving a destination does not start backups. Enable it separately in Connections.",
+      "browserHint": "Sign-in opens in the system browser. Kloda does not see your account password.",
+      "signIn": "Sign in and save",
+      "save": "Save destination",
+      "waiting": "Waiting for confirmation in the browser…",
+      "cancelSignIn": "Cancel sign-in"
     },
     "pair": {},
     "devices": {},

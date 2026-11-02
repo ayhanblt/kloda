@@ -9,12 +9,15 @@ import { PairingButton } from '../../../features/pairing/ui/pairing-button';
 import { useSmbBackup } from '../../../features/backup-setup/model/use-smb-backup';
 import { useSftpBackup } from '../../../features/backup-setup/model/use-sftp-backup';
 import { useThemeColors } from '../../../shared/theme/theme-provider';
+import { useCloudDestinations } from '../../../features/cloud-destination/model/use-cloud-destinations';
+import { CloudDestinationList, addedDestinations } from './cloud-destination-list';
 
 export function ConnectionsPage({ adding, navigate, openProvider, saved }: { adding: boolean; navigate: NavigateMobile; openProvider: (id: DestinationProviderId) => void; saved: Omit<MobileStorageForm,'password'> | null }) {
   const colors = useThemeColors();
   const { t } = useTranslation();
   const smb = useSmbBackup().status;
   const sftp = useSftpBackup().status;
+  const cloud = useCloudDestinations();
   return <MobileSurface title={t(adding ? 'ui.conn.add' : 'ui.conn.title')} description={t('ui.conn.subtitle')} onBack={() => navigate(adding ? 'connections' : 'home')}>
     <MobilePanel>
       <Monitor size={24} color={colors['text-primary']} />
@@ -23,11 +26,7 @@ export function ConnectionsPage({ adding, navigate, openProvider, saved }: { add
       <PairingButton label={t('computer.title')} onPress={() => navigate('computer')} />
     </MobilePanel>
     {!adding && <>
-      {saved && <MobilePanel><HardDrive size={24} color={colors['text-secondary']} /><Text className="text-base font-inter-semibold text-primary-text">{t('ui.providers.webdav')}</Text>
-        <Text className="font-sans text-sm text-secondary-text">{t('ui.savedTarget')}</Text><Text selectable className="font-sans text-sm text-primary-text">{saved.endpoint}</Text>
-        <Text selectable className="font-sans text-sm text-secondary-text">{saved.targetPath}</Text>
-        <PairingButton variant="secondary" label={t('ui.common.manage')} onPress={() => navigate('storage')} />
-      </MobilePanel>}
+      <CloudDestinationList cloud={cloud} navigate={navigate} saved={saved} />
       {smb?.configured && <MobilePanel>
         <HardDrive size={24} color={colors['text-secondary']} /><Text className="text-base font-inter-semibold text-primary-text">{t('ui.providers.smb')}</Text>
         <Text className="font-sans text-sm text-secondary-text">{t(smb.enabled ? 'destinations.enabled' : 'destinations.disabled')}</Text>
@@ -43,7 +42,7 @@ export function ConnectionsPage({ adding, navigate, openProvider, saved }: { add
         <Text selectable className="font-sans text-sm text-secondary-text">{sftp.config?.fingerprint}</Text>
         <PairingButton variant="secondary" label={t('ui.common.manage')} onPress={() => openProvider('sftp')} />
       </MobilePanel>}
-      {!saved && !smb?.configured && !sftp?.configured && <MobilePanel><FolderPlus size={24} color={colors['text-secondary']} /><Text className="font-sans text-sm leading-5 text-secondary-text">{t('ui.noSavedCloud')}</Text></MobilePanel>}
+      {!saved && !smb?.configured && !sftp?.configured && !addedDestinations(cloud.destinations).length && <MobilePanel><FolderPlus size={24} color={colors['text-secondary']} /><Text className="font-sans text-sm leading-5 text-secondary-text">{t('ui.noSavedCloud')}</Text></MobilePanel>}
       <PairingButton variant="secondary" icon={<Plus size={20} color={colors['text-primary']} />} label={t('ui.conn.add')} onPress={() => navigate('add-connection')} />
     </>}
     {adding && (['protocol','cloud'] as const).map((kind) => <MobilePanel key={kind}>

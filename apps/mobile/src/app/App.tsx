@@ -15,6 +15,7 @@ import { ConnectionsPage } from '../pages/connections/ui/connections-page';
 import { SmbPage } from '../pages/connections/ui/smb-page';
 import { SftpPage } from '../pages/connections/ui/sftp-page';
 import { ProviderPage } from '../pages/connections/ui/provider-page';
+import { CloudProviderPage, cloudProviderFor } from '../pages/connections/ui/cloud-provider-page';
 import { SettingsPage } from '../pages/settings/ui/settings-page';
 import { ComputerPage } from '../pages/computer/ui/computer-page';
 import { PairingPage } from '../pages/pairing/ui/pairing-page';
@@ -34,6 +35,7 @@ export function App() {
   // Pairing owns its protected foreground/camera/pending back actions; no global tab can bypass them.
   if (page === 'pairing') return <PairingPage onBack={() => navigate('computer')} onContinue={() => navigate('activity')} />;
   const back = () => navigate('home');
+  const cloudProvider = cloudProviderFor(provider);
   const openProvider = (id: DestinationProviderId) => { setProvider(id); navigate(id === 'webdav' ? 'storage' : 'provider'); };
   return <MobileShell page={page} navigate={navigate}>
     {page === 'home' && <HomePage sourceCount={model.sources.length} navigate={navigate} />}
@@ -45,7 +47,8 @@ export function App() {
     {page === 'activity' && <ActivityPage embedded onBack={back} />}
     {page === 'backups' && <ActivityPage embedded view="backups" onBack={back} />}
     {(page === 'connections' || page === 'add-connection') && <ConnectionsPage adding={page === 'add-connection'} navigate={navigate} openProvider={openProvider} saved={model.savedStorage} />}
-    {page === 'provider' && (provider === 'smb' ? <SmbPage onBack={() => navigate('add-connection')} /> : provider === 'sftp' ? <SftpPage onBack={() => navigate('add-connection')} /> : <ProviderPage provider={provider} onBack={() => navigate('add-connection')} />)}
+    {page === 'provider' && (provider === 'smb' ? <SmbPage onBack={() => navigate('add-connection')} /> : provider === 'sftp' ? <SftpPage onBack={() => navigate('add-connection')} />
+      : cloudProvider ? <CloudProviderPage provider={cloudProvider} onBack={() => navigate('add-connection')} onSaved={() => navigate('connections')} /> : <ProviderPage provider={provider} onBack={() => navigate('add-connection')} />)}
     {page === 'settings' && <SettingsPage navigate={navigate} />}
   </MobileShell>;
 }

@@ -121,7 +121,9 @@
       "nextcloud_login_expired": "Giriş 20 dakika içinde onaylanmadı. Yeniden başlat.",
       "destination_limit": "Bu cihazda zaten 8 bulut hedefi var. Yenisini eklemeden önce birini kaldır.",
       "destination_exists": "Bu hedef bu cihazda zaten kayıtlı.",
-      "destination_unsupported": "Bu hedef için yedekleme henüz açılamıyor."
+      "destination_unsupported": "Bu hedef için yedekleme henüz açılamıyor.",
+      "oauth_login": "Giriş tamamlanamadı. Yeniden deneyin.",
+      "oauth_expired": "Girişin süresi doldu. Hedefi kaldırıp yeniden giriş yapın."
     },
     "rebackup": "Bu sürümü yeniden yedekle",
     "rebackupConfirm": "Bu değişmemiş kaynak sürümü eşleşmiş bilgisayara açık isteğinizle yeniden gönderilsin mi? Bilgisayarda dosya erişimi onaylı olmalıdır.",
@@ -390,7 +392,17 @@
       "protocols": "Dosya protokolleri",
       "clouds": "Bulut hizmetleri",
       "test": "Bağlantıyı test et",
-      "fields": {}
+      "fields": {},
+      "remove": "Hedefi kaldır",
+      "removeTitle": "Bu hedef kaldırılsın mı?",
+      "removeBody": "Kayıtlı giriş bu cihazdan silinir ve bu hedefe yedekleme durur. Sunucudaki dosyalar silinmez. Hizmet yanıt verirse erişim orada da iptal edilir.",
+      "cancel": "Vazgeç",
+      "addHint": "Hedefi kaydetmek yedeklemeyi başlatmaz. Bağlantılar ekranında ayrıca etkinleştirin.",
+      "browserHint": "Giriş sistem tarayıcısında açılır. Kloda hesap parolanızı görmez.",
+      "signIn": "Giriş yap ve kaydet",
+      "save": "Hedefi kaydet",
+      "waiting": "Tarayıcıda onay bekleniyor…",
+      "cancelSignIn": "Girişi iptal et"
     },
     "pair": {},
     "devices": {},

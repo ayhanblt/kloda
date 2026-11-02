@@ -1,0 +1,41 @@
+{
+ "step": "18A/4b",
+ "date": "2026-11-03",
+ "base": "67701e7895ca9d7d5d7efe66d23b09954a8bf690",
+ "sources": {
+  "src/pages/connections/ui/connections-page.tsx": "c3c6055de2416e63e7f289a97afebf0b8e0c82faf7e664a4808bbe8f561aa25d",
+  "src/pages/connections/ui/cloud-destination-list.tsx": "e746004caae2821329409774b6f49dcebffb0d09ead6181684ef032d00b4d9e8",
+  "src/pages/connections/ui/cloud-provider-page.tsx": "bb2680e3911acd340f450b2c2995776413b767957e1413ee44ee6a65631fb61c",
+  "src/pages/connections/ui/cloud-destinations.spec.tsx": "ad19a61f73178c3728b67b2236f35ad2b26ff11b1bec372193ad7e5b8a714740",
+  "src/features/cloud-destination/model/use-cloud-destinations.ts": "2c19854685d663a7ce8ec86ada539dda92d51b688909fc38fc81f9fd390faea5",
+  "src/app/App.tsx": "e5f35c8c8dc7249d89e34657ba6fa5404c38b8b63de367fd1b04868ba90d58c8",
+  "src/shared/i18n/locales/tr.json": "43b1934d01aea72ca4a954f029462e7b25d7cd3c1de1b5a1e4843c37d74b46ec",
+  "src/shared/i18n/locales/en.json": "98b4beac4640ba3c71add6d8056ab77b5a345002407b31590a33f1b2ba18e37a",
+  "src/shared/i18n/locales/de.json": "aa084c730a9c0368061bb5746460ef37e4dfde71ac3ad42d09b86dd0524f6226"
+ },
+ "checks": {
+  "jest_full": "34 suites/200 tests PASS (before original-row filter fix)",
+  "jest_affected_after_fix": "pages/connections+app 26 tests PASS",
+  "tsc": "PASS",
+  "eslint": "PASS (full lint before fix, scoped after)",
+  "android_build": "assembleDebug arm64 PASS (AVD KlodaCloud18)",
+  "ios_build": "Debug iphonesimulator arm64 PASS (Kloda-Cloud18-Disposable)"
+ },
+ "captures": {
+  "android-tr-add.png": "36719e7f68d92abe39d1ec89c43eaa86c30c9a94c313acfb52b663ae393554a8",
+  "android-tr-connections.png": "6166860cdb79659f94a98909171a3a6334eae2022110ef87279d42748dab63db",
+  "android-tr-dropbox.png": "a6f591d88f8ea535dcc8a3566bd9c74d8a5ec099d6881d5bbb23decc574e8004",
+  "android-tr-kolab-now.png": "fe80ab1f45791b9d0139e7fe0aad120879d0b0c4fa5bf039a7452e15cb617806",
+  "android-tr-nextcloud.png": "a7058abf1903aa64b5916557b855d8a0fe559db9134061f988d0244662068ee4",
+  "ios-tr-connections.png": "1ede6f113d4f2173df711a14e9dff9f001be08fa196aa37e0efcf9f468540da3",
+  "ios-tr-nextcloud.png": "953d171e0c04491042adcae2aaae9a7da6a87e80902affae7ad8d290c33c6658"
+ },
+ "notes": [
+  "TR dark only; EN/DE, light, large text and VoiceOver NOT_RUN",
+  "Android has no saved destinations: list empty state only",
+  "iOS: original WebDAV card; native lists it as provider webdav -> filtered (defect found in capture, fixed)",
+  "Cards with added destinations covered by Jest only; no real Nextcloud/Kolab/OAuth sign-in performed",
+  "Manual run and per-destination run status: no bridge, user chose to proceed without (2026-11-03)",
+  "Capture driven by adb/simulator tool taps, not a durable script"
+ ]
+}

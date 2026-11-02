@@ -11,6 +11,7 @@ export function useCloudDestinations() {
   const [destinations, setDestinations] = useState<CloudDestination[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [action, setAction] = useState<Action>('idle');
+  const [lastAdded, setLastAdded] = useState<string | null>(null);
   const mounted = useRef(true);
   const busy = useRef(false);
   const refresh = async () => {
@@ -29,7 +30,9 @@ export function useCloudDestinations() {
     finally { busy.current = false; if (mounted.current) setAction('idle'); }
   };
   const added = (value: CloudDestination) => {
-    if (mounted.current) setDestinations((current) => [...(current ?? []).filter((item) => item.targetId !== value.targetId), value]);
+    if (!mounted.current) return;
+    setDestinations((current) => [...(current ?? []).filter((item) => item.targetId !== value.targetId), value]);
+    setLastAdded(value.targetId);
   };
   const signIn = (server: string, folder: string) => run('signing-in', async () => added(await cloudDestinations.signInNextcloud(server, folder)));
   const signInOAuth = (provider: OAuthProvider, folder: string) =>
@@ -46,5 +49,5 @@ export function useCloudDestinations() {
   });
   const cancel = () => { void cloudDestinations.cancelSignIn().catch(() => undefined); };
   const full = (destinations?.length ?? 0) >= destinationLimit;
-  return { destinations, error, action, full, signIn, signInOAuth, addKolabNow, remove, setEnabled, cancel, refresh };
+  return { destinations, error, action, full, lastAdded, signIn, signInOAuth, addKolabNow, remove, setEnabled, cancel, refresh };
 }

@@ -121,7 +121,9 @@
       "nextcloud_login_expired": "Die Anmeldung wurde nicht innerhalb von 20 Minuten bestätigt. Starte sie erneut.",
       "destination_limit": "Auf diesem Gerät gibt es bereits 8 Cloud-Ziele. Entferne eines, bevor du ein weiteres hinzufügst.",
       "destination_exists": "Dieses Ziel ist auf diesem Gerät bereits gespeichert.",
-      "destination_unsupported": "Sicherungen zu diesem Ziel können noch nicht aktiviert werden."
+      "destination_unsupported": "Sicherungen zu diesem Ziel können noch nicht aktiviert werden.",
+      "oauth_login": "Die Anmeldung konnte nicht abgeschlossen werden. Versuchen Sie es erneut.",
+      "oauth_expired": "Die Anmeldung ist abgelaufen. Entfernen Sie das Ziel und melden Sie sich erneut an."
     },
     "rebackup": "Diese Version erneut sichern",
     "rebackupConfirm": "Diese unveränderte Quellversion ausdrücklich erneut an den gekoppelten Computer senden? Der Computer muss den Dateizugriff erlauben.",
@@ -390,7 +392,17 @@
       "protocols": "Dateiprotokolle",
       "clouds": "Cloud-Dienste",
       "test": "Verbindung testen",
-      "fields": {}
+      "fields": {},
+      "remove": "Ziel entfernen",
+      "removeTitle": "Dieses Ziel entfernen?",
+      "removeBody": "Die gespeicherte Anmeldung wird von diesem Gerät gelöscht und Sicherungen zu diesem Ziel werden beendet. Dateien auf dem Server werden nicht gelöscht. Der Zugriff wird auch beim Dienst widerrufen, sofern er antwortet.",
+      "cancel": "Abbrechen",
+      "addHint": "Das Speichern eines Ziels startet keine Sicherung. Aktivieren Sie es separat unter Verbindungen.",
+      "browserHint": "Die Anmeldung öffnet sich im Systembrowser. Kloda sieht Ihr Kontopasswort nicht.",
+      "signIn": "Anmelden und speichern",
+      "save": "Ziel speichern",
+      "waiting": "Warten auf Bestätigung im Browser…",
+      "cancelSignIn": "Anmeldung abbrechen"
     },
     "pair": {},
     "devices": {},

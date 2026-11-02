@@ -243,7 +243,7 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
   alınır. 18'in çoklu DAV kuyruğu bu kilit kapsamını korumalı. Gerçek düğme yarışı yeniden oynatılmadı.
 - Yapılmadı: açık tema, EN/DE, VoiceOver, fiziksel cihaz.
 
-## Dilim 18A/3 — hedef başına DAV kuyruğu (2.11, commit edilmedi)
+## Dilim 18A/3 — hedef başına DAV kuyruğu (2.11, commit `67701e7`, push yok)
 
 - Kullanıcı kararı 2.11: hedefler **sırayla** (tek yükleme, mevcut kilit ve `begin()` sırası); 18A/3'te yalnız DAV
   (özgün WebDAV, Nextcloud, Kolab Now) yükler; OAuth türleri tabloya eklendi ama yükleyicileri (18B/5) gelene kadar
@@ -258,6 +258,22 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
 - Bilinen sınır: özgün WebDAV yeniden yapılandırılınca ortak bağlam yenilenir, diğer DAV hedefleri yeniden planlanır.
 - Açık: ekran (4b: hedef listesi, aç/kapa, elle başlat, durum), eklenen hedeften geri yükleme, iOS çalışma zamanı testi.
 
+## Dilim 18A/4b — Bağlantılar hedef listesi (3.11, commit edilmedi)
+
+- `ConnectionsPage`: tek saved WebDAV kartı yerine `cloud-destination-list.tsx` (özgün WebDAV kartı + eklenen DAV/OAuth
+  kartları: durum, aç/kapa yalnız Nextcloud/Kolab Now, OAuth için `destination_unsupported`, onaylı kaldırma).
+  Native `destinations()` özgün WebDAV'ı `provider: webdav` ile ilk satırda döndürür; listede süzülür (yakalamada
+  bulunan kusur). Ekleme: `cloud-provider-page.tsx` (Nextcloud giriş, Kolab Now kullanıcı/parola, OAuth klasör);
+  App.tsx bu sağlayıcıları ProviderPage yerine buraya yönlendirir, kayıttan sonra Bağlantılar'a döner. Hook `lastAdded`.
+- TR/EN/DE: `ui.conn.{remove,removeTitle,removeBody,cancel,addHint,browserHint,signIn,save,waiting,cancelSignIn}`,
+  `transfer.errors.{oauth_login,oauth_expired}`.
+- Kullanıcı kararı 3.11: hedef başına elle başlatma ve çalışma durumu için köprü yok; köprüsüz ilerlendi, açık iş.
+- Kontroller: Jest tam 34/200 PASS (süzme düzeltmesinden önce), sonra etkilenen 26 test, tsc, ESLint PASS. Android
+  arm64 debug (AVD KlodaCloud18) ve iOS Simulator debug (Kloda-Cloud18-Disposable) yeniden derlendi/kuruldu; TR koyu
+  yakalama: [manifest](evidence/cloud18-connections-ui-2026-11-03/manifest.json). Codex simülatörlerine dokunulmadı.
+- NOT_RUN: EN/DE/açık tema/büyük yazı/VoiceOver yakalaması; eklenmiş hedefli kartların native görüntüsü (yalnız Jest);
+  gerçek giriş; kalıcı yakalama betiği (dokunma araçla yapıldı). Aynı ajan review; bağımsız review yok.
+
 ## Sıradaki (kullanıcı 1.11: açık işler sırayla)
 
 19, bu listede 18'in 1.–3. maddelerinden sonra gelmesine rağmen önce yapıldı; sıra artık buna göre.
@@ -269,10 +285,14 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
    birleştirildi. Çakışmalar (manifest, `expo-module.config.json`, instrumentation scope listesi) iki tarafın
    eklemeleri korunarak çözüldü. Sonrası: Jest 33/196, tsc, ESLint, Android compile+lint+androidTest APK, iOS arm64
    Simulator derlemesi PASS (worktree'de `sync-core` dist yeniden derlendi; genel simülatör hedefi x86_64 pairing
-   dilimi olmadığı için link etmez). Birleşik kodla çalışma zamanı testi koşulmadı. Not: Codex "4 yeni tür
-   migration'ı tamam" diyor; 18A/2 yalnız DAV türlerini ekledi, OAuth türleri (dropbox/onedrive/yandex/google-drive)
-   için `backup_destination` migration'ı hâlâ 18A/3 ile yapılacak.
-2. 18A/4 — Expo köprüsü (4a tamam, yukarıda) + Lovable bağlantı ekranı (4b, Codex commit'ini bekliyor).
+   dilimi olmadığı için link etmez). OAuth türlerinin `backup_destination` migration'ı 18A/3 ile yapıldı.
+2. 18A/4 — Expo köprüsü (4a tamam) + Lovable bağlantı ekranı (4b yapıldı 3.11, yukarıda; açık: elle başlatma/durum köprüsü, EN/DE/a11y yakalama).
+   Kapsam (Codex yanıtı): `pages/connections/ui/connections-page.tsx` içinde tek kayıtlı WebDAV kartının yerine
+   hedef listesi; ekleme (Nextcloud giriş, Kolab Now, OAuth girişleri), aç/kapa (`setEnabled`, OAuth kapalı +
+   `destination_unsupported`), kaldırma, durum; i18n önekleri `ui.conn.*`, `ui.providers.*`; Lovable
+   `provider-page` eşlemesi, 300 satır sınırı. Elle başlatma/durum için native köprü yoksa genişleme olarak
+   kullanıcıya sorulur. Doğrulama: Jest/tsc/ESLint + bir Android ve bir iOS Simulator toplu ekran yakalaması;
+   18A/3 testleri tekrarlanmaz.
 3. 18A/5 — uygulama parolası iptali: tamam (Android fixture testi 1.11'de PASS).
 4. 18A/6 — yapıldı: Kolab Now adaptörü, CloudMe Digest-only olduğu için engelli; gerçek Kolab Now hesap testi ayrı kullanıcı izni ister.
 5. 18 kapanış — yapıldı (iOS yükseltme PASS, Android NOT_RUN; kanıt; aynı ajan review + düzeltmeler).
