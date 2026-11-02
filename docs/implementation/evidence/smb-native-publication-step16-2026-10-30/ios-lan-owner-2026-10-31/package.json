@@ -1,0 +1,30 @@
+{
+  "profile": "debug",
+  "minimumIos": "16.4",
+  "targetSlices": [
+    {
+      "target": "aarch64-apple-ios",
+      "sdk": "iphoneos"
+    },
+    {
+      "target": "aarch64-apple-ios-sim",
+      "sdk": "iphonesimulator"
+    }
+  ],
+  "exports": [
+    "kloda_ios_open",
+    "kloda_ios_request",
+    "kloda_ios_suspend",
+    "kloda_ios_set_foreground",
+    "kloda_ios_transfer",
+    "kloda_ios_reply_free",
+    "kloda_ios_background_begin",
+    "kloda_ios_background_end",
+    "kloda_ios_background_transfer",
+    "kloda_ios_lan_with_socket",
+    "kloda_ios_lan_current"
+  ],
+  "framework": "/Users/ayhanblt/Desktop/projects/kloda/packages/pairing-native/target/ios-abi-rL2Bd6/KlodaPairingNative.xcframework",
+  "published": "/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/ios/NativePairing",
+  "scope": "Native packaging; simulator/device/runtime acceptance is separate"
+}

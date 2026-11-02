@@ -1,0 +1,102 @@
+{
+  "recordedAt": "2026-10-31T20:15:41.978542+00:00",
+  "scope": "16b started by explicit user request. SDK candidate elimination and one bounded owned host feasibility path only; no native product SFTP implementation, SDK fork, activation or mobile/physical acceptance. SMB open gates preserved.",
+  "authority": "ADR0022 D2 independently supplied exact host+port SHA256, no TOFU, password only; no SSH key import/device identity reuse.",
+  "rejectedCandidate": {
+    "wrapper": "ssh2=0.9.6",
+    "sys": "libssh2-sys=0.3.3",
+    "sourceHeader": "1.11.1_DEV",
+    "registryChecksumVerified": true,
+    "status": "NOT_ACCEPTED unresolved upstream security follow-up",
+    "reason": "Bundled transport.c resets packet_length in ETM branch before total_num arithmetic without the subsequent per-assignment bound check identified by open upstream PR2677. Existing June fixes present; no new local patch applied; no exploit reproduction claim.",
+    "upstream": "https://github.com/libssh2/libssh2/pull/2677"
+  },
+  "alternativeCandidate": {
+    "russh": "0.65.0",
+    "russh-sftp": "3.0.1",
+    "features": {
+      "russh": [
+        "ring"
+      ],
+      "defaultFeatures": false
+    },
+    "registryChecksumsVerified": true,
+    "rsaPresent": false,
+    "opensslPresent": false,
+    "localPatchApplied": false,
+    "licenseScreen": "All188 resolved packages have license metadata; Apache/MIT/permissive alternatives available. r-efi MIT alternative, not LGPL selection. Final bundled distribution notices/platform legal acceptance NOT_COMPLETE.",
+    "advisoryScreen": "OSV querybatch exact188 versions:0 matches; current russh upstream advisories list0.65 fixes for recent EXT_INFO/zero-write/nested-cert advisories. Not a general vulnerability-free claim.",
+    "hostProfile": "Fixture plain Ed25519 host key only. RSA unsupported in this evaluated feature profile; ECDSA/cert/other-server interoperability NOT_RUN."
+  },
+  "checks": {
+    "host": "PASS pinned password + SFTPv3,131073bytes/32KiB sequential WRITE ACKs, explicit fsync ACK/CLOSE ACK, exclusive create refusal, standard rename existing-destination refusal, final exact bounded bytes+SHA256 fresh read. Own test only, no production durable receipt claim.",
+    "pinBeforePassword": "PASS malformed/missing pin rejected; wrong SHA256 reaches actual host-key callback and rejects before auth; one successful fixture password auth total independently confirmed in sshd logs. Pin obtained through Docker exec management channel, not learned from SSH connection.",
+    "static": "Rust1.99 host build and all-target Clippy -D warnings PASS; formatted. No mobile ABI build yet.",
+    "review": "Separate same-agent pass rejected silent sync_all success when server lacks fsync, uses explicit raw fsync status; tightened negative pin proof to require actual key callback after initial fixture connection failure. Not independent review."
+  },
+  "limits": [
+    "No production adapter/native custody/profile generation/queue/journal/recovery/UI/restore yet.",
+    "No SMB receipt/Photos contract automatically adopted for SFTP; exact destination/source generation and lost-ACK ownership must be bound before product activation. No backup_destination schema/CHECK/user_version change.",
+    "No remote/Internet scope expansion; host feasibility uses owned loopback endpoint, not real OS LAN-route proof.",
+    "No mobile ABI/signing/real-device/Photos/visual/a11y/performance acceptance. No personal source/account/NAS or host mount.",
+    "No git add/commit/push/reset/clean/stash; original staged start.log deletion preserved."
+  ],
+  "fixtures": {
+    "image": "sha256:c4ee2088f3c5d8cc5e44ab1a93548675b50f4dfb05cdf88bbac22364308b4674",
+    "network": "29648638358be1554a9d3fac1a99cb757a4d398875b3337eb9b7896e1c97c145",
+    "name": "kloda-sftp16b-c79284872b-loopback",
+    "port": 27448,
+    "container": "9cb4a3cda794de53f4905df638dfbd95d79eaf9674880aefb63bcb5c7daa1335",
+    "previousContainer": "923c5baf0e2ea867397670fe0e56896427ccea3eb4bc1c2b78058e642ca22f72",
+    "previousNetwork": "7a09c975a62f9bd3520de570045ec34a51daf4d8c7cfa0dcf805f0a91ef164d8",
+    "networkInternal": false,
+    "status": "all owned SFTP16b fixture containers stopped; files/layers/networks retained; no host mounts",
+    "stoppedAt": "2026-10-31T20:14:01.767384+00:00"
+  },
+  "archives": {
+    "russh-sftp-3.0.1.crate": "9bb17f72aba4314656b359ffba72c68dcbd70ed9e97497898b75498fe7198042",
+    "ssh2-0.9.6.crate": "c95eb3c09e378543395a3fa9796f897861862466ee331d59140ade4ea0dcfdfc",
+    "russh-0.65.0.crate": "3bb77a4b259312b2abbc541bca1c13cb4e9b61c560a7fd894068c3b92e0c9dc3",
+    "libssh2-sys-0.3.3.crate": "0f5eb74291e8691cab524a01274a1b1e7742b1a94f29d8b101d8aadc8372c1cd"
+  },
+  "evidenceSha256": {
+    "libssh2-sys-Cargo.toml.gz": "0eb971495a1a2c251369d34c7d500ffdf1d089e8eebb6deb837195f66cb2b9f4",
+    "libssh2-sys-.cargo_vcs_info.json.gz": "725ee2f25cc5ff65a2c94ae5e85a70c63e709b6acd9145181e91637a02b8f79a",
+    "libssh2-sys-libssh2.h.gz": "229bffb8b9f911b21d003aac7d9448c1776ad8d232080fa60b384d3b71f6e18d",
+    "libssh2-sys-transport.c.gz": "b7ce45259c257c65db77a13d83934b2e4400b61b58481a6658d1e960c9706f3c",
+    "libssh2-COPYING.gz": "dfc102c8a48b993f412560fd902a0f035de89af28ddf6181dc732f5c4dc2ea13",
+    "libssh2-sys-index.jsonl.gz": "5d80dba53fe5678ab3acb5a57f75c8c086a68e61ad29bb5d48653fa7492d82e9",
+    "upstream-2677.json.gz": "5e9be2613409cd56a9afb2747e3725df1a093f32c4b51f582ec56fe744a66e49",
+    "wrapper-359.json.gz": "587942c9a89745a14272785a4caea9df2e9f211f56e5e36252289ab10312c646",
+    "russh-Cargo.toml.gz": "3dce68b994069e77f70dbdd30a374a686f7209fe1dea05dc86725f2c6a14efa1",
+    "russh-sftp-Cargo.toml.gz": "d4c26edfaf92babd8d4b6ee7c3383b5897f7792eaf9248a9099889f9a1f91f8c",
+    "russh-sftp-LICENSE.gz": "9351c14f756c4a73bcc5ba9a3133e8aa3a499818f74f0030e6b3bcd689e3b70a",
+    "russh-metadata.json.gz": "f7a35544821bed9af1f7ad27ddbc27fef53242ac02ceac1640709e1b41234da5",
+    "osv-request.json.gz": "0cf5f1051da0b7c050764f2cd13c5bec3b846fca19a2b133c62acc1ef5877db8",
+    "osv-response.json.gz": "43b2df79d10dbb49bee69297bd06f1ed59433ecd9f79844288bfeb1f344cf76f",
+    "russh-resolution.log.gz": "d0dc544db951dff6f86c3e3bbaac281019182a650d5bdcc6cf3d130d7b156952",
+    "russh-resolution-rustup.log.gz": "9b1ea12dcb76716fec38aed1ced8d2cc3a837d3b3238931209d24eb3f4c1981e",
+    "russh-resolution-final.log.gz": "191e1aab75ef99f9d0e1111396f158ff25893a4a63500a545f4089568713ba0d",
+    "fixture-build.log.gz": "8016ea425a23793abef5453d95d9ef84c48960bf160cdbbd7370ed068e914681",
+    "fixture-build2.log.gz": "e46de04b4105aac4767490a88fef9b8225ee8173b7744276514ba5e79726cd54",
+    "russh-host-build.log.gz": "be85c68f6bc8f6ace56bc7fb9c049358a0c7da5718a3b3ab6b9ee1d4612143a6",
+    "russh-host-build2.log.gz": "109b6d9def4c94abbe5b44765c561ca60fe6a41974c55c5272243359982eeb2f",
+    "russh-host-build3.log.gz": "c1d63aa75437e34e0416d28cad47b42c7662df73e835ea2bcf6b8394fb7f4fe3",
+    "russh-host-build4.log.gz": "6e3a0d02cbae528eb770de90a5133cbb51edf2b7aeee89ad363bd0d702638807",
+    "russh-host-clippy.log.gz": "40656c078334f2541ef75863d13de91573ca8f81f755dd1569341af0b82c8ebe",
+    "russh-host-runtime.log.gz": "98225acc94a5084b556dabd3a2d12b4d950a5edb390613fd0a5d713e4b161872",
+    "russh-host-runtime2.log.gz": "761f7a4dc066572b8b61a7b136741c4f75fb22550911b66f0ee828cef53d7da2",
+    "sshd-runtime.log.gz": "91cc45112f3f846667e72399a49df0b230ad9bc15f9fc1f4a3d4cd71b3835801",
+    "sshd-runtime2.log.gz": "ee186e1f93bd717ec7086f5662cef9a12c1cd4e1cdf39c991fb6e37909adc64c",
+    "independent-fixture-fingerprint.txt.gz": "ed25fef616e6dda74f90138e8e126b653bfd2acf069f4e7515653d59a1ec4b2e",
+    "owned-runtime.json.gz": "3a9e464d752a74ff2aca2f2715864e466e570b0050e407b3826f0f444c47759b",
+    "fixture-base.json.gz": "1503e8e49c2865eb4ace595886c28a5ac869d10527ff5dfeea9ecd4d56943a46",
+    "candidate-Cargo.toml": "a80f3fd881603a8e7d3c160005d2e9cc6166792fea2aa667a778d37c74a86f10",
+    "candidate-Cargo.lock": "422e35187f90a22f73f9d5c23810a0bd004678bd7b4be88a496a59f60522d5ce",
+    "candidate-main.rs": "206dfd274ec73d3c55072810f9431ab4ddd2696e33596e3f9e961856fe96a925",
+    "fixture-Dockerfile": "c2016d930ca4cc605926728d0d94e4d5707ee40418ceecea2e6f41d0e67a3d9c",
+    "fixture-sshd_config": "83691c1c0c4e4cc9b5014a3ab00cadbb14060777fcdc1465d8876160641c564d",
+    "run-owned-host.py": "99261da9caaa8964e4d5fab14004a7d470317bd93e9ed80065e84ba9d40338ba",
+    "resolved-licenses.json": "8620084485adb653c4538e28132ebc927780e69722b2d4de6525b07b67424d55"
+  }
+}

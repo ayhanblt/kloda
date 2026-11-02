@@ -54,7 +54,8 @@ final class IosWebDavAutomaticCoordinator {
     guard active == nil else { return }
     timer?.cancel(); timer = nil
     do {
-      guard try !IosSyncJournal().automaticPaused(), let profile = try IosWebDavVault.read() else { cancelRequest(); return }
+      guard !IosAutomaticPause.requested, let profile = try IosWebDavVault.read() else { cancelRequest(); return }
+      guard try !IosSyncJournal().automaticPaused() else { cancelRequest(); return }
       let journal = try IosWebDavJournal.open(), target = try profile.targetId()
       guard try journal.enabled(kind: "webdav", id: target, revision: profile.revision),
         try !IosFilesSelection.current().isEmpty || !IosPhotosSource.currentSelections().isEmpty else { cancelRequest(); return }
@@ -129,9 +130,10 @@ final class IosWebDavAutomaticCoordinator {
   }
   private func begin(_ expected: IosWebDavPlan, profile: IosWebDavProfile, task: BGProcessingTask?, lease: IosBackgroundLease?, token: UUID = UUID()) {
     var execution: Execution?
-    do {
+    // Retain the manual-start fence from availability through journal setup and queue admission.
+    do { try IosWebDavContext.synchronized {
       let journal = try IosWebDavJournal.open(), clock = try IosAutomaticClock.read()
-      guard active == nil, try !IosSyncJournal().automaticPaused(), try journal.plan() == expected,
+      guard active == nil, try !(IosAutomaticPause.requested || IosSyncJournal().automaticPaused()), try journal.plan() == expected,
         try IosWebDavContext.capture(profile, journal: journal) == expected.binding, try profile.targetId() == expected.target,
         clock.now >= expected.due else { lease?.cancel(); task?.setTaskCompleted(success: false); return }
       try IosWebDavContext.check(profile, binding: expected.binding, journal: journal)
@@ -156,7 +158,7 @@ final class IosWebDavAutomaticCoordinator {
       let value = Execution(token: token, plan: plan, profile: profile, task: task, lease: lease)
       execution = value; active = value
       try IosWebDavQueue.shared.start(automatic: true, lease: lease, prior: run) { result in self.worker.async { self.finish(value, result: result) } }
-    } catch {
+    } } catch {
       if let execution, let id = execution.plan.run {
         do {
           let journal = try IosWebDavJournal.open()

@@ -1,0 +1,20 @@
+{
+  "observedAt": "2026-11-01",
+  "method": "CUA native AX + screenshot observations retained in chat; final keyboard screenshot write did not execute because approval-review usage limit was reached",
+  "fieldLabels": [
+    "Sunucu",
+    "Port",
+    "Hedef klasör",
+    "Kullanıcı adı",
+    "Sunucu kimliği",
+    "Parola"
+  ],
+  "serverDraftEditableAndVisiblyUnmasked": true,
+  "passwordAutoScrolledAboveKeyboard": true,
+  "passwordSecureRoleAndMaskedSyntheticDraft": true,
+  "savePressed": false,
+  "realPasswordUsed": false,
+  "configurationWritten": false,
+  "networkOperation": false,
+  "standaloneKeyboardScreenshotSaved": false
+}

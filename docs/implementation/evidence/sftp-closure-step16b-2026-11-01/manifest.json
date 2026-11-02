@@ -1,0 +1,419 @@
+{
+  "updatedAt": "2026-11-02T13:51:09.131720+00:00",
+  "step": "16b implementation and scoped isolated acceptance complete; general product gates retained",
+  "head": "50ae92ecc168ac0d8a323bbb844627443493fcd8",
+  "passed": [
+    "mobile lint and TypeScript",
+    "SFTP UI/API 7 tests",
+    "whole mobile suite 179 passed plus 3 stale SFTP button expectations fixed; affected App suite 18/18 (182 total covered)",
+    "Rust path unit test and JNI Clippy",
+    "real owned OpenSSH consuming bound ABI, pin before password, fsync/CLOSE/rename/fresh hash, no overwrite and revoked-admission fence",
+    "Swift actual journal/publication seed/reopen/receipt failures and profile codec",
+    "four Android ABI JNI/C exports + 16KB ELF alignment; two iOS arm64 slices and XCFramework",
+    "Android native Kotlin and complete iOS native typecheck including Expo",
+    "iOS arm64 Simulator product build, no signing or device launch",
+    "WebDAV/SMB/SFTP coordinator admission/unconfigured source-derived controls, not OS delivery",
+    "Android real bound JNI/journal reopen and Keystore profile",
+    "Android SAF source/reuse/version/keep-both/download/restore, cross-protocol Photos codec rejection, product factory/service and owned OS Job; raw instrumentation=-1",
+    "iOS isolated source-generation, local restore seed/reopen and Photos codec authority; synthetic ACKs are local contracts only",
+    "exact all-feature 211 registry package OSV query: zero matches; third-party inventory/notices generated",
+    "Final rename-admission negative control reproduced pre-fix bug; fixed host bound runtime rejects rename after revocation during parent checks",
+    "Final six mobile artifacts rebuilt after rename fence; Android current sources/codec, product factory/owned OS, approved Photos runtime PASS",
+    "Actual Windows LAN iOS Files picker/security-scoped bookmarks,4097-byte publication/download/restore/repeat and separate process reopen PASS",
+    "Explicitly approved iOS Windows SFTP Photos: one PNG resource/manifest, unchanged reuse, native import/repeat and separate process reopen PASS; two assets/two albums cleaned with post-fetch zero",
+    "Android approved Photos source/revision/publication/download/restore/reopen/stale/unknown-create fences PASS; receipt-owned cleanup and permission revocation completed",
+    "SFTP native TR/EN/DE and maximum German font batch captures; keyboard secure/editable visibility observed through CUA; standalone keyboard screenshot missing",
+    "Separate same-agent review completed; independent Claude review remains deferred",
+    "Final rename-admission negative control reproduced pre-fix bug; fixed host bound runtime rejects rename after revocation during parent checks",
+    "Final six mobile artifacts rebuilt after rename fence; Android current sources/codec, product factory/owned OS, approved Photos runtime PASS",
+    "Actual Windows LAN iOS Files picker/security-scoped bookmarks,4097-byte publication/download/restore/repeat and separate process reopen PASS",
+    "Explicitly approved iOS Windows SFTP Photos: one PNG resource/manifest, unchanged reuse, native import/repeat and separate process reopen PASS; two assets/two albums cleaned with post-fetch zero",
+    "Android approved Photos source/revision/publication/download/restore/reopen/stale/unknown-create fences PASS; receipt-owned cleanup and permission revocation completed",
+    "SFTP native TR/EN/DE and maximum German font batch captures; keyboard secure/editable visibility observed through CUA; standalone keyboard screenshot missing",
+    "Separate same-agent review completed; independent Claude review remains deferred"
+  ],
+  "pending": [
+    "Final Claude independent review deferred by user",
+    "General12/20/21: full visual/VoiceOver/a11y, durable all-screen capture script, actual background delivery/lock, production signing/device custody, physical/performance acceptance",
+    "Windows test sshd remains running; user must Stop-Service sshd when finished"
+  ],
+  "resolvedFailures": [
+    "App integration test expected obsolete generic SFTP test button; affected18 passed after fix",
+    "cold-boot disposable System UI ANR held Activity focus; Wait dismissed, real SAF then passed",
+    "source-only fixture missed JNI loader; explicit package load fixed",
+    "runner omitted am instrument -r; raw final code verified after fix",
+    "Pre-rename authority was stale across asynchronous parent checks; fresh native receipt checks added inside parents/open and immediately before rename; old/fixed controls retained",
+    "Product fixture saw legitimate empty DB created by unconfigured boot reconciliation; fixture now proves zero content/profile and ledger-owns only that test metadata, without deleting unknown state",
+    "iOS fixture Photos authorization wait expired before OS dialog was handled; source/restore ledgers absent, same approved fixture resumed only before any source existed; subsequent seed/reopen/cleanup PASS",
+    "Simulator cleanup said 30 albums for two photos; native exact-ID membership verified one album per owned asset before accepting only two-photo deletion",
+    "Pre-rename authority was stale across asynchronous parent checks; fresh native receipt checks added inside parents/open and immediately before rename; old/fixed controls retained",
+    "Product fixture saw legitimate empty DB created by unconfigured boot reconciliation; fixture now proves zero content/profile and ledger-owns only that test metadata, without deleting unknown state",
+    "iOS fixture Photos authorization wait expired before OS dialog was handled; source/restore ledgers absent, same approved fixture resumed only before any source existed; subsequent seed/reopen/cleanup PASS",
+    "Simulator cleanup said 30 albums for two photos; native exact-ID membership verified one album per owned asset before accepting only two-photo deletion"
+  ],
+  "mediaWrites": true,
+  "commonDestinationSchemaChanged": false,
+  "claudeWorktreeChanged": false,
+  "artifacts": [
+    {
+      "target": "aarch64-apple-ios",
+      "release": true,
+      "artifact": "/tmp/kloda-sftp16b-release/aarch64-apple-ios/aarch64-apple-ios/release/libkloda_sftp_native.a",
+      "sha256": "11ce92c371a164737a16739bb1f5b9d2248075e7f93564618c1c298abf48f725",
+      "bytes": 32680104,
+      "exports": [
+        "kloda_sftp_publish_bound",
+        "kloda_sftp_read_bound"
+      ],
+      "alignments": []
+    },
+    {
+      "target": "aarch64-apple-ios-sim",
+      "release": true,
+      "artifact": "/tmp/kloda-sftp16b-release/aarch64-apple-ios-sim/aarch64-apple-ios-sim/release/libkloda_sftp_native.a",
+      "sha256": "deccbac666402026dd8b45d277ccaf58411f1aa7089f06df619d2689a51bc649",
+      "bytes": 32642112,
+      "exports": [
+        "kloda_sftp_publish_bound",
+        "kloda_sftp_read_bound"
+      ],
+      "alignments": []
+    },
+    {
+      "target": "aarch64-linux-android",
+      "release": true,
+      "artifact": "/tmp/kloda-sftp16b-release/aarch64-linux-android/aarch64-linux-android/release/libkloda_sftp_native.so",
+      "sha256": "586f3c1b62bd581b5ae277eed70ab3c47915f03a6a1a1baac22f168e2ee1872d",
+      "bytes": 4690528,
+      "exports": [
+        "kloda_sftp_publish_bound",
+        "kloda_sftp_read_bound",
+        "Java_com_kloda_sync_SftpNativeEngine_publishBound",
+        "Java_com_kloda_sync_SftpNativeEngine_readBound"
+      ],
+      "alignments": [
+        16384,
+        16384,
+        16384,
+        16384
+      ]
+    },
+    {
+      "target": "armv7-linux-androideabi",
+      "release": true,
+      "artifact": "/tmp/kloda-sftp16b-release/armv7-linux-androideabi/armv7-linux-androideabi/release/libkloda_sftp_native.so",
+      "sha256": "98e7f60dd37cc6c2e1777bc8a5598c1f27d561ac1aeb8bf44615a80e7c26758a",
+      "bytes": 3396188,
+      "exports": [
+        "kloda_sftp_publish_bound",
+        "kloda_sftp_read_bound",
+        "Java_com_kloda_sync_SftpNativeEngine_publishBound",
+        "Java_com_kloda_sync_SftpNativeEngine_readBound"
+      ],
+      "alignments": [
+        16384,
+        16384,
+        16384,
+        16384
+      ]
+    },
+    {
+      "target": "i686-linux-android",
+      "release": true,
+      "artifact": "/tmp/kloda-sftp16b-release/i686-linux-android/i686-linux-android/release/libkloda_sftp_native.so",
+      "sha256": "8556643e9cdaf711ff819ab3d386bb81f00dbdb87eee342edcbc76a31c350125",
+      "bytes": 5066572,
+      "exports": [
+        "kloda_sftp_publish_bound",
+        "kloda_sftp_read_bound",
+        "Java_com_kloda_sync_SftpNativeEngine_publishBound",
+        "Java_com_kloda_sync_SftpNativeEngine_readBound"
+      ],
+      "alignments": [
+        16384,
+        16384,
+        16384,
+        16384
+      ]
+    },
+    {
+      "target": "x86_64-linux-android",
+      "release": true,
+      "artifact": "/tmp/kloda-sftp16b-release/x86_64-linux-android/x86_64-linux-android/release/libkloda_sftp_native.so",
+      "sha256": "57fcbd1a1117d831c1181a47c1f24d7cdee9425afdbcef45af4fa53d7461d733",
+      "bytes": 4702488,
+      "exports": [
+        "kloda_sftp_publish_bound",
+        "kloda_sftp_read_bound",
+        "Java_com_kloda_sync_SftpNativeEngine_publishBound",
+        "Java_com_kloda_sync_SftpNativeEngine_readBound"
+      ],
+      "alignments": [
+        16384,
+        16384,
+        16384,
+        16384
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "path": "all-feature-osv-request.json",
+      "sha256": "65c77388817713d2d457e46c1a1ebf67c2e3f0651dc696a83139a24609d5d372"
+    },
+    {
+      "path": "all-feature-osv.json",
+      "sha256": "03044cd2be453d4856a7ee3d0bd0551e92ded195a7c249015153b66fb8409b2a"
+    },
+    {
+      "path": "android-kotlin.log.gz",
+      "sha256": "e4759bc9e6ef3f8004979b7a5e4b6cb94da2db79652e05df37bfc2ab898e936e"
+    },
+    {
+      "path": "android-package-final.log.gz",
+      "sha256": "5462ce08a492ec57ec20c83716e33d5866657155d4c49910e2ee85bfb537a193"
+    },
+    {
+      "path": "android-package.log.gz",
+      "sha256": "dc6e29f1a7de7a7034b9a1e6b2767f2f929d2514b7b7697d547552f8e5b6fe41"
+    },
+    {
+      "path": "android-photos-approved.log.gz",
+      "sha256": "0570a11c16076c1d80c933d99edc2677b6df34a9c886034c214554fa3461692b"
+    },
+    {
+      "path": "android-product-current.log.gz",
+      "sha256": "31fb220cff2e103efdf6ad845c75be55edafd6d23b178765027aa63ec02dcb4c"
+    },
+    {
+      "path": "android-rename-fence-current2.log.gz",
+      "sha256": "54dd9824befb782b3100c0f8231b8cb71763a123a54625e6bf70e3bb95e5baf9"
+    },
+    {
+      "path": "android-runtime.log.gz",
+      "sha256": "b4429070d7980b12374229b760535e6ddc42de2cca0f016bde257e89784b60f1"
+    },
+    {
+      "path": "android-sources-os-final.log.gz",
+      "sha256": "656fbef66e1127b4c87a490a2e77dcaa5f0712219b3018210d28f0f370ec6886"
+    },
+    {
+      "path": "android-sources-os-recheck.log.gz",
+      "sha256": "63e389831dbaf49fafacb83705d080f04da33f33772c1976d8957414e530bba5"
+    },
+    {
+      "path": "android-sources-recheck.log.gz",
+      "sha256": "877fc874afbf2b1fd5aa12d0a8fc3b9a474e94fe1ab71319b55e58c27d85724c"
+    },
+    {
+      "path": "app-recheck.log.gz",
+      "sha256": "e5631b03ee307011f8b2ca26a0e9aec882a5545c30a57b8b22162a445c9ed8b7"
+    },
+    {
+      "path": "automatic-admission.log.gz",
+      "sha256": "1f92b62a2db68ae2407db21fc724cbd0e1d0922681bca075dd74bf30c6cbc4d5"
+    },
+    {
+      "path": "automatic-unconfigured.log.gz",
+      "sha256": "bad9ae43f6657824d137b689909840fa8c0c779375660c74a42d372e86ab712f"
+    },
+    {
+      "path": "bound-runtime-final.log.gz",
+      "sha256": "7224b517a2080d39ac21675519a97cbac0934283485f765183fde0d11f903617"
+    },
+    {
+      "path": "bound-runtime.log.gz",
+      "sha256": "81da42ce8b9a59ae1e9daa33e69303f8a9b97eb3c3be0448b84a94c29f8776e6"
+    },
+    {
+      "path": "host-library.log.gz",
+      "sha256": "9ae0e419acfa15a4b174d2ed02abb98ad4d9b9a9e443da372cbe24394463b35b"
+    },
+    {
+      "path": "ios-contracts.log.gz",
+      "sha256": "a54df5cfee10065308c239b248da809eef6659a36f97acc4ba8c6b268d02fea2"
+    },
+    {
+      "path": "ios-native-types.log.gz",
+      "sha256": "357a6bfa2450d10c1209177f1dbb44527b6479b72da00ba5d24c75d6de4ce303"
+    },
+    {
+      "path": "ios-package-final.log.gz",
+      "sha256": "cc9cb2cd4a9831b008c25a016553ae5dbf7c134a38ac9c2239f90a4d31d2eeb8"
+    },
+    {
+      "path": "ios-package.log.gz",
+      "sha256": "5460970ff6be31f108844efd3c8784f44123e57688ff522c7e9fafbbe61f9ae4"
+    },
+    {
+      "path": "ios-product-build.log.gz",
+      "sha256": "54ec582d0d7057f5114dadd8f72515e466a3f1404a48ec214ea964b64c171d72"
+    },
+    {
+      "path": "lint.log.gz",
+      "sha256": "54360fb608aa4bd5faff525d2a2d78a5595276729d72fcc612e3e99f0a776e6a"
+    },
+    {
+      "path": "mobile-suite.log.gz",
+      "sha256": "841f0a0a7d13e02c42afdd14228f09e46e9e9f893cbab74038708d91715be257"
+    },
+    {
+      "path": "native-ui/capture.py.gz",
+      "sha256": "3877d2baefee3529ac997805a8bde01af6bd5f375d944a3402409e10c58b9c0e"
+    },
+    {
+      "path": "native-ui/captures.json",
+      "sha256": "b0041b254fd31d71a000fd444ea918011da2c1aa95da825fe86856c13c9d2acd"
+    },
+    {
+      "path": "native-ui/cleanup.json",
+      "sha256": "9de82b7d767d50d09bce0da96f01f955e1aed17da888e3ab6d27fced5e52fcea"
+    },
+    {
+      "path": "native-ui/de-accessibility-extra-extra-extra-large.png",
+      "sha256": "b58a9c4201159bd2a230441d669d512edb0f1068515c11cc05295ded17ba100c"
+    },
+    {
+      "path": "native-ui/de-large.png",
+      "sha256": "fab343fa7fb88dfac31aa9a909f0ebb8fe722e9a4eed6e24025c5a5543c9457a"
+    },
+    {
+      "path": "native-ui/en-large.png",
+      "sha256": "c10c1d10d69813a8beeb6b5d66e0c77bd66432d8738d43b28226048dc7107275"
+    },
+    {
+      "path": "native-ui/entry.js.gz",
+      "sha256": "00bd7f0b0386351502871de3bcce61c0f0ca902e9ea7993ec1525e4c983d411b"
+    },
+    {
+      "path": "native-ui/keyboard-checks.json",
+      "sha256": "19639a1ef09bf92907aa143937b34814c26ab805a085ea09e892754890c81490"
+    },
+    {
+      "path": "native-ui/runtime.json",
+      "sha256": "b08a11593f596bafaac8a7b9f7e3b1eb41d42ef3fa1aa1ecd55f2d2af8b678c9"
+    },
+    {
+      "path": "native-ui/tr-large.png",
+      "sha256": "bc49011223f17b072d5ad4327cc4ebfc3a42787d0587f33b17d26bb407e024dd"
+    },
+    {
+      "path": "photos-fixture-build.log.gz",
+      "sha256": "9ed46ac9e5c079fbb665f34e247ac2467e40833561aa9224609a07504e627578"
+    },
+    {
+      "path": "rename-admission-control.log.gz",
+      "sha256": "176cdca94c32dec00e0777786f39fabc0c9690cc322cdde45d85c813a4a2e023"
+    },
+    {
+      "path": "rename-fence-quality.log.gz",
+      "sha256": "489a0ac393e01a742b0037f47993c7bca10b182b21b8b940e5e4121a3082febe"
+    },
+    {
+      "path": "review-sources.tar.gz",
+      "sha256": "de59ad075f109c837f1fa361be3e0de99bad2615716e9e9e6a1a0ac21986face"
+    },
+    {
+      "path": "rust-quality.log.gz",
+      "sha256": "c1b63451dc8812b4c21a7c28e5366bfe9d1e3850e85223e9b4fcf2175d56068d"
+    },
+    {
+      "path": "rust.log.gz",
+      "sha256": "68a0c1bf29ae785839cc344c35205b72095af6ec8aa9666e56dec0b1ade35245"
+    },
+    {
+      "path": "source-hashes.json",
+      "sha256": "5d25b992546c261020f16d662e37d161a6b4d5144bdc23dc4a8dbdf157642293"
+    },
+    {
+      "path": "typescript.log.gz",
+      "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "path": "ui-tests.log.gz",
+      "sha256": "894a863dd95f0a5e1a6465e4951b53d9b8da536afede14d7080031138206d700"
+    },
+    {
+      "path": "windows-files-build.log.gz",
+      "sha256": "5305adca65f55907604f12791840fa763c794983cace36eb7492dc61ae529dd9"
+    },
+    {
+      "path": "windows-photos-build.log.gz",
+      "sha256": "72614661f2ba53be41e2a2e2991ebecbb1d05f2ed21c83984bf42ba34a1df282"
+    },
+    {
+      "path": "windows-runtime/approval-receipt.json",
+      "sha256": "c9e17e2973df59fbdf13bdc4ba3b79ec40b4ec9409539c5459799f86001a7609"
+    },
+    {
+      "path": "windows-runtime/files/keychain-cleanup.json",
+      "sha256": "935a2acfdc27e2cd1c096e47c306accce2e085d67b0c5fab8b78694f9d1a6b21"
+    },
+    {
+      "path": "windows-runtime/files/ownership.json",
+      "sha256": "db97a3d53a15799c52dabf48fba172a43eb57f3f1bf89ced6f1d0e7d5bbe5aa7"
+    },
+    {
+      "path": "windows-runtime/files/reopen-result.json",
+      "sha256": "514f01665c66ae721b890328815ce724a522d82cd2a2c1a2e0fdaa86613d0fb5"
+    },
+    {
+      "path": "windows-runtime/files/seed-result.json",
+      "sha256": "d47e94c000d1dc2153e16b73847422df7dcb08d905fd25c77cd106b2d270109d"
+    },
+    {
+      "path": "windows-runtime/photos/approval.json",
+      "sha256": "87de56e83938f3734d02320503a5d6725e77f7066f105176cb845be11d3d1b8f"
+    },
+    {
+      "path": "windows-runtime/photos/cleanup-dialog-check.json",
+      "sha256": "f5b065669a2b63df006b542a05ba28fddb4cef5134e9f737cb3a42d2eb38b713"
+    },
+    {
+      "path": "windows-runtime/photos/cleanup-result.json",
+      "sha256": "8c7de216e123efdee8274c9088c5e82f9210622f9468666a8afc523d2a549748"
+    },
+    {
+      "path": "windows-runtime/photos/final-cleanup.json",
+      "sha256": "46b0180d7c8454bcbc891220fa32225d552c4d2d37a5b3129f5f091b8de637a7"
+    },
+    {
+      "path": "windows-runtime/photos/keychain-cleanup.json",
+      "sha256": "935a2acfdc27e2cd1c096e47c306accce2e085d67b0c5fab8b78694f9d1a6b21"
+    },
+    {
+      "path": "windows-runtime/photos/membership.json",
+      "sha256": "5fb0b635fbd8d8377e821bfdc17718c30165c4713966293d821ea3f5edda5f20"
+    },
+    {
+      "path": "windows-runtime/photos/ownership.json",
+      "sha256": "4870371ac4cb683df0922080d848dc6c7c0f97b805d139e7a0a7dc45bcaa3dad"
+    },
+    {
+      "path": "windows-runtime/photos/reopen-result.json",
+      "sha256": "16656db5badfbc5da7ef246692679b8fddd253ca596ec0990ab6f5506b4d2b40"
+    },
+    {
+      "path": "windows-runtime/photos/restore-ids.json",
+      "sha256": "f85c3096c18f3ab9bf3f065845583ad445488e2847e934595ef29c8b32fe8211"
+    },
+    {
+      "path": "windows-runtime/photos/seed-result.json",
+      "sha256": "3c987d2e8e4aa307275e4d9ceecfcc9c755b0f0c1221016ef774b4957f954563"
+    },
+    {
+      "path": "windows-runtime/photos/source-ids.json",
+      "sha256": "99226bda4de04f8e3dc90f6ab06a4f84de1ca404b79b946ace1cf209454a470f"
+    }
+  ],
+  "mediaCleanup": "PASS exact owned IDs; no blanket media deletion",
+  "defaultFeatureEnabled": false,
+  "sourceSnapshot": {
+    "path": "source-hashes.json",
+    "files": 131,
+    "sha256": "5d25b992546c261020f16d662e37d161a6b4d5144bdc23dc4a8dbdf157642293",
+    "archive": "review-sources.tar.gz",
+    "archiveSha256": "de59ad075f109c837f1fa361be3e0de99bad2615716e9e9e6a1a0ac21986face",
+    "scope": "SFTP sources/tests/direct integration files at final closure; includes preexisting shared-file work, not an attribution-only patch"
+  }
+}

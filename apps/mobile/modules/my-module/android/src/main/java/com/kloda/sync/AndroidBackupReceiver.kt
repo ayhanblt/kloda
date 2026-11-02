@@ -11,6 +11,8 @@ class AndroidBackupReceiver : BroadcastReceiver() {
       val changed = intent.action == Intent.ACTION_TIME_CHANGED || intent.action == Intent.ACTION_TIMEZONE_CHANGED
       AndroidBackupScheduler.reconcile(context.applicationContext, changed)
       AndroidWebDavScheduler.reconcile(context.applicationContext, changed)
+      AndroidSmbScheduler.reconcile(context.applicationContext, changed)
+      AndroidSftpScheduler.reconcile(context.applicationContext, changed)
     } finally { pending.finish() } }, "kloda-backup-reconcile").start()
   }
 }

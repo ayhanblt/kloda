@@ -13,7 +13,10 @@ dependencies {
 android {
   namespace "com.kloda.sync"
   ndkVersion "27.1.12297006"
+  buildFeatures { buildConfig true }
   defaultConfig {
+    buildConfigField "boolean", "KLODA_SMB_NATIVE", (providers.gradleProperty("klodaSmbNative").orNull == "true").toString()
+    buildConfigField "boolean", "KLODA_SFTP_NATIVE", (providers.gradleProperty("klodaSftpNative").orNull == "true").toString()
     minSdkVersion 24
     consumerProguardFiles "consumer-rules.pro"
     testInstrumentationRunner "com.kloda.sync.AndroidFilesQueueRecoveryInstrumentation"
@@ -63,4 +66,30 @@ def buildPairingNative = tasks.register('buildPairingNative', Exec) {
 
 tasks.matching { it.name == 'preBuild' }.configureEach {
   dependsOn buildPairingNative
+}
+
+if (providers.gradleProperty("klodaSmbNative").orNull == "true") {
+  def storageCrate = new File(pairingRepo, "packages/storage-native")
+  def buildStorageNative = tasks.register('buildStorageNative', Exec) {
+    workingDir pairingRepo
+    inputs.files(fileTree(storageCrate) { include 'src/**', 'vendor/**', 'Cargo.toml', 'Cargo.lock', 'build.rs' }).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.files(new File(pairingRepo, 'tools/build-storage-native.mjs'), new File(pairingRepo, 'tools/check-storage-native.mjs')).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.property('rustToolchain', '1.99.0'); inputs.property('ndkVersion', '27.1.12297006')
+    outputs.files(pairingAbis.collect { file("src/main/jniLibs/${it}/libkloda_storage_native.so") })
+    commandLine(System.getenv('NODE_BINARY') ?: 'node', new File(pairingRepo, 'tools/build-storage-native.mjs').absolutePath, 'android')
+  }
+  tasks.matching { it.name == 'preBuild' }.configureEach { dependsOn buildStorageNative }
+}
+
+if (providers.gradleProperty("klodaSftpNative").orNull == "true") {
+  def sftpCrate = new File(pairingRepo, "packages/sftp-native")
+  def buildSftpNative = tasks.register('buildSftpNative', Exec) {
+    workingDir pairingRepo
+    inputs.files(fileTree(sftpCrate) { include 'src/**', 'vendor/**', 'Cargo.toml', 'Cargo.lock', 'build.rs' }).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.files(new File(pairingRepo, 'tools/build-sftp-native.mjs'), new File(pairingRepo, 'tools/check-sftp-native.mjs')).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.property('rustToolchain', '1.99.0'); inputs.property('ndkVersion', '27.1.12297006')
+    outputs.files(pairingAbis.collect { file("src/main/jniLibs/${it}/libkloda_sftp_native.so") })
+    commandLine(System.getenv('NODE_BINARY') ?: 'node', new File(pairingRepo, 'tools/build-sftp-native.mjs').absolutePath, 'android')
+  }
+  tasks.matching { it.name == 'preBuild' }.configureEach { dependsOn buildSftpNative }
 }

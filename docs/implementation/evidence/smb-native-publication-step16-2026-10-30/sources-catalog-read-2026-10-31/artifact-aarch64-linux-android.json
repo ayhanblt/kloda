@@ -1,0 +1,21 @@
+{
+  "target": "aarch64-linux-android",
+  "release": true,
+  "artifact": "/tmp/kloda-smb16-release/aarch64-linux-android/aarch64-linux-android/release/libkloda_storage_native.so",
+  "sha256": "bd31f327e9d54def8465f871578cca83599edb4476639fc93202cbd4cfbe89a0",
+  "bytes": 2618760,
+  "exports": [
+    "kloda_smb_publish",
+    "kloda_smb_publish_bound",
+    "kloda_smb_read_bound",
+    "Java_com_kloda_sync_SmbNativeEngine_publish",
+    "Java_com_kloda_sync_SmbNativeEngine_publishBound",
+    "Java_com_kloda_sync_SmbNativeEngine_readBound"
+  ],
+  "alignments": [
+    16384,
+    16384,
+    16384,
+    16384
+  ]
+}

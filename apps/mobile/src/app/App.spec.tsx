@@ -202,7 +202,7 @@ describe('App', () => {
     await fireEvent.press(surface.getByText(i18n.t('ui.providers.sftp')));
     expect(surface.getByText(i18n.t('ui.integrationUnavailable'))).toBeTruthy();
     expect(surface.getByLabelText(i18n.t('ui.providerFields.fingerprint')).props.editable).toBe(false);
-    expect(surface.getByRole('button', { name: i18n.t('ui.conn.test') }).props.accessibilityState.disabled).toBe(true);
+    expect(surface.getByRole('button', { name: i18n.t('destinations.sftp.saveEnable') }).props.accessibilityState.disabled).toBe(true);
     await surface.unmount();
     await i18n.changeLanguage('tr');
   });

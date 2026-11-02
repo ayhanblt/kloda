@@ -1,0 +1,8 @@
+{
+  "date": "2026-11-02",
+  "androidAnswer": "Bu sınırlı Android SFTP Photos testini onaylıyorum",
+  "iosAnswer": "Bu sınırlı iOS SFTP Photos testini onaylıyorum",
+  "questionCall": "call_147b4ce6733e4f6d9eb69b4432fe6f18",
+  "androidScope": "KlodaWebDavStep15/emulator-5584; ledger-owned Docker only; one source PNG, four restore calls; conservative cap five media items; receipt-owned cleanup and new-permission revocation",
+  "iosScope": "Kloda-WebDAV15-Disposable; Windows KlodaTest16b/upload; one PNG source+album, three restore calls; expected two assets/two albums, cap four/four; exact-ID cleanup"
+}

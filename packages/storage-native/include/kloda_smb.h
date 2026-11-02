@@ -17,7 +17,16 @@ int32_t kloda_smb_publish(const uint8_t *json, size_t length, int32_t snapshot_f
 /* Native route-bound path. Consumes both FDs on every return; no new connection,
  * DNS or fallback. Socket must be connected to the exact request peer, exclusively
  * transferred after native OS route admission; callbacks/Completed still recheck it.
+ * The native route owner may retain its original FD without I/O until return;
+ * no concurrent socket I/O is allowed.
  * The legacy entry remains for the isolated wire fixture, not route admission proof. */
 int32_t kloda_smb_publish_bound(const uint8_t *json, size_t length,
     int32_t snapshot_fd, int32_t socket_fd, kloda_smb_receipt callback, void *context);
+/* Read-only: consumes both FDs, writes only a fresh private empty staging file.
+ * Same strict request shape; event0 checks current native restore/route/profile
+ * admission. No write ACK events. Return0 proves exact stage SHA256/size and fsync,
+ * not local publication or backup ownership. Caller first requires an own Completed
+ * receipt and independently fences destination publication. No DNS/new connection. */
+int32_t kloda_smb_read_bound(const uint8_t *json, size_t length,
+    int32_t output_fd, int32_t socket_fd, kloda_smb_receipt callback, void *context);
 #endif

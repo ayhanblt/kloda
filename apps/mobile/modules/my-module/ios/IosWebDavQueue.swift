@@ -106,7 +106,7 @@ final class IosWebDavQueue {
       guard active == nil else { throw IosWebDavFailure.code("backup_busy") }
       guard foreground || lease != nil else { throw IosWebDavFailure.code("candidate_stale") }
       guard protectedData else { throw IosWebDavFailure.code("credential_locked") }
-      if automatic, try IosSyncJournal().automaticPaused() { throw IosWebDavFailure.code("user_pause") }
+      if automatic, try (IosAutomaticPause.requested || IosSyncJournal().automaticPaused()) { throw IosWebDavFailure.code("user_pause") }
       try lease?.check()
       let journal = try IosWebDavJournal.open()
       guard let profile = try IosWebDavVault.read() else { throw IosWebDavFailure.code("webdav_missing") }

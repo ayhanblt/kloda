@@ -1,0 +1,13 @@
+{
+  "bundle": "com.kloda.fixture.smb16.rc0bcc833e1464c718e4e107fabb7fd1a",
+  "simulator": "497AAA0F-967E-4781-9468-3F05CA2D3D5A",
+  "inputs": {
+    "apps/mobile/modules/my-module/ios/IosSyncJournal.swift": "2aaba689218fba631dceb1a63155d143bef41cf341a18d4528836dd05b23d0e3",
+    "apps/mobile/modules/my-module/ios/IosSmbJournal.swift": "8d42dada4ab985988f7410c4eb5da3aa841e01815b3007ce712316e89b9a6fca",
+    "apps/mobile/modules/my-module/ios/IosSmbProfile.swift": "63f5dbcc3072985092e2693f29babf8715b95fa1fb728a5d0f1fea3501a21ea4",
+    "apps/mobile/modules/my-module/ios/IosSmbVault.swift": "2223590ab3f598bfed487feb6ee33f542f0a1a20baeefd69ad25651c84ab4686",
+    "apps/mobile/modules/my-module/ios/IosSmbProfiles.swift": "29c50691399a6ef14657504d71b16cfe71572f44e5ab4fbbb906cd2fd5de63b6",
+    "packages/storage-native/apple/tests/IosSmbCustodyApp.swift": "dd18bfbbc461a39cdfdb849c06be8ce32132660c46b4f9a950cc25bc74ccc0c2",
+    "tools/test-ios-smb-custody.py": "0762819eef5b0d9ecc91404c9cb78cdf99f668245a34b88fbb77e501f9fb1c59"
+  }
+}

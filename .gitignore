@@ -93,3 +93,9 @@ apps/mobile/.expo/dev/logs/export.log
 !/docs/implementation/evidence/lovable-step12-2026-10-28/mobile-native/metro.log
 !/docs/implementation/evidence/lovable-step12-2026-10-28/mobile-suite-final.log
 !/docs/implementation/evidence/lovable-step12-2026-10-28/mobile-typecheck-final.log
+
+apps/mobile/modules/my-module/ios/NativeStorage/
+
+/apps/mobile/modules/my-module/ios/NativeSftp/
+
+/apps/mobile/modules/my-module/android/src/androidTest/assets/kloda-sftp16/

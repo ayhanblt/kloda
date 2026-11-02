@@ -1,0 +1,9 @@
+{
+  "quickCheck": "ok",
+  "counts": {
+    "smb_profile": 0,
+    "smb_upload": 0,
+    "smb_run": 0,
+    "smb_enabled": 0
+  }
+}

@@ -7,7 +7,9 @@
     "modules": [
       "KlodaSyncRuntimeModule",
       "KlodaPairingModule",
-      "KlodaBackupModule"
+      "KlodaBackupModule",
+      "KlodaSmbModule",
+      "KlodaSftpModule"
     ],
     "appDelegateSubscribers": [
       "IosAutomaticSubscriber"
@@ -17,7 +19,9 @@
     "modules": [
       "com.kloda.sync.KlodaSyncRuntimeModule",
       "com.kloda.sync.KlodaPairingModule",
-      "com.kloda.sync.KlodaBackupModule"
+      "com.kloda.sync.KlodaBackupModule",
+      "com.kloda.sync.KlodaSmbModule",
+      "com.kloda.sync.KlodaSftpModule"
     ]
   }
 }

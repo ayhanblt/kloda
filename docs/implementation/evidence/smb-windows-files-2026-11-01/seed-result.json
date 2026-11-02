@@ -1,0 +1,16 @@
+{
+  "bytes": 4097,
+  "catalogCount": 1,
+  "hash": "oWVg1mi4Q_s76ZrOQdvRhHHzQr0yVaHSEgSzXkP3RDY",
+  "job": "49c618e3-4c33-4a3f-8382-ef81e6144e16",
+  "mode": "seed",
+  "phase": "finished",
+  "photosOperations": 0,
+  "relativePath": "f4255125-9c9c-4eb2-9597-0796c4fcc874/files/oWVg1mi4Q_s76ZrOQdvRhHHzQr0yVaHSEgSzXkP3RDY/owned.bin",
+  "remoteRoot": "kloda16a-f4255125-9c9c-4eb2-9597-0796c4fcc874",
+  "restorePicker": true,
+  "restoreRepeatSameInode": true,
+  "sourcePicker": true,
+  "status": "PASS",
+  "unchangedReuse": true
+}

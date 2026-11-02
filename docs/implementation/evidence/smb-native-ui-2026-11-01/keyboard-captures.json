@@ -1,0 +1,24 @@
+[
+  {
+    "image": "tr-large.png",
+    "report": {
+      "id": 1,
+      "language": "tr",
+      "fontsLoaded": true,
+      "fontError": false,
+      "dimensions": {
+        "fontScale": 1,
+        "width": 402,
+        "height": 874,
+        "scale": 3
+      },
+      "status": {
+        "supported": true,
+        "configured": false,
+        "enabled": false,
+        "running": false
+      },
+      "appState": "active"
+    }
+  }
+]

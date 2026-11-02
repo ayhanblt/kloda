@@ -15,21 +15,21 @@ use std::{
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct Request {
-    address: std::net::IpAddr,
-    port: u16,
-    share: String,
-    username: String,
-    password: String,
-    domain: String,
-    operation_id: String,
-    final_path: String,
-    size: String,
-    sha256: [u8; 32],
-    response_timeout_ms: u32,
+pub(crate) struct Request {
+    pub(crate) address: std::net::IpAddr,
+    pub(crate) port: u16,
+    pub(crate) share: String,
+    pub(crate) username: String,
+    pub(crate) password: String,
+    pub(crate) domain: String,
+    pub(crate) operation_id: String,
+    pub(crate) final_path: String,
+    pub(crate) size: String,
+    pub(crate) sha256: [u8; 32],
+    pub(crate) response_timeout_ms: u32,
 }
 impl Request {
-    fn size(&self) -> Result<u64, PublishError> {
+    pub(crate) fn size(&self) -> Result<u64, PublishError> {
         if self.size.len() > 19
             || self.size.is_empty()
             || !self.size.bytes().all(|b| b.is_ascii_digit())
@@ -56,9 +56,9 @@ impl Request {
 }
 
 pub type ReceiptCallback = unsafe extern "C" fn(*mut c_void, i32, u64) -> i32;
-struct Receipt {
-    callback: ReceiptCallback,
-    context: *mut c_void,
+pub(crate) struct Receipt {
+    pub(crate) callback: ReceiptCallback,
+    pub(crate) context: *mut c_void,
 }
 impl NativeReceipt for Receipt {
     fn admit(&mut self) -> Result<(), PublishError> {
@@ -164,6 +164,10 @@ pub(crate) unsafe fn publish_with_socket(
             publication::publish(&mut conn, tree, &mut snapshot, &job, &mut receipt).await
         })
     }));
+    result_code(result)
+}
+
+pub(crate) fn result_code(result: std::thread::Result<Result<(), PublishError>>) -> i32 {
     match result {
         Ok(Ok(())) => 0,
         Ok(Err(PublishError::InvalidInput)) => 1,

@@ -52,6 +52,16 @@ final class IosFilesSnapshot {
     let support = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
     return try IosFilesSnapshot(directoryURL: support.appendingPathComponent("kloda-webdav-snapshots", isDirectory: true))
   }
+  var isSmb: Bool { rootURL.lastPathComponent == "kloda-smb-snapshots" }
+  static func smb() throws -> IosFilesSnapshot {
+    let support = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+    return try IosFilesSnapshot(directoryURL: support.appendingPathComponent("kloda-smb-snapshots", isDirectory: true))
+  }
+  var isSftp: Bool { rootURL.lastPathComponent == "kloda-sftp-snapshots" }
+  static func sftp() throws -> IosFilesSnapshot {
+    let support = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+    return try IosFilesSnapshot(directoryURL: support.appendingPathComponent("kloda-sftp-snapshots", isDirectory: true))
+  }
   deinit { Darwin.close(directory) }
 
   func createStaging() throws -> (String, FileHandle) {
@@ -160,6 +170,15 @@ final class IosFilesSnapshot {
     }
   }
 
+  func sealStaging(_ name: String, sha256: String, size: Int64, cancelled: () -> Bool) throws {
+    let verified = try open(name, sha256: sha256, size: size, cancelled: cancelled)
+    defer { try? verified.close() }
+    let writable = try openStaging(name, offset: size)
+    defer { try? writable.close() }
+    guard fchmod(writable.fileDescriptor, 0o400) == 0, fsync(writable.fileDescriptor) == 0,
+      fcntl(writable.fileDescriptor, F_FULLFSYNC) == 0, fsync(directory) == 0 else { throw IosFilesSource.ioFailure() }
+    if cancelled() { throw IosFilesSource.failure("cancelled") }
+  }
   func verifiedURL(_ name: String, sha256: String, size: Int64, check: () throws -> Void) throws -> URL {
     try check()
     let file = try open(name, sha256: sha256, size: size, cancelled: { (try? check()) == nil })

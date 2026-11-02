@@ -61,14 +61,14 @@ internal object AndroidBackupScheduler {
     AndroidPairingRuntime.files?.requestPause()
     val saved = prefs(context).edit().putBoolean("automaticPaused", true).commit()
     try { AndroidWebDavRuntime.pause() }
-    finally { context.getSystemService(JobScheduler::class.java).apply { cancel(JOB); cancel(WATCH) }; AndroidWebDavScheduler.cancel(context) }
+    finally { try { AndroidSmbRuntime.pause() } finally { try { AndroidSftpRuntime.pause() } finally { context.getSystemService(JobScheduler::class.java).apply { cancel(JOB); cancel(WATCH) }; AndroidWebDavScheduler.cancel(context); AndroidSmbScheduler.cancel(context); AndroidSftpScheduler.cancel(context) } } }
     if (!saved) throw FilesFailure("automatic_pause_not_saved")
   }
   fun resume(context: Context) {
     pauseBarrier = true
     if (!prefs(context).edit().putBoolean("automaticPaused", false).commit()) throw FilesFailure("storage_failure")
     pauseBarrier = false
-    reconcile(context); AndroidWebDavScheduler.reconcile(context)
+    reconcile(context); AndroidWebDavScheduler.reconcile(context); AndroidSmbScheduler.reconcile(context); AndroidSftpScheduler.reconcile(context)
   }
   fun reconcileAsync(context: Context) { Thread({ reconcile(context.applicationContext) }, "kloda-backup-reconcile").start() }
 

@@ -4,7 +4,8 @@ import SQLite3
 
 // This lock also fences source/program mutations against the final local receipt.
 enum IosWebDavContext {
-  static let lock = NSRecursiveLock()
+  // Share the selected-source mutation fence with SMB final completion.
+  static let lock = IosSmbJournal.ownerLock
   static func synchronized<T>(_ action: () throws -> T) rethrows -> T {
     lock.lock(); defer { lock.unlock() }; return try action()
   }
@@ -13,7 +14,15 @@ enum IosWebDavContext {
     try journal.execute("INSERT OR IGNORE INTO backup_context(id,revision) VALUES(1,?)", values: [UUID().uuidString])
   }
   static func mutate<T>(_ action: () throws -> T) throws -> T {
-    defer { try? IosWebDavQueue.shared.pause(code: "settings_changed"); IosWebDavAutomaticCoordinator.shared.reconcile() }
+    defer {
+      try? IosWebDavQueue.shared.pause(code: "settings_changed"); IosWebDavAutomaticCoordinator.shared.reconcile()
+#if KLODA_SMB_NATIVE
+      try? IosSmbQueue.shared.pause(code: "settings_changed"); IosSmbAutomaticCoordinator.shared.reconcile()
+#endif
+#if KLODA_SFTP_NATIVE
+      try? IosSftpQueue.shared.pause(code: "settings_changed"); IosSftpAutomaticCoordinator.shared.reconcile()
+#endif
+    }
     return try synchronized {
       let journal = try IosWebDavJournal.open().database; try initialize(journal)
       // Persist the new generation before changing values; away/back cannot reauthorize old work.

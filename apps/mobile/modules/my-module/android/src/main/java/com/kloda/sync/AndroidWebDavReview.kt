@@ -60,7 +60,7 @@ internal class AndroidWebDavReview(private val context: Context, private val vis
         val captured = AndroidWebDavContext.capture(context, journal)
         if (captured.profile.targetId() != value.target || (!explicit && captured.binding != value.binding)) throw FilesFailure("settings_changed")
         val check = { current(token); captured.check(context, journal) }
-        val snapshots = AndroidFilesSnapshots(context, true, check)
+        val snapshots = AndroidFilesSnapshots(context, true, checkPaused = check)
         val activeTransport = AndroidWebDavTransport(context, captured.profile, snapshots, check)
         transport = activeTransport
         synchronized(lock) { if (active != token) throw FilesFailure("cancelled"); sender = activeTransport }

@@ -38,7 +38,7 @@ final class IosSmbProfiles {
   }
 #if KLODA_SMB_NATIVE
   func publishBound(job: IosSmbUpload, snapshot: Int32, socket: Int32,
-    currentSourceAndRoute: @escaping () throws -> Bool) throws {
+    currentSourceAndRoute: @escaping () throws -> Bool, completedSource: (() throws -> Bool)? = nil) throws {
     var ownedSocket: Int32? = socket
     defer { if let fd = ownedSocket, fd >= 0 { Darwin.close(fd) } }
     guard let captured = try capture(), job.target == captured.profile.target, job.context == captured.context
@@ -47,6 +47,8 @@ final class IosSmbProfiles {
     try IosSmbPublication.runBound(journal: journal, job: job, snapshot: snapshot,
       password: captured.profile.password, socket: socket, current: {
         try self.current(captured) && currentSourceAndRoute()
+      }, completed: {
+        try self.current(captured) && (completedSource ?? currentSourceAndRoute)()
       })
   }
 #endif

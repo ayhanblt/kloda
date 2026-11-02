@@ -1,0 +1,50 @@
+{
+  "at": "2026-10-31T17:57:07.604975+00:00",
+  "removed": [
+    {
+      "cache": "/var/folders/cm/fsyld6dn5xl1p74jcds8tc640000gn/T/kloda-smb-sources16-0kxyedll/cache",
+      "bytes": 96316562
+    },
+    {
+      "cache": "/var/folders/cm/fsyld6dn5xl1p74jcds8tc640000gn/T/kloda-smb-sources16-9crlsmvq/cache",
+      "bytes": 31530896
+    },
+    {
+      "cache": "/var/folders/cm/fsyld6dn5xl1p74jcds8tc640000gn/T/kloda-smb-sources16-_bi8j_67/cache",
+      "bytes": 96316562
+    },
+    {
+      "cache": "/var/folders/cm/fsyld6dn5xl1p74jcds8tc640000gn/T/kloda-smb-sources16-_h8lov_u/cache",
+      "bytes": 96316562
+    },
+    {
+      "cache": "/var/folders/cm/fsyld6dn5xl1p74jcds8tc640000gn/T/kloda-smb-sources16-cwfj88_g/cache",
+      "bytes": 96316562
+    },
+    {
+      "cache": "/var/folders/cm/fsyld6dn5xl1p74jcds8tc640000gn/T/kloda-smb-sources16-fl3ecjbm/cache",
+      "bytes": 96316562
+    },
+    {
+      "cache": "/var/folders/cm/fsyld6dn5xl1p74jcds8tc640000gn/T/kloda-smb-sources16-g7sc5w87/cache",
+      "bytes": 96316562
+    },
+    {
+      "cache": "/var/folders/cm/fsyld6dn5xl1p74jcds8tc640000gn/T/kloda-smb-sources16-lrq1ivaw/cache",
+      "bytes": 31530896
+    },
+    {
+      "cache": "/var/folders/cm/fsyld6dn5xl1p74jcds8tc640000gn/T/kloda-smb-sources16-rn8pecyh/cache",
+      "bytes": 96316562
+    },
+    {
+      "cache": "/var/folders/cm/fsyld6dn5xl1p74jcds8tc640000gn/T/kloda-smb-sources16-stwkcwcp/cache",
+      "bytes": 96316562
+    },
+    {
+      "cache": "/var/folders/cm/fsyld6dn5xl1p74jcds8tc640000gn/T/kloda-smb-sources16-y62ukj4g/cache",
+      "bytes": 96316562
+    }
+  ],
+  "preserved": "all evidence/logs/test binaries/DBs/Rust targets and every shared cache"
+}

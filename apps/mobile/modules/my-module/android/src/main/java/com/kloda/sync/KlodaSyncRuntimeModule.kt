@@ -169,7 +169,7 @@ class KlodaSyncRuntimeModule : Module() {
   }
 
   private fun reconcileSources() { appContext.reactContext?.applicationContext?.let {
-    AndroidWebDavRuntime.settingsChanged(); AndroidBackupScheduler.reconcile(it); AndroidWebDavScheduler.reconcile(it)
+    AndroidWebDavRuntime.settingsChanged(); AndroidSmbRuntime.settingsChanged(); AndroidSftpRuntime.settingsChanged(); AndroidBackupScheduler.reconcile(it); AndroidWebDavScheduler.reconcile(it); AndroidSmbScheduler.reconcile(it); AndroidSftpScheduler.reconcile(it)
   } }
 
   private fun preferences() = appContext.reactContext?.getSharedPreferences("kloda-sync", 0)

@@ -48,7 +48,7 @@ fn read(address: &libc::ifaddrs, witness: &Witness) -> Option<Interface> {
     }
     let class = witness.class(&name, index)?;
     let local = unsafe { ip(address.ifa_addr) }?;
-    let mask = unsafe { ip(address.ifa_netmask) }?;
+    let mask = unsafe { netmask(address.ifa_netmask) }?;
     let bits = match (local, mask) {
         (IpAddr::V4(_), IpAddr::V4(mask)) => {
             let mask = u32::from(mask);
@@ -76,6 +76,27 @@ fn read(address: &libc::ifaddrs, witness: &Witness) -> Option<Interface> {
         prefix,
         class,
     })
+}
+
+unsafe fn netmask(address: *const libc::sockaddr) -> Option<IpAddr> {
+    if unsafe { (*address).sa_family } as libc::c_int != libc::AF_INET {
+        return unsafe { ip(address) };
+    }
+    let length = unsafe { (*address).sa_len } as usize;
+    let offset = std::mem::offset_of!(libc::sockaddr_in, sin_addr);
+    if length <= offset || length > std::mem::size_of::<libc::sockaddr_in>() {
+        return None;
+    }
+    // Darwin trims trailing zero netmask bytes; never read beyond the reported length.
+    let mut octets = [0; 4];
+    unsafe {
+        ptr::copy_nonoverlapping(
+            address.cast::<u8>().add(offset),
+            octets.as_mut_ptr(),
+            (length - offset).min(octets.len()),
+        );
+    }
+    Some(octets.into())
 }
 
 unsafe fn ip(address: *const libc::sockaddr) -> Option<IpAddr> {
@@ -135,6 +156,34 @@ pub(super) fn current(expected: Interface, witness: &Witness) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn darwin_ipv4_netmasks_zero_extend_only_the_reported_bytes() {
+        let mut raw = [0_u8; std::mem::size_of::<libc::sockaddr_in>()];
+        raw[1] = libc::AF_INET as u8;
+        let offset = std::mem::offset_of!(libc::sockaddr_in, sin_addr);
+        raw[offset..offset + 4].copy_from_slice(&[255, 255, 255, 123]);
+        for (length, expected) in [
+            (5, [255, 0, 0, 0]),
+            (6, [255, 255, 0, 0]),
+            (7, [255, 255, 255, 0]),
+            (16, [255, 255, 255, 123]),
+        ] {
+            raw[0] = length;
+            assert_eq!(
+                unsafe { netmask(raw.as_ptr().cast()) },
+                Some(IpAddr::from(expected))
+            );
+        }
+        for length in [0, 2, 4, 17] {
+            raw[0] = length;
+            assert_eq!(unsafe { netmask(raw.as_ptr().cast()) }, None);
+        }
+        raw[0] = 7;
+        assert_eq!(unsafe { ip(raw.as_ptr().cast()) }, None);
+        raw[1] = libc::AF_UNSPEC as u8;
+        assert_eq!(unsafe { netmask(raw.as_ptr().cast()) }, None);
+    }
 
     fn candidate(index: u32, address: [u8; 4]) -> Interface {
         Interface {

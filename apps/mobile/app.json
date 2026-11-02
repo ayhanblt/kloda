@@ -29,7 +29,9 @@
         ],
         "BGTaskSchedulerPermittedIdentifiers": [
           "com.kloda.app.backup.processing",
-          "com.kloda.app.webdav.processing"
+          "com.kloda.app.webdav.processing",
+          "com.kloda.app.smb.processing",
+          "com.kloda.app.sftp.processing"
         ]
       }
     },
