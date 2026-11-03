@@ -1,0 +1,20 @@
+{
+  "slice": "18B/5 iOS runtime + queue run",
+  "date": "2026-11-03",
+  "simulator": "Kloda-Cloud18-Disposable (0309DEBC-9F6A-429C-AAB7-487F5BEC9390), iOS Simulator Debug arm64, ad-hoc signed",
+  "account": "user's own Dropbox, user signed in (approved 2026-11-03); Kloda never deletes remotely",
+  "results": {
+    "oauthSignInSave": "PASS: saved with folder 'test', card shows disabled (saving != enabling)",
+    "enable": "PASS: backup_destination dropbox row enabled=1",
+    "noSource": "PASS native source_unavailable; UI showed outcome_unknown -> JS code mapping fixed (Expo iOS puts code in error.code)",
+    "folderPicker": "crash (MainActor assert in KlodaSyncRuntimeModule.pickDirectory) -> fixed, picker opens and saves the folder",
+    "automaticQueueRun": "PASS: run 14152d84 automatic=1 finished; 2 jobs completed, issue none",
+    "files": [
+      {"name": "Dropbox kuyruk ü 😀.txt", "size": 63, "sha256": "1a19cacd31f1872b3557b14338947f16f1eed5b1ad6f2a1932e2890e34946683", "journalMatchesSource": true},
+      {"name": "rastgele-2mb.bin", "size": 2000000, "sha256": "177c74cb2559d2b258e0269c311f31d6cce08905fd9fc0df4f4ece63e13b38aa", "journalMatchesSource": true}
+    ],
+    "manualRun": "PASS: runDestination run 4d34b330 automatic=0 finished, no new upload (dedupe)"
+  },
+  "remote": "Dropbox Apps/<app>/test/<sourceId>/... (left for the user)",
+  "notRun": ["Android runtime of the per-destination JS error mapping", "upload_session (>150 MiB) on iOS", "EN/DE/a11y capture"]
+}

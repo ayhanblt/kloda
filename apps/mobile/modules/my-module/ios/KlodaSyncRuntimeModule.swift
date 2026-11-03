@@ -11,7 +11,7 @@ struct DirectorySelection {
 final class DirectoryPickerDelegate: NSObject, UIDocumentPickerDelegate, UIAdaptivePresentationControllerDelegate {
   private var continuation: CheckedContinuation<DirectorySelection?, Never>?
 
-  func pick(from viewController: UIViewController) async -> DirectorySelection? {
+  @MainActor func pick(from viewController: UIViewController) async -> DirectorySelection? {
     await withCheckedContinuation { continuation in
       self.continuation = continuation
       let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.folder], asCopy: false)
@@ -51,14 +51,17 @@ public class KlodaSyncRuntimeModule: Module {
   private let storageUsernameKey = "kloda.sync.storageUsername"
   private let directoryPicker = DirectoryPickerDelegate()
 
+  // The picker and the current view controller are UIKit state: main actor only (an async function runs off main).
+  @MainActor private func presentDirectoryPicker() async -> DirectorySelection? {
+    guard let viewController = appContext?.utilities?.currentViewController() else { return nil }
+    return await directoryPicker.pick(from: viewController)
+  }
+
   public func definition() -> ModuleDefinition {
     Name("KlodaSyncRuntime")
 
     AsyncFunction("pickDirectory") { (_: String) async throws -> [String: String]? in
-      guard let viewController = self.appContext?.utilities?.currentViewController() else {
-        return nil
-      }
-      guard let selection = await self.directoryPicker.pick(from: viewController) else {
+      guard let selection = await self.presentDirectoryPicker() else {
         return nil
       }
       return try self.saveDirectorySource(selection)

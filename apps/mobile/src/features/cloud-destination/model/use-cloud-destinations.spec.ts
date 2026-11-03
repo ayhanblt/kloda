@@ -47,6 +47,13 @@ it('switches the opt-in through native and shows its answer', async () => {
   api.setEnabled.mockRejectedValueOnce(new Error('destination_unsupported'));
   await act(async () => { await hook.result.current.setEnabled(row(1).targetId, false); });
   expect(hook.result.current.error).toBe('destination_unsupported');
+  // Expo iOS: the code is on `code`, the message is descriptive text.
+  api.setEnabled.mockRejectedValueOnce(Object.assign(new Error("Calling the 'setDestinationEnabled' function has failed"), { code: 'source_unavailable' }));
+  await act(async () => { await hook.result.current.setEnabled(row(1).targetId, false); });
+  expect(hook.result.current.error).toBe('source_unavailable');
+  api.setEnabled.mockRejectedValueOnce(new Error('Some descriptive text'));
+  await act(async () => { await hook.result.current.setEnabled(row(1).targetId, false); });
+  expect(hook.result.current.error).toBe('outcome_unknown');
 });
 
 it('cancels a pending sign-in on unmount', async () => {

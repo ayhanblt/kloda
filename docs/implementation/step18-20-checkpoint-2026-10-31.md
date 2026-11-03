@@ -319,11 +319,41 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
   Test dosyaları kullanıcının Dropbox'ında `Apps/Kloda/Kloda/test18b5-*` altında kaldı. Not: Android seçicisinde ürün
   uygulaması ve test paketi aynı yönlendirmeyi dinler → `com.kloda.sync.test`, "Just once". Daha uzun uzak dosya boyut
   sınırında `review_required` verir (DAV ile aynı). [Kanıt](evidence/cloud18-nextcloud-2026-10-31/dropbox-upload-2026-11-03.json).
-- NOT_RUN: etkin Dropbox hedefinin kuyruk/JobService üzerinden koşusu; iOS çalışma zamanı (yalnız derleme);
-  18A/3 DAV çok hedefli regresyon (`test-android-dav-targets.py`: HTTPS fixture özel anahtarları Codex'in
+- Commit `b0980e8` (3.11, push yok). İlk NOT_RUN listesindeki iOS çalışma zamanı ve kuyruk koşusu aşağıda kapandı.
+- NOT_RUN (Android): etkin Dropbox hedefinin JobService üzerinden koşusu; 18A/3 DAV çok hedefli regresyon (`test-android-dav-targets.py`: HTTPS fixture özel anahtarları Codex'in
   `/tmp/kloda-step15` alanında silinmiş; yeniden üretmek Codex fixture'ını ve izlenen CA dosyasını değiştirirdi).
 - Bilinen sınırlar: eklenen hedeflerde inceleme (review) ekranı yok (özgün WebDAV'a bağlı, önceden de böyle); Dropbox
   yolları büyük/küçük harf duyarsız → yalnız harf farkı olan iki yol `conflict` olur. Aynı ajan review; bağımsız yok.
+
+## Dilim 18B/5 kapanış — iOS gerçek hesap + kuyruk (3.11, commit yok)
+
+- Kloda-Cloud18-Disposable, ürün uygulaması (Debug arm64, ad-hoc). Kullanıcı kendi Dropbox girişini yaptı. PASS: kaydet
+  ≠ etkinleştir; etkinleştirme; kaynak seçilince **otomatik** kuyruk koşusu (`automatic=1`) Dropbox'a 2 dosya (Unicode
+  adlı 63 B + 2 MB) yükledi, journal SHA-256'ları kaynakla birebir; ardından elle `runDestination` koşusu bitti, yeni
+  yükleme yok. [Kanıt](evidence/cloud18-nextcloud-2026-10-31/dropbox-ios-queue-2026-11-03.json). Uzak dosyalar
+  kullanıcının Dropbox'ında `Apps/<app>/test/<sourceId>/` altında kaldı.
+- Bulunan ve düzeltilen iki hata: (1) `use-cloud-destinations.ts` yalnız `Error.message` okuyordu; Expo iOS kodu
+  `error.code`'a koyuyor, mesaj `"x: x (at ExpoModulesCore/Promise.swift:65)"` → Bağlantılar ekranında 18A/4b'den beri
+  her hata `outcome_unknown` görünüyordu. `sftpErrorCode` kalıbına çevrildi + Jest testi. Aynı `cause.message` kalıbı
+  `use-webdav-backup.ts` ve benzerlerinde de var (dokunulmadı, açık iş). (2) `KlodaSyncRuntimeModule.pickDirectory`
+  `currentViewController()`'ı ana iş parçacığı dışında çağırıp MainActor assert ile çöküyordu (Klasör seç → uygulama
+  kapanıyor); `@MainActor` yardımcıya taşındı. **Codex ortak dosyası — birleştirmede not.**
+- Kontroller: Jest etkilenen 4 dosya/15 test, tsc, ESLint PASS; iOS Simulator derlemesi PASS (uyarı yok).
+  NOT_RUN: Android'de JS hata eşlemesinin çalışırken denenmesi; iOS'ta >150 MiB `upload_session`; EN/DE/a11y.
+- Not: Metro'yu `CI=1` ile başlatmak dosya izlemeyi kapatır, uygulama eski JS'i alır; `--dev-client`'la başlatın.
+  Dropbox kartı hesap adı yerine ham `dbid:` gösteriyor (görsel açık iş).
+
+## Dilim 18B/5r — karar (3.11)
+
+- Kullanıcı kararı 3.11: Lovable Yedekler ekranında hedef seçimi yok; seçim **Bağlantılar'daki her etkin hedef kartında
+  "Yedekleri gör" düğmesiyle** yapılır, düğme mevcut Yedekler ekranını o hedefe bağlı açar (yeni bileşen yok).
+- Henüz kod yok. Sıradaki dilim: taşıma katmanına `download` (iOS `IosBackupTransport`, Android
+  `AndroidBackupTransport`; DAV GET + Dropbox `files/download`, kendi SHA-256/boyut doğrulaması);
+  `IosWebDavDownload`/`AndroidWebDavDownload` profil yerine `IosCloudTarget`/`AndroidCloudTarget` alır; Files/Photos
+  restore'da `IosWebDavVault.read() == profile` / `AndroidWebDavVault(context).read() != profile` bağı yerine
+  `IosWebDavContext.stored(kind:target:) == destination` hedef kontrolü; `IosWebDavBackups.list`/Android karşılığı
+  `targetId` alır; JS köprüsü + kart düğmesi + i18n (`ui.conn.viewBackups` TR/EN/DE). Doğrulama: Jest/tsc/ESLint, bir
+  Android + bir iOS derleme, Dropbox'a yüklenmiş bu iki dosyanın iOS'ta geri yüklenmesi (kullanıcı girişi mevcut).
 
 ## Sıradaki (kullanıcı 1.11: açık işler sırayla)
 
@@ -350,14 +380,14 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
 6. 20 — regresyon iskeleti (görsel yakalama betiği hazır).
 7. Kullanıcıda bekleyenler: fiziksel test (gate 21, en sonda, [liste](ios-physical-tests/ios-fiziksel-testi-claude-step18-20.md)), iOS 16
    runtime kararı, birleştirme. C grubu kararı verildi (3.11, V1 dışı). B grubu kayıtları alındı (yukarıda); 18B/1 Dropbox yapıldı.
-8. 18B/5 Dropbox — kod ve Android gerçek hesap testi yapıldı (yukarıdaki dilim); açık: iOS çalışma zamanı, kuyruk üzerinden koşu. OAuth yükleme adaptörleri (ADR0028 §5). Kullanıcı onayı 3.11: önce yalnız Dropbox
+8. 18B/5 Dropbox — tamam (Android gerçek hesap 3.11; iOS gerçek hesap + otomatik/elle kuyruk koşusu 3.11); açık: Android JobService koşusu. OAuth yükleme adaptörleri (ADR0028 §5). Kullanıcı onayı 3.11: önce yalnız Dropbox
    iOS+Android; DAV yayın durum makinesi korunur, publisher taşıma katmanını dışarıdan alır (inspect/upload/move +
    ileride download); Dropbox `mode=add`/`autorename=false`, `move_v2`, doğrulama kendi SHA-256'mızla; 150 MB üstü
    `upload_session` yalnız tek çalışma içinde (çalışmalar arası devam ayrı migration, sonraya); aç/kapa ve elle başlatma
    yalnız Dropbox için açılır. Gerçek hesap testi kullanıcının girişi ve ayrı onayıyla.
 9. 18B/5r — hedef başına geri yükleme (onaylı sıra): taşıma katmanına `download`; `IosWebDavVault.read() == profile`
    bağı yerine hedef bazlı kontrol (eklenen Nextcloud hedeflerini de açar); Dropbox dosya+fotoğraf; hedef seçimi
-   Lovable'da yoksa görsel karar sorulur.
+   kararı 3.11 verildi (kartta "Yedekleri gör"); kapsam yukarıdaki "Dilim 18B/5r — karar" bölümünde. **Sıradaki iş.**
 10. [ADR0029 taslağı](../decisions/0029-cloud-restore-catalog-and-recovery-key.md) (3.11, onaylanmadı): yeni cihazda
    geri yükleme için kurtarma kodu + HMAC'li create-only katalog + salt geri yükleme yetkili içe aktarılmış fiş.
    ADR sonundaki 4 açık soru kullanıcıda; dilimler 29/1–4, 18B/5r'den sonra.

@@ -3,7 +3,12 @@ import { AppState } from 'react-native';
 import { cloudDestinations, destinationLimit, type CloudDestination, type OAuthProvider } from '../../../shared/api/cloud-destinations';
 
 type Action = 'idle' | 'signing-in' | 'adding' | 'removing' | 'switching' | 'starting';
-function code(cause: unknown): string { return cause instanceof Error ? cause.message : 'outcome_unknown'; }
+// Expo rejects with the native code in `code` (iOS wraps the message); a plain Error carries it as the message.
+function code(cause: unknown): string {
+  const value = typeof cause === 'object' && cause !== null && 'code' in cause ? cause.code : undefined;
+  if (typeof value === 'string' && /^[a-z][a-z0-9_]{0,127}$/.test(value)) return value;
+  return cause instanceof Error && /^[a-z][a-z0-9_]{0,127}$/.test(cause.message) ? cause.message : 'outcome_unknown';
+}
 
 // Saved destinations, Nextcloud and OAuth sign-in, Kolab Now credentials and the explicit per-destination opt-in;
 // one action at a time, results ignored after unmount.
