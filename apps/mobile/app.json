@@ -33,7 +33,8 @@
           "com.kloda.app.webdav.processing",
           "com.kloda.app.smb.processing",
           "com.kloda.app.sftp.processing"
-        ]
+        ],
+        "NSFaceIDUsageDescription": "Kloda asks for Face ID or your passcode before it shows your recovery code."
       }
     },
     "android": {

@@ -123,7 +123,11 @@
       "destination_exists": "This destination is already saved on this device.",
       "destination_unsupported": "Backups to this destination cannot be turned on yet.",
       "oauth_login": "Sign-in could not be completed. Try again.",
-      "oauth_expired": "The sign-in has expired. Remove the destination and sign in again."
+      "oauth_expired": "The sign-in has expired. Remove the destination and sign in again.",
+      "recovery_required": "Confirm your recovery code before enabling a cloud destination.",
+      "recovery_lock_required": "To show the recovery code, first set a screen lock (PIN, pattern, password or fingerprint) on this phone.",
+      "recovery_auth_failed": "The phone lock could not be verified. Try again.",
+      "recovery_mismatch": "The groups you entered don't match the code. Show the code again and check."
     },
     "rebackup": "Back up this version again",
     "rebackupConfirm": "Explicitly send this unchanged source version again to the currently paired computer? The computer must approve file access.",
@@ -646,5 +650,19 @@
       "en": "English",
       "de": "Deutsch"
     }
+  },
+  "recovery": {
+    "title": "Your recovery code",
+    "body": "If you lose this phone, this code is the only way to restore your cloud backups on a new device. Kloda never sends it anywhere and cannot recover it for you.",
+    "warning": "Write it on paper or keep it in a password manager. Don't take a screenshot or share it.",
+    "show": "Show code",
+    "hide": "Hide code",
+    "codeHidden": "Recovery code hidden",
+    "codeShown": "Recovery code: {{code}}",
+    "promptTitle": "Show recovery code",
+    "promptReason": "Unlock your phone to see your recovery code.",
+    "confirmHint": "Enter the two requested groups to confirm you wrote the code down.",
+    "group": "Group {{number}}",
+    "confirm": "Confirm and enable destination"
   }
 }

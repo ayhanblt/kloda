@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
 
   s.dependency 'ExpoModulesCore'
   s.libraries = 'sqlite3'
-  s.frameworks = 'Security', 'Network', 'SystemConfiguration'
+  s.frameworks = 'Security', 'Network', 'SystemConfiguration', 'LocalAuthentication'
   s.vendored_frameworks = 'NativePairing/KlodaPairingNative.xcframework'
 
   # Swift/Objective-C compatibility

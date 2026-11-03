@@ -90,3 +90,20 @@ it('adds a signed-in Dropbox destination and shows a cancelled sign-in', async (
   expect(hook.result.current.error).toBe('cancelled');
   expect(hook.result.current.action).toBe('idle');
 });
+
+it('holds the destination for the recovery code instead of showing recovery_required', async () => {
+  const hook = await renderHook(() => useCloudDestinations());
+  await waitFor(() => expect(hook.result.current.destinations).not.toBeNull());
+  api.setEnabled.mockRejectedValueOnce(Object.assign(new Error('wrapped'), { code: 'recovery_required' }));
+  await act(async () => { await hook.result.current.setEnabled(row(1).targetId, true); });
+  expect(hook.result.current.recoveryFor).toBe(row(1).targetId);
+  expect(hook.result.current.error).toBeNull();
+  api.setEnabled.mockResolvedValueOnce([{ ...row(1), enabled: true }]);
+  await act(async () => { await hook.result.current.setEnabled(row(1).targetId, true); });
+  expect(hook.result.current.recoveryFor).toBeNull();
+  expect(hook.result.current.destinations?.[0]?.enabled).toBe(true);
+  api.setEnabled.mockRejectedValueOnce(new Error('recovery_required'));
+  await act(async () => { await hook.result.current.setEnabled(row(1).targetId, false); });
+  expect(hook.result.current.recoveryFor).toBeNull();
+  expect(hook.result.current.error).toBe('recovery_required');
+});

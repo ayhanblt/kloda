@@ -1,5 +1,6 @@
 import AuthenticationServices
 import ExpoModulesCore
+import LocalAuthentication
 import UIKit
 
 // Step18A/4 (ADR0027): add, list, enable and remove DAV destinations. Saving custody is not enabling (ADR0023);
@@ -54,10 +55,44 @@ public final class KlodaCloudModule: Module {
     AsyncFunction("setDestinationEnabled") { (targetId: String, enabled: Bool, promise: Promise) in
       guard UIApplication.shared.applicationState == .active else { return promise.reject("candidate_stale", "candidate_stale") }
       self.background(promise) {
+        if enabled { try IosRecoveryVault.requireConfirmed() }
         try IosWebDavDestinations.setEnabled(targetId, enabled: enabled)
         return ["destinations": try Self.summaries()]
       }
     }.runOnQueue(.main)
+    // ADR0029 29/1: the recovery code is shown only after the device lock check (Face ID/Touch ID or passcode) and
+    // confirmed before the first cloud destination is enabled.
+    AsyncFunction("recoveryStatus") { (promise: Promise) in
+      self.background(promise) { ["state": try IosRecoveryVault.state()] }
+    }
+    AsyncFunction("revealRecovery") { (title: String, reason: String, promise: Promise) in
+      guard UIApplication.shared.applicationState == .active else { return promise.reject("candidate_stale", "candidate_stale") }
+      guard [title, reason].allSatisfy({ !$0.trimmingCharacters(in: .whitespaces).isEmpty && $0.count <= 200 }) else {
+        return promise.reject("invalid_request", "invalid_request")
+      }
+      let context = LAContext()
+      var unavailable: NSError?
+      guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &unavailable) else {
+        return promise.reject("recovery_lock_required", "recovery_lock_required")
+      }
+      context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, error in
+        guard success else {
+          let code: String
+          switch (error as? LAError)?.code {
+          case .userCancel?, .appCancel?, .systemCancel?, .userFallback?: code = "cancelled"
+          case .passcodeNotSet?: code = "recovery_lock_required"
+          default: code = "recovery_auth_failed"
+          }
+          return DispatchQueue.main.async { promise.reject(code, code) }
+        }
+        self.background(promise) { ["code": try IosRecoveryVault.reveal()] }
+      }
+    }.runOnQueue(.main)
+    AsyncFunction("hideRecovery") { () -> Void in }
+    AsyncFunction("confirmRecovery") { (first: Int, firstGroup: String, second: Int, secondGroup: String, promise: Promise) in
+      guard first != second else { return promise.reject("invalid_request", "invalid_request") }
+      self.background(promise) { ["state": try IosRecoveryVault.confirm([first: firstGroup, second: secondGroup])] }
+    }
     // Step18A/4c: one manual run of an enabled, added destination (DAV, or Dropbox since 18B/5) through the shared
     // queue (same lock and begin() order as the original WebDAV run); the original entry keeps KlodaBackup's run/pause.
     AsyncFunction("runDestination") { (targetId: String, promise: Promise) in

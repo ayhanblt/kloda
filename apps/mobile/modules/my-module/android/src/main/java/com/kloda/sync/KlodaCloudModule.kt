@@ -34,7 +34,10 @@ class KlodaCloudModule : Module() {
     Name("KlodaCloud")
     OnDestroy { cancel() }
     OnActivityEntersForeground { AndroidOAuthRedirect.resumed() }
-    OnActivityResult { _, payload -> AndroidGoogleDrive.delivered(payload.requestCode, payload.resultCode, payload.data) }
+    OnActivityResult { _, payload ->
+      AndroidGoogleDrive.delivered(payload.requestCode, payload.resultCode, payload.data)
+      AndroidDeviceCheck.delivered(payload.requestCode, payload.resultCode)
+    }
     AsyncFunction("destinations") Coroutine { -> withContext(Dispatchers.IO) { guarded { mapOf("destinations" to summaries()) } } }
     AsyncFunction("signInNextcloud") Coroutine { server: String, folder: String -> signIn(server, folder) }
     AsyncFunction("signInOAuth") Coroutine { provider: String, folder: String -> signInOAuth(provider, folder) }
@@ -73,9 +76,31 @@ class KlodaCloudModule : Module() {
     AsyncFunction("setDestinationEnabled") Coroutine { targetId: String, enabled: Boolean ->
       if (!resumed()) throw CodedException("candidate_stale", "candidate_stale", null)
       withContext(Dispatchers.IO) { guarded {
+        if (enabled) AndroidRecoveryVault(context()).requireConfirmed()
         AndroidWebDavDestinations.setEnabled(context(), targetId, enabled)
         mapOf("destinations" to summaries())
       } }
+    }
+    // ADR0029 29/1: the recovery code is shown only after the device lock check and confirmed before the first
+    // cloud destination is enabled. The window is FLAG_SECURE while the code is on screen.
+    AsyncFunction("recoveryStatus") Coroutine { -> withContext(Dispatchers.IO) { guarded { mapOf("state" to AndroidRecoveryVault(context()).state()) } } }
+    AsyncFunction("revealRecovery") Coroutine { title: String, reason: String ->
+      if (!resumed()) throw CodedException("candidate_stale", "candidate_stale", null)
+      if (listOf(title, reason).any { it.isBlank() || it.length > 200 }) throw CodedException("invalid_request", "invalid_request", null)
+      val activity = appContext.currentActivity ?: throw CodedException("candidate_stale", "candidate_stale", null)
+      try { withContext(Dispatchers.Main) { AndroidDeviceCheck.confirm(activity, title, reason) } }
+      catch (error: FilesFailure) { throw CodedException(error.code, error.code, null) }
+      val code = withContext(Dispatchers.IO) { guarded { AndroidRecoveryVault(context()).reveal() } }
+      withContext(Dispatchers.Main) { activity.window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE) }
+      mapOf("code" to code)
+    }
+    AsyncFunction("hideRecovery") Coroutine { ->
+      withContext(Dispatchers.Main) { appContext.currentActivity?.window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE) }
+      Unit
+    }
+    AsyncFunction("confirmRecovery") Coroutine { first: Int, firstGroup: String, second: Int, secondGroup: String ->
+      if (first == second) throw CodedException("invalid_request", "invalid_request", null)
+      withContext(Dispatchers.IO) { guarded { mapOf("state" to AndroidRecoveryVault(context()).confirm(mapOf(first to firstGroup, second to secondGroup))) } }
     }
     // Step18A/4c: one manual run of an enabled, added destination (DAV, or Dropbox since 18B/5) through the shared
     // queue (same lock and begin() order as the original WebDAV run); the original entry keeps KlodaBackup's run/pause.
@@ -185,7 +210,7 @@ class KlodaCloudModule : Module() {
   }
   private fun cancel() {
     login.get()?.cancel()
-    oauth.get()?.cancel(); AndroidOAuthRedirect.cancel(); AndroidGoogleDrive.cancel()
+    oauth.get()?.cancel(); AndroidOAuthRedirect.cancel(); AndroidGoogleDrive.cancel(); AndroidDeviceCheck.cancel()
   }
 
   // Custom Tabs cannot be closed by the app; bringing the existing Kloda activity forward finishes the tab above it.

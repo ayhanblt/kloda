@@ -7,6 +7,8 @@ export function useWebDavBackup() {
   const [status, setStatus] = useState<WebDavBackupStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
+  // ADR0029 29/1: enabling waits for the recovery code; the panel retries `enable` once it is confirmed.
+  const [needsRecovery, setNeedsRecovery] = useState(false);
   const current = useRef(true);
   const mounted = useRef(true);
   const busy = useRef(false);
@@ -37,14 +39,17 @@ export function useWebDavBackup() {
   }, []);
   const action = async (kind: 'enable' | 'disable' | 'run' | 'pause') => {
     if (busy.current || !current.current) return;
-    busy.current = true; setWorking(true); setError(null);
+    busy.current = true; setWorking(true); setError(null); setNeedsRecovery(false);
     const version = ++epoch.current;
     try {
       const value = kind === 'enable' ? await enableSavedWebDavBackup(() => current.current && version === epoch.current) : await backupDestinations[kind]();
       if (current.current && version === epoch.current) setStatus(value);
     } catch (cause) {
-      if (current.current && version === epoch.current) setError(cause instanceof Error ? cause.message : 'outcome_unknown');
+      if (!(current.current && version === epoch.current)) return;
+      const coded = typeof cause === 'object' && cause !== null && 'code' in cause ? cause.code : undefined;
+      if (kind === 'enable' && (coded === 'recovery_required' || (cause instanceof Error && cause.message === 'recovery_required'))) setNeedsRecovery(true);
+      else setError(cause instanceof Error ? cause.message : 'outcome_unknown');
     } finally { busy.current = false; if (mounted.current) setWorking(false); }
   };
-  return { status, error, working, action };
+  return { status, error, working, needsRecovery, closeRecovery: () => setNeedsRecovery(false), action };
 }

@@ -57,7 +57,7 @@ class KlodaBackupModule : Module() {
     OnDestroy { destroyed = true; cancelRestore(); reviews?.cancel(); AndroidWebDavRuntime.detach(token) }
     AsyncFunction("webDavStatus") { guarded { queue().status() + (AndroidWebDavScheduler.error(context())?.let { mapOf("automaticError" to it) } ?: emptyMap()) } }
     AsyncFunction("configureWebDav") { endpoint: String, path: String, username: String, password: String -> guarded {
-      checkUi(); cancelRestore(); reviews?.cancel(); queue().configure(AndroidWebDavProfile(UUID.randomUUID().toString(), endpoint, path, username, password)); AndroidWebDavScheduler.reconcileAsync(context()); queue().status()
+      checkUi(); AndroidRecoveryVault(context()).requireConfirmed(); cancelRestore(); reviews?.cancel(); queue().configure(AndroidWebDavProfile(UUID.randomUUID().toString(), endpoint, path, username, password)); AndroidWebDavScheduler.reconcileAsync(context()); queue().status()
     } }
     AsyncFunction("disableWebDav") { guarded { checkUi(); cancelRestore(); reviews?.cancel(); queue().disable(); AndroidWebDavScheduler.reconcileAsync(context()); queue().status() } }
     AsyncFunction("runWebDav") { guarded {

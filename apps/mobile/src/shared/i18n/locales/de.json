@@ -123,7 +123,11 @@
       "destination_exists": "Dieses Ziel ist auf diesem Gerät bereits gespeichert.",
       "destination_unsupported": "Sicherungen zu diesem Ziel können noch nicht aktiviert werden.",
       "oauth_login": "Die Anmeldung konnte nicht abgeschlossen werden. Versuchen Sie es erneut.",
-      "oauth_expired": "Die Anmeldung ist abgelaufen. Entfernen Sie das Ziel und melden Sie sich erneut an."
+      "oauth_expired": "Die Anmeldung ist abgelaufen. Entfernen Sie das Ziel und melden Sie sich erneut an.",
+      "recovery_required": "Bestätige deinen Wiederherstellungscode, bevor du ein Cloud-Ziel aktivierst.",
+      "recovery_lock_required": "Richte zuerst eine Displaysperre (PIN, Muster, Passwort oder Fingerabdruck) ein, um den Wiederherstellungscode anzuzeigen.",
+      "recovery_auth_failed": "Die Telefonsperre konnte nicht bestätigt werden. Versuch es noch einmal.",
+      "recovery_mismatch": "Die eingegebenen Gruppen passen nicht zum Code. Zeig den Code erneut an und prüfe ihn."
     },
     "rebackup": "Diese Version erneut sichern",
     "rebackupConfirm": "Diese unveränderte Quellversion ausdrücklich erneut an den gekoppelten Computer senden? Der Computer muss den Dateizugriff erlauben.",
@@ -646,5 +650,19 @@
       "en": "English",
       "de": "Deutsch"
     }
+  },
+  "recovery": {
+    "title": "Dein Wiederherstellungscode",
+    "body": "Wenn du dieses Telefon verlierst, kannst du deine Cloud-Sicherungen nur mit diesem Code auf einem neuen Gerät wiederherstellen. Kloda sendet ihn nirgendwohin und kann ihn nicht für dich wiederherstellen.",
+    "warning": "Schreib ihn auf Papier oder speichere ihn in einem Passwortmanager. Mach keinen Screenshot und teile ihn mit niemandem.",
+    "show": "Code anzeigen",
+    "hide": "Code ausblenden",
+    "codeHidden": "Wiederherstellungscode ausgeblendet",
+    "codeShown": "Wiederherstellungscode: {{code}}",
+    "promptTitle": "Wiederherstellungscode anzeigen",
+    "promptReason": "Entsperre dein Telefon, um deinen Wiederherstellungscode zu sehen.",
+    "confirmHint": "Gib die zwei angeforderten Gruppen ein, um zu bestätigen, dass du den Code notiert hast.",
+    "group": "Gruppe {{number}}",
+    "confirm": "Bestätigen und Ziel aktivieren"
   }
 }

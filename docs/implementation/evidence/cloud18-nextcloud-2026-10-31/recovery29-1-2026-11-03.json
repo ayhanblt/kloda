@@ -1,0 +1,47 @@
+{
+  "slice": "29/1 recovery secret, vault, HKDF, code screen (ADR0029 user decisions 1–5)",
+  "date": "2026-11-03",
+  "base": "80806ef + uncommitted 29/1 diff (no commit)",
+  "approval": "user 2026-11-03: decisions 1–4 answered, decision 5 (hidden code, device-lock reveal) added; 29/1 continued in this chat as a one-time exception",
+  "checks": {
+    "vectors": "PASS python3 -I tools/recovery-code-vectors.py (RFC 5869 A.1 + two code/HKDF vectors)",
+    "ios_host": "PASS python3 -I tools/test-ios-recovery-code.py (production IosRecoveryCode.swift)",
+    "android_instrumentation": "PASS scope recovery29 on emulator-5590 KlodaCloud18: vectors, HKDF, create-once, same code after reopen, invalid/mismatch refused, confirm persists, tampered file refused",
+    "jest": "PASS 36 suites / 213 tests",
+    "tsc": "PASS",
+    "eslint": "PASS",
+    "android_build": "PASS :app:assembleDebug :my-module:assembleDebugAndroidTest arm64-v8a",
+    "ios_build": "PASS xcodebuild Debug iphonesimulator arm64 after pod install (no warnings in new code)"
+  },
+  "runtime_android": {
+    "device": "emulator-5590 KlodaCloud18 (pattern lock drawn by the user)",
+    "steps": [
+      "Dropbox disabled then enable -> recovery_required -> masked panel under the Dropbox card",
+      "Show code -> system BiometricPrompt with our title/reason; cancel kept the code masked, 'cancelled' shown, no secret file",
+      "user drew pattern -> secret created (no_backup/kloda-recovery.v1) -> 14 groups shown; screencap black while shown (FLAG_SECURE)",
+      "groups 5 and 14 typed -> confirmed -> Dropbox 'Bu hedef etkin', panel closed, screencap normal again"
+    ],
+    "result": "PASS"
+  },
+  "runtime_ios": {
+    "device": "Kloda-Cloud18-Disposable (0309DEBC-...), no simulator passcode; simulated Face ID enrolled and matched via notifyutil",
+    "steps": [
+      "enable -> masked panel under the Dropbox card",
+      "Show code -> LAContext .deviceOwnerAuthentication with our reason; passcode fallback could not be used (no passcode, paste refused)",
+      "first Face ID success hid the code at once: the prompt leaves the app 'inactive'; fixed to hide only after a trip to the background (Jest case added)",
+      "after fix: Face ID match -> code shown -> user typed groups 8 and 10 -> Dropbox 'Bu hedef etkin'"
+    ],
+    "result": "PASS"
+  },
+  "limits": [
+    "iOS cannot block screenshots; the code is hidden when the app leaves the foreground and the warning text says not to screenshot",
+    "a phone without a screen lock cannot show the code and so cannot enable a cloud destination (recovery_lock_required)",
+    "destinations enabled before 29/1 are not asked for the code until re-enabled; their prompt/backfill belongs to 29/2",
+    "Android API 24-29 Keyguard path and NSFaceIDUsageDescription TR/DE localisation not exercised",
+    "Keychain item is WhenUnlockedThisDeviceOnly; 29/2 background catalog writes must re-check this accessibility",
+    "legacy WebDAV enable gate exercised by Jest only, not at runtime",
+    "EN/DE/light/large-text/VoiceOver/TalkBack capture NOT_RUN"
+  ],
+  "test_residue": "test recovery secrets on KlodaCloud18 and the disposable simulator (both confirmed); simulator Face ID left enrolled",
+  "review": "same-agent separate pass (found and fixed: panel placement, iOS inactive hide, double-tap guard); no independent review"
+}

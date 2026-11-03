@@ -17,6 +17,8 @@ export function useCloudDestinations() {
   const [error, setError] = useState<string | null>(null);
   const [action, setAction] = useState<Action>('idle');
   const [lastAdded, setLastAdded] = useState<string | null>(null);
+  // ADR0029 29/1: the destination waiting for the recovery code to be confirmed before it is enabled.
+  const [recoveryFor, setRecoveryFor] = useState<string | null>(null);
   const mounted = useRef(true);
   const busy = useRef(false);
   const refresh = async () => {
@@ -49,9 +51,15 @@ export function useCloudDestinations() {
     if (mounted.current) setDestinations(value);
   });
   const setEnabled = (targetId: string, enabled: boolean) => run('switching', async () => {
-    const value = await cloudDestinations.setEnabled(targetId, enabled);
-    if (mounted.current) setDestinations(value);
+    let value: CloudDestination[];
+    try { value = await cloudDestinations.setEnabled(targetId, enabled); } catch (cause) {
+      if (!enabled || code(cause) !== 'recovery_required') throw cause;
+      if (mounted.current) setRecoveryFor(targetId);
+      return;
+    }
+    if (mounted.current) { setDestinations(value); setRecoveryFor(null); }
   });
+  const closeRecovery = () => setRecoveryFor(null);
   // A manual run is admitted by the shared queue; while one shows `running` the list is refreshed every 2 s.
   const runNow = (targetId: string) => run('starting', async () => {
     const value = await cloudDestinations.runNow(targetId);
@@ -69,5 +77,5 @@ export function useCloudDestinations() {
   }, [active]);
   const cancel = () => { void cloudDestinations.cancelSignIn().catch(() => undefined); };
   const full = (destinations?.length ?? 0) >= destinationLimit;
-  return { destinations, error, action, full, lastAdded, signIn, signInOAuth, addKolabNow, remove, setEnabled, runNow, pause, cancel, refresh };
+  return { destinations, error, action, full, lastAdded, recoveryFor, closeRecovery, signIn, signInOAuth, addKolabNow, remove, setEnabled, runNow, pause, cancel, refresh };
 }

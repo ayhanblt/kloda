@@ -123,7 +123,11 @@
       "destination_exists": "Bu hedef bu cihazda zaten kayıtlı.",
       "destination_unsupported": "Bu hedef için yedekleme henüz açılamıyor.",
       "oauth_login": "Giriş tamamlanamadı. Yeniden deneyin.",
-      "oauth_expired": "Girişin süresi doldu. Hedefi kaldırıp yeniden giriş yapın."
+      "oauth_expired": "Girişin süresi doldu. Hedefi kaldırıp yeniden giriş yapın.",
+      "recovery_required": "Bulut hedefini etkinleştirmeden önce kurtarma kodunu onaylaman gerekir.",
+      "recovery_lock_required": "Kurtarma kodunu göstermek için önce telefonuna ekran kilidi (PIN, desen, parola veya parmak izi) ekle.",
+      "recovery_auth_failed": "Telefon kilidi doğrulanamadı. Tekrar dene.",
+      "recovery_mismatch": "Girdiğin gruplar kodla eşleşmiyor. Kodu tekrar gösterip kontrol et."
     },
     "rebackup": "Bu sürümü yeniden yedekle",
     "rebackupConfirm": "Bu değişmemiş kaynak sürümü eşleşmiş bilgisayara açık isteğinizle yeniden gönderilsin mi? Bilgisayarda dosya erişimi onaylı olmalıdır.",
@@ -646,5 +650,19 @@
       "en": "English",
       "de": "Deutsch"
     }
+  },
+  "recovery": {
+    "title": "Kurtarma kodun",
+    "body": "Bu kod, telefonunu kaybedersen bulut yedeklerini yeni bir cihazda geri yüklemenin tek yolu. Kloda kodu hiçbir yere göndermez ve sonradan kurtaramaz.",
+    "warning": "Kodu kâğıda yaz veya bir parola yöneticisinde sakla. Ekran görüntüsü alma, kimseyle paylaşma.",
+    "show": "Kodu göster",
+    "hide": "Kodu gizle",
+    "codeHidden": "Kurtarma kodu gizli",
+    "codeShown": "Kurtarma kodu: {{code}}",
+    "promptTitle": "Kurtarma kodunu göster",
+    "promptReason": "Kurtarma kodunu görmek için telefonunun kilidini aç.",
+    "confirmHint": "Kodu yazdığını doğrulamak için istenen iki grubu gir.",
+    "group": "{{number}}. grup",
+    "confirm": "Onayla ve hedefi etkinleştir"
   }
 }

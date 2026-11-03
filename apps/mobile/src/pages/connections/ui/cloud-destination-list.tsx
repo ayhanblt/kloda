@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Cloud, HardDrive } from 'lucide-react-native';
@@ -9,6 +10,7 @@ import type { useCloudDestinations } from '../../../features/cloud-destination/m
 import { MobilePanel } from '../../../widgets/mobile-surface/ui';
 import { PairingButton } from '../../../features/pairing/ui/pairing-button';
 import { useThemeColors } from '../../../shared/theme/theme-provider';
+import { RecoveryCodePanel } from '../../../features/recovery-code/ui/recovery-code-panel';
 
 type CloudModel = ReturnType<typeof useCloudDestinations>;
 export const providerLabel = (provider: CloudProvider) => `ui.providers.${provider === 'yandex' ? 'yandex-disk' : provider}`;
@@ -56,9 +58,12 @@ export function CloudDestinationList({ cloud, navigate, openBackups, saved }: { 
       <Text selectable className="font-sans text-sm text-secondary-text">{saved.targetPath}</Text>
       <PairingButton variant="secondary" label={t('ui.common.manage')} onPress={() => navigate('storage')} />
     </MobilePanel>}
-    {addedDestinations(cloud.destinations).map((item) => <DestinationCard key={item.targetId} destination={item} busy={busy}
-      onToggle={() => { void cloud.setEnabled(item.targetId, !item.enabled); }} onRemove={() => { void cloud.remove(item.targetId); }}
-      onRun={() => { void cloud.runNow(item.targetId); }} onPause={() => { void cloud.pause(item.targetId); }} onBackups={() => openBackups(item.targetId)} />)}
+    {addedDestinations(cloud.destinations).map((item) => <Fragment key={item.targetId}>
+      <DestinationCard destination={item} busy={busy}
+        onToggle={() => { void cloud.setEnabled(item.targetId, !item.enabled); }} onRemove={() => { void cloud.remove(item.targetId); }}
+        onRun={() => { void cloud.runNow(item.targetId); }} onPause={() => { void cloud.pause(item.targetId); }} onBackups={() => openBackups(item.targetId)} />
+      {cloud.recoveryFor === item.targetId && <RecoveryCodePanel onCancel={cloud.closeRecovery} onConfirmed={() => { void cloud.setEnabled(item.targetId, true); }} />}
+    </Fragment>)}
     {cloud.error && <Text accessibilityRole="alert" className="font-sans text-sm text-danger-text">{t(errorLabel(cloud.error), { defaultValue: t(errorLabel('outcome_unknown')) })}</Text>}
   </>;
 }

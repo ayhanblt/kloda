@@ -28,7 +28,8 @@ public final class KlodaBackupModule: Module {
     } }
     AsyncFunction("configureWebDav") { (endpoint: String, path: String, username: String, password: String, promise: Promise) in
       self.reply(promise) {
-        try self.checkUi(); self.review.cancel(); self.restore.cancel(); self.photosRestore.cancel(); self.restoreRequest = nil
+        try self.checkUi(); try IosRecoveryVault.requireConfirmed()
+        self.review.cancel(); self.restore.cancel(); self.photosRestore.cancel(); self.restoreRequest = nil
         try IosWebDavQueue.shared.configure(IosWebDavProfile(revision: UUID().uuidString, endpoint: endpoint, targetPath: path, username: username, password: password))
         IosWebDavAutomaticCoordinator.shared.reconcile()
         return try IosWebDavQueue.shared.status()

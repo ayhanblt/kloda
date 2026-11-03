@@ -23,7 +23,7 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
   }
 
   override fun onStart() {
-    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore", "smb-files", "smb-product", "smb-photos-owned", "smb-profile", "sftp-files", "sftp-sources", "sftp-photos-owned", "sftp-product", "cloud18-nextcloud", "cloud18-destination", "cloud18-oauth", "cloud18-targets", "cloud18-dropbox", "cloud18-dropbox-live")) {
+    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore", "smb-files", "smb-product", "smb-photos-owned", "smb-profile", "sftp-files", "sftp-sources", "sftp-photos-owned", "sftp-product", "cloud18-nextcloud", "cloud18-destination", "cloud18-oauth", "cloud18-targets", "cloud18-dropbox", "cloud18-dropbox-live", "recovery29")) {
       finish(Activity.RESULT_CANCELED, Bundle().apply { putString("stream", "Explicit scope required: local-files, media-fixture or webdav-journal\n") })
       return
     }
@@ -72,6 +72,11 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
       if (scope == "cloud18-destination") {
         group("cloud18-destination-migration") { AndroidDestinationMigrationChecks.run(scratch) }
         finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "backup_destination shared kind migration: rows kept, new kinds accepted, unknown refused, idempotent, fresh create, rollback PASS; production upgrade on device, queue wiring and iOS NOT_RUN here\n") })
+        return
+      }
+      if (scope == "recovery29") {
+        group("recovery29-code-vault") { AndroidRecoveryChecks.run(IsolatedContext(targetContext, scratch)) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Recovery code vectors, HKDF and vault life cycle PASS; device-lock prompt and UI NOT_RUN here\n") })
         return
       }
       if (scope == "cloud18-dropbox") {

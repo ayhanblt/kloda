@@ -363,11 +363,31 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
   (arm64) PASS; iOS Simulator Debug arm64 PASS. iOS çalışma zamanı (Kloda-Cloud18-Disposable, kullanıcının mevcut Dropbox
   girişi): kart → Yedekleri gör → liste (2 öğe) → iki dosya yeni boş klasöre geri yüklendi; host `shasum` kaynakla
   birebir. [Kanıt](evidence/cloud18-nextcloud-2026-10-31/dropbox-ios-restore-2026-11-03.json).
-- NOT_RUN: Android çalışma zamanı geri yükleme; Dropbox'tan Photos; eklenmiş Nextcloud hedefinden geri yükleme;
+- Android çalışma zamanı (3.11, KlodaCloud18, kullanıcı onayı; uygulamada yeni Dropbox girişi, "Allow"a kullanıcı isteğiyle Claude bastı): boş durumdan Dropbox ekle → etkinleştir → kaynak klasör → Şimdi yedekle (doğrulandı) → Yedekleri gör → liste (2) → iki dosya yeni klasöre geri yüklendi; cihaz ve host SHA-256 kaynakla birebir. [Kanıt](evidence/cloud18-nextcloud-2026-10-31/dropbox-android-restore-2026-11-03.json). Uzakta kalıntı: Apps/Kloda/Kloda18B5r-android/*.
+- NOT_RUN: Dropbox'tan Photos; eklenmiş Nextcloud hedefinden geri yükleme;
   geri yükleme sırasında ayar değişimi / `oauth_expired`; EN/DE/a11y yakalaması. Aynı ajan review; bağımsız yok.
 - Görsel/metin açık işi (yeni i18n onayı gerekir): hedefe bağlı ekranda başlıklar özgün WebDAV/PC metinleri
   ("PC'deki tamamlanmış yedekleriniz", "WebDAV yedeklerim", "PC yedeği tamamlandı · Yerel şifreli LAN"); alt sekme
   "Durum" seçili görünür.
+
+## Dilim 29/1 — kurtarma sırrı ve kod ekranı (3.11, commit yok)
+
+- Kullanıcı kararları 3.11 (ADR0029 §User decisions 1–5): gruplu Crockford Base32 (52 + 4 kontrol, 14×4), ilk bulut
+  etkinleştirmede zorunlu, yenileme = tam yeniden imza (29/2), yalnız mobil; kod gizli, "Kodu göster" telefon kilidiyle.
+  Bu adım istisna olarak aynı sohbette sürdü; sonraki adımlarda checkpoint kuralı geçerli.
+- Native: `AndroidRecoveryVault`/`IosRecoveryVault` (Keystore AES-GCM dosyası / Keychain WhenUnlockedThisDeviceOnly),
+  `AndroidRecoveryCode`/`IosRecoveryCode` (format + HKDF-SHA256), `AndroidDeviceCheck` (API 30+ BiometricPrompt
+  STRONG|DEVICE_CREDENTIAL, altı Keyguard), iOS LAContext. Sır yalnız başarılı kilit kontrolünden sonra oluşur.
+  Köprü `KlodaCloud.recoveryStatus/revealRecovery/hideRecovery/confirmRecovery`; `setDestinationEnabled(true)` ve
+  `configureWebDav` onaysız `recovery_required`. Android kod görünürken FLAG_SECURE.
+- JS: `shared/api/recovery-code.ts`, `features/recovery-code` (hook + `RecoveryCodePanel`), hedef kartının altında ve
+  WebDAV paneli yerinde; i18n `recovery.*` + 4 hata TR/EN/DE. Referans vektörler `tools/recovery-code-vectors.py`.
+- Kontroller ve çalışma zamanı: [kanıt](evidence/cloud18-nextcloud-2026-10-31/recovery29-1-2026-11-03.json) — Jest 213,
+  tsc, ESLint, Android+iOS derleme, Android instrumentation `recovery29`, iOS host vektörleri PASS; Android (desen) ve
+  iOS (simüle Face ID) kart → gizli kod → göster → iki grup → hedef etkin PASS.
+- Açık/sınır: iOS ekran görüntüsü engellenemez; kilitsiz telefon bulut hedefi açamaz; 29/1 öncesi etkin hedefler
+  yeniden açılana kadar sorulmaz (29/2); Android 24–29 Keyguard yolu, eski WebDAV kapısı çalışma zamanı, EN/DE/a11y
+  yakalaması NOT_RUN. Aynı ajan review (panel yeri, iOS inactive gizleme, çift dokunma düzeltildi); bağımsız yok.
 
 ## Sıradaki (kullanıcı 1.11: açık işler sırayla)
 
@@ -401,10 +421,12 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
    yalnız Dropbox için açılır. Gerçek hesap testi kullanıcının girişi ve ayrı onayıyla.
 9. 18B/5r — hedef başına geri yükleme (onaylı sıra): taşıma katmanına `download`; `IosWebDavVault.read() == profile`
    bağı yerine hedef bazlı kontrol (eklenen Nextcloud hedeflerini de açar); Dropbox dosya+fotoğraf; hedef seçimi
-   kararı 3.11 verildi (kartta "Yedekleri gör"). **Yapıldı 3.11** (yukarıda; Android çalışma zamanı ve metin açık işi kaldı).
+   kararı 3.11 verildi (kartta "Yedekleri gör"). **Yapıldı 3.11** (iOS + Android çalışma zamanı PASS; metin açık işi kaldı, geri düğmesi "Kuruluma dön" da bu işe dahil).
 10. [ADR0029 taslağı](../decisions/0029-cloud-restore-catalog-and-recovery-key.md) (3.11, onaylanmadı): yeni cihazda
    geri yükleme için kurtarma kodu + HMAC'li create-only katalog + salt geri yükleme yetkili içe aktarılmış fiş.
-   ADR sonundaki 4 açık soru kullanıcıda; dilimler 29/1–4, 18B/5r'den sonra.
+   4 açık soru 3.11'de yanıtlandı (gruplu Base32; ilk bulut etkinleştirmede zorunlu; yenileme = tam yeniden imza;
+   yalnız mobil; kod gizli + kilitle göster). 29/1 yapıldı 3.11 (yukarıda). Sıradaki: 29/2 (katalog yazıcı + backfill +
+   yenileme). Hedefe bağlı Yedekler metni açık iş olarak bekliyor.
 
 Açık: sunucu uyuşmazlığında iptal uçtan uca test edilmedi;
 bağımsız (başka ajan) review yapılmadı, yalnız aynı ajanın ayrı review geçişi.

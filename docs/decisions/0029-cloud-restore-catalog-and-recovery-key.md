@@ -1,8 +1,8 @@
 # ADR0029 — Cloud restore catalog and recovery key (restore on a new device)
 
 - Date: 2026-11-03.
-- Status: **draft, not approved.** Requested by the user 2026-11-03 for V1 consideration.
-  No implementation, runtime or physical acceptance. Open questions are listed at the end.
+- Status: **draft; the four open questions were answered by the user 2026-11-03** (see the end).
+  No implementation, runtime or physical acceptance yet.
 
 ## Context
 
@@ -55,19 +55,32 @@ destinations. It does not touch the PC/LAN path (ADR0016/0017), which has its ow
   while media is not end-to-end encrypted.
 - Recovery code shown on screen: no screenshot/clipboard by default; the screen warns.
 
-## Open questions for the user
+## User decisions (2026-11-03, answers to the former open questions)
 
-1. Code format: grouped Base32 (no asset) or a word list (needs a licence-checked list).
-2. Code at first cloud enable mandatory, or optional and created later from settings
-   (backups made before it are then not recoverable on a new device).
-3. Should the user be able to regenerate the code (new secret; older deltas stay under
-   the old code)?
-4. Scope: mobile cloud destinations only (DAV + OAuth); Desktop out of scope.
+1. **Code format:** grouped Base32 (no word-list asset or licence); groups plus a check
+   character, independent of the UI language.
+2. **Mandatory:** the code is created, shown and confirmed on the first enable of any
+   cloud destination; enabling does not continue without it.
+3. **Regeneration:** allowed, as a full re-sign. A new secret replaces the old one; every
+   Completed receipt on this device is catalogued again under the new key as a new delta
+   chain, so the old code is no longer needed. Old deltas stay on the destination
+   (no cloud deletion, ADR0022) and are ignored by an import with the new code. Added to 29/2.
+4. **Scope:** mobile cloud destinations only (DAV + OAuth). Desktop and the PC/LAN path are
+   out of scope.
+5. **Hidden by default, unlocked by the device lock** (added 2026-11-03). The code screen never
+   shows the code on its own; a "Show code" button asks for the phone's own screen lock
+   (fingerprint/Face ID or PIN/pattern/passcode: iOS `LAContext` `.deviceOwnerAuthentication`,
+   Android `BiometricPrompt` BIOMETRIC_STRONG|DEVICE_CREDENTIAL on API 30+, otherwise the
+   Keyguard credential screen). Native code returns the code only after that check succeeds;
+   the secret itself stays readable without it (29/2 needs it in background runs). The code is
+   hidden again when the app leaves the foreground; Android marks the window FLAG_SECURE while
+   it is shown. A phone without a screen lock cannot show the code, so it cannot enable a cloud
+   destination (`recovery_lock_required`); the secret is created only after the first successful check.
 
 ## Proposed slices (after 18B/5 and 18B/5r)
 
 29/1 secret, vault, HKDF, code screen (Lovable mapping, TR/EN/DE); 29/2 catalog writer +
-backfill, shared test vectors for both platforms; 29/3 import + imported receipt migration;
+backfill and regeneration re-sign, shared test vectors for both platforms; 29/3 import + imported receipt migration;
 29/4 restore wiring and tamper tests (altered file, injected file, deleted/replayed delta,
 wrong code, interruption).
 
