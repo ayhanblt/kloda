@@ -343,7 +343,7 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
 - Not: Metro'yu `CI=1` ile başlatmak dosya izlemeyi kapatır, uygulama eski JS'i alır; `--dev-client`'la başlatın.
   Dropbox kartı hesap adı yerine ham `dbid:` gösteriyor (görsel açık iş).
 
-## Dilim 18B/5r — hedef başına geri yükleme (3.11, commit yok)
+## Dilim 18B/5r — hedef başına geri yükleme (3.11, commit `1cc5004`, push yok)
 
 - Kullanıcı kararı 3.11: Lovable Yedekler ekranında hedef seçimi yok; seçim Bağlantılar'daki her etkin hedef kartında
   **"Yedekleri gör"** ile yapılır, mevcut Yedekler ekranı o hedefe bağlı açılır (yeni bileşen yok).
