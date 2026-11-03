@@ -1,25 +1,24 @@
 import Foundation
 
-// Shared Files/Photos publication; source-specific preparation and validation remain native.
+// Shared Files/Photos publication; source-specific preparation and validation remain native. The destination's
+// transport comes from outside (ADR0028 §5), so DAV and REST providers share one state machine.
 final class IosWebDavPublisher {
-  let profile: IosWebDavProfile
+  let target: String
   let binding: String
   let journal: IosWebDavJournal
   let snapshots: IosFilesSnapshot
-  let transport: IosWebDavTransport
+  let transport: IosBackupTransport
   let check: () throws -> Void
   let settle: (IosWebDavUpload) throws -> Void
   let track: (IosWebDavUpload) throws -> Void
-  init(profile: IosWebDavProfile, binding: String, journal: IosWebDavJournal, snapshots: IosFilesSnapshot,
+  init(target: String, binding: String, journal: IosWebDavJournal, snapshots: IosFilesSnapshot, transport: IosBackupTransport,
     check: @escaping () throws -> Void, settle: @escaping (IosWebDavUpload) throws -> Void, track: @escaping (IosWebDavUpload) throws -> Void) {
-    self.profile = profile; self.binding = binding; self.journal = journal; self.snapshots = snapshots
+    self.target = target; self.binding = binding; self.journal = journal; self.snapshots = snapshots; self.transport = transport
     self.check = check; self.settle = settle; self.track = track
-    transport = IosWebDavTransport(profile: profile, snapshots: snapshots, check: check)
   }
   @discardableResult func publish(source: String, reference: String, path: String, revision: String,
     sha256: String, size: Int64, sourceIdentity: String, kind: String = "file", prepare: () throws -> String, validate: @escaping () throws -> Void) throws -> IosWebDavUpload {
     try check()
-    let target = try profile.targetId()
     let rows = try journal.candidates(target: target, source: source, reference: reference)
     let pending = rows.filter { $0.phase != "completed" && !$0.skipped }
     guard pending.count <= 1 else { throw IosWebDavFailure.code("review_required") }

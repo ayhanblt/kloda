@@ -5,7 +5,7 @@ import android.content.Context
 // Native source identity and bytes are re-read before a review can settle an old upload.
 internal class AndroidWebDavSourceValidation(private val context: Context, private val captured: AndroidWebDavContext,
   private val journal: AndroidWebDavJournal, private val snapshots: AndroidFilesSnapshots,
-  private val transport: AndroidWebDavTransport, private val check: () -> Unit) {
+  private val transport: AndroidBackupTransport, private val check: () -> Unit) {
   fun validate(value: WebDavUpload) {
     check()
     val source = captured.sources.sources[value.source] ?: throw FilesFailure("source_changed")

@@ -23,7 +23,7 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
   }
 
   override fun onStart() {
-    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore", "smb-files", "smb-product", "smb-photos-owned", "smb-profile", "sftp-files", "sftp-sources", "sftp-photos-owned", "sftp-product", "cloud18-nextcloud", "cloud18-destination", "cloud18-oauth", "cloud18-targets")) {
+    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore", "smb-files", "smb-product", "smb-photos-owned", "smb-profile", "sftp-files", "sftp-sources", "sftp-photos-owned", "sftp-product", "cloud18-nextcloud", "cloud18-destination", "cloud18-oauth", "cloud18-targets", "cloud18-dropbox", "cloud18-dropbox-live")) {
       finish(Activity.RESULT_CANCELED, Bundle().apply { putString("stream", "Explicit scope required: local-files, media-fixture or webdav-journal\n") })
       return
     }
@@ -72,6 +72,24 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
       if (scope == "cloud18-destination") {
         group("cloud18-destination-migration") { AndroidDestinationMigrationChecks.run(scratch) }
         finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "backup_destination shared kind migration: rows kept, new kinds accepted, unknown refused, idempotent, fresh create, rollback PASS; production upgrade on device, queue wiring and iOS NOT_RUN here\n") })
+        return
+      }
+      if (scope == "cloud18-dropbox") {
+        group("cloud18-dropbox-wiring") {
+          AndroidDropboxChecks.run(IsolatedContext(targetContext, scratch)) { sendStatus(0, Bundle().apply { putString("stream", "$it\n") }) }
+        }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Dropbox adapter offline wiring PASS; real-account upload, upload session and iOS runtime NOT_RUN here\n") })
+        return
+      }
+      if (scope == "cloud18-dropbox-live") {
+        group("cloud18-dropbox-live") {
+          val announce = { line: String -> sendStatus(0, Bundle().apply { putString("stream", "$line\n") }) }
+          AndroidOAuthChecks.run(IsolatedContext(targetContext, scratch), "dropbox", {
+            startActivitySync(android.content.Intent(targetContext, AndroidLifecycleActivity::class.java)
+              .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) as Activity
+          }, { context, profile -> AndroidDropboxChecks.live(context, profile, announce) }, announce)
+        }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Dropbox real-account publication (small, conflict, upload session) PASS; queue/JobService runtime, cross-run session resume and iOS NOT_RUN here\n") })
         return
       }
       if (scope == "cloud18-oauth") {

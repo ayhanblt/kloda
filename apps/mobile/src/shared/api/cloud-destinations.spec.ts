@@ -17,7 +17,8 @@ it('accepts display metadata only and rejects a password or unknown field', () =
   const missing: Record<string, unknown> = { ...row }; delete missing.enabled;
   expect(() => cloudDestinationFromNative(missing)).toThrow('outcome_unknown');
   expect(() => cloudDestinationFromNative({ ...row, enabled: 'yes' })).toThrow('outcome_unknown');
-  expect(() => cloudDestinationFromNative({ ...row, provider: 'dropbox', enabled: true })).toThrow('outcome_unknown');
+  expect(() => cloudDestinationFromNative({ ...row, provider: 'onedrive', enabled: true })).toThrow('outcome_unknown');
+  expect(cloudDestinationFromNative({ ...row, provider: 'dropbox', enabled: true })).toEqual({ ...row, provider: 'dropbox', enabled: true });
 });
 
 it('enables a DAV destination explicitly and checks the native answer', async () => {
@@ -112,6 +113,6 @@ it('runs and pauses one destination by targetId and accepts only a known run sta
   await expect(cloudDestinations.pause(target)).resolves.toEqual([{ ...row, run: { state: 'paused', errorCode: 'target_pause' } }]);
   native.destinations.mockResolvedValueOnce({ destinations: [{ ...row, run: { ...run, state: 'exploded' } }] });
   await expect(cloudDestinations.list()).rejects.toThrow('outcome_unknown');
-  native.destinations.mockResolvedValueOnce({ destinations: [{ ...row, provider: 'dropbox', endpoint: 'https://api.dropboxapi.com', run }] });
+  native.destinations.mockResolvedValueOnce({ destinations: [{ ...row, provider: 'onedrive', endpoint: 'https://graph.microsoft.com', run }] });
   await expect(cloudDestinations.list()).rejects.toThrow('outcome_unknown');
 });

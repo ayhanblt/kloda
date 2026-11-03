@@ -13,14 +13,14 @@ final class IosWebDavQueue {
   private final class Execution {
     let token = UUID()
     let journal: IosWebDavJournal
-    let profile: IosWebDavProfile
+    let destination: IosCloudTarget
     let binding: String
     let lease: IosBackgroundLease?
     let onFinish: ((IosWebDavRun) -> Void)?
     var run: IosWebDavRun
-    init(journal: IosWebDavJournal, profile: IosWebDavProfile, binding: String, run: IosWebDavRun,
+    init(journal: IosWebDavJournal, destination: IosCloudTarget, binding: String, run: IosWebDavRun,
       lease: IosBackgroundLease?, onFinish: ((IosWebDavRun) -> Void)?) {
-      self.journal = journal; self.profile = profile; self.binding = binding; self.run = run
+      self.journal = journal; self.destination = destination; self.binding = binding; self.run = run
       self.lease = lease; self.onFinish = onFinish
     }
   }
@@ -115,14 +115,14 @@ final class IosWebDavQueue {
       if automatic, try (IosAutomaticPause.requested || IosSyncJournal().automaticPaused()) { throw IosWebDavFailure.code("user_pause") }
       try lease?.check()
       let journal = try IosWebDavJournal.open()
-      let profile: IosWebDavProfile
+      let profile: IosCloudTarget
       if let target = prior?.target ?? target {
         guard let header = try journal.destination(target: target) else { throw IosWebDavFailure.code("destination_disabled") }
         guard let stored = try IosWebDavContext.stored(kind: header.kind, target: target) else { throw IosWebDavFailure.code("webdav_missing") }
         profile = stored
       } else {
         guard let stored = try IosWebDavVault.read() else { throw IosWebDavFailure.code("webdav_missing") }
-        profile = stored
+        profile = .dav(stored)
       }
       let binding = try IosWebDavContext.capture(profile, journal: journal)
       try IosWebDavContext.check(profile, binding: binding, journal: journal)
@@ -131,7 +131,7 @@ final class IosWebDavQueue {
       let run = try prior ?? IosWebDavRun(id: UUID().uuidString.lowercased(), target: profile.targetId(), binding: binding, automatic: automatic, occurrence: clock.now)
       guard try run.target == profile.targetId(), run.binding == binding, run.automatic == automatic, run.phase == "running" else { throw IosWebDavFailure.code("settings_changed") }
       try journal.saveRun(run)
-      let value = Execution(journal: journal, profile: profile, binding: binding, run: run, lease: lease, onFinish: onFinish)
+      let value = Execution(journal: journal, destination: profile, binding: binding, run: run, lease: lease, onFinish: onFinish)
       active = value; lastError = nil; return value
     }
     worker.async { self.attempt(execution) }
@@ -142,18 +142,20 @@ final class IosWebDavQueue {
       guard active?.token == execution.token, execution.run.phase == "running", foreground || execution.lease != nil else { throw IosWebDavFailure.code("cancelled") }
       guard protectedData else { throw IosWebDavFailure.code("credential_locked") }
       try execution.lease?.check()
-      try IosWebDavContext.check(execution.profile, binding: execution.binding, journal: execution.journal)
+      try IosWebDavContext.check(execution.destination, binding: execution.binding, journal: execution.journal)
     }
   }
   private func attempt(_ execution: Execution) {
     do {
       try check(execution)
       let snapshots = try IosFilesSnapshot.webdav()
-      let publisher = IosWebDavPublisher(profile: execution.profile, binding: execution.binding, journal: execution.journal, snapshots: snapshots,
-        check: { try self.check(execution) }, settle: { value in
+      let check = { try self.check(execution) }
+      let publisher = IosWebDavPublisher(target: try execution.destination.targetId(), binding: execution.binding, journal: execution.journal,
+        snapshots: snapshots, transport: try execution.destination.transport(snapshots: snapshots, check: check),
+        check: check, settle: { value in
           try IosWebDavContext.synchronized {
             try self.check(execution)
-            try IosWebDavContext.complete(value, profile: execution.profile, journal: execution.journal)
+            try IosWebDavContext.complete(value, destination: execution.destination, journal: execution.journal)
           }
         }, track: { value in
           try IosWebDavContext.synchronized { try self.check(execution); try execution.journal.track(run: execution.run, job: value) }
@@ -209,7 +211,7 @@ final class IosWebDavQueue {
     do {
       let ready = try IosWebDavContext.synchronized { () -> Bool in
         guard active?.token == execution.token, foreground else { return false }
-        try IosWebDavContext.check(execution.profile, binding: execution.binding, journal: execution.journal)
+        try IosWebDavContext.check(execution.destination, binding: execution.binding, journal: execution.journal)
         let clock = try IosAutomaticClock.read()
         guard let next = try execution.run.retried(clock: clock) else {
           arm(execution, delay: max(0, execution.run.retryUptime! - clock.uptime)); return false

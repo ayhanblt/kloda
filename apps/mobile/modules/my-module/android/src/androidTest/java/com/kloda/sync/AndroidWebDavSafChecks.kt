@@ -50,8 +50,8 @@ internal object AndroidWebDavSafChecks {
         fun backup(): WebDavUpload {
           val captured = AndroidWebDavContext.capture(context, journal)
           val snapshots = AndroidFilesSnapshots(context, true) { captured.check(context, journal) }
-          val publisher = AndroidWebDavPublisher(context, profile, captured.binding, journal, snapshots,
-            { captured.check(context, journal) }, { captured.complete(context, journal, it) }, {})
+          val publisher = AndroidWebDavPublisher(profile.targetId(), captured.binding, journal, snapshots,
+            AndroidWebDavTransport(context, profile, snapshots) { captured.check(context, journal) }, { captured.check(context, journal) }, { captured.complete(context, journal, it) }, {})
           val runner = AndroidWebDavFilesRunner(context, publisher); runner.run(captured.sources.sources)
           check(runner.errorCode == "conflict")
           return journal.uploads(profile.targetId()).single { it.phase != "completed" }

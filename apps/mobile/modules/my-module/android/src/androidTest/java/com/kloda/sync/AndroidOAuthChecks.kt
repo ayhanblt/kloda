@@ -22,7 +22,8 @@ internal object AndroidOAuthChecks {
     check(observed == code) { "Expected $code; observed $observed" }
   }
 
-  fun run(isolated: Context, providerName: String, open: () -> Activity, announce: (String) -> Unit) {
+  fun run(isolated: Context, providerName: String, open: () -> Activity,
+    use: ((Context, AndroidOAuthProfile) -> Unit)? = null, announce: (String) -> Unit) {
     val provider = OAuthProvider.named(providerName)
     val namespace = UUID.randomUUID().toString().replace("-", "")
     val context = object : ContextWrapper(isolated) {
@@ -31,7 +32,7 @@ internal object AndroidOAuthChecks {
     if (provider == OAuthProvider.GOOGLE_DRIVE) { custody(context, provider); drive(open(), context, announce); return }
     offline(context, provider)
     custody(context, provider)
-    live(isolated, context, provider, announce)
+    live(isolated, context, provider, announce, use)
   }
 
   private fun offline(context: Context, provider: OAuthProvider) {
@@ -112,7 +113,8 @@ internal object AndroidOAuthChecks {
   }
 
   // The redirect reaches KlodaOAuthRedirectActivity in this test package, which completes the pending deferred.
-  private fun live(launcher: Context, context: Context, provider: OAuthProvider, announce: (String) -> Unit) {
+  private fun live(launcher: Context, context: Context, provider: OAuthProvider, announce: (String) -> Unit,
+    use: ((Context, AndroidOAuthProfile) -> Unit)?) {
     val request = AndroidOAuthLogin.request(provider)
     val redirect = AndroidOAuthRedirect.expect()
     launcher.startActivity(CustomTabsIntent.Builder().build().intent.setData(request.url).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -131,6 +133,12 @@ internal object AndroidOAuthChecks {
       check((grant.expiresAt ?: 0) > System.currentTimeMillis() / 1000 + 86400) { "yandex expiry" }
     }
     announce("PASS pkce-exchange account-id keystore-round-trip refresh")
+    // Optional work with the live grant (18B/5 upload) before it is revoked; revoke and custody deletion always follow.
+    try { use?.invoke(context, profile) } catch (error: Throwable) {
+      if (login.canRevoke) runCatching { AndroidOAuthLogin(context, provider).revoke(grant.refreshToken) }
+      runCatching { vault.delete() }
+      throw error
+    }
     if (login.canRevoke) {
       AndroidOAuthLogin(context, provider).revoke(grant.refreshToken)
       var revoked = false

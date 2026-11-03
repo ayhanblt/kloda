@@ -1,17 +1,15 @@
 package com.kloda.sync
 
-import android.content.Context
 import java.util.UUID
 
-internal class AndroidWebDavPublisher(context: Context, val profile: AndroidWebDavProfile, val binding: String,
-  val journal: AndroidWebDavJournal, val snapshots: AndroidFilesSnapshots, val check: () -> Unit,
+// The destination's transport comes from outside (ADR0028 §5), so DAV and REST providers share one state machine.
+internal class AndroidWebDavPublisher(val target: String, val binding: String,
+  val journal: AndroidWebDavJournal, val snapshots: AndroidFilesSnapshots, val transport: AndroidBackupTransport, val check: () -> Unit,
   private val settle: (WebDavUpload) -> Unit, private val track: (WebDavUpload) -> Unit) {
-  val transport = AndroidWebDavTransport(context, profile, snapshots, check)
   fun cancel() { transport.cancel(); snapshots.cancelRead() }
   fun publish(source: String, reference: String, path: String, revision: String, digest: FilesDigest, sourceIdentity: String,
     prepare: () -> FilesSnapshot, validate: () -> Unit, kind: String = "file"): WebDavUpload {
     check()
-    val target = profile.targetId()
     val rows = journal.candidates(target, source, reference)
     val pending = rows.filter { it.phase != "completed" && !it.skipped }
     if (pending.size > 1) throw FilesFailure("review_required")

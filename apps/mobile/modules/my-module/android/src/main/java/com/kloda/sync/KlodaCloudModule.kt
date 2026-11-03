@@ -60,6 +60,7 @@ class KlodaCloudModule : Module() {
           vault.delete()
         } else {
           val grant = saved.read() ?: throw FilesFailure("not_found")
+          AndroidWebDavDestinations.forget(context(), targetId)
           if (grant.accountName != null) runBlocking { withTimeoutOrNull(15_000) { AndroidGoogleDrive.revoke(context(), grant.accountName) } }
           else runCatching { AndroidOAuthLogin(context(), OAuthProvider.named(grant.provider)) }.getOrNull()?.revoke(grant.refreshToken)
           saved.delete()
@@ -67,7 +68,8 @@ class KlodaCloudModule : Module() {
         mapOf("destinations" to summaries())
       } }
     }
-    // Explicit, foreground-only opt-in (ADR0023); OAuth destinations stay unsupported until their adapters exist.
+    // Explicit, foreground-only opt-in (ADR0023); OAuth destinations stay unsupported until their adapters exist
+    // (Dropbox has one since 18B/5).
     AsyncFunction("setDestinationEnabled") Coroutine { targetId: String, enabled: Boolean ->
       if (!resumed()) throw CodedException("candidate_stale", "candidate_stale", null)
       withContext(Dispatchers.IO) { guarded {
@@ -75,8 +77,8 @@ class KlodaCloudModule : Module() {
         mapOf("destinations" to summaries())
       } }
     }
-    // Step18A/4c: one manual run of an enabled, added DAV destination through the shared queue (same lock and
-    // begin() order as the original WebDAV run); the original entry keeps KlodaBackup's run/pause.
+    // Step18A/4c: one manual run of an enabled, added destination (DAV, or Dropbox since 18B/5) through the shared
+    // queue (same lock and begin() order as the original WebDAV run); the original entry keeps KlodaBackup's run/pause.
     AsyncFunction("runDestination") Coroutine { targetId: String ->
       if (!resumed()) throw CodedException("candidate_stale", "candidate_stale", null)
       withContext(Dispatchers.IO) { guarded {
@@ -201,8 +203,9 @@ class KlodaCloudModule : Module() {
     vault.write(profile)
   }
   private fun added(targetId: String) {
-    if (AndroidWebDavVault(context(), targetId).read()?.provider == null)
-      throw FilesFailure(if (AndroidOAuthVault(context(), targetId).read() != null) "destination_unsupported" else "not_found")
+    if (AndroidWebDavDestinations.added(context(), targetId) != null) return
+    val stored = AndroidWebDavVault(context(), targetId).read() != null || AndroidOAuthVault(context(), targetId).read() != null
+    throw FilesFailure(if (stored) "destination_unsupported" else "not_found")
   }
   // ADR0028 §7: DAV and OAuth destinations share one limit.
   private fun total(): Int = AndroidWebDavVault.count(context()) + AndroidOAuthVault.slots(context()).size
@@ -216,9 +219,13 @@ class KlodaCloudModule : Module() {
     if (profile.provider != null) AndroidWebDavRuntime.queue(context()).runView(profile.targetId())?.let { put("run", it) }
   }
   // Display metadata only: never the refresh token. The account ID stands in for the user name.
-  private fun summary(profile: AndroidOAuthProfile): Map<String, Any> = mapOf("targetId" to profile.targetId(),
-    "provider" to profile.provider, "endpoint" to OAuthProvider.named(profile.provider).api, "targetPath" to profile.targetPath, "username" to profile.accountId,
-    "enabled" to false)
+  private fun summary(profile: AndroidOAuthProfile): Map<String, Any> = buildMap {
+    val target = profile.targetId()
+    put("targetId", target); put("provider", profile.provider); put("endpoint", OAuthProvider.named(profile.provider).api)
+    put("targetPath", profile.targetPath); put("username", profile.accountId)
+    put("enabled", AndroidWebDavDestinations.enabled(context(), target))
+    if (profile.provider in AndroidCloudTarget.OAUTH_KINDS) AndroidWebDavRuntime.queue(context()).runView(target)?.let { put("run", it) }
+  }
   private fun summaries(): List<Map<String, Any>> {
     val context = context()
     val legacy = AndroidWebDavVault(context).read()?.let { listOf(summary(it)) } ?: emptyList()

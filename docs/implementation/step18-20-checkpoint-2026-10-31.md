@@ -292,6 +292,39 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
 - [iOS fiziksel test dosyası](ios-physical-tests/ios-fiziksel-testi-claude-step18-20.md): 19 listesi + 18 cihaz adımları
   birleştirildi (Codex aynı klasöre ekler); eski step19 listesi yönlendirme oldu.
 
+## Dilim 18B/5 — Dropbox yükleme adaptörü (3.11, commit yok)
+
+- Kapsam kullanıcı onayı 3.11 (aşağıda madde 8). Ortak taşıma arayüzü: iOS `IosBackupTransport`, Android
+  `AndroidBackupTransport` (inspect/upload/move). Publisher artık `target` + dışarıdan taşıma alır; yayın durum makinesi
+  (`IosWebDavPublication`/`AndroidWebDavPublication`) değişmedi. Hedef türü `IosCloudTarget`/`AndroidCloudTarget`
+  (DAV profili veya OAuth profili) bağlam/kuyruk/koordinatörden geçer; `stored()` OAuth yuvasını yalnız adaptörü olan
+  sağlayıcı (`oauthKinds = dropbox`) için döndürür. Journal `queueKinds = davKinds + dropbox` (tablo CHECK değişmedi).
+- `IosDropboxTransport`/`AndroidDropboxTransport`: `files/upload` ve `upload_session` commit'i `mode=add`,
+  `autorename=false`, `strict_conflict=true`, `mute=true`; `move_v2` `autorename=false`; `inspect` dosyayı indirip
+  kendi SHA-256/boyutumuzla karşılaştırır (409 `path/not_found` → missing). 150 MiB üstü: 8 MiB parçalı oturum, oturum
+  kimliği yalnız bellekte (tek çalışma). `Dropbox-API-Arg` ASCII dışı ve 0x7F `\uXXXX`. Erişim jetonu bellekte, 401'de bir
+  kez yenile+yeniden gönder; yenileme reddi → `oauth_expired`. Hata eşlemesi: 409 conflict → `conflict`,
+  insufficient_space → `disk_full`, malformed/disallowed/too_long → `backup_path_rejected`, 429/5xx → `connection_unavailable`.
+- HTTP: `IosWebDavClient.exchange` / `AndroidWebDavClient.call` REST yolu (gövde okunur; mutasyonun alınan durumu ACK
+  kalır, okuma kesilirse hata). DAV yolu davranışı aynı.
+- Aç/kapa, elle başlatma, kaldırmada `forget` (satır kapatılır, plan silinir) Dropbox için açıldı; OneDrive/Yandex/Drive
+  `destination_unsupported` kalır. JS `enableableProviders` + `dropbox`; yeni i18n yok.
+- Kontroller: Jest etkilenen 5 dosya 23 test, tsc, ESLint PASS; Android `:my-module` Kotlin + androidTest derleme,
+  `lintDebug` (worklets lint çökmesi hariç, 18A/4a ile aynı) PASS; iOS `pod install` + Simulator debug derleme
+  (`Kloda-Cloud18-Disposable`) PASS. `python3 -I tools/test-android-dropbox-wiring.py` (KlodaCloud18, ağsız) PASS:
+  arg kaçışı, hata eşlemesi, kaydet≠etkinleştir, açma/journal satırı/stored/taşıma türü, OneDrive reddi, forget.
+- Gerçek hesap (kullanıcı onayı ve kendi girişi, 3.11): `python3 -I tools/test-android-dropbox-live.py` (KlodaCloud18) PASS —
+  küçük Unicode adlı dosya create-only upload + `move_v2` + kendi SHA-256; var olan dosyaya upload/move reddi, asıl dosya
+  değişmedi, yayın `conflict`'te durdu; 157 286 401 bayt `upload_session` tek çalışmada + SHA-256; iptal ve kasa silme.
+  Test dosyaları kullanıcının Dropbox'ında `Apps/Kloda/Kloda/test18b5-*` altında kaldı. Not: Android seçicisinde ürün
+  uygulaması ve test paketi aynı yönlendirmeyi dinler → `com.kloda.sync.test`, "Just once". Daha uzun uzak dosya boyut
+  sınırında `review_required` verir (DAV ile aynı). [Kanıt](evidence/cloud18-nextcloud-2026-10-31/dropbox-upload-2026-11-03.json).
+- NOT_RUN: etkin Dropbox hedefinin kuyruk/JobService üzerinden koşusu; iOS çalışma zamanı (yalnız derleme);
+  18A/3 DAV çok hedefli regresyon (`test-android-dav-targets.py`: HTTPS fixture özel anahtarları Codex'in
+  `/tmp/kloda-step15` alanında silinmiş; yeniden üretmek Codex fixture'ını ve izlenen CA dosyasını değiştirirdi).
+- Bilinen sınırlar: eklenen hedeflerde inceleme (review) ekranı yok (özgün WebDAV'a bağlı, önceden de böyle); Dropbox
+  yolları büyük/küçük harf duyarsız → yalnız harf farkı olan iki yol `conflict` olur. Aynı ajan review; bağımsız yok.
+
 ## Sıradaki (kullanıcı 1.11: açık işler sırayla)
 
 19, bu listede 18'in 1.–3. maddelerinden sonra gelmesine rağmen önce yapıldı; sıra artık buna göre.
@@ -317,7 +350,17 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
 6. 20 — regresyon iskeleti (görsel yakalama betiği hazır).
 7. Kullanıcıda bekleyenler: fiziksel test (gate 21, en sonda, [liste](ios-physical-tests/ios-fiziksel-testi-claude-step18-20.md)), iOS 16
    runtime kararı, birleştirme. C grubu kararı verildi (3.11, V1 dışı). B grubu kayıtları alındı (yukarıda); 18B/1 Dropbox yapıldı.
-8. Sıradaki kod işi: 18B/5 OAuth yükleme adaptörleri (ADR0028 §5).
+8. 18B/5 Dropbox — kod ve Android gerçek hesap testi yapıldı (yukarıdaki dilim); açık: iOS çalışma zamanı, kuyruk üzerinden koşu. OAuth yükleme adaptörleri (ADR0028 §5). Kullanıcı onayı 3.11: önce yalnız Dropbox
+   iOS+Android; DAV yayın durum makinesi korunur, publisher taşıma katmanını dışarıdan alır (inspect/upload/move +
+   ileride download); Dropbox `mode=add`/`autorename=false`, `move_v2`, doğrulama kendi SHA-256'mızla; 150 MB üstü
+   `upload_session` yalnız tek çalışma içinde (çalışmalar arası devam ayrı migration, sonraya); aç/kapa ve elle başlatma
+   yalnız Dropbox için açılır. Gerçek hesap testi kullanıcının girişi ve ayrı onayıyla.
+9. 18B/5r — hedef başına geri yükleme (onaylı sıra): taşıma katmanına `download`; `IosWebDavVault.read() == profile`
+   bağı yerine hedef bazlı kontrol (eklenen Nextcloud hedeflerini de açar); Dropbox dosya+fotoğraf; hedef seçimi
+   Lovable'da yoksa görsel karar sorulur.
+10. [ADR0029 taslağı](../decisions/0029-cloud-restore-catalog-and-recovery-key.md) (3.11, onaylanmadı): yeni cihazda
+   geri yükleme için kurtarma kodu + HMAC'li create-only katalog + salt geri yükleme yetkili içe aktarılmış fiş.
+   ADR sonundaki 4 açık soru kullanıcıda; dilimler 29/1–4, 18B/5r'den sonra.
 
 Açık: sunucu uyuşmazlığında iptal uçtan uca test edilmedi;
 bağımsız (başka ajan) review yapılmadı, yalnız aynı ajanın ayrı review geçişi.

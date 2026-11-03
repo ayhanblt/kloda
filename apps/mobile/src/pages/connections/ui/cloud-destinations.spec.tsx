@@ -18,7 +18,7 @@ beforeEach(() => { jest.clearAllMocks(); api.cancelSignIn.mockResolvedValue(); }
 function List() { return <CloudDestinationList cloud={useCloudDestinations()} navigate={() => undefined} saved={null} />; }
 
 it('switches a DAV destination, keeps OAuth unsupported and removes only after confirmation', async () => {
-  const dav = row(1, 'nextcloud'), oauth = row(2, 'dropbox');
+  const dav = row(1, 'nextcloud'), oauth = row(2, 'onedrive');
   const original = row(0, 'webdav');
   api.list.mockResolvedValue([original, dav, oauth]);
   api.setEnabled.mockResolvedValue([original, { ...dav, enabled: true }, oauth]);
@@ -71,8 +71,18 @@ it('runs an enabled DAV destination now and pauses it while running', async () =
   await view.unmount();
 });
 
-it('offers no manual run for a disabled or OAuth destination', async () => {
-  api.list.mockResolvedValue([row(5, 'nextcloud'), row(6, 'dropbox')]);
+it('lets an enabled Dropbox destination run like a DAV one (18B/5)', async () => {
+  api.list.mockResolvedValue([row(7, 'dropbox', true), row(8, 'dropbox')]);
+  const view = await render(<List />);
+  await waitFor(() => expect(view.getByText('user8')).toBeTruthy());
+  expect(view.queryByText(i18n.t('transfer.errors.destination_unsupported'))).toBeNull();
+  expect(view.getAllByRole('button', { name: i18n.t('destinations.enableSaved') })).toHaveLength(1);
+  expect(view.getAllByRole('button', { name: i18n.t('statusUi.backupNow') })).toHaveLength(1);
+  await view.unmount();
+});
+
+it('offers no manual run for a disabled or unsupported OAuth destination', async () => {
+  api.list.mockResolvedValue([row(5, 'nextcloud'), row(6, 'onedrive')]);
   const view = await render(<List />);
   await waitFor(() => expect(view.getByText('user6')).toBeTruthy());
   expect(view.queryByRole('button', { name: i18n.t('statusUi.backupNow') })).toBeNull();

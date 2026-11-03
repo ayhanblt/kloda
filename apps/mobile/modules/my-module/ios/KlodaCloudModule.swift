@@ -41,6 +41,7 @@ public final class KlodaCloudModule: Module {
           if profile.provider == "nextcloud" { try IosNextcloudLogin().revoke(profile) }
           try IosWebDavVault.delete(slot: targetId)
         } else if let profile = try IosOAuthVault.read(slot: targetId) {
+          try IosWebDavDestinations.forget(targetId)
           // Best effort (ADR0028): local custody is deleted whatever the provider answers.
           IosOAuthLogin(try IosOAuthProvider.named(profile.provider)).revoke(refreshToken: profile.refreshToken)
           try IosOAuthVault.delete(slot: targetId)
@@ -48,7 +49,8 @@ public final class KlodaCloudModule: Module {
         return ["destinations": try Self.summaries()]
       }
     }.runOnQueue(.main)
-    // Explicit, foreground-only opt-in (ADR0023); OAuth destinations stay unsupported until their adapters exist.
+    // Explicit, foreground-only opt-in (ADR0023); OAuth destinations stay unsupported until their adapters exist
+    // (Dropbox has one since 18B/5).
     AsyncFunction("setDestinationEnabled") { (targetId: String, enabled: Bool, promise: Promise) in
       guard UIApplication.shared.applicationState == .active else { return promise.reject("candidate_stale", "candidate_stale") }
       self.background(promise) {
@@ -56,8 +58,8 @@ public final class KlodaCloudModule: Module {
         return ["destinations": try Self.summaries()]
       }
     }.runOnQueue(.main)
-    // Step18A/4c: one manual run of an enabled, added DAV destination through the shared queue (same lock and
-    // begin() order as the original WebDAV run); the original entry keeps KlodaBackup's run/pause.
+    // Step18A/4c: one manual run of an enabled, added destination (DAV, or Dropbox since 18B/5) through the shared
+    // queue (same lock and begin() order as the original WebDAV run); the original entry keeps KlodaBackup's run/pause.
     AsyncFunction("runDestination") { (targetId: String, promise: Promise) in
       guard UIApplication.shared.applicationState == .active else { return promise.reject("candidate_stale", "candidate_stale") }
       self.background(promise) {
@@ -192,9 +194,9 @@ public final class KlodaCloudModule: Module {
     try IosWebDavVault.write(profile, slot: slot)
   }
   static func added(_ targetId: String) throws {
-    guard try IosWebDavVault.read(slot: targetId)?.provider != nil else {
-      throw IosWebDavFailure.code(try IosOAuthVault.read(slot: targetId) != nil ? "destination_unsupported" : "not_found")
-    }
+    guard try IosWebDavDestinations.added(targetId) == nil else { return }
+    let stored = try IosWebDavVault.read(slot: targetId) != nil || IosOAuthVault.read(slot: targetId) != nil
+    throw IosWebDavFailure.code(stored ? "destination_unsupported" : "not_found")
   }
   // ADR0028 §7: DAV and OAuth destinations share one limit.
   static func total() throws -> Int { try IosWebDavVault.count() + IosOAuthVault.slots().count }
@@ -211,8 +213,11 @@ public final class KlodaCloudModule: Module {
   }
   // Display metadata only: never the refresh token. The account ID stands in for the user name.
   static func summary(_ profile: IosOAuthProfile) throws -> [String: Any] {
-    ["targetId": try profile.targetId(), "provider": profile.provider, "endpoint": try IosOAuthProvider.named(profile.provider).api,
-      "targetPath": profile.targetPath, "username": profile.accountId, "enabled": false]
+    let target = try profile.targetId()
+    var row: [String: Any] = ["targetId": target, "provider": profile.provider, "endpoint": try IosOAuthProvider.named(profile.provider).api,
+      "targetPath": profile.targetPath, "username": profile.accountId, "enabled": try IosWebDavDestinations.enabled(target)]
+    if IosCloudTarget.oauthKinds.contains(profile.provider), let run = try IosWebDavQueue.shared.runView(target: target) { row["run"] = run }
+    return row
   }
   static func summaries() throws -> [[String: Any]] {
     var rows = try IosWebDavVault.read().map { [try summary($0)] } ?? []

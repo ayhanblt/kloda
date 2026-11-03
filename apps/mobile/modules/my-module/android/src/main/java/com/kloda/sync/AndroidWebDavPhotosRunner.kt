@@ -43,7 +43,7 @@ internal class AndroidWebDavPhotosRunner(private val context: Context, private v
       { publisher.snapshots.stage(tree, file.reference) }, validate, kind = "photo_resource")
     val resource = WebDavPhotoResource(publisher.journal.publications.read(published), "original", metadata.name, metadata.mimeType, digest.sha256, digest.size)
     val draft = WebDavPhotoManifest(metadata.sourceDeviceId, metadata.assetId, 1, listOf(resource), metadata.albums, metadata.favorite)
-    val target = publisher.profile.targetId()
+    val target = publisher.target
     val signature = AndroidFilesSnapshots.digest(ByteArrayInputStream(WebDavPhotoManifestCodec.encode(draft))).sha256
     val revision = publisher.journal.photoRevision("$target:${metadata.assetId}", signature)
     val manifest = draft.copy(revision = revision)

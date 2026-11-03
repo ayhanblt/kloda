@@ -17,9 +17,11 @@ import java.io.InputStream
 import java.security.MessageDigest
 import java.util.concurrent.atomic.AtomicReference
 
-internal data class WebDavReply(val status: Int, val size: Long, val sha256: String)
+// `body`: bounded (64 KiB) body of a REST error reply, or of a REST reply the caller asked to collect (JSON APIs).
+internal data class WebDavReply(val status: Int, val size: Long, val sha256: String, val body: ByteArray = ByteArray(0))
 
-internal class AndroidWebDavClient(context: Context, val profile: AndroidWebDavProfile, private val check: () -> Unit) {
+// `profile` is null for REST destinations (Dropbox), which use `call` with their own authorization.
+internal class AndroidWebDavClient(context: Context, val profile: AndroidWebDavProfile?, private val check: () -> Unit) {
   private val connectivity = context.getSystemService(ConnectivityManager::class.java)
   private val network = connectivity.activeNetwork ?: throw FilesFailure("wifi_required")
   private fun currentNetwork() {
@@ -41,18 +43,30 @@ internal class AndroidWebDavClient(context: Context, val profile: AndroidWebDavP
   fun request(path: String, method: String, headers: Map<String, String> = emptyMap(),
     upload: InputStream? = null, uploadSize: Long = 0, maximum: Long = 65536,
     receive: ((ByteArray, Int) -> Unit)? = null): WebDavReply {
-    return exchange(profile.url(path), method, headers, upload, uploadSize, maximum, receive)
+    val dav = requireNotNull(profile)
+    return exchange(dav.url(path), method, dav.authorization(), headers, upload, uploadSize, maximum, receive)
   }
-  fun collection(prefix: String): WebDavReply = exchange(
-    profile.copy(targetPath = prefix).url().newBuilder().addPathSegment("").build(), "MKCOL")
+  fun collection(prefix: String): WebDavReply {
+    val dav = requireNotNull(profile)
+    return exchange(dav.copy(targetPath = prefix).url().newBuilder().addPathSegment("").build(), "MKCOL", dav.authorization())
+  }
+  // REST APIs (Dropbox): POST, body always read. A mutation's received status stays its ACK even if its body is lost;
+  // a read's interrupted body is a failure. `collect` keeps a 200 body (at most `maximum`, bounded to 64 KiB).
+  fun call(url: okhttp3.HttpUrl, authorization: String, mutation: Boolean, headers: Map<String, String> = emptyMap(),
+    upload: InputStream? = null, uploadSize: Long = 0, maximum: Long = 65536, collect: Boolean = false,
+    contentType: String = "application/octet-stream"): WebDavReply {
+    if (collect && maximum > 65536) throw FilesFailure("invalid_request")
+    return exchange(url, "POST", authorization, headers, upload, uploadSize, maximum, null, Rest(mutation, collect), contentType)
+  }
+  private class Rest(val mutation: Boolean, val collect: Boolean)
 
-  private fun exchange(url: okhttp3.HttpUrl, method: String, headers: Map<String, String> = emptyMap(),
+  private fun exchange(url: okhttp3.HttpUrl, method: String, authorization: String, headers: Map<String, String> = emptyMap(),
     upload: InputStream? = null, uploadSize: Long = 0, maximum: Long = 65536,
-    receive: ((ByteArray, Int) -> Unit)? = null): WebDavReply {
+    receive: ((ByteArray, Int) -> Unit)? = null, rest: Rest? = null, contentType: String = "application/octet-stream"): WebDavReply {
     currentNetwork()
     if (uploadSize < 0 || maximum < 0) throw FilesFailure("invalid_request")
     val body = upload?.let { input -> object : RequestBody() {
-      override fun contentType() = "application/octet-stream".toMediaType()
+      override fun contentType() = contentType.toMediaType()
       override fun contentLength() = uploadSize
       override fun isOneShot() = true
       override fun writeTo(sink: BufferedSink) {
@@ -69,7 +83,7 @@ internal class AndroidWebDavClient(context: Context, val profile: AndroidWebDavP
         currentNetwork()
       }
     } }
-    val request = Request.Builder().url(url).header("Authorization", profile.authorization())
+    val request = Request.Builder().url(url).header("Authorization", authorization)
     headers.forEach { (key, value) -> request.header(key, value) }
     // WebDAV methods with no payload still use an explicit empty body where OkHttp requires one.
     request.method(method, body ?: if (method in setOf("PUT", "POST", "PATCH", "PROPPATCH", "REPORT")) EmptyBody else null)
@@ -85,6 +99,7 @@ internal class AndroidWebDavClient(context: Context, val profile: AndroidWebDavP
       registered = true
       currentNetwork()
       call.execute().use { response ->
+        if (rest != null) return restReply(response, rest, maximum)
         if (response.code != 200 || method != "GET") return WebDavReply(response.code, 0, "")
         val digest = MessageDigest.getInstance("SHA-256"); var count = 0L
         response.body?.byteStream()?.use { input ->
@@ -106,6 +121,31 @@ internal class AndroidWebDavClient(context: Context, val profile: AndroidWebDavP
       if (registered) runCatching { connectivity.unregisterNetworkCallback(callback) }
       active.compareAndSet(call, null)
     }
+  }
+  private fun restReply(response: okhttp3.Response, rest: Rest, maximum: Long): WebDavReply {
+    val limit = if (response.code == 200) maximum else 65536L
+    val keep = rest.collect || response.code != 200
+    val digest = MessageDigest.getInstance("SHA-256"); val kept = java.io.ByteArrayOutputStream(); var count = 0L
+    try {
+      response.body?.byteStream()?.use { input ->
+        val bytes = ByteArray(65536)
+        while (true) {
+          currentNetwork()
+          val size = input.read(bytes)
+          if (size < 0) break
+          if (size == 0) continue
+          if (size.toLong() > limit - count) {
+            // A mutation's ACK stands; its oversized diagnostic body is simply dropped.
+            if (rest.mutation) return WebDavReply(response.code, count, "") else throw FilesFailure("review_required")
+          }
+          digest.update(bytes, 0, size); if (keep) kept.write(bytes, 0, size); count += size
+        }
+      }
+    } catch (error: java.io.IOException) {
+      if (rest.mutation) return WebDavReply(response.code, count, "", kept.toByteArray())
+      throw error
+    }
+    return WebDavReply(response.code, count, AndroidWebDavProfile.encode(digest.digest()), kept.toByteArray())
   }
   companion object {
     private val EmptyBody = object : RequestBody() {

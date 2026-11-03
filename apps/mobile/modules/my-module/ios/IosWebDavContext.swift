@@ -31,33 +31,47 @@ enum IosWebDavContext {
     }
   }
   static func capture(_ profile: IosWebDavProfile, journal: IosWebDavJournal) throws -> String {
+    try capture(.dav(profile), journal: journal)
+  }
+  static func capture(_ destination: IosCloudTarget, journal: IosWebDavJournal) throws -> String {
     try synchronized {
       let revision = try journal.database.statement("SELECT revision FROM backup_context WHERE id=1") { row -> String in
         guard sqlite3_step(row) == SQLITE_ROW, let text = sqlite3_column_text(row, 0) else { throw IosWebDavFailure.code("storage_failure") }
         return String(cString: text)
       }
-      let bytes = try JSONSerialization.data(withJSONObject: [revision, profile.revision, profile.targetId(), IosFilesSelection.binding().base64EncodedString()])
+      let bytes = try JSONSerialization.data(withJSONObject: [revision, destination.revision, destination.targetId(), IosFilesSelection.binding().base64EncodedString()])
       return IosWebDavClient.encode(Data(SHA256.hash(data: bytes)))
     }
   }
-  // The original WebDAV entry or the destination's own Keychain slot (ADR0027 §3); a slot must hold the same provider and target.
-  static func stored(kind: String, target: String) throws -> IosWebDavProfile? {
-    if kind == "webdav" { return try IosWebDavVault.read() }
+  // The original WebDAV entry or the destination's own Keychain slot (ADR0027 §3, ADR0028 §2); a slot must hold the
+  // same provider and target. OAuth slots count only for providers with an upload adapter.
+  static func stored(kind: String, target: String) throws -> IosCloudTarget? {
+    if kind == "webdav" { return try IosWebDavVault.read().map { .dav($0) } }
+    if IosCloudTarget.oauthKinds.contains(kind) {
+      guard let profile = try IosOAuthVault.read(slot: target), profile.provider == kind, try profile.targetId() == target else { return nil }
+      return .oauth(profile)
+    }
     guard let profile = try IosWebDavVault.read(slot: target), profile.provider == kind, try profile.targetId() == target else { return nil }
-    return profile
+    return .dav(profile)
   }
   static func check(_ profile: IosWebDavProfile, binding: String, journal: IosWebDavJournal) throws {
+    try check(.dav(profile), binding: binding, journal: journal)
+  }
+  static func check(_ destination: IosCloudTarget, binding: String, journal: IosWebDavJournal) throws {
     try synchronized {
-      let kind = profile.provider ?? "webdav"
-      guard try stored(kind: kind, target: profile.targetId()) == profile,
-        try journal.enabled(kind: kind, id: profile.targetId(), revision: profile.revision),
-        try capture(profile, journal: journal) == binding else { throw IosWebDavFailure.code("settings_changed") }
+      let target = try destination.targetId()
+      guard try stored(kind: destination.kind, target: target) == destination,
+        try journal.enabled(kind: destination.kind, id: target, revision: destination.revision),
+        try capture(destination, journal: journal) == binding else { throw IosWebDavFailure.code("settings_changed") }
     }
   }
   static func complete(_ value: IosWebDavUpload, profile: IosWebDavProfile, journal: IosWebDavJournal) throws {
+    try complete(value, destination: .dav(profile), journal: journal)
+  }
+  static func complete(_ value: IosWebDavUpload, destination: IosCloudTarget, journal: IosWebDavJournal) throws {
     try synchronized {
-      try check(profile, binding: value.binding, journal: journal)
-      guard try value.target == profile.targetId() else { throw IosWebDavFailure.code("settings_changed") }
+      try check(destination, binding: value.binding, journal: journal)
+      guard try value.target == destination.targetId() else { throw IosWebDavFailure.code("settings_changed") }
       try journal.advance(value, phase: "completed")
     }
   }

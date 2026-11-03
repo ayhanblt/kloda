@@ -130,7 +130,7 @@ internal object AndroidWebDavChecks {
         remote.remove(from); remote[to] = "match"; moved = true
         if (lostMove) throw FilesFailure("connection_unavailable")
       }, { if (cancelAfterAck && moved) throw FilesFailure("settings_changed") }, { journal.advance(it, "completed") })
-      val captured = AndroidWebDavContext(profile, FilesRunContext("unselected-native-source", emptyMap()), "unselected-native-source")
+      val captured = AndroidWebDavContext(AndroidCloudTarget.Dav(profile), FilesRunContext("unselected-native-source", emptyMap()), "unselected-native-source")
       val nativeSnapshots = AndroidFilesSnapshots(context, true) {}
       val validation = AndroidWebDavSourceValidation(context, captured, journal, nativeSnapshots, AndroidWebDavTransport(context, profile, nativeSnapshots) {}, {})
       var rejectedSource = false

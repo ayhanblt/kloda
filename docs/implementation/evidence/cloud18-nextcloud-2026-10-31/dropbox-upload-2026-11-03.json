@@ -1,0 +1,23 @@
+{
+  "slice": "18B/5 Dropbox upload adapter",
+  "date": "2026-11-03",
+  "approval": "user approved real-account test in chat 2026-11-03; user signed in themselves",
+  "device": "emulator-5590 KlodaCloud18 (owned); Codex emulator-5584 untouched",
+  "sourceHash": "11d6b0d8e084615f (sha256 prefix of AndroidDropboxTransport, AndroidCloudTarget, AndroidWebDavClient, AndroidDropboxChecks)",
+  "runs": [
+    {"command": "python3 -I tools/test-android-dropbox-wiring.py", "result": "PASS", "note": "offline: arg escaping, error mapping, opt-in/forget, OneDrive unsupported"},
+    {"command": "python3 -I tools/test-android-dropbox-live.py", "result": "PASS", "lines": [
+      "PASS pkce-exchange account-id keystore-round-trip refresh",
+      "PASS dropbox small create-only upload+move_v2 own-sha256 verified, unicode path",
+      "PASS dropbox upload mode=add and move_v2 refuse an existing file; original unchanged; publication stops at conflict",
+      "PASS dropbox upload_session 157286401 bytes in one run, own-sha256 verified",
+      "PASS revoke-invalidates-refresh", "PASS custody-deleted"]}
+  ],
+  "earlierAttempts": [
+    "1: sign-in timed out (Android chooser: product app and test package both register db-5435jnh71fcmfck; pick com.kloda.sync.test, Just once)",
+    "2: test expectation bug: a longer remote file stops at the size bound with review_required (same as DAV), not mismatch; test contents made equal length; grant revoked and custody deleted on that failure"
+  ],
+  "remoteResidue": "test files remain under Apps/Kloda/Kloda/test18b5-* in the user's Dropbox (Kloda never deletes remotely)",
+  "notRun": ["queue/JobService run of an enabled Dropbox destination", "iOS runtime (build only)", "cross-run session resume (out of scope)", "18A/3 DAV multi-target regression (fixture keys gone from Codex /tmp area)"],
+  "review": "same-agent review only; no independent review"
+}

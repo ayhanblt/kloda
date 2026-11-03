@@ -34,7 +34,7 @@ final class IosWebDavPhotosRunner {
     let albums = try IosPhotosSource.albums(asset: asset).map { album in
       try IosPhotoAlbum(id: database.photoIdentity("album", album.localIdentifier), name: album.title)
     }
-    let target = try publisher.profile.targetId()
+    let target = publisher.target
     let exported = try IosPhotosSource.export(asset: asset, check: publisher.check, snapshots: publisher.snapshots)
     func path(_ resource: IosPhotosExportedResource) -> String {
       selection.id + "/" + assetId + "/" + resource.role + "/" + resource.sha256 + "/" + resource.name

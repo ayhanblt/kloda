@@ -14,7 +14,7 @@ final class IosWebDavAutomaticCoordinator {
   private struct Execution {
     let token: UUID
     let plan: IosWebDavPlan
-    let profile: IosWebDavProfile
+    let profile: IosCloudTarget
     let task: BGProcessingTask?
     let lease: IosBackgroundLease?
   }
@@ -51,7 +51,7 @@ final class IosWebDavAutomaticCoordinator {
       localTime: UserDefaults.standard.string(forKey: "kloda.sync.localTime") ?? "12:00")
   }
   @discardableResult
-  private func reconcileOnWorker(allowForeground: Bool, clockChanged: Bool = false) -> (IosWebDavPlan, IosWebDavProfile)? {
+  private func reconcileOnWorker(allowForeground: Bool, clockChanged: Bool = false) -> (IosWebDavPlan, IosCloudTarget)? {
     guard active == nil else { return nil }
     timer?.cancel(); timer = nil
     do {
@@ -60,7 +60,7 @@ final class IosWebDavAutomaticCoordinator {
       guard try !IosFilesSelection.current().isEmpty || !IosPhotosSource.currentSelections().isEmpty else { cancelRequest(); return nil }
       // ADR0027 §4, sequential (user decision 2026-11-02): each enabled DAV destination keeps its own plan and the earliest
       // due one is dispatched; the others wait for the next opportunity without spending theirs.
-      var candidates: [(IosWebDavPlan, IosWebDavProfile)] = []
+      var candidates: [(IosWebDavPlan, IosCloudTarget)] = []
       for header in try journal.destinations() {
         guard let profile = try IosWebDavContext.stored(kind: header.kind, target: header.target), profile.revision == header.revision else { continue }
         candidates.append((try settle(profile, journal: journal, clockChanged: clockChanged), profile))
@@ -74,7 +74,7 @@ final class IosWebDavAutomaticCoordinator {
     } catch { cancelRequest(); report(IosWebDavFilesRunner.code(error)); return nil }
   }
   // One destination's plan, settled exactly as the former single plan was.
-  private func settle(_ profile: IosWebDavProfile, journal: IosWebDavJournal, clockChanged: Bool) throws -> IosWebDavPlan {
+  private func settle(_ profile: IosCloudTarget, journal: IosWebDavJournal, clockChanged: Bool) throws -> IosWebDavPlan {
     let target = try profile.targetId()
     let binding = try IosWebDavContext.capture(profile, journal: journal), clock = try IosAutomaticClock.read()
     var plan: IosWebDavPlan
@@ -138,7 +138,7 @@ final class IosWebDavAutomaticCoordinator {
       self.begin(plan, profile: profile, task: task, lease: lease, token: token)
     }
   }
-  private func begin(_ expected: IosWebDavPlan, profile: IosWebDavProfile, task: BGProcessingTask?, lease: IosBackgroundLease?, token: UUID = UUID()) {
+  private func begin(_ expected: IosWebDavPlan, profile: IosCloudTarget, task: BGProcessingTask?, lease: IosBackgroundLease?, token: UUID = UUID()) {
     var execution: Execution?
     // Retain the manual-start fence from availability through journal setup and queue admission.
     do { try IosWebDavContext.synchronized {

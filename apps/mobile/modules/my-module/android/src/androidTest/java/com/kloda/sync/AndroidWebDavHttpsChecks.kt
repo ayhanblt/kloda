@@ -95,8 +95,8 @@ internal object AndroidWebDavHttpsChecks {
         val captured = AndroidWebDavContext.capture(context, journal)
         val run = WebDavRun(UUID.randomUUID().toString(), profile.targetId(), captured.binding, false, System.currentTimeMillis())
         journal.runs.save(run)
-        val publisher = AndroidWebDavPublisher(context, profile, captured.binding, journal, snapshots,
-          { captured.check(context, journal) }, { captured.complete(context, journal, it) }, { journal.runs.track(run, it) })
+        val publisher = AndroidWebDavPublisher(profile.targetId(), captured.binding, journal, snapshots,
+          AndroidWebDavTransport(context, profile, snapshots) { captured.check(context, journal) }, { captured.check(context, journal) }, { captured.complete(context, journal, it) }, { journal.runs.track(run, it) })
         val runner = AndroidWebDavPhotosRunner(context, publisher)
         runner.run(captured.sources.sources)
         check(runner.errorCode == null)
@@ -125,8 +125,8 @@ internal object AndroidWebDavHttpsChecks {
         val itemCounts = journal.runs.counts(run.id)
         check(itemCounts["photos"] == "1" && itemCounts["completedPhotos"] == "1")
         check(itemCounts["operations"] == "3" && itemCounts["completedOperations"] == "3")
-        val afterAck = AndroidWebDavPublisher(context, profile, captured.binding, journal, snapshots,
-          { captured.check(context, journal) }, { value ->
+        val afterAck = AndroidWebDavPublisher(profile.targetId(), captured.binding, journal, snapshots,
+          AndroidWebDavTransport(context, profile, snapshots) { captured.check(context, journal) }, { captured.check(context, journal) }, { value ->
             check(FilesRunContext.stamp(context.getSharedPreferences("kloda-sync", 0).edit()).commit())
             captured.complete(context, journal, value)
           }, { journal.runs.track(run, it) })
@@ -138,8 +138,8 @@ internal object AndroidWebDavHttpsChecks {
         val fenced = journal.candidates(profile.targetId(), source, reference).single()
         check(fenced.phase == "moved")
         val current = AndroidWebDavContext.capture(context, journal)
-        val fresh = AndroidWebDavPublisher(context, profile, current.binding, journal, snapshots,
-          { current.check(context, journal) }, { current.complete(context, journal, it) }, { journal.runs.track(run, it) })
+        val fresh = AndroidWebDavPublisher(profile.targetId(), current.binding, journal, snapshots,
+          AndroidWebDavTransport(context, profile, snapshots) { current.check(context, journal) }, { current.check(context, journal) }, { current.complete(context, journal, it) }, { journal.runs.track(run, it) })
         rejects("review_required") { fresh.publish(source, reference, reference, scanned.revision, digest, "fixture-source", { error("Cannot create a replacement intent") }, {}) }
         check(journal.find(fenced.id)!!.phase == "moved")
         val visible = java.util.concurrent.atomic.AtomicBoolean(false)

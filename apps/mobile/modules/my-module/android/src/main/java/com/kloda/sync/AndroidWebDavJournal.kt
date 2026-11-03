@@ -91,7 +91,7 @@ internal class AndroidWebDavJournal(private val database: SQLiteDatabase) {
   data class Header(val target: String, val revision: String, val kind: String = "webdav")
   // ADR0027 §4: every enabled DAV destination, each with its own opportunity; at most one legacy WebDAV row.
   fun destinations(): List<Header> = database.rawQuery(
-    "SELECT id,revision,kind FROM backup_destination WHERE kind IN ($DAV_SQL) AND enabled=1 ORDER BY kind,id", null
+    "SELECT id,revision,kind FROM backup_destination WHERE kind IN ($QUEUE_SQL) AND enabled=1 ORDER BY kind,id", null
   ).use {
     val values = buildList { while (it.moveToNext()) add(Header(it.getString(0), it.getString(1), it.getString(2))) }
     if (values.size > AndroidWebDavVault.LIMIT || values.count { value -> value.kind == "webdav" } > 1 || values.any { value ->
@@ -102,7 +102,7 @@ internal class AndroidWebDavJournal(private val database: SQLiteDatabase) {
   fun destination(target: String): Header? = destinations().firstOrNull { it.target == target }
   fun setEnabled(kind: String, id: String, enabled: Boolean, revision: String) {
     val pattern = if (kind == "pc") Regex("[A-Za-z0-9_-]{21}[AQgw]") else Regex("[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]")
-    if (kind != "pc" && kind !in DAV_KINDS || !pattern.matches(id) || revision.isEmpty() || revision.toByteArray().size > 128 || revision.contains('\u0000')) throw FilesFailure("invalid_request")
+    if (kind != "pc" && kind !in QUEUE_KINDS || !pattern.matches(id) || revision.isEmpty() || revision.toByteArray().size > 128 || revision.contains('\u0000')) throw FilesFailure("invalid_request")
     database.beginTransaction()
     try {
       val values = ContentValues().apply { put("enabled", if (enabled) 1 else 0); put("revision", revision) }
@@ -162,11 +162,14 @@ internal class AndroidWebDavJournal(private val database: SQLiteDatabase) {
     if (changes != 1) throw FilesFailure("outcome_unknown")
   }
   companion object {
-    // ADR0028 adds the OAuth kinds; they stay disabled until their upload adapters exist (user decision 2026-11-02).
+    // ADR0028 adds the OAuth kinds; each stays disabled until its upload adapter exists (user decision 2026-11-02).
+    // Dropbox has one since 18B/5 (user decision 2026-11-03).
     const val DESTINATION_KINDS = "'pc','webdav','nextcloud','cloudme','kolab-now','smb','dropbox','onedrive','yandex','google-drive'"
     // DAV kinds the WebDAV queue uploads to; CloudMe stays blocked (Digest only).
     val DAV_KINDS = setOf("webdav", "nextcloud", "kolab-now")
-    private val DAV_SQL = DAV_KINDS.joinToString(",") { "'$it'" }
+    // Every kind the shared queue uploads to.
+    val QUEUE_KINDS = DAV_KINDS + AndroidCloudTarget.OAUTH_KINDS
+    private val QUEUE_SQL = QUEUE_KINDS.joinToString(",") { "'$it'" }
     fun destinationTable(name: String) = """CREATE TABLE $name (
       kind TEXT NOT NULL CHECK(kind IN ($DESTINATION_KINDS)),id TEXT NOT NULL,
       enabled INTEGER NOT NULL CHECK(enabled IN (0,1)),revision TEXT NOT NULL,PRIMARY KEY(kind,id))"""

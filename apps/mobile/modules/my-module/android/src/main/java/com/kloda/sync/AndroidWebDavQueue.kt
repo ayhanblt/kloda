@@ -81,8 +81,8 @@ internal class AndroidWebDavQueue(private val context: Context, private val mayR
       if (active != null) throw FilesFailure("backup_busy")
       if (automatic && AndroidBackupScheduler.paused(context)) throw FilesFailure("user_pause")
       val captured = AndroidWebDavContext.capture(context, journal, prior?.target ?: target)
-      val run = prior ?: WebDavRun(UUID.randomUUID().toString(), captured.profile.targetId(), captured.binding, automatic, WebDavRun.clock(context).now)
-      if (run.target != captured.profile.targetId() || run.binding != captured.binding || run.automatic != automatic || run.phase != "running") throw FilesFailure("settings_changed")
+      val run = prior ?: WebDavRun(UUID.randomUUID().toString(), captured.destination.targetId(), captured.binding, automatic, WebDavRun.clock(context).now)
+      if (run.target != captured.destination.targetId() || run.binding != captured.binding || run.automatic != automatic || run.phase != "running") throw FilesFailure("settings_changed")
       if (!mayRun(run)) throw FilesFailure("candidate_stale")
       journal.runs.save(run)
       Execution(captured, run, finished).also { active = it; lastError = null }
@@ -101,8 +101,9 @@ internal class AndroidWebDavQueue(private val context: Context, private val mayR
       try {
         check(execution)
         val snapshots = AndroidFilesSnapshots(context, true) { check(execution) }
-        val publisher = AndroidWebDavPublisher(context, execution.captured.profile, execution.captured.binding, journal, snapshots,
-          { check(execution) }, { value -> locked { check(execution); execution.captured.complete(context, journal, value) } },
+        val check = { check(execution) }
+        val publisher = AndroidWebDavPublisher(execution.captured.destination.targetId(), execution.captured.binding, journal, snapshots,
+          execution.captured.destination.transport(context, snapshots, check), check, { value -> locked { check(execution); execution.captured.complete(context, journal, value) } },
           { value -> locked { check(execution); journal.runs.track(execution.run, value) } })
         execution.publisher = publisher; check(execution)
         val files = AndroidWebDavFilesRunner(context, publisher); files.run(execution.captured.sources.sources)

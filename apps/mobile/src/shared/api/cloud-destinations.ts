@@ -29,8 +29,9 @@ export const blockedProviders: readonly CloudProvider[] = ['cloudme'];
 export const hiddenProviders = ['kolab-now'] as const;
 const targetPattern = /^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/;
 const keys = ['targetId', 'provider', 'endpoint', 'targetPath', 'username', 'enabled'];
-// The DAV providers the queue uploads to; the original WebDAV entry is enabled from its own screen.
-export const enableableProviders: readonly CloudProvider[] = ['nextcloud', 'kolab-now'];
+// The providers the queue uploads to: DAV, and Dropbox since 18B/5 (user decision 2026-11-03). The original WebDAV
+// entry is enabled from its own screen.
+export const enableableProviders: readonly CloudProvider[] = ['nextcloud', 'kolab-now', 'dropbox'];
 function invalid(): never { throw new Error('outcome_unknown'); }
 function native(): NativeCloud {
   const value = requireOptionalNativeModule<NativeCloud>('KlodaCloud');

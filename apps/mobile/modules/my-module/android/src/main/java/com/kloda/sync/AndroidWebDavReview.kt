@@ -7,7 +7,7 @@ internal class AndroidWebDavReview(private val context: Context, private val vis
   private val lock = Any()
   private var active: UUID? = null
   private val cancelled = mutableSetOf<UUID>()
-  @Volatile private var sender: AndroidWebDavTransport? = null
+  @Volatile private var sender: AndroidBackupTransport? = null
   fun cancel(request: UUID? = null) {
     val ended = synchronized(lock) {
       if (request != null) cancelled.add(request)
@@ -27,7 +27,7 @@ internal class AndroidWebDavReview(private val context: Context, private val vis
     catch (error: Exception) { contextError = (error as? FilesFailure)?.code ?: "outcome_unknown" }
     buildMap {
       put("items", page.map { value ->
-        val current = value.target == captured?.profile?.targetId() && captured?.sources?.sources?.containsKey(value.source) == true && value.sourceIdentity != null && value.kind != null && !value.skipped && (value.binding == captured?.binding || value.phase in setOf("uploaded", "moving", "moved"))
+        val current = value.target == captured?.destination?.targetId() && captured?.sources?.sources?.containsKey(value.source) == true && value.sourceIdentity != null && value.kind != null && !value.skipped && (value.binding == captured?.binding || value.phase in setOf("uploaded", "moving", "moved"))
         val path = journal.publications.read(value)
         buildMap<String, Any> {
           put("id", value.id); put("targetId", value.target); put("sourceId", value.source); put("name", value.relativePath.substringAfterLast('/'))
@@ -46,7 +46,7 @@ internal class AndroidWebDavReview(private val context: Context, private val vis
     val explicit = requested in setOf("authorize_recheck", "authorize_keep_both")
     val action = if (explicit) requested.removePrefix("authorize_") else requested
     val token = synchronized(lock) { if (request in cancelled) throw FilesFailure("cancelled"); if (active != null) throw FilesFailure("backup_busy"); request.also { active = it } }
-    var transport: AndroidWebDavTransport? = null
+    var transport: AndroidBackupTransport? = null
     try {
       if (runCatching { UUID.fromString(id).toString() != id }.getOrDefault(true) || action !in setOf("skip", "recheck", "keep_both")) throw FilesFailure("invalid_request")
       current(token)
@@ -58,10 +58,10 @@ internal class AndroidWebDavReview(private val context: Context, private val vis
           current(token); journal.issue(value, value.issue ?: "review_required", true); mapOf("state" to "skipped")
         }
         val captured = AndroidWebDavContext.capture(context, journal)
-        if (captured.profile.targetId() != value.target || (!explicit && captured.binding != value.binding)) throw FilesFailure("settings_changed")
+        if (captured.destination.targetId() != value.target || (!explicit && captured.binding != value.binding)) throw FilesFailure("settings_changed")
         val check = { current(token); captured.check(context, journal) }
         val snapshots = AndroidFilesSnapshots(context, true, checkPaused = check)
-        val activeTransport = AndroidWebDavTransport(context, captured.profile, snapshots, check)
+        val activeTransport = captured.destination.transport(context, snapshots, check)
         transport = activeTransport
         synchronized(lock) { if (active != token) throw FilesFailure("cancelled"); sender = activeTransport }
         val validation = AndroidWebDavSourceValidation(context, captured, journal, snapshots, activeTransport, check)
@@ -75,7 +75,7 @@ internal class AndroidWebDavReview(private val context: Context, private val vis
             check()
             if (explicit) {
               journal.reviewAuthority.require(upload, request, captured.binding)
-              if (upload.target != captured.profile.targetId()) throw FilesFailure("settings_changed")
+              if (upload.target != captured.destination.targetId()) throw FilesFailure("settings_changed")
               journal.advance(upload, "completed")
             } else captured.complete(context, journal, upload)
           } }

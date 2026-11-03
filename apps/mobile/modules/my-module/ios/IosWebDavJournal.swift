@@ -80,10 +80,13 @@ final class IosWebDavJournal {
     try migrateDestinations()
     try createRuns(); try createPlan(); try createPublicationPaths(); try createWebDavRestores()
   }
-  // ADR0028 adds the OAuth kinds; they stay disabled until their upload adapters exist (user decision 2026-11-02).
+  // ADR0028 adds the OAuth kinds; each stays disabled until its upload adapter exists (user decision 2026-11-02).
+  // Dropbox has one since 18B/5 (user decision 2026-11-03).
   static let destinationKinds = "'pc','webdav','nextcloud','cloudme','kolab-now','smb','dropbox','onedrive','yandex','google-drive'"
   // DAV kinds the WebDAV queue uploads to; CloudMe stays blocked (Digest only).
   static let davKinds = ["webdav", "nextcloud", "kolab-now"]
+  // Every kind the shared queue uploads to.
+  static let queueKinds = davKinds + IosCloudTarget.oauthKinds.sorted()
   static func destinationTable(_ name: String) -> String {
     """
     CREATE TABLE \(name) (
@@ -123,7 +126,7 @@ final class IosWebDavJournal {
   }
   func setEnabled(kind: String, id: String, enabled: Bool, revision: String) throws {
     let pattern = kind == "pc" ? "\\A[A-Za-z0-9_-]{21}[AQgw]\\z" : "\\A[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]\\z"
-    guard kind == "pc" || Self.davKinds.contains(kind), id.range(of: pattern, options: .regularExpression) != nil,
+    guard kind == "pc" || Self.queueKinds.contains(kind), id.range(of: pattern, options: .regularExpression) != nil,
       !revision.isEmpty, revision.utf8.count <= 128, !revision.utf8.contains(0) else { throw IosWebDavFailure.code("invalid_request") }
     try database.execute("""
       INSERT INTO backup_destination(kind,id,enabled,revision) VALUES(?,?,?,?)
@@ -133,7 +136,7 @@ final class IosWebDavJournal {
   struct Header: Equatable { let target: String; let revision: String; let kind: String }
   // ADR0027 §4: every enabled DAV destination, each with its own opportunity; at most one original WebDAV row.
   func destinations() throws -> [Header] {
-    let kinds = Self.davKinds.map { "'\($0)'" }.joined(separator: ",")
+    let kinds = Self.queueKinds.map { "'\($0)'" }.joined(separator: ",")
     let values = try database.statement("SELECT id,revision,kind FROM backup_destination WHERE kind IN (\(kinds)) AND enabled=1 ORDER BY kind,id") { row -> [Header] in
       var result: [Header] = []
       while true {

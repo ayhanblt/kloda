@@ -1,6 +1,6 @@
 import Foundation
 
-final class IosWebDavTransport {
+final class IosWebDavTransport: IosBackupTransport {
   let profile: IosWebDavProfile
   let snapshots: IosFilesSnapshot
   let check: () throws -> Void
