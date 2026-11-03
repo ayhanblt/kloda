@@ -4,10 +4,12 @@ import android.content.Context
 
 // Step18B/5 (ADR0028 §5): the publication state machine stays the DAV one; each destination kind supplies only
 // its create-only transport. `inspect` answers "missing", "match" or "mismatch" from Kloda's own SHA-256.
+// `download` (18B/5r) streams a published file into `receive`; the caller compares the reply's SHA-256/size.
 internal interface AndroidBackupTransport {
   fun inspect(path: String, job: WebDavUpload): String
   fun upload(path: String, job: WebDavUpload)
   fun move(from: String, to: String)
+  fun download(path: String, job: WebDavUpload, receive: (ByteArray, Int) -> Unit): WebDavReply
   fun cancel()
 }
 

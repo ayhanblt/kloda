@@ -54,9 +54,9 @@ internal class AndroidWebDavClient(context: Context, val profile: AndroidWebDavP
   // a read's interrupted body is a failure. `collect` keeps a 200 body (at most `maximum`, bounded to 64 KiB).
   fun call(url: okhttp3.HttpUrl, authorization: String, mutation: Boolean, headers: Map<String, String> = emptyMap(),
     upload: InputStream? = null, uploadSize: Long = 0, maximum: Long = 65536, collect: Boolean = false,
-    contentType: String = "application/octet-stream"): WebDavReply {
+    contentType: String = "application/octet-stream", receive: ((ByteArray, Int) -> Unit)? = null): WebDavReply {
     if (collect && maximum > 65536) throw FilesFailure("invalid_request")
-    return exchange(url, "POST", authorization, headers, upload, uploadSize, maximum, null, Rest(mutation, collect), contentType)
+    return exchange(url, "POST", authorization, headers, upload, uploadSize, maximum, receive, Rest(mutation, collect), contentType)
   }
   private class Rest(val mutation: Boolean, val collect: Boolean)
 
@@ -99,7 +99,7 @@ internal class AndroidWebDavClient(context: Context, val profile: AndroidWebDavP
       registered = true
       currentNetwork()
       call.execute().use { response ->
-        if (rest != null) return restReply(response, rest, maximum)
+        if (rest != null) return restReply(response, rest, maximum, receive)
         if (response.code != 200 || method != "GET") return WebDavReply(response.code, 0, "")
         val digest = MessageDigest.getInstance("SHA-256"); var count = 0L
         response.body?.byteStream()?.use { input ->
@@ -122,7 +122,8 @@ internal class AndroidWebDavClient(context: Context, val profile: AndroidWebDavP
       active.compareAndSet(call, null)
     }
   }
-  private fun restReply(response: okhttp3.Response, rest: Rest, maximum: Long): WebDavReply {
+  // Only a 200 body reaches `receive` (a REST download); error bodies stay bounded diagnostics.
+  private fun restReply(response: okhttp3.Response, rest: Rest, maximum: Long, receive: ((ByteArray, Int) -> Unit)?): WebDavReply {
     val limit = if (response.code == 200) maximum else 65536L
     val keep = rest.collect || response.code != 200
     val digest = MessageDigest.getInstance("SHA-256"); val kept = java.io.ByteArrayOutputStream(); var count = 0L
@@ -138,6 +139,7 @@ internal class AndroidWebDavClient(context: Context, val profile: AndroidWebDavP
             // A mutation's ACK stands; its oversized diagnostic body is simply dropped.
             if (rest.mutation) return WebDavReply(response.code, count, "") else throw FilesFailure("review_required")
           }
+          if (response.code == 200) receive?.invoke(bytes, size)
           digest.update(bytes, 0, size); if (keep) kept.write(bytes, 0, size); count += size
         }
       }

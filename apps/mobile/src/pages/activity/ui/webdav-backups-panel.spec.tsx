@@ -46,7 +46,7 @@ it('routes Photos restore through its typed native API', async () => {
   await fireEvent.press(surface.getByText(i18n.t('destinations.restore.load')));
   await waitFor(() => expect(surface.getByText(i18n.t('transfer.photos.restore'))).toBeTruthy());
   await fireEvent.press(surface.getByText(i18n.t('transfer.photos.restore')));
-  await waitFor(() => expect(webDavBackups.restorePhotos).toHaveBeenCalledWith(id, expect.any(String)));
+  await waitFor(() => expect(webDavBackups.restorePhotos).toHaveBeenCalledWith(id, expect.any(String), ''));
   expect(webDavBackups.restoreFile).not.toHaveBeenCalled();
 });
 it('does not call a filtered first catalog page empty when more local receipts remain', async () => {

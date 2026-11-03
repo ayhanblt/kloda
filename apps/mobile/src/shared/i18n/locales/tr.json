@@ -402,7 +402,8 @@
       "signIn": "Giriş yap ve kaydet",
       "save": "Hedefi kaydet",
       "waiting": "Tarayıcıda onay bekleniyor…",
-      "cancelSignIn": "Girişi iptal et"
+      "cancelSignIn": "Girişi iptal et",
+      "viewBackups": "Yedekleri gör"
     },
     "pair": {},
     "devices": {},

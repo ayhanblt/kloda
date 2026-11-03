@@ -15,7 +15,8 @@ const row = (n: number, provider: CloudDestination['provider'], enabled = false)
   ({ targetId: String(n).padStart(42, 'A') + 'E', provider, endpoint: 'https://c.example/dav', targetPath: 'Kloda', username: `user${n}`, enabled });
 beforeEach(() => { jest.clearAllMocks(); api.cancelSignIn.mockResolvedValue(); });
 
-function List() { return <CloudDestinationList cloud={useCloudDestinations()} navigate={() => undefined} saved={null} />; }
+const openBackups = jest.fn();
+function List() { return <CloudDestinationList cloud={useCloudDestinations()} navigate={() => undefined} openBackups={openBackups} saved={null} />; }
 
 it('switches a DAV destination, keeps OAuth unsupported and removes only after confirmation', async () => {
   const dav = row(1, 'nextcloud'), oauth = row(2, 'onedrive');
@@ -86,5 +87,16 @@ it('offers no manual run for a disabled or unsupported OAuth destination', async
   const view = await render(<List />);
   await waitFor(() => expect(view.getByText('user6')).toBeTruthy());
   expect(view.queryByRole('button', { name: i18n.t('statusUi.backupNow') })).toBeNull();
+  await view.unmount();
+});
+
+it('opens the Backups screen bound to an enabled destination only', async () => {
+  const on = row(6, 'dropbox', true), off = row(7, 'nextcloud');
+  api.list.mockResolvedValue([on, off]);
+  const view = await render(<List />);
+  await waitFor(() => expect(view.getByText('user7')).toBeTruthy());
+  expect(view.getAllByRole('button', { name: i18n.t('ui.conn.viewBackups') })).toHaveLength(1);
+  await fireEvent.press(view.getByRole('button', { name: i18n.t('ui.conn.viewBackups') }));
+  expect(openBackups).toHaveBeenCalledWith(on.targetId);
   await view.unmount();
 });

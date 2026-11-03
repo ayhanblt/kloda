@@ -74,7 +74,7 @@ internal object AndroidWebDavSafChecks {
         context.revokeUriPermission(sourceTree, Intent.FLAG_GRANT_READ_URI_PERMISSION)
         granted.removeAll { it.first == sourceTree }
         val restoreBinding = FilesRunContext.webdav(context).binding
-        fun restore() = AndroidWebDavFilesRestore(context, profile, restoreBinding, UUID.randomUUID()) {
+        fun restore() = AndroidWebDavFilesRestore(context, AndroidCloudTarget.Dav(profile), restoreBinding, UUID.randomUUID()) {
           if (!visible.resumed || !visible.focused) throw FilesFailure("candidate_stale")
         }.let { session -> session.choosing = false; try { session.restore(targetTree.toString(), first.id) } finally { session.pause() } }
         check(restore()["state"] == "completed")

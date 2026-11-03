@@ -25,7 +25,9 @@ export function App() {
   const model = useBackupSetup();
   const [page, setPage] = useState<MobilePage>('welcome');
   const [provider, setProvider] = useState<DestinationProviderId>('webdav');
-  const navigate = (next: MobilePage) => { if (page === 'storage') model.leaveStorage(); setPage(next); };
+  const [backupTarget, setBackupTarget] = useState<string | undefined>();
+  const navigate = (next: MobilePage) => { if (page === 'storage') model.leaveStorage(); setBackupTarget(undefined); setPage(next); };
+  const openBackups = (target: string) => { navigate('backups'); setBackupTarget(target); };
   useEffect(() => {
     if (page === 'pairing' || page === 'welcome' || page === 'home' || page === 'photos') return;
     const listener = BackHandler.addEventListener('hardwareBackPress', () => { navigate('home'); return true; });
@@ -45,8 +47,8 @@ export function App() {
     {page === 'storage' && <WebDavPage model={model} onBack={() => navigate('connections')} />}
     {page === 'computer' && <ComputerPage embedded onBack={() => navigate('connections')} onPair={() => navigate('pairing')} onActivity={() => navigate('activity')} onAdvanced={() => navigate('storage')} />}
     {page === 'activity' && <ActivityPage embedded onBack={back} />}
-    {page === 'backups' && <ActivityPage embedded view="backups" onBack={back} />}
-    {(page === 'connections' || page === 'add-connection') && <ConnectionsPage adding={page === 'add-connection'} navigate={navigate} openProvider={openProvider} saved={model.savedStorage} />}
+    {page === 'backups' && <ActivityPage embedded view="backups" target={backupTarget} onBack={backupTarget ? () => navigate('connections') : back} />}
+    {(page === 'connections' || page === 'add-connection') && <ConnectionsPage adding={page === 'add-connection'} navigate={navigate} openProvider={openProvider} openBackups={openBackups} saved={model.savedStorage} />}
     {page === 'provider' && (provider === 'smb' ? <SmbPage onBack={() => navigate('add-connection')} /> : provider === 'sftp' ? <SftpPage onBack={() => navigate('add-connection')} />
       : cloudProvider ? <CloudProviderPage provider={cloudProvider} onBack={() => navigate('add-connection')} onSaved={() => navigate('connections')} /> : <ProviderPage provider={provider} onBack={() => navigate('add-connection')} />)}
     {page === 'settings' && <SettingsPage navigate={navigate} />}

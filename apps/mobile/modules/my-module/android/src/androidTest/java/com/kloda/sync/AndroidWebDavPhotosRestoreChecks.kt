@@ -58,12 +58,12 @@ internal object AndroidWebDavPhotosRestoreChecks {
         check(rows.size == 3 && rows.count { it.kind == "photo_resource" } == 1 && rows.all { it.phase == "completed" })
         latest = rows.filter { it.kind == "photo_manifest" }.maxBy { it.revision.toLong() }
         val snapshots = AndroidFilesSnapshots(context, true) {}
-        val reader = AndroidWebDavDownload(context, profile, journal, snapshots) {}
+        val reader = AndroidWebDavDownload(context, AndroidCloudTarget.Dav(profile), journal, snapshots) {}
         manifest = reader.manifest(latest.id); reader.cancel()
         check(manifest.favorite == true && manifest.revision > 1 && manifest.resources.single().size == bytes.size.toLong())
       }
       fun restore(binding: String = FilesRunContext.webdav(context).binding): Map<String, String> {
-        val session = AndroidWebDavPhotosRestore(context, profile, binding, UUID.randomUUID()) {
+        val session = AndroidWebDavPhotosRestore(context, AndroidCloudTarget.Dav(profile), binding, UUID.randomUUID()) {
           if (!visible.resumed || !visible.focused) throw FilesFailure("candidate_stale")
         }
         return try { session.restore(latest.id) } finally {

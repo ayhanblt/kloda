@@ -2,10 +2,12 @@ import Foundation
 
 // Step18B/5 (ADR0028 §5): the publication state machine stays the DAV one; each destination kind supplies only
 // its create-only transport. `inspect` answers "missing", "match" or "mismatch" from Kloda's own SHA-256.
+// `download` (18B/5r) streams a published file into `receive`; the caller compares the reply's SHA-256/size.
 protocol IosBackupTransport: AnyObject {
   func inspect(_ path: String, _ job: IosWebDavUpload) throws -> String
   func upload(_ path: String, _ job: IosWebDavUpload) throws
   func move(_ from: String, _ to: String) throws
+  func download(_ path: String, _ job: IosWebDavUpload, receive: @escaping (Data) throws -> Void) throws -> IosWebDavReply
 }
 
 // One queue destination: a DAV profile (original WebDAV entry or an added slot) or an OAuth profile whose

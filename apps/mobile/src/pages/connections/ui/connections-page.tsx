@@ -15,7 +15,7 @@ import { CloudDestinationList, addedDestinations } from './cloud-destination-lis
 
 const hiddenIds: ReadonlySet<string> = new Set(hiddenProviders);
 
-export function ConnectionsPage({ adding, navigate, openProvider, saved }: { adding: boolean; navigate: NavigateMobile; openProvider: (id: DestinationProviderId) => void; saved: Omit<MobileStorageForm,'password'> | null }) {
+export function ConnectionsPage({ adding, navigate, openProvider, openBackups, saved }: { adding: boolean; navigate: NavigateMobile; openProvider: (id: DestinationProviderId) => void; openBackups: (targetId: string) => void; saved: Omit<MobileStorageForm,'password'> | null }) {
   const colors = useThemeColors();
   const { t } = useTranslation();
   const smb = useSmbBackup().status;
@@ -29,7 +29,7 @@ export function ConnectionsPage({ adding, navigate, openProvider, saved }: { add
       <PairingButton label={t('computer.title')} onPress={() => navigate('computer')} />
     </MobilePanel>
     {!adding && <>
-      <CloudDestinationList cloud={cloud} navigate={navigate} saved={saved} />
+      <CloudDestinationList cloud={cloud} navigate={navigate} openBackups={openBackups} saved={saved} />
       {smb?.configured && <MobilePanel>
         <HardDrive size={24} color={colors['text-secondary']} /><Text className="text-base font-inter-semibold text-primary-text">{t('ui.providers.smb')}</Text>
         <Text className="font-sans text-sm text-secondary-text">{t(smb.enabled ? 'destinations.enabled' : 'destinations.disabled')}</Text>

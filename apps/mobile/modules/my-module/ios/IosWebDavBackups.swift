@@ -1,10 +1,9 @@
 import Foundation
 
 enum IosWebDavBackups {
-  static func list(after: String) throws -> [String: Any] {
+  static func list(after: String, target requested: String) throws -> [String: Any] {
     guard after.isEmpty || UUID(uuidString: after) != nil else { throw IosWebDavFailure.code("invalid_request") }
-    guard let profile = try IosWebDavVault.read() else { throw IosWebDavFailure.code("webdav_missing") }
-    let target = try profile.targetId(), journal = try IosWebDavJournal.open()
+    let target = try IosWebDavContext.restoreTarget(requested).targetId(), journal = try IosWebDavJournal.open()
     let rows = try journal.uploads(target: target, after: after)
     let items: [[String: Any]] = rows.filter {
       $0.phase == "completed" && !$0.skipped && $0.issue == nil && $0.sourceIdentity != nil && ["file", "photo_manifest"].contains($0.kind ?? "")

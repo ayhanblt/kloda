@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { uuid } from 'expo-modules-core';
 import { webDavBackups, type WebDavBackups, type WebDavBackup } from '../../../shared/api/webdav-backups';
+import { sftpErrorCode } from '../../../shared/api/sftp';
 
-export function useWebDavRestore() {
+// `target` '' is the original WebDAV entry; otherwise the added destination opened from its card (18B/5r).
+export function useWebDavRestore(target = '') {
   const [page, setPage] = useState<WebDavBackups | null>(null), [error, setError] = useState<string | null>(null);
   const [working, setWorking] = useState(false), [restored, setRestored] = useState<string | null>(null);
   const mounted = useRef(false), active = useRef(false), busy = useRef(false), epoch = useRef(0), request = useRef<string | null>(null);
@@ -24,10 +26,10 @@ export function useWebDavRestore() {
     if (busy.current || !active.current || (more && !page?.nextCursor)) return;
     const version = ++epoch.current; busy.current = true; setWorking(true); setError(null);
     try {
-      const value = await webDavBackups.list(more ? page?.nextCursor : undefined);
+      const value = await webDavBackups.list(more ? page?.nextCursor : undefined, target);
       if (mounted.current && active.current && version === epoch.current) setPage({ ...value,
         items: more && page?.targetId === value.targetId ? [...new Map([...page.items, ...value.items].map((item) => [item.id, item])).values()] : value.items });
-    } catch (cause) { if (mounted.current && version === epoch.current) setError(cause instanceof Error ? cause.message : 'outcome_unknown'); }
+    } catch (cause) { if (mounted.current && version === epoch.current) setError(sftpErrorCode(cause)); }
     finally { if (version === epoch.current) { busy.current = false; if (mounted.current) setWorking(false); } }
   };
   const restore = async (item: WebDavBackup) => {
@@ -35,9 +37,9 @@ export function useWebDavRestore() {
     const nonce = uuid.v4(), version = ++epoch.current;
     request.current = nonce; busy.current = true; setWorking(true); setRestored(null); setError(null);
     try {
-      const result = await (item.kind === 'file' ? webDavBackups.restoreFile(item.id, nonce) : webDavBackups.restorePhotos(item.id, nonce));
+      const result = await (item.kind === 'file' ? webDavBackups.restoreFile(item.id, nonce, target) : webDavBackups.restorePhotos(item.id, nonce, target));
       if (mounted.current && active.current && version === epoch.current) setRestored(result.name);
-    } catch (cause) { if (mounted.current && version === epoch.current) setError(cause instanceof Error ? cause.message : 'outcome_unknown'); }
+    } catch (cause) { if (mounted.current && version === epoch.current) setError(sftpErrorCode(cause)); }
     finally { if (request.current === nonce) { request.current = null; busy.current = false; if (mounted.current) setWorking(false); } }
   };
   return { page, error, restored, working, load, restore, cancel: () => { cancel(); setWorking(false); } };

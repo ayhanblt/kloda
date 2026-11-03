@@ -10,7 +10,7 @@ final class IosWebDavPhotosRestore {
     if let ticket { cancelled.insert(ticket) }
     if ticket == nil || active == ticket { if let active { cancelled.insert(active) }; active = nil }
   }
-  func restore(id: String, profile: IosWebDavProfile, binding: String, ticket: UUID, visible: @escaping () -> Bool, completion: @escaping (Result<[String: Any], Error>) -> Void) {
+  func restore(id: String, destination: IosCloudTarget, binding: String, ticket: UUID, visible: @escaping () -> Bool, completion: @escaping (Result<[String: Any], Error>) -> Void) {
     lock.lock()
     guard !cancelled.contains(ticket), active == nil else { lock.unlock(); completion(.failure(IosWebDavFailure.code("cancelled"))); return }
     active = ticket; lock.unlock()
@@ -21,10 +21,11 @@ final class IosWebDavPhotosRestore {
           self.lock.lock(); let current = self.active == ticket; self.lock.unlock()
           guard current && visible() else { throw IosWebDavFailure.code("cancelled") }
           try IosWebDavContext.synchronized {
-            guard try IosWebDavVault.read() == profile, try IosWebDavContext.capture(profile, journal: journal) == binding else { throw IosWebDavFailure.code("settings_changed") }
+            guard try IosWebDavContext.stored(kind: destination.kind, target: destination.targetId()) == destination,
+              try IosWebDavContext.capture(destination, journal: journal) == binding else { throw IosWebDavFailure.code("settings_changed") }
           }
         }
-        let download = IosWebDavDownload(journal: journal, profile: profile, snapshots: snapshots, check: check)
+        let download = try IosWebDavDownload(journal: journal, destination: destination, snapshots: snapshots, check: check)
         let receipt = try download.receipt(id), manifest = try download.manifest(id)
         var stages: [String: URL] = [:], retained: [String] = []
         // Retain private downloads on uncertainty; an import intent is never blindly recreated.

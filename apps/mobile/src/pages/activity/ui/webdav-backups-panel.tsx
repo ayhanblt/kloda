@@ -4,8 +4,8 @@ import { useWebDavRestore } from '../../../features/file-transfer/model/use-webd
 import { PairingButton } from '../../../features/pairing/ui/pairing-button';
 import { Text } from '../../../shared/ui/text';
 
-export function WebDavBackupsPanel() {
-  const { t } = useTranslation(), model = useWebDavRestore();
+export function WebDavBackupsPanel({ target }: { target?: string }) {
+  const { t } = useTranslation(), model = useWebDavRestore(target);
   return <View className="gap-3 rounded-2xl border border-border-subtle bg-surface-1 p-5">
     <Text accessibilityRole="header" className="text-lg font-inter-semibold text-primary-text">{t('destinations.restore.title')}</Text>
     <Text className="font-sans text-sm text-secondary-text">{t('destinations.restore.hint')}</Text>

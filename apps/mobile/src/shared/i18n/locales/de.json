@@ -402,7 +402,8 @@
       "signIn": "Anmelden und speichern",
       "save": "Ziel speichern",
       "waiting": "Warten auf Bestätigung im Browser…",
-      "cancelSignIn": "Anmeldung abbrechen"
+      "cancelSignIn": "Anmeldung abbrechen",
+      "viewBackups": "Backups anzeigen"
     },
     "pair": {},
     "devices": {},

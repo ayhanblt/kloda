@@ -3,9 +3,9 @@ import { requireOptionalNativeModule } from 'expo';
 export interface WebDavBackup { id: string; sourceId: string; name: string; kind: 'file' | 'photo_manifest'; sha256: string; size: string }
 export interface WebDavBackups { targetId: string; items: WebDavBackup[]; hasMore: boolean; nextCursor?: string; canRestoreFiles: boolean; canRestorePhotos: boolean }
 interface NativeBackups {
-  webDavBackups(after: string): Promise<unknown>;
-  restoreWebDavPhotos?(id: string, request: string): Promise<unknown>;
-  restoreWebDavFile?(id: string, request: string): Promise<unknown>;
+  webDavBackups(after: string, target: string): Promise<unknown>;
+  restoreWebDavPhotos?(id: string, request: string, target: string): Promise<unknown>;
+  restoreWebDavFile?(id: string, request: string, target: string): Promise<unknown>;
   cancelWebDavRestore?(request: string): Promise<void>;
 }
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -41,19 +41,25 @@ export function webDavBackupsFromNative(value: unknown): WebDavBackups {
   return { targetId: text(row.targetId, hash), items, hasMore: row.hasMore as boolean,
     nextCursor: row.nextCursor === undefined ? undefined : text(row.nextCursor, uuid), canRestoreFiles: row.canRestoreFiles as boolean, canRestorePhotos: row.canRestorePhotos as boolean };
 }
+// `target` '' is the original WebDAV entry; an added destination's targetId binds the list and restores to it (18B/5r).
 export const webDavBackups = {
-  async list(after = '') { if (after) text(after, uuid); return webDavBackupsFromNative(await native().webDavBackups(after)); },
-  async restoreFile(id: string, request: string): Promise<{ name: string }> {
-    text(id, uuid); text(request, uuid);
+  async list(after = '', target = '') {
+    if (after) text(after, uuid);
+    if (target) text(target, hash);
+    const value = webDavBackupsFromNative(await native().webDavBackups(after, target));
+    return target && value.targetId !== target ? invalid() : value;
+  },
+  async restoreFile(id: string, request: string, target = ''): Promise<{ name: string }> {
+    text(id, uuid); text(request, uuid); if (target) text(target, hash);
     const module = native(); if (!module.restoreWebDavFile) throw new Error('native_unsupported');
-    const value = object(await module.restoreWebDavFile(id, request), ['id', 'state', 'name']);
+    const value = object(await module.restoreWebDavFile(id, request, target), ['id', 'state', 'name']);
     if (value.id !== id || value.state !== 'completed') return invalid();
     return { name: name(value.name) };
   },
-  async restorePhotos(id: string, request: string): Promise<{ name: string }> {
-    text(id, uuid); text(request, uuid);
+  async restorePhotos(id: string, request: string, target = ''): Promise<{ name: string }> {
+    text(id, uuid); text(request, uuid); if (target) text(target, hash);
     const module = native(); if (!module.restoreWebDavPhotos) throw new Error('native_unsupported');
-    const value = object(await module.restoreWebDavPhotos(id, request), ['id', 'state', 'name']);
+    const value = object(await module.restoreWebDavPhotos(id, request, target), ['id', 'state', 'name']);
     if (value.id !== id || value.state !== 'completed') return invalid();
     return { name: name(value.name) };
   },

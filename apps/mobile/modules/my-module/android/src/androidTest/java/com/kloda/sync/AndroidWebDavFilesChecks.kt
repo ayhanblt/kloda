@@ -27,7 +27,7 @@ internal object AndroidWebDavFilesChecks {
         val transport = AndroidWebDavTransport(context, profile, snapshots) {}
         val publication = AndroidWebDavPublication(journal, transport::inspect, transport::upload, transport::move, {}, { journal.advance(it, "completed") })
         val normal = row("normal"); check(publication.execute(normal.id))
-        val download = AndroidWebDavDownload(context, profile, journal, snapshots) {}
+        val download = AndroidWebDavDownload(context, AndroidCloudTarget.Dav(profile), journal, snapshots) {}
         val restored = download.stage(normal.id)
         snapshots.open(restored.id, digest.size).use { snapshots.validate(digest, it) }
         snapshots.discard(restored)
@@ -39,7 +39,7 @@ internal object AndroidWebDavFilesChecks {
         try { download.stage(unknown.id) } catch (error: FilesFailure) { rejected = error.code }
         check(rejected == "review_required")
         AndroidWebDavVault(context).write(profile)
-        val catalog = AndroidWebDavBackups.list(context, "")
+        val catalog = AndroidWebDavBackups.list(context, "", "")
         @Suppress("UNCHECKED_CAST") val items = catalog["items"] as List<Map<String, String>>
         check(items.size == 1 && items[0]["id"] == normal.id && catalog["targetId"] == profile.targetId())
         check(!journal.enabled("webdav", profile.targetId())) // Explicit own restore/catalog is separate from automatic backup opt-in.

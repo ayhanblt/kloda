@@ -69,15 +69,15 @@ class KlodaBackupModule : Module() {
       checkUi(); review().perform(id, action, UUID.fromString(request))
     } }
     AsyncFunction("cancelWebDavReview") { request: String -> guarded { reviews?.cancel(UUID.fromString(request)) } }
-    AsyncFunction("webDavBackups") { after: String -> guarded { checkUi(); AndroidWebDavBackups.list(context(), after) } }
-    AsyncFunction("restoreWebDavFile") Coroutine { id: String, request: String ->
+    AsyncFunction("webDavBackups") { after: String, target: String -> guarded { checkUi(); AndroidWebDavBackups.list(context(), after, target) } }
+    AsyncFunction("restoreWebDavFile") Coroutine { id: String, request: String, target: String ->
       val session = withContext(Dispatchers.IO) { guarded {
         checkUi()
-        val profile = AndroidWebDavVault(context()).read() ?: throw FilesFailure("webdav_missing")
+        val destination = synchronized(AndroidSyncJournal.sourceLock) { AndroidWebDavContext.restoreTarget(context(), target) }
         val binding = FilesRunContext.webdav(context()).binding
         val ticket = UUID.fromString(request)
         lateinit var current: AndroidWebDavFilesRestore
-        current = AndroidWebDavFilesRestore(context(), profile, binding, ticket) {
+        current = AndroidWebDavFilesRestore(context(), destination, binding, ticket) {
           synchronized(restoreLock) { if (restore !== current) throw FilesFailure("cancelled") }
           if (!current.choosing) checkUi()
         }
@@ -99,14 +99,14 @@ class KlodaBackupModule : Module() {
         session.pause()
       }
     }
-    AsyncFunction("restoreWebDavPhotos") Coroutine { id: String, request: String ->
+    AsyncFunction("restoreWebDavPhotos") Coroutine { id: String, request: String, target: String ->
       val session = withContext(Dispatchers.IO) { guarded {
         checkUi()
-        val profile = AndroidWebDavVault(context()).read() ?: throw FilesFailure("webdav_missing")
+        val destination = synchronized(AndroidSyncJournal.sourceLock) { AndroidWebDavContext.restoreTarget(context(), target) }
         val binding = FilesRunContext.webdav(context()).binding
         val ticket = UUID.fromString(request)
         lateinit var current: AndroidWebDavPhotosRestore
-        current = AndroidWebDavPhotosRestore(context(), profile, binding, ticket) {
+        current = AndroidWebDavPhotosRestore(context(), destination, binding, ticket) {
           synchronized(restoreLock) { if (restore !== current) throw FilesFailure("cancelled") }; checkUi()
         }
         synchronized(restoreLock) {

@@ -31,6 +31,8 @@ internal class AndroidWebDavTransport(private val context: Context, private val 
     val reply = client.request(from, "MOVE", mapOf("Destination" to profile.url(to).toString(), "Overwrite" to "F"))
     AndroidWebDavClient.require(reply, 201)
   }
+  override fun download(path: String, job: WebDavUpload, receive: (ByteArray, Int) -> Unit): WebDavReply =
+    client.request(path, "GET", maximum = job.size, receive = receive).also { AndroidWebDavClient.require(it, 200) }
   private fun prepareParents(path: String) {
     val parts = profile.targetPath.split('/').filter { it.isNotEmpty() } + path.split('/').dropLast(1)
     for (index in 1..parts.size) {

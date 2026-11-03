@@ -3,7 +3,7 @@ package com.kloda.sync
 import android.content.Context
 import java.util.UUID
 
-internal class AndroidWebDavPhotosRestore(private val context: Context, private val profile: AndroidWebDavProfile,
+internal class AndroidWebDavPhotosRestore(private val context: Context, private val destination: AndroidCloudTarget,
   private val binding: String, override val ticket: UUID, private val owner: () -> Unit) : AndroidWebDavRestoreTask {
   override val choosing = false
   private val commitLock = Any()
@@ -14,14 +14,14 @@ internal class AndroidWebDavPhotosRestore(private val context: Context, private 
     if (cancelled) throw FilesFailure("cancelled")
     owner()
     synchronized(AndroidSyncJournal.sourceLock) {
-      if (AndroidWebDavVault(context).read() != profile || FilesRunContext.webdav(context).binding != binding) throw FilesFailure("settings_changed")
+      if (AndroidWebDavContext.stored(context, destination.kind, destination.targetId()) != destination || FilesRunContext.webdav(context).binding != binding) throw FilesFailure("settings_changed")
     }
   }
   fun restore(id: String): Map<String, String> = AndroidSyncJournal.webdav(context).use { database ->
     check()
     val journal = AndroidWebDavJournal(database.writableDatabase)
     val snapshots = AndroidFilesSnapshots(context, true, checkPaused = ::check)
-    val reader = AndroidWebDavDownload(context, profile, journal, snapshots, ::check)
+    val reader = AndroidWebDavDownload(context, destination, journal, snapshots, ::check)
     download = reader
     val staged = mutableMapOf<String, FilesSnapshot>()
     try {

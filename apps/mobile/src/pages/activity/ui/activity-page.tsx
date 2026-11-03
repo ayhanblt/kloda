@@ -15,7 +15,8 @@ import { ByteProgress } from '../../../shared/ui/byte-progress';
 import { OwnBackups } from '../../../widgets/own-backups/own-backups';
 import { useThemeColors } from '../../../shared/theme/theme-provider';
 
-export function ActivityPage({ onBack, view = 'activity', embedded = false }: { onBack: () => void; view?: 'activity' | 'backups'; embedded?: boolean }) {
+// `target`: the Backups view opened from one destination card shows only that destination's backups (18B/5r).
+export function ActivityPage({ onBack, view = 'activity', embedded = false, target }: { onBack: () => void; view?: 'activity' | 'backups'; embedded?: boolean; target?: string }) {
   const colors = useThemeColors();
   const { t } = useTranslation();
   const transfer = useFileTransfer();
@@ -116,8 +117,8 @@ export function ActivityPage({ onBack, view = 'activity', embedded = false }: { 
         {queue?.hasMore && <Text className="font-sans text-sm leading-5 text-secondary-text">{t('transfer.more', { count: queue.totalJobs })}</Text>}
         </>}
         {view === 'backups' && error && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-danger-text">{t(`transfer.errors.${error}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
-        {view === 'backups' && <><WebDavBackupsPanel /><SmbItemsPanel /><SftpItemsPanel /></>}
-        {(view === 'backups' || !embedded) && <OwnBackups transfer={transfer} />}
+        {view === 'backups' && (target ? <WebDavBackupsPanel target={target} /> : <><WebDavBackupsPanel /><SmbItemsPanel /><SftpItemsPanel /></>)}
+        {((view === 'backups' && !target) || !embedded) && <OwnBackups transfer={transfer} />}
         {scrollChrome && controls}
       </ScrollView>
       {!scrollChrome && controls}

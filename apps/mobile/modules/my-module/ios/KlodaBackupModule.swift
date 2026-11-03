@@ -59,22 +59,22 @@ public final class KlodaBackupModule: Module {
       guard let ticket = UUID(uuidString: request) else { throw IosWebDavFailure.code("invalid_request") }
       self.review.cancel(request: ticket)
     }
-    AsyncFunction("webDavBackups") { (after: String, promise: Promise) in
-      self.reply(promise) { try self.checkUi(); return try IosWebDavBackups.list(after: after) }
+    AsyncFunction("webDavBackups") { (after: String, target: String, promise: Promise) in
+      self.reply(promise) { try self.checkUi(); return try IosWebDavBackups.list(after: after, target: target) }
     }.runOnQueue(.main)
-    AsyncFunction("restoreWebDavFile") { (id: String, request: String, promise: Promise) in
+    AsyncFunction("restoreWebDavFile") { (id: String, request: String, target: String, promise: Promise) in
       Task { @MainActor in
         do {
           try self.checkUi()
           guard self.restoreRequest == nil, !self.restoreSelecting, let ticket = UUID(uuidString: request), !self.cancelledRestoreRequests.contains(ticket), UUID(uuidString: id) != nil,
             let view = self.appContext?.utilities?.currentViewController() else { throw IosWebDavFailure.code("invalid_request") }
-          let (profile, binding) = try self.restoreContext()
+          let (cloud, binding) = try self.restoreContext(target)
           self.restoreRequest = ticket; self.restoreSelecting = true
           defer { self.restoreSelecting = false }
           guard let destination = await self.restorePicker.pick(from: view) else { throw IosWebDavFailure.code("cancelled") }
           guard self.restoreRequest == ticket else { throw IosWebDavFailure.code("cancelled") }
           try self.checkUi()
-          self.restore.restore(id: id, destination: destination.bookmark, profile: profile, binding: binding, ticket: ticket,
+          self.restore.restore(id: id, destination: destination.bookmark, cloud: cloud, binding: binding, ticket: ticket,
             visible: { IosWebDavQueue.shared.interactive(self.token) }) { result in
             DispatchQueue.main.async {
               self.cancelledRestoreRequests.insert(ticket)
@@ -88,14 +88,14 @@ public final class KlodaBackupModule: Module {
         }
       }
     }.runOnQueue(.main)
-    AsyncFunction("restoreWebDavPhotos") { (id: String, request: String, promise: Promise) in
+    AsyncFunction("restoreWebDavPhotos") { (id: String, request: String, target: String, promise: Promise) in
       do {
         try self.checkUi()
         guard self.restoreRequest == nil, !self.restoreSelecting, let ticket = UUID(uuidString: request),
           !self.cancelledRestoreRequests.contains(ticket), UUID(uuidString: id) != nil else { throw IosWebDavFailure.code("cancelled") }
-        let (profile, binding) = try self.restoreContext()
+        let (cloud, binding) = try self.restoreContext(target)
         self.restoreRequest = ticket
-        self.photosRestore.restore(id: id, profile: profile, binding: binding, ticket: ticket, visible: { IosWebDavQueue.shared.interactive(self.token) }) { result in
+        self.photosRestore.restore(id: id, destination: cloud, binding: binding, ticket: ticket, visible: { IosWebDavQueue.shared.interactive(self.token) }) { result in
           DispatchQueue.main.async {
             if self.restoreRequest == ticket { self.restoreRequest = nil }
             self.reply(promise) { try result.get() }
@@ -126,10 +126,10 @@ public final class KlodaBackupModule: Module {
       }
     }.runOnQueue(.main)
   }
-  private func restoreContext() throws -> (IosWebDavProfile, String) {
+  private func restoreContext(_ target: String) throws -> (IosCloudTarget, String) {
     try IosWebDavContext.synchronized {
-      guard let profile = try IosWebDavVault.read() else { throw IosWebDavFailure.code("webdav_missing") }
-      return (profile, try IosWebDavContext.capture(profile, journal: IosWebDavJournal.open()))
+      let destination = try IosWebDavContext.restoreTarget(target)
+      return (destination, try IosWebDavContext.capture(destination, journal: IosWebDavJournal.open()))
     }
   }
   private func reply(_ promise: Promise, _ operation: () throws -> [String: Any]) {

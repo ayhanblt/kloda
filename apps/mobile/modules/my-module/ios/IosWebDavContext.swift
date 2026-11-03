@@ -54,6 +54,19 @@ enum IosWebDavContext {
     guard let profile = try IosWebDavVault.read(slot: target), profile.provider == kind, try profile.targetId() == target else { return nil }
     return .dav(profile)
   }
+  // Restore and the backups list (18B/5r): "" is the original WebDAV entry, otherwise the added destination
+  // (DAV slot or OAuth slot with a transport). Receipts stay bound to this targetId.
+  static func restoreTarget(_ target: String) throws -> IosCloudTarget {
+    let original = try IosWebDavVault.read()
+    if target.isEmpty {
+      guard let original else { throw IosWebDavFailure.code("webdav_missing") }
+      return .dav(original)
+    }
+    do { try IosFilesTransfer.fixed(target, bytes: 32) } catch { throw IosWebDavFailure.code("invalid_request") }
+    if let original, try original.targetId() == target { return .dav(original) }
+    guard let destination = try IosWebDavDestinations.added(target) else { throw IosWebDavFailure.code("not_found") }
+    return destination
+  }
   static func check(_ profile: IosWebDavProfile, binding: String, journal: IosWebDavJournal) throws {
     try check(.dav(profile), binding: binding, journal: journal)
   }

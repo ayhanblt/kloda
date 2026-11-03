@@ -70,6 +70,12 @@ final class IosDropboxTransport: IosBackupTransport {
       "autorename": false, "allow_ownership_transfer": false], options: [.sortedKeys])
     try Self.require(try send(Self.api + "move_v2", mutation: true, headers: ["Content-Type": "application/json"], data: body))
   }
+  func download(_ path: String, _ job: IosWebDavUpload, receive: @escaping (Data) throws -> Void) throws -> IosWebDavReply {
+    let arg = try Self.arg(["path": try full(path)])
+    let reply = try send(Self.content + "download", mutation: false, headers: ["Dropbox-API-Arg": arg], size: job.size, receive: receive)
+    try Self.require(reply)
+    return reply
+  }
 
   // The app folder is Dropbox's root for this token; the destination root sits inside it.
   private func full(_ relative: String) throws -> String {
@@ -80,9 +86,10 @@ final class IosDropboxTransport: IosBackupTransport {
     }
     return "/" + parts.joined(separator: "/")
   }
-  // A 401 on any call means the request was not applied, so one refresh and resend is safe for writes too.
+  // A 401 on any call means the request was not applied, so one refresh and resend is safe for writes too. A non-200
+  // reply never reaches `receive`, so a resent download starts from an empty sink.
   private func send(_ url: String, mutation: Bool, headers: [String: String], upload: URL? = nil, data: Data? = nil,
-    size: Int64 = 65536, collect: Bool = false) throws -> IosWebDavReply {
+    size: Int64 = 65536, collect: Bool = false, receive: ((Data) throws -> Void)? = nil) throws -> IosWebDavReply {
     var fresh = false
     if access == nil { access = try token(); fresh = true }
     while true {
@@ -91,7 +98,7 @@ final class IosDropboxTransport: IosBackupTransport {
       request.setValue("Bearer " + access!, forHTTPHeaderField: "Authorization")
       for (key, value) in headers { request.setValue(value, forHTTPHeaderField: key) }
       let reply = try IosWebDavClient.exchange(request, mutation: mutation, upload: upload, data: data, size: size,
-        collect: collect, check: check)
+        collect: collect, receive: receive, check: check)
       guard reply.status == 401 else { return reply }
       if fresh { throw IosWebDavFailure.code("oauth_expired") }
       access = try token(); fresh = true

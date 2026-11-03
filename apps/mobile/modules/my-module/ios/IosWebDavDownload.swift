@@ -2,18 +2,21 @@ import Foundation
 import Darwin
 
 // Restore authority is this device's immutable Completed receipt, never remote discovery/hash equality.
+// 18B/5r: any destination with a transport (DAV GET, Dropbox files/download); bytes are checked by Kloda's SHA-256.
 final class IosWebDavDownload {
   let journal: IosWebDavJournal
-  let profile: IosWebDavProfile
+  let destination: IosCloudTarget
   let snapshots: IosFilesSnapshot
   let check: () throws -> Void
-  init(journal: IosWebDavJournal, profile: IosWebDavProfile, snapshots: IosFilesSnapshot, check: @escaping () throws -> Void) {
-    self.journal = journal; self.profile = profile; self.snapshots = snapshots; self.check = check
+  private let transport: IosBackupTransport
+  init(journal: IosWebDavJournal, destination: IosCloudTarget, snapshots: IosFilesSnapshot, check: @escaping () throws -> Void) throws {
+    self.journal = journal; self.destination = destination; self.snapshots = snapshots; self.check = check
+    transport = try destination.transport(snapshots: snapshots, check: check)
   }
   func receipt(_ id: String) throws -> IosWebDavUpload {
     try check()
     guard UUID(uuidString: id) != nil, let value = try journal.find(id),
-      try value.target == profile.targetId(), value.phase == "completed", value.issue == nil, !value.skipped,
+      try value.target == destination.targetId(), value.phase == "completed", value.issue == nil, !value.skipped,
       ["file", "photo_resource", "photo_manifest"].contains(value.kind ?? ""), value.sourceIdentity != nil else { throw IosWebDavFailure.code("review_required") }
     return value
   }
@@ -23,9 +26,7 @@ final class IosWebDavDownload {
     let (name, handle) = try snapshots.createStaging()
     var retained = false
     defer { try? handle.close(); if !retained { try? snapshots.discard(name) } }
-    let response = try IosWebDavClient.send(profile: profile, path: path, method: "GET", size: value.size,
-      receive: { data in try self.check(); try handle.write(contentsOf: data) }, check: check)
-    try IosWebDavClient.require(response, [200])
+    let response = try transport.download(path, value, receive: { data in try self.check(); try handle.write(contentsOf: data) })
     guard response.sha256 == value.sha256, response.size == value.size else { throw IosWebDavFailure.code("hash_mismatch") }
     guard fsync(handle.fileDescriptor) == 0, fcntl(handle.fileDescriptor, F_FULLFSYNC) == 0 else { throw IosFilesSource.ioFailure() }
     try check()

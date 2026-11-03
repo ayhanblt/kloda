@@ -10,7 +10,7 @@ import java.io.Closeable
 import java.io.InputStream
 import java.io.FilterInputStream
 
-internal class AndroidWebDavFilesRestore(private val context: Context, private val profile: AndroidWebDavProfile,
+internal class AndroidWebDavFilesRestore(private val context: Context, private val destination: AndroidCloudTarget,
   private val binding: String, override val ticket: UUID, private val owner: () -> Unit) : AndroidWebDavRestoreTask {
   private val commitLock = Any()
   @Volatile override var choosing = true
@@ -26,7 +26,7 @@ internal class AndroidWebDavFilesRestore(private val context: Context, private v
     if (cancelled) throw FilesFailure("cancelled")
     owner()
     synchronized(AndroidSyncJournal.sourceLock) {
-      if (AndroidWebDavVault(context).read() != profile || FilesRunContext.webdav(context).binding != binding) throw FilesFailure("settings_changed")
+      if (AndroidWebDavContext.stored(context, destination.kind, destination.targetId()) != destination || FilesRunContext.webdav(context).binding != binding) throw FilesFailure("settings_changed")
     }
   }
   fun restore(treeReference: String, id: String): Map<String, String> {
@@ -38,11 +38,11 @@ internal class AndroidWebDavFilesRestore(private val context: Context, private v
       val journal = AndroidWebDavJournal(database.writableDatabase)
       val history = AndroidWebDavRestoreJournal(database.writableDatabase)
       val snapshots = AndroidFilesSnapshots(context, true, checkPaused = ::check)
-      val download = AndroidWebDavDownload(context, profile, journal, snapshots, ::check)
+      val download = AndroidWebDavDownload(context, destination, journal, snapshots, ::check)
       transfer = download
       val receipt = download.receipt(id)
       if (receipt.kind != "file") throw FilesFailure("manifest_invalid")
-      val previous = history.latest(profile.targetId(), id)
+      val previous = history.latest(destination.targetId(), id)
       if (previous?.directory == treeReference) {
         // A provider URI has no stable inode/generation proof after process loss: never resume unknown writes.
         if (previous.phase != "completed" || previous.document == null) throw FilesFailure("review_required")
@@ -51,7 +51,7 @@ internal class AndroidWebDavFilesRestore(private val context: Context, private v
         check(); return@use mapOf("state" to "completed", "id" to id, "name" to displayName(uri))
       }
       val snapshot = download.stage(id)
-      var intent = WebDavFileRestore(UUID.randomUUID().toString(), profile.targetId(), id, receipt.relativePath.substringAfterLast('/'), receipt.sha256, receipt.size, snapshot.id, treeReference)
+      var intent = WebDavFileRestore(UUID.randomUUID().toString(), destination.targetId(), id, receipt.relativePath.substringAfterLast('/'), receipt.sha256, receipt.size, snapshot.id, treeReference)
       history.save(intent)
       fun save(phase: String) = synchronized(AndroidSyncJournal.sourceLock) { synchronized(commitLock) {
         check(); intent = intent.copy(phase = phase); history.save(intent)

@@ -1,0 +1,32 @@
+{
+  "slice": "18B/5r",
+  "date": "2026-11-03",
+  "base": "a567eb7 + uncommitted 18B/5r diff",
+  "device": "Kloda-Cloud18-Disposable (0309DEBC-9F6A-429C-AAB7-487F5BEC9390), Debug arm64, Metro --dev-client :8081",
+  "account": "user's own Dropbox sign-in from 18B/5 closure (no new sign-in)",
+  "checks": {
+    "jest": "PASS 34 suites / 206 tests",
+    "tsc": "PASS",
+    "eslint": "PASS",
+    "android": "PASS :app:assembleDebug :my-module:assembleDebugAndroidTest arm64-v8a (no Kotlin warnings)",
+    "ios": "PASS xcodebuild Debug iphonesimulator arm64 (no new warnings)"
+  },
+  "runtime_ios": {
+    "flow": "Connections > Dropbox card 'Yedekleri gör' > target-bound Backups view (only that destination's panel) > list > restore each file into a new empty folder via picker",
+    "list": "2 items for the Dropbox targetId (63 B Unicode name, 2000000 B)",
+    "restored": [
+      { "name": "Dropbox kuyruk ü 😀.txt", "size": 63, "sha256_hex": "1a19cacd31f1872b3557b14338947f16f1eed5b1ad6f2a1932e2890e34946683", "matches_source": true },
+      { "name": "rastgele-2mb.bin", "size": 2000000, "sha256_hex": "177c74cb2559d2b258e0269c311f31d6cce08905fd9fc0df4f4ece63e13b38aa", "matches_source": true }
+    ],
+    "hash_check": "host shasum of File Provider Storage/<restore folder>/* equals Kloda18B5/* originals; app reported 'hedef byte'ları ve SHA-256 doğrulandı'",
+    "result": "PASS"
+  },
+  "not_run": [
+    "Android runtime restore (build only)",
+    "Photos restore from Dropbox",
+    "Nextcloud added-target restore at runtime",
+    "settings_changed mid-restore, oauth_expired during download",
+    "EN/DE/light/large-text/VoiceOver capture"
+  ],
+  "review": "same-agent separate pass; no independent review"
+}

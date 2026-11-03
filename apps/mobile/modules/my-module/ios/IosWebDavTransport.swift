@@ -28,6 +28,11 @@ final class IosWebDavTransport: IosBackupTransport {
       headers: ["Destination": destination, "Overwrite": "F"], check: check)
     try IosWebDavClient.require(reply, [201])
   }
+  func download(_ path: String, _ job: IosWebDavUpload, receive: @escaping (Data) throws -> Void) throws -> IosWebDavReply {
+    let reply = try IosWebDavClient.send(profile: profile, path: path, method: "GET", size: job.size, receive: receive, check: check)
+    try IosWebDavClient.require(reply, [200])
+    return reply
+  }
   private func prepareParents(_ path: String) throws {
     // MKCOL is create-only. A 405 never authorizes replacing an existing resource.
     let parts = profile.targetPath.split(separator: "/").map(String.init) + path.split(separator: "/").dropLast().map(String.init)

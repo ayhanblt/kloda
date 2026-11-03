@@ -28,6 +28,15 @@ internal data class AndroidWebDavContext(val destination: AndroidCloudTarget, va
         ?.takeIf { it.provider == kind && it.targetId() == target }?.let { AndroidCloudTarget.OAuth(it) }
       else -> AndroidWebDavVault(context, target).read()?.takeIf { it.provider == kind && it.targetId() == target }?.let { AndroidCloudTarget.Dav(it) }
     }
+    // Restore and the backups list (18B/5r): "" is the original WebDAV entry, otherwise the added destination
+    // (DAV slot or OAuth slot with a transport). Receipts stay bound to this targetId.
+    fun restoreTarget(context: Context, target: String): AndroidCloudTarget {
+      val original = AndroidWebDavVault(context).read()
+      if (target.isEmpty()) return AndroidCloudTarget.Dav(original ?: throw FilesFailure("webdav_missing"))
+      if (!Regex("^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$").matches(target)) throw FilesFailure("invalid_request")
+      if (original != null && original.targetId() == target) return AndroidCloudTarget.Dav(original)
+      return AndroidWebDavDestinations.added(context, target) ?: throw FilesFailure("not_found")
+    }
     // target == null is the original WebDAV destination (manual start from its screen).
     fun capture(context: Context, journal: AndroidWebDavJournal, target: String? = null): AndroidWebDavContext = synchronized(AndroidSyncJournal.sourceLock) {
       val header = if (target == null) null else journal.destination(target) ?: throw FilesFailure("destination_disabled")

@@ -402,7 +402,8 @@
       "signIn": "Sign in and save",
       "save": "Save destination",
       "waiting": "Waiting for confirmation in the browser…",
-      "cancelSignIn": "Cancel sign-in"
+      "cancelSignIn": "Cancel sign-in",
+      "viewBackups": "View backups"
     },
     "pair": {},
     "devices": {},

@@ -80,6 +80,9 @@ internal class AndroidDropboxTransport(private val context: Context, private val
       .put("allow_ownership_transfer", false).toString().toByteArray(Charsets.UTF_8)
     require(send("${API}move_v2", true, emptyMap(), { ByteArrayInputStream(body) }, body.size.toLong(), contentType = "application/json"))
   }
+  override fun download(path: String, job: WebDavUpload, receive: (ByteArray, Int) -> Unit): WebDavReply =
+    send("${CONTENT}download", false, mapOf("Dropbox-API-Arg" to arg(JSONObject().put("path", full(path)))), maximum = job.size,
+      receive = receive).also(::require)
 
   // The app folder is Dropbox's root for this token; the destination root sits inside it.
   private fun full(relative: String): String {
@@ -89,14 +92,15 @@ internal class AndroidDropboxTransport(private val context: Context, private val
     return "/" + parts.joinToString("/")
   }
   // A 401 on any call means the request was not applied, so one refresh and resend (with a fresh body stream) is
-  // safe for writes too.
+  // safe for writes too. A non-200 reply never reaches `receive`, so a resent download starts from an empty sink.
   private fun send(url: String, mutation: Boolean, headers: Map<String, String>, body: (() -> java.io.InputStream)? = null,
-    size: Long = 0, maximum: Long = 65536, collect: Boolean = false, contentType: String = "application/octet-stream"): WebDavReply {
+    size: Long = 0, maximum: Long = 65536, collect: Boolean = false, contentType: String = "application/octet-stream",
+    receive: ((ByteArray, Int) -> Unit)? = null): WebDavReply {
     var fresh = false
     if (access == null) { access = token(); fresh = true }
     while (true) {
       val stream = body?.invoke()
-      val reply = try { client.call(url.toHttpUrl(), "Bearer $access", mutation, headers, stream, size, maximum, collect, contentType) }
+      val reply = try { client.call(url.toHttpUrl(), "Bearer $access", mutation, headers, stream, size, maximum, collect, contentType, receive) }
         finally { stream?.close() }
       if (reply.status != 401) return reply
       if (fresh) throw FilesFailure("oauth_expired")

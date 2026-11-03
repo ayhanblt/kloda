@@ -5,7 +5,7 @@ final class IosWebDavFilesRestore {
   private let worker = DispatchQueue(label: "com.kloda.webdav.restore", attributes: .concurrent)
   private var active: UUID?
   func cancel(_ ticket: UUID? = nil) { lock.lock(); if ticket == nil || ticket == active { active = nil }; lock.unlock() }
-  func restore(id: String, destination: String, profile: IosWebDavProfile, binding: String, ticket: UUID, visible: @escaping () -> Bool, completion: @escaping (Result<[String: Any], Error>) -> Void) {
+  func restore(id: String, destination: String, cloud: IosCloudTarget, binding: String, ticket: UUID, visible: @escaping () -> Bool, completion: @escaping (Result<[String: Any], Error>) -> Void) {
     lock.lock()
     guard active == nil else { lock.unlock(); completion(.failure(IosWebDavFailure.code("backup_busy"))); return }
     active = ticket; lock.unlock()
@@ -16,13 +16,14 @@ final class IosWebDavFilesRestore {
           self.lock.lock(); let current = self.active == ticket; self.lock.unlock()
           guard current && visible() else { throw IosWebDavFailure.code("cancelled") }
           try IosWebDavContext.synchronized {
-            guard try IosWebDavVault.read() == profile, try IosWebDavContext.capture(profile, journal: journal) == binding else { throw IosWebDavFailure.code("settings_changed") }
+            guard try IosWebDavContext.stored(kind: cloud.kind, target: cloud.targetId()) == cloud,
+              try IosWebDavContext.capture(cloud, journal: journal) == binding else { throw IosWebDavFailure.code("settings_changed") }
           }
         }
-        let download = IosWebDavDownload(journal: journal, profile: profile, snapshots: snapshots, check: check)
+        let download = try IosWebDavDownload(journal: journal, destination: cloud, snapshots: snapshots, check: check)
         let receipt = try download.receipt(id)
         guard receipt.kind == "file" else { throw IosWebDavFailure.code("manifest_invalid") }
-        let target = try profile.targetId()
+        let target = try cloud.targetId()
         func fresh() throws -> IosWebDavRestoreIntent {
           let stage = try download.stage(id)
           let result = IosWebDavRestoreIntent(id: UUID().uuidString.lowercased(), target: target, job: id,

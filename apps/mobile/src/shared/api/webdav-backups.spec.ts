@@ -27,3 +27,19 @@ it('requires an exact Photos completion and never treats organization review as 
   mockNative.restoreWebDavPhotos.mockResolvedValueOnce({ id, state: 'completed', name: 'own.png' });
   expect(await webDavBackups.restorePhotos(id, id)).toEqual({ name: 'own.png' });
 });
+
+it('binds the list and restores to the requested destination', async () => {
+  const target = 'B'.repeat(42) + 'A';
+  mockNative.webDavBackups.mockResolvedValueOnce({ ...page, targetId: target });
+  expect((await webDavBackups.list('', target)).targetId).toBe(target);
+  expect(mockNative.webDavBackups).toHaveBeenLastCalledWith('', target);
+  mockNative.webDavBackups.mockResolvedValueOnce(page);
+  await expect(webDavBackups.list('', target)).rejects.toThrow('outcome_unknown');
+  await expect(webDavBackups.list('', 'bad')).rejects.toThrow('outcome_unknown');
+  mockNative.restoreWebDavFile.mockResolvedValueOnce({ id, name: 'own.bin', state: 'completed' });
+  await webDavBackups.restoreFile(id, id, target);
+  expect(mockNative.restoreWebDavFile).toHaveBeenLastCalledWith(id, id, target);
+  mockNative.restoreWebDavPhotos.mockResolvedValueOnce({ id, name: 'own.png', state: 'completed' });
+  await webDavBackups.restorePhotos(id, id);
+  expect(mockNative.restoreWebDavPhotos).toHaveBeenLastCalledWith(id, id, '');
+});

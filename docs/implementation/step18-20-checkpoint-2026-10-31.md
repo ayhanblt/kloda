@@ -343,17 +343,31 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
 - Not: Metro'yu `CI=1` ile başlatmak dosya izlemeyi kapatır, uygulama eski JS'i alır; `--dev-client`'la başlatın.
   Dropbox kartı hesap adı yerine ham `dbid:` gösteriyor (görsel açık iş).
 
-## Dilim 18B/5r — karar (3.11)
+## Dilim 18B/5r — hedef başına geri yükleme (3.11, commit yok)
 
-- Kullanıcı kararı 3.11: Lovable Yedekler ekranında hedef seçimi yok; seçim **Bağlantılar'daki her etkin hedef kartında
-  "Yedekleri gör" düğmesiyle** yapılır, düğme mevcut Yedekler ekranını o hedefe bağlı açar (yeni bileşen yok).
-- Henüz kod yok. Sıradaki dilim: taşıma katmanına `download` (iOS `IosBackupTransport`, Android
-  `AndroidBackupTransport`; DAV GET + Dropbox `files/download`, kendi SHA-256/boyut doğrulaması);
-  `IosWebDavDownload`/`AndroidWebDavDownload` profil yerine `IosCloudTarget`/`AndroidCloudTarget` alır; Files/Photos
-  restore'da `IosWebDavVault.read() == profile` / `AndroidWebDavVault(context).read() != profile` bağı yerine
-  `IosWebDavContext.stored(kind:target:) == destination` hedef kontrolü; `IosWebDavBackups.list`/Android karşılığı
-  `targetId` alır; JS köprüsü + kart düğmesi + i18n (`ui.conn.viewBackups` TR/EN/DE). Doğrulama: Jest/tsc/ESLint, bir
-  Android + bir iOS derleme, Dropbox'a yüklenmiş bu iki dosyanın iOS'ta geri yüklenmesi (kullanıcı girişi mevcut).
+- Kullanıcı kararı 3.11: Lovable Yedekler ekranında hedef seçimi yok; seçim Bağlantılar'daki her etkin hedef kartında
+  **"Yedekleri gör"** ile yapılır, mevcut Yedekler ekranı o hedefe bağlı açılır (yeni bileşen yok).
+- Taşıma: `IosBackupTransport`/`AndroidBackupTransport.download(path, job, receive)`; DAV GET, Dropbox
+  `files/download` (yalnız 200 gövdesi sink'e gider → 401 sonrası yeniden gönderim boş sink'le başlar; Android
+  `call`/`restReply` `receive` alır). Doğrulama değişmedi: kendi SHA-256/boyut, `hash_mismatch`.
+- `IosWebDavDownload`/`AndroidWebDavDownload` `IosCloudTarget`/`AndroidCloudTarget` alır. Files/Photos restore kontrolü
+  `IosWebDavVault.read() == profile` / `AndroidWebDavVault.read() != profile` yerine
+  `stored(kind, targetId) == destination` (+ mevcut bağlam bağlaması). `restoreTarget(target)`: `""` = özgün WebDAV
+  (eski davranış), aksi halde 32 baytlık targetId + `added()`; yoksa `not_found`. Etkinlik restore için şart değil
+  (önceki gibi); düğme yalnız etkin kartta.
+- Köprü: `webDavBackups(after, target)`, `restoreWebDavFile/Photos(id, request, target)` iOS+Android; JS
+  `webDavBackups.list/restoreFile/restorePhotos(..., target = '')`, dönen `targetId` istenenle eşleşmeli.
+  `useWebDavRestore(target)` hata kodunu `sftpErrorCode` ile okur (Expo iOS `error.code`). `ActivityPage target`:
+  yalnız o hedefin paneli; geri → Bağlantılar. i18n `ui.conn.viewBackups` TR/EN/DE. androidTest çağrıları güncellendi.
+- Kontroller: Jest 34/206, tsc, ESLint PASS; Android `:app:assembleDebug` + `:my-module:assembleDebugAndroidTest`
+  (arm64) PASS; iOS Simulator Debug arm64 PASS. iOS çalışma zamanı (Kloda-Cloud18-Disposable, kullanıcının mevcut Dropbox
+  girişi): kart → Yedekleri gör → liste (2 öğe) → iki dosya yeni boş klasöre geri yüklendi; host `shasum` kaynakla
+  birebir. [Kanıt](evidence/cloud18-nextcloud-2026-10-31/dropbox-ios-restore-2026-11-03.json).
+- NOT_RUN: Android çalışma zamanı geri yükleme; Dropbox'tan Photos; eklenmiş Nextcloud hedefinden geri yükleme;
+  geri yükleme sırasında ayar değişimi / `oauth_expired`; EN/DE/a11y yakalaması. Aynı ajan review; bağımsız yok.
+- Görsel/metin açık işi (yeni i18n onayı gerekir): hedefe bağlı ekranda başlıklar özgün WebDAV/PC metinleri
+  ("PC'deki tamamlanmış yedekleriniz", "WebDAV yedeklerim", "PC yedeği tamamlandı · Yerel şifreli LAN"); alt sekme
+  "Durum" seçili görünür.
 
 ## Sıradaki (kullanıcı 1.11: açık işler sırayla)
 
@@ -387,7 +401,7 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
    yalnız Dropbox için açılır. Gerçek hesap testi kullanıcının girişi ve ayrı onayıyla.
 9. 18B/5r — hedef başına geri yükleme (onaylı sıra): taşıma katmanına `download`; `IosWebDavVault.read() == profile`
    bağı yerine hedef bazlı kontrol (eklenen Nextcloud hedeflerini de açar); Dropbox dosya+fotoğraf; hedef seçimi
-   kararı 3.11 verildi (kartta "Yedekleri gör"); kapsam yukarıdaki "Dilim 18B/5r — karar" bölümünde. **Sıradaki iş.**
+   kararı 3.11 verildi (kartta "Yedekleri gör"). **Yapıldı 3.11** (yukarıda; Android çalışma zamanı ve metin açık işi kaldı).
 10. [ADR0029 taslağı](../decisions/0029-cloud-restore-catalog-and-recovery-key.md) (3.11, onaylanmadı): yeni cihazda
    geri yükleme için kurtarma kodu + HMAC'li create-only katalog + salt geri yükleme yetkili içe aktarılmış fiş.
    ADR sonundaki 4 açık soru kullanıcıda; dilimler 29/1–4, 18B/5r'den sonra.

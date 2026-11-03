@@ -16,8 +16,8 @@ export const errorLabel = (code: string) => `transfer.errors.${code}`;
 // Native lists the original WebDAV entry first; it is shown by its own card and cannot be removed here.
 export const addedDestinations = (items: CloudDestination[] | null) => (items ?? []).filter((item) => item.provider !== 'webdav');
 
-type CardActions = { onToggle: () => void; onRemove: () => void; onRun: () => void; onPause: () => void };
-function DestinationCard({ destination, busy, onToggle, onRemove, onRun, onPause }: { destination: CloudDestination; busy: boolean } & CardActions) {
+type CardActions = { onToggle: () => void; onRemove: () => void; onRun: () => void; onPause: () => void; onBackups: () => void };
+function DestinationCard({ destination, busy, onToggle, onRemove, onRun, onPause, onBackups }: { destination: CloudDestination; busy: boolean } & CardActions) {
   const colors = useThemeColors();
   const { t } = useTranslation();
   const enableable = enableableProviders.includes(destination.provider);
@@ -38,6 +38,7 @@ function DestinationCard({ destination, busy, onToggle, onRemove, onRun, onPause
     {run && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-secondary-text">{t(`destinations.states.${run.state}`)}</Text>}
     {run?.errorCode && <Text className="font-sans text-sm text-danger-text">{t(errorLabel(run.errorCode), { defaultValue: t(errorLabel('outcome_unknown')) })}</Text>}
     {enableable && destination.enabled && <PairingButton disabled={busy} label={t(running ? 'statusUi.pause' : 'statusUi.backupNow')} onPress={running ? onPause : onRun} />}
+    {enableable && destination.enabled && <PairingButton variant="secondary" disabled={busy} label={t('ui.conn.viewBackups')} onPress={onBackups} />}
     {enableable && <PairingButton variant="secondary" disabled={busy} label={t(destination.enabled ? 'destinations.disable' : 'destinations.enableSaved')} onPress={onToggle} />}
     <PairingButton variant="destructive" disabled={busy} label={t('ui.conn.remove')} onPress={confirm} />
   </MobilePanel>;
@@ -45,7 +46,7 @@ function DestinationCard({ destination, busy, onToggle, onRemove, onRun, onPause
 
 // Saved destinations in one list: the original WebDAV entry keeps its own screen; added DAV/OAuth destinations
 // are switched, run, paused and removed here (ADR0023 explicit opt-in, ADR0027, 18A/4c).
-export function CloudDestinationList({ cloud, navigate, saved }: { cloud: CloudModel; navigate: NavigateMobile; saved: Omit<MobileStorageForm, 'password'> | null }) {
+export function CloudDestinationList({ cloud, navigate, openBackups, saved }: { cloud: CloudModel; navigate: NavigateMobile; openBackups: (targetId: string) => void; saved: Omit<MobileStorageForm, 'password'> | null }) {
   const colors = useThemeColors();
   const { t } = useTranslation();
   const busy = cloud.action !== 'idle';
@@ -57,7 +58,7 @@ export function CloudDestinationList({ cloud, navigate, saved }: { cloud: CloudM
     </MobilePanel>}
     {addedDestinations(cloud.destinations).map((item) => <DestinationCard key={item.targetId} destination={item} busy={busy}
       onToggle={() => { void cloud.setEnabled(item.targetId, !item.enabled); }} onRemove={() => { void cloud.remove(item.targetId); }}
-      onRun={() => { void cloud.runNow(item.targetId); }} onPause={() => { void cloud.pause(item.targetId); }} />)}
+      onRun={() => { void cloud.runNow(item.targetId); }} onPause={() => { void cloud.pause(item.targetId); }} onBackups={() => openBackups(item.targetId)} />)}
     {cloud.error && <Text accessibilityRole="alert" className="font-sans text-sm text-danger-text">{t(errorLabel(cloud.error), { defaultValue: t(errorLabel('outcome_unknown')) })}</Text>}
   </>;
 }
