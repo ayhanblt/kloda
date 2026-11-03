@@ -1,0 +1,29 @@
+{
+  "slice": "18B/5r",
+  "date": "2026-11-03",
+  "base": "1cc5004 (installed app-debug.apk built 16:54 from the 18B/5r tree; no native source newer than the APK)",
+  "device": "emulator-5590 KlodaCloud18 (owned), Debug arm64, Metro --dev-client :8081 from worktree-step18-20",
+  "approval": "user approved in chat 2026-11-03: Android Dropbox backup + restore of the two files; user asked Claude to tap Dropbox 'Allow' (scope: Apps > Kloda folder + basic account info)",
+  "checks_reused": "Jest/tsc/ESLint/Android+iOS builds and iOS runtime restore from dropbox-ios-restore-2026-11-03.json (not repeated)",
+  "runtime_android": {
+    "setup": "fresh product app state (empty journal) > skip onboarding > Hedefler > Bağlantı ekle > Dropbox, folder Kloda18B5r-android > sign-in (chooser: Kloda product app, not com.kloda.sync.test) > enable > source folder /sdcard/Download/Kloda18B5r-android (copies of the iOS Kloda18B5 originals) > Şimdi yedekle: 'Bu çalışma doğrulandı ve tamamlandı'",
+    "flow": "Dropbox card 'Yedekleri gör' > target-bound Backups view > list (2 items) > each file restored into new folder /sdcard/Download/'Kloda18B5r-restore ' (trailing space from keyboard; harmless)",
+    "restored": [
+      { "name": "Dropbox kuyruk ü 😀.txt", "size": 63, "sha256_hex": "1a19cacd31f1872b3557b14338947f16f1eed5b1ad6f2a1932e2890e34946683", "matches_source": true },
+      { "name": "rastgele-2mb.bin", "size": 2000000, "sha256_hex": "177c74cb2559d2b258e0269c311f31d6cce08905fd9fc0df4f4ece63e13b38aa", "matches_source": true }
+    ],
+    "hash_check": "device sha256sum and host shasum (adb pull) equal the originals; app reported 'hedef byte'ları ve SHA-256 doğrulandı' for both",
+    "screenshot": "dropbox-android-restore-2026-11-03.png",
+    "result": "PASS"
+  },
+  "observed_text_issues": "target-bound view still shows PC/WebDAV copy ('PC'deki tamamlanmış yedekleriniz', 'WebDAV yedeklerim', 'PC yedeği tamamlandı · Yerel şifreli LAN'), back button reads 'Kuruluma dön', bottom tab 'Durum' selected — same open text item as iOS",
+  "remote_residue": "Apps/Kloda/Kloda18B5r-android/* in the user's Dropbox (Kloda never deletes remotely); Dropbox grant stays active in the app on KlodaCloud18",
+  "not_run": [
+    "Photos restore from Dropbox",
+    "Nextcloud added-target restore at runtime",
+    "settings_changed mid-restore, oauth_expired during download",
+    "Android JobService (scheduled) Dropbox run",
+    "EN/DE/light/large-text/TalkBack capture"
+  ],
+  "review": "same-agent; no code changed in this run; no independent review"
+}
