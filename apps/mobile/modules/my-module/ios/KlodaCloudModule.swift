@@ -56,6 +56,23 @@ public final class KlodaCloudModule: Module {
         return ["destinations": try Self.summaries()]
       }
     }.runOnQueue(.main)
+    // Step18A/4c: one manual run of an enabled, added DAV destination through the shared queue (same lock and
+    // begin() order as the original WebDAV run); the original entry keeps KlodaBackup's run/pause.
+    AsyncFunction("runDestination") { (targetId: String, promise: Promise) in
+      guard UIApplication.shared.applicationState == .active else { return promise.reject("candidate_stale", "candidate_stale") }
+      self.background(promise) {
+        try Self.added(targetId)
+        try IosWebDavQueue.shared.start(target: targetId)
+        return ["destinations": try Self.summaries()]
+      }
+    }.runOnQueue(.main)
+    AsyncFunction("pauseDestination") { (targetId: String, promise: Promise) in
+      self.background(promise) {
+        try Self.added(targetId)
+        try IosWebDavQueue.shared.pauseTarget(targetId, code: "target_pause")
+        return ["destinations": try Self.summaries()]
+      }
+    }
   }
 
   // Login Flow v2: the login page opens in an ephemeral system browser sheet while the poll waits for the grant.
@@ -174,6 +191,11 @@ public final class KlodaCloudModule: Module {
     guard try total() < IosWebDavVault.limit else { throw IosWebDavFailure.code("destination_limit") }
     try IosWebDavVault.write(profile, slot: slot)
   }
+  static func added(_ targetId: String) throws {
+    guard try IosWebDavVault.read(slot: targetId)?.provider != nil else {
+      throw IosWebDavFailure.code(try IosOAuthVault.read(slot: targetId) != nil ? "destination_unsupported" : "not_found")
+    }
+  }
   // ADR0028 §7: DAV and OAuth destinations share one limit.
   static func total() throws -> Int { try IosWebDavVault.count() + IosOAuthVault.slots().count }
 
@@ -181,9 +203,11 @@ public final class KlodaCloudModule: Module {
   // entry's lives in KlodaBackup, so it reads false here).
   static func summary(_ profile: IosWebDavProfile) throws -> [String: Any] {
     let target = try profile.targetId()
-    return ["targetId": target, "provider": profile.provider ?? "webdav", "endpoint": profile.endpoint,
+    var row: [String: Any] = ["targetId": target, "provider": profile.provider ?? "webdav", "endpoint": profile.endpoint,
       "targetPath": profile.targetPath, "username": profile.username,
       "enabled": profile.provider != nil ? try IosWebDavDestinations.enabled(target) : false]
+    if profile.provider != nil, let run = try IosWebDavQueue.shared.runView(target: target) { row["run"] = run }
+    return row
   }
   // Display metadata only: never the refresh token. The account ID stands in for the user name.
   static func summary(_ profile: IosOAuthProfile) throws -> [String: Any] {

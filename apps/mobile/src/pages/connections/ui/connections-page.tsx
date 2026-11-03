@@ -10,7 +10,10 @@ import { useSmbBackup } from '../../../features/backup-setup/model/use-smb-backu
 import { useSftpBackup } from '../../../features/backup-setup/model/use-sftp-backup';
 import { useThemeColors } from '../../../shared/theme/theme-provider';
 import { useCloudDestinations } from '../../../features/cloud-destination/model/use-cloud-destinations';
+import { hiddenProviders } from '../../../shared/api/cloud-destinations';
 import { CloudDestinationList, addedDestinations } from './cloud-destination-list';
+
+const hiddenIds: ReadonlySet<string> = new Set(hiddenProviders);
 
 export function ConnectionsPage({ adding, navigate, openProvider, saved }: { adding: boolean; navigate: NavigateMobile; openProvider: (id: DestinationProviderId) => void; saved: Omit<MobileStorageForm,'password'> | null }) {
   const colors = useThemeColors();
@@ -48,7 +51,7 @@ export function ConnectionsPage({ adding, navigate, openProvider, saved }: { add
     {adding && (['protocol','cloud'] as const).map((kind) => <MobilePanel key={kind}>
       {kind === 'cloud' ? <Cloud size={24} color={colors['text-primary']} /> : <HardDrive size={24} color={colors['text-primary']} />}
       <Text accessibilityRole="header" className="text-lg font-inter-semibold text-primary-text">{t(kind === 'cloud' ? 'ui.conn.clouds' : 'ui.conn.protocols')}</Text>
-      {destinationProviders.filter((p) => p.kind === kind).map((p) => <PairingButton key={p.id} variant="secondary" label={t(`ui.providers.${p.id}`)} onPress={() => openProvider(p.id)} />)}
+      {destinationProviders.filter((p) => p.kind === kind && !hiddenIds.has(p.id)).map((p) => <PairingButton key={p.id} variant="secondary" label={t(`ui.providers.${p.id}`)} onPress={() => openProvider(p.id)} />)}
     </MobilePanel>)}
   </MobileSurface>;
 }

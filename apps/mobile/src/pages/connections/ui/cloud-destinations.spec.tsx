@@ -8,7 +8,7 @@ import { i18n } from '../../../shared/i18n';
 
 jest.mock('../../../shared/api/cloud-destinations', () => ({
   ...jest.requireActual('../../../shared/api/cloud-destinations'),
-  cloudDestinations: { list: jest.fn(), signInNextcloud: jest.fn(), signInOAuth: jest.fn(), addKolabNow: jest.fn(), cancelSignIn: jest.fn(), remove: jest.fn(), setEnabled: jest.fn() },
+  cloudDestinations: { list: jest.fn(), signInNextcloud: jest.fn(), signInOAuth: jest.fn(), addKolabNow: jest.fn(), cancelSignIn: jest.fn(), remove: jest.fn(), setEnabled: jest.fn(), runNow: jest.fn(), pause: jest.fn() },
 }));
 const api = jest.mocked(cloudDestinations);
 const row = (n: number, provider: CloudDestination['provider'], enabled = false): CloudDestination =>
@@ -53,5 +53,28 @@ it('signs in to Nextcloud from the add page and returns after the destination is
   await fireEvent.press(view.getByRole('button', { name: i18n.t('ui.conn.signIn') }));
   await waitFor(() => expect(saved).toHaveBeenCalledTimes(1));
   expect(api.signInNextcloud).toHaveBeenCalledWith('https://c.example', 'Kloda');
+  await view.unmount();
+});
+
+it('runs an enabled DAV destination now and pauses it while running', async () => {
+  const dav = row(4, 'nextcloud', true);
+  api.list.mockResolvedValue([dav]);
+  api.runNow.mockResolvedValue([{ ...dav, run: { state: 'running' } }]);
+  api.pause.mockResolvedValue([{ ...dav, run: { state: 'paused', errorCode: 'target_pause' } }]);
+  const view = await render(<List />);
+  await fireEvent.press(await view.findByRole('button', { name: i18n.t('statusUi.backupNow') }));
+  await waitFor(() => expect(view.getByText(i18n.t('destinations.states.running'))).toBeTruthy());
+  expect(api.runNow).toHaveBeenCalledWith(dav.targetId);
+  await fireEvent.press(view.getByRole('button', { name: i18n.t('statusUi.pause') }));
+  await waitFor(() => expect(view.getByText(i18n.t('destinations.states.paused'))).toBeTruthy());
+  expect(api.pause).toHaveBeenCalledWith(dav.targetId);
+  await view.unmount();
+});
+
+it('offers no manual run for a disabled or OAuth destination', async () => {
+  api.list.mockResolvedValue([row(5, 'nextcloud'), row(6, 'dropbox')]);
+  const view = await render(<List />);
+  await waitFor(() => expect(view.getByText('user6')).toBeTruthy());
+  expect(view.queryByRole('button', { name: i18n.t('statusUi.backupNow') })).toBeNull();
   await view.unmount();
 });

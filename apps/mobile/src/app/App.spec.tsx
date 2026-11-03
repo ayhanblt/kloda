@@ -196,9 +196,10 @@ describe('App', () => {
     expect(testAndSaveWebDavSettings).not.toHaveBeenCalled();
     await fireEvent.press(surface.getByRole('tab', { name: i18n.t('statusUi.targets') }));
     await fireEvent.press(surface.getByText(i18n.t('ui.conn.add')));
-    for (const id of ['webdav','smb','ftp','sftp','s3-compatible','amazon-s3','box','cloudme','dropbox','google-drive','google-cloud-storage','kolab-now','mega','onedrive','nextcloud','yandex-disk']) {
+    for (const id of ['webdav','smb','ftp','sftp','s3-compatible','amazon-s3','box','cloudme','dropbox','google-drive','google-cloud-storage','mega','onedrive','nextcloud','yandex-disk']) {
       expect(surface.getByRole('button', { name: i18n.t(`ui.providers.${id}`) })).toBeTruthy();
     }
+    expect(surface.queryByRole('button', { name: i18n.t('ui.providers.kolab-now') })).toBeNull();
     await fireEvent.press(surface.getByText(i18n.t('ui.providers.sftp')));
     expect(surface.getByText(i18n.t('ui.integrationUnavailable'))).toBeTruthy();
     expect(surface.getByLabelText(i18n.t('ui.providerFields.fingerprint')).props.editable).toBe(false);

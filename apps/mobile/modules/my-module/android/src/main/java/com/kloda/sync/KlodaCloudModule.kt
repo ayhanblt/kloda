@@ -75,6 +75,21 @@ class KlodaCloudModule : Module() {
         mapOf("destinations" to summaries())
       } }
     }
+    // Step18A/4c: one manual run of an enabled, added DAV destination through the shared queue (same lock and
+    // begin() order as the original WebDAV run); the original entry keeps KlodaBackup's run/pause.
+    AsyncFunction("runDestination") Coroutine { targetId: String ->
+      if (!resumed()) throw CodedException("candidate_stale", "candidate_stale", null)
+      withContext(Dispatchers.IO) { guarded {
+        added(targetId); AndroidWebDavRuntime.queue(context()).start(target = targetId)
+        mapOf("destinations" to summaries())
+      } }
+    }
+    AsyncFunction("pauseDestination") Coroutine { targetId: String ->
+      withContext(Dispatchers.IO) { guarded {
+        added(targetId); AndroidWebDavRuntime.queue(context()).pauseTarget(targetId, "target_pause")
+        mapOf("destinations" to summaries())
+      } }
+    }
   }
 
   // Login Flow v2: the login page opens in a Custom Tab while the poll waits for the grant (up to 20 minutes).
@@ -185,14 +200,21 @@ class KlodaCloudModule : Module() {
     if (total() >= AndroidWebDavVault.LIMIT) throw FilesFailure("destination_limit")
     vault.write(profile)
   }
+  private fun added(targetId: String) {
+    if (AndroidWebDavVault(context(), targetId).read()?.provider == null)
+      throw FilesFailure(if (AndroidOAuthVault(context(), targetId).read() != null) "destination_unsupported" else "not_found")
+  }
   // ADR0028 §7: DAV and OAuth destinations share one limit.
   private fun total(): Int = AndroidWebDavVault.count(context()) + AndroidOAuthVault.slots(context()).size
 
   // Display metadata only: never the password.
   // `enabled` is the destination's queue opt-in (the original WebDAV entry's lives in KlodaBackup, so it reads false here).
-  private fun summary(profile: AndroidWebDavProfile): Map<String, Any> = mapOf("targetId" to profile.targetId(),
-    "provider" to (profile.provider ?: "webdav"), "endpoint" to profile.endpoint, "targetPath" to profile.targetPath, "username" to profile.username,
-    "enabled" to (profile.provider != null && AndroidWebDavDestinations.enabled(context(), profile.targetId())))
+  private fun summary(profile: AndroidWebDavProfile): Map<String, Any> = buildMap {
+    put("targetId", profile.targetId()); put("provider", profile.provider ?: "webdav"); put("endpoint", profile.endpoint)
+    put("targetPath", profile.targetPath); put("username", profile.username)
+    put("enabled", profile.provider != null && AndroidWebDavDestinations.enabled(context(), profile.targetId()))
+    if (profile.provider != null) AndroidWebDavRuntime.queue(context()).runView(profile.targetId())?.let { put("run", it) }
+  }
   // Display metadata only: never the refresh token. The account ID stands in for the user name.
   private fun summary(profile: AndroidOAuthProfile): Map<String, Any> = mapOf("targetId" to profile.targetId(),
     "provider" to profile.provider, "endpoint" to OAuthProvider.named(profile.provider).api, "targetPath" to profile.targetPath, "username" to profile.accountId,

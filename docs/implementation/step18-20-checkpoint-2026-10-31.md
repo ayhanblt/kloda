@@ -274,6 +274,24 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
 - NOT_RUN: EN/DE/açık tema/büyük yazı/VoiceOver yakalaması; eklenmiş hedefli kartların native görüntüsü (yalnız Jest);
   gerçek giriş; kalıcı yakalama betiği (dokunma araçla yapıldı). Aynı ajan review; bağımsız review yok.
 
+## Kararlar ve dilim 18A/4c — hedef başına elle başlatma (3.11, commit yok)
+
+- Kullanıcı kararları 3.11 (ADR0027/0028'e yazıldı): CloudMe V1'de görünür engelli kalır (Digest). Box, MEGA, GCS V1 dışı
+  (GCS için kullanıcı bucket'ı/HMAC yolu konuşuldu, V1 için reddedildi, ADR taslağı yok). **Kolab Now V1 dışı ve uygulamada
+  görünmez**: `hiddenProviders` ekleme listesinden süzer; native ekleme yolu ve testleri kodda kalır.
+- Köprü: `KlodaCloud.runDestination(targetId)` (yalnız ön planda) ve `pauseDestination(targetId)` iOS/Android; yalnız
+  eklenmiş DAV hedefi (`not_found`/`destination_unsupported`), mevcut `start(target:)`/`pauseTarget` — aynı kilit ve
+  `begin()` sırası. Özetlere eklenmiş DAV hedefinin son koşusu `run` olarak eklendi (`runView`, `status()` ile ortak
+  `view`). JS: sıkı ayrıştırıcı `run.state`/`errorCode` kabul eder; hook `runNow`/`pause`, koşu sürerken 2 sn'de bir
+  yenileme; kart: durum satırı, hata, etkinse Şimdi yedekle/Duraklat (mevcut `statusUi.*`, `destinations.states.*`
+  anahtarları; yeni i18n yok).
+- Kontroller: tsc, ESLint, Jest tam 34/203 PASS; Android arm64 debug ve iOS Simulator debug derlemesi PASS.
+- NOT_RUN: köprünün çalışırken denenmesi. iOS Simulator'da metin yapıştırma çalışmadı (sunucu/giriş girilemedi);
+  Android çalışma zamanı denenmedi. EN/DE/açık yakalama: dil/tema uygulama ayarından geldiği için simctl argümanları
+  etkisiz; betikli yakalamaya kaldı. Aynı ajan review; bağımsız review yok.
+- [iOS fiziksel test dosyası](ios-physical-tests/ios-fiziksel-testi-claude-step18-20.md): 19 listesi + 18 cihaz adımları
+  birleştirildi (Codex aynı klasöre ekler); eski step19 listesi yönlendirme oldu.
+
 ## Sıradaki (kullanıcı 1.11: açık işler sırayla)
 
 19, bu listede 18'in 1.–3. maddelerinden sonra gelmesine rağmen önce yapıldı; sıra artık buna göre.
@@ -286,7 +304,7 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
    eklemeleri korunarak çözüldü. Sonrası: Jest 33/196, tsc, ESLint, Android compile+lint+androidTest APK, iOS arm64
    Simulator derlemesi PASS (worktree'de `sync-core` dist yeniden derlendi; genel simülatör hedefi x86_64 pairing
    dilimi olmadığı için link etmez). OAuth türlerinin `backup_destination` migration'ı 18A/3 ile yapıldı.
-2. 18A/4 — Expo köprüsü (4a tamam) + Lovable bağlantı ekranı (4b yapıldı 3.11, yukarıda; açık: elle başlatma/durum köprüsü, EN/DE/a11y yakalama).
+2. 18A/4 — Expo köprüsü (4a tamam) + Lovable bağlantı ekranı (4b ve 4c yapıldı 3.11, yukarıda; açık: köprünün Android çalışma testi, EN/DE/a11y yakalama).
    Kapsam (Codex yanıtı): `pages/connections/ui/connections-page.tsx` içinde tek kayıtlı WebDAV kartının yerine
    hedef listesi; ekleme (Nextcloud giriş, Kolab Now, OAuth girişleri), aç/kapa (`setEnabled`, OAuth kapalı +
    `destination_unsupported`), kaldırma, durum; i18n önekleri `ui.conn.*`, `ui.providers.*`; Lovable
@@ -294,11 +312,12 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
    kullanıcıya sorulur. Doğrulama: Jest/tsc/ESLint + bir Android ve bir iOS Simulator toplu ekran yakalaması;
    18A/3 testleri tekrarlanmaz.
 3. 18A/5 — uygulama parolası iptali: tamam (Android fixture testi 1.11'de PASS).
-4. 18A/6 — yapıldı: Kolab Now adaptörü, CloudMe Digest-only olduğu için engelli; gerçek Kolab Now hesap testi ayrı kullanıcı izni ister.
+4. 18A/6 — yapıldı: Kolab Now adaptörü (3.11 kararıyla V1 dışı, gizli), CloudMe Digest-only olduğu için engelli.
 5. 18 kapanış — yapıldı (iOS yükseltme PASS, Android NOT_RUN; kanıt; aynı ajan review + düzeltmeler).
 6. 20 — regresyon iskeleti (görsel yakalama betiği hazır).
-7. Kullanıcıda bekleyenler: 19 fiziksel test (gate 21, [liste](step19-physical-test-checklist.md)), iOS 16
-   runtime kararı, C grubu kararı, birleştirme. B grubu kayıtları alındı (yukarıda); 18B/1 Dropbox yapıldı.
+7. Kullanıcıda bekleyenler: fiziksel test (gate 21, en sonda, [liste](ios-physical-tests/ios-fiziksel-testi-claude-step18-20.md)), iOS 16
+   runtime kararı, birleştirme. C grubu kararı verildi (3.11, V1 dışı). B grubu kayıtları alındı (yukarıda); 18B/1 Dropbox yapıldı.
+8. Sıradaki kod işi: 18B/5 OAuth yükleme adaptörleri (ADR0028 §5).
 
 Açık: sunucu uyuşmazlığında iptal uçtan uca test edilmedi;
 bağımsız (başka ajan) review yapılmadı, yalnız aynı ajanın ayrı review geçişi.

@@ -54,6 +54,13 @@ The user registered public clients on 2026-11-01 (IDs in the step18–20 checkpo
 7. **Limit and opt-in.** All cloud destinations together (ADR0027 DAV + these)
    stay within 8 per device. Signing in or saving is not enabling (ADR0023).
 
+## V1 scope decision (user, 2026-11-03)
+
+Group C is out of V1: Box (no verified secret-free public client; a broker conflicts with
+the serverless model), MEGA (own SDK, session and key custody) and Google Cloud Storage
+(no narrow app scope via OAuth; user-owned bucket with bucket-scoped keys was considered
+and declined for V1, no ADR draft). They stay in the catalogue as unavailable.
+
 ## Preserved boundaries
 
 ADR0010, ADR0016, ADR0022, ADR0023, ADR0024, ADR0025 and ADR0027 apply per

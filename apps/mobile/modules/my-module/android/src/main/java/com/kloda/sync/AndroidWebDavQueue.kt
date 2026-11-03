@@ -169,17 +169,20 @@ internal class AndroidWebDavQueue(private val context: Context, private val mayR
         val target = profile.targetId(); put("targetId", target)
         put("config", mapOf("endpoint" to profile.endpoint, "targetPath" to profile.targetPath, "username" to profile.username))
         put("enabled", journal.enabled("webdav", target, profile.revision))
-        journal.runs.read(target = target)?.let { run ->
-          val state = if (active?.run?.id != run.id && (run.phase == "running" || (!run.automatic && run.phase == "waiting"))) "paused" else run.phase
-          put("run", buildMap<String, Any> {
-            put("id", run.id); put("targetId", run.target); put("automatic", run.automatic); put("state", state)
-            put("attempts", run.attempts); put("osAttempts", run.osAttempts); put("counts", journal.runs.counts(run.id))
-            run.error?.let { put("errorCode", it) }
-            if (state == "waiting") run.retryAt?.let { put("retryAt", it.toString()) }
-          })
-        }
+        journal.runs.read(target = target)?.let { put("run", view(it)) }
       }
       lastError?.let { put("errorCode", it) }
+    }
+  }
+  // Step18A/4c: the latest run of one added DAV destination, for its connections card.
+  fun runView(target: String): Map<String, Any>? = locked { journal.runs.read(target = target)?.let(::view) }
+  private fun view(run: WebDavRun): Map<String, Any> {
+    val state = if (active?.run?.id != run.id && (run.phase == "running" || (!run.automatic && run.phase == "waiting"))) "paused" else run.phase
+    return buildMap {
+      put("id", run.id); put("targetId", run.target); put("automatic", run.automatic); put("state", state)
+      put("attempts", run.attempts); put("osAttempts", run.osAttempts); put("counts", journal.runs.counts(run.id))
+      run.error?.let { put("errorCode", it) }
+      if (state == "waiting") run.retryAt?.let { put("retryAt", it.toString()) }
     }
   }
   private fun code(error: Exception): String = when {

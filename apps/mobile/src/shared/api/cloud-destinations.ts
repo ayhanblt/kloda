@@ -7,7 +7,10 @@ export const cloudProviders = ['webdav', 'nextcloud', 'cloudme', 'kolab-now', 'd
 export const oauthProviders = ['dropbox', 'onedrive', 'yandex', 'google-drive'] as const;
 export type OAuthProvider = typeof oauthProviders[number];
 export type CloudProvider = typeof cloudProviders[number];
-export interface CloudDestination { targetId: string; provider: CloudProvider; endpoint: string; targetPath: string; username: string; enabled: boolean }
+export const runStates = ['running', 'waiting', 'paused', 'finished', 'needs_attention', 'exhausted'] as const;
+export interface DestinationRun { state: typeof runStates[number]; errorCode?: string }
+// `run` is the latest queue run of an added DAV destination (18A/4c); the original WebDAV run stays in KlodaBackup.
+export interface CloudDestination { targetId: string; provider: CloudProvider; endpoint: string; targetPath: string; username: string; enabled: boolean; run?: DestinationRun }
 interface NativeCloud {
   destinations(): Promise<unknown>;
   signInNextcloud(server: string, folder: string): Promise<unknown>;
@@ -16,10 +19,14 @@ interface NativeCloud {
   addKolabNow(username: string, password: string, folder: string): Promise<unknown>;
   removeDestination(targetId: string): Promise<unknown>;
   setDestinationEnabled(targetId: string, enabled: boolean): Promise<unknown>;
+  runDestination(targetId: string): Promise<unknown>;
+  pauseDestination(targetId: string): Promise<unknown>;
 }
 export const destinationLimit = 8;
 // ADR0027 §6: CloudMe answers only with Digest (probed 2026-11-01); no auth downgrade, so it has no add path.
 export const blockedProviders: readonly CloudProvider[] = ['cloudme'];
+// User decision 2026-11-03: Kolab Now is out of V1 and not offered; its native add path stays, unreachable.
+export const hiddenProviders = ['kolab-now'] as const;
 const targetPattern = /^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/;
 const keys = ['targetId', 'provider', 'endpoint', 'targetPath', 'username', 'enabled'];
 // The DAV providers the queue uploads to; the original WebDAV entry is enabled from its own screen.
@@ -36,7 +43,7 @@ function text(value: unknown, max = 8192): string {
 export function cloudDestinationFromNative(value: unknown): CloudDestination {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return invalid();
   const row = value as Record<string, unknown>;
-  if (Object.keys(row).length !== keys.length || keys.some((key) => !(key in row))) return invalid();
+  if (Object.keys(row).length !== keys.length + ('run' in row ? 1 : 0) || keys.some((key) => !(key in row))) return invalid();
   const provider = row.provider as CloudProvider;
   if (!cloudProviders.includes(provider)) return invalid();
   const endpoint = text(row.endpoint);
@@ -44,7 +51,15 @@ export function cloudDestinationFromNative(value: unknown): CloudDestination {
   const targetId = text(row.targetId, 43);
   if (!targetPattern.test(targetId)) return invalid();
   if (typeof row.enabled !== 'boolean' || (row.enabled && !enableableProviders.includes(provider))) return invalid();
-  return { targetId, provider, endpoint, targetPath: text(row.targetPath), username: text(row.username), enabled: row.enabled };
+  const result: CloudDestination = { targetId, provider, endpoint, targetPath: text(row.targetPath), username: text(row.username), enabled: row.enabled };
+  if ('run' in row) result.run = runFromNative(row.run, provider);
+  return result;
+}
+function runFromNative(value: unknown, provider: CloudProvider): DestinationRun {
+  if (!value || typeof value !== 'object' || Array.isArray(value) || !enableableProviders.includes(provider)) return invalid();
+  const { state, errorCode } = value as Record<string, unknown>;
+  if (!runStates.includes(state as DestinationRun['state'])) return invalid();
+  return errorCode === undefined ? { state: state as DestinationRun['state'] } : { state: state as DestinationRun['state'], errorCode: text(errorCode, 64) };
 }
 function list(value: unknown): CloudDestination[] {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return invalid();
@@ -93,5 +108,13 @@ export const cloudDestinations = {
     if (!targetPattern.test(targetId) || typeof enabled !== 'boolean') throw new Error('invalid_request');
     const value = list(await native().setDestinationEnabled(targetId, enabled));
     return value.find((item) => item.targetId === targetId)?.enabled === enabled ? value : invalid();
+  },
+  async runNow(targetId: string): Promise<CloudDestination[]> {
+    if (!targetPattern.test(targetId)) throw new Error('invalid_request');
+    return list(await native().runDestination(targetId));
+  },
+  async pause(targetId: string): Promise<CloudDestination[]> {
+    if (!targetPattern.test(targetId)) throw new Error('invalid_request');
+    return list(await native().pauseDestination(targetId));
   },
 };

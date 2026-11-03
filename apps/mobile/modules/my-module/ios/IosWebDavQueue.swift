@@ -233,19 +233,27 @@ final class IosWebDavQueue {
         result["targetId"] = target
         result["config"] = ["endpoint": profile.endpoint, "targetPath": profile.targetPath, "username": profile.username]
         result["enabled"] = try journal.enabled(kind: "webdav", id: target, revision: profile.revision)
-        if let run = try journal.run(target: target) {
-          var state = run.phase
-          if state == "running", active?.run.id != run.id { state = "paused" }
-          if state == "waiting", !run.automatic, active?.run.id != run.id { state = "paused" }
-          var view: [String: Any] = ["id": run.id, "targetId": run.target, "automatic": run.automatic, "state": state,
-            "attempts": run.attempts, "osAttempts": run.osAttempts, "counts": try journal.runCounts(run.id)]
-          if let code = run.error { view["errorCode"] = code }
-          if state == "waiting", let due = run.retryAt { view["retryAt"] = String(due) }
-          result["run"] = view
-        }
+        if let run = try journal.run(target: target) { result["run"] = try view(run, journal: journal) }
       }
       if let error = lastError { result["errorCode"] = error }
       return result
     }
+  }
+  // Step18A/4c: the latest run of one added DAV destination, for its connections card.
+  func runView(target: String) throws -> [String: Any]? {
+    try IosWebDavContext.synchronized {
+      let journal = try IosWebDavJournal.open()
+      return try journal.run(target: target).map { try view($0, journal: journal) }
+    }
+  }
+  private func view(_ run: IosWebDavRun, journal: IosWebDavJournal) throws -> [String: Any] {
+    var state = run.phase
+    if state == "running", active?.run.id != run.id { state = "paused" }
+    if state == "waiting", !run.automatic, active?.run.id != run.id { state = "paused" }
+    var view: [String: Any] = ["id": run.id, "targetId": run.target, "automatic": run.automatic, "state": state,
+      "attempts": run.attempts, "osAttempts": run.osAttempts, "counts": try journal.runCounts(run.id)]
+    if let code = run.error { view["errorCode"] = code }
+    if state == "waiting", let due = run.retryAt { view["retryAt"] = String(due) }
+    return view
   }
 }

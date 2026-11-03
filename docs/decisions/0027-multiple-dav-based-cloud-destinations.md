@@ -78,6 +78,11 @@ retention policy. A provider is not "working" until isolated fixture evidence
   accepted by the table but cannot be enabled until their upload adapters exist.
   Known limit: reconfiguring the original WebDAV entry still renews the shared backup
   context (Codex-owned fence), which re-plans the other DAV destinations too.
+- 2026-11-03 user decisions (V1 scope): CloudMe stays visibly blocked in V1 (Digest only, §6
+  unchanged). Kolab Now is out of V1 and **not shown** in the app; its native add path and
+  tests stay in the code, unreachable from the UI, until a real-account test is approved.
+  Added DAV destinations get a foreground manual run/pause and a per-destination run state
+  through `KlodaCloud` (18A/4c), using the same queue, lock and `begin()` order.
 
 Sources: [Nextcloud Login Flow](https://docs.nextcloud.com/server/latest/developer_manual/client_apis/LoginFlow/index.html),
 [step14 matrix](../implementation/provider-decision-matrix-step14-2026-10-29.md).

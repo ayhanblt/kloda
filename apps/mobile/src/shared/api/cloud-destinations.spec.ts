@@ -1,10 +1,10 @@
 import { requireOptionalNativeModule } from 'expo';
-import { blockedProviders, cloudDestinationFromNative, cloudDestinations, validateCredentials, validateFolder, validateNextcloudServer } from './cloud-destinations';
+import { blockedProviders, hiddenProviders, cloudDestinationFromNative, cloudDestinations, validateCredentials, validateFolder, validateNextcloudServer } from './cloud-destinations';
 
 jest.mock('expo', () => ({ requireOptionalNativeModule: jest.fn() }));
 const target = 'A'.repeat(42) + 'E';
 const row = { targetId: target, provider: 'nextcloud', endpoint: 'https://cloud.example/remote.php/dav/files/kloda', targetPath: 'Kloda', username: 'kloda', enabled: false };
-const native = { destinations: jest.fn(), signInNextcloud: jest.fn(), signInOAuth: jest.fn(), cancelSignIn: jest.fn(), addKolabNow: jest.fn(), removeDestination: jest.fn(), setDestinationEnabled: jest.fn() };
+const native = { destinations: jest.fn(), signInNextcloud: jest.fn(), signInOAuth: jest.fn(), cancelSignIn: jest.fn(), addKolabNow: jest.fn(), removeDestination: jest.fn(), setDestinationEnabled: jest.fn(), runDestination: jest.fn(), pauseDestination: jest.fn() };
 beforeEach(() => { jest.clearAllMocks(); jest.mocked(requireOptionalNativeModule).mockReturnValue(native); });
 
 it('accepts display metadata only and rejects a password or unknown field', () => {
@@ -76,6 +76,7 @@ it('validates Kolab Now credentials and folder before native custody; CloudMe st
   await expect(cloudDestinations.addKolabNow('me', 'secret', 'Kloda')).rejects.toThrow('outcome_unknown');
   expect(native.addKolabNow).toHaveBeenCalledTimes(2);
   expect(blockedProviders).toEqual(['cloudme']);
+  expect(hiddenProviders).toEqual(['kolab-now']);
 });
 
 it('signs in to an OAuth provider with a normalized folder and accepts the account ID as display name only', async () => {
@@ -99,4 +100,18 @@ it('signs in to an OAuth provider with a normalized folder and accepts the accou
   native.signInOAuth.mockResolvedValueOnce(drive);
   await expect(cloudDestinations.signInOAuth('google-drive', 'Kloda')).resolves.toEqual(drive);
   expect(native.signInOAuth).toHaveBeenCalledTimes(6);
+});
+
+it('runs and pauses one destination by targetId and accepts only a known run state for a DAV destination', async () => {
+  await expect(cloudDestinations.runNow('bad')).rejects.toThrow('invalid_request');
+  const run = { id: 'r', targetId: target, automatic: false, state: 'running', attempts: 1, osAttempts: 0, counts: {} };
+  native.runDestination.mockResolvedValueOnce({ destinations: [{ ...row, enabled: true, run }] });
+  await expect(cloudDestinations.runNow(target)).resolves.toEqual([{ ...row, enabled: true, run: { state: 'running' } }]);
+  expect(native.runDestination).toHaveBeenCalledWith(target);
+  native.pauseDestination.mockResolvedValueOnce({ destinations: [{ ...row, run: { ...run, state: 'paused', errorCode: 'target_pause' } }] });
+  await expect(cloudDestinations.pause(target)).resolves.toEqual([{ ...row, run: { state: 'paused', errorCode: 'target_pause' } }]);
+  native.destinations.mockResolvedValueOnce({ destinations: [{ ...row, run: { ...run, state: 'exploded' } }] });
+  await expect(cloudDestinations.list()).rejects.toThrow('outcome_unknown');
+  native.destinations.mockResolvedValueOnce({ destinations: [{ ...row, provider: 'dropbox', endpoint: 'https://api.dropboxapi.com', run }] });
+  await expect(cloudDestinations.list()).rejects.toThrow('outcome_unknown');
 });

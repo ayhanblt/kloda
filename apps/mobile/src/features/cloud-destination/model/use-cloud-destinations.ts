@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { cloudDestinations, destinationLimit, type CloudDestination, type OAuthProvider } from '../../../shared/api/cloud-destinations';
 
-type Action = 'idle' | 'signing-in' | 'adding' | 'removing' | 'switching';
+type Action = 'idle' | 'signing-in' | 'adding' | 'removing' | 'switching' | 'starting';
 function code(cause: unknown): string { return cause instanceof Error ? cause.message : 'outcome_unknown'; }
 
 // Saved destinations, Nextcloud and OAuth sign-in, Kolab Now credentials and the explicit per-destination opt-in;
@@ -47,7 +47,22 @@ export function useCloudDestinations() {
     const value = await cloudDestinations.setEnabled(targetId, enabled);
     if (mounted.current) setDestinations(value);
   });
+  // A manual run is admitted by the shared queue; while one shows `running` the list is refreshed every 2 s.
+  const runNow = (targetId: string) => run('starting', async () => {
+    const value = await cloudDestinations.runNow(targetId);
+    if (mounted.current) setDestinations(value);
+  });
+  const pause = (targetId: string) => run('switching', async () => {
+    const value = await cloudDestinations.pause(targetId);
+    if (mounted.current) setDestinations(value);
+  });
+  const active = destinations?.some((item) => item.run?.state === 'running') ?? false;
+  useEffect(() => {
+    if (!active) return undefined;
+    const timer = setInterval(() => { if (!busy.current) void refresh(); }, 2000);
+    return () => clearInterval(timer);
+  }, [active]);
   const cancel = () => { void cloudDestinations.cancelSignIn().catch(() => undefined); };
   const full = (destinations?.length ?? 0) >= destinationLimit;
-  return { destinations, error, action, full, lastAdded, signIn, signInOAuth, addKolabNow, remove, setEnabled, cancel, refresh };
+  return { destinations, error, action, full, lastAdded, signIn, signInOAuth, addKolabNow, remove, setEnabled, runNow, pause, cancel, refresh };
 }
