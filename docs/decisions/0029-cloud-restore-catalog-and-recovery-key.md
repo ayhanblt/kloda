@@ -53,7 +53,8 @@ destinations. It does not touch the PC/LAN path (ADR0016/0017), which has its ow
   alter files (rejected by hash). Replaying old authentic deltas restores only authentic data.
 - Catalog contents (names, sizes) are as visible as the files themselves; no new exposure
   while media is not end-to-end encrypted.
-- Recovery code shown on screen: no screenshot/clipboard by default; the screen warns.
+- Recovery code shown on screen: Android blocks screenshots, iOS hides it when the app leaves the
+  foreground; copying is explicit and time-limited (decision 6); the screen warns.
 
 ## User decisions (2026-11-03, answers to the former open questions)
 
@@ -76,6 +77,13 @@ destinations. It does not touch the PC/LAN path (ADR0016/0017), which has its ow
    hidden again when the app leaves the foreground; Android marks the window FLAG_SECURE while
    it is shown. A phone without a screen lock cannot show the code, so it cannot enable a cloud
    destination (`recovery_lock_required`); the secret is created only after the first successful check.
+6. **Viewing again and copying** (added 2026-11-03). After confirmation the code stays reachable from
+   Settings ("Recovery code for cloud backups", listing the cloud destinations it currently covers) and
+   from a short "Protected by the recovery code" line on each cloud card; showing it always asks for the
+   device lock again. While shown, a copy button puts it on the clipboard (user decision; replaces the
+   former "no clipboard" default): iOS local-only (no Universal Clipboard) with an expiry, Android marked
+   sensitive (API 33+) and cleared after a short timeout where the app still owns the clip. The code
+   covers every cloud destination of this installation (DAV + OAuth), not one provider.
 
 ## Proposed slices (after 18B/5 and 18B/5r)
 

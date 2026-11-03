@@ -427,6 +427,15 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
    4 açık soru 3.11'de yanıtlandı (gruplu Base32; ilk bulut etkinleştirmede zorunlu; yenileme = tam yeniden imza;
    yalnız mobil; kod gizli + kilitle göster). 29/1 yapıldı 3.11 (yukarıda). Sıradaki: 29/2 (katalog yazıcı + backfill +
    yenileme). Hedefe bağlı Yedekler metni açık iş olarak bekliyor.
+11. Hedefe özel metinler (kullanıcı kararı 3.11, 29/2'den önce yeni sohbette): (a) Yedekler ekranında hedefe bağlı
+   başlıklar (PC/WebDAV metinleri yerine hedef adı), alt sekme seçimi, geri düğmesi "Kuruluma dön" yerine Bağlantılar;
+   (b) bulut kartında `dbid:` yerine hesap e-postası/adı: girişte bir kez sorulur (`users/get_current_account` vb.),
+   şifreli kayda yalnız görüntü alanı olarak yazılır, kimlik targetId/accountId kalır, log/kilit ekranı/Live Activity/
+   katalogda yer almaz; eski hedefler sonraki başarılı çalışmada bir kez doldurulur; ADR0028'e saklama notu eklenir;
+   (c) ADR0029 karar 6: Ayarlar'da "Bulut yedekleri için kurtarma kodu" girişi (kapsanan hedefleri listeler), her
+   bulut kartında "Kurtarma koduyla korunuyor" satırı, panelde "bu telefondaki tüm bulut hedefleri için tek kod";
+   gösterme her seferinde telefon kilidi ister; kod görünürken kopyala düğmesi (Lucide Copy; iOS local-only + süreli,
+   Android hassas işaretli + kısa sürede temizleme). Yeni metinler TR/EN/DE ve Lovable eşlemesi gerektirir.
 
 Açık: sunucu uyuşmazlığında iptal uçtan uca test edilmedi;
 bağımsız (başka ajan) review yapılmadı, yalnız aynı ajanın ayrı review geçişi.
