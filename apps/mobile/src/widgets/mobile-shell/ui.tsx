@@ -7,10 +7,10 @@ import type { MobilePage, NavigateMobile } from '../../shared/model/mobile-navig
 import { NativeSafeArea } from '../../shared/ui/native-safe-area';
 import { useThemeColors } from '../../shared/theme/theme-provider';
 
-export function MobileShell({ page, navigate, children }: { page: MobilePage; navigate: NavigateMobile; children: ReactNode }) {
+export function MobileShell({ page, navigate, section, children }: { page: MobilePage; navigate: NavigateMobile; section?: 'connections'; children: ReactNode }) {
   const { t } = useTranslation();
   const c = useThemeColors();
-  const active = page === 'photos' ? 'photos' : ['home', 'activity', 'backups'].includes(page) ? 'home' : ['connections', 'add-connection', 'provider', 'computer', 'storage', 'pairing'].includes(page) ? 'connections' : 'settings';
+  const active = section ?? (page === 'photos' ? 'photos' : ['home', 'activity', 'backups'].includes(page) ? 'home' : ['connections', 'add-connection', 'provider', 'computer', 'storage', 'pairing'].includes(page) ? 'connections' : 'settings');
   const tabs = [{ page: 'home', label: 'statusUi.title', Icon: CircleDot }, { page: 'photos', label: 'statusUi.photos', Icon: Images },
     { page: 'connections', label: 'statusUi.targets', Icon: Waypoints }, { page: 'settings', label: 'statusUi.settings', Icon: Settings }] as const;
   const { fontScale } = useWindowDimensions();

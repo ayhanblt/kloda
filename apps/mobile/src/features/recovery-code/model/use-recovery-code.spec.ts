@@ -6,7 +6,7 @@ import { useRecoveryCode } from './use-recovery-code';
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 jest.mock('../../../shared/api/recovery-code', () => ({
   recoveryGroupCount: 14,
-  recoveryCode: { status: jest.fn(), reveal: jest.fn(), hide: jest.fn(), confirm: jest.fn() },
+  recoveryCode: { status: jest.fn(), reveal: jest.fn(), renew: jest.fn(), hide: jest.fn(), confirm: jest.fn(), copy: jest.fn() },
 }));
 const api = jest.mocked(recoveryCode);
 const groups = ['000G', '40R4', '0M30', 'E209', '185G', 'R38E', '1W81', '24GK', '2GAH', 'C5RR', '34D1', 'P70X', '3RFG', 'F3V8'];
@@ -72,5 +72,41 @@ it('confirms two distinct groups and then retries the enable', async () => {
   await act(async () => { await hook.result.current.confirm(); });
   expect(api.confirm).toHaveBeenLastCalledWith([[first, 'wrong'], [second, 'f3v8']]);
   expect(hook.result.current.state).toBe('confirmed');
+  expect(confirmed).toHaveBeenCalledTimes(1);
+});
+
+it('copies only while the code is shown and forgets the notice when it is hidden', async () => {
+  const hook = await renderHook(() => useRecoveryCode(jest.fn(), () => 0));
+  await waitFor(() => expect(hook.result.current.state).toBe('none'));
+  await act(async () => { await hook.result.current.copy(); });
+  expect(api.copy).not.toHaveBeenCalled();
+  api.reveal.mockResolvedValueOnce(groups); api.copy.mockResolvedValueOnce();
+  await act(async () => { await hook.result.current.reveal(); });
+  await act(async () => { await hook.result.current.copy(); });
+  expect(api.copy).toHaveBeenCalledWith(groups);
+  expect(hook.result.current.copied).toBe(true);
+  await act(async () => { hook.result.current.hide(); });
+  expect(hook.result.current.copied).toBe(false);
+  await hook.unmount();
+});
+
+it('renewal asks for the groups only after the new code was shown and keeps the confirmed state until then', async () => {
+  api.status.mockResolvedValue('confirmed');
+  const confirmed = jest.fn();
+  const hook = await renderHook(() => useRecoveryCode(confirmed, () => 0, true));
+  await waitFor(() => expect(hook.result.current.state).toBe('confirmed'));
+  expect(hook.result.current.confirmable).toBe(false);
+  api.renew.mockResolvedValueOnce(groups);
+  await act(async () => { await hook.result.current.reveal(); });
+  expect(api.renew).toHaveBeenCalledWith('recovery.promptTitle', 'recovery.renewPromptReason');
+  expect(api.reveal).not.toHaveBeenCalled();
+  expect(hook.result.current.state).toBe('confirmed');
+  expect(hook.result.current.confirmable).toBe(true);
+  await act(async () => { change('background'); });
+  expect(hook.result.current.groups).toBeNull();
+  expect(hook.result.current.confirmable).toBe(true);
+  api.confirm.mockResolvedValueOnce('confirmed');
+  await act(async () => { hook.result.current.answer(0, '000G'); hook.result.current.answer(1, '40R4'); });
+  await act(async () => { await hook.result.current.confirm(); });
   expect(confirmed).toHaveBeenCalledTimes(1);
 });

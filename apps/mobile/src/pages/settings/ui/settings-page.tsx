@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Clock3, Folder, HardDrive, ShieldCheck } from 'lucide-react-native';
+import { Clock3, Folder, HardDrive, KeyRound, ShieldCheck } from 'lucide-react-native';
 import { Platform, Pressable, View } from 'react-native';
 import { Text } from '../../../shared/ui/text';
 import type { NavigateMobile } from '../../../shared/model/mobile-navigation';
@@ -25,6 +25,7 @@ export function SettingsPage({ navigate }: { navigate: NavigateMobile }) {
       <PairingButton variant="secondary" icon={<Folder size={20} color={colors['text-primary']} />} label={t('ui.sources.title')} onPress={() => navigate('sources')} />
       <PairingButton variant="secondary" icon={<Clock3 size={20} color={colors['text-primary']} />} label={t('ui.schedule.title')} onPress={() => navigate('schedule')} />
       <PairingButton variant="secondary" icon={<HardDrive size={20} color={colors['text-primary']} />} label={t('ui.nav.backups')} onPress={() => navigate('backups')} />
+      <PairingButton variant="secondary" icon={<KeyRound size={20} color={colors['text-primary']} />} label={t('recovery.settingsEntry')} onPress={() => navigate('recovery')} />
     </MobilePanel>
     <MobilePanel><ShieldCheck size={23} color={colors['brand-base']} /><Text className="text-lg font-inter-semibold text-primary-text">{t('ui.settings.background')}</Text>
       <Text className="font-sans text-sm leading-5 text-secondary-text">{t(Platform.OS === 'ios' ? 'computer.iosBackground' : 'computer.androidBackground')}</Text>

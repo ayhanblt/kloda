@@ -15,14 +15,16 @@ import { ByteProgress } from '../../../shared/ui/byte-progress';
 import { OwnBackups } from '../../../widgets/own-backups/own-backups';
 import { useThemeColors } from '../../../shared/theme/theme-provider';
 
-// `target`: the Backups view opened from one destination card shows only that destination's backups (18B/5r).
-export function ActivityPage({ onBack, view = 'activity', embedded = false, target }: { onBack: () => void; view?: 'activity' | 'backups'; embedded?: boolean; target?: string }) {
+// `target`: the Backups view opened from one destination card shows only that destination's backups (18B/5r), titled
+// with `targetLabel` (the provider's translation key) and returning to the Destinations tab.
+export function ActivityPage({ onBack, view = 'activity', embedded = false, target, targetLabel }: { onBack: () => void; view?: 'activity' | 'backups'; embedded?: boolean; target?: string; targetLabel?: string }) {
   const colors = useThemeColors();
   const { t } = useTranslation();
   const transfer = useFileTransfer();
   const webdav = useWebDavBackup();
   const { queue, error, working, peer, run, pause, resumeAutomatic, restoring, cancelRestore } = transfer;
   const Surface = embedded ? View : NativeSafeArea;
+  const targetName = target && targetLabel ? t(targetLabel) : undefined;
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => { onBack(); return true; });
     return () => subscription.remove();
@@ -31,7 +33,7 @@ export function ActivityPage({ onBack, view = 'activity', embedded = false, targ
   const scrollChrome = fontScale > 1.3 || height < 600;
   const header = (
     <View className={scrollChrome ? 'gap-4' : 'flex-row items-center justify-between gap-4 p-5'}>
-        <PairingButton label={t('pairing.back')} variant="secondary" icon={<ArrowLeft color={colors['text-primary']} size={20} />} onPress={onBack} />
+        <PairingButton label={t(targetName ? 'ui.conn.backToTargets' : 'pairing.back')} variant="secondary" icon={<ArrowLeft color={colors['text-primary']} size={20} />} onPress={onBack} />
         {!embedded && <Text className={scrollChrome ? 'shrink text-lg font-semibold text-primary-text' : 'shrink text-right text-lg font-semibold text-primary-text'}>{t('pairing.brand')}</Text>}
       </View>
   );
@@ -50,7 +52,7 @@ export function ActivityPage({ onBack, view = 'activity', embedded = false, targ
       {!scrollChrome && header}
       <ScrollView contentContainerClassName="gap-4 px-4 pt-5 pb-8">
         {scrollChrome && header}
-        <Text accessibilityRole="header" className="text-[28px] font-inter-semibold leading-9 text-primary-text">{t(view === 'backups' ? 'transfer.backups.title' : 'transfer.title')}</Text>
+        <Text accessibilityRole="header" className="text-[28px] font-inter-semibold leading-9 text-primary-text">{targetName ? t('destinations.restore.targetTitle', { name: targetName }) : t(view === 'backups' ? 'transfer.backups.title' : 'transfer.title')}</Text>
         {view === 'activity' && (webdav.status?.configured || transfer.webdavActionError || (webdav.error && webdav.error !== 'native_unsupported')) && <View className="gap-3 rounded-2xl border border-border-subtle bg-surface-1 p-5">
           <Text accessibilityRole="header" className="text-lg font-inter-semibold text-primary-text">{t('destinations.webdav')}</Text>
           {webdav.status && <Text className="font-sans text-sm text-secondary-text">{t(webdav.status.enabled ? 'destinations.enabled' : 'destinations.disabled')}</Text>}
@@ -63,7 +65,7 @@ export function ActivityPage({ onBack, view = 'activity', embedded = false, targ
         </View>}
         {view === 'activity' && <><WebDavReviewPanel /><SmbItemsPanel issues /><SftpItemsPanel issues /></>}
         {view === 'activity' && <Text accessibilityRole="header" className="text-lg font-inter-semibold text-primary-text">{t('destinations.pc')}</Text>}
-        <Text className="font-sans text-sm leading-5 text-secondary-text">{t(view === 'backups' ? 'transfer.backups.description' : 'transfer.description')}</Text>
+        {!targetName && <Text className="font-sans text-sm leading-5 text-secondary-text">{t(view === 'backups' ? 'transfer.backups.description' : 'transfer.description')}</Text>}
         {view === 'activity' && <>
         <View className="gap-3 rounded-2xl border border-border-subtle bg-surface-1 p-5">
           <FolderSync color={colors['brand-base']} size={28} />
@@ -117,7 +119,7 @@ export function ActivityPage({ onBack, view = 'activity', embedded = false, targ
         {queue?.hasMore && <Text className="font-sans text-sm leading-5 text-secondary-text">{t('transfer.more', { count: queue.totalJobs })}</Text>}
         </>}
         {view === 'backups' && error && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-danger-text">{t(`transfer.errors.${error}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
-        {view === 'backups' && (target ? <WebDavBackupsPanel target={target} /> : <><WebDavBackupsPanel /><SmbItemsPanel /><SftpItemsPanel /></>)}
+        {view === 'backups' && (target ? <WebDavBackupsPanel target={target} name={targetName} /> : <><WebDavBackupsPanel /><SmbItemsPanel /><SftpItemsPanel /></>)}
         {((view === 'backups' && !target) || !embedded) && <OwnBackups transfer={transfer} />}
         {scrollChrome && controls}
       </ScrollView>

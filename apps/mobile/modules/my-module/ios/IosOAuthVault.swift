@@ -12,6 +12,23 @@ struct IosOAuthProfile: Codable, Equatable {
   let targetPath: String
   let refreshToken: String
   var expiresAt: Int64? = nil
+  // Display-only (ADR0028 account display label): never identity, so equality and `targetId` ignore it.
+  var accountLabel: String? = nil
+
+  static func == (left: Self, right: Self) -> Bool {
+    left.revision == right.revision && left.provider == right.provider && left.accountId == right.accountId &&
+      left.targetPath == right.targetPath && left.refreshToken == right.refreshToken && left.expiresAt == right.expiresAt
+  }
+  // Email, else display name, from the provider's own account reply; anything unusable leaves the label empty.
+  static func label(_ body: Data?) -> String? {
+    guard let body, let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any] else { return nil }
+    let value = (json["email"] as? String).flatMap { $0.contains("@") ? $0 : nil } ?? (json["name"] as? [String: Any])?["display_name"] as? String
+    guard let value, valid(label: value) else { return nil }
+    return value
+  }
+  static func valid(label: String) -> Bool {
+    !label.isEmpty && label.utf8.count <= 512 && !label.unicodeScalars.contains(where: { $0.value < 32 || (127...159).contains($0.value) })
+  }
 
   func validate() throws {
     let parts = targetPath.split(separator: "/").map(String.init)
@@ -21,6 +38,7 @@ struct IosOAuthProfile: Codable, Equatable {
         !$0.unicodeScalars.contains(where: { $0.value < 32 || (127...159).contains($0.value) }) }) else {
       throw IosWebDavFailure.code("webdav_fields")
     }
+    if let accountLabel, !Self.valid(label: accountLabel) { throw IosWebDavFailure.code("webdav_fields") }
   }
   // Provider, stable account ID and normalized root; another account or root is another destination.
   func targetId() throws -> String {
@@ -69,6 +87,16 @@ enum IosOAuthVault {
     if status == errSecDuplicateItem { throw IosWebDavFailure.code("destination_exists") }
     guard status == errSecSuccess else { throw failure(status) }
     guard try read(slot: slot) == profile else { throw IosWebDavFailure.code("webdav_storage") }
+  }
+  // Fills a missing display label once; the credential fields are rewritten unchanged.
+  static func fill(label: String, slot: String) throws {
+    guard IosOAuthProfile.valid(label: label), var profile = try read(slot: slot), profile.accountLabel == nil else { return }
+    profile.accountLabel = label
+    let data = try JSONEncoder().encode(profile)
+    guard data.count <= 65536 else { throw IosWebDavFailure.code("webdav_storage") }
+    let status = SecItemUpdate(try query(slot) as CFDictionary, [kSecValueData as String: data] as CFDictionary)
+    guard status == errSecSuccess else { throw failure(status) }
+    guard try read(slot: slot)?.accountLabel == label else { throw IosWebDavFailure.code("webdav_storage") }
   }
   static func delete(slot: String) throws {
     let status = SecItemDelete(try query(slot) as CFDictionary)

@@ -20,7 +20,8 @@ with tempfile.TemporaryDirectory(prefix="kloda-webdav-") as scratch:
     sources = [native / name for name in ["IosSyncJournal.swift", "IosWebDavProfile.swift",
         "IosWebDavClient.swift", "IosWebDavJournal.swift", "IosWebDavPublication.swift",
         "IosPhotoJson.swift", "IosPhotoManifest.swift", "IosWebDavPhotoManifest.swift",
-        "IosWebDavRuns.swift", "IosWebDavSchedule.swift", "IosWebDavPublicationPath.swift", "IosWebDavReviewAuthorization.swift", "IosFilesRestoreJournal.swift", "IosLocalRestorePublication.swift", "IosWebDavRestoreJournal.swift", "IosAutomaticPolicy.swift"]]
+        "IosWebDavRuns.swift", "IosWebDavSchedule.swift", "IosWebDavPublicationPath.swift", "IosWebDavReviewAuthorization.swift", "IosFilesRestoreJournal.swift", "IosLocalRestorePublication.swift", "IosWebDavRestoreJournal.swift", "IosAutomaticPolicy.swift",
+        "IosRecoveryCode.swift", "IosRecoveryCatalog.swift", "IosRecoveryCatalogJournal.swift"]]
     subprocess.run(["xcrun", "swiftc", "-swift-version", "5", *map(str, sources), str(stub),
         str(repo / "packages/pairing-native/apple/tests/IosWebDavPublicationChecks.swift"),
         "-o", str(binary)], check=True, cwd=repo)

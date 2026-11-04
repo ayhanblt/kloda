@@ -1,0 +1,17 @@
+{
+ "slice": "29/4 restore wiring of imported receipts + tamper tests (ADR0029 §5/§6)",
+ "date": "2026-11-04",
+ "base": "3a8813e + uncommitted 29/1 text work + 29/2 + 29/3 + 29/4 diff (no commit)",
+ "smallest_validation_path": "iOS host (production download, snapshot staging, journal, importer and merged list against the in-memory destination holding the old device's catalog and files; tampered copies) -> same cases in Android instrumentation scope recovery29 (its APK build compiles main + androidTest) -> one iOS arm64 Simulator build. No JS/TS change, so no Jest/tsc/ESLint. 29/2 and 29/3 checks were not rerun as separate gates; they print inside the same host binary and instrumentation scope.",
+ "checks": {
+  "ios_host": "PASS python3 tools/test-ios-recovery-catalog.py (new 29/4 lines: restore of imported files + photo manifest by SHA-256 with no staging kept; bound to its destination, never an upload row, intents only in imported_restore; altered file hash_mismatch / longer body refused / swapped manifest hash_mismatch; injected remote file never listed, cross-origin resource never completes a manifest; deleted/replayed delta leaves later entries unrestorable, wrong code nothing to restore; interrupted import resumes to the same 5 receipts after 9 cuts, interrupted download keeps no staging; merged list pages <=100 without gaps/repeats over 450 rows)",
+  "android_instrumentation": "PASS python3 tools/test-android-recovery-catalog.py (scope recovery29, emulator-5590 KlodaCloud18, unlocked): same 7 new lines as iOS; INSTRUMENTATION_CODE -1",
+  "ios_build": "PASS xcodebuild Debug iphonesimulator ARCHS=arm64 (LANG=en_US.UTF-8, derived data apps/mobile/ios/build/dd29-4, no pod install needed: no new native source file); no warnings in changed files"
+ },
+ "not_run": [
+  "real Nextcloud/Dropbox restore of an imported receipt (needs a real catalog written by 29/2 and an import on a second device)",
+  "user-selected folder publication of an imported file and Photos import of an imported manifest on device (shared code path with 18B/5r, unchanged; only the receipt source and intent table differ)",
+  "UI: code entry screen and unverified notice still need approved TR/EN/DE texts"
+ ],
+ "review": "same-agent separate pass: local-receipt behaviour unchanged (lookup order, target binding, photo source, list output when nothing is imported); projection cannot be inserted (snapshot/phase validation); imported restore intents in separate retained tables; no independent review"
+}

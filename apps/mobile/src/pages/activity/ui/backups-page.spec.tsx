@@ -39,3 +39,18 @@ it('keeps failed own-backup loading visible on the separate backups surface', as
   await waitFor(() => expect(surface.getByRole('alert').props.children).toBe(i18n.t('transfer.errors.connection_closed')));
   await surface.unmount();
 });
+
+it('names a destination-bound Backups view after the destination and returns to Destinations', async () => {
+  jest.mocked(fileTransfer.status).mockResolvedValue({ running: false, jobs: [], totalJobs: '0', hasMore: false });
+  const back = jest.fn();
+  const surface = await render(<ActivityPage onBack={back} embedded view="backups" target={'A'.repeat(42) + 'E'} targetLabel="ui.providers.dropbox" />);
+  const name = i18n.t('ui.providers.dropbox');
+  expect(surface.getByRole('header', { name: i18n.t('destinations.restore.targetTitle', { name }) })).toBeTruthy();
+  expect(surface.getByText(i18n.t('destinations.restore.targetLoad', { name }))).toBeTruthy();
+  expect(surface.queryByText(i18n.t('transfer.backups.title'))).toBeNull();
+  expect(surface.queryByText(i18n.t('transfer.backups.description'))).toBeNull();
+  expect(surface.queryByText(i18n.t('destinations.restore.title'))).toBeNull();
+  await fireEvent.press(surface.getByText(i18n.t('ui.conn.backToTargets')));
+  expect(back).toHaveBeenCalled();
+  await surface.unmount();
+});

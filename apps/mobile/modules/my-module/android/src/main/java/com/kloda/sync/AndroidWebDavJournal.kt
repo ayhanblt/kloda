@@ -31,6 +31,8 @@ internal class AndroidWebDavJournal(private val database: SQLiteDatabase) {
   val schedule: AndroidWebDavSchedule
   val reviewAuthority: AndroidWebDavReviewAuthorization
   val publications: AndroidWebDavPublicationPaths
+  val catalog: AndroidRecoveryCatalogJournal
+  val imports: AndroidRecoveryImportJournal
   init {
     database.execSQL("""CREATE TABLE IF NOT EXISTS webdav_upload (
       id TEXT PRIMARY KEY,target TEXT NOT NULL,source TEXT NOT NULL,reference TEXT NOT NULL,
@@ -51,6 +53,8 @@ internal class AndroidWebDavJournal(private val database: SQLiteDatabase) {
     schedule = AndroidWebDavSchedule(database)
     publications = AndroidWebDavPublicationPaths(database)
     reviewAuthority = AndroidWebDavReviewAuthorization(database)
+    catalog = AndroidRecoveryCatalogJournal(database, publications)
+    imports = AndroidRecoveryImportJournal(database)
   }
   fun photoRevision(asset: String, signature: String): Long {
     database.execSQL("CREATE TABLE IF NOT EXISTS webdav_photo_revision(asset TEXT PRIMARY KEY,signature TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0))")
@@ -154,6 +158,7 @@ internal class AndroidWebDavJournal(private val database: SQLiteDatabase) {
     val changes = database.update("webdav_upload", ContentValues().apply { put("phase", phase); putNull("issue") },
       "id=? AND target=? AND phase=? AND skipped=0", arrayOf(value.id, value.target, value.phase))
     if (changes != 1) throw FilesFailure("outcome_unknown")
+    if (phase == "completed") catalog.recordCompletion(value)
   }
   fun issue(value: WebDavUpload, code: String, skipped: Boolean = false) {
     if (code.isEmpty() || code.length > 128 || code.contains('\u0000') || value.phase == "completed") throw FilesFailure("invalid_request")

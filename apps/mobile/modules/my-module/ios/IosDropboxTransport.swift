@@ -77,6 +77,37 @@ final class IosDropboxTransport: IosBackupTransport {
     return reply
   }
 
+  // 29/3: `list_folder` pages of about 100 entries (one bounded 64 KiB reply each); deleted entries are skipped.
+  func list(_ folder: String) throws -> [IosRemoteChild] {
+    var result: [IosRemoteChild] = [], cursor: String?
+    let path = try full(folder)
+    repeat {
+      let request: [String: Any] = cursor.map { ["cursor": $0] } ?? ["path": path, "recursive": false, "limit": 100]
+      let reply = try send(Self.api + (cursor == nil ? "list_folder" : "list_folder/continue"), mutation: false,
+        headers: ["Content-Type": "application/json"], data: try JSONSerialization.data(withJSONObject: request, options: [.sortedKeys]), collect: true)
+      if cursor == nil, reply.status == 409, Self.summary(reply).hasPrefix("path/not_found") { return [] }
+      try Self.require(reply)
+      guard let json = try? JSONSerialization.jsonObject(with: reply.body) as? [String: Any], let entries = json["entries"] as? [[String: Any]],
+        let more = json["has_more"] as? Bool else { throw IosWebDavFailure.code("webdav_response") }
+      for entry in entries {
+        guard let tag = entry[".tag"] as? String, let name = entry["name"] as? String else { throw IosWebDavFailure.code("webdav_response") }
+        if tag != "deleted" { result.append(IosRemoteChild(name: name, folder: tag == "folder")) }
+      }
+      cursor = more ? json["cursor"] as? String : nil
+      guard !more || cursor != nil, result.count <= 100_000 else { throw IosWebDavFailure.code("webdav_response") }
+    } while cursor != nil
+    return result
+  }
+
+  // ADR0028: a profile saved before the display label existed gets it once, after a successful run. Best effort.
+  func fillLabel() {
+    guard profile.accountLabel == nil, let slot = try? profile.targetId(),
+      let reply = try? send("https://api.dropboxapi.com/2/users/get_current_account", mutation: false,
+        headers: ["Content-Type": "application/json"], data: Data("null".utf8), collect: true),
+      reply.status == 200, let label = IosOAuthProfile.label(reply.body) else { return }
+    try? IosOAuthVault.fill(label: label, slot: slot)
+  }
+
   // The app folder is Dropbox's root for this token; the destination root sits inside it.
   private func full(_ relative: String) throws -> String {
     let parts = profile.targetPath.split(separator: "/").map(String.init) + relative.split(separator: "/").map(String.init)

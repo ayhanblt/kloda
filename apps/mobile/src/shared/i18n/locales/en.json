@@ -127,7 +127,8 @@
       "recovery_required": "Confirm your recovery code before enabling a cloud destination.",
       "recovery_lock_required": "To show the recovery code, first set a screen lock (PIN, pattern, password or fingerprint) on this phone.",
       "recovery_auth_failed": "The phone lock could not be verified. Try again.",
-      "recovery_mismatch": "The groups you entered don't match the code. Show the code again and check."
+      "recovery_mismatch": "The groups you entered don't match the code. Show the code again and check.",
+      "recovery_code_invalid": "This recovery code isn't valid. There may be a typo; check every group."
     },
     "rebackup": "Back up this version again",
     "rebackupConfirm": "Explicitly send this unchanged source version again to the currently paired computer? The computer must approve file access.",
@@ -407,7 +408,10 @@
       "save": "Save destination",
       "waiting": "Waiting for confirmation in the browser…",
       "cancelSignIn": "Cancel sign-in",
-      "viewBackups": "View backups"
+      "viewBackups": "View backups",
+      "backToTargets": "Back to destinations",
+      "account": "Account: {{account}}",
+      "accountPending": "The account name appears after the next backup."
     },
     "pair": {},
     "devices": {},
@@ -534,9 +538,13 @@
     },
     "restore": {
       "title": "My WebDAV backups",
-      "hint": "Only this device’s completed receipts are listed. Restore verifies remote bytes again and preserves existing files in the folder you choose.",
+      "hint": "Lists this device’s completed backups and backups verified with your old phone’s recovery code. Restore verifies remote bytes again and preserves existing files in the folder you choose.",
       "unavailable": "Native restore for this content is not yet connected.",
-      "load": "List WebDAV backups"
+      "load": "List WebDAV backups",
+      "targetTitle": "My {{name}} backups",
+      "targetLoad": "List {{name}} backups",
+      "targetCompleted": "Backup completed · {{name}}",
+      "targetEmpty": "{{name}} has no completed backups from this device."
     },
     "smb": {
       "scope": "SMB3 on your local network, with encryption and signing. Enter a numeric LAN IP; server names and Internet fallback are unavailable.",
@@ -663,6 +671,40 @@
     "promptReason": "Unlock your phone to see your recovery code.",
     "confirmHint": "Enter the two requested groups to confirm you wrote the code down.",
     "group": "Group {{number}}",
-    "confirm": "Confirm and enable destination"
+    "confirm": "Confirm and enable destination",
+    "settingsEntry": "Recovery code for cloud backups",
+    "covers": "This code protects:",
+    "coversNone": "The recovery code is created when you enable your first cloud destination.",
+    "protected": "Protected by the recovery code",
+    "protectedHint": "Open the recovery code in Settings",
+    "scope": "One code for every cloud destination on this phone. Cloud destinations you add later use the same code.",
+    "copy": "Copy code",
+    "copiedIos": "Code copied. It stays on this device's clipboard only and is removed after 1 minute.",
+    "copiedAndroid": "Code copied. It is marked sensitive and removed from the clipboard after 1 minute.",
+    "renew": "Create a new code",
+    "renewTitle": "Create a new recovery code?",
+    "renewBody": "Your current code stays valid until you confirm the new one. After that, every cloud backup on this phone is recorded again under the new code on each destination's next backup.",
+    "renewLimit": "Records written with the old code stay in the cloud; anyone who knows the old code and can access the destination can still restore backups made before the renewal.",
+    "renewPromptReason": "Unlock your phone to see your new recovery code.",
+    "renewTitleShown": "Your new recovery code",
+    "renewConfirm": "Confirm new code",
+    "renewCancel": "Cancel, keep the old code",
+    "renewDone": "The new code is active. You no longer need to keep the old one.",
+    "legacyTitle": "Your cloud backups aren't protected yet",
+    "legacyBody": "These destinations were enabled before recovery codes existed. Without a code, you can't restore these backups with Kloda on a new device if you lose this phone. Backups continue in the meantime.",
+    "legacyAction": "Create recovery code",
+    "confirmOnly": "Confirm",
+    "importEntry": "Bring in your old phone's backups",
+    "importTitle": "Enter your old phone's recovery code",
+    "importBody": "Kloda uses the code to verify your old phone's backup records on this destination. You can restore verified backups under \"View backups\". The code is not stored on this phone.",
+    "importField": "Recovery code",
+    "importHint": "Upper or lower case, spaces and hyphens don't matter.",
+    "importSubmit": "Verify and bring in",
+    "importWorking": "Verifying backup records…",
+    "importDone_one": "{{count}} file ready to restore.",
+    "importDone_other": "{{count}} files ready to restore.",
+    "importNone": "No backup records for this code were found on this destination. Check that you chose the right destination and code.",
+    "unverifiedTitle": "Some backups could not be verified",
+    "unverifiedBody": "Some backup records in the cloud are missing or were changed. Files in them can't be restored with Kloda; they remain with the provider. Verified backups are not affected."
   }
 }

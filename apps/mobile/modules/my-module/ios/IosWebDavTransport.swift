@@ -33,6 +33,21 @@ final class IosWebDavTransport: IosBackupTransport {
     try IosWebDavClient.require(reply, [200])
     return reply
   }
+  // 29/3: PROPFIND Depth 1, at most 4 MiB of multistatus XML.
+  func list(_ folder: String) throws -> [IosRemoteChild] {
+    let url = try profile.url(folder).appendingPathComponent("", isDirectory: true)
+    var request = URLRequest(url: url)
+    request.httpMethod = "PROPFIND"
+    request.setValue(profile.authorization, forHTTPHeaderField: "Authorization")
+    request.setValue("1", forHTTPHeaderField: "Depth")
+    request.setValue("application/xml; charset=utf-8", forHTTPHeaderField: "Content-Type")
+    var body = Data()
+    let reply = try IosWebDavClient.exchange(request, mutation: false, data: Data(IosWebDavListing.request.utf8), size: 4 << 20,
+      multistatus: true, receive: { body.append($0) }, check: check)
+    if reply.status == 404 { return [] }
+    try IosWebDavClient.require(reply, [207])
+    return try IosWebDavListing.children(body, of: url)
+  }
   private func prepareParents(_ path: String) throws {
     // MKCOL is create-only. A 405 never authorizes replacing an existing resource.
     let parts = profile.targetPath.split(separator: "/").map(String.init) + path.split(separator: "/").dropLast().map(String.init)

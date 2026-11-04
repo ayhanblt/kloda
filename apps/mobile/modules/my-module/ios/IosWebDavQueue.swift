@@ -150,8 +150,9 @@ final class IosWebDavQueue {
       try check(execution)
       let snapshots = try IosFilesSnapshot.webdav()
       let check = { try self.check(execution) }
+      let transport = try execution.destination.transport(snapshots: snapshots, check: check)
       let publisher = IosWebDavPublisher(target: try execution.destination.targetId(), binding: execution.binding, journal: execution.journal,
-        snapshots: snapshots, transport: try execution.destination.transport(snapshots: snapshots, check: check),
+        snapshots: snapshots, transport: transport,
         check: check, settle: { value in
           try IosWebDavContext.synchronized {
             try self.check(execution)
@@ -164,7 +165,24 @@ final class IosWebDavQueue {
       try files.run()
       let photos = IosWebDavPhotosRunner(publisher: publisher)
       try photos.run()
-      finish(execution, error: photos.errorCode ?? files.errorCode)
+      var outcome = photos.errorCode ?? files.errorCode
+      if outcome == nil { (transport as? IosDropboxTransport)?.fillLabel() }
+      // ADR0029 29/2: catalogue what completed, also when other items wait for review; a catalog failure only
+      // reports when the backup itself had none.
+      if outcome == nil || outcome == "review_required", let keys = try IosRecoveryVault.catalogKeys() {
+        do {
+          try IosRecoveryCatalogWriter(journal: execution.journal, target: try execution.destination.targetId(), keys: keys,
+            transport: transport, check: check, stage: { bytes in
+              let (name, file) = try snapshots.createStaging()
+              do {
+                try file.write(contentsOf: bytes); try file.synchronize()
+                guard fcntl(file.fileDescriptor, F_FULLFSYNC) == 0 else { throw IosFilesSource.ioFailure() }
+                try file.close(); return name
+              } catch { try? file.close(); try? snapshots.discard(name); throw error }
+            }, discard: { try? snapshots.discard($0) }).publish()
+        } catch { if outcome == nil { outcome = IosWebDavFilesRunner.code(error) } }
+      }
+      finish(execution, error: outcome)
     } catch { finish(execution, error: IosWebDavFilesRunner.code(error)) }
   }
   private func finish(_ execution: Execution, error: String?) {

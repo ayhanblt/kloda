@@ -10,12 +10,12 @@ import { useSmbBackup } from '../../../features/backup-setup/model/use-smb-backu
 import { useSftpBackup } from '../../../features/backup-setup/model/use-sftp-backup';
 import { useThemeColors } from '../../../shared/theme/theme-provider';
 import { useCloudDestinations } from '../../../features/cloud-destination/model/use-cloud-destinations';
-import { hiddenProviders } from '../../../shared/api/cloud-destinations';
+import { hiddenProviders, type CloudProvider } from '../../../shared/api/cloud-destinations';
 import { CloudDestinationList, addedDestinations } from './cloud-destination-list';
 
 const hiddenIds: ReadonlySet<string> = new Set(hiddenProviders);
 
-export function ConnectionsPage({ adding, navigate, openProvider, openBackups, saved }: { adding: boolean; navigate: NavigateMobile; openProvider: (id: DestinationProviderId) => void; openBackups: (targetId: string) => void; saved: Omit<MobileStorageForm,'password'> | null }) {
+export function ConnectionsPage({ adding, navigate, openProvider, openBackups, saved }: { adding: boolean; navigate: NavigateMobile; openProvider: (id: DestinationProviderId) => void; openBackups: (targetId: string, provider: CloudProvider) => void; saved: Omit<MobileStorageForm,'password'> | null }) {
   const colors = useThemeColors();
   const { t } = useTranslation();
   const smb = useSmbBackup().status;

@@ -61,6 +61,15 @@ the serverless model), MEGA (own SDK, session and key custody) and Google Cloud 
 (no narrow app scope via OAuth; user-owned bucket with bucket-scoped keys was considered
 and declined for V1, no ADR draft). They stay in the catalogue as unavailable.
 
+## Account display label (user, 2026-11-03)
+
+At sign-in the adapter reads the provider's own account endpoint (Dropbox
+`users/get_current_account`) once and stores email, else display name, as a display-only
+field inside the encrypted profile record. It is never an identifier or authority (identity
+stays `targetId`/`accountId`), and it is excluded from logs, lock-screen/notification text,
+Live Activity payloads and the ADR0029 catalog. Existing profiles are filled once after
+their next successful run; a failed lookup leaves the field empty and changes nothing else.
+
 ## Preserved boundaries
 
 ADR0010, ADR0016, ADR0022, ADR0023, ADR0024, ADR0025 and ADR0027 apply per

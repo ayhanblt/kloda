@@ -10,8 +10,11 @@ internal interface AndroidBackupTransport {
   fun upload(path: String, job: WebDavUpload)
   fun move(from: String, to: String)
   fun download(path: String, job: WebDavUpload, receive: (ByteArray, Int) -> Unit): WebDavReply
+  // 29/3: direct children of a folder under the destination root; a missing folder has none.
+  fun list(folder: String): List<RemoteChild>
   fun cancel()
 }
+internal data class RemoteChild(val name: String, val folder: Boolean)
 
 // One queue destination: a DAV profile (original WebDAV entry or an added slot) or an OAuth profile whose
 // provider has an upload adapter. Only Dropbox has one so far (user decision 2026-11-03).

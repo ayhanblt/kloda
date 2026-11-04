@@ -29,6 +29,17 @@ class KlodaCloudModule : Module() {
     val code = if (error is FilesFailure) error.code else "outcome_unknown"
     throw CodedException(code, code, null)
   }
+  // ADR0029 29/1: the code is returned only after the device lock check; the window is FLAG_SECURE while it is shown.
+  private suspend fun afterDeviceLock(title: String, reason: String, code: () -> String): Map<String, String> {
+    if (!resumed()) throw CodedException("candidate_stale", "candidate_stale", null)
+    if (listOf(title, reason).any { it.isBlank() || it.length > 200 }) throw CodedException("invalid_request", "invalid_request", null)
+    val activity = appContext.currentActivity ?: throw CodedException("candidate_stale", "candidate_stale", null)
+    try { withContext(Dispatchers.Main) { AndroidDeviceCheck.confirm(activity, title, reason) } }
+    catch (error: FilesFailure) { throw CodedException(error.code, error.code, null) }
+    val value = withContext(Dispatchers.IO) { guarded(code) }
+    withContext(Dispatchers.Main) { activity.window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE) }
+    return mapOf("code" to value)
+  }
 
   override fun definition() = ModuleDefinition {
     Name("KlodaCloud")
@@ -85,22 +96,46 @@ class KlodaCloudModule : Module() {
     // cloud destination is enabled. The window is FLAG_SECURE while the code is on screen.
     AsyncFunction("recoveryStatus") Coroutine { -> withContext(Dispatchers.IO) { guarded { mapOf("state" to AndroidRecoveryVault(context()).state()) } } }
     AsyncFunction("revealRecovery") Coroutine { title: String, reason: String ->
-      if (!resumed()) throw CodedException("candidate_stale", "candidate_stale", null)
-      if (listOf(title, reason).any { it.isBlank() || it.length > 200 }) throw CodedException("invalid_request", "invalid_request", null)
-      val activity = appContext.currentActivity ?: throw CodedException("candidate_stale", "candidate_stale", null)
-      try { withContext(Dispatchers.Main) { AndroidDeviceCheck.confirm(activity, title, reason) } }
-      catch (error: FilesFailure) { throw CodedException(error.code, error.code, null) }
-      val code = withContext(Dispatchers.IO) { guarded { AndroidRecoveryVault(context()).reveal() } }
-      withContext(Dispatchers.Main) { activity.window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE) }
-      mapOf("code" to code)
+      afterDeviceLock(title, reason) { AndroidRecoveryVault(context()).reveal() }
+    }
+    // ADR0029 decision 3 (29/2): a new code, behind the same lock; it replaces the old one once confirmed.
+    AsyncFunction("renewRecovery") Coroutine { title: String, reason: String ->
+      afterDeviceLock(title, reason) { AndroidRecoveryVault(context()).renew() }
     }
     AsyncFunction("hideRecovery") Coroutine { ->
       withContext(Dispatchers.Main) { appContext.currentActivity?.window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE) }
       Unit
     }
+    // ADR0029 decision 6: only the code already shown after the lock check (AndroidRecoveryClip).
+    AsyncFunction("copyRecovery") Coroutine { code: String ->
+      withContext(Dispatchers.IO) { guarded { if (!AndroidRecoveryVault(context()).shown(code)) throw FilesFailure("invalid_request") } }
+      withContext(Dispatchers.Main) { guarded { AndroidRecoveryClip.copy(context(), code) } }
+      Unit
+    }
+    AsyncFunction("expireRecoveryClip") Coroutine { -> withContext(Dispatchers.Main) { guarded { AndroidRecoveryClip.expire(context()) } }; Unit }
     AsyncFunction("confirmRecovery") Coroutine { first: Int, firstGroup: String, second: Int, secondGroup: String ->
       if (first == second) throw CodedException("invalid_request", "invalid_request", null)
       withContext(Dispatchers.IO) { guarded { mapOf("state" to AndroidRecoveryVault(context()).confirm(mapOf(first to firstGroup, second to secondGroup))) } }
+    }
+    // ADR0029 29/3: the old phone's code reads this added destination's catalog into restore-only imported receipts.
+    // The code is not stored and does not become this phone's code; nothing is uploaded or enabled.
+    AsyncFunction("importRecovery") Coroutine { targetId: String, code: String ->
+      if (!resumed()) throw CodedException("candidate_stale", "candidate_stale", null)
+      withContext(Dispatchers.IO) { guarded {
+        val secret = AndroidRecoveryCode.parse(code)
+        val keys = try { AndroidRecoveryCatalog.keys(secret) } finally { secret.fill(0) }
+        added(targetId)
+        val destination = AndroidWebDavDestinations.added(context(), targetId) ?: throw FilesFailure("not_found")
+        val check = { if (AndroidWebDavDestinations.added(context(), targetId) != destination) throw FilesFailure("settings_changed") }
+        AndroidSyncJournal.webdav(context()).use { helper ->
+          val journal = AndroidWebDavJournal(helper.writableDatabase)
+          val transport = destination.transport(context(), AndroidFilesSnapshots(context(), webdav = true, checkPaused = check), check)
+          val summary = try { AndroidRecoveryImport(journal.catalog, journal.imports, targetId, keys, transport, check).run() }
+            finally { keys.mac.fill(0) }
+          mapOf("chains" to summary.chains, "deltas" to summary.deltas, "entries" to summary.entries,
+            "unverified" to summary.unverified, "imported" to journal.imports.count(targetId))
+        }
+      } }
     }
     // Step18A/4c: one manual run of an enabled, added destination (DAV, or Dropbox since 18B/5) through the shared
     // queue (same lock and begin() order as the original WebDAV run); the original entry keeps KlodaBackup's run/pause.
@@ -167,7 +202,8 @@ class KlodaCloudModule : Module() {
         catch (_: TimeoutCancellationException) { throw CodedException("cancelled", "cancelled", null) }
       return withContext(Dispatchers.IO) { guarded {
         val grant = current.exchange(AndroidOAuthLogin.code(callback, request), request)
-        val profile = AndroidOAuthProfile(UUID.randomUUID().toString(), provider.name, grant.accountId, folder, grant.refreshToken, grant.expiresAt)
+        val profile = AndroidOAuthProfile(UUID.randomUUID().toString(), provider.name, grant.accountId, folder, grant.refreshToken, grant.expiresAt,
+          accountLabel = current.label(grant.accessToken))
         try {
           if (current.cancelled) throw FilesFailure("cancelled")
           if (total() >= AndroidWebDavVault.LIMIT) throw FilesFailure("destination_limit")
@@ -243,11 +279,12 @@ class KlodaCloudModule : Module() {
     put("enabled", profile.provider != null && AndroidWebDavDestinations.enabled(context(), profile.targetId()))
     if (profile.provider != null) AndroidWebDavRuntime.queue(context()).runView(profile.targetId())?.let { put("run", it) }
   }
-  // Display metadata only: never the refresh token. The account ID stands in for the user name.
+  // Display metadata only: never the refresh token. The account ID stands in for the user name; `accountLabel` is the
+  // display-only email or name (ADR0028), shown on the card and nowhere else.
   private fun summary(profile: AndroidOAuthProfile): Map<String, Any> = buildMap {
     val target = profile.targetId()
     put("targetId", target); put("provider", profile.provider); put("endpoint", OAuthProvider.named(profile.provider).api)
-    put("targetPath", profile.targetPath); put("username", profile.accountId)
+    put("targetPath", profile.targetPath); put("username", profile.accountId); profile.accountLabel?.let { put("accountLabel", it) }
     put("enabled", AndroidWebDavDestinations.enabled(context(), target))
     if (profile.provider in AndroidCloudTarget.OAUTH_KINDS) AndroidWebDavRuntime.queue(context()).runView(target)?.let { put("run", it) }
   }

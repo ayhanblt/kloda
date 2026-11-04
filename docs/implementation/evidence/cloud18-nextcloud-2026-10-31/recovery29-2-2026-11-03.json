@@ -1,0 +1,23 @@
+{
+ "slice": "29/2 catalog writer + backfill + regeneration as full re-sign, shared test vectors (ADR0029 §3, user decision 3)",
+ "date": "2026-11-03",
+ "base": "3a8813e + uncommitted 29/1 text work + uncommitted 29/2 diff (no commit)",
+ "smallest_validation_path": "Python reference vectors -> iOS host (production codec + SQLite journal + writer, in-memory destination) -> Android instrumentation scope recovery29 on emulator-5590 -> one Android and one iOS Simulator build; Jest/tsc/ESLint for the changed JS API only. 29/1 and destination-text checks not repeated.",
+ "checks": {
+  "vectors": "PASS python3 -I tools/recovery-catalog-vectors.py (chain c6d1c4897cde441fdbd14d1f1b4e6f75; delta 1 650 B opP5n9sO-...; delta 2 299 B ofj1ltRY-...)",
+  "ios_host": "PASS python3 -I tools/test-ios-recovery-catalog.py: vectors; backfill idempotent; chain + interrupted move resumes; lost move ACK stays outcome_unknown; occupied path never overwritten; two destinations sharing a remote folder; regeneration = new chain with every receipt, old deltas untouched; 300-receipt backfill split into 3 chained deltas <= 64 KiB",
+  "android_instrumentation": "PASS 2026-11-04 python3 -I tools/test-android-recovery-catalog.py (scope recovery29, emulator-5590 KlodaCloud18, unlocked by the user): recovery29-code-vault + catalog vectors, backfill, chain/resume, lost move ACK, occupied path, shared remote folder, regeneration, bulk split — on the code with the targetId-in-path fix (one run, shared with 29/3)",
+  "jest": "PASS src/shared/api/recovery-code.spec.ts (3 tests, renew shape)",
+  "tsc": "PASS",
+  "eslint": "PASS changed files",
+  "android_build": "PASS :my-module:assembleDebugAndroidTest (built by the instrumentation run)",
+  "ios_build": "PASS xcodebuild Debug iphonesimulator arm64 after pod install (LANG=en_US.UTF-8), no warnings/errors in changed files; built with the targetId path fix"
+ },
+ "not_run": [
+  "real Nextcloud/Dropbox run writing a delta (catalog upload through the real DAV/Dropbox transports)",
+  "Keychain/Keystore locked-device skip at runtime (iOS background lease, Android JobService)",
+  "renewRecovery device-lock prompt at runtime (no screen yet; texts need approval)",
+  "tools/test-ios-webdav-journal.py: pre-existing host break, not caused by 29/2 (IosWebDavClient URLSession optionals under Swift 6.4 / macOS 26 SDK; IosCloudTarget reference since 18B/5); 29/2 journal init is covered by tools/test-ios-recovery-catalog.py"
+ ],
+ "review": "same-agent separate pass: found and fixed a shared-remote-folder collision (targetId added to the catalog folder) and a shadowed error variable in the iOS queue hook; no independent review"
+}

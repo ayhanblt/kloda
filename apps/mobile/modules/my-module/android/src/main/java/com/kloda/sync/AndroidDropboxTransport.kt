@@ -84,6 +84,31 @@ internal class AndroidDropboxTransport(private val context: Context, private val
     send("${CONTENT}download", false, mapOf("Dropbox-API-Arg" to arg(JSONObject().put("path", full(path)))), maximum = job.size,
       receive = receive).also(::require)
 
+  // 29/3: `list_folder` pages of about 100 entries (one bounded 64 KiB reply each); deleted entries are skipped.
+  override fun list(folder: String): List<RemoteChild> {
+    val result = mutableListOf<RemoteChild>(); var cursor: String? = null
+    do {
+      val request = cursor?.let { JSONObject().put("cursor", it) } ?: JSONObject().put("path", full(folder)).put("recursive", false).put("limit", 100)
+      val body = request.toString().toByteArray(Charsets.UTF_8)
+      val reply = send(API + if (cursor == null) "list_folder" else "list_folder/continue", false, emptyMap(), { ByteArrayInputStream(body) },
+        body.size.toLong(), collect = true, contentType = "application/json")
+      if (cursor == null && reply.status == 409 && summary(reply).startsWith("path/not_found")) return emptyList()
+      require(reply)
+      val json = runCatching { JSONObject(String(reply.body, Charsets.UTF_8)) }.getOrNull() ?: throw FilesFailure("webdav_response")
+      val entries = json.optJSONArray("entries") ?: throw FilesFailure("webdav_response")
+      for (index in 0 until entries.length()) {
+        val entry = entries.optJSONObject(index) ?: throw FilesFailure("webdav_response")
+        val tag = entry.opt(".tag") as? String ?: throw FilesFailure("webdav_response")
+        val name = entry.opt("name") as? String ?: throw FilesFailure("webdav_response")
+        if (tag != "deleted") result.add(RemoteChild(name, tag == "folder"))
+      }
+      val more = json.opt("has_more") as? Boolean ?: throw FilesFailure("webdav_response")
+      cursor = if (more) json.opt("cursor") as? String ?: throw FilesFailure("webdav_response") else null
+      if (result.size > 100_000) throw FilesFailure("webdav_response")
+    } while (cursor != null)
+    return result
+  }
+
   // The app folder is Dropbox's root for this token; the destination root sits inside it.
   private fun full(relative: String): String {
     val parts = profile.targetPath.split('/').filter { it.isNotEmpty() } + relative.split('/').filter { it.isNotEmpty() }
@@ -105,6 +130,15 @@ internal class AndroidDropboxTransport(private val context: Context, private val
       if (reply.status != 401) return reply
       if (fresh) throw FilesFailure("oauth_expired")
       access = token(); fresh = true
+    }
+  }
+  // ADR0028: a profile saved before the display label existed gets it once, after a successful run. Best effort.
+  fun fillLabel() {
+    if (profile.accountLabel != null) return
+    runCatching {
+      val reply = send("https://api.dropboxapi.com/2/users/get_current_account", false, emptyMap(), { ByteArrayInputStream("null".toByteArray()) },
+        4, collect = true, contentType = "application/json")
+      if (reply.status == 200) AndroidOAuthProfile.label(String(reply.body, Charsets.UTF_8))?.let { AndroidOAuthVault(context, profile.targetId()).fill(it) }
     }
   }
   // Access tokens stay in memory (ADR0028 §2). A refused refresh means the grant is gone: sign in again.

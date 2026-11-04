@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BackHandler } from 'react-native';
 import type { DestinationProviderId } from '@kloda/sync-core';
+import { providerLabel, type CloudProvider } from '../shared/api/cloud-destinations';
 import '../shared/i18n';
 import type { MobilePage } from '../shared/model/mobile-navigation';
 import { useBackupSetup } from '../features/backup-setup/model/use-backup-setup';
@@ -17,6 +18,7 @@ import { SftpPage } from '../pages/connections/ui/sftp-page';
 import { ProviderPage } from '../pages/connections/ui/provider-page';
 import { CloudProviderPage, cloudProviderFor } from '../pages/connections/ui/cloud-provider-page';
 import { SettingsPage } from '../pages/settings/ui/settings-page';
+import { RecoveryPage } from '../pages/settings/ui/recovery-page';
 import { ComputerPage } from '../pages/computer/ui/computer-page';
 import { PairingPage } from '../pages/pairing/ui/pairing-page';
 import { ActivityPage } from '../pages/activity/ui/activity-page';
@@ -25,9 +27,9 @@ export function App() {
   const model = useBackupSetup();
   const [page, setPage] = useState<MobilePage>('welcome');
   const [provider, setProvider] = useState<DestinationProviderId>('webdav');
-  const [backupTarget, setBackupTarget] = useState<string | undefined>();
+  const [backupTarget, setBackupTarget] = useState<{ id: string; provider: CloudProvider } | undefined>();
   const navigate = (next: MobilePage) => { if (page === 'storage') model.leaveStorage(); setBackupTarget(undefined); setPage(next); };
-  const openBackups = (target: string) => { navigate('backups'); setBackupTarget(target); };
+  const openBackups = (id: string, target: CloudProvider) => { navigate('backups'); setBackupTarget({ id, provider: target }); };
   useEffect(() => {
     if (page === 'pairing' || page === 'welcome' || page === 'home' || page === 'photos') return;
     const listener = BackHandler.addEventListener('hardwareBackPress', () => { navigate('home'); return true; });
@@ -39,7 +41,8 @@ export function App() {
   const back = () => navigate('home');
   const cloudProvider = cloudProviderFor(provider);
   const openProvider = (id: DestinationProviderId) => { setProvider(id); navigate(id === 'webdav' ? 'storage' : 'provider'); };
-  return <MobileShell page={page} navigate={navigate}>
+  // A destination's own Backups view belongs to the Destinations tab it was opened from.
+  return <MobileShell page={page} navigate={navigate} section={page === 'backups' && backupTarget ? 'connections' : undefined}>
     {page === 'home' && <HomePage sourceCount={model.sources.length} navigate={navigate} />}
     {page === 'photos' && <PhotosPage navigate={navigate} />}
     {page === 'sources' && <SourcePage model={model} onBack={back} onNext={() => navigate('schedule')} />}
@@ -47,10 +50,11 @@ export function App() {
     {page === 'storage' && <WebDavPage model={model} onBack={() => navigate('connections')} />}
     {page === 'computer' && <ComputerPage embedded onBack={() => navigate('connections')} onPair={() => navigate('pairing')} onActivity={() => navigate('activity')} onAdvanced={() => navigate('storage')} />}
     {page === 'activity' && <ActivityPage embedded onBack={back} />}
-    {page === 'backups' && <ActivityPage embedded view="backups" target={backupTarget} onBack={backupTarget ? () => navigate('connections') : back} />}
+    {page === 'backups' && <ActivityPage embedded view="backups" target={backupTarget?.id} targetLabel={backupTarget && providerLabel(backupTarget.provider)} onBack={backupTarget ? () => navigate('connections') : back} />}
     {(page === 'connections' || page === 'add-connection') && <ConnectionsPage adding={page === 'add-connection'} navigate={navigate} openProvider={openProvider} openBackups={openBackups} saved={model.savedStorage} />}
     {page === 'provider' && (provider === 'smb' ? <SmbPage onBack={() => navigate('add-connection')} /> : provider === 'sftp' ? <SftpPage onBack={() => navigate('add-connection')} />
       : cloudProvider ? <CloudProviderPage provider={cloudProvider} onBack={() => navigate('add-connection')} onSaved={() => navigate('connections')} /> : <ProviderPage provider={provider} onBack={() => navigate('add-connection')} />)}
     {page === 'settings' && <SettingsPage navigate={navigate} />}
+    {page === 'recovery' && <RecoveryPage onBack={() => navigate('settings')} />}
   </MobileShell>;
 }

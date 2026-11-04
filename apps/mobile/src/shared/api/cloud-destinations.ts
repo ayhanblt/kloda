@@ -2,7 +2,8 @@ import { requireOptionalNativeModule } from 'expo';
 
 // Step18A/4 (ADR0027) and 18B/1 (ADR0028): saved DAV and OAuth destinations. Saving is not enabling (ADR0023); an enabled
 // DAV destination gets its own queue plan (18A/3). OAuth destinations cannot be enabled until their upload adapters exist.
-// For an OAuth destination `username` carries the provider's account ID and `endpoint` the fixed API origin.
+// For an OAuth destination `username` carries the provider's account ID and `endpoint` the fixed API origin;
+// `accountLabel` is the display-only email or name (ADR0028), absent until native has read it once.
 export const cloudProviders = ['webdav', 'nextcloud', 'cloudme', 'kolab-now', 'dropbox', 'onedrive', 'yandex', 'google-drive'] as const;
 export const oauthProviders = ['dropbox', 'onedrive', 'yandex', 'google-drive'] as const;
 export type OAuthProvider = typeof oauthProviders[number];
@@ -10,7 +11,7 @@ export type CloudProvider = typeof cloudProviders[number];
 export const runStates = ['running', 'waiting', 'paused', 'finished', 'needs_attention', 'exhausted'] as const;
 export interface DestinationRun { state: typeof runStates[number]; errorCode?: string }
 // `run` is the latest queue run of an added DAV destination (18A/4c); the original WebDAV run stays in KlodaBackup.
-export interface CloudDestination { targetId: string; provider: CloudProvider; endpoint: string; targetPath: string; username: string; enabled: boolean; run?: DestinationRun }
+export interface CloudDestination { targetId: string; provider: CloudProvider; endpoint: string; targetPath: string; username: string; accountLabel?: string; enabled: boolean; run?: DestinationRun }
 interface NativeCloud {
   destinations(): Promise<unknown>;
   signInNextcloud(server: string, folder: string): Promise<unknown>;
@@ -23,6 +24,10 @@ interface NativeCloud {
   pauseDestination(targetId: string): Promise<unknown>;
 }
 export const destinationLimit = 8;
+export const providerLabel = (provider: CloudProvider) => `ui.providers.${provider === 'yandex' ? 'yandex-disk' : provider}`;
+// What a card shows as the account: the DAV login name, or an OAuth destination's display label once native has it.
+export const destinationAccount = (item: CloudDestination): string | undefined =>
+  oauthProviders.includes(item.provider as OAuthProvider) ? item.accountLabel : item.username;
 // ADR0027 §6: CloudMe answers only with Digest (probed 2026-11-01); no auth downgrade, so it has no add path.
 export const blockedProviders: readonly CloudProvider[] = ['cloudme'];
 // User decision 2026-11-03: Kolab Now is out of V1 and not offered; its native add path stays, unreachable.
@@ -44,7 +49,8 @@ function text(value: unknown, max = 8192): string {
 export function cloudDestinationFromNative(value: unknown): CloudDestination {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return invalid();
   const row = value as Record<string, unknown>;
-  if (Object.keys(row).length !== keys.length + ('run' in row ? 1 : 0) || keys.some((key) => !(key in row))) return invalid();
+  const optional = ['run', 'accountLabel'].filter((key) => key in row).length;
+  if (Object.keys(row).length !== keys.length + optional || keys.some((key) => !(key in row))) return invalid();
   const provider = row.provider as CloudProvider;
   if (!cloudProviders.includes(provider)) return invalid();
   const endpoint = text(row.endpoint);
@@ -53,6 +59,10 @@ export function cloudDestinationFromNative(value: unknown): CloudDestination {
   if (!targetPattern.test(targetId)) return invalid();
   if (typeof row.enabled !== 'boolean' || (row.enabled && !enableableProviders.includes(provider))) return invalid();
   const result: CloudDestination = { targetId, provider, endpoint, targetPath: text(row.targetPath), username: text(row.username), enabled: row.enabled };
+  if ('accountLabel' in row) {
+    if (!oauthProviders.includes(provider as OAuthProvider)) return invalid();
+    result.accountLabel = text(row.accountLabel, 512);
+  }
   if ('run' in row) result.run = runFromNative(row.run, provider);
   return result;
 }

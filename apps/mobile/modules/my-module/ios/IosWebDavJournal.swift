@@ -78,7 +78,7 @@ final class IosWebDavJournal {
     try database.execute("CREATE INDEX IF NOT EXISTS webdav_upload_locator ON webdav_upload(target,source,reference)")
     try database.execute("CREATE INDEX IF NOT EXISTS webdav_upload_unfinished ON webdav_upload(id) WHERE phase!='completed'")
     try migrateDestinations()
-    try createRuns(); try createPlan(); try createPublicationPaths(); try createWebDavRestores()
+    try createRuns(); try createPlan(); try createPublicationPaths(); try createWebDavRestores(); try createCatalog(); try createImports()
   }
   // ADR0028 adds the OAuth kinds; each stays disabled until its upload adapter exists (user decision 2026-11-02).
   // Dropbox has one since 18B/5 (user decision 2026-11-03).
@@ -221,6 +221,7 @@ final class IosWebDavJournal {
     var next = value; next.phase = phase; try next.validate()
     try mutate("UPDATE webdav_upload SET phase=?,issue=NULL WHERE id=? AND target=? AND phase=? AND skipped=0 RETURNING id",
       values: [phase, value.id, value.target, value.phase])
+    if phase == "completed" { recordCompletion(value) }
   }
   func issue(_ value: IosWebDavUpload, code: String, skipped: Bool = false) throws {
     guard !code.isEmpty, code.utf8.count <= 128, !code.utf8.contains(0), value.phase != "completed" else { throw IosWebDavFailure.code("invalid_request") }

@@ -138,6 +138,18 @@ final class IosOAuthLogin: NSObject, URLSessionTaskDelegate, @unchecked Sendable
     return value
   }
 
+  // ADR0028 account display label, Dropbox only for now: best effort, a failure never fails sign-in.
+  func label(_ access: String) -> String? {
+    guard provider == .dropbox else { return nil }
+    var request = URLRequest(url: URL(string: provider.api + "/2/users/get_current_account")!)
+    request.httpMethod = "POST"
+    request.setValue("Bearer " + access, forHTTPHeaderField: "Authorization")
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.httpBody = Data("null".utf8)
+    guard let (status, body) = try? exchange(request), status == 200 else { return nil }
+    return IosOAuthProfile.label(body)
+  }
+
   // A fresh access token; for Yandex the stored token itself while it has not expired.
   func refresh(_ refreshToken: String, expiresAt: Int64? = nil) throws -> String {
     if provider == .yandex {

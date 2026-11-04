@@ -8,7 +8,10 @@ protocol IosBackupTransport: AnyObject {
   func upload(_ path: String, _ job: IosWebDavUpload) throws
   func move(_ from: String, _ to: String) throws
   func download(_ path: String, _ job: IosWebDavUpload, receive: @escaping (Data) throws -> Void) throws -> IosWebDavReply
+  // 29/3: direct children of a folder under the destination root; a missing folder has none.
+  func list(_ folder: String) throws -> [IosRemoteChild]
 }
+struct IosRemoteChild: Equatable { let name: String; let folder: Bool }
 
 // One queue destination: a DAV profile (original WebDAV entry or an added slot) or an OAuth profile whose
 // provider has an upload adapter. Only Dropbox has one so far (user decision 2026-11-03).

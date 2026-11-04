@@ -8,6 +8,7 @@ import okhttp3.Authenticator
 import okhttp3.Call
 import okhttp3.CookieJar
 import okhttp3.FormBody
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
@@ -100,6 +101,15 @@ internal class AndroidOAuthLogin(context: Context, val provider: OAuthProvider) 
     val id = user?.optString("permissionId")?.takeIf(::token) ?: throw FilesFailure("oauth_login")
     val email = user.optString("emailAddress").takeIf { it.contains('@') && token(it) } ?: throw FilesFailure("oauth_login")
     return id to email
+  }
+
+  // ADR0028 account display label, Dropbox only for now: best effort, a failure never fails sign-in.
+  fun label(access: String): String? {
+    if (provider != OAuthProvider.DROPBOX) return null
+    val (status, body) = runCatching { exchange(Request.Builder().url("${provider.api}/2/users/get_current_account")
+      .header("Authorization", "Bearer $access").post("null".toByteArray().toRequestBody("application/json".toMediaType())).build()) }
+      .getOrNull() ?: return null
+    return if (status == 200) AndroidOAuthProfile.label(body) else null
   }
 
   // A fresh access token; for Yandex the stored token itself while it has not expired.

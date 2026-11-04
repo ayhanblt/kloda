@@ -48,10 +48,12 @@ struct IosWebDavRestoreIntent: Codable, Equatable, IosLocalRestorePublication {
 }
 
 extension IosWebDavJournal {
-  func createWebDavRestores() throws {
+  // 29/4: imported receipts keep their restore intents in `imported_restore` (same shape, bound to `imported_receipt`),
+  // because `webdav_restore.job_id` references this device's uploads.
+  func createWebDavRestores(_ table: String = "webdav_restore", receipts: String = "webdav_upload") throws {
     try database.execute("""
-      CREATE TABLE IF NOT EXISTS webdav_restore (
-        id TEXT PRIMARY KEY NOT NULL, target_id TEXT NOT NULL, job_id TEXT NOT NULL REFERENCES webdav_upload(id),
+      CREATE TABLE IF NOT EXISTS \(table) (
+        id TEXT PRIMARY KEY NOT NULL, target_id TEXT NOT NULL, job_id TEXT NOT NULL REFERENCES \(receipts)(id),
         name TEXT NOT NULL, sha256 TEXT NOT NULL, size_bytes INTEGER NOT NULL CHECK(size_bytes>=0),
         staging TEXT NOT NULL, offset_bytes INTEGER NOT NULL CHECK(offset_bytes>=0 AND offset_bytes<=size_bytes),
         destination TEXT, device TEXT, inode TEXT,
@@ -64,11 +66,11 @@ extension IosWebDavJournal {
       )
       """)
     try database.execute("""
-      CREATE TRIGGER IF NOT EXISTS retain_webdav_restore BEFORE DELETE ON webdav_restore
+      CREATE TRIGGER IF NOT EXISTS retain_\(table) BEFORE DELETE ON \(table)
       BEGIN SELECT RAISE(ABORT,'retained'); END
       """)
     try database.execute("""
-      CREATE TRIGGER IF NOT EXISTS immutable_webdav_restore BEFORE UPDATE ON webdav_restore
+      CREATE TRIGGER IF NOT EXISTS immutable_\(table) BEFORE UPDATE ON \(table)
       WHEN NEW.id IS NOT OLD.id OR NEW.target_id IS NOT OLD.target_id OR NEW.job_id IS NOT OLD.job_id
         OR NEW.name IS NOT OLD.name OR NEW.sha256 IS NOT OLD.sha256 OR NEW.size_bytes IS NOT OLD.size_bytes
         OR NEW.staging IS NOT OLD.staging OR NEW.offset_bytes<OLD.offset_bytes
@@ -80,8 +82,8 @@ extension IosWebDavJournal {
       """)
   }
 
-  func restoreIntent(target: String, job: String) throws -> IosWebDavRestoreIntent? {
-    try database.statement("SELECT * FROM webdav_restore WHERE target_id=? AND job_id=? ORDER BY rowid DESC LIMIT 1", values: [target, job]) { statement in
+  func restoreIntent(target: String, job: String, table: String = "webdav_restore") throws -> IosWebDavRestoreIntent? {
+    try database.statement("SELECT * FROM \(table) WHERE target_id=? AND job_id=? ORDER BY rowid DESC LIMIT 1", values: [target, job]) { statement in
       let result = sqlite3_step(statement)
       if result == SQLITE_DONE { return nil }
       guard result == SQLITE_ROW else { throw IosWebDavFailure.code("storage_failure") }
@@ -112,14 +114,14 @@ extension IosWebDavJournal {
     }
   }
 
-  func saveRestoreIntent(_ value: IosWebDavRestoreIntent) throws {
+  func saveRestoreIntent(_ value: IosWebDavRestoreIntent, table: String = "webdav_restore") throws {
     try value.validate()
     let fields: [Any] = [value.id, value.target, value.job, value.name, value.sha256, value.size,
       value.staging, value.offset, value.destination as Any? ?? NSNull(),
       value.device.map(String.init) as Any? ?? NSNull(), value.inode.map(String.init) as Any? ?? NSNull(),
       value.state, value.errorCode as Any? ?? NSNull()]
     try database.execute("""
-      INSERT INTO webdav_restore (id,target_id,job_id,name,sha256,size_bytes,staging,offset_bytes,destination,device,inode,state,error_code)
+      INSERT INTO \(table) (id,target_id,job_id,name,sha256,size_bytes,staging,offset_bytes,destination,device,inode,state,error_code)
       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
       ON CONFLICT(id) DO UPDATE SET target_id=excluded.target_id,job_id=excluded.job_id,
         name=excluded.name,sha256=excluded.sha256,size_bytes=excluded.size_bytes,staging=excluded.staging,

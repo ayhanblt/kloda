@@ -92,6 +92,60 @@ backfill and regeneration re-sign, shared test vectors for both platforms; 29/3 
 29/4 restore wiring and tamper tests (altered file, injected file, deleted/replayed delta,
 wrong code, interruption).
 
+## 29/2 implementation notes (2026-11-03)
+
+- **Format.** Canonical bytes, key order and escaping are fixed by `tools/recovery-catalog-vectors.py`; iOS and
+  Android check the same vectors. Hashes and the MAC are unpadded base64url, like the receipts.
+- **Path (refines §3).** `.kloda/catalog/<installationId>/<chain>/<targetId>/<sequence>.json`. `chain` is the first
+  16 bytes of HKDF(secret, `kloda-catalog-id-v1`) in hex, so a regenerated secret writes a new chain without meeting
+  the old create-only paths, and an import with a code finds its own chain. `targetId` is in the path because two
+  destinations of one phone can share a remote folder (original WebDAV entry and an added Nextcloud entry).
+- **When.** At the end of every queue run (no error, or only `review_required`), the writer lists every Completed
+  receipt of that destination not yet in the current chain. The same step is the backfill (first confirmed secret)
+  and the full re-sign (new chain); both therefore happen on the destination's next run, not at once. Deltas are
+  split at 64 KiB. Without a confirmed secret, or while the device is locked, the step is skipped and the run is
+  unaffected; the next run catches up.
+- **Regeneration (decision 3).** The new secret waits beside the confirmed one and replaces it only when the new
+  code is confirmed; until then the old code and chain stay in force. Native and JS API only (`renewRecovery`);
+  its screen needs approved TR/EN/DE texts.
+- **Failures.** A delta follows the upload phases; anything unexpected (temp present, destination occupied, lost
+  move acknowledgement) is kept as an issue on that delta and the run reports `outcome_unknown`. There is no review
+  screen for catalog issues yet (29/4).
+
+## 29/3 implementation notes (2026-11-04)
+
+- **Code entry.** Native parses the typed code (case, spaces, hyphens free; Crockford O/I/L aliases); the 4 padding bits
+  and the check characters must match, else `recovery_code_invalid`. The code is used for the call only: it is not
+  stored and does not become this phone's code (this phone keeps its own secret, §7).
+- **Discovery.** The transport gained `list` (WebDAV PROPFIND Depth 1, at most 4 MiB; Dropbox `list_folder` pages).
+  Import walks `.kloda/catalog/<installation>/<chain of the code>/<targetId>/`; this installation's own folder is skipped.
+- **Verification.** A delta stands only if re-encoding its parsed fields under the code's keys reproduces its bytes
+  exactly (canonical form, chain and MAC in one constant-time comparison), its header names its own folder and
+  sequence, `previous` is the hash of the delta before, and every entry is one plain relative path outside `.kloda`
+  with a known kind. Each chain starts at 1; the first gap or failure ends it and every later sequence is counted as
+  `unverified` (§6), never imported. Deleting the newest deltas cannot be detected (no remote anchor).
+- **Imported receipts (migration).** New retained, immutable tables `imported_delta` and `imported_receipt`, bound to
+  the importing destination's `targetId`; separate from `webdav_upload`, so no upload, skip, review or settlement path
+  can see them. Re-import is idempotent; a position already imported with other bytes stops the chain. Restore wiring
+  and its tamper tests stay 29/4.
+
+## 29/4 implementation notes (2026-11-04)
+
+- **Restore wiring (§5).** The existing per-destination restore (18B/5r) resolves an id first among this device's
+  Completed receipts, then among the imported receipts bound to the same destination. An imported receipt is used as a
+  read-only projection (binding `imported`, no snapshot) that the upload journal refuses to store; download, staging,
+  SHA-256/size check and local publication are unchanged. Its restore intents live in their own retained table
+  (`imported_restore` on iOS, `imported_file_restore` on Android), because the existing tables reference uploads.
+- **Photos.** A manifest's resources resolve through the manifest's own authority: local receipts for a local manifest,
+  imported receipts of the same catalog origin (installation, chain, old destination) for an imported one; never mixed.
+- **List.** The Backups list shows both kinds in one id-ordered page of at most 100 (merge bounded by the smaller last
+  id of a full page); item shape unchanged, no new text. An imported entry whose first path part is not a UUID or that
+  has no identity is neither listed nor restorable.
+- **Tamper behaviour.** Altered remote file: `hash_mismatch` (longer body refused before writing); injected remote file
+  or delta: never listed or restorable; a resource from another origin cannot complete a manifest; deleted or replayed
+  delta: later entries are not imported, so not restorable; wrong code: nothing to restore; interrupted import keeps
+  a verified prefix and resumes idempotently; interrupted download keeps no staging.
+
 ## Preserved boundaries
 
 ADR0010 (equality alone is never authority), ADR0016/0017 (PC path unchanged), ADR0022

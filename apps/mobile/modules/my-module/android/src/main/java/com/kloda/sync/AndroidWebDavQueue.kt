@@ -102,13 +102,23 @@ internal class AndroidWebDavQueue(private val context: Context, private val mayR
         check(execution)
         val snapshots = AndroidFilesSnapshots(context, true) { check(execution) }
         val check = { check(execution) }
+        val transport = execution.captured.destination.transport(context, snapshots, check)
         val publisher = AndroidWebDavPublisher(execution.captured.destination.targetId(), execution.captured.binding, journal, snapshots,
-          execution.captured.destination.transport(context, snapshots, check), check, { value -> locked { check(execution); execution.captured.complete(context, journal, value) } },
+          transport, check, { value -> locked { check(execution); execution.captured.complete(context, journal, value) } },
           { value -> locked { check(execution); journal.runs.track(execution.run, value) } })
         execution.publisher = publisher; check(execution)
         val files = AndroidWebDavFilesRunner(context, publisher); files.run(execution.captured.sources.sources)
         val photos = AndroidWebDavPhotosRunner(context, publisher); photos.run(execution.captured.sources.sources)
         error = photos.errorCode ?: files.errorCode
+        if (error == null) (transport as? AndroidDropboxTransport)?.fillLabel()
+        // ADR0029 29/2: catalogue what completed, also when other items wait for review; a catalog failure only
+        // reports when the backup itself had none.
+        if (error == null || error == "review_required") AndroidRecoveryVault(context).catalogKeys()?.let { keys ->
+          try {
+            AndroidRecoveryCatalogWriter(journal.catalog, execution.captured.destination.targetId(), keys, transport, check,
+              { bytes -> snapshots.stageMetadata(bytes).id }, { id -> snapshots.discard(FilesSnapshot(id, FilesDigest("", 0))) }).publish()
+          } catch (failure: Exception) { if (error == null) error = code(failure) }
+        }
       } catch (failure: Exception) { error = code(failure) }
       finally { execution.publisher?.cancel(); execution.publisher = null }
       finish(execution, error)

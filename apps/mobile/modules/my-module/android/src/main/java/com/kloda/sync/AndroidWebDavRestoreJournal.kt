@@ -20,18 +20,20 @@ internal data class WebDavFileRestore(val id: String, val target: String, val jo
       (phase in setOf("created", "writing", "completed") && document == null) || (error != null && !Regex("[a-z][a-z0-9_]{0,127}").matches(error))) throw FilesFailure("outcome_unknown")
   }
 }
-internal class AndroidWebDavRestoreJournal(private val database: SQLiteDatabase) {
+// 29/4: imported receipts keep their restore rows in `imported_file_restore` (same shape, bound to `imported_receipt`),
+// because `webdav_file_restore.job` references this device's uploads.
+internal class AndroidWebDavRestoreJournal(private val database: SQLiteDatabase, private val table: String = "webdav_file_restore", receipts: String = "webdav_upload") {
   init {
-    database.execSQL("CREATE TABLE IF NOT EXISTS webdav_file_restore(id TEXT PRIMARY KEY,target TEXT NOT NULL,job TEXT NOT NULL REFERENCES webdav_upload(id),header TEXT NOT NULL,document TEXT,phase TEXT NOT NULL,error TEXT)")
-    database.execSQL("""CREATE TRIGGER IF NOT EXISTS immutable_webdav_file_restore BEFORE UPDATE ON webdav_file_restore
+    database.execSQL("CREATE TABLE IF NOT EXISTS $table(id TEXT PRIMARY KEY,target TEXT NOT NULL,job TEXT NOT NULL REFERENCES $receipts(id),header TEXT NOT NULL,document TEXT,phase TEXT NOT NULL,error TEXT)")
+    database.execSQL("""CREATE TRIGGER IF NOT EXISTS immutable_$table BEFORE UPDATE ON $table
       WHEN NEW.id IS NOT OLD.id OR NEW.target IS NOT OLD.target OR NEW.job IS NOT OLD.job OR NEW.header IS NOT OLD.header
       OR (OLD.document IS NOT NULL AND NEW.document IS NOT OLD.document)
       OR (NEW.phase!=OLD.phase AND NOT ((OLD.phase='verified' AND NEW.phase='creating') OR (OLD.phase='creating' AND NEW.phase='created')
       OR (OLD.phase='created' AND NEW.phase='writing') OR (OLD.phase='writing' AND NEW.phase='completed') OR (OLD.phase!='completed' AND NEW.phase='review_required')))
       BEGIN SELECT RAISE(ABORT,'binding'); END""")
-    database.execSQL("CREATE TRIGGER IF NOT EXISTS retain_webdav_file_restore BEFORE DELETE ON webdav_file_restore BEGIN SELECT RAISE(ABORT,'retained'); END")
+    database.execSQL("CREATE TRIGGER IF NOT EXISTS retain_$table BEFORE DELETE ON $table BEGIN SELECT RAISE(ABORT,'retained'); END")
   }
-  fun latest(target: String, job: String): WebDavFileRestore? = database.rawQuery("SELECT header,document,phase,error FROM webdav_file_restore WHERE target=? AND job=? ORDER BY rowid DESC LIMIT 1", arrayOf(target, job)).use {
+  fun latest(target: String, job: String): WebDavFileRestore? = database.rawQuery("SELECT header,document,phase,error FROM $table WHERE target=? AND job=? ORDER BY rowid DESC LIMIT 1", arrayOf(target, job)).use {
     if (!it.moveToFirst()) return@use null
     val v = JSONObject(it.getString(0))
     WebDavFileRestore(v.getString("id"), v.getString("target"), v.getString("job"), v.getString("name"), v.getString("sha256"), v.getString("size").toLong(), v.getString("snapshot"), v.getString("directory"),
@@ -44,9 +46,9 @@ internal class AndroidWebDavRestoreJournal(private val database: SQLiteDatabase)
     val values = ContentValues().apply {
       put("id", row.id); put("target", row.target); put("job", row.job); put("header", row.header()); put("document", row.document); put("phase", row.phase); put("error", row.error)
     }
-    if (database.update("webdav_file_restore", values, "id=?", arrayOf(row.id)) == 0) {
+    if (database.update(table, values, "id=?", arrayOf(row.id)) == 0) {
       if (row.phase != "verified" || row.document != null || row.error != null) throw FilesFailure("outcome_unknown")
-      database.insertOrThrow("webdav_file_restore", null, values)
+      database.insertOrThrow(table, null, values)
     }
   }
 }

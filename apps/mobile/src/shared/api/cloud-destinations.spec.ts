@@ -21,6 +21,14 @@ it('accepts display metadata only and rejects a password or unknown field', () =
   expect(cloudDestinationFromNative({ ...row, provider: 'dropbox', enabled: true })).toEqual({ ...row, provider: 'dropbox', enabled: true });
 });
 
+it('accepts a display label for an OAuth destination only', () => {
+  const dropbox = { ...row, provider: 'dropbox', username: 'dbid:A', accountLabel: 'me@example.com' };
+  expect(cloudDestinationFromNative(dropbox)).toEqual(dropbox);
+  expect(() => cloudDestinationFromNative({ ...row, accountLabel: 'me@example.com' })).toThrow('outcome_unknown');
+  expect(() => cloudDestinationFromNative({ ...dropbox, accountLabel: '' })).toThrow('outcome_unknown');
+  expect(() => cloudDestinationFromNative({ ...dropbox, accountLabel: 'x'.repeat(513) })).toThrow('outcome_unknown');
+});
+
 it('enables a DAV destination explicitly and checks the native answer', async () => {
   await expect(cloudDestinations.setEnabled('bad', true)).rejects.toThrow('invalid_request');
   native.setDestinationEnabled.mockResolvedValueOnce({ destinations: [{ ...row, enabled: true }] });

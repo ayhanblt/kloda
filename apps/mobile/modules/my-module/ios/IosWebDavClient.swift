@@ -16,6 +16,7 @@ final class IosWebDavClient: NSObject, URLSessionDataDelegate, @unchecked Sendab
   private var mutation = false
   private var readsBody = false
   private var collect = false
+  private var multistatus = false
   private var body = Data()
   private var mutationAcknowledged = false
   private var failure: Error?
@@ -43,17 +44,18 @@ final class IosWebDavClient: NSObject, URLSessionDataDelegate, @unchecked Sendab
   }
   // REST APIs (Dropbox): the body is always read. A mutation's received status stays its ACK even if the body is lost;
   // a read's interrupted body is a failure. `collect` keeps a 200 body (at most `size`, which callers bound to 64 KiB).
+  // `multistatus`: a 207 body (WebDAV PROPFIND, 29/3) goes to `receive` like a 200 one.
   static func exchange(_ request: URLRequest, mutation: Bool, upload: URL? = nil, data: Data? = nil, size: Int64 = 65536,
-    collect: Bool = false, receive: ((Data) throws -> Void)? = nil, check: () throws -> Void) throws -> IosWebDavReply {
+    collect: Bool = false, multistatus: Bool = false, receive: ((Data) throws -> Void)? = nil, check: () throws -> Void) throws -> IosWebDavReply {
     try check()
     guard !collect || size <= 65536 else { throw IosWebDavFailure.code("invalid_request") }
     return try IosWebDavClient().perform(request, mutation: mutation, readsBody: true, collect: collect,
-      upload: upload, data: data, size: size, receive: receive, check: check)
+      upload: upload, data: data, size: size, receive: receive, check: check, multistatus: multistatus)
   }
   func cancel() { condition.lock(); let current = task; condition.unlock(); current?.cancel() }
 
   private func perform(_ original: URLRequest, mutation: Bool, readsBody: Bool, collect: Bool, upload: URL?, data: Data?,
-    size: Int64, receive: ((Data) throws -> Void)?, check: () throws -> Void) throws -> IosWebDavReply {
+    size: Int64, receive: ((Data) throws -> Void)?, check: () throws -> Void, multistatus: Bool = false) throws -> IosWebDavReply {
     guard size >= 0, upload == nil || data == nil else { throw IosWebDavFailure.code("invalid_request") }
     let config = URLSessionConfiguration.ephemeral
     config.httpCookieStorage = nil; config.httpShouldSetCookies = false
@@ -67,7 +69,7 @@ final class IosWebDavClient: NSObject, URLSessionDataDelegate, @unchecked Sendab
     condition.lock()
     guard task == nil else { condition.unlock(); session.invalidateAndCancel(); throw IosWebDavFailure.code("backup_busy") }
     finished = false; mutationAcknowledged = false; failure = nil; status = 0; received = 0; maximum = size; digest = SHA256(); sink = receive
-    self.mutation = mutation; self.readsBody = readsBody; self.collect = collect; body = Data()
+    self.mutation = mutation; self.readsBody = readsBody; self.collect = collect; self.multistatus = multistatus; body = Data()
     active = session
     let operation = upload.map { session.uploadTask(with: request, fromFile: $0) }
       ?? data.map { session.uploadTask(with: request, from: $0) } ?? session.dataTask(with: request)
@@ -116,7 +118,7 @@ final class IosWebDavClient: NSObject, URLSessionDataDelegate, @unchecked Sendab
       finished = true; condition.broadcast()
       condition.unlock(); completionHandler(.cancel); return
     }
-    if status != 200 { maximum = 65536; sink = nil; collect = true }
+    if status != 200 && !(multistatus && status == 207) { maximum = 65536; sink = nil; collect = true }
     condition.unlock()
     completionHandler(.allow)
   }

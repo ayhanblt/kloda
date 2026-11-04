@@ -17,21 +17,25 @@ function pick(random: () => number): [number, number] {
 }
 
 // The code stays hidden until the device lock check; it is hidden again when the app leaves the foreground or the
-// panel closes, and never kept outside this hook's state.
-export function useRecoveryCode(onConfirmed: () => void, random: () => number = Math.random) {
+// panel closes, and never kept outside this hook's state. With `renew` (ADR0029 decision 3) the lock check returns the
+// pending new code instead; the confirmed state does not change until it is confirmed, so the groups are asked only
+// after it was shown once.
+export function useRecoveryCode(onConfirmed: () => void, random: () => number = Math.random, renew = false) {
   const { t } = useTranslation();
   const [state, setState] = useState<RecoveryState | null>(null);
   const [groups, setGroups] = useState<string[] | null>(null);
   const [answers, setAnswers] = useState<[string, string]>(['', '']);
   const [error, setError] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [revealed, setRevealed] = useState(false);
   const [positions] = useState(() => pick(random));
   const mounted = useRef(true);
   const shown = useRef(false);
   // The system lock prompt itself makes the app `inactive` (iOS); only a trip to the background voids a pending reveal.
   const backgrounded = useRef(0);
   const hide = () => {
-    setGroups(null);
+    setGroups(null); setCopied(false);
     if (shown.current) { shown.current = false; void recoveryCode.hide().catch(() => undefined); }
   };
   useEffect(() => {
@@ -53,10 +57,11 @@ export function useRecoveryCode(onConfirmed: () => void, random: () => number = 
   };
   const reveal = () => busy(async () => {
     const mark = backgrounded.current;
-    const value = await recoveryCode.reveal(t('recovery.promptTitle'), t('recovery.promptReason'));
+    const value = renew ? await recoveryCode.renew(t('recovery.promptTitle'), t('recovery.renewPromptReason'))
+      : await recoveryCode.reveal(t('recovery.promptTitle'), t('recovery.promptReason'));
     shown.current = true;
     if (!mounted.current || backgrounded.current !== mark || AppState.currentState === 'background') { hide(); return; }
-    setGroups(value); setState((current) => current === 'confirmed' ? current : 'pending');
+    setGroups(value); setRevealed(true); setState((current) => current === 'confirmed' ? current : 'pending');
   });
   const confirm = () => busy(async () => {
     const value = await recoveryCode.confirm([[positions[0], answers[0]], [positions[1], answers[1]]]);
@@ -64,6 +69,12 @@ export function useRecoveryCode(onConfirmed: () => void, random: () => number = 
     setState(value); hide();
     if (value === 'confirmed') onConfirmed();
   });
+  const copy = () => busy(async () => {
+    if (!groups) return;
+    await recoveryCode.copy(groups);
+    if (mounted.current) setCopied(true);
+  });
   const answer = (index: 0 | 1, value: string) => setAnswers((current) => index === 0 ? [value, current[1]] : [current[0], value]);
-  return { state, groups, positions, answers, error, working, reveal, hide, confirm, answer };
+  const confirmable = renew ? revealed : state !== 'none' && state !== null;
+  return { state, groups, positions, answers, error, working, copied, confirmable, reveal, hide, confirm, copy, answer };
 }

@@ -21,7 +21,13 @@ import javax.crypto.spec.GCMParameterSpec
 // except Yandex's long-lived one with its expiry (ADR0028 §2 exception). Google Drive keeps no token at all: Play services
 // holds the grant, and `accountName` names the device account to ask it for (AndroidGoogleDrive).
 internal data class AndroidOAuthProfile(val revision: String, val provider: String, val accountId: String,
-  val targetPath: String, val refreshToken: String, val expiresAt: Long? = null, val accountName: String? = null) {
+  val targetPath: String, val refreshToken: String, val expiresAt: Long? = null, val accountName: String? = null,
+  val accountLabel: String? = null) {
+  // `accountLabel` is display-only (ADR0028 account display label): never identity, so equality and `targetId` ignore it.
+  override fun equals(other: Any?) = other is AndroidOAuthProfile && revision == other.revision && provider == other.provider &&
+    accountId == other.accountId && targetPath == other.targetPath && refreshToken == other.refreshToken &&
+    expiresAt == other.expiresAt && accountName == other.accountName
+  override fun hashCode() = listOf(revision, provider, accountId, targetPath, refreshToken, expiresAt, accountName).hashCode()
   fun validate() {
     val parts = targetPath.split('/').filter { it.isNotEmpty() }
     val drive = provider == "google-drive"
@@ -31,6 +37,7 @@ internal data class AndroidOAuthProfile(val revision: String, val provider: Stri
       listOfNotNull(accountId, targetPath, refreshToken.takeIf { !drive }, accountName)
         .any { it.isEmpty() || it.toByteArray().size > 8192 || it.any(Char::isISOControl) })
       throw FilesFailure("webdav_fields")
+    if (accountLabel != null && !validLabel(accountLabel)) throw FilesFailure("webdav_fields")
   }
   // Provider, stable account ID and normalized root; another account or root is another destination.
   fun targetId(): String {
@@ -39,7 +46,17 @@ internal data class AndroidOAuthProfile(val revision: String, val provider: Stri
     val identity = JSONArray().put(provider).put(accountId).put(root)
     return AndroidWebDavProfile.encode(MessageDigest.getInstance("SHA-256").digest(identity.toString().toByteArray()))
   }
-  companion object { val PROVIDERS = setOf("dropbox", "onedrive", "yandex", "google-drive") }
+  companion object {
+    val PROVIDERS = setOf("dropbox", "onedrive", "yandex", "google-drive")
+    fun validLabel(value: String) = value.isNotEmpty() && value.toByteArray().size <= 512 && value.none(Char::isISOControl)
+    // Email, else display name, from the provider's own account reply; anything unusable leaves the label empty.
+    fun label(body: String?): String? {
+      val json = body?.let { runCatching { JSONObject(it) }.getOrNull() } ?: return null
+      val value = json.optString("email").takeIf { it.contains('@') }
+        ?: json.optJSONObject("name")?.optString("display_name")
+      return value?.takeIf(::validLabel)
+    }
+  }
 }
 
 // Same Keystore AES-GCM file policy as AndroidWebDavVault, with its own file and key per destination.
@@ -75,10 +92,11 @@ internal class AndroidOAuthVault(private val context: Context, private val slot:
       try {
         val json = JSONObject(String(plain, Charsets.UTF_8))
         val keys = json.keys().asSequence().toSet()
-        if (keys - setOf("expiresAt", "accountName") != FIELDS || !keys.containsAll(FIELDS)) throw FilesFailure("webdav_storage")
+        if (keys - setOf("expiresAt", "accountName", "accountLabel") != FIELDS || !keys.containsAll(FIELDS)) throw FilesFailure("webdav_storage")
         AndroidOAuthProfile(json.getString("revision"), json.getString("provider"), json.getString("accountId"),
           json.getString("targetPath"), json.getString("refreshToken"), if (json.has("expiresAt")) json.getLong("expiresAt") else null,
-          if (json.has("accountName")) json.getString("accountName") else null).also { if (it.targetId() != slot) throw FilesFailure("webdav_storage") }
+          if (json.has("accountName")) json.getString("accountName") else null,
+          if (json.has("accountLabel")) json.getString("accountLabel") else null).also { if (it.targetId() != slot) throw FilesFailure("webdav_storage") }
       } finally { plain.fill(0) }
     } catch (error: FilesFailure) { throw error }
     catch (_: Exception) { throw FilesFailure("webdav_storage") }
@@ -88,10 +106,22 @@ internal class AndroidOAuthVault(private val context: Context, private val slot:
     unlocked()
     if (profile.targetId() != slot) throw FilesFailure("invalid_request")
     if (file.baseFile.exists()) throw FilesFailure("destination_exists")
+    write(profile)
+  }
+  // Fills a missing display label once; the credential fields are rewritten unchanged under the same key.
+  fun fill(label: String) = synchronized(AndroidSyncJournal.sourceLock) {
+    if (!AndroidOAuthProfile.validLabel(label)) return@synchronized
+    val profile = read() ?: return@synchronized
+    if (profile.accountLabel != null) return@synchronized
+    write(profile.copy(accountLabel = label))
+    if (read()?.accountLabel != label) throw FilesFailure("webdav_storage")
+  }
+  private fun write(profile: AndroidOAuthProfile) {
     try {
       val plain = JSONObject().put("revision", profile.revision).put("provider", profile.provider).put("accountId", profile.accountId)
         .put("targetPath", profile.targetPath).put("refreshToken", profile.refreshToken)
-        .apply { profile.expiresAt?.let { put("expiresAt", it) }; profile.accountName?.let { put("accountName", it) } }.toString().toByteArray(Charsets.UTF_8)
+        .apply { profile.expiresAt?.let { put("expiresAt", it) }; profile.accountName?.let { put("accountName", it) }
+          profile.accountLabel?.let { put("accountLabel", it) } }.toString().toByteArray(Charsets.UTF_8)
       val bytes = try {
         if (plain.size > 65507) throw FilesFailure("webdav_storage")
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")

@@ -24,22 +24,23 @@ final class IosWebDavFilesRestore {
         let receipt = try download.receipt(id)
         guard receipt.kind == "file" else { throw IosWebDavFailure.code("manifest_invalid") }
         let target = try cloud.targetId()
+        let table = receipt.binding == IosWebDavJournal.importedBinding ? "imported_restore" : "webdav_restore"
         func fresh() throws -> IosWebDavRestoreIntent {
           let stage = try download.stage(id)
           let result = IosWebDavRestoreIntent(id: UUID().uuidString.lowercased(), target: target, job: id,
             name: (receipt.relativePath as NSString).lastPathComponent, sha256: receipt.sha256, size: receipt.size,
             staging: stage, offset: receipt.size, destination: destination, state: "verified")
-          try check(); try journal.saveRestoreIntent(result)
+          try check(); try journal.saveRestoreIntent(result, table: table)
           return result
         }
         let save = { (value: IosWebDavRestoreIntent) in
           try IosWebDavContext.synchronized {
             self.lock.lock(); defer { self.lock.unlock() }
-            try check(); try journal.saveRestoreIntent(value)
+            try check(); try journal.saveRestoreIntent(value, table: table)
           }
         }
         var intent: IosWebDavRestoreIntent
-        if let old = try journal.restoreIntent(target: target, job: id), IosRestoreDestination.sameLocation(old.destination, destination) {
+        if let old = try journal.restoreIntent(target: target, job: id, table: table), IosRestoreDestination.sameLocation(old.destination, destination) {
           guard old.sha256 == receipt.sha256, old.size == receipt.size else { throw IosWebDavFailure.code("conflict") }
           intent = old
         } else { intent = try fresh() }
@@ -54,7 +55,7 @@ final class IosWebDavFilesRestore {
           try check(); try snapshots.discard(intent.staging)
           return ["state": "completed", "id": id, "name": intent.name]
         } catch {
-          if intent.state != "completed" { intent.state = "review_required"; intent.errorCode = IosWebDavFilesRunner.code(error); try journal.saveRestoreIntent(intent) }
+          if intent.state != "completed" { intent.state = "review_required"; intent.errorCode = IosWebDavFilesRunner.code(error); try journal.saveRestoreIntent(intent, table: table) }
           throw error
         }
       }

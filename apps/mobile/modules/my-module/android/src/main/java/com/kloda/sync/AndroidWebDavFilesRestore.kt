@@ -36,12 +36,14 @@ internal class AndroidWebDavFilesRestore(private val context: Context, private v
     if (tree.scheme != "content" || !DocumentsContract.isTreeUri(tree) || !resolver.persistedUriPermissions.any { it.uri == tree && it.isReadPermission && it.isWritePermission }) throw FilesFailure("destination_permission_lost")
     return AndroidSyncJournal.webdav(context).use { database ->
       val journal = AndroidWebDavJournal(database.writableDatabase)
-      val history = AndroidWebDavRestoreJournal(database.writableDatabase)
       val snapshots = AndroidFilesSnapshots(context, true, checkPaused = ::check)
       val download = AndroidWebDavDownload(context, destination, journal, snapshots, ::check)
       transfer = download
       val receipt = download.receipt(id)
       if (receipt.kind != "file") throw FilesFailure("manifest_invalid")
+      val history = if (receipt.binding == AndroidRecoveryImportJournal.BINDING) {
+        AndroidWebDavRestoreJournal(database.writableDatabase, "imported_file_restore", "imported_receipt")
+      } else AndroidWebDavRestoreJournal(database.writableDatabase)
       val previous = history.latest(destination.targetId(), id)
       if (previous?.directory == treeReference) {
         // A provider URI has no stable inode/generation proof after process loss: never resume unknown writes.

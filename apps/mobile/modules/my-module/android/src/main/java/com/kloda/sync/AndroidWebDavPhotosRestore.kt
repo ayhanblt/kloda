@@ -29,15 +29,17 @@ internal class AndroidWebDavPhotosRestore(private val context: Context, private 
       val manifest = reader.manifest(id)
       for (resource in manifest.resources) {
         check()
-        val own = journal.photoReceipt(receipt.target, receipt.source, resource.relativePath,
-          "photos:${manifest.sourceDeviceId}:${manifest.assetId}:${resource.role}", resource.sha256, resource.size) ?: throw FilesFailure("manifest_invalid")
+        val own = reader.resource(manifest, resource, receipt) ?: throw FilesFailure("manifest_invalid")
         staged[resource.relativePath] = reader.stage(own.id)
       }
       val state = AndroidWebDavPhotosJournal(database.writableDatabase, receipt.target) { action ->
         synchronized(AndroidSyncJournal.sourceLock) { synchronized(commitLock) { check(); action() } }
       }
-      WebDavPhotoManifestCodec.requireReceipts(manifest, receipt.target, journal)
-      val result = AndroidWebDavPhotosImport(context, receipt.target, receipt.source, journal, state, staged, snapshots, ::check).restore(manifest)
+      // Every reference was downloaded through its own target-bound receipt (local Completed, or imported of the same origin).
+      reader.requireResources(manifest, receipt)
+      val result = AndroidWebDavPhotosImport(context, receipt.target, receipt.source, journal, state, staged, snapshots, ::check) { photo, resource ->
+        reader.resource(photo, resource, receipt)
+      }.restore(manifest)
       check()
       if (result["metadataCompleted"] != true || result["itemState"] != "completed") throw FilesFailure(if (result["itemState"] == "organization_review") "organization_review" else "review_required")
       mapOf("state" to "completed", "id" to id, "name" to manifest.filename)

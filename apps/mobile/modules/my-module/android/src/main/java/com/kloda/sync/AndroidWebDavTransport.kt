@@ -33,6 +33,14 @@ internal class AndroidWebDavTransport(private val context: Context, private val 
   }
   override fun download(path: String, job: WebDavUpload, receive: (ByteArray, Int) -> Unit): WebDavReply =
     client.request(path, "GET", maximum = job.size, receive = receive).also { AndroidWebDavClient.require(it, 200) }
+  // 29/3: PROPFIND Depth 1, at most 4 MiB of multistatus XML.
+  override fun list(folder: String): List<RemoteChild> {
+    val body = java.io.ByteArrayOutputStream()
+    val reply = client.propfind(folder, AndroidWebDavListing.REQUEST.toByteArray(Charsets.UTF_8), 4L shl 20) { bytes, size -> body.write(bytes, 0, size) }
+    if (reply.status == 404) return emptyList()
+    AndroidWebDavClient.require(reply, 207)
+    return AndroidWebDavListing.children(body.toByteArray(), profile.url(folder).newBuilder().addPathSegment("").build())
+  }
   private fun prepareParents(path: String) {
     val parts = profile.targetPath.split('/').filter { it.isNotEmpty() } + path.split('/').dropLast(1)
     for (index in 1..parts.size) {

@@ -76,7 +76,8 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
       }
       if (scope == "recovery29") {
         group("recovery29-code-vault") { AndroidRecoveryChecks.run(IsolatedContext(targetContext, scratch)) }
-        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Recovery code vectors, HKDF and vault life cycle PASS; device-lock prompt and UI NOT_RUN here\n") })
+        group("recovery29-catalog") { AndroidRecoveryCatalogChecks.run(IsolatedContext(targetContext, scratch)) { line -> sendStatus(0, Bundle().apply { putString("stream", "$line\n") }) } }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Recovery code vectors, HKDF, vault life cycle and renewal, catalog vectors and writer PASS; device-lock prompt, UI and real transports NOT_RUN here\n") })
         return
       }
       if (scope == "cloud18-dropbox") {

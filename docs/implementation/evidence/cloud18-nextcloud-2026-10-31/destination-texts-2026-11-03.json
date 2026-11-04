@@ -1,0 +1,43 @@
+{
+  "slice": "Hedefe özel metinler (Sıradaki madde 11): (a) hedefe bağlı Yedekler başlıkları/sekme/geri, (b) hesap görüntü etiketi, (c) ADR0029 karar 6 kurtarma kodu girişi, kart satırı, kapsam metni, kopyalama",
+  "date": "2026-11-03",
+  "base": "3a8813e + uncommitted diff (no commit)",
+  "approval": "user 2026-11-03: TR/EN/DE texts and Lovable mapping approved as proposed ('Hedeflere dön' kept)",
+  "adr": "ADR0028 §Account display label added before code",
+  "checks": {
+    "jest": "PASS 36 suites / 218 tests (+5: parser label, copy validation, hook copy, protected line, destination-bound Backups view)",
+    "tsc": "PASS",
+    "eslint": "PASS (300-line rule)",
+    "android_build": "PASS :app:assembleDebug :my-module:assembleDebugAndroidTest arm64-v8a",
+    "ios_build": "PASS xcodebuild Debug iphonesimulator arm64 (no warnings in changed files)"
+  },
+  "runtime_ios": {
+    "device": "Kloda-Cloud18-Disposable (0309DEBC-...)",
+    "steps": [
+      "existing Dropbox profile (saved before the label) showed the account email after the run that finished at launch: one-time backfill PASS; no dbid shown",
+      "Destinations: 'Kurtarma koduyla korunuyor' line on the WebDAV and Dropbox cards; its Settings link opens the recovery page",
+      "Yedekleri gör: title 'Dropbox yedeklerim', 'Hedeflere dön', Destinations tab selected, list rows 'Yedek tamamlandı · Dropbox'; back returns to Destinations",
+      "Settings recovery page: covered list WebDAV + Dropbox with account, scope text; Show code via simulated Face ID; Copy -> pasteboard held the 14-group code, notice shown; code gone from the pasteboard 60 s later (polled)"
+    ],
+    "result": "PASS"
+  },
+  "runtime_android": {
+    "device": "emulator-5590 KlodaCloud18",
+    "steps": [
+      "Dropbox card showed 'Hesap adı bir sonraki yedeklemeden sonra gösterilir' -> Şimdi yedekle -> verified run -> card shows the account email (accessibility label 'Hesap: …'): one-time backfill PASS",
+      "Yedekleri gör: 'Dropbox yedeklerim', 'Hedeflere dön', Destinations tab selected, 'Yedek tamamlandı · Dropbox'; back returns to Destinations",
+      "Settings -> 'Bulut yedekleri için kurtarma kodu': covered list Dropbox + account, scope text, code masked"
+    ],
+    "result": "PASS (reveal/copy NOT_RUN: needs the user's emulator pattern lock)"
+  },
+  "not_run": [
+    "Android Show code + Copy: sensitive flag, 60 s clear while focused, clear on next resume after background",
+    "EN/DE and large-font/a11y capture of the new screens (keys exist in all three locales; Jest renders TR)",
+    "Google Drive/OneDrive/Yandex labels (no upload adapter; only Dropbox reads the label)"
+  ],
+  "limits": [
+    "Android clears the clip only while it can read the clipboard (foreground) and only if the clip is still Kloda's; process death before expiry leaves the clip to the system",
+    "29/2 catalog writer must not include accountLabel (ADR0028 note)"
+  ],
+  "review": "same-agent separate pass: recovery status re-read on every 2 s run refresh fixed (keyed on targets/opt-ins); label kept out of equality/targetId on both platforms; no logging of label/code. No independent review."
+}

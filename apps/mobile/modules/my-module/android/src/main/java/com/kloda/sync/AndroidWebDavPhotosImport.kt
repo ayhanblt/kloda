@@ -7,15 +7,18 @@ internal class AndroidWebDavPhotosImport(
   private val context: Context, private val target: String, private val source: String,
   private val journal: AndroidWebDavJournal, private val state: AndroidWebDavPhotosJournal,
   private val stages: Map<String, FilesSnapshot>, private val snapshots: AndroidFilesSnapshots,
-  private val check: () -> Unit
+  private val check: () -> Unit,
+  // 29/4: the restore resolves resources through the manifest's own authority (local or imported receipts).
+  private val resolve: ((WebDavPhotoManifest, WebDavPhotoResource) -> WebDavUpload?)? = null
 ) {
   private fun guard() = check()
   private val media = AndroidPhotosMedia(context, ::guard)
   private lateinit var currentManifest: WebDavPhotoManifest
   private fun remote(resource: WebDavPhotoResource): WebDavUpload {
     guard()
-    return journal.photoReceipt(target, source, resource.relativePath,
-      "photos:${currentManifest.sourceDeviceId}:${currentManifest.assetId}:${resource.role}", resource.sha256, resource.size) ?: throw FilesFailure("manifest_invalid")
+    val found = if (resolve != null) resolve.invoke(currentManifest, resource) else journal.photoReceipt(target, source, resource.relativePath,
+      "photos:${currentManifest.sourceDeviceId}:${currentManifest.assetId}:${resource.role}", resource.sha256, resource.size)
+    return found ?: throw FilesFailure("manifest_invalid")
   }
   private fun result(intent: WebDavPhotoImportIntent): Map<String, Any> = mapOf(
     "assetId" to intent.manifest.assetId, "targetAssetId" to (intent.uri ?: ""), "itemState" to intent.phase,

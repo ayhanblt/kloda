@@ -127,7 +127,8 @@
       "recovery_required": "Bestätige deinen Wiederherstellungscode, bevor du ein Cloud-Ziel aktivierst.",
       "recovery_lock_required": "Richte zuerst eine Displaysperre (PIN, Muster, Passwort oder Fingerabdruck) ein, um den Wiederherstellungscode anzuzeigen.",
       "recovery_auth_failed": "Die Telefonsperre konnte nicht bestätigt werden. Versuch es noch einmal.",
-      "recovery_mismatch": "Die eingegebenen Gruppen passen nicht zum Code. Zeig den Code erneut an und prüfe ihn."
+      "recovery_mismatch": "Die eingegebenen Gruppen passen nicht zum Code. Zeig den Code erneut an und prüfe ihn.",
+      "recovery_code_invalid": "Dieser Wiederherstellungscode ist ungültig. Vielleicht ein Tippfehler; prüfe alle Gruppen."
     },
     "rebackup": "Diese Version erneut sichern",
     "rebackupConfirm": "Diese unveränderte Quellversion ausdrücklich erneut an den gekoppelten Computer senden? Der Computer muss den Dateizugriff erlauben.",
@@ -407,7 +408,10 @@
       "save": "Ziel speichern",
       "waiting": "Warten auf Bestätigung im Browser…",
       "cancelSignIn": "Anmeldung abbrechen",
-      "viewBackups": "Backups anzeigen"
+      "viewBackups": "Backups anzeigen",
+      "backToTargets": "Zurück zu Zielen",
+      "account": "Konto: {{account}}",
+      "accountPending": "Der Kontoname erscheint nach der nächsten Sicherung."
     },
     "pair": {},
     "devices": {},
@@ -534,9 +538,13 @@
     },
     "restore": {
       "title": "Meine WebDAV-Sicherungen",
-      "hint": "Nur abgeschlossene Belege dieses Geräts werden aufgelistet. Wiederherstellen prüft entfernte Bytes erneut und erhält vorhandene Dateien im gewählten Ordner.",
+      "hint": "Aufgelistet werden abgeschlossene Sicherungen dieses Geräts und Sicherungen, die mit dem Wiederherstellungscode deines alten Telefons bestätigt wurden. Wiederherstellen prüft entfernte Bytes erneut und erhält vorhandene Dateien im gewählten Ordner.",
       "unavailable": "Die native Wiederherstellung dieses Inhalts ist noch nicht angebunden.",
-      "load": "WebDAV-Sicherungen auflisten"
+      "load": "WebDAV-Sicherungen auflisten",
+      "targetTitle": "Meine {{name}}-Sicherungen",
+      "targetLoad": "{{name}}-Sicherungen anzeigen",
+      "targetCompleted": "Sicherung abgeschlossen · {{name}}",
+      "targetEmpty": "{{name}} enthält keine abgeschlossenen Sicherungen dieses Geräts."
     },
     "smb": {
       "scope": "SMB3 im lokalen Netzwerk mit Verschlüsselung und Signierung. Eine numerische LAN-IP eingeben; Servernamen und Internet-Fallback sind nicht verfügbar.",
@@ -663,6 +671,40 @@
     "promptReason": "Entsperre dein Telefon, um deinen Wiederherstellungscode zu sehen.",
     "confirmHint": "Gib die zwei angeforderten Gruppen ein, um zu bestätigen, dass du den Code notiert hast.",
     "group": "Gruppe {{number}}",
-    "confirm": "Bestätigen und Ziel aktivieren"
+    "confirm": "Bestätigen und Ziel aktivieren",
+    "settingsEntry": "Wiederherstellungscode für Cloud-Sicherungen",
+    "covers": "Dieser Code schützt:",
+    "coversNone": "Der Wiederherstellungscode wird erstellt, wenn du dein erstes Cloud-Ziel aktivierst.",
+    "protected": "Durch den Wiederherstellungscode geschützt",
+    "protectedHint": "Wiederherstellungscode in den Einstellungen öffnen",
+    "scope": "Ein Code für alle Cloud-Ziele auf diesem Telefon. Später hinzugefügte Cloud-Ziele verwenden denselben Code.",
+    "copy": "Code kopieren",
+    "copiedIos": "Code kopiert. Er bleibt nur in der Zwischenablage dieses Geräts und wird nach 1 Minute entfernt.",
+    "copiedAndroid": "Code kopiert. Er ist als vertraulich markiert und wird nach 1 Minute aus der Zwischenablage entfernt.",
+    "renew": "Neuen Code erstellen",
+    "renewTitle": "Neuen Wiederherstellungscode erstellen?",
+    "renewBody": "Dein aktueller Code bleibt gültig, bis du den neuen bestätigst. Danach werden alle Cloud-Sicherungen dieses Telefons bei der nächsten Sicherung jedes Ziels unter dem neuen Code neu erfasst.",
+    "renewLimit": "Mit dem alten Code geschriebene Einträge bleiben in der Cloud; wer den alten Code kennt und Zugriff auf das Ziel hat, kann Sicherungen von vor der Erneuerung weiterhin wiederherstellen.",
+    "renewPromptReason": "Entsperre dein Telefon, um deinen neuen Wiederherstellungscode zu sehen.",
+    "renewTitleShown": "Dein neuer Wiederherstellungscode",
+    "renewConfirm": "Neuen Code bestätigen",
+    "renewCancel": "Abbrechen, alten Code behalten",
+    "renewDone": "Der neue Code ist aktiv. Den alten musst du nicht mehr aufbewahren.",
+    "legacyTitle": "Deine Cloud-Sicherungen sind noch nicht geschützt",
+    "legacyBody": "Diese Ziele wurden vor Einführung der Wiederherstellungscodes aktiviert. Ohne Code kannst du diese Sicherungen bei Verlust des Telefons nicht mit Kloda auf einem neuen Gerät wiederherstellen. Die Sicherung läuft in der Zwischenzeit weiter.",
+    "legacyAction": "Wiederherstellungscode erstellen",
+    "confirmOnly": "Bestätigen",
+    "importEntry": "Sicherungen deines alten Telefons übernehmen",
+    "importTitle": "Gib den Wiederherstellungscode deines alten Telefons ein",
+    "importBody": "Kloda prüft mit dem Code die Sicherungseinträge deines alten Telefons auf diesem Ziel. Bestätigte Sicherungen kannst du unter „Backups anzeigen\" wiederherstellen. Der Code wird auf diesem Telefon nicht gespeichert.",
+    "importField": "Wiederherstellungscode",
+    "importHint": "Groß-/Kleinschreibung, Leerzeichen und Bindestriche spielen keine Rolle.",
+    "importSubmit": "Prüfen und übernehmen",
+    "importWorking": "Sicherungseinträge werden geprüft…",
+    "importDone_one": "{{count}} Datei bereit zur Wiederherstellung.",
+    "importDone_other": "{{count}} Dateien bereit zur Wiederherstellung.",
+    "importNone": "Für diesen Code wurden auf diesem Ziel keine Sicherungseinträge gefunden. Prüfe, ob Ziel und Code stimmen.",
+    "unverifiedTitle": "Einige Sicherungen konnten nicht geprüft werden",
+    "unverifiedBody": "Einige Sicherungseinträge in der Cloud fehlen oder wurden verändert. Die Dateien darin lassen sich nicht mit Kloda wiederherstellen; sie bleiben beim Anbieter. Bestätigte Sicherungen sind nicht betroffen."
   }
 }

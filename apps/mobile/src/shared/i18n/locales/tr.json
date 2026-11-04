@@ -127,7 +127,8 @@
       "recovery_required": "Bulut hedefini etkinleştirmeden önce kurtarma kodunu onaylaman gerekir.",
       "recovery_lock_required": "Kurtarma kodunu göstermek için önce telefonuna ekran kilidi (PIN, desen, parola veya parmak izi) ekle.",
       "recovery_auth_failed": "Telefon kilidi doğrulanamadı. Tekrar dene.",
-      "recovery_mismatch": "Girdiğin gruplar kodla eşleşmiyor. Kodu tekrar gösterip kontrol et."
+      "recovery_mismatch": "Girdiğin gruplar kodla eşleşmiyor. Kodu tekrar gösterip kontrol et.",
+      "recovery_code_invalid": "Bu kurtarma kodu geçerli değil. Yazım hatası olabilir; tüm grupları kontrol et."
     },
     "rebackup": "Bu sürümü yeniden yedekle",
     "rebackupConfirm": "Bu değişmemiş kaynak sürümü eşleşmiş bilgisayara açık isteğinizle yeniden gönderilsin mi? Bilgisayarda dosya erişimi onaylı olmalıdır.",
@@ -407,7 +408,10 @@
       "save": "Hedefi kaydet",
       "waiting": "Tarayıcıda onay bekleniyor…",
       "cancelSignIn": "Girişi iptal et",
-      "viewBackups": "Yedekleri gör"
+      "viewBackups": "Yedekleri gör",
+      "backToTargets": "Hedeflere dön",
+      "account": "Hesap: {{account}}",
+      "accountPending": "Hesap adı bir sonraki yedeklemeden sonra gösterilir."
     },
     "pair": {},
     "devices": {},
@@ -534,9 +538,13 @@
     },
     "restore": {
       "title": "WebDAV yedeklerim",
-      "hint": "Yalnız bu cihazın tamamlanmış kayıtları listelenir. Restore, uzak byte’ları yeniden doğrular ve seçtiğiniz klasörde mevcut dosyanın üzerine yazmaz.",
+      "hint": "Bu cihazın tamamlanmış yedekleri ve eski telefonun kurtarma koduyla doğrulanan yedekler listelenir. Geri yükleme, uzaktaki byte’ları yeniden doğrular ve seçtiğiniz klasörde mevcut dosyanın üzerine yazmaz.",
       "unavailable": "Bu içerik için native restore bağlantısı henüz tamamlanmadı.",
-      "load": "WebDAV yedeklerini listele"
+      "load": "WebDAV yedeklerini listele",
+      "targetTitle": "{{name}} yedeklerim",
+      "targetLoad": "{{name}} yedeklerini listele",
+      "targetCompleted": "Yedek tamamlandı · {{name}}",
+      "targetEmpty": "{{name}} hedefinde bu cihaza ait tamamlanmış yedek yok."
     },
     "smb": {
       "scope": "Yerel ağınızda, şifreleme ve imzalama kullanan SMB3. Sayısal LAN IP adresi girin; sunucu adı ve Internet üzerinden bağlantı yoktur.",
@@ -663,6 +671,40 @@
     "promptReason": "Kurtarma kodunu görmek için telefonunun kilidini aç.",
     "confirmHint": "Kodu yazdığını doğrulamak için istenen iki grubu gir.",
     "group": "{{number}}. grup",
-    "confirm": "Onayla ve hedefi etkinleştir"
+    "confirm": "Onayla ve hedefi etkinleştir",
+    "settingsEntry": "Bulut yedekleri için kurtarma kodu",
+    "covers": "Bu kod şu hedefleri korur:",
+    "coversNone": "Kurtarma kodu, ilk bulut hedefini etkinleştirdiğinde oluşturulur.",
+    "protected": "Kurtarma koduyla korunuyor",
+    "protectedHint": "Kurtarma kodunu Ayarlar'da aç",
+    "scope": "Bu telefondaki tüm bulut hedefleri için tek kod. Sonradan eklediğin bulut hedefleri de aynı kodu kullanır.",
+    "copy": "Kodu kopyala",
+    "copiedIos": "Kod kopyalandı. Yalnız bu cihazın panosunda durur ve 1 dakika sonra silinir.",
+    "copiedAndroid": "Kod kopyalandı. Hassas olarak işaretlendi ve 1 dakika sonra panodan silinir.",
+    "renew": "Yeni kod oluştur",
+    "renewTitle": "Yeni kurtarma kodu oluşturulsun mu?",
+    "renewBody": "Yeni kodu onaylayana kadar mevcut kodun geçerli kalır. Onayladıktan sonra bu telefondaki tüm bulut yedekleri, her hedefin bir sonraki yedeklemesinde yeni kodla yeniden kaydedilir.",
+    "renewLimit": "Eski kodla yazılmış kayıtlar bulutta kalır; eski kodu bilen biri, hedefe erişimi varsa yenilemeden önceki yedekleri hâlâ geri yükleyebilir.",
+    "renewPromptReason": "Yeni kurtarma kodunu görmek için telefonunun kilidini aç.",
+    "renewTitleShown": "Yeni kurtarma kodun",
+    "renewConfirm": "Yeni kodu onayla",
+    "renewCancel": "Vazgeç, eski kodu koru",
+    "renewDone": "Yeni kod etkin. Eski kodu artık saklaman gerekmez.",
+    "legacyTitle": "Bulut yedeklerin henüz korunmuyor",
+    "legacyBody": "Bu hedefler kurtarma kodundan önce etkinleştirildi. Kod oluşturmazsan telefonunu kaybettiğinde bu yedekleri yeni bir cihazda Kloda ile geri yükleyemezsin. Yedekleme bu arada devam eder.",
+    "legacyAction": "Kurtarma kodu oluştur",
+    "confirmOnly": "Onayla",
+    "importEntry": "Eski telefonun yedeklerini getir",
+    "importTitle": "Eski telefonun kurtarma kodunu gir",
+    "importBody": "Kloda bu hedefte eski telefonun yedek kayıtlarını kodla doğrular. Doğrulanan yedekleri \"Yedekleri gör\" altında geri yükleyebilirsin. Kod bu telefonda saklanmaz.",
+    "importField": "Kurtarma kodu",
+    "importHint": "Büyük/küçük harf, boşluk ve tire fark etmez.",
+    "importSubmit": "Doğrula ve getir",
+    "importWorking": "Yedek kayıtları doğrulanıyor…",
+    "importDone_one": "{{count}} dosya geri yüklemeye hazır.",
+    "importDone_other": "{{count}} dosya geri yüklemeye hazır.",
+    "importNone": "Bu kodla bu hedefte yedek kaydı bulunamadı. Doğru hedefi ve kodu seçtiğini kontrol et.",
+    "unverifiedTitle": "Bazı yedekler doğrulanamadı",
+    "unverifiedBody": "Bulutta bazı yedek kayıtları eksik ya da değiştirilmiş. Bunlardaki dosyalar Kloda ile geri yüklenemez; dosyalar sağlayıcıda durmaya devam eder. Doğrulanan yedekler etkilenmez."
   }
 }

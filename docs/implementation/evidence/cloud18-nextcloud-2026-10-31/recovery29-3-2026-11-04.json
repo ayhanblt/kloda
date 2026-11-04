@@ -1,0 +1,20 @@
+{
+ "slice": "29/3 new-device import (code entry, MAC/chain/sequence verification) + imported receipt migration (ADR0029 §4/§6)",
+ "date": "2026-11-04",
+ "base": "3a8813e + uncommitted 29/1 text work + 29/2 + 29/3 diff (no commit)",
+ "smallest_validation_path": "iOS host (production code parser, codec decode, PROPFIND listing parser, journal + importer against the 29/2 writer's in-memory deltas and tampered copies) -> Android compile + same cases in instrumentation scope recovery29 -> Jest/tsc/ESLint for the changed JS API -> one iOS arm64 Simulator build. 29/2 checks not repeated separately (they run inside the same host binary).",
+ "checks": {
+  "ios_host": "PASS python3 -I tools/test-ios-recovery-catalog.py (13 PASS lines; new: code parse round trip/aliases/refusals; PROPFIND listing direct children only; import of both old-code chains into 4 restore-only receipts bound to the importing destination, idempotent; renewed code reads its chain only, wrong code finds nothing, own installation skipped; tamper: altered byte, missing first, injected, replayed, oversized, authentic-but-unsafe path each end the chain and count as unverified). Rerun once after the review fix.",
+  "android_build": "PASS :my-module:assembleDebugAndroidTest (main + AndroidRecoveryImportChecks), rerun after the review fix",
+  "android_instrumentation": "PASS 2026-11-04 python3 -I tools/test-android-recovery-catalog.py (scope recovery29, emulator-5590 KlodaCloud18, unlocked by the user): code parse, PROPFIND listing, import of both chains (4 receipts, idempotent), renewed/wrong code/own installation, 6 tamper cases; INSTRUMENTATION_CODE -1",
+  "jest": "PASS src/shared/api/recovery-code.spec.ts (4 tests, importCatalog shape and refusals)",
+  "tsc": "PASS",
+  "eslint": "PASS changed files",
+  "ios_build": "PASS xcodebuild Debug iphonesimulator ARCHS=arm64 after pod install (LANG=en_US.UTF-8); first attempt failed on a missing try in IosDropboxTransport.list, fixed; no warnings in changed files. Not rebuilt after the one-line listing origin fix (compiled by the host test)."
+ },
+ "not_run": [
+  "real Nextcloud PROPFIND and Dropbox list_folder against a real catalog (needs a real delta written by 29/2 first)",
+  "code entry screen: no UI yet; TR/EN/DE texts (including recovery_code_invalid and the unverified notice) need approval"
+ ],
+ "review": "same-agent separate pass: added scheme/port match for PROPFIND hrefs on both platforms; checked value equality of the settings_changed guard, isolation of imported tables from upload paths, size bounds; no independent review"
+}

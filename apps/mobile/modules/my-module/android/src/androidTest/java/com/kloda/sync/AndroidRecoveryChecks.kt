@@ -30,6 +30,8 @@ internal object AndroidRecoveryChecks {
       val code = vault.reveal()
       check(Regex("^[0-9A-HJKMNP-TV-Z]{4}(-[0-9A-HJKMNP-TV-Z]{4}){13}$").matches(code)) { "code shape" }
       check(vault.state() == "pending" && AndroidRecoveryVault(context).reveal() == code) { "created once" }
+      rejects("recovery_required") { vault.renew() }
+      check(vault.catalogKeys() == null) { "no catalog before confirmation" }
       val groups = code.split('-')
       rejects("invalid_request") { vault.confirm(mapOf(3 to groups[3])) }
       rejects("invalid_request") { vault.confirm(mapOf(3 to groups[3], 14 to "0000")) }
@@ -38,6 +40,16 @@ internal object AndroidRecoveryChecks {
       check(vault.confirm(mapOf(3 to " " + groups[3].lowercase(), 9 to groups[9])) == "confirmed")
       vault.requireConfirmed()
       check(AndroidRecoveryVault(context).state() == "confirmed" && vault.reveal() == code) { "confirmed persists, secret unchanged" }
+      // 29/2 regeneration: the new secret waits beside the old one and replaces it only when confirmed.
+      val oldChain = vault.catalogKeys()!!.chain
+      val renewed = vault.renew()
+      check(renewed != code && AndroidRecoveryVault(context).renew() == renewed && vault.reveal() == code && vault.state() == "confirmed") { "renewal pending" }
+      check(vault.catalogKeys()!!.chain == oldChain && vault.shown(renewed) && vault.shown(code)) { "old chain in force until confirmed" }
+      val next = renewed.split('-')
+      val stale = (0 until AndroidRecoveryCode.GROUPS).filter { groups[it] != next[it] }.take(2)
+      rejects("recovery_mismatch") { vault.confirm(mapOf(stale[0] to groups[stale[0]], stale[1] to groups[stale[1]])) }
+      check(vault.confirm(mapOf(1 to next[1], 12 to next[12])) == "confirmed")
+      check(vault.reveal() == renewed && vault.catalogKeys()!!.chain != oldChain && vault.shown(renewed) && !vault.shown(code)) { "new secret replaces the old one" }
       val file = File(context.noBackupFilesDir, "kloda-recovery.v1")
       file.writeBytes(file.readBytes().also { it[it.size - 1] = (it[it.size - 1].toInt() xor 1).toByte() })
       rejects("webdav_storage") { vault.state() }

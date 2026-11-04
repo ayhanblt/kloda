@@ -31,8 +31,7 @@ final class IosWebDavPhotosRestore {
         // Retain private downloads on uncertainty; an import intent is never blindly recreated.
         for resource in manifest.resources {
             try check()
-            guard let value = try journal.photoReceipt(target: receipt.target, source: receipt.source, path: resource.relativePath,
-              identity: "photos:" + manifest.sourceDeviceId + ":" + manifest.assetId + ":" + resource.role, hash: resource.sha256, size: resource.size) else { throw IosWebDavFailure.code("manifest_invalid") }
+            guard let value = try download.resource(manifest, resource, of: receipt) else { throw IosWebDavFailure.code("manifest_invalid") }
             let stage = try download.stage(value.id); retained.append(stage)
             stages[resource.relativePath] = try snapshots.verifiedURL(stage, sha256: resource.sha256, size: resource.size, check: check)
           }
@@ -42,8 +41,8 @@ final class IosWebDavPhotosRestore {
               try check(); try action()
             }
           })
-          // Every reference was downloaded through its own target-bound local Completed receipt.
-          try check(); try IosWebDavPhotoManifestCodec.requireReceipts(manifest, target: receipt.target, journal: journal)
+          // Every reference was downloaded through its own target-bound receipt (local Completed, or imported of the same origin).
+          try check(); try download.requireResources(manifest, of: receipt)
           try IosWebDavPhotosImport.importManifest(manifest: manifest, stages: stages, journal: state, check: check)
           try check()
           guard let saved = try state.photoImport(state.photoKey([manifest.sourceDeviceId, manifest.assetId])), saved.state == "completed" else { throw IosWebDavFailure.code("review_required") }

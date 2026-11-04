@@ -2,6 +2,7 @@ import AuthenticationServices
 import ExpoModulesCore
 import LocalAuthentication
 import UIKit
+import UniformTypeIdentifiers
 
 // Step18A/4 (ADR0027): add, list, enable and remove DAV destinations. Saving custody is not enabling (ADR0023);
 // an enabled DAV destination gets its own queue plan (18A/3). The original WebDAV entry is managed by KlodaBackup.
@@ -66,33 +67,48 @@ public final class KlodaCloudModule: Module {
       self.background(promise) { ["state": try IosRecoveryVault.state()] }
     }
     AsyncFunction("revealRecovery") { (title: String, reason: String, promise: Promise) in
-      guard UIApplication.shared.applicationState == .active else { return promise.reject("candidate_stale", "candidate_stale") }
-      guard [title, reason].allSatisfy({ !$0.trimmingCharacters(in: .whitespaces).isEmpty && $0.count <= 200 }) else {
-        return promise.reject("invalid_request", "invalid_request")
-      }
-      let context = LAContext()
-      var unavailable: NSError?
-      guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &unavailable) else {
-        return promise.reject("recovery_lock_required", "recovery_lock_required")
-      }
-      context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, error in
-        guard success else {
-          let code: String
-          switch (error as? LAError)?.code {
-          case .userCancel?, .appCancel?, .systemCancel?, .userFallback?: code = "cancelled"
-          case .passcodeNotSet?: code = "recovery_lock_required"
-          default: code = "recovery_auth_failed"
-          }
-          return DispatchQueue.main.async { promise.reject(code, code) }
-        }
-        self.background(promise) { ["code": try IosRecoveryVault.reveal()] }
-      }
+      self.afterDeviceLock(title: title, reason: reason, promise: promise) { try IosRecoveryVault.reveal() }
+    }.runOnQueue(.main)
+    // ADR0029 decision 3 (29/2): a new code, behind the same lock; it replaces the old one once confirmed.
+    AsyncFunction("renewRecovery") { (title: String, reason: String, promise: Promise) in
+      self.afterDeviceLock(title: title, reason: reason, promise: promise) { try IosRecoveryVault.renew() }
     }.runOnQueue(.main)
     AsyncFunction("hideRecovery") { () -> Void in }
+    // ADR0029 decision 6: only the code already shown after the lock check. Local-only (no Universal Clipboard) and
+    // removed by the system after 60 s.
+    AsyncFunction("copyRecovery") { (code: String, promise: Promise) in
+      self.background(promise) {
+        guard try IosRecoveryVault.shown(code) else { throw IosWebDavFailure.code("invalid_request") }
+        DispatchQueue.main.sync {
+          UIPasteboard.general.setItems([[UTType.utf8PlainText.identifier: code]],
+            options: [.localOnly: true, .expirationDate: Date().addingTimeInterval(60)])
+        }
+        return [:]
+      }
+    }
     AsyncFunction("confirmRecovery") { (first: Int, firstGroup: String, second: Int, secondGroup: String, promise: Promise) in
       guard first != second else { return promise.reject("invalid_request", "invalid_request") }
       self.background(promise) { ["state": try IosRecoveryVault.confirm([first: firstGroup, second: secondGroup])] }
     }
+    // ADR0029 29/3: the old phone's code reads this added destination's catalog into restore-only imported receipts.
+    // The code is not stored and does not become this phone's code; nothing is uploaded or enabled.
+    AsyncFunction("importRecovery") { (targetId: String, code: String, promise: Promise) in
+      guard UIApplication.shared.applicationState == .active else { return promise.reject("candidate_stale", "candidate_stale") }
+      // Own queue: listing and reading the catalog must not hold up the destination calls on `worker`.
+      self.background(promise, on: DispatchQueue.global(qos: .userInitiated)) {
+        let keys = IosRecoveryCatalog.keys(try IosRecoveryCode.parse(code))
+        try Self.added(targetId)
+        guard let destination = try IosWebDavDestinations.added(targetId) else { throw IosWebDavFailure.code("not_found") }
+        let check = {
+          guard try IosWebDavDestinations.added(targetId) == destination else { throw IosWebDavFailure.code("settings_changed") }
+        }
+        let journal = try IosWebDavJournal.open()
+        let summary = try IosRecoveryImport(journal: journal, target: targetId, keys: keys,
+          transport: try destination.transport(snapshots: try IosFilesSnapshot.webdav(), check: check), check: check).run()
+        return ["chains": summary.chains, "deltas": summary.deltas, "entries": summary.entries, "unverified": summary.unverified,
+          "imported": try journal.importedCount(target: targetId)]
+      }
+    }.runOnQueue(.main)
     // Step18A/4c: one manual run of an enabled, added destination (DAV, or Dropbox since 18B/5) through the shared
     // queue (same lock and begin() order as the original WebDAV run); the original entry keeps KlodaBackup's run/pause.
     AsyncFunction("runDestination") { (targetId: String, promise: Promise) in
@@ -185,7 +201,7 @@ public final class KlodaCloudModule: Module {
           guard let callback else { throw IosWebDavFailure.code("cancelled") }
           let grant = try current.exchange(try IosOAuthLogin.code(callback, request), request)
           let profile = IosOAuthProfile(revision: UUID().uuidString, provider: request.provider.name, accountId: grant.accountId,
-            targetPath: folder, refreshToken: grant.refreshToken, expiresAt: grant.expiresAt)
+            targetPath: folder, refreshToken: grant.refreshToken, expiresAt: grant.expiresAt, accountLabel: current.label(grant.accessToken))
           do {
             if current.isCancelled() { throw IosWebDavFailure.code("cancelled") }
             guard try Self.total() < IosWebDavVault.limit else { throw IosWebDavFailure.code("destination_limit") }
@@ -210,8 +226,32 @@ public final class KlodaCloudModule: Module {
     oauth = nil; browser?.cancel(); browser = nil
     result(attempt.promise)
   }
-  private func background(_ promise: Promise, _ operation: @escaping () throws -> [String: Any]) {
-    worker.async {
+  // ADR0029 29/1: the code is returned only after the device lock check (Face ID/Touch ID or passcode).
+  private func afterDeviceLock(title: String, reason: String, promise: Promise, code: @escaping () throws -> String) {
+    guard UIApplication.shared.applicationState == .active else { return promise.reject("candidate_stale", "candidate_stale") }
+    guard [title, reason].allSatisfy({ !$0.trimmingCharacters(in: .whitespaces).isEmpty && $0.count <= 200 }) else {
+      return promise.reject("invalid_request", "invalid_request")
+    }
+    let context = LAContext()
+    var unavailable: NSError?
+    guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &unavailable) else {
+      return promise.reject("recovery_lock_required", "recovery_lock_required")
+    }
+    context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, error in
+      guard success else {
+        let failure: String
+        switch (error as? LAError)?.code {
+        case .userCancel?, .appCancel?, .systemCancel?, .userFallback?: failure = "cancelled"
+        case .passcodeNotSet?: failure = "recovery_lock_required"
+        default: failure = "recovery_auth_failed"
+        }
+        return DispatchQueue.main.async { promise.reject(failure, failure) }
+      }
+      self.background(promise) { ["code": try code()] }
+    }
+  }
+  private func background(_ promise: Promise, on queue: DispatchQueue? = nil, _ operation: @escaping () throws -> [String: Any]) {
+    (queue ?? worker).async {
       do { let value = try operation(); DispatchQueue.main.async { promise.resolve(value) } }
       catch { let code = IosWebDavFilesRunner.code(error); DispatchQueue.main.async { promise.reject(code, code) } }
     }
@@ -246,11 +286,13 @@ public final class KlodaCloudModule: Module {
     if profile.provider != nil, let run = try IosWebDavQueue.shared.runView(target: target) { row["run"] = run }
     return row
   }
-  // Display metadata only: never the refresh token. The account ID stands in for the user name.
+  // Display metadata only: never the refresh token. The account ID stands in for the user name; `accountLabel` is the
+  // display-only email or name (ADR0028), shown on the card and nowhere else.
   static func summary(_ profile: IosOAuthProfile) throws -> [String: Any] {
     let target = try profile.targetId()
     var row: [String: Any] = ["targetId": target, "provider": profile.provider, "endpoint": try IosOAuthProvider.named(profile.provider).api,
       "targetPath": profile.targetPath, "username": profile.accountId, "enabled": try IosWebDavDestinations.enabled(target)]
+    if let label = profile.accountLabel { row["accountLabel"] = label }
     if IosCloudTarget.oauthKinds.contains(profile.provider), let run = try IosWebDavQueue.shared.runView(target: target) { row["run"] = run }
     return row
   }

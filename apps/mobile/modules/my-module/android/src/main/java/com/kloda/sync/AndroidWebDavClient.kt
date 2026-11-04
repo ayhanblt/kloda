@@ -50,6 +50,12 @@ internal class AndroidWebDavClient(context: Context, val profile: AndroidWebDavP
     val dav = requireNotNull(profile)
     return exchange(dav.copy(targetPath = prefix).url().newBuilder().addPathSegment("").build(), "MKCOL", dav.authorization())
   }
+  // 29/3: PROPFIND Depth 1 of a folder; a 207 body streams to `receive` (at most `maximum`).
+  fun propfind(folder: String, body: ByteArray, maximum: Long, receive: (ByteArray, Int) -> Unit): WebDavReply {
+    val dav = requireNotNull(profile)
+    return exchange(dav.url(folder).newBuilder().addPathSegment("").build(), "PROPFIND", dav.authorization(), mapOf("Depth" to "1"),
+      body.inputStream(), body.size.toLong(), maximum, receive, contentType = "application/xml; charset=utf-8")
+  }
   // REST APIs (Dropbox): POST, body always read. A mutation's received status stays its ACK even if its body is lost;
   // a read's interrupted body is a failure. `collect` keeps a 200 body (at most `maximum`, bounded to 64 KiB).
   fun call(url: okhttp3.HttpUrl, authorization: String, mutation: Boolean, headers: Map<String, String> = emptyMap(),
@@ -100,7 +106,8 @@ internal class AndroidWebDavClient(context: Context, val profile: AndroidWebDavP
       currentNetwork()
       call.execute().use { response ->
         if (rest != null) return restReply(response, rest, maximum, receive)
-        if (response.code != 200 || method != "GET") return WebDavReply(response.code, 0, "")
+        val streamed = (method == "GET" && response.code == 200) || (method == "PROPFIND" && response.code == 207)
+        if (!streamed) return WebDavReply(response.code, 0, "")
         val digest = MessageDigest.getInstance("SHA-256"); var count = 0L
         response.body?.byteStream()?.use { input ->
           val bytes = ByteArray(65536)
