@@ -9,6 +9,7 @@
       "expo-dev-client",
       "expo-secure-store",
       "./plugins/with-optional-camera.cjs",
+      "./plugins/with-alert-case.cjs",
       "./plugins/with-live-activity.cjs",
       [
         "expo-camera",
@@ -32,7 +33,9 @@
           "com.kloda.app.backup.processing",
           "com.kloda.app.webdav.processing",
           "com.kloda.app.smb.processing",
-          "com.kloda.app.sftp.processing"
+          "com.kloda.app.sftp.processing",
+          "com.kloda.app.ftps.processing",
+          "com.kloda.app.s3.processing"
         ],
         "NSFaceIDUsageDescription": "Kloda asks for Face ID or your passcode before it shows your recovery code."
       }

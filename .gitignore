@@ -99,3 +99,10 @@ apps/mobile/modules/my-module/ios/NativeStorage/
 /apps/mobile/modules/my-module/ios/NativeSftp/
 
 /apps/mobile/modules/my-module/android/src/androidTest/assets/kloda-sftp16/
+
+/apps/mobile/modules/my-module/ios/NativeS3/
+
+# Reproducible native outputs and downloaded preflight candidate archives.
+/apps/mobile/modules/my-module/ios/NativeFtps/
+/apps/mobile/modules/my-module/android/src/androidTest/assets/kloda-ftps16/libkloda_ftps_native.so
+/docs/implementation/evidence/s3-step17-preflight-2026-11-03/**/*.crate

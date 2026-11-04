@@ -1,0 +1,43 @@
+{
+  "scope": "User-approved isolated process-local CA only; no system/product trust change",
+  "checks": {
+    "explicit_tls_prot_p_listing": {
+      "exit": 0,
+      "stderr": ""
+    },
+    "unknown_ca_rejected": {
+      "exit": 60,
+      "stderr": "curl: (60) SSL certificate OpenSSL verify result: unable to get local issuer certificate (20)\nMore details here: https://curl.se/docs/sslcerts.html\n\ncurl failed to verify the legitimacy of the server and therefore could not\nestablish a secure connection to it. To learn more about this situation and\nhow to fix it, please visit the webpage mentioned above."
+    },
+    "hostname_mismatch_rejected": {
+      "exit": 60,
+      "stderr": "curl: (60) SSL: no alternative certificate subject name matches target IPv4 address '127.0.0.1'\nMore details here: https://curl.se/docs/sslcerts.html\n\ncurl failed to verify the legitimacy of the server and therefore could not\nestablish a secure connection to it. To learn more about this situation and\nhow to fix it, please visit the webpage mentioned above."
+    },
+    "clear_data_rejected": {
+      "exit": 13,
+      "stderr": "curl: (13) Bad PASV/EPSV response: 550"
+    },
+    "standard_stor_overwrites": {
+      "exit": 0,
+      "stderr": "",
+      "safety": "FAIL: generic STOR overwrote existing file; not an acceptable publication path"
+    }
+  },
+  "cleanup": {
+    "server": "terminated and waited",
+    "privateKeysRemoved": true
+  },
+  "notAccepted": [
+    "general CA/real LAN",
+    "native control/data route generation",
+    "exclusive durable publication/lost ACK",
+    "mobile/product acceptance"
+  ],
+  "rawDirectory": "/private/tmp/kloda-ftps16c-fixture",
+  "sha256": {
+    "check.py": "074d1e92fc04ca6296176093849263d396def7571913df9373a88fe1cf16828b",
+    "result.json": "aa1c0dd05349973937dc27c8695a8deb88b178dd204ee09f2f83ba81f6e5a3d0",
+    "server.log": "8a44261bf2688382b38cc1c8495020f2a12e4194c3d68267ce8b6267bef12bd9"
+  },
+  "harnessCorrection": "clear-data rejection returned13, not the initially expected8; recorded successful cases reused, not rerun; only previously unreached STOR check subsequently executed"
+}

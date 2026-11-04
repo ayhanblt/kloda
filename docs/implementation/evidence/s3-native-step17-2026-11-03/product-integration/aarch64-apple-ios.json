@@ -1,0 +1,11 @@
+{
+  "target": "aarch64-apple-ios",
+  "release": true,
+  "artifact": "/Users/ayhanblt/Desktop/projects/kloda/packages/s3-native/target/aarch64-apple-ios/aarch64-apple-ios/release/libkloda_s3_native.a",
+  "sha256": "2ba1bcf719cee923e9832fd1c136481d0653413f8cfcc704ad0910f10dfdd11a",
+  "bytes": 23474760,
+  "exports": [
+    "kloda_s3_json_v1"
+  ],
+  "alignments": []
+}

@@ -1,0 +1,6 @@
+[package]
+name = "kloda_ftps_candidate_probe"
+version = "0.0.0"
+edition = "2024"
+[dependencies]
+suppaftp = { version = "=12.2.1", default-features = false, features = ["rustls-ring"] }

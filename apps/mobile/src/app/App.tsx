@@ -15,6 +15,8 @@ import { WebDavPage } from '../pages/setup/ui/webdav-page';
 import { ConnectionsPage } from '../pages/connections/ui/connections-page';
 import { SmbPage } from '../pages/connections/ui/smb-page';
 import { SftpPage } from '../pages/connections/ui/sftp-page';
+import { S3Page } from '../pages/connections/ui/s3-page';
+import { FtpsPage } from '../pages/connections/ui/ftps-page';
 import { ProviderPage } from '../pages/connections/ui/provider-page';
 import { CloudProviderPage, cloudProviderFor } from '../pages/connections/ui/cloud-provider-page';
 import { SettingsPage } from '../pages/settings/ui/settings-page';
@@ -53,6 +55,8 @@ export function App() {
     {page === 'backups' && <ActivityPage embedded view="backups" target={backupTarget?.id} targetLabel={backupTarget && providerLabel(backupTarget.provider)} onBack={backupTarget ? () => navigate('connections') : back} />}
     {(page === 'connections' || page === 'add-connection') && <ConnectionsPage adding={page === 'add-connection'} navigate={navigate} openProvider={openProvider} openBackups={openBackups} saved={model.savedStorage} />}
     {page === 'provider' && (provider === 'smb' ? <SmbPage onBack={() => navigate('add-connection')} /> : provider === 'sftp' ? <SftpPage onBack={() => navigate('add-connection')} />
+      : provider === 'ftp' ? <FtpsPage onBack={() => navigate('add-connection')} />
+      : provider === 'amazon-s3' || provider === 's3-compatible' ? <S3Page key={provider} provider={provider} onBack={() => navigate('add-connection')} />
       : cloudProvider ? <CloudProviderPage provider={cloudProvider} onBack={() => navigate('add-connection')} onSaved={() => navigate('connections')} /> : <ProviderPage provider={provider} onBack={() => navigate('add-connection')} />)}
     {page === 'settings' && <SettingsPage navigate={navigate} />}
     {page === 'recovery' && <RecoveryPage onBack={() => navigate('settings')} />}

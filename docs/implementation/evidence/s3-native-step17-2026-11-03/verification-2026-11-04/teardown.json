@@ -1,0 +1,7 @@
+{
+  "local_server": "stopped exact owned wrapper",
+  "private_tls_keys": "removed",
+  "android": "owned emulator stopped; reverse removed; test Photos permissions revoked; previous test CA restored",
+  "ios": "owned Photos fixtures terminated/permissions reset; successful native cleanup2assets+2albums/fakeKeychain recorded; Simulator and real-key user app retained",
+  "no_new_aws_requests": true
+}

@@ -1,0 +1,10 @@
+[package]
+name = "kloda-s3-sansio-probe"
+version = "0.0.0"
+edition = "2024"
+[dependencies]
+rusty-s3 = { version = "=0.10.2", default-features = false, features = ["rustcrypto", "xml"] }
+reqwest = { version = "=0.13.3", default-features = false, features = ["blocking", "rustls"] }
+sha2 = "=0.11.1"
+quick-xml = "=0.41.0"
+kloda_s3_native = { path = "/Users/ayhanblt/Desktop/projects/kloda/packages/s3-native" }

@@ -170,3 +170,23 @@ fn borrowed_lifetime_invalidation_and_socket_cleanup() {
         1
     );
 }
+
+unsafe extern "C" fn ftps_data_worker(_: *mut c_void, control: i32, lease: *const c_void) -> i32 {
+    assert!(unsafe { fcntl(control,1) } >= 0);
+    let data=unsafe { bridge::kloda_ios_lan_connect(lease,43210) };
+    assert!(data>=0 && unsafe { fcntl(data,1) } >= 0);
+    drop(unsafe { <std::fs::File as std::os::fd::FromRawFd>::from_raw_fd(data) });
+    assert!(unsafe { fcntl(data,1) } < 0);
+    FIXTURE.with(|f| { let f=f.borrow(); assert_eq!(f.drops,0); f.valid.store(false,Ordering::SeqCst); });
+    assert_eq!(unsafe { bridge::kloda_ios_lan_connect(lease,43211) },-1);
+    assert!(unsafe { fcntl(control,1) } >= 0);
+    0
+}
+#[test]
+fn ftps_data_uses_live_control_lease_and_fails_after_invalidation() {
+    assert_eq!(unsafe { bridge::kloda_ios_lan_connect(std::ptr::null(),21) },-1);
+    FIXTURE.with(|f| *f.borrow_mut()=Fixture {mode:Mode::Admit,valid:Arc::new(AtomicBool::new(true)),fd:-1,drops:0});
+    let address=b"192.168.1.10";
+    assert_eq!(unsafe { bridge::kloda_ios_lan_with_socket(address.as_ptr(),address.len(),445,Some(ftps_data_worker),std::ptr::null_mut()) },0);
+    FIXTURE.with(|f|assert_eq!(f.borrow().drops,1));
+}

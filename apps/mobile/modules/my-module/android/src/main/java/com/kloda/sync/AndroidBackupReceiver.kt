@@ -13,6 +13,8 @@ class AndroidBackupReceiver : BroadcastReceiver() {
       AndroidWebDavScheduler.reconcile(context.applicationContext, changed)
       AndroidSmbScheduler.reconcile(context.applicationContext, changed)
       AndroidSftpScheduler.reconcile(context.applicationContext, changed)
+      AndroidFtpsScheduler.reconcile(context.applicationContext, changed)
+      AndroidS3Automatic.reconcile(context.applicationContext, changed)
     } finally { pending.finish() } }, "kloda-backup-reconcile").start()
   }
 }

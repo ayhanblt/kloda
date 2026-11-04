@@ -1,0 +1,37 @@
+{
+  "candidate": "suppaftp=12.2.1, default-features=false, rustls-ring",
+  "license": "MIT OR Apache-2.0 declared; full dependency license inventory pending",
+  "archiveSha256": "2b58fcf921745cca6f0127c9f822069947da8c6dbeff52e9004750bcc448171f",
+  "osv": {
+    "queried": 66,
+    "matches": 0
+  },
+  "checks": {
+    "allow": {
+      "exit": 0,
+      "stdout": "PASS configured control socket + guarded EPSV data sockets + TLS + fresh readback; fixture only\n",
+      "stderr": ""
+    },
+    "deny": {
+      "exit": 0,
+      "stdout": "PASS data-socket owner denial\n",
+      "stderr": ""
+    }
+  },
+  "notRun": [
+    "Android/iOS OS-route and generation custody",
+    "production CA integration",
+    "native publication journal, lost-ACK, vault, Files/Photos/restore and product",
+    "platform matrix and independent review"
+  ],
+  "scope": "host diagnostic candidate only; not product/native ABI acceptance",
+  "cleanup": "fixture process terminated+waited; fixture CA/server private keys removed",
+  "sha256": {
+    "Cargo.toml": "7c9d03e74ca5e39fc20d869e525da0d20316d5020be0a31aba18c3dceb34f208",
+    "Cargo.lock": "126ab754c15f1eea94fc2c1669fc7d4627f5c3b1c99e68333823054ac3642661",
+    "main.rs": "3dfbf73e0047563afb19a26a44a1da8ca46afaba5db58118912c392055a3bee1",
+    "result.json": "f76595cff0a9f0c26d9b047c7cd22e172a4a841759f4266740c0027d41e23275",
+    "osv-response.json": "b6d1a26e330ddb48c74cda4970bd8416b1877a7d8ca06bc5a1125ec4faa2e152",
+    "osv-query.json": "0929d9e9d3877f2e3240c3149c1b50acf05f1671034a506938986920c489a249"
+  }
+}

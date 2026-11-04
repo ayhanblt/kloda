@@ -1,0 +1,14 @@
+{
+  "bundle": "com.kloda.fixture.s3custody17.r1180c1a3e6b847189d72ee0214f50749",
+  "simulator": "61A45399-D0F9-43C0-B356-E1EF6712E960",
+  "inputs": {
+    "apps/mobile/modules/my-module/ios/IosSyncJournal.swift": "2aaba689218fba631dceb1a63155d143bef41cf341a18d4528836dd05b23d0e3",
+    "apps/mobile/modules/my-module/ios/IosS3Journal.swift": "c1a5623e91a1759092cae1b9e45c7556b2a8fa8d3a1d147d7a05d387584d3af2",
+    "apps/mobile/modules/my-module/ios/IosS3Profile.swift": "574837f320bda24499207ac8d74badbe085dc09fff87a200cc1ae304aaa67168",
+    "apps/mobile/modules/my-module/ios/IosS3Vault.swift": "e26ca3d49a8f2bac032326817451c7819645285ef3109ff245c6bd0233e6059f",
+    "apps/mobile/modules/my-module/ios/IosS3Profiles.swift": "0d8872d3c7c904bb1984a69b6f37b56ea29b48e486dced6ddd901dadd4ee87e5",
+    "apps/mobile/modules/my-module/ios/IosS3Bridge.swift": "a28301b163baa4d218f550a7c0b3f9bf5c4b39ffa9238262889fe9db71902bb1",
+    "packages/s3-native/apple/tests/IosS3CustodyApp.swift": "2e4280dacbc0b2eec80672ae27f933713e7b1573334f393792066b2c5ea2544b",
+    "tools/test-ios-s3-custody.py": "c209560ea44438273d35ef312256a62998dcd200e27f2eccc48ff7ae89425c94"
+  }
+}

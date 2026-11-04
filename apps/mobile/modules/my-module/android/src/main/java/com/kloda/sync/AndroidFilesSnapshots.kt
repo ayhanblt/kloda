@@ -21,15 +21,15 @@ internal class FilesFailure(val code: String) : Exception(code)
 internal data class FilesDigest(val sha256: String, val size: Long)
 internal data class FilesSnapshot(val id: String, val digest: FilesDigest)
 
-internal class AndroidFilesSnapshots(private val context: Context, val webdav: Boolean = false, val smb: Boolean = false, val sftp: Boolean = false, private val checkPaused: () -> Unit) {
+internal class AndroidFilesSnapshots(private val context: Context, val webdav: Boolean = false, val smb: Boolean = false, val sftp: Boolean = false, val ftps: Boolean = false, val s3: String? = null, private val checkPaused: () -> Unit) {
   private val scanner = AndroidSafSourceScanner(context.contentResolver)
   private val photos = AndroidPhotosSources(context)
   private val signal = AtomicReference<CancellationSignal?>()
   private val input = AtomicReference<InputStream?>()
-  private val directory = File(context.noBackupFilesDir, if (sftp) "kloda-sftp-snapshots" else if (smb) "kloda-smb-snapshots" else if (webdav) "kloda-webdav-snapshots" else "kloda-files")
+  private val directory = File(context.noBackupFilesDir, if (s3 != null) "kloda-$s3-snapshots" else if (ftps) "kloda-ftps-snapshots" else if (sftp) "kloda-sftp-snapshots" else if (smb) "kloda-smb-snapshots" else if (webdav) "kloda-webdav-snapshots" else "kloda-files")
 
-  init { require(listOf(webdav, smb, sftp).count { it } <= 1) { "invalid_snapshot_namespace" } }
-  private fun snapshotId() = if (smb || sftp) java.util.UUID.randomUUID().toString() else randomId()
+  init { require((s3 == null || s3 in setOf("amazon-s3", "s3-compatible")) && listOf(webdav, smb, sftp, ftps, s3 != null).count { it } <= 1) { "invalid_snapshot_namespace" } }
+  private fun snapshotId() = if (smb || sftp || ftps || s3 != null) java.util.UUID.randomUUID().toString() else randomId()
 
   companion object {
     private val random = SecureRandom()
@@ -126,7 +126,7 @@ internal class AndroidFilesSnapshots(private val context: Context, val webdav: B
 
   fun stageMetadata(bytes: ByteArray): FilesSnapshot {
     checkPaused()
-    if ((!webdav && !smb && !sftp) || bytes.size > 65536) throw FilesFailure("invalid_request")
+    if ((!webdav && !smb && !sftp && !ftps && s3 == null) || bytes.size > 65536) throw FilesFailure("invalid_request")
     ensureDirectory()
     val id = snapshotId(); val file = path(id)
     val descriptor = Os.open(file.path, OsConstants.O_CREAT or OsConstants.O_EXCL or OsConstants.O_WRONLY or OsConstants.O_NOFOLLOW, 384)
@@ -139,7 +139,7 @@ internal class AndroidFilesSnapshots(private val context: Context, val webdav: B
 
   fun stageDownload(expected: FilesDigest, receive: (FileOutputStream) -> Unit): FilesSnapshot {
     checkPaused()
-    if ((!webdav && !smb && !sftp) || expected.size < 0 || !Regex("[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]").matches(expected.sha256)) throw FilesFailure("invalid_request")
+    if ((!webdav && !smb && !sftp && !ftps && s3 == null) || expected.size < 0 || !Regex("[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]").matches(expected.sha256)) throw FilesFailure("invalid_request")
     ensureDirectory()
     val id = snapshotId(); val file = path(id)
     val descriptor = Os.open(file.path, OsConstants.O_CREAT or OsConstants.O_EXCL or OsConstants.O_WRONLY or OsConstants.O_NOFOLLOW, 384)
@@ -159,7 +159,7 @@ internal class AndroidFilesSnapshots(private val context: Context, val webdav: B
   fun discard(snapshot: FilesSnapshot) { path(snapshot.id).delete() }
 
   fun recover(journal: AndroidSyncJournal) = synchronized(AndroidSyncJournal.sourceLock) {
-    if (smb || sftp) throw FilesFailure("invalid_request")
+    if (smb || sftp || ftps || s3 != null) throw FilesFailure("invalid_request")
     if (directory.exists()) {
       val files = directory.listFiles() ?: throw FilesFailure("queue_unavailable")
       for (file in files) {
@@ -204,8 +204,8 @@ internal class AndroidFilesSnapshots(private val context: Context, val webdav: B
   }
 
   private fun path(id: String): File {
-    if ((smb || sftp) && runCatching { java.util.UUID.fromString(id).toString() == id }.getOrDefault(false).not() ||
-      !(smb || sftp) && (id.length != 22 || id.any { !(it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' || it == '-' || it == '_') })) {
+    if ((smb || sftp || ftps || s3 != null) && runCatching { java.util.UUID.fromString(id).toString() == id }.getOrDefault(false).not() ||
+      !(smb || sftp || ftps || s3 != null) && (id.length != 22 || id.any { !(it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' || it == '-' || it == '_') })) {
       throw FilesFailure("snapshot_unavailable")
     }
     return File(directory, "$id.snapshot")

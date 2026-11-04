@@ -43,6 +43,24 @@ must remain bound to durable work; old receipts do not authorize another target.
 A provider SDK/package/version and its dependency/license/platform validation
 are separate implementation checks, not automatically accepted by this ADR.
 
+## Step17 scoped credential/test approval — 2026-11-03
+
+The user approved user-supplied, bucket/prefix-scoped access key and secret plus
+optional session token in device-native secure storage, and a real-server test
+with their existing Amazon S3 account. Secrets will be entered only in the app's
+secure input screen. Provider/test readiness must be checked first; substantial
+setup/work/time and any new resource/cost scope must be explained before proceeding.
+The user has no ready test bucket/region/prefix setup and requested sequential
+guidance. No new account, bucket, IAM user/role or billing resource is created
+by this decision. It is not personal-media cloud/E2EE/retention/remote-authority
+or physical acceptance. P5 production vendor selection remains open.
+
+## Step17 V1 data model — user decision, 2026-11-04
+
+The user explicitly selected option A: “V1: TLS + AWS SSE-S3 ile ilerle”. Amazon S3 V1 uses direct HTTPS/TLS and the bucket's AWS SSE-S3 server-side encryption; Kloda does not add client-side E2EE. AWS and authorized account access can read object content. Implement the product with this stated model and native credential custody. Actual personal-source transfers still require explicit source/destination opt-in in the app; the completed synthetic test does not trigger them.
+
+Do not infer AWS at-rest guarantees for another P5 vendor. P5 vendor/at-rest verification stays open. No cloud-delete/retention/adoption policy, IAM scope expansion, further paid-resource creation or physical acceptance is authorized by this decision. Future Kloda E2EE/key recovery remains a separate design, not a blocker to this selected V1 model. LAN contracts are unchanged. [Concrete options and selected scope](../implementation/s3-personal-cloud-decision-2026-11-03.md).
+
 ## Preserved boundaries
 
 ADRs0010/0016/0017/0018/0019/0020 remain unchanged in their scopes. No identity,
@@ -52,3 +70,9 @@ physical acceptance remain open. This ADR does not choose one-vs-many automatic
 backup destinations when PC and WebDAV coexist; step15 records that product gate.
 
 [Research and remaining checks](../implementation/provider-decision-matrix-step14-2026-10-29.md).
+
+## FTPS practical verification — user decision, 2026-11-03
+
+For FTPS only, the user approved practical transfer checks in place of the previously proposed mandatory atomic no-clobber and explicit remote durability acceptance gates. No custom server extension will be developed. Check for existing names and refuse/choose a fresh job-bound name; require successful transfer completion and a fresh full readback matching size and SHA256 before local transfer-verified admission. This is not an atomic no-overwrite guarantee or proof of persistence after power loss. Existence-check races remain a known protocol limitation. Do not advertise stronger guarantees.
+
+Unknown create/upload/rename results remain in review; no blind retry, hash-only adoption or automatic Completed inference after a lost ACK. Retain request/job/target/source/profile binding and durable local receipts. This FTPS decision does not weaken SMB/SFTP or PC/WebDAV contracts. AUTH TLS/PROT P, full certificate+hostname validation, LAN-only and native control+data route/generation fences remain required. The separate disposable fixture CA permission does not authorize product custom-CA trust.

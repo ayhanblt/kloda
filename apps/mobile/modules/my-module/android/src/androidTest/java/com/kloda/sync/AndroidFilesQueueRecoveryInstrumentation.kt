@@ -23,8 +23,16 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
   }
 
   override fun onStart() {
-    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore", "smb-files", "smb-product", "smb-photos-owned", "smb-profile", "sftp-files", "sftp-sources", "sftp-photos-owned", "sftp-product", "cloud18-nextcloud", "cloud18-destination", "cloud18-oauth", "cloud18-targets", "cloud18-dropbox", "cloud18-dropbox-live", "recovery29")) {
+    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore", "smb-files", "smb-product", "smb-photos-owned", "smb-profile", "sftp-files", "sftp-sources", "sftp-photos-owned", "sftp-product", "ftps-files", "ftps-sources", "ftps-product", "ftps-photos-owned", "cloud18-nextcloud", "cloud18-destination", "cloud18-oauth", "cloud18-targets", "s3-profile", "s3-journal", "s3-wire", "s3-publisher", "s3-files", "s3-drop-write", "s3-drop-read", "s3-redirect", "s3-diagnostic", "s3-abort", "s3-runs", "s3-pause", "s3-global-pause", "s3-media-contract", "s3-copy-contract", "s3-photos-owned", "s3-photos-cleanup", "s3-automatic-contract", "cloud18-dropbox", "cloud18-dropbox-live", "recovery29")) {
       finish(Activity.RESULT_CANCELED, Bundle().apply { putString("stream", "Explicit scope required: local-files, media-fixture or webdav-journal\n") })
+      return
+    }
+    if (scope in listOf("s3-drop-write", "s3-drop-read")) {
+      try {
+        val token = restartToken.orEmpty(); check(Regex("[0-9a-f]{32}").matches(token))
+        AndroidS3DropChecks.run(this, token, scope == "s3-drop-read")
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "PASS $scope\n") })
+      } catch (error: Throwable) { finish(Activity.RESULT_CANCELED, Bundle().apply { putString("stream", error.stackTraceToString()) }) }
       return
     }
     restartPhase?.let { phase ->
@@ -48,6 +56,70 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
         check()
         sendStatus(0, Bundle().apply { putString("stream", "PASS $name\n") })
       }
+      if (scope == "s3-automatic-contract") {
+        group("s3-automatic-manual-authority") { AndroidS3AutomaticChecks.run(this, scratch) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "S3 default-off/automatic survives UI leave/authority revocation/manual pause/callback-once/fake-key cleanup PASS; no network/media\n") }); return
+      }
+      if (scope == "s3-photos-cleanup") {
+        group("s3-owned-photos-recovery-cleanup") { AndroidS3PhotosCleanup.run(this) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "Exact failed owned source/import URI/fake alias cleanup PASS\n") }); return
+      }
+      if (scope == "s3-photos-owned") {
+        group("s3-selected-owned-photos") { AndroidS3PhotosChecks.run(this, scratch) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "S3 actual owned PNG/native publish/full readback/metadata/restore/repeat/reopen/exact cleanup PASS; no AWS or real photos\n") }); return
+      }
+      if (scope == "s3-copy-contract") {
+        group("s3-explicit-new-copy-contract") { AndroidS3CopyChecks.run(this, scratch) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "S3 explicit new-copy/revocation/immutable-original/one-request contract PASS; fake key cleanup; no network/media\n") }); return
+      }
+      if (scope == "s3-media-contract") {
+        group("s3-media-own-receipt-contract") { AndroidS3MediaChecks.run(this, scratch) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "S3 media manifest/own-ACK/isolation/legacy/default-off contract PASS; no network/media/vault\n") }); return
+      }
+      if (scope == "s3-global-pause") {
+        group("s3-global-pause-terminal") { AndroidS3RunChecks.run(this, scratch, pauseOnly = true, globalPause = true) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "S3 global queue pause/failure fences PASS; no network/media\n") }); return
+      }
+      if (scope == "s3-pause") {
+        group("s3-manual-pause-terminal") { AndroidS3RunChecks.run(this, scratch, pauseOnly = true) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "S3 normal pause vs persistence failure PASS; no old store/network/media tests\n") }); return
+      }
+      if (scope == "s3-runs") {
+        group("s3-manual-run-store-pause") { AndroidS3RunChecks.run(this, scratch) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "S3 run/store/blocked foreground/pause-store-failure PASS; component ACKs only, no network/media\n") }); return
+      }
+      if (scope == "s3-abort") {
+        group("s3-native-owned-abort") { AndroidS3AbortChecks.run(this, scratch) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "S3 owned multipart abort/stale authority/terminal fences PASS; no AWS or media\n") }); return
+      }
+      if (scope == "s3-diagnostic") {
+        group("s3-native-synthetic-diagnostic") { AndroidS3DiagnosticChecks.run(this, scratch) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "S3 synthetic diagnostic/grant/replay/general-disabled PASS; no AWS or media\n") }); return
+      }
+      if (scope == "s3-redirect") {
+        group("s3-native-no-redirect") { AndroidS3RedirectChecks.run(this) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "S3 signed request307 returned without follow/replay PASS\n") }); return
+      }
+      if (scope == "s3-files") {
+        group("s3-native-selected-files-restore") { AndroidS3FilesChecks.run(this, scratch) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "S3 owned SAF publish/reuse/restore/repeat PASS; synthetic only\n") }); return
+      }
+      if (scope == "s3-publisher") {
+        group("s3-native-snapshot-publisher") { AndroidS3PublisherChecks.run(this, scratch) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "S3 native snapshot multipart/readback/source fences PASS; synthetic only\n") }); return
+      }
+      if (scope == "s3-wire") {
+        group("s3-native-owned-wire") { AndroidS3WireChecks.run(this, scratch) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "S3 TLS multipart/full readback/journal PASS; synthetic bytes only\n") }); return
+      }
+      if (scope == "s3-journal") {
+        group("s3-native-multipart-journal") { AndroidS3JobChecks.run(this, scratch) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "S3 journal binding/ACK/recovery PASS; no network or media\n") }); return
+      }
+      if (scope == "s3-profile") {
+        group("s3-native-custody-profile") { AndroidS3ProfileChecks.run(this, scratch) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "S3 native JNI/Keystore/profile/isolation/tamper/missing-key PASS; no network or media\n") }); return
+      }
       if (scope == "sftp-files" || scope == "sftp-sources") {
         if (scope == "sftp-files") {
           group("sftp-owned-files") { AndroidSftpFilesChecks.run(this, scratch) }
@@ -68,6 +140,28 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
         System.loadLibrary("kloda_sftp_native")
         group("sftp-owned-photos-restore") { AndroidSftpPhotosRestoreChecks.run(this, IsolatedContext(targetContext, scratch)) }
         finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "SFTP owned Photos source/publication/download/restore/reopen PASS\n") }); return
+      }
+      if (scope == "ftps-files" || scope == "ftps-sources") {
+        if (scope == "ftps-files") {
+          group("ftps-owned-files") { AndroidFtpsFilesChecks.run(this, scratch) }
+          group("ftps-profile-owner") { AndroidFtpsProfileChecks.run(this, scratch) }
+        } else { AndroidFtpsFixture.load(this, scratch) }
+        group("ftps-owned-sources") { AndroidFtpsSourceChecks.run(this, scratch) }
+        group("ftps-photos-codec-authority") { AndroidFtpsPhotosChecks.run(scratch) }
+        group("ftps-product-factory-service") { AndroidFtpsProductChecks.run(this) }
+        group("ftps-owned-os-files") { AndroidFtpsOsChecks.run(this) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "FTPS owned Files/profile/source/codec PASS\n") }); return
+      }
+      if (scope == "ftps-product") {
+        AndroidFtpsFixture.load(this, scratch)
+        group("ftps-product-factory-service") { AndroidFtpsProductChecks.run(this) }
+        group("ftps-owned-os-files") { AndroidFtpsOsChecks.run(this) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "FTPS owned product/OS PASS\n") }); return
+      }
+      if (scope == "ftps-photos-owned") {
+        AndroidFtpsFixture.load(this, scratch)
+        group("ftps-owned-photos-restore") { AndroidFtpsPhotosRestoreChecks.run(this, IsolatedContext(targetContext, scratch)) }
+        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "FTPS owned Photos source/publication/download/restore/reopen PASS\n") }); return
       }
       if (scope == "cloud18-destination") {
         group("cloud18-destination-migration") { AndroidDestinationMigrationChecks.run(scratch) }

@@ -1,0 +1,6 @@
+{
+  "checked": 14,
+  "findings": [],
+  "tls": "system curl verified, no -k",
+  "scope": "only 14 previously unchecked JNI package pairs"
+}

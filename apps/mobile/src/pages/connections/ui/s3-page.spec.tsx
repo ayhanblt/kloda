@@ -1,0 +1,30 @@
+import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
+import { AppState, type AppStateStatus } from 'react-native';
+import { S3Page } from './s3-page';
+import { s3 } from '../../../shared/api/s3';
+import { i18n } from '../../../shared/i18n';
+jest.mock('../../../shared/api/s3',() => ({ emptyS3Form:{ endpoint:'',region:'',bucket:'',prefix:'',pathStyle:true,accessKey:'',secret:'',token:'' },s3:{ status:jest.fn(),configure:jest.fn() },s3ErrorCode:() => 'storage_failure' }));
+const mocked = jest.mocked(s3), idle = { provider:'amazon-s3' as const,supported:true,configured:false,enabled:false as const,canRun:false as const };
+beforeEach(() => jest.clearAllMocks());
+it('disables the unavailable build and uses masked secret fields',async () => {
+  mocked.status.mockResolvedValue({ ...idle,supported:false });
+  const view = await render(<S3Page provider="amazon-s3" onBack={() => undefined} />);
+  await waitFor(() => expect(view.getByText(i18n.t('ui.integrationUnavailable'))).toBeTruthy());
+  expect(view.getByRole('button',{ name:i18n.t('destinations.s3.save') }).props.accessibilityState.disabled).toBe(true);
+  expect(view.getByLabelText(i18n.t('destinations.s3.fields.secret')).props.secureTextEntry).toBe(true);
+  await view.unmount();
+});
+it('clears secrets on save failure and background without enabling a destination',async () => {
+  mocked.status.mockResolvedValue(idle); mocked.configure.mockRejectedValue(new Error('storage_failure'));
+  let changed: ((state: AppStateStatus) => void) | undefined;
+  const subscription = jest.spyOn(AppState,'addEventListener').mockImplementation((_event,handler) => { changed = handler; return { remove:jest.fn() }; });
+  const view = await render(<S3Page provider="amazon-s3" onBack={() => undefined} />);
+  const input = () => view.getByLabelText(i18n.t('destinations.s3.fields.secret'));
+  await waitFor(() => expect(input().props.editable).toBe(true));
+  await fireEvent.changeText(input(),'synthetic-secret'); expect(mocked.configure).not.toHaveBeenCalled();
+  await act(async () => { changed?.('background'); }); expect(input().props.value).toBe('');
+  await fireEvent.changeText(input(),'synthetic-secret'); await fireEvent.press(view.getByRole('button',{ name:i18n.t('destinations.s3.save') }));
+  await waitFor(() => expect(mocked.configure).toHaveBeenCalledTimes(1));
+  await waitFor(() => expect(input().props.value).toBe(''));
+  await view.unmount(); subscription.mockRestore();
+});

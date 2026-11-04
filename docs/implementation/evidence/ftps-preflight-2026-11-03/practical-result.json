@@ -1,0 +1,18 @@
+{
+  "scope": "new practical publication representative path; Python protocol fixture only, not native libcurl adapter acceptance",
+  "checks": {
+    "explicitTlsProtP": "PASS",
+    "existingNameNotUploaded": "PASS",
+    "newNameUploadAck": "PASS",
+    "freshReadbackSizeSha256": "PASS",
+    "sentinelPreserved": "PASS"
+  },
+  "bytes": 4294,
+  "sha256": "1da299c95c0913411f6aa6e34d28e1b1b68c814df6bd84b7638dd709b3f3f3f0",
+  "limitations": [
+    "existence check has a race; no atomic no-clobber guarantee",
+    "no power-loss durability guarantee",
+    "native route/generation and lost-ACK recovery NOT_RUN"
+  ],
+  "serverStopped": true
+}

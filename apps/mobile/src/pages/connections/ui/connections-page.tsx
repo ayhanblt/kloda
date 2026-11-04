@@ -8,6 +8,8 @@ import { MobilePanel, MobileSurface } from '../../../widgets/mobile-surface/ui';
 import { PairingButton } from '../../../features/pairing/ui/pairing-button';
 import { useSmbBackup } from '../../../features/backup-setup/model/use-smb-backup';
 import { useSftpBackup } from '../../../features/backup-setup/model/use-sftp-backup';
+import { useS3Backup } from '../../../features/backup-setup/model/use-s3-backup';
+import { useFtpsBackup } from '../../../features/backup-setup/model/use-ftps-backup';
 import { useThemeColors } from '../../../shared/theme/theme-provider';
 import { useCloudDestinations } from '../../../features/cloud-destination/model/use-cloud-destinations';
 import { hiddenProviders, type CloudProvider } from '../../../shared/api/cloud-destinations';
@@ -21,6 +23,8 @@ export function ConnectionsPage({ adding, navigate, openProvider, openBackups, s
   const smb = useSmbBackup().status;
   const sftp = useSftpBackup().status;
   const cloud = useCloudDestinations();
+  const ftps = useFtpsBackup().status;
+  const amazon = useS3Backup('amazon-s3').status, compatible = useS3Backup('s3-compatible').status;
   return <MobileSurface title={t(adding ? 'ui.conn.add' : 'ui.conn.title')} description={t('ui.conn.subtitle')} onBack={() => navigate(adding ? 'connections' : 'home')}>
     <MobilePanel>
       <Monitor size={24} color={colors['text-primary']} />
@@ -45,7 +49,22 @@ export function ConnectionsPage({ adding, navigate, openProvider, openBackups, s
         <Text selectable className="font-sans text-sm text-secondary-text">{sftp.config?.fingerprint}</Text>
         <PairingButton variant="secondary" label={t('ui.common.manage')} onPress={() => openProvider('sftp')} />
       </MobilePanel>}
-      {!saved && !smb?.configured && !sftp?.configured && !addedDestinations(cloud.destinations).length && <MobilePanel><FolderPlus size={24} color={colors['text-secondary']} /><Text className="font-sans text-sm leading-5 text-secondary-text">{t('ui.noSavedCloud')}</Text></MobilePanel>}
+      {ftps?.configured && <MobilePanel>
+        <HardDrive size={24} color={colors['text-secondary']} /><Text className="text-base font-inter-semibold text-primary-text">{t('ui.providers.ftp')}</Text>
+        <Text className="font-sans text-sm text-secondary-text">{t(ftps.enabled ? 'destinations.enabled' : 'destinations.disabled')}</Text>
+        <Text selectable className="font-sans text-sm text-primary-text">{ftps.config?.address}:{ftps.config?.port}</Text>
+        <Text selectable className="font-sans text-sm text-secondary-text">{ftps.config?.root}</Text>
+        <Text selectable className="font-sans text-sm text-secondary-text">{ftps.config?.hostname}</Text>
+        <PairingButton variant="secondary" label={t('ui.common.manage')} onPress={() => openProvider('ftp')} />
+      </MobilePanel>}
+      {[amazon,compatible].filter(value => value?.configured).map(value => value && <MobilePanel key={value.provider}>
+        <HardDrive size={24} color={colors['text-secondary']} /><Text className="text-base font-inter-semibold text-primary-text">{t(`ui.providers.${value.provider}`)}</Text>
+        <Text className="font-sans text-sm text-secondary-text">{t('destinations.s3.saved')}</Text>
+        <Text selectable className="font-sans text-sm text-primary-text">{value.profile?.bucket}</Text>
+        <Text selectable className="font-sans text-sm text-secondary-text">{value.profile?.region} / {value.profile?.prefix}</Text>
+        <PairingButton variant="secondary" label={t('ui.common.manage')} onPress={() => openProvider(value.provider)} />
+      </MobilePanel>)}
+      {!saved && !smb?.configured && !sftp?.configured && !ftps?.configured && !amazon?.configured && !compatible?.configured && !addedDestinations(cloud.destinations).length && <MobilePanel><FolderPlus size={24} color={colors['text-secondary']} /><Text className="font-sans text-sm leading-5 text-secondary-text">{t('ui.noSavedCloud')}</Text></MobilePanel>}
       <PairingButton variant="secondary" icon={<Plus size={20} color={colors['text-primary']} />} label={t('ui.conn.add')} onPress={() => navigate('add-connection')} />
     </>}
     {adding && (['protocol','cloud'] as const).map((kind) => <MobilePanel key={kind}>

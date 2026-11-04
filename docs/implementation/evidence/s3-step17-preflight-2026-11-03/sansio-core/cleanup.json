@@ -1,0 +1,17 @@
+{
+  "stopped": [
+    {
+      "kind": "minio",
+      "pid": 62481
+    },
+    {
+      "kind": "fault_proxy",
+      "pid": 59907
+    }
+  ],
+  "private_keys_removed": [
+    "ca.key",
+    "certs/private.key"
+  ],
+  "retained": "owned synthetic MinIO data, binary, public certs and evidence; no real account/system trust/device changes"
+}

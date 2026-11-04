@@ -1,0 +1,10 @@
+{
+  "ownedPid": 61206,
+  "verifiedCommand": "/Library/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python /private/tmp/kloda-ftps16c-engine/fixed-fixture-server.py serve",
+  "serverStopped": true,
+  "serverPrivateKeyRemoved": true,
+  "caSigningKeyAbsent": true,
+  "fixturePasswordInputsAbsent": true,
+  "systemTrustChanged": false,
+  "testArchiveAndReceiptsRetained": true
+}

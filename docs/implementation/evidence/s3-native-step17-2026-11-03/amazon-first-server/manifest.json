@@ -1,0 +1,47 @@
+{
+  "date": "2026-11-03",
+  "provider": "amazon-s3",
+  "region": "eu-north-1",
+  "bucket": "kloda-test-20261103-748227128483-eu-north-1-an",
+  "prefix": "kloda-test/step17",
+  "simulator": "61A45399-D0F9-43C0-B356-E1EF6712E960",
+  "job": {
+    "id": "ee16bbaf-0d4f-4909-8d59-31db4f7e3b80",
+    "state": "completed",
+    "size": 4097,
+    "sha256": "oWVg1mi4Q_s76ZrOQdvRhHHzQr0yVaHSEgSzXkP3RDY",
+    "key": "objects/51eae05a-3a69-4ad6-aae9-d7d9770451af/ee16bbaf-0d4f-4909-8d59-31db4f7e3b80"
+  },
+  "events": {
+    "complete-ack": 1,
+    "completed": 1,
+    "completing": 1,
+    "created": 1,
+    "creating": 1,
+    "part-ack": 1,
+    "part-intent": 1
+  },
+  "normal_backup_enabled": false,
+  "normal_backup_jobs": 0,
+  "diagnostic_enabled_after": false,
+  "ui_result": "Test dosyası yüklendi ve geri okunarak doğrulandı. Yedekleme kapalı.",
+  "verification": "native multipart ACK + full GET/hash + second own staged download/readback; generated4097-byte payload only",
+  "credential_handling": "user entered scoped IAM key directly in secure app form; no credential, signed URL, raw response or network log read/captured",
+  "limits": [
+    "one actual AWS trial only; successful test not repeated",
+    "test object retained at prefix/key; no delete permission/use",
+    "iOS Simulator only; physical custody and broad step17 activation/queue/OS/Photos not accepted"
+  ],
+  "source_sha256": {
+    "apps/mobile/modules/my-module/ios/IosS3Diagnostic.swift": "7d0919c433899870a59cd12057b3b697e963c4c734b4440d1a36d4fc7e3c07da",
+    "apps/mobile/modules/my-module/ios/IosS3TestGrant.swift": "4741aac8fdeeea83d66abd458034385a4b8c3e215a8f6217a70a4bf2b5f9345f",
+    "apps/mobile/modules/my-module/ios/IosS3Publisher.swift": "d20f3b40f8e1dc9856e67cbb091764cbfd93b47c8a224de6ac891fed1372265b",
+    "apps/mobile/modules/my-module/ios/IosS3Download.swift": "80ae58869838aeb097c151d16f26e351123431978aaec3b1f3c037fe0a5cc568",
+    "apps/mobile/modules/my-module/ios/IosS3Client.swift": "b510379df56d419fe76b237f70a6af7d86aa137dc0c97d70d47e6995c7d1332a",
+    "apps/mobile/modules/my-module/ios/IosS3Profiles.swift": "0d8872d3c7c904bb1984a69b6f37b56ea29b48e486dced6ddd901dadd4ee87e5",
+    "apps/mobile/modules/my-module/ios/IosS3Journal.swift": "09e88f270c6d7cbded1ad8ab5f98eeec250deb6906fd27a281f3b22b436150e5",
+    "apps/mobile/modules/my-module/ios/KlodaS3Module.swift": "955e0f86fe1f1012ce67d06fc57cb64034e7258d0477675199236b8eabeec5ea",
+    "apps/mobile/src/shared/api/s3.ts": "00843ed5f8fd329386d32112ceccce5cf0b1a7cf64361b16fa9e303e9a4db7cf",
+    "apps/mobile/src/features/backup-setup/model/use-s3-backup.ts": "f0f31e2cba96dfadf329340f7ef19e41a886ea6a6d63109a5b9e0e46653b284f"
+  }
+}

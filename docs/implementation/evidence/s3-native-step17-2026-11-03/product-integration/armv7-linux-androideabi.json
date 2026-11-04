@@ -1,0 +1,17 @@
+{
+  "target": "armv7-linux-androideabi",
+  "release": true,
+  "artifact": "/Users/ayhanblt/Desktop/projects/kloda/packages/s3-native/target/armv7-linux-androideabi/armv7-linux-androideabi/release/libkloda_s3_native.so",
+  "sha256": "9f7564f98a9dd92747dd5ad2f1dabfdac339d70a29daec9583ea6769df693962",
+  "bytes": 1213284,
+  "exports": [
+    "kloda_s3_json_v1",
+    "Java_com_kloda_sync_S3NativeEngine_process"
+  ],
+  "alignments": [
+    16384,
+    16384,
+    16384,
+    16384
+  ]
+}

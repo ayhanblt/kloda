@@ -1,0 +1,7 @@
+# FTPS native
+
+Opt-in explicit FTPS wire engine for ADR0022 and the user-approved practical transfer checks. Production TLS uses Mozilla public roots, hostname verification, AUTH TLS and PROT P; no custom-CA input or plaintext fallback. Native owners supply the preconnected control FD and every same-peer passive data FD under their live OS route/source/profile lease.
+
+The synchronous consuming-FD C/JNI API never opens an unbound socket. Event0 checks admission, event1 persists upload intent before STOR, event2 records the transfer ACK with byte count, event3 records fresh full size/SHA256 readback. Only the native journal can admit local transfer-verified completion. Unknown results stay in review; no hash-only adoption or blind retry. This does not promise atomic no-overwrite or power-loss durability. Files already present are refused by a practical listing check; a concurrent writer remains a known protocol risk.
+
+Status: native owners, Files/Photos backup and own restore, queue/OS integration and TR/EN/DE product form implemented; scoped host/mobile contracts, packaging, owned runtime and app builds accepted. Default off. See docs/implementation/ftps-native-checkpoint-2026-11-03.md for evidence and open general gates. Public-CA/real-LAN, physical/signing, full accessibility/performance and independent final review remain open. The private test-only root store is forbidden by production packaging.

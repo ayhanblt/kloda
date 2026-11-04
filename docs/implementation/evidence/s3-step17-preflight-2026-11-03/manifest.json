@@ -1,0 +1,120 @@
+{
+  "date": "2026-11-03",
+  "scope": "step17 documentation preflight only; no runtime acceptance",
+  "head": "67701e7895ca9d7d5d7efe66d23b09954a8bf690",
+  "origin_main": "50ae92ecc168ac0d8a323bbb844627443493fcd8",
+  "baseline_status_sha256": "1252c52a48df27f3e34f9cb2e81fe065b690a549ad92d365cd6d8e0df38febd4",
+  "baseline_tracked_patch_sha256": "f1eeee6713d19684e8b8d4c513d2e24a55886ea10d0069f1208af2a563ab3a18",
+  "validation": "targeted source discovery, official AWS docs + Context7; no tests/builds repeated",
+  "review": "separate same-agent documentation review; not independent review",
+  "sources": [
+    "https://docs.aws.amazon.com/AmazonS3/latest/API/API_CompleteMultipartUpload.html",
+    "https://docs.aws.amazon.com/AmazonS3/latest/userguide/conditional-writes.html",
+    "https://docs.aws.amazon.com/AmazonS3/latest/API/API_AbortMultipartUpload.html"
+  ],
+  "candidate_preflight": {
+    "candidate": "rust-s3 =0.38.0",
+    "features": [
+      "sync-rustls-tls",
+      "fail-on-err"
+    ],
+    "license": "MIT; transitive license acceptance incomplete",
+    "decision": "reject this sync variant: uncontrolled redirect forwards signed authorization/session header",
+    "host_probe": "4 negative completion cases + cross-port307 reproduction; synthetic loopback only",
+    "upstream_filter": "0 selected tests; compile only, not PASS",
+    "osv_exact_packages": 117,
+    "osv_matches": 0,
+    "docker": "29.8.0; no S3 image/host started",
+    "mobile": "not validated",
+    "artifacts": {
+      "README.md": "e761cecc7cb4e2d5bf8039dbba3eb6345aa3d706c438a077029b2bbbc83b3897",
+      "candidate-test.log": "cd9b5398a3ae6a2367826fae09d739a75ee121dc2936d6c5bbd2d9212257f7dc",
+      "osv-direct.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "osv-lock.json": "8a6d058e050618508b6690151c41f2645907dbc2332376f2287da41a9a4bacb0",
+      "osv-query.json": "d3f4c4218388da5809ce0420918e5e4246b8df8da81e409bd3eede89ec326acf",
+      "probe-Cargo.lock": "f79c4c684a6aeec7991febf2283f421fc57a6932c9d750d7406ae857463111bc",
+      "probe-Cargo.toml": "3216e843b09e008bafee72d3a57d3eed5c319a4e0d6c34b7c48a1093c6c0c3ea",
+      "probe.rs": "ceae47b6f3674022ce993c8a4be3527e46087c0355e30503d29910e6e7aceb3d",
+      "rust-s3-0.38.0.crate": "15d4ed794cdfede6c59f81d485cae6bb63f47a7e35d190148d40754f783073c4",
+      "wire-probe.log": "b960b9d3572fe2f7f698e9835d7453ca06bcfbd89239adb62414b7ac702c795c"
+    }
+  },
+  "sansio_core": {
+    "candidate": "rusty-s3=0.10.2; no I/O; BSD-2-Clause",
+    "core_dependency_count": 70,
+    "core_osv_matches": 0,
+    "core_license_text_coverage": "68/70; instant-xml and instant-xml-macros SPDX Apache-2.0 OR MIT but no license file in crates or exact upstream root; distribution gate open",
+    "probe": "reqwest=0.13.3 only in disposable host test; default redirect/retry/proxy disabled; HTTPS-only;182 lock packages OSV0",
+    "host": "MinIO RELEASE.2025-09-07T16-13-09Z official darwin-arm64 binary; AGPLv3 fixture only; checksum7c3b3039b76e55a1b80935848ed83998d5e8d317374f87851f46a019ff5c0aa4; no product linkage",
+    "results": [
+      "TLS2parts5246977byte conditional completion/readback SHA256",
+      "collision412 and exact own abort204/ListParts404; original retained",
+      "new-core200 Error XML/409/307 classification",
+      "actual committed object+lost completion ACK => Review even with equal GET; one completion request, redirect sink0",
+      "final create reply bucket/key binding against actual MinIO reply"
+    ],
+    "unit_tests": "8 unique tests passed incrementally; initial6, only3affected ACK cases after normalization API fix,2create cases after review,1new bucket case; unchanged successful tests not repeated",
+    "platform": "Rust1.99.0 cargo check Androidarm64+iOSarm64Simulator PASS; no native ABI/runtime/app acceptance",
+    "review": "separate same-agent; added create bucket/key binding, trailing XML-declaration rejection, proper dotted-bucket DNS/prefix checks; no independent review",
+    "abi": "concrete one C symbol+one JNI entry proposal only;3new buffer/strict/sign tests,JNI feature host Clippy,header syntax and final cargo check PASS; not applied",
+    "user_decisions": [
+      "user-supplied scoped key/secret/optional session token in native vault approved",
+      "existing Amazon S3 account real server test authorized; values only in secure app screen; first check provider/test readiness and explain substantial work/time"
+    ],
+    "pending": [
+      "ABI scope approval question pending",
+      "Existing Amazon S3 test bucket/region/prefix not ready; user requests sequential guidance; first read-only Console/Buckets step provided",
+      "native custody/journal/transport/form,Files/Photos/restore/queue/OS not implemented",
+      "real AWS acceptance, cloud data policy, general12/20/21 and independent review open"
+    ],
+    "cleanup": "owned MinIO+TLS proxy stopped; private CA/server keys removed; only synthetic data retained; no system trust or personal device/account changes",
+    "core_source_sha256": {
+      "packages/s3-native/Cargo.toml": "4b0983de79a06a3d7276dd0990bac965f4e201d7dde1dfc5cf85c08952bd9d0b",
+      "packages/s3-native/dependency-inventory.json": "032f74f54a1f6c028b9d6393a745bc99434b389b1582ef60bfba18e6f4aaeb80",
+      "packages/s3-native/Cargo.lock": "0be45549c4c6ee46c2fdbf13c11f0294c6cd49d29d1946e81168600215f699fb",
+      "packages/s3-native/THIRD_PARTY_NOTICES.md": "73e6602f40c2d729084cdbd0a2c9076c391939185fb6ed37a24a490156f58d27",
+      "packages/s3-native/README.md": "c4dadee32aa977cb260620771fb1cc03adcdfded576efa0cf3caaef08bae27e6",
+      "packages/s3-native/.gitignore": "306fd52e74fca6746e12acc750f232de15e71da917756a1270d74c91f5eb7368",
+      "packages/s3-native/tests/core.rs": "83c1368bac6fc266577606e9b7223fdf96072cd78e9b17a261cfa628567ac99f",
+      "packages/s3-native/src/request.rs": "9e4239e4adcc0d1494a255f45d0b8dd3edac68859d9d3e5e799facc89675f3c8",
+      "packages/s3-native/src/lib.rs": "7a13dccba91bdb79582c9d2f4910bb1649fcd5493995127edc158f9103aa6d58",
+      "packages/s3-native/src/reply.rs": "887d812110478876a8daf4338969cbbb9b428c5fcb797bbd9a279547407a7d08"
+    },
+    "artifacts_sha256": {
+      "fault-counts.json": "bd88afacc14e881ef97c3bf8284074e66c31612a15cac72c969ee2739eab0b02",
+      "minio.sha256sum": "44a6c78da8ceb3a333d50aa0520396e392bdae0d4c21bb778398429e3532fda2",
+      "core-test.log": "f7c387a2355616665785221c728b67b0469f1a3da391b9822a47f662fec55e77",
+      "core-clippy.log": "65265dfabd970d4890074a4a8010a4ac6d4e00bf200ff4d8b47b492197192b87",
+      "osv-query.json": "6f8c0f0b9eeb41e3b750f20128802186a9b3a96716aa141d24e1b16652afd282",
+      "core-bucket-test.log": "349021d80d509d2c3c4e63622fa1a6326344e84e799049aa1f635f89602d4172",
+      "fault-probe.log": "68120f207b66b8a2fe9c6d58f0145cf18effc54f87d010ca74538cc102958210",
+      "host-probe.log": "dcac343e5d61a09f4e7e769cf6cf0adab5cf67c9420d66044cf5e4e0125f27c1",
+      "abi-proposal-sign-test.log": "86b2b6c2213aac6433067900bccd6d9a854bb304610b0ffd46766c8783534628",
+      "native-abi-proposal.patch": "4af2f829a50f69eb86daca77ce481860158e213dabd7da2a3f4840716c95f7d6",
+      "core-inventory.json": "032f74f54a1f6c028b9d6393a745bc99434b389b1582ef60bfba18e6f4aaeb80",
+      "ca.crt": "82b1e4a9789aebd7c918f5d9d82a119e3d95e9b3955a6772660b038309cae680",
+      "rusty-s3-0.10.2.crate": "2412ec048709e6a8ee4ee1505313bce003f6b8b27fc41a97e30615223c7ed592",
+      "check-aarch64-linux-android.log": "db71c3f85f8c8be089118eab6fa4577555563c02a4b6daeb98dbee5571d231f2",
+      "core-create-review-test.log": "1cba805a01d84f355439c8dc6f10671b5cc81bd099edcaec65a093d923948903",
+      "cleanup.json": "3eea1439ef2934e9376237db4702217f810ddd5527d4ff5eab9382e681c94ff3",
+      "core-osv-result.json": "c9b638b1f760515fb0ae2b304da2a60bda702b744f5184541c53ce40f31fb826",
+      "abi-proposal-final-check.log": "611c3b76febc3350fd4f8b7a9f64ce8bd8591d496f11d08982b75b8cacd95403",
+      "create-binding.log": "fa84ee8d70092b9d49e6fbb0214a5cf046f537d9968866c017ebdbd5229999e9",
+      "osv-result.json": "c8304822eacbb84337a6764cc793d72d7911eb0f6ae306bdf034f4cbf9b8d6e5",
+      "probe-Cargo.lock": "7a9291718c752960eb351af3df4a7052ab232d5f8695592005037d26bea60f42",
+      "core-ack-test.log": "bba91c24a7f86904dca99836410c31fed677b349453d8acc974deb42e537a7cc",
+      "core-osv-query.json": "a09bd7cc5cc05c406292524563efe2cf1cf0cd9e306543ce078945758d2c64e2",
+      "host-probe.rs": "396474c07e1fe6a7b29fe095581d616703517ed7e4379332e860fc842f224637",
+      "abi-proposal-test.log": "784e45fde289cadc816bf97a505d155f3184d0fc60794cd4a24da0fac2c73226",
+      "fault_proxy.py": "ecc50e8af86849f2c5558a891341048c27eff184a930f955f3a36e116bce7c99",
+      "public.crt": "3e69808dbdb5b2014aa4b6147dad60fa884274201439524e3751feacd63b6723",
+      "probe-Cargo.toml": "f5d6afb73ed86a04b1ab59f44dad3215502dcd3ee1332c71d4df50ea5e07e797",
+      "check-aarch64-apple-ios-sim.log": "7222e96bc5f8113cb79ab9f9d21c5e004d5c79d8ffe2cccd57cb64b435101492",
+      "abi-proposal-jni-clippy.log": "04863e2233252189bb3723ecf90e739945e548ec800733c81e74ed093b220176",
+      "fault-runtime-core/request.rs": "9e4239e4adcc0d1494a255f45d0b8dd3edac68859d9d3e5e799facc89675f3c8",
+      "fault-runtime-core/lib.rs": "4671ca28e0dbe88b94603bf3c398b4f095c68d142e9ec3a7f98a169a3e127038",
+      "fault-runtime-core/hashes.json": "dbb9ad996da7f4543e661e9959f8ab6964804b37b3420177c8c945dd744d24c9",
+      "fault-runtime-core/reply.rs": "fdf4f98b02f3dacb11e2ae599e567a441f4baa76df8d9bb99fa248747fb49ce4"
+    }
+  }
+}

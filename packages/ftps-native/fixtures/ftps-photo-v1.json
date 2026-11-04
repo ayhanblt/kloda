@@ -1,0 +1,24 @@
+{
+  "format": "kloda-ftps-photo",
+  "version": 1,
+  "sourceDeviceId": "owned_device",
+  "assetId": "owned_asset",
+  "revision": "9007199254740993",
+  "resources": [
+    {
+      "relativePath": "12345678-1234-1234-1234-123456789abc/original.png",
+      "role": "original",
+      "name": "source:photo?.png",
+      "mimeType": "image/png",
+      "sha256": "3qiErY3oQMq0lNwWVzT24DkWpX02ou7_bz5iXP4PU0o",
+      "size": "68"
+    }
+  ],
+  "albums": [
+    {
+      "id": "owned_album",
+      "name": "Fotoğraflar"
+    }
+  ],
+  "favorite": true
+}

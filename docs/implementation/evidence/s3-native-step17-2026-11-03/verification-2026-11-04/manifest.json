@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-04",
+  "head": "67701e7895ca9d7d5d7efe66d23b09954a8bf690",
+  "scope": "Step17 additional isolated functional verification only; user18/19 owned by Claude, alignment after user report; general20/physical21 separate",
+  "photos_authorization": "User explicitly approved exact one synthetic image/source album and own restore copy/album per named disposable iOS/Android environment, metadata/favorite mutation and exact own cleanup",
+  "passed": [
+    "iOS actual native selected PNG publication/multipart ACK/full readback/S3 manifest/metadata stamp change fence/PhotoKit restore/repeat/same manifest after separate process reopen; native verifies source and restored bytes/albums/favorite",
+    "iOS exact2assets+2albums logical deletion and separate fixture Keychain cleanup, verified after OS confirmation dialogs",
+    "Android actual native selected PNG publication/full readback/albums/favorite/MediaStore own restore/repeat/journal reopen/no duplicate/exact URI and fake alias cleanup",
+    "new iOS+Android automatic/manual authority components: default-off, explicit opt-in, automatic mode survives UI leave, authority revocation pauses, manual mode stops, callback-once/reopen/fake-key cleanup; no network in these components",
+    "new14JNI package pairs OSV result0findings using system curl TLS; previous core query not repeated",
+    "exact upstream jni-sys-macros MIT text restored; license coverage78/81",
+    "normal iOS app build/link after Int64 fix, Xcode27.2/SDK27.2"
+  ],
+  "fix": "IosS3Journal.setAutomatic used Swift Int but shared SQLite binder accepts Int64; corrected value binding to Int64. New automatic runtime test and normal app build pass.",
+  "fixture_failures": [
+    "new TLS leaf/root lacked Python3.13 strict extensions; corrected full AKI/SKI/CA keyUsage and verified strict chain; no TLS validation bypass",
+    "new helper stale args.runs/CA path corrected before launch",
+    "pregranted Photos readWrite still required Simulator OS upgrade prompts; accepted only approved owned fixture; permission-only attempts created no media/key",
+    "iOS cleanup CLI timeout preceded OS delete confirmations; native final cleanup PASS2assets/2albums/fakeKeychain verified separately; timeout never treated as PASS",
+    "Android fake context package differed from actual MediaStore owner; fixture identity corrected, previous exact URI/nonce/native receipt/fake alias cleanup passed before new case resumed",
+    "automatic test gate initially armed during default-off assertion and reporting hid journal error; fixture corrected; actual product Int64 binding bug then fixed"
+  ],
+  "variants": [
+    "Photos runtime evidence source hashes belong to captured ownership inputs. The later Int64 setter fix affects automatic opt-in, not Photos publication/restore; successful Photos tests were not repeated.",
+    "new automatic test helper final report/variant labels were clarified after success; native source/Info RunsAutomaticOnly flag retained in evidence",
+    "Android photo case source class unchanged after success; later instrumentation added a separate automatic mode; no old tests replayed"
+  ],
+  "limits": [
+    "Actual OS delivery/Doze/BG expiration and physical device behavior remain21; component grants are not OS delivery proof",
+    "normal native app UI end-to-end visual/a11y/performance and final independent review remain20; real-key app not installed/reset or read",
+    "P5 production vendor/at-rest activation remains a20readiness gate; this is local MinIO functional proof, not provider qualification",
+    "three license texts remain missing: cesu8, instant-xml, instant-xml-macros; distribution gate remains20; no invented upstream notice",
+    "historical AWS real-server success retained; no new AWS requests, personal media, IAM expansion or cloud deletes",
+    "Claude18/19 source was not modified; final alignment awaits user notification"
+  ],
+  "wire_counts": {
+    "complete": 6,
+    "dropped": 0,
+    "sink": 0
+  },
+  "sources_current": {
+    "apps/mobile/modules/my-module/ios/IosS3Journal.swift": "09b22a6e3bc256191e9ba72bdf6bdd0ecb56852b6575240e2e29177969021475",
+    "packages/s3-native/apple/tests/IosS3PhotosApp.swift": "b0c19f935b89ba4840a147d74f18b06e4641060f7ff8e6b403664097e40b6280",
+    "packages/s3-native/apple/tests/IosS3PhotosFixtureSupport.swift": "1c21b9ad2f13c340bf25dca3eac1f97c96df134e3475c3a331a62a5964a1596d",
+    "packages/s3-native/apple/tests/IosS3RunApp.swift": "630c800419ca7973e22ea8cc7de2312c2a3655bc5a6eaa3da705631645d08484",
+    "tools/test-ios-s3-photos.py": "661351162271a6a42da57a4afaaeffc5efae82c7ef2b2fdaeb31ec2b8b75c345",
+    "tools/test-ios-s3-selected-files.py": "ca657c8656db822611a29a4ada1f78259d7cc4acd8c3498290415ee4e3ad0bc7",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3PhotosChecks.kt": "efade01aa6ffd62d1ac9ca10d7511214fce439e94e96dbf75b2d3e774be32add",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3PhotosCleanup.kt": "d2af7972c112945e48ef484aa2fc372e72c3bc04f7e1298f994a3da4e35f6bf1",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticChecks.kt": "98a1886112a51ab9704369143052b543d0f875b9778d89fa3175edf8c55e4dfa",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt": "bd6de7bfa4c2206ffdf05d98329859a6c57eff5da7513896031303bc515056e5",
+    "packages/s3-native/dependency-inventory.json": "dbafa05015845b518ebcfc1f78ab77ade23b06950eeb774eb0be0c5c0e993282",
+    "packages/s3-native/THIRD_PARTY_NOTICES.md": "02364705828bd48d8d7c47277ab6cea31ee38c4ae9ce672edf6f16ddcca7ed43",
+    "packages/s3-native/licenses/jni-sys-macros-0.4.1-LICENSE-MIT": "1d85bd754b04ceec93e98e890edd1fa3c6a22e81bcb32135806beeccefa51cd1"
+  },
+  "handoff": "Step17 isolated functional verification complete; outstanding general/distribution/provider/physical acceptance retained in20-21-acceptance-collection-2026-11-04.md; Claude18/19 alignment awaits user notice"
+}

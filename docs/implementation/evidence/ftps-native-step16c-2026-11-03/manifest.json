@@ -1,0 +1,459 @@
+{
+  "head": "67701e7895ca9d7d5d7efe66d23b09954a8bf690",
+  "status": "SCOPED_IMPLEMENTATION_AND_ISOLATED_ACCEPTANCE_COMPLETE; default off; general gates open",
+  "decision": "ADR0022 user-approved FTPS practical checks; no server extension; no atomic no-clobber or power-loss durability claim",
+  "checks": {
+    "coreHostFirst": "2 new tests PASS (paths and publication/collision/source/data denial); subsequent core edits tracked separately",
+    "lostAck": "1 new filtered lost-ACK test PASS; only intent recorded",
+    "boundC": {
+      "wrongHostname": {
+        "code": 6,
+        "events": []
+      },
+      "publication": {
+        "code": 0,
+        "events": [
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            65537
+          ],
+          [
+            3,
+            0
+          ]
+        ]
+      },
+      "readbackRestore": "PASS bytes, private staging, consumed FDs",
+      "existingRefused": {
+        "code": 10,
+        "events": []
+      },
+      "dataOwnerDenied": {
+        "code": 8,
+        "events": []
+      },
+      "revokedAfterUploadAck": {
+        "code": 2,
+        "events": [
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            65537
+          ]
+        ]
+      },
+      "verificationReceiptFailure": {
+        "code": 3,
+        "events": [
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            65537
+          ]
+        ]
+      },
+      "lostUploadAck": {
+        "code": 8,
+        "events": [
+          [
+            1,
+            0
+          ]
+        ]
+      }
+    },
+    "iosLease": "1 new same-control-lease/invalidation/FD lifetime test PASS; deterministic route double, not actual OS LAN",
+    "mobileJest": "3 new suites/7 tests plus 1 filtered App FTPS-route test PASS; old App tests skipped",
+    "typecheck": "PASS",
+    "eslint": "PASS scoped changed product files",
+    "androidKotlin": "PASS production and instrumentation compilation",
+    "iosContracts": "PASS source seed/reopen, local restore seed/reopen, Photos metadata/receipt/retry/CAS (no media mutation)",
+    "iosProductBuild": "PASS final generated BG identifiers and all native flags; additional Xcode entitled Simulator variant PASS and live native FTPS form supported",
+    "nativePackaging": "Android4ABI/16KB and iOS device+Simulator public-root packages PASS; no product activation",
+    "androidProductBuild": "PASS :app:assembleDebug, FTPS enabled, arm64; separate production4ABI package check PASS on final JNI source",
+    "androidOwnedRuntime": {
+      "groups": [
+        "Files/JNI",
+        "Keystore/profile",
+        "SAF/source/reuse/collision/review/queue/revoke/restore/reopen/recovery",
+        "Photos codec/authority",
+        "product factory/service",
+        "OS JobScheduler Files",
+        "Photos seed/publication/download/own import/repeat/new restore owner/unknown intent"
+      ],
+      "result": "PASS; source failed runs diagnosed, only affected scope resumed",
+      "fixtureAdjustments": "Owned AVD RSSI poll temporarily fixed at 2147483647ms to prevent link-speed capability churn; restored3000ms. Source/OS fixture completion waits180s; product5s wire timeout and native guards unchanged.",
+      "photos": "Body PASS; Android then kills test process for permission revocation. Exact two URI post-delete queries empty, all READ_MEDIA grants=false, ActivityManager reason=permissions revoked; no media rerun. Android new owner reopens persisted ledger, not a separate-process Photos run."
+    },
+    "iosOwnedRuntime": "PASS real Files pickers,4097-byte publication/readback/restore/repeat and separate process reopen; approved Photos1resource+1manifest, repeat/no duplicate and separate process reopen; exact2asset+2album cleanup and Keychain cleanup. Private CA and synthetic loopback route only, not real OS LAN proof.",
+    "nativeUi": "PASS TR/EN/DE live product form, native supported status, secure field masking/keyboard; max font labels/secure focus inspected. Existing global bottom-navigation overflow/full reader/full capture remain12/20 open.",
+    "separateReview": "Same agent reviewed wire FD/TLS/path/publication, native journals/custody/route/current fences, module callers/pause/lifecycle, opt-in build and fixture separation. Corrected stale test Job IDs. No unresolved new blocking finding; independent Claude final review not performed.",
+    "teardown": "PASS owned server stopped, server/CA private keys absent, exact media/Keychain/TCC/password inputs cleaned, AVD RSSI/ports/adbd restored, both owned devices stopped; other devices untouched"
+  },
+  "photosApproval": {
+    "fixture": "ftps16c-one-png",
+    "sha256": "7ac2abfce2be8b46dd9826d597d94edeefc1570b4a992622721b90a1850e3ee9",
+    "bytes": 68,
+    "devices": {
+      "androidAvd": "KlodaFtps16c",
+      "androidSerial": "emulator-5584",
+      "iosUdid": "61A45399-D0F9-43C0-B356-E1EF6712E960",
+      "iosName": "Kloda-Ftps16c-Disposable",
+      "scope": "User-approved exact disposable FTPS16c Photos fixture; cleanup complete; devices stopped"
+    },
+    "scope": "Per disposable device: seed one fixture PNG+one UUID-named album, FTPS upload/download/import/repeat/reopen, at most 2 assets+2 albums including restored copy; cleanup exact tracked IDs only; stop on any membership/identity mismatch. No personal library/device/account; no physical21 acceptance.",
+    "authorization": "APPROVED by user 2026-11-03: only this exact owned Photos fixture"
+  },
+  "devices": {
+    "androidAvd": "KlodaFtps16c",
+    "androidSerial": "emulator-5584",
+    "iosUdid": "61A45399-D0F9-43C0-B356-E1EF6712E960",
+    "iosName": "Kloda-Ftps16c-Disposable",
+    "scope": "User-approved exact disposable FTPS16c Photos fixture; cleanup complete; devices stopped"
+  },
+  "rawDirectory": "/private/tmp/kloda-ftps16c-engine",
+  "remaining": [],
+  "openGeneralGates": [
+    "Real public-CA/real-LAN FTPS endpoint; none available, not represented by private-CA loopback tests",
+    "Physical21/release signing and real iOS background delivery, lock/provider/storage/network variations",
+    "Whole-app12/20 accessibility/VoiceOver/full capture; max-font existing bottom navigation overflow; broad performance/power/storage tests",
+    "Independent final Claude review; same-agent review does not satisfy it"
+  ],
+  "notRepeated": "Reused passing16a/16b, old preflight/Jest/contracts/native checks. Resumed failed/uncovered scopes only; final Android app packaging rebuilt affected JNI source/opt-in variant. No Photos seed/import replay.",
+  "sourceHashes": {
+    "apps/mobile/app.json": "f895de082bdf4092be3b7ed34c39175988da2dc30631086c587d930fac1666e7",
+    "apps/mobile/modules/my-module/android/build.gradle": "aee976d5b494e535f2ef88fefb82a6bee0002549bc83dc61cd8d5591dab5ddeb",
+    "apps/mobile/modules/my-module/android/src/androidTest/assets/kloda-ftps16/hostname.txt": "d906aecb61d076a967d9ffe8821c7b04b063f72df9d9e35b33ef36b1c0d98f16",
+    "apps/mobile/modules/my-module/android/src/androidTest/assets/kloda-ftps16/libkloda_ftps_native.so": "04cf489acbe98913c49b46e47d58ac721b80b3e25322633dfb3715e375504653",
+    "apps/mobile/modules/my-module/android/src/androidTest/assets/kloda-ftps16/owned-photo.png": "7ac2abfce2be8b46dd9826d597d94edeefc1570b4a992622721b90a1850e3ee9",
+    "apps/mobile/modules/my-module/android/src/androidTest/assets/kloda-ftps16/sha256.txt": "16662b89020f514ea65220657fd7bcbf642ec3f174efe581fde56b9d61136495",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt": "0a09a80310edfbb2d996ceb64b046bbefa7fbba786572f673ed48977a1bbaf85",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsFilesChecks.kt": "83031d2669cbaae044f4cb900bed8dfe3b4de439997c94ae7ce6eaf6a1673330",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsFixture.kt": "a97fee666397817ebfb168c51a2fc119481043bedc224a13810f76c4e80a0314",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsOsChecks.kt": "0e7d09cb3dafe4b30f7e8e14819186e30bfa5f36c4df69c096f8792d34bdd3cc",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsPhotosChecks.kt": "d17d1616cbbf85d791253367e8ccf799c2bd726aee505ecf71145068eb4618ca",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsPhotosRestoreChecks.kt": "5756cc2c46e0e6dfc296db03f2ec5efce35fb82f342c94393ba2103fe9d9b25c",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsProductChecks.kt": "5dff7ceba2977bfc57a2503e68fd07b42c4781c64135981d5a17023a0dc0cf67",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsProfileChecks.kt": "c1d41301f9e91cf3d539d115901c55fbfd3b1d8fec685b13302ffef4c2d32b17",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsSourceChecks.kt": "b59baa631ece903f1fef59a57be5bc982bbc62dd4c0355473aa4f4d3b63591cc",
+    "apps/mobile/modules/my-module/android/src/main/AndroidManifest.xml": "6824177affe93c89fcf2eca0b37c5cd93efe2ab4813878b0b615556d67b48dea",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupReceiver.kt": "02141f7c170d1bb6544921acc1a112f854f96e3efe3a02f257eaac308393ed10",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt": "6b07d2b4b451b08da556501f14befbc0fdc21518df7521990bfdea25a10180ae",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesSnapshots.kt": "b59db25b2374effc06f7a3a73b9533e7fb69d350bc857b10d271201890eba7ba",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsBackups.kt": "99b9514fa74af883f1a5a10b4378eb2b9609a7bea38e37b175c3c7040f76d12a",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsCopyRequests.kt": "a9766d57f748403d4ad25c803eb531d75f32848e1df1866a13febcf8834bc875",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsDownload.kt": "222d7532836b94c52c089d9bf442dcec0b7da66f7a2d38b44c8159e8b4d1eb17",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsFiles.kt": "609643d41e7bad23dd6fbbb8b96ef29fa38b66ea4de968a54d59e9dd3f52e99e",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsFilesRestore.kt": "2e54e3fec730d59ff85f66c745d51f92e3f536098e5eb0a7d2ff3e86b5f0f5b0",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsJob.kt": "07c247207752c923db170e1d33cf13df734cfdbd84d6f4e1da6131200f8cb387",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsJournal.kt": "2d4de3eb32d9b7f0f21d4a7249ad0ee257e75e7583379d84c8701e6e84f5dd7a",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsLan.kt": "39b266881dace773a5fee51f4356da10eee52b951b921539791d70571aa5e11f",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsPhotos.kt": "0bdaa7c7ec116a20dc9c9099800b5cc0155442acc15f2164034f8b9297e30e27",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsPhotosImport.kt": "8a674f386a18e2ab0e5f5c8d13ccafd283eb1ad4d8979bc9377a4955c7b1b4de",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsPhotosJournal.kt": "0e12cff764844675e6c7540054e80d773f7328de67d40896c6f5407ac16104b2",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsPhotosRestore.kt": "ab7908b54bc8506d13316484577067341d7fc8b9a00b7b13db2f51b736eac3bb",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsPhotosState.kt": "2d88ed598863b392b500155361df950c2658e37adb3e36d0029138467f904d7f",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsProfile.kt": "52fdbc8c293b63b1add04ba2b330a784bb7d5f4de728f44314a1d78cde5ce179",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsProfiles.kt": "b97ab55e1ffa8bb9129c4b5d748d368a30d476b40a4cc2b7c3dc7242fecce08c",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsPublication.kt": "924ab8227895712c8b4d254e311797af70ad592e3ebed538a90ab6b33fd96c85",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsPublisher.kt": "11664fa74f249fcae70fdd797369fc7d2130a9b74aa6277147bb522dc46943b1",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsQueue.kt": "05b6362bfa03841cbef0c2beba383fcd27d2b4f23e7cc69069632c919e3b57f2",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsRestoreJournal.kt": "35aa8190cbe1a4297c68926cf41d191b35b4d945b6492ed62a3c9d22051954a1",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsRestoreTask.kt": "ac5e6fa721c69a3a3d893d67ea469e46f1eb4e4ab4e91b33cb6e9b677b3e48b9",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsReview.kt": "ed504639a9e37d8ee0a0b16efd1ffb748c5ae2bb1ba7bca80a33298d67868479",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsReviewEntries.kt": "cb6f8339a93ac07523a5feeee439768f1d46bfe249af4494b55e2521b4360ef3",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsRuns.kt": "1b349fb61f1047487b621499f29f49c4241907e56bb603e46f395d51170623f3",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsRuntime.kt": "21466635fc0815b5ce99eab02589851ecdbf9b088080cab1e0dd31ed9ec07e11",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsSchedule.kt": "7d59f5d9532e69d30728dbc4e55c4b9399151963e720eedfbac9f2e7d373211c",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsScheduler.kt": "23df8d47b88b37da3df36c3d8dcb9801c97aa8eb42ad38c3a9b8a5c47ad35152",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsSources.kt": "a89b2c2fe9227915dff47b6314b7c78874f0aac07ecccd16dbfa6df4e756230b",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsVault.kt": "b02a14b8319cc3283335d428a8de984bdb9e53fe73b718c4cc560197cd0bcb24",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/FtpsPhotoManifestCodec.kt": "25770ed5056b792a4c2155ca2af47efb623886f7aefdc80bb29518f86b21d35b",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/FtpsRun.kt": "fdf715a25d07db1d97a3bb935bb5f86a6427be53aecbddcb58c1d68d66f2d0ce",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaFtpsModule.kt": "0d4f4c12341df7590b9b9854a6ec2282c85145a92b54e1715cd308d3b4b0d426",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt": "771a5518b633183d4d7662950d95a23eb111dc84ab74c80814e8cece95a7c41c",
+    "apps/mobile/modules/my-module/expo-module.config.json": "f0b686d790b858d620ef30242446375f183ec936b041437d2d1a6a0f79bba9ab",
+    "apps/mobile/modules/my-module/ios/IosAutomaticCoordinator.swift": "7c95661aae96935107881a1db7e4b0eb334419bc63692c2835804f772fbb2af3",
+    "apps/mobile/modules/my-module/ios/IosAutomaticSubscriber.swift": "c8ce7d7cab0db101500d041243e467d7564227e491c6c05547048e84d103ba26",
+    "apps/mobile/modules/my-module/ios/IosFilesSnapshot.swift": "ac43ea3b3d36315d80adb708d7a9dcdcd8e187478a5b2fa65fa490830e34f9a5",
+    "apps/mobile/modules/my-module/ios/IosFtpsAutomaticCoordinator.swift": "15f4f19fdd97ccaffc4bdf39dd634231b640be3197747181c7ecff1bdff13cff",
+    "apps/mobile/modules/my-module/ios/IosFtpsBackups.swift": "d20b2358e5e2c21af0790d51744f8ddfa282294f6b9a3706be55103729b23f73",
+    "apps/mobile/modules/my-module/ios/IosFtpsContext.swift": "6030a956e49e4613bfd6f1237812394b55e92d3f7f8d1292706ca23199f595c8",
+    "apps/mobile/modules/my-module/ios/IosFtpsCopyRequests.swift": "b5bec5fb86c58778c61539241a33b733f394503f1548e5cbccd4f6691e9a50a5",
+    "apps/mobile/modules/my-module/ios/IosFtpsDownload.swift": "70dea42cab8e11c49519328df075ddfb147bb1c79d6408e77aea4bd0f0b37e3f",
+    "apps/mobile/modules/my-module/ios/IosFtpsFiles.swift": "1fefa96b49c487c35a41d4d75453099611107813b76ccd04816a9ddf318287cc",
+    "apps/mobile/modules/my-module/ios/IosFtpsFilesRestore.swift": "28e681e3588cd8477a9e480987fd6d8f90c3d24fd51d8413e3123b30848cf807",
+    "apps/mobile/modules/my-module/ios/IosFtpsIssues.swift": "769038b7ad4245a0b34536f2abc35808fdd1bf0eef3b03f38b6b4e47a6985595",
+    "apps/mobile/modules/my-module/ios/IosFtpsJournal.swift": "be36137f53bcc265a4a5687d648d82967393d5dfcc0323094fa9ca1b05dc9ee9",
+    "apps/mobile/modules/my-module/ios/IosFtpsLan.swift": "69cf756dbf71143ed7168426fcbcb531ea8022c58c0aa2e2e22f63bcb6000162",
+    "apps/mobile/modules/my-module/ios/IosFtpsPhotoManifest.swift": "0b77414f311441abb062ea8cc024c749cc325229133561cc68955903074effca",
+    "apps/mobile/modules/my-module/ios/IosFtpsPhotos.swift": "1b7596bc45bc3662551aed4697550cd57fd246857002d22d9cf97cbce7cffc33",
+    "apps/mobile/modules/my-module/ios/IosFtpsPhotosImport.swift": "e62a45c0c39614ec1af4ef99f7c7b18b6d92040731b35238b1be66be9778cbe3",
+    "apps/mobile/modules/my-module/ios/IosFtpsPhotosJournal.swift": "b90d053e5754408881c527a15d1e3c85d81383878f460df194b2b933ef4ab761",
+    "apps/mobile/modules/my-module/ios/IosFtpsPhotosRestore.swift": "dbc0c8d685f6c7adec9833af89ebfc1f4e022b4a29f1f287bf571ce0b7ad37bb",
+    "apps/mobile/modules/my-module/ios/IosFtpsPhotosState.swift": "ca9fa9cfed4e46841d682f96fb8cbe97f0ee74489ea0f09c72e627cabf4d7053",
+    "apps/mobile/modules/my-module/ios/IosFtpsProfile.swift": "3773b44e17a1399ef365374c977a516ad39949f381316e141ac238a206752539",
+    "apps/mobile/modules/my-module/ios/IosFtpsProfiles.swift": "fd9b28600917c0f81519eb9901b03f7cb38e241ec19ab625b0a366339b920c50",
+    "apps/mobile/modules/my-module/ios/IosFtpsPublication.swift": "09ccb6f7733a105939debc43dccdf682f120126c239316d26a18ed0bdb631158",
+    "apps/mobile/modules/my-module/ios/IosFtpsPublisher.swift": "361a180356213265da92da09b8a6da320d6361a41aeda7a5a85683855a6ae0cf",
+    "apps/mobile/modules/my-module/ios/IosFtpsQueue.swift": "5ee699f542699289deb4981caf2f47f71bca9c6b334b173313d53b20c9af29f0",
+    "apps/mobile/modules/my-module/ios/IosFtpsRestoreJournal.swift": "502b4f8434d5314dcbdeff41bb590a493acad8d8742086ccf59eb14563009fbf",
+    "apps/mobile/modules/my-module/ios/IosFtpsReview.swift": "9c77c1f2f3a54ced381bb77fbff72835cf6716b3c53eae176b990b58ca320df2",
+    "apps/mobile/modules/my-module/ios/IosFtpsReviewEntries.swift": "3214db3d3be839de23bf374d7c9d6d1085176fe1ff85ad5d2408d960498bfbca",
+    "apps/mobile/modules/my-module/ios/IosFtpsRuns.swift": "4f6bb1bf18e92cf661776cfbc594dba54d1f9547769da7deb7f1f641d1064fb8",
+    "apps/mobile/modules/my-module/ios/IosFtpsSchedule.swift": "94ebbda4131c42b6f342ec4ad4315720ee72fff61a5e97e0ab4125000c847137",
+    "apps/mobile/modules/my-module/ios/IosFtpsSources.swift": "528e5c57e5c4acc420ca0845f3d0db6e3e506c01efbd3c41839818117f9fcabf",
+    "apps/mobile/modules/my-module/ios/IosFtpsUi.swift": "ce5b73901265cf77984e69b864196d6e60d24b891c8ea08a4c240ddd7e324c95",
+    "apps/mobile/modules/my-module/ios/IosFtpsVault.swift": "fee50514d3a2c44492fca7394c08e87093acd3488b59a966f18677f768284763",
+    "apps/mobile/modules/my-module/ios/IosWebDavContext.swift": "e2338fe3c3e309379d47a4c149b9f5d6c1a68c140ab6b3b38f86ac5de09ac7af",
+    "apps/mobile/modules/my-module/ios/KlodaFtpsModule.swift": "008faf32c53f52fdd295b828e26a7aa2499e2020aa4086ed926ef0f8ea13ea79",
+    "apps/mobile/modules/my-module/ios/KlodaSyncRuntime.podspec": "bef17785304abb79a41bae81a97508071c8a0bbd6c5dff88668779b73329ae6b",
+    "apps/mobile/modules/my-module/ios/NativeFtps/KlodaFtpsNative.xcframework/Info.plist": "6650a8e56012f697b599a305930442d07b5ab6e7c621b4db4efb57a6347b19ea",
+    "apps/mobile/modules/my-module/ios/NativeFtps/KlodaFtpsNative.xcframework/ios-arm64-simulator/Headers/kloda_ftps.h": "588cfc16427f82c57978e6499ba89e6d171565a5294801a62383c89e6c5dc3d2",
+    "apps/mobile/modules/my-module/ios/NativeFtps/KlodaFtpsNative.xcframework/ios-arm64-simulator/libkloda_ftps_native.a": "dd4fe56b1364dbdad26e63297da91ae6622302625203c5609dd49b6dfb4f9afc",
+    "apps/mobile/modules/my-module/ios/NativeFtps/KlodaFtpsNative.xcframework/ios-arm64/Headers/kloda_ftps.h": "588cfc16427f82c57978e6499ba89e6d171565a5294801a62383c89e6c5dc3d2",
+    "apps/mobile/modules/my-module/ios/NativeFtps/KlodaFtpsNative.xcframework/ios-arm64/libkloda_ftps_native.a": "30f237d08111c6a6b81521ad012eefc42865a70276ffa5cdc38244ef3d117dce",
+    "apps/mobile/modules/my-module/ios/NativeFtps/kloda_ftps.h": "588cfc16427f82c57978e6499ba89e6d171565a5294801a62383c89e6c5dc3d2",
+    "apps/mobile/src/app/App.spec.tsx": "1a26b1f3bafc3fc02296d62fac94dbf67e35642f8d89212e56c81828b16c4165",
+    "apps/mobile/src/app/App.tsx": "f4b3731ba6e5f091c1705083bd27778a8993868378d0534d54e40d2fbfc399c6",
+    "apps/mobile/src/features/backup-setup/model/use-ftps-backup.ts": "a6fec32416fdbbf62e4616232380efd7c201e9a5337d84017b427f2d645c33fb",
+    "apps/mobile/src/features/file-transfer/model/use-ftps-items.ts": "4444d021aac7ad2895dc0128fe82b1657de5506ed1d8528f33ce1fdc2db1d07d",
+    "apps/mobile/src/pages/activity/ui/activity-page.tsx": "5e5aec0a3ec146df9f0bcd5dc2d0272cc3685afffe1eeabebac8a5f0d0efe3a5",
+    "apps/mobile/src/pages/activity/ui/ftps-items-panel.spec.tsx": "fe4ff8ebbe95beee58756566a79942086f2fd0cb15ef0008e3278c68f08221c1",
+    "apps/mobile/src/pages/activity/ui/ftps-items-panel.tsx": "c30f8ed5d5f3631808e4f998f9bab528566bdb98d46f2aef7762c85962e2f603",
+    "apps/mobile/src/pages/connections/ui/connections-page.tsx": "1a8770c2f44a1d2fa67e37f22ceb2d8108204b828f6da999a1eb8c3089ff66e6",
+    "apps/mobile/src/pages/connections/ui/ftps-page.spec.tsx": "0254bb41513414a5c49bbe40a088ab9cbd38822dff5a469f79e984ed0b7eada8",
+    "apps/mobile/src/pages/connections/ui/ftps-page.tsx": "b27431d4d1c0ddfe7699a3188624a90d09969d199463692e0c65dc02d7b4bd92",
+    "apps/mobile/src/shared/api/ftps-backups.ts": "02653994670f43ccbaab315f1157b082241899bed9bf4979110f38c2840020f1",
+    "apps/mobile/src/shared/api/ftps.spec.ts": "f64f4ff6007b6124b0f6937a36f2f7dcc021b7be79fc62c31bae0b4478ea4aa1",
+    "apps/mobile/src/shared/api/ftps.ts": "391f5e6142ca62debcc7ece882a62ae72b41bd67fa689071f861c2be9609878e",
+    "apps/mobile/src/shared/i18n/locales/de.json": "21fbdc8b2c9d389eab8f61933ed14edac27a5c880ea8979ac547a6053b889e20",
+    "apps/mobile/src/shared/i18n/locales/en.json": "a8d72e5a2fe01cb5aa5c6ca126e6166a5b7ad1ef7dd2ea966d6a8268c6c6add3",
+    "apps/mobile/src/shared/i18n/locales/tr.json": "040ecbd3dfa0b25c8191264294e80ce4ba9a48217cac80a90b03544695e1fb92",
+    "packages/ftps-native/.gitignore": "306fd52e74fca6746e12acc750f232de15e71da917756a1270d74c91f5eb7368",
+    "packages/ftps-native/Cargo.lock": "6252ca0dcdab3446a8542898ebd3f891db292658fb99fe113ff17f2d9841cf20",
+    "packages/ftps-native/Cargo.toml": "be9263f9cb0a7e8a3da89892d1250fe72abef0ed37dbfafe2fefe9e4eea46071",
+    "packages/ftps-native/README.md": "00d760ff3180ef18c5a0f978457510755d6f3bb9e59325145d71e165c89b2378",
+    "packages/ftps-native/THIRD_PARTY_NOTICES.md": "4f75685422c832454c9cbc022b2dd3c86e6aac82fd6bca76b77128381c578881",
+    "packages/ftps-native/apple/tests/IosFtpsLoopbackFilesApp.swift": "d7509251cee98862b8017077baf1bdb4c11b7ab3458f794a4b6593e44d9eca21",
+    "packages/ftps-native/apple/tests/IosFtpsLoopbackPhotosApp.swift": "3e830296ed33900d3bd4220124c4b0121eaa4a51cc8608b75f40522aefcf2482",
+    "packages/ftps-native/apple/tests/IosFtpsPhotosChecks.swift": "63f902d3906bb68c91e765531feb1d1057c8f2db7158e10b2dcd8fda0c66d1e0",
+    "packages/ftps-native/apple/tests/IosFtpsProfileChecks.swift": "e15294edbeacc923c23315eab9911969aeaf57872acc9ddb681932435565233c",
+    "packages/ftps-native/apple/tests/IosFtpsRestoreChecks.swift": "b5af38968fc74fa7e7d2a7e3232654e7894de475b181285c097118c3a2576c32",
+    "packages/ftps-native/apple/tests/IosFtpsSourcesChecks.swift": "fabc3476e6633750ce3ac24714b8bd0c27e697abf65073659c545e9253d7ef3b",
+    "packages/ftps-native/apple/tests/OwnedLoopbackRoute.c": "bbe936c8ac13718cbfb4e205ddc5180a30b0f0ab083c0218ee643f8f11791fc9",
+    "packages/ftps-native/build.rs": "81b27e03f076d0fad70fd1a2facd2afaeb08bedd562f4ff7fb96ba0445b40f2e",
+    "packages/ftps-native/dependency-inventory.json": "34819c24184d69d8bcb91699a9788f5dae6c85165b9924a2dbdb7b6885af3967",
+    "packages/ftps-native/fixtures/ftps-photo-v1.json": "9445b9b5732caa2551da3a004a41663b08e945e78847da1de47fd346f75d68bf",
+    "packages/ftps-native/include/kloda_ftps.h": "588cfc16427f82c57978e6499ba89e6d171565a5294801a62383c89e6c5dc3d2",
+    "packages/ftps-native/src/android_jni.rs": "1a78b56e4676671e491333d1fd97f7be9836c7656bbb0e1e004fbb514e0a8956",
+    "packages/ftps-native/src/bridge.rs": "e528d1bc9e33e97fe493fe00153814848f49b2d0916d39593003d48bc0a9d0f6",
+    "packages/ftps-native/src/lib.rs": "5f65805849a604b4f55414601f94c0db59a26c77776575ecdf21abf7d4984d20",
+    "packages/ftps-native/src/request.rs": "33bd1854d1af3029ae023eac1cf7bdd5f30c0a59a6687632627cfa762ff6ef53",
+    "packages/ftps-native/src/session.rs": "7b4fed384eabd637c79af2874e3e7b4d72a3dec5f0a5612636a4be7fcc2746e3",
+    "packages/ftps-native/src/transfer.rs": "088f4dcc94c7d35965964e0c191a8c7a438c332be06f4ab215f59662d5ca1fd6",
+    "packages/pairing-native/apple/include/KlodaPairingNative.h": "114209b5763110ebfae272f1586a990fce4ef032ff1aa9556e39c2557dfc2751",
+    "packages/pairing-native/src/ios_lan_socket.rs": "b5712e6c0fb5c5411797eb05ebd14838286b5e8d793cdfa5120c6fc5322eda78",
+    "packages/pairing-native/tests/ios_lan_socket.rs": "3bdd9756ad999191e893e0b5a58c1120867cf937c9018635c1717fe9826bacb0",
+    "tools/build-ftps-native.mjs": "f598a4eee21d55cae3288d94a100890de864aea6625d285ff037c94326520248",
+    "tools/build-native-ios.mjs": "9329cc824f3c12bbd0cca64050a8c8c32e94020c152a3276f4b1fdc80c56e9b5",
+    "tools/check-ftps-native.mjs": "37762d7d714518c8c41eb4d523c30b472c1c40d597c5e5c9f6245a6023beb71d",
+    "tools/test-ios-ftps-contracts.py": "0aff7a5a7b4ee7bca9cb0e1cb57ef4826572162f92560e3e4ab6f2ec50a45e93"
+  },
+  "productionArtifacts": [
+    {
+      "target": "aarch64-linux-android",
+      "release": true,
+      "artifact": "/Users/ayhanblt/Desktop/projects/kloda/packages/ftps-native/target/aarch64-linux-android/aarch64-linux-android/release/libkloda_ftps_native.so",
+      "sha256": "dd6995c472ba0d019ed9225d402bf047f2b906e1b2249aa385562d9565ee922d",
+      "bytes": 5130600,
+      "exports": [
+        "kloda_ftps_publish_bound",
+        "kloda_ftps_read_bound",
+        "Java_com_kloda_sync_FtpsNativeEngine_publishBound",
+        "Java_com_kloda_sync_FtpsNativeEngine_readBound"
+      ],
+      "alignments": [
+        16384,
+        16384,
+        16384,
+        16384
+      ]
+    },
+    {
+      "target": "armv7-linux-androideabi",
+      "release": true,
+      "artifact": "/Users/ayhanblt/Desktop/projects/kloda/packages/ftps-native/target/armv7-linux-androideabi/armv7-linux-androideabi/release/libkloda_ftps_native.so",
+      "sha256": "ac318637d9e4e55c420d04881989b13ef63abf931d4848500a8aaf2b7eb49b65",
+      "bytes": 3394420,
+      "exports": [
+        "kloda_ftps_publish_bound",
+        "kloda_ftps_read_bound",
+        "Java_com_kloda_sync_FtpsNativeEngine_publishBound",
+        "Java_com_kloda_sync_FtpsNativeEngine_readBound"
+      ],
+      "alignments": [
+        16384,
+        16384,
+        16384,
+        16384
+      ]
+    },
+    {
+      "target": "x86_64-linux-android",
+      "release": true,
+      "artifact": "/Users/ayhanblt/Desktop/projects/kloda/packages/ftps-native/target/x86_64-linux-android/x86_64-linux-android/release/libkloda_ftps_native.so",
+      "sha256": "f4ab22a2a2fdfd03dfc3bf2356cabeac3eeae4bc6331ddd9605df42def4d5d0d",
+      "bytes": 5243936,
+      "exports": [
+        "kloda_ftps_publish_bound",
+        "kloda_ftps_read_bound",
+        "Java_com_kloda_sync_FtpsNativeEngine_publishBound",
+        "Java_com_kloda_sync_FtpsNativeEngine_readBound"
+      ],
+      "alignments": [
+        16384,
+        16384,
+        16384,
+        16384
+      ]
+    },
+    {
+      "target": "i686-linux-android",
+      "release": true,
+      "artifact": "/Users/ayhanblt/Desktop/projects/kloda/packages/ftps-native/target/i686-linux-android/i686-linux-android/release/libkloda_ftps_native.so",
+      "sha256": "95a3a7ae07ecbf0a28ad47f5686091f696d599ca19428d5e62ad440d27ce488d",
+      "bytes": 4738724,
+      "exports": [
+        "kloda_ftps_publish_bound",
+        "kloda_ftps_read_bound",
+        "Java_com_kloda_sync_FtpsNativeEngine_publishBound",
+        "Java_com_kloda_sync_FtpsNativeEngine_readBound"
+      ],
+      "alignments": [
+        16384,
+        16384,
+        16384,
+        16384
+      ]
+    },
+    {
+      "target": "aarch64-apple-ios",
+      "release": true,
+      "artifact": "/private/tmp/kloda-ftps16c-release/aarch64-apple-ios/aarch64-apple-ios/release/libkloda_ftps_native.a",
+      "sha256": "30f237d08111c6a6b81521ad012eefc42865a70276ffa5cdc38244ef3d117dce",
+      "bytes": 28706456,
+      "exports": [
+        "kloda_ftps_publish_bound",
+        "kloda_ftps_read_bound"
+      ],
+      "alignments": []
+    },
+    {
+      "target": "aarch64-apple-ios-sim",
+      "release": true,
+      "artifact": "/private/tmp/kloda-ftps16c-release/aarch64-apple-ios-sim/aarch64-apple-ios-sim/release/libkloda_ftps_native.a",
+      "sha256": "dd4fe56b1364dbdad26e63297da91ae6622302625203c5609dd49b6dfb4f9afc",
+      "bytes": 28702344,
+      "exports": [
+        "kloda_ftps_publish_bound",
+        "kloda_ftps_read_bound"
+      ],
+      "alignments": []
+    }
+  ],
+  "rawEvidence": {
+    "android-product-ftps-build.log": {
+      "path": "/private/tmp/kloda-ftps16c-engine/android-product-ftps-build.log",
+      "sha256": "dce4de1e91925f7ae533a12b11a4f80895145984db30f6147e4149d5f2bf3b3f"
+    },
+    "android-timeout-fixture-build.log": {
+      "path": "/private/tmp/kloda-ftps16c-engine/android-timeout-fixture-build.log",
+      "sha256": "e3b55d1cc7dac47cce0cc7267eb903d0cc27db0ff84afc134cec6ed5c935180e"
+    },
+    "ios-app-final-build.log": {
+      "path": "/private/tmp/kloda-ftps16c-engine/ios-app-final-build.log",
+      "sha256": "3fdd13253fba67c600329b361eae0907e7845fadb4e7b137522a05b57e262628"
+    },
+    "ios-product-entitled-build.log": {
+      "path": "/private/tmp/kloda-ftps16c-engine/ios-product-entitled-build.log",
+      "sha256": "c3ae8e5b9ac6980a6a407ad78dabf4f896bf3a767a4ca11d4c13650731790e7f"
+    },
+    "clippy-final.log": {
+      "path": "/private/tmp/kloda-ftps16c-engine/clippy-final.log",
+      "sha256": "7703ad42446bccde763f2b1a9ad05acbee25e4cade3211c7f6d0e6be1cd88adb"
+    },
+    "android-photos-owned.log": {
+      "path": "/private/tmp/kloda-ftps16c-engine/android-photos-owned.log",
+      "sha256": "bc1e6550fcd4427567aadc2fadf8909ad9cee2a10147df8446f34fc364742323"
+    },
+    "android-sources-final.log": {
+      "path": "/private/tmp/kloda-ftps16c-engine/android-sources-final.log",
+      "sha256": "ca587e6c3f136d12f4ab7b69013a68cb980c6da09051d34215301bb1b96e3508"
+    },
+    "android-route-callbacks-v2.log": {
+      "path": "/private/tmp/kloda-ftps16c-engine/android-route-callbacks-v2.log",
+      "sha256": "bc14d58d1d580410fde2e5245fb40b93a350160cc28781d555561d14bd615c6c"
+    },
+    "android-stable-sources.log": {
+      "path": "/private/tmp/kloda-ftps16c-engine/android-stable-sources.log",
+      "sha256": "62b2391c85602f8ec168094cb4692894e087a18ba30bc2ba793d501a3b3a3518"
+    },
+    "typecheck.log": {
+      "path": "/private/tmp/kloda-ftps16c-engine/typecheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "eslint.log": {
+      "path": "/private/tmp/kloda-ftps16c-engine/eslint.log",
+      "sha256": "6839ad0642096b6f1a8168fd8940098422a34c6d80129b85dfe7eb3ae24b0942"
+    },
+    "jest.log": {
+      "path": "/private/tmp/kloda-ftps16c-engine/jest.log",
+      "sha256": "1d916cb06244a990e93a31b22a878e14b211f05b8dc662fc76c18ea799b4284b"
+    },
+    "ftps-route-jest.log": {
+      "path": "/private/tmp/kloda-ftps16c-engine/ftps-route-jest.log",
+      "sha256": "b304e32cb468a6f0766de5ff115a058d6d89429299fff30e0bd3c338f5204350"
+    },
+    "ios-contracts.log": {
+      "path": "/private/tmp/kloda-ftps16c-engine/ios-contracts.log",
+      "sha256": "7dd175cee0bbbb9cd8145dfd434c1483d22fc1eca6a53b39278874725d77eb44"
+    },
+    "bound-result.json": {
+      "path": "/private/tmp/kloda-ftps16c-engine/bound-result.json",
+      "sha256": "2d76e8412f5bb18fa5e9ef90d01f6fefbb0e87c4aa88504372d4719c82d46598"
+    }
+  },
+  "evidenceFiles": {
+    "android-photos-cleanup.json": "bba994ff3b484ff573447bf6ed17031ca18577ce55fd041e34b82036398c2856",
+    "android-photos-owned.log": "bc1e6550fcd4427567aadc2fadf8909ad9cee2a10147df8446f34fc364742323",
+    "android-photos-process-cleanup.log": "31027c68221d8c8b9aa21f4f304f0ea5d7b52ff94cb78b9e7430d1f8810bc3cf",
+    "android-sources-final.log": "ca587e6c3f136d12f4ab7b69013a68cb980c6da09051d34215301bb1b96e3508",
+    "bound-check.py": "a02820a508cd4a0d24348a8c6f39143911fb3ac9588852381d4f6aa297b2b777",
+    "device-teardown.json": "a24a08627be63576a5cb1924e92214083b90f5c1405b35b38c5bcacdc96cbcae",
+    "final-checks.json": "dee31c942b939e8318d7dc689e93ee222d8be1f517f4d1fa33bf5179ffc6bb9a",
+    "ios-owned-runtime.json": "f87ca094cf96c0682d703e6814ff0369fb91f67175aa026f3ccc5cb83b9c7abd",
+    "server-teardown.json": "45a3f347625a93c4f89c969180549c8e59fbc5d0ff4aac1ed05c3e9caf0776ed",
+    "ui/de-form.png": "5c3299ec11356a6906fe36da932171f7fa5896bc520d30cee2bc957f20b3b88d",
+    "ui/de-max-font-fields.png": "12f387d2319a4ea19405840eca5106fdd9f34ce38c7ef58287d7041554aff7dc",
+    "ui/de-max-font-top.png": "8e159049317463943d0b77edcf31cbb50580e80ca933c2d583ac79f234129aa6",
+    "ui/en-form.png": "36cb5410208d66a134441c72fba0df29e6f654697c157c5114e4427ae59b0631",
+    "ui/tr-form.png": "7a5c09eb2b911b5612852b531421f1b0cf1d16a8126d272b29d0d19b22e1e6ae",
+    "ui/tr-secure-field.png": "02eb0a5820054e2c4ce018624f3d04909914b3af0d0a01b27ce57aadcb73e679",
+    "ui-check.json": "8b578fdbb7eb239c752dd9e55dac29bc932a625b42f75435357f48cd8440c8a2"
+  },
+  "postBuildNonSemanticEdits": {
+    "apps/mobile/modules/my-module/ios/IosFtpsPublication.swift": "Comment only: clarified opt-in bridge/default-off status; executable logic unchanged from built/tested variant",
+    "packages/ftps-native/README.md": "Status/evidence documentation only"
+  }
+}

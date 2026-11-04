@@ -1,0 +1,6 @@
+[package]
+name = "kloda-s3-candidate-probe"
+version = "0.0.0"
+edition = "2024"
+[dependencies]
+s3 = { package = "rust-s3", path = "../rust-s3-0.38.0", default-features = false, features = ["sync-rustls-tls", "fail-on-err"] }

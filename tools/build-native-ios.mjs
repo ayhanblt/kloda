@@ -29,7 +29,7 @@ const simulator = process.arch === 'arm64' ? 'aarch64-apple-ios-sim' : 'x86_64-a
 assert(['arm64', 'x64'].includes(process.arch), 'Unsupported build host architecture');
 const libraries = [];
 const symbols = ['open', 'request', 'suspend', 'set_foreground', 'transfer', 'reply_free',
-  'background_begin', 'background_end', 'background_transfer', 'lan_with_socket', 'lan_current'];
+  'background_begin', 'background_end', 'background_transfer', 'lan_with_socket', 'lan_current', 'lan_connect'];
 for (const [target, sdk] of [['aarch64-apple-ios', 'iphoneos'], [simulator, 'iphonesimulator']]) {
   const sdkRoot = run('xcrun', ['--sdk', sdk, '--show-sdk-path'], {}, true);
   run('rustup', ['run', rustToolchain, 'cargo', 'rustc', '--locked', '--offline', '--no-default-features',

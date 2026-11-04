@@ -1,0 +1,7 @@
+# S3 native core — step17
+
+`rusty-s3=0.10.2` (BSD-2-Clause), no I/O or credential discovery. This native library validates target/key inputs, prepares native-only60-second SigV4 URLs and classifies bounded create/complete replies. AWS standard regional endpoints and S3-compatible endpoints remain distinct inputs. Dotted buckets may use path style; other AWS partitions/access-points/Express are not accepted by the current endpoint profile. Signed URLs are bearer credentials: do not persist, log or pass to JS.
+
+Transport, current native authority, vault, immutable job journal, source generation, ACK ordering, whole-file verification and recovery are caller responsibilities. The crate does not authorize or perform uploads. `CompletionAck` is never Completed; unknown results remain Review. No final-object delete/adoption operation exists. Full server/vendor equivalence, media/restore/queue/UI/native runtime and physical acceptance are open.
+
+Only new tests: `cargo test --manifest-path packages/s3-native/Cargo.toml`; successful cases are recorded and must not be rerun without changed behavior. Exact results/source variants and one-host TLS/fault evidence: docs/implementation/evidence/s3-step17-preflight-2026-11-03/manifest.json. The approved C/JNI bridge and native mobile product adapters are implemented; current code acceptance is tracked separately from earlier evidence; see docs/implementation/s3-native-integration-decision-2026-11-03.md.

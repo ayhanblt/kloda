@@ -47,6 +47,9 @@ final class IosAutomaticCoordinator {
   }
   func reconcile() { worker.async { self.reconcileOnWorker() } }
   func pause() throws {
+#if KLODA_S3_NATIVE
+    IosS3Queue.cancelAllInMemory()
+#endif
     var actions: [() throws -> Void] = [{ [self] in try worker.sync {
       active?.lease?.cancel(); files.pause()
       timer?.cancel(); timer = nil
@@ -62,7 +65,13 @@ final class IosAutomaticCoordinator {
 #if KLODA_SFTP_NATIVE
     actions.append { defer { IosSftpAutomaticCoordinator.shared.reconcile(allowForeground: false) }; try IosSftpQueue.shared.pause() }
 #endif
+#if KLODA_FTPS_NATIVE
+    actions.append { defer { IosFtpsAutomaticCoordinator.shared.reconcile(allowForeground: false) }; try IosFtpsQueue.shared.pause() }
+#endif
     actions.append { defer { IosWebDavAutomaticCoordinator.shared.reconcile(allowForeground: false) }; try IosWebDavQueue.shared.pause() }
+#if KLODA_S3_NATIVE
+    actions.append { defer { IosS3Automatic.shared.reconcile() }; try IosS3Queue.pauseAll() }
+#endif
     try IosAutomaticPause.stop(actions)
   }
   func resume() throws {
@@ -78,6 +87,12 @@ final class IosAutomaticCoordinator {
 #endif
 #if KLODA_SFTP_NATIVE
     IosSftpAutomaticCoordinator.shared.reconcile()
+#endif
+#if KLODA_FTPS_NATIVE
+    IosFtpsAutomaticCoordinator.shared.reconcile()
+#endif
+#if KLODA_S3_NATIVE
+    IosS3Automatic.shared.reconcile()
 #endif
   }
   func status() throws -> [String: Any] {

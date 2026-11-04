@@ -550,6 +550,25 @@ Kullanıcı 4.11: 18A/4 kapanınca dur; worktree commit + Codex hizalama isteği
 ([codex-request-merge](codex-request-merge-2026-11-04.md)) + main birleştirmesi; ardından sırayla 8 (18B/5 açıkları)
 ve 9 (18B/5r açıkları).
 
+Main birleştirmesi (4.11): Codex `db1e721` (16c FTPS + 17 S3) ve `4cf38e2` (yanıt: main'de `codex-response-merge-2026-11-04.md`;
+ortak journal'a migration yok, FTPS/S3 ayrı veritabanları). main dala birleştirildi; 5 çakışma iki taraf korunarak çözüldü
+(app.json BG kimlikleri + FaceID; instrumentation scope birleşimi; App.tsx FTPS/S3/bulut sağlayıcı rotaları; activity
+FtpsItemsPanel + hedef başına panel; connections FTPS/S3 kartları + bulut listesi, boş durum hepsini sayar).
+`IosWebDavContext.mutate` S3/FTPS duraklat+uzlaştır korunarak otomatik birleşti; S3/FTPS kartlarında kurtarma satırı yok.
+Aynı commit'te 18A/4d bulgu düzeltmeleri: (1) `plugins/with-alert-case.cjs` — Android `alertDialogTheme` düğmeleri
+`textAllCaps=false` (tüm `Alert.alert`); (2) `transfer.errors.wifi_required` TR/EN/DE hedef adsız; (4) DE `viewBackups`
+"Sicherungen anzeigen" (+ `importBody` atfı). (3) Durum sekmesi kök neden: `home-status.ts`/`use-home-status.ts` yalnız PC +
+ilk WebDAV profilini izliyor; eklenen bulut hedefleri (ve SMB/SFTP/FTPS/S3) toplanmıyor → genişleme, kullanıcı onayı bekliyor.
+Kontroller: tsc, `npm run lint` PASS; Jest 258/259 — tek başarısız `s3-diagnostic-page.spec.tsx` "cancels the exact test…",
+temiz main `4cf38e2`'de de aynı (Codex'e bildirilecek, birleştirmeden kaynaklanmıyor). `expo prebuild` (android, ios) +
+Android `:app:installDebug` arm64 + `:my-module:assembleDebugAndroidTest` PASS; `pod install` (`LANG=en_US.UTF-8` gerekir,
+yoksa CocoaPods hata raporunda çöküp workspace'i yarım bırakıyor) + iOS arm64 Simulator Debug derlemesi PASS. Emülatörde
+kaldırma penceresi "Vazgeç" / "Hedefi kaldır" olarak görünüyor PASS
+([android-remove-confirm-case](evidence/step18A4-android-2026-11-04/android-remove-confirm-case.png)); Vazgeç, hedef korundu.
+Açık: `tools/test-ios-webdav-journal.py` merge öncesinden beri host'ta derlenmiyor (IosWebDavClient URLSession macOS host
+SDK'sında opsiyonel çıkarım; kaynak listesinde `IosCloudTarget`/`IosRecoveryImportJournal` yok) — 29/4'teki stub yaklaşımıyla
+ayrı düzeltme; birleştirme ortak journal'lara dokunmadı.
+
 1. 18A/3 — yapıldı (yukarıdaki dilim). Kuyruk/runner/schedule/review/sidecar'ı `targetId` ile çoklu hedefe açmak (ADR0027 §4); Codex'in
    `begin()` kilit kapsamı korunur. Codex'e hizalama isteği: [codex-request-18A3](codex-request-18A3-2026-11-02.md);
    Codex yanıtı main'de `docs/implementation/codex-response-18A3-2026-11-02.md` (kuyruk sözleşmesi, kilit sırası, ekran yeri).

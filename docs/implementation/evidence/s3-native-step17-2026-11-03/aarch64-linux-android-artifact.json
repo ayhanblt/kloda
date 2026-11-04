@@ -1,0 +1,17 @@
+{
+  "target": "aarch64-linux-android",
+  "release": false,
+  "artifact": "/Users/ayhanblt/Desktop/projects/kloda/packages/s3-native/target/aarch64-linux-android/aarch64-linux-android/debug/libkloda_s3_native.so",
+  "sha256": "a74022321ce81fe90a003484b6278e2702a1de5756f56742802f24e16c053b84",
+  "bytes": 4341936,
+  "exports": [
+    "kloda_s3_json_v1",
+    "Java_com_kloda_sync_S3NativeEngine_process"
+  ],
+  "alignments": [
+    16384,
+    16384,
+    16384,
+    16384
+  ]
+}

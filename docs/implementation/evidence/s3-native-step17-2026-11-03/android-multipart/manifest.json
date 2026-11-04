@@ -1,0 +1,39 @@
+{
+  "head": "67701e7895ca9d7d5d7efe66d23b09954a8bf690",
+  "scope": "owned emulator-5584 KlodaFtps16c; standalone test APK only; synthetic data, test APK CA only; no AWS/media",
+  "source_hashes": {
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Profile.kt": "bb043aa773cc68a5f4d0dd55fba92d8621a505b05548ab05aaf18acd338c342b",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Profiles.kt": "67fbf1f21bb3b15eb99d47eb38609e8e01bfa5aa8810f7a19e18c332374e0ad1",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Journal.kt": "9fa42b5667e9ded347d160389fa8ecacecd21756dd9f84ff21b13caed1941db5",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Client.kt": "2f91f5e36464f0a6d02273677c9719d0926c94c5ab4426cd4997be23fb021731",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaS3Module.kt": "9235fe75c47e15f11ce62340eda8a7e2dc91b287a264474218ef1aab5a25da40",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Jobs.kt": "b76e9df63ed02706a9e6dff2f955326710d6110755458b091e63dfa1fb15d0b1",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Publisher.kt": "4345c8176fcacbf08861692f391f9011843ea65af039cd9e8faeb73406d179bf",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Vault.kt": "e9bc067a8ed442a8a57a654461c3e344f0c23b91ba083fe01115932e51c9fef4",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/S3NativeEngine.kt": "0b8574317e4f8967487e061129076d0c25184ea53bce2f4c739b4b5d0df606b0",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3WireChecks.kt": "94a759a1182d82185ccc3545f31e1bb08fb650939e5ff25080dc28d5a497b41a",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3ProfileChecks.kt": "0722f6ed9727d4f9a6cd5301499484c61a2b69b68fedc55a47089b5acb16f3bc",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3PublisherChecks.kt": "d3ac427642629af290139a398766c70147cc328aec5ddce7cf07c46814c8bd93",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3JobChecks.kt": "5a7bb9c436606ee3f312fd613251fb8901d7073b61a9bf7ca451bc088b36d485"
+  },
+  "counts_before": {
+    "complete": 3,
+    "dropped": 1,
+    "sink": 0
+  },
+  "counts_after": {
+    "complete": 5,
+    "dropped": 1,
+    "sink": 0
+  },
+  "passed": [
+    "new immutable multipart journal/context/ACK-before-authority/reopen/recovery/terminal/source/P5-C1 tests",
+    "Android controlled OkHttp native TLS multipart 4097 bytes/full readback/bounded GET",
+    "Android native sealed FD publisher 2 parts/5246977 bytes/full remote readback; wrong digest and revoked source stopped before create; exact owned KeyStore alias cleanup"
+  ],
+  "limits": [
+    "journal reopen is SQLite close/reopen in same instrumentation process; separate Android process recovery still pending",
+    "wire and publisher only tested successful server route; Android dropped ACK/redirect negative fixture pending",
+    "no selected SAF/catalog/restore/queue/OS/Photos acceptance yet"
+  ]
+}

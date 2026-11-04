@@ -1,0 +1,11 @@
+{
+  "crate": "jni-sys-macros@0.4.1",
+  "source": "https://raw.githubusercontent.com/jni-rs/jni-sys/64d77b7a5f119d7b55b4e2c169a4668067ff59e6/LICENSE-MIT",
+  "sha256": "1d85bd754b04ceec93e98e890edd1fa3c6a22e81bcb32135806beeccefa51cd1",
+  "remaining_missing": [
+    "cesu8@1.1.0",
+    "instant-xml@0.7.7",
+    "instant-xml-macros@0.7.2"
+  ],
+  "cesu8_one_lookup": "exact upstream v1.1.0 tree unavailable; no fallback branch text attributed to this version"
+}

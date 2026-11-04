@@ -1,6 +1,6 @@
 //! Reuse the existing iOS OS-route owner for a synchronous SMB worker.
 use crate::{qr::LanHint, route};
-use std::{ffi::c_void, net::IpAddr, os::fd::AsRawFd, panic::AssertUnwindSafe, time::Duration};
+use std::{ffi::c_void, net::IpAddr, os::fd::{AsRawFd, IntoRawFd}, panic::AssertUnwindSafe, time::Duration};
 
 struct Lease {
     route: route::Route,
@@ -65,6 +65,23 @@ pub unsafe extern "C" fn kloda_ios_lan_current(raw: *const c_void) -> i32 {
         }
     }))
     .unwrap_or(1)
+}
+
+/// Connect another port to the exact peer using the current borrowed route lease.
+/// # Safety
+/// raw must be the live lease supplied synchronously by kloda_ios_lan_with_socket.
+/// Returned FD transfers ownership; negative means no FD. The lease must never escape its worker.
+#[no_mangle]
+pub unsafe extern "C" fn kloda_ios_lan_connect(raw: *const c_void, port: u16) -> i32 {
+    if raw.is_null() || port == 0 { return -1; }
+    std::panic::catch_unwind(AssertUnwindSafe(|| {
+        let lease = unsafe { &*raw.cast::<Lease>() };
+        if lease.route.check(lease.peer).is_err() { return -1; }
+        let hint = LanHint { ip: lease.peer, port };
+        let Ok(socket) = lease.route.connect(&hint, Duration::from_secs(5)) else { return -1; };
+        if lease.route.check(lease.peer).is_err() { return -1; }
+        socket.into_raw_fd()
+    })).unwrap_or(-1)
 }
 
 #[cfg(test)]
