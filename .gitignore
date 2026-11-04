@@ -24,11 +24,6 @@ node_modules/
 !.vscode/extensions.json
 !.vscode/settings.json
 
-# OMP runtime / personal state
-.omp/sessions/
-.omp/history/
-.omp/cache/
-.omp/tmp/
 
 # Local-only evidence archives and recovery artifacts
 /.local-evidence/

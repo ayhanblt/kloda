@@ -6,7 +6,7 @@ Current UI source of truth is the user-approved [Lovable design](docs/ui/lovable
 
 Read in this order: (1) AGENTS.md, (2) [CURRENT.md](docs/implementation/CURRENT.md),
 (3) only the ADR/checkpoint sections CURRENT lists for the active step.
-.omp/AGENTS.md, Codex migration/old handoffs and the full expanded execution plan
+[archive/omp-AGENTS.md](docs/implementation/archive/omp-AGENTS.md) (former `.omp/AGENTS.md`), Codex migration/old handoffs and the full expanded execution plan
 are on-demand references: read only a relevant section, never mandatory whole-file
 startup input. They are repository documents, not an OMP runtime dependency. ADR0016 is current V1 LAN authority; ADR0017 is current Photos metadata/import recovery. Preserve their scoped supersession of older central-authorization requirements.
 
