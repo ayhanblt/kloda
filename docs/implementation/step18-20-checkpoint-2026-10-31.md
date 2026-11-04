@@ -389,9 +389,166 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
   yeniden açılana kadar sorulmaz (29/2); Android 24–29 Keyguard yolu, eski WebDAV kapısı çalışma zamanı, EN/DE/a11y
   yakalaması NOT_RUN. Aynı ajan review (panel yeri, iOS inactive gizleme, çift dokunma düzeltildi); bağımsız yok.
 
+## Hedefe özel metinler (3.11, commit yok)
+
+- Onaylı TR/EN/DE metinleri ve Lovable eşlemesi (M12 başlığı hedef adı, M13 Yedekleme satırı `KeyRound`, kart
+  `ShieldCheck` şeridi). ADR0028 §Account display label koddan önce eklendi.
+- (a) `ActivityPage` `targetLabel`: "{{name}} yedeklerim", panel başlığı yok, `targetLoad/Completed/Empty`,
+  "Hedeflere dön"; `MobileShell section` ile Hedefler sekmesi seçili.
+- (b) `accountLabel` (iOS Keychain / Android Keystore dosyası), giriş sırasında `users/get_current_account`; eski
+  profil başarılı çalışmadan sonra bir kez `fill`; eşitlik/targetId etiketi yok sayar. Kart: etiket veya
+  "Hesap adı bir sonraki yedeklemeden sonra gösterilir"; OAuth kimliği gösterilmez.
+- (c) Ayarlar → `recovery` sayfası (kapsanan hedefler + görüntüleme kipi panel), kart satırı, kapsam metni,
+  `copyRecovery` (iOS localOnly + 60 sn; Android `AndroidRecoveryClip` hassas + 60 sn/sonraki resume'da temizleme).
+- Kanıt: [destination-texts](evidence/cloud18-nextcloud-2026-10-31/destination-texts-2026-11-03.json) — Jest 218, tsc,
+  ESLint, Android+iOS derleme, iOS ve Android çalışma zamanı PASS; Android göster/kopyala (kullanıcı deseni),
+  EN/DE/a11y yakalama NOT_RUN. Aynı ajan review (yenileme anahtarı düzeltildi); bağımsız yok.
+
+## Dilim 29/2 — katalog yazıcı, backfill, yenileme (3.11, commit yok)
+
+- Biçim: `tools/recovery-catalog-vectors.py` (kanonik JSON, HMAC, base64url); yol
+  `.kloda/catalog/<installation>/<chain>/<targetId>/<sequence>.json`, `chain` = HKDF(`kloda-catalog-id-v1`) ilk 16 bayt.
+  `targetId` yolda: özgün WebDAV girişi ve aynı hesaba eklenen Nextcloud aynı uzak klasörü paylaşabilir (review'da
+  bulundu). ADR0029'a "29/2 implementation notes" eklendi.
+- Native: `IosRecoveryCatalog*` / `AndroidRecoveryCatalog*` (codec, journal tabloları `catalog_installation`,
+  `catalog_delta`, `catalog_entry`, `webdav_completion`, yazıcı). Kuyruk çalışmasının sonunda (hata yok ya da yalnız
+  `review_required`) hedefin geçerli zincirde olmayan tüm Completed fişleri delta olur: backfill ve tam yeniden imza
+  aynı adım, hedefin bir sonraki çalışmasında. 64 KiB'de bölünür. Onaysız sır ya da kilitli cihazda adım atlanır.
+  Yükleme sözleşmesi: create-only temp → inceleme → üzerine yazmayan taşıma → doğrulama; beklenmeyen durum delta
+  sorunu olarak kalır, çalışma `outcome_unknown`.
+- Yenileme: yeni sır onaylanana kadar eskisinin yanında bekler (eski kod ve zincir geçerli); `confirmRecovery` yeni
+  kodla değiştirir. Köprü `renewRecovery`, JS `recoveryCode.renew`; kopyalama gösterilen (yeni) kodu kabul eder.
+- Kanıt: [recovery29-2](evidence/cloud18-nextcloud-2026-10-31/recovery29-2-2026-11-03.json) — vektörler, iOS host
+  (`tools/test-ios-recovery-catalog.py`), Jest/tsc/ESLint (değişen API), iOS arm64 Simulator derlemesi PASS. Android
+  `recovery29` (`tools/test-android-recovery-catalog.py`) review düzeltmesinden önce PASS; düzeltmeden sonraki koşu
+  emülatör kilitli olduğu için (`credential_locked`) tamamlanamadı; 4.11'de kilit açıldıktan sonra tek koşuda PASS
+  (29/3 bölümüne bakın).
+- Açık/sınır: gerçek Nextcloud/Dropbox ile delta yazımı, kilitli cihazda atlama ve `renewRecovery` kilit istemi
+  çalışma zamanında NOT_RUN; yenileme ekranı yok (TR/EN/DE metin onayı gerekir); 29/1 öncesi etkin hedeflere kod
+  sorulması hâlâ yok (kod onaylanana kadar katalog yazılmaz); katalog sorunu için review ekranı yok (29/4); takılan
+  delta o hedefin her çalışmasını `outcome_unknown` bitirir. `tools/test-ios-webdav-journal.py` önceden kırık (macOS 26
+  SDK'da `IosWebDavClient`, 18B/5'ten beri `IosCloudTarget`); 29/2 journal'ı yeni host testi kapsıyor. Aynı ajan
+  review (paylaşılan klasör çakışması, iOS kancasında gölgelenen `error` düzeltildi); bağımsız yok.
+
+## Dilim 29/3 — yeni cihazda içe aktarma + içe aktarılmış fiş (4.11, commit yok)
+
+- Önce: emulator-5590 hâlâ kilitli (`deviceLocked=1`); 29/2 Android yeniden koşusu yapılamadı.
+- Native (iOS + Android): `RecoveryCode.parse` (büyük/küçük harf, boşluk, tire serbest; O/I/L takma adları; dolgu
+  bitleri ve kontrol karakterleri → aksi `recovery_code_invalid`); `RecoveryCatalog.decode` (ayrıştırılan alanları
+  kodun anahtarlarıyla yeniden kodlar, baytlar birebir eşit olmalı: kanonik biçim + zincir + MAC tek sabit-zamanlı
+  karşılaştırma); taşımaya `list` (WebDAV PROPFIND Depth 1 ≤4 MiB, `IosWebDavListing`/`AndroidWebDavListing`;
+  Dropbox `list_folder` sayfaları; iOS istemcide `multistatus`, Android istemcide `propfind`); `RecoveryImport`
+  (`.kloda/catalog/<kurulum>/<kodun zinciri>/<targetId>/`, kendi kurulumu atlanır; her zincir 1'den, başlık klasörü,
+  sırayı ve önceki hash'i doğrular, girdi yolu `.kloda` dışında düz göreli yol; ilk boşluk/hata zinciri bitirir, kalan
+  sıralar `unverified`); migration `imported_delta` + `imported_receipt` (değişmez, silinmez, içe aktaran hedefin
+  `targetId`'sine bağlı, `webdav_upload`'dan ayrı). Köprü `KlodaCloud.importRecovery(targetId, code)` (ön planda,
+  eklenmiş hedef; kod saklanmaz, bu telefonun kodu olmaz); JS `recoveryCode.importCatalog`. ADR0029'a "29/3
+  implementation notes" eklendi.
+- Kanıt: [recovery29-3](evidence/cloud18-nextcloud-2026-10-31/recovery29-3-2026-11-04.json) — iOS host (kod çözme,
+  PROPFIND ayrıştırma, içe aktarma idempotent, yanlış kod/yenilenmiş kod/kendi kurulumu, 6 kurcalama durumu), Android
+  derleme, Jest/tsc/ESLint (değişen API), iOS arm64 Simulator derlemesi PASS. Android instrumentation `recovery29` 4.11
+  PASS (kullanıcı kilidi açtı; tek koşu 29/2 düzeltmesini de kapsadı).
+- Açık/sınır: kod giriş ekranı yok — TR/EN/DE metin onayı gerekir (`recovery_code_invalid`, "bazı yedekler
+  doğrulanamadı" bildirimi, özet); gerçek Nextcloud/Dropbox listeleme NOT_RUN; en yeni deltaların silinmesi
+  algılanamaz (uzak çapa yok, ADR notunda); geri yükleme bağlantısı ve kurcalama testleri 29/4. Aynı ajan review
+  (PROPFIND href şema/port eşleşmesi eklendi); bağımsız yok.
+
+## Dilim 29/4 — içe aktarılmış fişlerle geri yükleme + kurcalama testleri (4.11, commit yok)
+
+- Native (iOS + Android): hedef başına geri yükleme (18B/5r) kimliği önce bu cihazın Completed fişlerinde, sonra aynı
+  hedefe bağlı `imported_receipt`'te arar; içe aktarılmış fiş salt okunur projeksiyon (binding `imported`, snapshot yok;
+  `insert` reddeder). İndirme/staging/SHA-256/yayın aynı. Niyet tabloları ayrı: iOS `imported_restore`, Android
+  `imported_file_restore`. Fotoğraf: manifest kaynakları manifestin kendi yetkisinden (yerel ya da aynı katalog kökeni:
+  kurulum+zincir+eski hedef). Yedekler listesi iki türü tek id sıralı sayfada birleştirir (≤100; öğe şekli ve metin
+  değişmedi, JS değişikliği yok). ADR0029'a "29/4 implementation notes" eklendi.
+- Kanıt: [recovery29-4](evidence/cloud18-nextcloud-2026-10-31/recovery29-4-2026-11-04.json) — iOS host
+  (`tools/test-ios-recovery-catalog.py`, yeni `IosRecoveryRestoreChecks.swift`) ve Android `recovery29`
+  (`AndroidRecoveryRestoreChecks.kt`) PASS: değişmiş dosya `hash_mismatch`/uzun gövde reddi/değişmiş manifest; eklenmiş
+  dosya listelenmez, başka kökenden kaynak manifesti tamamlamaz; silinmiş/tekrar oynatılmış delta sonrası girdiler geri
+  yüklenemez; yanlış kod boş; kesintide içe aktarma kaldığı yerden, indirme staging bırakmaz; sayfalama boşluksuz.
+  iOS arm64 Simulator derlemesi PASS (değişen dosyalarda uyarı yok).
+- Açık/sınır: gerçek Nextcloud/Dropbox ile içe aktarılmış fiş geri yüklemesi ve cihazda klasör/Fotoğraflar yayını
+  NOT_RUN; kod giriş ekranı + doğrulanamayan delta bildirimi + yenileme ekranı TR/EN/DE metin onayı bekliyor. Aynı ajan
+  review; bağımsız yok. ADR0029 dilimleri (29/1–29/4) böylece tamam; ADR hâlâ "proposed" (kabul kullanıcıda).
+
+## Dilim 29/5 — kurtarma UI: yenileme, eski hedefler, kod girişi, doğrulanamayan bildirim (4.11, commit yok)
+
+- Onaylı metinler [recovery-ui-texts-draft](recovery-ui-texts-draft-2026-11-04.md) (kullanıcı 4.11 "Approved"); `recovery.*` +
+  `transfer.errors.recovery_code_invalid` TR/EN/DE, `importDone_one/_other`. Native değişmedi.
+- JS: `RecoveryCodePanel mode` (`enable`/`confirm`/`renew`; renew'de gruplar yalnız yeni kod gösterildikten sonra),
+  `RecoveryLegacyPanel` (kod onaysız + etkin hedef: Bağlantılar ve Ayarlar), `useRecoveryImport` + `RecoveryImportPanel`
+  (eklenmiş Nextcloud/Kolab/Dropbox kartında; başarıda kod temizlenir, sonuçta "Yedekleri gör"), Ayarlar'da yenileme
+  (uyarı penceresi → panel → "Yeni kod etkin"). Kod alanlarında Android `visible-password` (Gboard öneri/öğrenme kapalı).
+- Kontroller: Jest 38 suite / 227 PASS (+6), tsc, ESLint PASS; klavye düzeltmesinden sonra etkilenen 24 test + tsc + ESLint PASS.
+  iOS (Cloud18 sim, Metro): kart düğmesi, içe aktarma paneli, yenileme düğmesi/uyarısı/paneli + Vazgeç PASS
+  (`ios-renew-alert.png`, `ios-renew-panel.png`, `ios-import-panel.png`). Android (emulator-5590): panel + yanlış kod
+  gönderimi çalıştı (`android-import-invalid.png`).
+- AÇIK (sıradaki): (1) Android yanlış kod `recovery_code_invalid` yerine `outcome_unknown` gösterdi — `KlodaCloudModule.kt`
+  `importRecovery` içindeki `guarded {}` eşlemesi `FilesFailure("recovery_code_invalid")`'ı geçirmiyor olmalı; iOS hata yolu
+  çalışma zamanında NOT_RUN (simülatör metin girişi ulaşmadı). (2) "Yedekleri gör" giriş metni ("Yalnız bu cihazın
+  tamamlanmış kayıtları listelenir") içe aktarılmış fişlerle eksik: yeni TR/EN/DE metin onayı gerekir. (3) Bekleyen
+  yenilemede Ayarlar'daki eski kod kopyalanamaz (native `shown` yeni kodu bekler). (4) Klavye düzeltmesi cihazda yeniden
+  yakalanmadı; eski hedef paneli yalnız Jest'te; EN/DE/a11y yakalama NOT_RUN. Aynı ajan review; bağımsız yok.
+
+- 4.11 devam: (1) kapandı — kök neden kod değil, emülatördeki uygulama APK'sı 3.11 21:51 kurulumuydu (`importRecovery`
+  4.11 01:08 eklendi) → JS `TypeError` → `outcome_unknown`. Native `guarded {}` ve Expo `FunctionCallException` kodu
+  koruyor; kod değişikliği yok. `:app:installDebug` (arm64) + worktree Metro ile `abcd efgh` → "Bu kurtarma kodu geçerli
+  değil…" PASS ([android-import-invalid-rebuilt](evidence/cloud18-nextcloud-2026-10-31/android-import-invalid-rebuilt.png)).
+  29/5 Jest tekrarlanmadı. (2) `destinations.restore.hint` TR/EN/DE taslağı [recovery-ui-texts-draft](recovery-ui-texts-draft-2026-11-04.md)
+  sonunda, kullanıcı onayı bekliyor. 
+- 4.11 devam 2: iOS hata yolu PASS — simülatör uygulaması da 3.11 derlemesiydi (`importRecovery` yok); ad-hoc imzalı
+  yeniden derleme (`xcodebuild … -derivedDataPath build/dd29-5 CODE_SIGN_IDENTITY=-`; `CODE_SIGNING_ALLOWED=NO`
+  Keychain'e erişemez, yalnız derleme kontrolü) + Metro, `AB` → "Bu kurtarma kodu geçerli değil…"
+  ([ios-import-invalid](evidence/cloud18-nextcloud-2026-10-31/ios-import-invalid.png)). Metin girişi çalışıyor, simülatör
+  yavaş; iOS klavyede öneri şeridi yok. (3) düzeltildi (kod): `shown()` iOS+Android'de geçerli kodu da kabul eder
+  (bekleyen yenilemede Ayarlar eski kodu gösterir, ADR0029 karar 6 "gösterilen kod"); onaydan sonra eski kod reddedilir.
+  `AndroidRecoveryChecks` buna göre güncellendi. Doğrulama: iOS derleme PASS; Android `recovery29` PASS (ilk koşu emülatör
+  çökmesiyle düştü, kullanıcı kilidi açınca yeniden koşuldu); iOS Ayarlar → kilit → "Kodu kopyala" PASS (bekleyen
+  yenileme durumu UI'dan görülemez; o durum Android testinde açıkça doğrulanır; kod içerdiği için ekran kaydedilmedi). Yan etki: simülatörde Dropbox
+  hedefi kaydırma ataletiyle yanlışlıkla devre dışı bırakıldı (yeniden etkinleştirilmedi). Eski hedef paneli cihaz
+  yakalaması kasa silmeyi gerektirir, yapılmadı. iOS EN/DE kurtarma sayfası yakalandı (`ios-recovery-{en,de}-{1,2}.png`, taşma yok; dil yeniden TR). Android a11y:
+  kod alanı `content-desc="Kurtarma kodu"`, düğmeler etiketli, boş alanda gönder devre dışı; Gboard `visible-password`
+  düzeni, öneri şeridi yok ([android-import-keyboard](evidence/cloud18-nextcloud-2026-10-31/android-import-keyboard.png)).
+  "Yedekleri gör" metni onaylandı (kullanıcı 4.11) ve `destinations.restore.hint` TR/EN/DE'ye işlendi;
+  `webdav-backups-panel.spec` 4/4 PASS. 29/5 kapandı; sınır: iOS VoiceOver ve EN/DE içe aktarma paneli yakalanmadı,
+  eski hedef paneli yalnız Jest'te.
+- 4.11 not (iOS sim, dev client): aynı süreçte birkaç kez Metro/dev-launcher yeniden yüklemesinden sonra "Şimdi yedekle"
+  `candidate_stale` verdi; arka plan/ön plan geçişi düzeltmedi, temiz yeniden açılış düzeltti (bekleyen Dropbox
+  çalışması kendiliğinden tamamlandı). Olası neden: `KlodaBackupModule` her `OnCreate`'te `IosWebDavQueue.attachUI` ile
+  sahipliği alıyor; canlı olmayan bir modül örneği son sahip kalınca `refresh()` `ownsUI` ile çıkıyor ve `foreground`
+  açılmıyor. Yalnız geliştirme yeniden yüklemesinde görüldü; üretimde (tek React örneği) doğrulanmadı — açık iş, kod
+  değişmedi. Ayrıca: hedef yeniden etkinleştirilince eski çalışmanın hata satırı açıklamasız görünmeye devam ediyor
+  (UX notu, metin/davranış kararı gerekir). Aynı ajan review; bağımsız yok.
+
+## Dilim 18A/4d — Android köprü çalışma testi + EN/DE/a11y yakalama (4.11)
+
+- Ortam: emulator-5590 (KlodaCloud18), `:app:installDebug` arm64 (son APK'dan sonra `AndroidRecoveryVault.kt` değişmişti)
+  + worktree Metro. Kod değişikliği yok; yalnız yeni betik `tools/capture-android-connections.py` (step 20'nin Android parçası).
+- Köprü (Bağlantılar ekranı, mevcut gerçek Dropbox hedefi): "Şimdi yedekle" → `AndroidWebDavJob` JobService'te çalıştı →
+  "Bu çalışma doğrulandı ve tamamlandı" PASS; devre dışı bırak → "Bu hedef devre dışı" (Şimdi yedekle/Yedekleri gör gizli)
+  → "Kayıtlı profili yedekleme için etkinleştir" → yeniden etkin PASS; "Hedefi kaldır" onay penceresi → Vazgeç, hedef
+  korundu PASS. Ekleme: Nextcloud `https://10.0.2.2:18443` → `connection_unavailable` metni (`outcome_unknown` değil) PASS.
+- Yakalama: `python3 -I tools/capture-android-connections.py docs/implementation/evidence/step18A4-android-2026-11-04`
+  → TR/EN/DE × koyu/açık × üst/alt + TR koyu font 1.3 (14 kare + uiautomator dökümü). Dil/tema uygulama Ayarları'ndan;
+  font değişimi activity'yi yeniden başlattığı için betik karşılama ekranını atlar, sonunda font 1.0'a döner. EN/DE'de
+  Türkçe kalan metin yok; tüm düğmeler `content-desc` etiketli; 1.3'te kesilme yok. Hesap e-postası karelerde gri kutuyla,
+  dökümlerde `redacted@example.invalid` ile karartıldı.
+- NOT_RUN: uygulamadan gerçek Nextcloud girişi (fixture CA yalnız androidTest ağ yapılandırmasında; uygulama sistem CA'sına
+  güvenir — debug ağ yapılandırması ya da emülatöre CA kurmak ayrı karar); gerçek hedef kaldırma (tek hedef gerçek Dropbox
+  hesabı, yeniden giriş gerekir); TalkBack sesli gezinme (yalnız etiket dökümü); iOS EN/DE Bağlantılar yakalaması.
+- Bulgular (açık, metin/davranış kararı gerekir): (1) Android onay penceresi düğmesi büyük harfe "HEDEFI KALDIR" çevriliyor
+  (sistem dili İngilizce, Türkçe İ kayboluyor — RN `Alert` düğme stili). (2) Dropbox kartında önceki çalışmanın satırı
+  "WebDAV gönderimi için uygun Wi-Fi veya Ethernet bağlantısı gerekiyor" — hedefe özel olmayan DAV metni (madde 11 kapsamı).
+  (3) Durum sekmesi etkin Dropbox hedefi varken "Yedeklemeyi ayarla" gösteriyor. (4) DE'de "Backups anzeigen" diğer
+  "Sicherungen" metinleriyle tutarsız. Aynı ajan review (betik başlangıç durumu ve font yeniden başlatma düzeltildi); bağımsız yok.
+
 ## Sıradaki (kullanıcı 1.11: açık işler sırayla)
 
 19, bu listede 18'in 1.–3. maddelerinden sonra gelmesine rağmen önce yapıldı; sıra artık buna göre.
+
+Kullanıcı 4.11: 18A/4 kapanınca dur; worktree commit + Codex hizalama isteği
+([codex-request-merge](codex-request-merge-2026-11-04.md)) + main birleştirmesi; ardından sırayla 8 (18B/5 açıkları)
+ve 9 (18B/5r açıkları).
 
 1. 18A/3 — yapıldı (yukarıdaki dilim). Kuyruk/runner/schedule/review/sidecar'ı `targetId` ile çoklu hedefe açmak (ADR0027 §4); Codex'in
    `begin()` kilit kapsamı korunur. Codex'e hizalama isteği: [codex-request-18A3](codex-request-18A3-2026-11-02.md);
@@ -401,7 +558,7 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
    eklemeleri korunarak çözüldü. Sonrası: Jest 33/196, tsc, ESLint, Android compile+lint+androidTest APK, iOS arm64
    Simulator derlemesi PASS (worktree'de `sync-core` dist yeniden derlendi; genel simülatör hedefi x86_64 pairing
    dilimi olmadığı için link etmez). OAuth türlerinin `backup_destination` migration'ı 18A/3 ile yapıldı.
-2. 18A/4 — Expo köprüsü (4a tamam) + Lovable bağlantı ekranı (4b ve 4c yapıldı 3.11, yukarıda; açık: köprünün Android çalışma testi, EN/DE/a11y yakalama).
+2. 18A/4 — **kapandı 4.11** (4a–4c 3.11; 4d Android köprü çalışma testi + EN/DE/a11y yakalama, yukarıda; sınırlar ve 4 metin bulgusu orada).
    Kapsam (Codex yanıtı): `pages/connections/ui/connections-page.tsx` içinde tek kayıtlı WebDAV kartının yerine
    hedef listesi; ekleme (Nextcloud giriş, Kolab Now, OAuth girişleri), aç/kapa (`setEnabled`, OAuth kapalı +
    `destination_unsupported`), kaldırma, durum; i18n önekleri `ui.conn.*`, `ui.providers.*`; Lovable
@@ -425,8 +582,9 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
 10. [ADR0029 taslağı](../decisions/0029-cloud-restore-catalog-and-recovery-key.md) (3.11, onaylanmadı): yeni cihazda
    geri yükleme için kurtarma kodu + HMAC'li create-only katalog + salt geri yükleme yetkili içe aktarılmış fiş.
    4 açık soru 3.11'de yanıtlandı (gruplu Base32; ilk bulut etkinleştirmede zorunlu; yenileme = tam yeniden imza;
-   yalnız mobil; kod gizli + kilitle göster). 29/1 yapıldı 3.11 (yukarıda). Sıradaki: 29/2 (katalog yazıcı + backfill +
-   yenileme). Hedefe bağlı Yedekler metni açık iş olarak bekliyor.
+   yalnız mobil; kod gizli + kilitle göster). 29/1 ve 29/2 yapıldı 3.11, 29/3 ve 29/4 yapıldı 4.11 (yukarıda). `tools/test-android-recovery-catalog.py` (29/2–29/4)
+   4.11'de koştu, PASS. Sıradaki bu maddede yalnız metin onayı bekleyen UI işleri. Bekleyen UI (metin onayı gerekir): yenileme ekranı, 29/1 öncesi etkin hedeflere kod sorma,
+   yeni cihazda kod giriş ekranı ve doğrulanamayan delta bildirimi. 4.11: onaylandı ve yapıldı (29/5, yukarıda); hata kodu (eski APK, kod değişmedi), Yedekler giriş metni ve eski kod kopyalama da 4.11'de kapandı. ADR0029 hâlâ "proposed" (kabul kullanıcıda).
 11. Hedefe özel metinler (kullanıcı kararı 3.11, 29/2'den önce yeni sohbette): (a) Yedekler ekranında hedefe bağlı
    başlıklar (PC/WebDAV metinleri yerine hedef adı), alt sekme seçimi, geri düğmesi "Kuruluma dön" yerine Bağlantılar;
    (b) bulut kartında `dbid:` yerine hesap e-postası/adı: girişte bir kez sorulur (`users/get_current_account` vb.),
@@ -435,7 +593,7 @@ Simulator'da gerçek yedeklemeyle deneme (2026-11-01,
    (c) ADR0029 karar 6: Ayarlar'da "Bulut yedekleri için kurtarma kodu" girişi (kapsanan hedefleri listeler), her
    bulut kartında "Kurtarma koduyla korunuyor" satırı, panelde "bu telefondaki tüm bulut hedefleri için tek kod";
    gösterme her seferinde telefon kilidi ister; kod görünürken kopyala düğmesi (Lucide Copy; iOS local-only + süreli,
-   Android hassas işaretli + kısa sürede temizleme). Yeni metinler TR/EN/DE ve Lovable eşlemesi gerektirir.
+   Android hassas işaretli + kısa sürede temizleme). Yeni metinler TR/EN/DE ve Lovable eşlemesi gerektirir. **Yapıldı 3.11** (yukarıda; açık: Android göster/kopyala çalışma testi kullanıcı deseniyle, EN/DE/a11y yakalama).
 
 Açık: sunucu uyuşmazlığında iptal uçtan uca test edilmedi;
 bağımsız (başka ajan) review yapılmadı, yalnız aynı ajanın ayrı review geçişi.
