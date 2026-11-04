@@ -1,0 +1,26 @@
+{
+  "scope": "first-platform native4097-byte synthetic diagnostic; own separate journal, no selected sources or general activation",
+  "sources": {
+    "apps/mobile/modules/my-module/ios/IosS3Diagnostic.swift": "7d0919c433899870a59cd12057b3b697e963c4c734b4440d1a36d4fc7e3c07da",
+    "apps/mobile/modules/my-module/ios/IosS3TestGrant.swift": "4741aac8fdeeea83d66abd458034385a4b8c3e215a8f6217a70a4bf2b5f9345f",
+    "apps/mobile/modules/my-module/ios/KlodaS3Module.swift": "955e0f86fe1f1012ce67d06fc57cb64034e7258d0477675199236b8eabeec5ea",
+    "apps/mobile/src/shared/api/s3.ts": "00843ed5f8fd329386d32112ceccce5cf0b1a7cf64361b16fa9e303e9a4db7cf",
+    "apps/mobile/src/shared/api/s3-diagnostic.spec.ts": "11534ce8268b095b51c9851d209dae28b80a3c29f2dd455a411b2953286e9ea7",
+    "apps/mobile/src/features/backup-setup/model/use-s3-backup.ts": "f0f31e2cba96dfadf329340f7ef19e41a886ea6a6d63109a5b9e0e46653b284f",
+    "apps/mobile/src/pages/connections/ui/s3-page.tsx": "8c1006a8f3f0bd73f184ae42c1e1c932d17e3456e0e3f33aaf9820ee5a65821d",
+    "apps/mobile/src/pages/connections/ui/s3-diagnostic-page.spec.tsx": "5f90e778714af54de4809ceb66916f4130ec19b7feb3e6386f6c8ee1f487f5f6"
+  },
+  "passed": [
+    "owned native synthetic publish/full readback/staged restore; original general-enabled false/context unchanged; poisoned selected bookmarks unused; request replay rejected; grant/protected/cancel fences; separate process reopen/exact fixture Keychain cleanup",
+    "normal app secure-form fake profile saved to native Keychain; secret fields cleared; recorded fake metadata only, no network on save",
+    "4new diagnostic JS tests initially passed; native runtime found missing Hermes crypto.randomUUID before network; fixed S3 request generation via native UUID sync factory and caught factory failure",
+    "changed factory API1new test passed (2unaffected successful cases skipped); affected2UI cases passed; new missing-factory case passed alone after subscription mock fix; TS/lint passed",
+    "normal app with native UUID factory built; actual test reached durable creating\u2192Review with sanitized connection_unavailable/create/status0; OS error code only -1202 confirmed; test enabled0; local proxy completion remained7, dropped1/sink0; no private CA trust installed in normal app"
+  ],
+  "limits": [
+    "real AWS not yet run; secret entry handed off to user, do not read UI/network logs during input",
+    "P5 UI password suggestion was dismissed without saving to Passwords; input then entered and cleared on native save",
+    "same-agent review, not independent review; actual physical lock/OS/Photos/general activation not accepted",
+    "existing SMB/SFTP/FTPS item hooks still use global crypto.randomUUID; not changed/exercised in step17, known Hermes runtime risk retained for follow-up"
+  ]
+}

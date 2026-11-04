@@ -1,0 +1,6 @@
+{
+  "application-identifier": "com.kloda.app",
+  "keychain-access-groups": [
+    "com.kloda.app"
+  ]
+}

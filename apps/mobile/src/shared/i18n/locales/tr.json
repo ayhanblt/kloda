@@ -409,7 +409,7 @@
     "providers": {
       "webdav": "WebDAV",
       "smb": "SMB",
-      "ftp": "FTP",
+      "ftp": "FTPS",
       "sftp": "SFTP",
       "s3-compatible": "S3 uyumlu",
       "amazon-s3": "Amazon S3",
@@ -444,7 +444,8 @@
       "region": "Bölge",
       "bucket": "Bucket",
       "prefix": "Hedef öneki",
-      "project": "Proje"
+      "project": "Proje",
+      "hostname": "Sertifika sunucu adı"
     },
     "fontUnavailable": "Yazı tipi yüklenemedi; sistem yazı tipi kullanılıyor."
   },
@@ -584,6 +585,104 @@
       },
       "lastRun": "Son kaydedilen çalışma",
       "pinHint": "Kimlik bilgilerini girmeden önce sunucunun SHA256 parmak izini bağımsız olarak doğrulayın. Bu sürüm düz Ed25519 sunucu anahtarlarını kabul eder; bilinmeyen veya değişen anahtar bağlantıyı durdurur."
+    },
+    "ftps": {
+      "scope": "Yerel ağda explicit FTPS. Sayısal LAN IP adresi, sertifikadaki sunucu adı ve mevcut mutlak hedef klasörü kullanılır.",
+      "enableHint": "Kaydet ve etkinleştir, seçili dosya ve fotoğraf kaynaklarını bu hedefe yedeklemeyi açar. Bağlantı ve yedek durumu çalıştırma sonucunda doğrulanır.",
+      "saveEnable": "FTPS yedeklerini kaydet ve etkinleştir",
+      "run": "Şimdi FTPS’ye yedekle",
+      "pause": "Bu FTPS çalışmasını duraklat",
+      "reviewTitle": "Bekleyen FTPS yayınları",
+      "backupsTitle": "FTPS yedeklerim",
+      "reviewHint": "Belirsiz sonuçlar incelemede kalır. İkisini de tut, seçili dosyayı yeniden okuyup ayrı bir kopya yayımlar; eski kanıtı ve uzaktaki mevcut içeriği korur.",
+      "restoreHint": "Yalnız bu cihazın doğrulanmış aktarım kayıtları listelenir. Geri yükleme, seçtiğiniz klasöre veya fotoğraf arşivine yazmadan önce içeriği yeniden doğrular.",
+      "copied": "Ayrı kopya doğrulandı: {{name}}",
+      "errors": {
+        "ftps_fields": "Sayısal LAN IP, port, sertifika sunucu adı, mutlak klasör, kullanıcı adı ve parola girin.",
+        "lan_unavailable": "İzin verilen bir yerel ağ rotası yok.",
+        "integration_unavailable": "Bu uygulama derlemesinde veya OS sürümünde native FTPS kullanılamıyor.",
+        "profile_missing": "Önce bir FTPS hedefi kaydedin.",
+        "context_changed": "Ayarlar veya kaynak erişimi değişti. Yeni bir işlem başlatın; eski iş inceleme için korunur.",
+        "review_required": "Sonuç inceleme gerektiriyor. Sahipsiz uzak içerik benimsenmedi.",
+        "native_3": "Kalıcı işlem makbuzu korunamadı.",
+        "native_4": "Seçili kaynak değişti veya okunamadı.",
+        "native_7": "Uzak byte’lar doğrulanamadı.",
+        "native_1": "Bu hedef veya dosya adı desteklenmiyor.",
+        "storage_failure": "Native depolama işlemi güvenle kaydedemedi.",
+        "native_6": "Güvenli FTPS görüşmesi veya sunucu sertifikası/adı doğrulaması başarısız oldu.",
+        "native_9": "Sunucu kimlik bilgilerini reddetti.",
+        "authentication_failed": "Sunucu kimlik bilgilerini reddetti.",
+        "native_10": "Hedef dosya zaten var. Mevcut dosya değiştirilmedi; ayrı kopya oluşturmak için inceleyin.",
+        "native_11": "Yapılandırılmış hedef klasör güvenli biçimde kullanılamadı.",
+        "ftps_root_unsafe": "Yapılandırılmış hedef klasör güvenli biçimde kullanılamadı.",
+        "native_2": "Yerel yetkilendirme değişti. Sonuç doğrulanmadı.",
+        "native_5": "Özel yerel dosya güvenli biçimde kullanılamadı.",
+        "native_8": "FTPS yanıtı yok veya belirsiz. Başka kopya oluşturmadan önce bu işi inceleyin.",
+        "certificate_invalid": "Sunucu sertifikası veya adı doğrulanamadı."
+      },
+      "lastRun": "Son kaydedilen çalışma",
+      "trustHint": "Kontrol ve veri bağlantıları TLS ile korunur; sunucu sertifikası ve adı doğrulanır. Aktarım yeniden okunan içerikle doğrulanır; elektrik kesintisinde kalıcılık garantisi verilmez."
+    },
+    "s3": {
+      "scope": "Amazon S3 ve S3 uyumlu hedefler ayrı yapılandırılır.",
+      "custody": "Gizli alanlar cihazın güvenli kasasında tutulur; kayıtlı değerleri bu ekrana geri gönderilmez.",
+      "saveHint": "Kaydetmek bağlantıyı doğrulamaz veya yedeklemeyi açmaz. Mevcut bucket ve ayrı test prefix’i kullanın.",
+      "save": "Güvenli kaydet",
+      "saved": "Yapılandırma kaydedildi; yedekleme kapalı.",
+      "pathStyleOn": "Adres biçimi: path-style",
+      "pathStyleOff": "Adres biçimi: virtual-hosted",
+      "fields": {
+        "endpoint": "HTTPS endpoint",
+        "region": "Region",
+        "bucket": "Bucket",
+        "prefix": "Prefix (isteğe bağlı)",
+        "accessKey": "Access key",
+        "secret": "Secret access key",
+        "token": "Session token (isteğe bağlı)"
+      },
+      "errors": {
+        "s3_fields": "Hedef ve giriş alanlarını kontrol edin.",
+        "invalid_request": "Hedef ve giriş alanlarını kontrol edin.",
+        "native_unavailable": "Bu derlemede S3 bağlantısı hazır değil.",
+        "storage_failure": "Güvenli kayıt okunamadı veya yazılamadı.",
+        "credential_locked": "Cihazın kilidini açıp yeniden deneyin.",
+        "context_changed": "Yapılandırma değişti. Ekranı yeniden açın.",
+        "candidate_stale": "Uygulamayı öne getirip yeniden deneyin.",
+        "s3_auth": "Access key, secret, session token ve bucket yetkilerini kontrol edin.",
+        "target_missing": "Bucket, region ve hedef yapılandırmasını kontrol edin.",
+        "conflict": "Nesne zaten mevcut; üzerine yazılmadı.",
+        "multipart_restart_required": "Multipart çakıştı; bu iş otomatik yeniden gönderilmez.",
+        "review_required": "Sonuç belirsiz; iş incelemede tutuluyor.",
+        "verification_failed": "Geri okunan byte’lar doğrulanamadı; tamamlandı sayılmadı.",
+        "profile_missing": "Önce güvenli hedef yapılandırmasını kaydedin."
+      },
+      "test": "4.097 baytlık test dosyasıyla dene",
+      "testHint": "Kaydedilmiş hedefte uygulamanın ürettiği küçük dosyayı yükler ve geri okuyarak doğrular. Seçili dosya/fotoğrafları kullanmaz; yedeklemeyi açmaz. Test nesnesi hedefte kalır; sağlayıcı kullanım ücreti alabilir. Önce ayrı bir test prefix’i kaydedin.",
+      "testSuccess": "Test dosyası yüklendi ve geri okunarak doğrulandı. Yedekleme kapalı.",
+      "security": {
+        "aws": "V1 aktarımı HTTPS kullanır; Amazon S3 sunucuda AWS anahtarlarıyla şifreler. Kloda ek istemci şifrelemesi yapmaz. AWS ve yetkili hesap erişimleri içeriği okuyabilir.",
+        "compatible": "Aktarım HTTPS kullanır. Sunucudaki şifreleme sağlayıcı ayarlarına bağlıdır; Kloda ek istemci şifrelemesi yapmaz. Kişisel yedekleme için sağlayıcı kabulü gerekir."
+      },
+      "manualHint": "Seçili Dosyalar ve Fotoğrafları bu AWS hedefine yedeklemeyi açıkça etkinleştirirsiniz. Çalıştır düğmesi aktarımı başlatır. Otomatik çalışmayı ayrıca etkinleştirebilirsiniz.",
+      "enable": "AWS dosya yedeklemesini etkinleştir",
+      "disable": "Bu hedefi devre dışı bırak",
+      "run": "Seçili kaynakları şimdi yedekle",
+      "pause": "Aktarımı duraklat",
+      "verified": "Doğrulanmış nesne: {{count}} · {{bytes}} bayt",
+      "runStates": {
+        "running": "Çalışıyor",
+        "paused": "Duraklatıldı",
+        "finished": "Çalışma tamamlandı",
+        "needs_attention": "Kontrol gerekiyor"
+      },
+      "backupsTitle": "Bu cihazın S3 yedekleri",
+      "reviewTitle": "Kontrol gereken S3 işleri",
+      "catalogHint": "Yalnız bu cihazın bu hedefe ait doğrulanmış tamamlanma kayıtları listelenir. Geri yükleme, buluttaki dosyayı yeniden doğrular ve seçtiğiniz klasöre yazar.",
+      "reviewHint": "Yanıtı belirsiz işler otomatik tamamlanmış sayılmaz veya yeniden gönderilmez. Mevcut dosya ve kayıtlar korunur.",
+      "automaticHint": "Otomatik çalışma seçili kaynakları mevcut zamanlama ayarlarıyla yedekler. Başlama zamanı işletim sistemine, ağ ve kilit durumuna bağlıdır; belirsiz işler otomatik tekrarlanmaz.",
+      "automaticOn": "Otomatik yedeklemeyi etkinleştir",
+      "automaticOff": "Otomatik yedeklemeyi kapat",
+      "copied": "Yeni ayrı kopya doğrulandı: {{name}}. Eski belirsiz kayıt korunuyor."
     }
   },
   "statusUi": {

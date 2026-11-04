@@ -1,0 +1,41 @@
+import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
+import { AppState, type AppStateStatus } from 'react-native';
+import { S3ItemsPanel } from './s3-items-panel';
+import { s3 } from '../../../shared/api/s3';
+import { s3Backups } from '../../../shared/api/s3-backups';
+import { i18n } from '../../../shared/i18n';
+jest.mock('../../../shared/api/s3',() => ({ s3:{ status:jest.fn(),newRequest:jest.fn() },s3ErrorCode:() => 'storage_failure' }));
+jest.mock('../../../shared/api/s3-backups',() => ({ s3Backups:{ list:jest.fn(),restore:jest.fn(),copy:jest.fn(),cancel:jest.fn() } }));
+const native = jest.mocked(s3), items = jest.mocked(s3Backups), original = Object.getOwnPropertyDescriptor(AppState,'currentState')!;
+const id = '12345678-1234-1234-1234-123456789abc', ticket = '22345678-1234-1234-1234-123456789abc', hash = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+const file = { id,name:'owned.jpg',path:'owned/owned.jpg',kind:'file' as const,sha256:hash,size:'5' };
+beforeEach(() => {
+  jest.clearAllMocks(); Object.defineProperty(AppState,'currentState',{ ...original,value:'active' });
+  jest.spyOn(AppState,'addEventListener').mockReturnValue({ remove:jest.fn() });
+  native.status.mockResolvedValue({ provider:'amazon-s3',supported:true,configured:true,enabled:false,canRun:false });
+  native.newRequest.mockReturnValue(ticket); items.cancel.mockResolvedValue(undefined);
+  items.list.mockResolvedValue({ targetId:hash,items:[file],hasMore:false,canRestoreFiles:true,canRestorePhotos:true });
+});
+afterEach(() => { Object.defineProperty(AppState,'currentState',original); jest.restoreAllMocks(); });
+it('loads own catalogue and restores the selected receipt with a native request identifier',async () => {
+  items.restore.mockResolvedValue('owned.jpg');
+  const view = await render(<S3ItemsPanel provider="amazon-s3" />);
+  await waitFor(() => expect(view.getByRole('button',{ name:i18n.t('destinations.review.refresh') })).toBeTruthy());
+  await fireEvent.press(view.getByRole('button',{ name:i18n.t('destinations.review.refresh') }));
+  await waitFor(() => expect(view.getByText('owned.jpg')).toBeTruthy());
+  await fireEvent.press(view.getByRole('button',{ name:i18n.t('transfer.backups.restore',{ name:'owned.jpg' }) }));
+  expect(items.restore).toHaveBeenCalledWith('amazon-s3',file,ticket); expect(items.copy).not.toHaveBeenCalled(); await view.unmount();
+});
+it('cancels explicit review on departure and ignores a late copy completion',async () => {
+  let changed: ((state: AppStateStatus) => void) | undefined, finish: ((name: string) => void) | undefined;
+  jest.spyOn(AppState,'addEventListener').mockImplementation((_event,handler) => { changed = handler; return { remove:jest.fn() }; });
+  items.copy.mockImplementation(() => new Promise(resolve => { finish = resolve; }));
+  const view = await render(<S3ItemsPanel provider="amazon-s3" issues />);
+  await waitFor(() => expect(view.getByRole('button',{ name:i18n.t('destinations.review.refresh') })).toBeTruthy());
+  await fireEvent.press(view.getByRole('button',{ name:i18n.t('destinations.review.refresh') }));
+  await waitFor(() => expect(view.getByText('owned.jpg')).toBeTruthy());
+  await fireEvent.press(view.getByRole('button',{ name:i18n.t('destinations.review.keepBoth',{ name:'owned.jpg' }) }));
+  expect(items.copy).toHaveBeenCalledWith('amazon-s3',id,ticket);
+  await act(async () => { changed?.('background'); finish?.('new-copy.jpg'); });
+  expect(items.cancel).toHaveBeenCalledWith(ticket,true); expect(view.queryByText(/new-copy.jpg/)).toBeNull(); await view.unmount();
+});

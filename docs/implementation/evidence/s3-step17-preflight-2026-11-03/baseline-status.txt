@@ -1,0 +1,173 @@
+D  apps/mobile/.expo/dev/logs/start.log
+ M apps/mobile/app.json
+ M apps/mobile/modules/my-module/android/build.gradle
+ M apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt
+ M apps/mobile/modules/my-module/android/src/main/AndroidManifest.xml
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupReceiver.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesSnapshots.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt
+ M apps/mobile/modules/my-module/expo-module.config.json
+ M apps/mobile/modules/my-module/ios/IosAutomaticCoordinator.swift
+ M apps/mobile/modules/my-module/ios/IosAutomaticSubscriber.swift
+ M apps/mobile/modules/my-module/ios/IosFilesSnapshot.swift
+ M apps/mobile/modules/my-module/ios/IosWebDavContext.swift
+ M apps/mobile/modules/my-module/ios/KlodaSyncRuntime.podspec
+ M apps/mobile/src/app/App.spec.tsx
+ M apps/mobile/src/app/App.tsx
+ M apps/mobile/src/pages/activity/ui/activity-page.tsx
+ M apps/mobile/src/pages/connections/ui/connections-page.tsx
+ M apps/mobile/src/shared/i18n/locales/de.json
+ M apps/mobile/src/shared/i18n/locales/en.json
+ M apps/mobile/src/shared/i18n/locales/tr.json
+ M docs/decisions/0022-advanced-destination-transport-and-credential-custody.md
+ M docs/implementation/CURRENT.md
+ M docs/implementation/ftps-native-preflight-2026-11-02.md
+ M packages/pairing-native/apple/include/KlodaPairingNative.h
+ M packages/pairing-native/src/ios_lan_socket.rs
+ M packages/pairing-native/tests/ios_lan_socket.rs
+ M tools/build-native-ios.mjs
+?? .claude/worktrees/step18-20/
+?? apps/mobile/modules/my-module/android/src/androidTest/assets/kloda-ftps16/hostname.txt
+?? apps/mobile/modules/my-module/android/src/androidTest/assets/kloda-ftps16/libkloda_ftps_native.so
+?? apps/mobile/modules/my-module/android/src/androidTest/assets/kloda-ftps16/owned-photo.png
+?? apps/mobile/modules/my-module/android/src/androidTest/assets/kloda-ftps16/sha256.txt
+?? apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsFilesChecks.kt
+?? apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsFixture.kt
+?? apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsOsChecks.kt
+?? apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsPhotosChecks.kt
+?? apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsPhotosRestoreChecks.kt
+?? apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsProductChecks.kt
+?? apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsProfileChecks.kt
+?? apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsSourceChecks.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsBackups.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsCopyRequests.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsDownload.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsFiles.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsFilesRestore.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsJob.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsJournal.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsLan.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsPhotos.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsPhotosImport.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsPhotosJournal.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsPhotosRestore.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsPhotosState.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsProfile.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsProfiles.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsPublication.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsPublisher.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsQueue.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsRestoreJournal.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsRestoreTask.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsReview.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsReviewEntries.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsRuns.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsRuntime.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsSchedule.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsScheduler.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsSources.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsVault.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/FtpsPhotoManifestCodec.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/FtpsRun.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaFtpsModule.kt
+?? apps/mobile/modules/my-module/ios/IosFtpsAutomaticCoordinator.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsBackups.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsContext.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsCopyRequests.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsDownload.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsFiles.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsFilesRestore.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsIssues.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsJournal.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsLan.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsPhotoManifest.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsPhotos.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsPhotosImport.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsPhotosJournal.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsPhotosRestore.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsPhotosState.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsProfile.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsProfiles.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsPublication.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsPublisher.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsQueue.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsRestoreJournal.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsReview.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsReviewEntries.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsRuns.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsSchedule.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsSources.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsUi.swift
+?? apps/mobile/modules/my-module/ios/IosFtpsVault.swift
+?? apps/mobile/modules/my-module/ios/KlodaFtpsModule.swift
+?? apps/mobile/modules/my-module/ios/NativeFtps/KlodaFtpsNative.xcframework/Info.plist
+?? apps/mobile/modules/my-module/ios/NativeFtps/KlodaFtpsNative.xcframework/ios-arm64-simulator/Headers/kloda_ftps.h
+?? apps/mobile/modules/my-module/ios/NativeFtps/KlodaFtpsNative.xcframework/ios-arm64-simulator/libkloda_ftps_native.a
+?? apps/mobile/modules/my-module/ios/NativeFtps/KlodaFtpsNative.xcframework/ios-arm64/Headers/kloda_ftps.h
+?? apps/mobile/modules/my-module/ios/NativeFtps/KlodaFtpsNative.xcframework/ios-arm64/libkloda_ftps_native.a
+?? apps/mobile/modules/my-module/ios/NativeFtps/kloda_ftps.h
+?? apps/mobile/src/features/backup-setup/model/use-ftps-backup.ts
+?? apps/mobile/src/features/file-transfer/model/use-ftps-items.ts
+?? apps/mobile/src/pages/activity/ui/ftps-items-panel.spec.tsx
+?? apps/mobile/src/pages/activity/ui/ftps-items-panel.tsx
+?? apps/mobile/src/pages/connections/ui/ftps-page.spec.tsx
+?? apps/mobile/src/pages/connections/ui/ftps-page.tsx
+?? apps/mobile/src/shared/api/ftps-backups.ts
+?? apps/mobile/src/shared/api/ftps.spec.ts
+?? apps/mobile/src/shared/api/ftps.ts
+?? docs/implementation/16c-head-check-2026-11-03.md
+?? docs/implementation/evidence/ftps-native-step16c-2026-11-03/android-photos-cleanup.json
+?? docs/implementation/evidence/ftps-native-step16c-2026-11-03/bound-check.py
+?? docs/implementation/evidence/ftps-native-step16c-2026-11-03/device-teardown.json
+?? docs/implementation/evidence/ftps-native-step16c-2026-11-03/final-checks.json
+?? docs/implementation/evidence/ftps-native-step16c-2026-11-03/ios-owned-runtime.json
+?? docs/implementation/evidence/ftps-native-step16c-2026-11-03/manifest.json
+?? docs/implementation/evidence/ftps-native-step16c-2026-11-03/server-teardown.json
+?? docs/implementation/evidence/ftps-native-step16c-2026-11-03/ui-check.json
+?? docs/implementation/evidence/ftps-native-step16c-2026-11-03/ui/de-form.png
+?? docs/implementation/evidence/ftps-native-step16c-2026-11-03/ui/de-max-font-fields.png
+?? docs/implementation/evidence/ftps-native-step16c-2026-11-03/ui/de-max-font-top.png
+?? docs/implementation/evidence/ftps-native-step16c-2026-11-03/ui/en-form.png
+?? docs/implementation/evidence/ftps-native-step16c-2026-11-03/ui/tr-form.png
+?? docs/implementation/evidence/ftps-native-step16c-2026-11-03/ui/tr-secure-field.png
+?? docs/implementation/evidence/ftps-preflight-2026-11-03/manifest.json
+?? docs/implementation/evidence/ftps-preflight-2026-11-03/native-candidate/Cargo.lock
+?? docs/implementation/evidence/ftps-preflight-2026-11-03/native-candidate/Cargo.toml
+?? docs/implementation/evidence/ftps-preflight-2026-11-03/native-candidate/main.rs
+?? docs/implementation/evidence/ftps-preflight-2026-11-03/native-candidate/manifest.json
+?? docs/implementation/evidence/ftps-preflight-2026-11-03/native-candidate/osv-query.json
+?? docs/implementation/evidence/ftps-preflight-2026-11-03/native-candidate/osv-response.json
+?? docs/implementation/evidence/ftps-preflight-2026-11-03/native-candidate/result.json
+?? docs/implementation/evidence/ftps-preflight-2026-11-03/practical-result.json
+?? docs/implementation/evidence/ftps-preflight-2026-11-03/practical.py
+?? docs/implementation/evidence/ftps-preflight-2026-11-03/probe-client.c
+?? docs/implementation/evidence/ftps-preflight-2026-11-03/probe.py
+?? docs/implementation/evidence/ftps-preflight-2026-11-03/tls-fixture.json
+?? docs/implementation/ftps-native-checkpoint-2026-11-03.md
+?? docs/implementation/ftps-publication-decision-2026-11-03.md
+?? packages/ftps-native/.gitignore
+?? packages/ftps-native/Cargo.lock
+?? packages/ftps-native/Cargo.toml
+?? packages/ftps-native/README.md
+?? packages/ftps-native/THIRD_PARTY_NOTICES.md
+?? packages/ftps-native/apple/tests/IosFtpsLoopbackFilesApp.swift
+?? packages/ftps-native/apple/tests/IosFtpsLoopbackPhotosApp.swift
+?? packages/ftps-native/apple/tests/IosFtpsPhotosChecks.swift
+?? packages/ftps-native/apple/tests/IosFtpsProfileChecks.swift
+?? packages/ftps-native/apple/tests/IosFtpsRestoreChecks.swift
+?? packages/ftps-native/apple/tests/IosFtpsSourcesChecks.swift
+?? packages/ftps-native/apple/tests/OwnedLoopbackRoute.c
+?? packages/ftps-native/build.rs
+?? packages/ftps-native/dependency-inventory.json
+?? packages/ftps-native/fixtures/ftps-photo-v1.json
+?? packages/ftps-native/include/kloda_ftps.h
+?? packages/ftps-native/src/android_jni.rs
+?? packages/ftps-native/src/bridge.rs
+?? packages/ftps-native/src/lib.rs
+?? packages/ftps-native/src/request.rs
+?? packages/ftps-native/src/session.rs
+?? packages/ftps-native/src/transfer.rs
+?? tools/build-ftps-native.mjs
+?? tools/check-ftps-native.mjs
+?? tools/test-ios-ftps-contracts.py

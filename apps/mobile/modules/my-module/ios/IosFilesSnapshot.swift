@@ -62,6 +62,17 @@ final class IosFilesSnapshot {
     let support = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
     return try IosFilesSnapshot(directoryURL: support.appendingPathComponent("kloda-sftp-snapshots", isDirectory: true))
   }
+  var isFtps: Bool { rootURL.lastPathComponent == "kloda-ftps-snapshots" }
+  static func ftps() throws -> IosFilesSnapshot {
+    let support = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+    return try IosFilesSnapshot(directoryURL: support.appendingPathComponent("kloda-ftps-snapshots", isDirectory: true))
+  }
+  func isS3(_ provider: String) -> Bool { ["amazon-s3", "s3-compatible"].contains(provider) && rootURL.lastPathComponent == "kloda-" + provider + "-snapshots" }
+  static func s3(_ provider: String) throws -> IosFilesSnapshot {
+    guard ["amazon-s3", "s3-compatible"].contains(provider) else { throw IosFilesSource.failure("invalid_request") }
+    let support = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+    return try IosFilesSnapshot(directoryURL: support.appendingPathComponent("kloda-" + provider + "-snapshots", isDirectory: true))
+  }
   deinit { Darwin.close(directory) }
 
   func createStaging() throws -> (String, FileHandle) {

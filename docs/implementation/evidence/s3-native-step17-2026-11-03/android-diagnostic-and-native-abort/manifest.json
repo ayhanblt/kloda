@@ -1,0 +1,36 @@
+{
+  "scope": "new Android generated-only diagnostic and Android/iOS own multipart abort; fake local TLS MinIO only, no actual AWS replay",
+  "passed": [
+    "Android module/instrumentation compile; generated4097 native diagnostic publication/full readback/own staged restore; general enabled0/job0/context unchanged; poisoned selected metadata unused; grant/cancel/lock/replay/close-reopen and exact KeyStore cleanup",
+    "Android and iOS native own-create-ACK-bound abort: stale authority sent no abort, fresh authority204 then ListParts404, terminal/no completion/repeat rejection; iOS separate-process reopen and exact fixture Keychain cleanup"
+  ],
+  "counts_after": {
+    "complete": 8,
+    "dropped": 1,
+    "sink": 0
+  },
+  "infrastructure": {
+    "failure": "new Android diagnostic initially stopped safely at part HTTP507; no new completion; positive path was not marked PASS",
+    "cause": "owned MinIO on nearly full APFS volume; exact RELEASE.2025-09-07T16-13-09Z cmd/globals.go diskFillFraction0.99",
+    "source_url": "https://raw.githubusercontent.com/minio/minio/RELEASE.2025-09-07T16-13-09Z/cmd/globals.go",
+    "cleanup": "only /tmp/kloda-s3-step17/rust-s3-0.38.0/target and /tmp/kloda-s3-step17/rusty/probe/target removed; source/locks/evidence/current native libraries retained",
+    "available_before_GiB": 4.3,
+    "available_after_GiB": 5.9,
+    "repeat": "only the previously failing new diagnostic scope rerun after space recovery; existing successful suites and actual AWS trial not repeated"
+  },
+  "source_sha256": {
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Diagnostic.kt": "2b22c3cbc2b314bf51f0264f42491d9416434a1a54ef49bf17f999fbfc74c5a0",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3TestGrant.kt": "34ecce09ee64a46a3e0314695a03325fc2868ac313b19a64fe3b0357501e8ac0",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Abort.kt": "865c177dd333000cfa870aaed210281fbe3e674df37177e6d756fd833ed4fafd",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Journal.kt": "17cfccd120fa0412f8946543b84e52aa79cb40693cce12d4171e11f6cf6eef44",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaS3Module.kt": "2eb626ae858d3beba3cccbbf4ea70866b27217132f62476ffe1e7d5e6c473f95",
+    "apps/mobile/modules/my-module/ios/IosS3Abort.swift": "a2425818f49d35179a5372141503c79cf792fc90eebc42275bbb65e5c745cea1",
+    "tools/test-ios-s3-selected-files.py": "dd9387af7a9cd6f87ca42a67be3921858d8e6e689c880301b00228e9d6ad13e5"
+  },
+  "limits": [
+    "new Abort is native transfer cleanup only, no public cloud delete/general Review adoption authority",
+    "Android normal-app diagnostic UI/lifecycle not yet runtime exercised; backend+grant fixture passed",
+    "latest iOS Abort source compiled/linked in separate fixture; not yet reintegrated into product Pods build",
+    "6ABI/production/Photos/general cloud activation and independent review remain open"
+  ]
+}

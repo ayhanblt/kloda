@@ -1,0 +1,20 @@
+{
+  "stopped": [
+    "exact native-wire wrapper/minio PID pair",
+    "owned KlodaFtps16c emulator-5584"
+  ],
+  "removed_private_fixture_keys": [
+    "ca.key",
+    "certs/private.key"
+  ],
+  "retained": [
+    "synthetic server data/public certs/evidence",
+    "owned iOS Simulator with real-user app and native AWS credential untouched",
+    "localhost8087 Metro for user app"
+  ],
+  "pids": {
+    "wrapper": 515,
+    "minio": 517
+  },
+  "time_utc": "2026-11-03T20:46:20.836514+00:00"
+}

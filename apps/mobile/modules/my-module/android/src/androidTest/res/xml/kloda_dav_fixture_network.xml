@@ -4,6 +4,7 @@
     <trust-anchors>
       <certificates src="system" />
       <certificates src="@raw/kloda_dav_fixture_ca" />
+      <certificates src="@raw/kloda_s3_fixture_ca" />
     </trust-anchors>
   </base-config>
 </network-security-config>

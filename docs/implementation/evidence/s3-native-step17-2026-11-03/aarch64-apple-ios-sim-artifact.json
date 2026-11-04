@@ -1,0 +1,11 @@
+{
+  "target": "aarch64-apple-ios-sim",
+  "release": false,
+  "artifact": "/Users/ayhanblt/Desktop/projects/kloda/packages/s3-native/target/aarch64-apple-ios-sim/aarch64-apple-ios-sim/debug/libkloda_s3_native.a",
+  "sha256": "7c30394a826e1c6678b2de6fb73adf670094fb35263dfd22014114f402b62ed6",
+  "bytes": 34446336,
+  "exports": [
+    "kloda_s3_json_v1"
+  ],
+  "alignments": []
+}

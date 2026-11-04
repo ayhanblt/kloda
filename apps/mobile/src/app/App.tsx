@@ -14,6 +14,8 @@ import { WebDavPage } from '../pages/setup/ui/webdav-page';
 import { ConnectionsPage } from '../pages/connections/ui/connections-page';
 import { SmbPage } from '../pages/connections/ui/smb-page';
 import { SftpPage } from '../pages/connections/ui/sftp-page';
+import { S3Page } from '../pages/connections/ui/s3-page';
+import { FtpsPage } from '../pages/connections/ui/ftps-page';
 import { ProviderPage } from '../pages/connections/ui/provider-page';
 import { SettingsPage } from '../pages/settings/ui/settings-page';
 import { ComputerPage } from '../pages/computer/ui/computer-page';
@@ -45,7 +47,7 @@ export function App() {
     {page === 'activity' && <ActivityPage embedded onBack={back} />}
     {page === 'backups' && <ActivityPage embedded view="backups" onBack={back} />}
     {(page === 'connections' || page === 'add-connection') && <ConnectionsPage adding={page === 'add-connection'} navigate={navigate} openProvider={openProvider} saved={model.savedStorage} />}
-    {page === 'provider' && (provider === 'smb' ? <SmbPage onBack={() => navigate('add-connection')} /> : provider === 'sftp' ? <SftpPage onBack={() => navigate('add-connection')} /> : <ProviderPage provider={provider} onBack={() => navigate('add-connection')} />)}
+    {page === 'provider' && (provider === 'smb' ? <SmbPage onBack={() => navigate('add-connection')} /> : provider === 'sftp' ? <SftpPage onBack={() => navigate('add-connection')} /> : provider === 'ftp' ? <FtpsPage onBack={() => navigate('add-connection')} /> : provider === 'amazon-s3' || provider === 's3-compatible' ? <S3Page key={provider} provider={provider} onBack={() => navigate('add-connection')} /> : <ProviderPage provider={provider} onBack={() => navigate('add-connection')} />)}
     {page === 'settings' && <SettingsPage navigate={navigate} />}
   </MobileShell>;
 }

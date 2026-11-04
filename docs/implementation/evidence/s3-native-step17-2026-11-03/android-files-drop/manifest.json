@@ -1,0 +1,50 @@
+{
+  "head": "67701e7895ca9d7d5d7efe66d23b09954a8bf690",
+  "scope": "owned emulator-5584 KlodaFtps16c; own fresh DocumentsProvider tree, preferences, test KeyStore alias; no AWS/media",
+  "source_hashes": {
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Profile.kt": "bb043aa773cc68a5f4d0dd55fba92d8621a505b05548ab05aaf18acd338c342b",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Files.kt": "5e4b9cdc3b7858d69bafaae482a6817c46a4b50581b256ee408eab4253bd2177",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Catalog.kt": "d67a243718ce061007c8cff7450a6baea6dcee2f1db69c3440e14da49691d679",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Profiles.kt": "67fbf1f21bb3b15eb99d47eb38609e8e01bfa5aa8810f7a19e18c332374e0ad1",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Journal.kt": "9fa42b5667e9ded347d160389fa8ecacecd21756dd9f84ff21b13caed1941db5",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Client.kt": "2f91f5e36464f0a6d02273677c9719d0926c94c5ab4426cd4997be23fb021731",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3RestoreJournal.kt": "04b99600515c5f5308b282becb2ae9b9ccacc765d2baa2894f27a774b092f251",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaS3Module.kt": "9235fe75c47e15f11ce62340eda8a7e2dc91b287a264474218ef1aab5a25da40",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Jobs.kt": "c42df0a40e232cc17d657eed3871ba87ffe6e5f55661641a31d8416e6070f9f1",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Publisher.kt": "4345c8176fcacbf08861692f391f9011843ea65af039cd9e8faeb73406d179bf",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Vault.kt": "e9bc067a8ed442a8a57a654461c3e344f0c23b91ba083fe01115932e51c9fef4",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3RestoreTask.kt": "09131f00139db975e9159f4469cbcb0f2f8397aa2e705d3151efd5440a8d88fc",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Sources.kt": "2c1bca56537f92f6e14b4d603a16bc50e8cd1d758015048ad1dee96f4016fb3f",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Download.kt": "bb512525a5f68f66b05d847bcb305cfbd425839f813cf044b17b984446bc67ac",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3FilesRestore.kt": "ed90b9849e91789fc053a4bd5f5cc77ef2b63bf10ea120577b31ed31f8694672",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/S3NativeEngine.kt": "0b8574317e4f8967487e061129076d0c25184ea53bce2f4c739b4b5d0df606b0",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3WireChecks.kt": "94a759a1182d82185ccc3545f31e1bb08fb650939e5ff25080dc28d5a497b41a",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3ProfileChecks.kt": "0722f6ed9727d4f9a6cd5301499484c61a2b69b68fedc55a47089b5acb16f3bc",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3FilesChecks.kt": "d4079c908b871a560ca6e96c5dbc478ff333c8f54031f6473e2be955f3d9e99e",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3PublisherChecks.kt": "d3ac427642629af290139a398766c70147cc328aec5ddce7cf07c46814c8bd93",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3JobChecks.kt": "5a7bb9c436606ee3f312fd613251fb8901d7073b61a9bf7ca451bc088b36d485",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3DropChecks.kt": "c5b0a1121bb184057dabb6aa7539e41df69736b0e0cd8e13606fb44bf951146d",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesSnapshots.kt": "aa2db55c2cd35a67857af759b67e83b5cbc6e24481504db53f115502546449ea",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt": "71169f5965074d7dca981dd89bd3afb662ed018c2aaeb9d36475c7243f3e72e1"
+  },
+  "main_proxy_counts": {
+    "complete": 6,
+    "dropped": 1,
+    "sink": 0
+  },
+  "drop_proxy_counts": {
+    "complete": 1,
+    "dropped": 1,
+    "get": 1
+  },
+  "passed": [
+    "actual owned SAF selected scan/snapshot/S3 publication+full readback; unchanged reuse same job/no second publication",
+    "own receipt-bound staged download and selected SAF restore; repeat restored same recorded URI/no duplicate; strict receipt/header/retained locator checks",
+    "real remote completion ACK dropped; one completion, equal GET remained Review; separate Android instrumentation process reopen preserved Review without network; exact owned KeyStore alias cleanup"
+  ],
+  "limits": [
+    "no general activation/queue/OS/Photos/physical21",
+    "new optional job name/path, catalog and S3 snapshot namespace are covered by new selected Files test; previous unrelated successful tests not repeated",
+    "Android redirect-negative route still pending; immutable job schema assumes app-private trusted SQLite and no remote adoption"
+  ]
+}

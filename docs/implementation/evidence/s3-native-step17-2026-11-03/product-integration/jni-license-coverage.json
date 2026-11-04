@@ -1,0 +1,13 @@
+{
+  "scope": "exact Cargo.lock android-jni feature resolved closure; Android arm64 target filter; core historical evidence retained, other mobile runtime acceptance separate",
+  "packages": 81,
+  "license_texts": 77,
+  "missing": [
+    "cesu8@1.1.0",
+    "instant-xml@0.7.7",
+    "instant-xml-macros@0.7.2",
+    "jni-sys-macros@0.4.1"
+  ],
+  "distribution_accepted": false,
+  "new_advisory_check": "14 new pairs attempted once; OSV network URLError; no advisory result"
+}

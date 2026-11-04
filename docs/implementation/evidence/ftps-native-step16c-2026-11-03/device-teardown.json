@@ -1,0 +1,29 @@
+{
+  "android": {
+    "serial": "emulator-5584",
+    "avd": "KlodaFtps16c",
+    "wifiPollRestoredMs": 3000,
+    "temporaryReversePortsRemoved": [
+      27449,
+      27450,
+      27451,
+      27452,
+      27453,
+      27454,
+      27455,
+      27456,
+      27457,
+      27458,
+      27459
+    ],
+    "adbdUnrooted": true,
+    "emulatorStopped": true
+  },
+  "ios": {
+    "simulator": "61A45399-D0F9-43C0-B356-E1EF6712E960",
+    "contentSizeRestored": "large",
+    "ownedPhotosTccReset": true,
+    "simulatorShutdown": true
+  },
+  "otherDevicesTouched": false
+}

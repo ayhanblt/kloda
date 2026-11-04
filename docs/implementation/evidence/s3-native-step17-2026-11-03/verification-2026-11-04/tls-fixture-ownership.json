@@ -1,0 +1,5 @@
+{
+  "scope": "new local-only MinIO fixture; no real AWS; synthetic native product verification",
+  "minio_sha256": "7c3b3039b76e55a1b80935848ed83998d5e8d317374f87851f46a019ff5c0aa4",
+  "ca": "99c7c6f4d1cc9a3ef5abe59046532e7738a8a1973b1cdfde77387877b85ff5c7"
+}

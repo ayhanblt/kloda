@@ -21,6 +21,8 @@ android {
   defaultConfig {
     buildConfigField "boolean", "KLODA_SMB_NATIVE", (providers.gradleProperty("klodaSmbNative").orNull == "true").toString()
     buildConfigField "boolean", "KLODA_SFTP_NATIVE", (providers.gradleProperty("klodaSftpNative").orNull == "true").toString()
+    buildConfigField "boolean", "KLODA_FTPS_NATIVE", (providers.gradleProperty("klodaFtpsNative").orNull == "true").toString()
+    buildConfigField "boolean", "KLODA_S3_NATIVE", (providers.gradleProperty("klodaS3Native").orNull == "true").toString()
     minSdkVersion 24
     consumerProguardFiles "consumer-rules.pro"
     testInstrumentationRunner "com.kloda.sync.AndroidFilesQueueRecoveryInstrumentation"
@@ -96,4 +98,30 @@ if (providers.gradleProperty("klodaSftpNative").orNull == "true") {
     commandLine(System.getenv('NODE_BINARY') ?: 'node', new File(pairingRepo, 'tools/build-sftp-native.mjs').absolutePath, 'android')
   }
   tasks.matching { it.name == 'preBuild' }.configureEach { dependsOn buildSftpNative }
+}
+
+if (providers.gradleProperty("klodaFtpsNative").orNull == "true") {
+  def ftpsCrate = new File(pairingRepo, "packages/ftps-native")
+  def buildFtpsNative = tasks.register('buildFtpsNative', Exec) {
+    workingDir pairingRepo
+    inputs.files(fileTree(ftpsCrate) { include 'src/**', 'vendor/**', 'Cargo.toml', 'Cargo.lock', 'build.rs' }).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.files(new File(pairingRepo, 'tools/build-ftps-native.mjs'), new File(pairingRepo, 'tools/check-ftps-native.mjs')).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.property('rustToolchain', '1.99.0'); inputs.property('ndkVersion', '27.1.12297006')
+    outputs.files(pairingAbis.collect { file("src/main/jniLibs/${it}/libkloda_ftps_native.so") })
+    commandLine(System.getenv('NODE_BINARY') ?: 'node', new File(pairingRepo, 'tools/build-ftps-native.mjs').absolutePath, 'android')
+  }
+  tasks.matching { it.name == 'preBuild' }.configureEach { dependsOn buildFtpsNative }
+}
+
+if (providers.gradleProperty("klodaS3Native").orNull == "true") {
+  def s3Crate = new File(pairingRepo, "packages/s3-native")
+  def buildS3Native = tasks.register('buildS3Native', Exec) {
+    workingDir pairingRepo
+    inputs.files(fileTree(s3Crate) { include 'src/**', 'vendor/**', 'Cargo.toml', 'Cargo.lock', 'build.rs' }).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.files(new File(pairingRepo, 'tools/build-s3-native.mjs'), new File(pairingRepo, 'tools/check-s3-native.mjs')).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.property('rustToolchain', '1.99.0'); inputs.property('ndkVersion', '27.1.12297006')
+    outputs.files(pairingAbis.collect { file("src/main/jniLibs/${it}/libkloda_s3_native.so") })
+    commandLine(System.getenv('NODE_BINARY') ?: 'node', new File(pairingRepo, 'tools/build-s3-native.mjs').absolutePath, 'android')
+  }
+  tasks.matching { it.name == 'preBuild' }.configureEach { dependsOn buildS3Native }
 }

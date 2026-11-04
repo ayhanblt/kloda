@@ -1,0 +1,14 @@
+{
+  "target": "61A45399-D0F9-43C0-B356-E1EF6712E960",
+  "bundle": "com.kloda.app",
+  "variant": "all native flags enabled, public-root libraries, Xcode simulator signing with com.kloda.app Keychain entitlement",
+  "languages": [
+    "tr",
+    "en",
+    "de"
+  ],
+  "nativeStatusAndForm": "PASS supported, unconfigured, editable; no save or network action invoked",
+  "secureInput": "PASS synthetic unsaved input masked, cleared on leaving form",
+  "font": "accessibility-extra-extra-extra-large; labels wrap and AX focuses secure input with keyboard; restored large",
+  "remaining": "Existing global bottom-navigation overflow visible at max font; whole-app accessibility/VoiceOver and full all-screen capture remain general12/20 gates, not claimed PASS"
+}

@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-04",
+  "head": "67701e7895ca9d7d5d7efe66d23b09954a8bf690",
+  "decision": "User explicitly selected V1 TLS + AWS SSE-S3; no client E2EE; personal transfer requires explicit app opt-in",
+  "scope": "C1 foreground manual selected Files queue, own immutable run/verified receipt counters, explicit opt-in/run/pause/disable API and TR/EN/DE UI; P5 personal activation remains blocked",
+  "passed": [
+    "new Android/iOS run store component and independently cancellable blocked-worker pause, normal pause vs persistence failure, terminal/callback-once/reopen/exact fake-key cleanup",
+    "new global queue pause on both platforms (normal and forced persistence failure), no media/network",
+    "2new API trust-boundary/action cases; 2new explicit opt-in/running settings UI cases; 1new delayed poll response race (previous2 skipped)",
+    "final mobile TypeScript and scoped ESLint9",
+    "Android S3-enabled instrumentation APK build and runtime; iOS normal app compile/link/Simulator signing; no install into real-key user app"
+  ],
+  "validation_notes": [
+    "run-store fake ACK tests are bookkeeping components, not actual remote authority proof; existing AWS and local TLS publisher successes were not repeated",
+    "first Android global-pause attempt stopped native_unavailable before any network because feature flag omitted; only failed new scope resumed with -PklodaS3Native=true",
+    "new poll test dynamic import incompatible with current Jest; switched to normal import, only failed new case resumed",
+    "first mobile-local lint resolved ESLint8 without config; corrected to repo ESLint9, no code/config expansion",
+    "first2UI tests predate final polling revision/busy guards; final new race test covers changed hook, their historical success is not a full final rerun"
+  ],
+  "review": "separate same-agent review: removed unintended global automatic-paused gate from new explicit manual starts to match existing destinations; concurrent diagnostic disabled while queue runs; stale poll fenced against explicit action; not independent review",
+  "limits": [
+    "no new real AWS requests, personal sources, IAM expansion or cloud delete",
+    "new queue/module controls not exercised in normal native UI; real-key app/vault untouched; default opt-in false",
+    "Photos, automatic BG, catalog/review/restore public UI, production P5 vendor, full6ABI/package/licenses/physical and independent review remain open"
+  ],
+  "sources_current": {
+    "apps/mobile/modules/my-module/ios/IosS3Queue.swift": "6808bd66f2d78a325adc5c6dfa6738c245aa0c6e1e8341051b68e373af04bc9f",
+    "apps/mobile/modules/my-module/ios/IosS3Runs.swift": "9fc40a2c6527b6f4a1b70a4707d73959317ea6f1476cef72d141c900b80f668a",
+    "apps/mobile/modules/my-module/ios/IosS3Journal.swift": "0e72499a08c7d4c7038ef663614692ca4b2ecb005a86c24e07bde152edfe0024",
+    "apps/mobile/modules/my-module/ios/IosS3TestGrant.swift": "6be47a91eaa1c24fa5252c2eb560ed8e313ee9e3bfba40eccac2ff4435115aae",
+    "apps/mobile/modules/my-module/ios/KlodaS3Module.swift": "f37bfae527e151e01a7ff23d64eaffeb1ab04b2403e9c0fbcd64258f0e551a0b",
+    "apps/mobile/modules/my-module/ios/IosAutomaticCoordinator.swift": "7d0f534ea9503e53c7d42ece70eced50175d7df0bc2070f311313c13088de5a4",
+    "apps/mobile/modules/my-module/ios/IosWebDavContext.swift": "84c672a05f792e7e2bed9f784521d6f96051ce6234ab0f087b08124f4d0f3ca1",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Queue.kt": "84b2bf9051d2d56082d9af2970dcc93e2e3a99f1998bb1c09c6faa09bfce3387",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Runs.kt": "9d265f9d8e1df26768dc404002711faf8748e70f63da95a8b4bfd64b99e2dbfb",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaS3Module.kt": "d651c34b1066705395648ce9637f7c59e40e6f49d714a96dcad0d962ae8551e4",
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt": "c9338be6047f71f7e34ee4dbe06092915a3f99ee9f664c40de39d7301e0adc86",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3RunChecks.kt": "acd37e856eb9fa48a3382862976bfff6cf6e4572da921c819ee80cc06a575780",
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt": "f8ab1dcb448025b8d2899eee92dd63d047c1c570dc60d0b0d2ed6052cd547fd1",
+    "apps/mobile/src/shared/api/s3.ts": "559e168531477f60de3d49a7a47f384ad36b22dce65d46f6590db40b39bf4ece",
+    "apps/mobile/src/shared/api/s3-queue.spec.ts": "7534e31d8e4fd81144c20d3654b669a9afa07187f0c0fff65be25d24d6216c47",
+    "apps/mobile/src/features/backup-setup/model/use-s3-backup.ts": "fd76265dcfe5fa5ef9801c0b933341ce9b0b619356fe098339f530b77147cd41",
+    "apps/mobile/src/pages/connections/ui/s3-page.tsx": "c78ca77ef4d474e9fcc23fa2be26a39af05058c7698aebd7b119859540ffdb12",
+    "apps/mobile/src/pages/connections/ui/s3-queue-page.spec.tsx": "e97e5391966aa21205227bbe7840451a5ac5bde6254a64305e674c0abca4e843",
+    "packages/s3-native/apple/tests/IosS3RunApp.swift": "4e7735770506835eaad6c57dde315d02de96f62437402967e93b118aa93f65b4",
+    "tools/test-ios-s3-selected-files.py": "66d19dd93667a6f5c2e604aea9cfd7281b9b97d85ed286310b30c72b18ed30e3"
+  },
+  "logs": {
+    "android-global-pause": "android-s3-global-pause-enabled-runtime.log",
+    "ios-global-pause": "ios-s3-global-pause.log",
+    "api": "s3-queue-api-jest.log",
+    "ui-opt-in": "s3-queue-ui-jest.log",
+    "ui-poll-race": "s3-queue-ui-poll-jest.log",
+    "typescript": "s3-queue-final-tsc.log",
+    "lint": "s3-queue-final-lint.log"
+  },
+  "teardown": "Owned KlodaFtps16c emulator-5584 identity checked then stopped after successful no-network controls; MinIO remains closed; real-key user app/vault untouched"
+}

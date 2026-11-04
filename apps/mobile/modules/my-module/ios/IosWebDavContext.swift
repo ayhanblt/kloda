@@ -15,12 +15,18 @@ enum IosWebDavContext {
   }
   static func mutate<T>(_ action: () throws -> T) throws -> T {
     defer {
+#if KLODA_S3_NATIVE
+      try? IosS3Queue.pauseAll(code: "settings_changed"); IosS3Automatic.shared.reconcile()
+#endif
       try? IosWebDavQueue.shared.pause(code: "settings_changed"); IosWebDavAutomaticCoordinator.shared.reconcile()
 #if KLODA_SMB_NATIVE
       try? IosSmbQueue.shared.pause(code: "settings_changed"); IosSmbAutomaticCoordinator.shared.reconcile()
 #endif
 #if KLODA_SFTP_NATIVE
       try? IosSftpQueue.shared.pause(code: "settings_changed"); IosSftpAutomaticCoordinator.shared.reconcile()
+#endif
+#if KLODA_FTPS_NATIVE
+      try? IosFtpsQueue.shared.pause(code: "settings_changed"); IosFtpsAutomaticCoordinator.shared.reconcile()
 #endif
     }
     return try synchronized {

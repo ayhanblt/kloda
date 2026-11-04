@@ -16,6 +16,13 @@ public final class IosAutomaticSubscriber: ExpoAppDelegateSubscriber {
     IosSftpQueue.shared.setProtected(application.isProtectedDataAvailable)
     IosSftpAutomaticCoordinator.shared.register()
 #endif
+#if KLODA_FTPS_NATIVE
+    IosFtpsQueue.shared.setProtected(application.isProtectedDataAvailable)
+    IosFtpsAutomaticCoordinator.shared.register()
+#endif
+#if KLODA_S3_NATIVE
+    IosS3Runtime.shared.setProtected(application.isProtectedDataAvailable); IosS3Automatic.shared.register()
+#endif
     IosBackupNotifications.refresh()
     observers.append(NotificationCenter.default.addObserver(forName: NSNotification.Name.NSSystemTimeZoneDidChange,
       object: nil, queue: .main) { _ in IosAutomaticCoordinator.shared.clockChanged(); IosWebDavAutomaticCoordinator.shared.reconcile(clockChanged: true)
@@ -24,6 +31,12 @@ public final class IosAutomaticSubscriber: ExpoAppDelegateSubscriber {
 #endif
 #if KLODA_SFTP_NATIVE
         IosSftpAutomaticCoordinator.shared.reconcile(clockChanged: true)
+#endif
+#if KLODA_FTPS_NATIVE
+        IosFtpsAutomaticCoordinator.shared.reconcile(clockChanged: true)
+#endif
+#if KLODA_S3_NATIVE
+        IosS3Automatic.shared.reconcile(clockChanged: true)
 #endif
     })
     observers.append(NotificationCenter.default.addObserver(forName: UIApplication.protectedDataWillBecomeUnavailableNotification,
@@ -36,6 +49,12 @@ public final class IosAutomaticSubscriber: ExpoAppDelegateSubscriber {
 #if KLODA_SFTP_NATIVE
         IosSftpQueue.shared.setProtected(false); try? IosSftpQueue.shared.pause(code: "credential_locked")
 #endif
+#if KLODA_FTPS_NATIVE
+        IosFtpsQueue.shared.setProtected(false); try? IosFtpsQueue.shared.pause(code: "credential_locked")
+#endif
+#if KLODA_S3_NATIVE
+        IosS3Runtime.shared.setProtected(false)
+#endif
       })
     observers.append(NotificationCenter.default.addObserver(forName: UIApplication.protectedDataDidBecomeAvailableNotification,
       object: nil, queue: .main) { _ in
@@ -45,6 +64,12 @@ public final class IosAutomaticSubscriber: ExpoAppDelegateSubscriber {
 #endif
 #if KLODA_SFTP_NATIVE
         IosSftpQueue.shared.setProtected(true); IosSftpAutomaticCoordinator.shared.reconcile(allowForeground: false)
+#endif
+#if KLODA_FTPS_NATIVE
+        IosFtpsQueue.shared.setProtected(true); IosFtpsAutomaticCoordinator.shared.reconcile(allowForeground: false)
+#endif
+#if KLODA_S3_NATIVE
+        IosS3Runtime.shared.setProtected(true); IosS3Automatic.shared.reconcile()
 #endif
       })
     return true
@@ -56,6 +81,12 @@ public final class IosAutomaticSubscriber: ExpoAppDelegateSubscriber {
 #endif
 #if KLODA_SFTP_NATIVE
     IosSftpAutomaticCoordinator.shared.reconcile(clockChanged: true)
+#endif
+#if KLODA_FTPS_NATIVE
+    IosFtpsAutomaticCoordinator.shared.reconcile(clockChanged: true)
+#endif
+#if KLODA_S3_NATIVE
+        IosS3Automatic.shared.reconcile(clockChanged: true)
 #endif
   }
   deinit { for observer in observers { NotificationCenter.default.removeObserver(observer) } }

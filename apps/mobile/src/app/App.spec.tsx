@@ -232,4 +232,27 @@ describe('App', () => {
     await surface.unmount();
   });
 
+  it('routes FTP to the explicit FTPS form without enabling or saving an unsupported native target', async () => {
+    const surface = await render(<App />);
+    await fireEvent.press(surface.getByText(i18n.t('ui.common.skip')));
+    await fireEvent.press(surface.getByRole('tab', { name: i18n.t('statusUi.targets') }));
+    await fireEvent.press(surface.getByText(i18n.t('ui.conn.add')));
+    await fireEvent.press(surface.getByRole('button', { name: i18n.t('ui.providers.ftp') }));
+    await waitFor(() => expect(surface.getByLabelText(i18n.t('ui.providerFields.hostname')).props.editable).toBe(false));
+    expect(surface.getByRole('button', { name: i18n.t('destinations.ftps.saveEnable') }).props.accessibilityState.disabled).toBe(true);
+    await surface.unmount();
+  });
+
+  it('opens native S3 screens with distinct provider identities and no automatic activation', async () => {
+    const surface = await render(<App />);
+    await fireEvent.press(surface.getByText(i18n.t('ui.common.skip')));
+    await fireEvent.press(surface.getByRole('tab', { name: i18n.t('statusUi.targets') }));
+    await fireEvent.press(surface.getByText(i18n.t('ui.conn.add')));
+    await fireEvent.press(surface.getByRole('button', { name: i18n.t('ui.providers.amazon-s3') }));
+    await waitFor(() => expect(surface.getByLabelText(i18n.t('destinations.s3.fields.accessKey')).props.secureTextEntry).toBe(true));
+    expect(surface.queryByLabelText(i18n.t('destinations.s3.fields.endpoint'))).toBeNull();
+    expect(surface.getByRole('button', { name:i18n.t('destinations.s3.save') }).props.accessibilityState.disabled).toBe(true);
+    await surface.unmount();
+  });
+
 });

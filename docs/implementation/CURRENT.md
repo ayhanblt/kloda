@@ -1,8 +1,10 @@
-# CURRENT — 02.11.2026
+# CURRENT — 03.11.2026
 
 Tarihî PASS taze kabul değildir.
 
-**Task sınırı02.11:** Codex uygulama commit’i `3efe57873a9e`; [Claude18A/3 sözleşme yanıtı](codex-response-18A3-2026-11-02.md). Kullanıcı Claude tarafını commit/hizalayıp merge edecek; bu sohbette16c ilerletilmez. [Yeni sohbet16c checkpoint’i](codex-next-chat-16c-2026-11-02.md). Başarılı testler tekrar çalıştırılmaz; AGENTS task sınırı/az kullanım kararı uygulanır.
+**16c uygulama/izole kapanış03.11:** main67701e7; [tek checkpoint](ftps-native-checkpoint-2026-11-03.md), [manifest](evidence/ftps-native-step16c-2026-11-03/manifest.json). ADR0022 pratik FTPS profiliyle native engine/journal/vault/Files/Photos/restore/queue/OS ve TR/EN/DE ürün bağlantısı tamam, varsayılan kapalı. Yeni scoped testler,6ABI paketleri, Android/iOS app build, owned Files/Photos/restore/reopen/cleanup ve aynı-agent ayrı review PASS. Başarılı eski testler tekrarlanmadı; commit/push yok,17 başlamadı. Gerçek public-CA/LAN, genel12/20/21 ve bağımsız son Claude review açık; izole CA/sentetik route bunları kapatmaz.
+
+**17 S3 —04.11 uygulama/izole doğrulama tamam:** [checkpoint](s3-step17-checkpoint-2026-11-03.md), [son doğrulama](evidence/s3-native-step17-2026-11-03/verification-2026-11-04/manifest.json). İki platform actual owned Photos upload/full GET/metadata/restore/repeat/reopen/cleanup ve automatic/manual yetki componentleri PASS. iOS Int64 SQLite bind düzeltmesi + normal Xcode27.2 app build PASS. Önceki6ABI/newJS/native kanıtları korunur; başarılı eski AWS/core testleri tekrar edilmedi. JNI14yeni paket advisory0eşleşme;3lisans metni eksik. Dağıtım/P5 production/genel UI/bağımsız review/gerçek OS/fiziksel kabul [tek20–21 listesinde](20-21-acceptance-collection-2026-11-04.md), kapalı sayılmaz.18/19 Claude alanında; kullanıcı nihai bildirimi sonrası hizalama yapılacak, kaynaklarına dokunulmadı. Gerçek-key app/AWS ve gerçek kullanıcı medyası değişmedi. Commit/push yok.
 
 ## Steps
 
@@ -23,8 +25,8 @@ Tarihî PASS taze kabul değildir.
 |13|Dar salt-okunur galeri uygulandı|Android/native/physical açık|
 |14|16/16 teknik matris+D1–3 onaylı|SDK/fiyat/hesap/platform|
 |15|WebDAV Files+Photos/own restore izole|picker/UI/BG/signing/20/21|
-|16|16a+16b uygulama/izole kapanış tamam;16c dar ön eleme aktif|Genel12/20/21 ve son Claude review açık; protokoller varsayılan kapalı|
-|17|S3 uyumlu/Amazon S3 başlamadı|multipart/belirsiz commit/integrity|
+|16|16a+16b+16c uygulama/izole kapanış tamam|Genel12/20/21 ve son Claude review açık; protokoller varsayılan kapalı|
+|17|Uygulama/izole fonksiyonel doğrulama tamam|Dağıtım/P5/genel UI/OS/physical kabul20–21listesinde|
 |18|Diğer bulutlar başlamadı|native auth/hesap; Box engelli|
 |19|Live Activities başlamadı|extension/signing/mahremiyet/SwiftUI|
 |20|Geniş kapanış başlamadı|platform/güvenlik/a11y/perf|
@@ -50,7 +52,7 @@ Gerçek Android Files+ürün/OS ve exact onaylı Photos zinciri PASS. Gerçek Wi
 
 Ayrı aynı-agent review’da parent kontrolü sırasında düşen yetkinin rename’e sızması düzeltildi; eski negatif kontrol ve düzeltilmiş bound gerçek sunucu testi PASS, altı mobile artifact yeniden paketlendi. Native TR/EN/DE/maxfont batch ve klavye alan gözlemi scoped PASS; ayrı klavye screenshot eksik. Bağımsız Claude review kullanıcı kararıyla en sonda; genel12/20/21 görsel/a11y/VoiceOver, kalıcı tüm-ekran capture, gerçek BG delivery/lock, production signing/device custody, fiziksel/perf açık. `backup_destination` şema/CHECK/user_version ve Claude worktree değişmedi.
 
-[16c explicit FTPS dar ön elemesi](ftps-native-preflight-2026-11-02.md) başladı: resmî doküman/TLS+socket ve STOR/STOU yayın sınırı incelendi; SDK/ABI/ürün uygulaması/17 başlamadı. Devamda yalnız bu kısa checkpoint ve [ADR0022][a22] FTPS bölümünü oku.
+[16c explicit FTPS dar ön elemesi](ftps-native-preflight-2026-11-02.md)03.11 ilerledi: exact libcurl8.23.0 kaynak/lisans/advisory+iki sentetik host negatif probe; STOU upload/TLS-only API varsayımları elendi. Exclusive/durable publication ve gerçek TLS/control+data route kapıları açık; dependency/ABI/ürün uygulaması/17 başlamadı. Devamda yalnız bu kısa checkpoint ve [ADR0022][a22] D1 bölümünü oku.
 
 ## 16a — korunan kanıt ve açık kabul
 

@@ -1,0 +1,79 @@
+{
+  "scope": "New diagnostic negative probes only, synthetic loopback, no real credentials or writes; not approved FTPS transport, TLS handshake, LAN ownership or product acceptance.",
+  "candidate": "libcurl 8.23.0, unmodified source, diagnostic host build; configure ignored --disable-everything, not a minimal production dependency profile",
+  "version": "curl 8.23.0 (aarch64-apple-darwin25.6.0) libcurl/8.23.0 OpenSSL/3.6.4 OpenLDAP/2.4.28/Apple\nRelease-Date: 2026-10-14\nProtocols: dict file ftp ftps gopher gophers http https imap imaps ipfs ipns ldap ldaps mqtt mqtts pop3 pop3s rtsp smtp smtps telnet tftp ws wss\nFeatures: alt-svc AsynchDNS HSTS HTTPS-proxy IPv6 Largefile SSL threadsafe UnixSockets",
+  "sha256": {
+    "curl-8.23.0.tar.xz": "8dadd7d2536a314f982ad05a651b713f426bf7d02cc2c76cffb9796f2218e6c5",
+    "curl-8.23.0/lib/ftp.c": "6b580a184b878dab22b0fb44122cc313b7f6ed1839916b24232c6ffb2f21f1f6",
+    "curl-8.23.0/COPYING": "82f2f4427d6545ee5aaac4f0b80428da6cc8ba41c2cf5da3a03680ec327b9681",
+    "curl-8.23.0/src/curl": "2104529615c0d7593c98c943fa97490b29b3db2f3dd308e182f16191b6da5dbc",
+    "probe.py": "f30d349b49613036190883e42a79b2752f696ec95345bd13b4b3e3128a7db268",
+    "probe-client.c": "849435a4b894bb1c0e6844b8f04d64ea552ac60627b3f61cb85375a763b103fc",
+    "probe-client": "52d9336ec0a66efcf8d94f55a88b62882cde21d027c22ca58ade58002e820bb7",
+    "configure.log": "903e855986bf0415e6d0513d992ae08ade4309a92a7421c8a0a4868921b9f34b",
+    "build.log": "0ef46c0afe5f437cf89d18067d32e579c6920f2b35f0ee15d54ca10ad6e6460b",
+    "vuln-8.23.0.html": "1a4affd11b797a95329bbe6cb18c872c57381394dd7b20fa2b873a50f6e0f1d5"
+  },
+  "authTlsRefusal": {
+    "commands": [
+      "AUTH TLS",
+      "AUTH SSL"
+    ],
+    "exitCode": 64,
+    "stderr": "Requested SSL level failed"
+  },
+  "customStouUpload": {
+    "commands": [
+      "USER probe",
+      "PASS unused",
+      "PWD",
+      "EPSV",
+      "TYPE I",
+      "STOR candidate",
+      "QUIT"
+    ],
+    "exitCode": 25,
+    "stderr": "Upload failed (at start/before it took off)"
+  },
+  "conclusion": "Negative assumptions reproduced: FTPSSLAUTH_TLS is preference, not TLS-command-only; CUSTOMREQUEST=STOU does not override upload STOR. No native/product acceptance.",
+  "date": "2026-11-03",
+  "head": "67701e7895ca9d7d5d7efe66d23b09954a8bf690",
+  "status": "BLOCKED_FOR_PRODUCT: public-API assumptions rejected; FTPS not accepted or implemented",
+  "sources": {
+    "archive": "https://curl.se/download/curl-8.23.0.tar.xz",
+    "release": "https://curl.se/download.html",
+    "license": "https://curl.se/docs/copyright.html",
+    "advisories": "https://curl.se/docs/vuln-8.23.0.html",
+    "customRequest": "https://curl.se/libcurl/c/CURLOPT_CUSTOMREQUEST.html",
+    "authOrder": "https://curl.se/libcurl/c/CURLOPT_FTPSSLAUTH.html",
+    "socket": "https://curl.se/libcurl/c/CURLOPT_OPENSOCKETFUNCTION.html",
+    "protocol": "https://www.rfc-editor.org/rfc/rfc959#section-4.1.3"
+  },
+  "candidateScreen": {
+    "license": "SPDX curl; COPYING inspected; notice preservation required; no shipped dependency added",
+    "publishedCurlAdvisories": "Official exact-version page reports 0 published vulnerabilities at observation; not full dependency/security acceptance",
+    "archiveSignature": "Not independently PGP verified; HTTPS archive + locally computed SHA256 only",
+    "tlsBackend": "Host diagnostic used installed OpenSSL 3.6.4; no production backend chosen or dependency/advisory closure",
+    "context7": "library resolve + /websites/everything_curl_dev docs queried; generic upload docs insufficient for exact API, checked release source and official API docs"
+  },
+  "sourceLocations": {
+    "upload": "lib/ftp.c:1673-1771 (STOR/APPE at1765)",
+    "customRequest": "lib/ftp.c:1478-1484,1574-1578 (listing/PRET listing)",
+    "authOrder": "lib/ftp.c:3120-3165,3206-3251"
+  },
+  "hostBuildNotes": [
+    "configure and make exited0; --disable-everything was unrecognized, so no minimal-protocol/dependency claim",
+    "libtool emitted integer-expression warnings; link and probe succeeded; no mobile build or production acceptance"
+  ],
+  "probeSetupCorrection": "Initial CLI probe used nonexistent --ftp-ssl-auth; timed out without a server connection. Replaced with explicit C public API caller; only the corrected two probes are evidence.",
+  "notRun": [
+    "real TLS handshake/certificate/hostname and PROT P data validation",
+    "native route/source/profile-generation ownership on control and every data socket",
+    "exclusive create, no-clobber final publication, explicit durability, fresh readback and lost-ACK recovery",
+    "Android/iOS ABI, product/UI, media, physical acceptance",
+    "old successful tests; independent review"
+  ],
+  "nextScope": "Before another SDK/build matrix: inspect one unmodified server capability for atomic exclusive-create + durable publication and strict AUTH TLS handling. STOR alone, existence prechecks, UUID names, RNFR/RNTO and readback do not prove these guarantees. STOU alone also does not close durability, receipt binding or lost-ACK. If a fork/new ABI/policy is needed, prepare concrete scope/diff for explicit approval; no such change is authorized or applied.",
+  "review": "Separate same-agent pass: distinguished AUTH SSL command from SSLv3 protocol downgrade; no claim all libcurl/server designs impossible; no source hash equals signature claim; runtime and dependency gates remain open",
+  "rawDirectory": "/private/tmp/kloda-ftps16c-preflight"
+}

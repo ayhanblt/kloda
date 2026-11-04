@@ -1,0 +1,12 @@
+{
+  "allow": {
+    "exit": 0,
+    "stdout": "PASS configured control socket + guarded EPSV data sockets + TLS + fresh readback; fixture only\n",
+    "stderr": ""
+  },
+  "deny": {
+    "exit": 0,
+    "stdout": "PASS data-socket owner denial\n",
+    "stderr": ""
+  }
+}

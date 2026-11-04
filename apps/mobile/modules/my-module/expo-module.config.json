@@ -10,7 +10,9 @@
       "KlodaBackupModule",
       "KlodaSmbModule",
       "KlodaSftpModule",
-      "KlodaCloudModule"
+      "KlodaFtpsModule",
+      "KlodaCloudModule",
+      "KlodaS3Module"
     ],
     "appDelegateSubscribers": [
       "IosAutomaticSubscriber",
@@ -24,7 +26,9 @@
       "com.kloda.sync.KlodaBackupModule",
       "com.kloda.sync.KlodaSmbModule",
       "com.kloda.sync.KlodaSftpModule",
-      "com.kloda.sync.KlodaCloudModule"
+      "com.kloda.sync.KlodaFtpsModule",
+      "com.kloda.sync.KlodaCloudModule",
+      "com.kloda.sync.KlodaS3Module"
     ]
   }
 }

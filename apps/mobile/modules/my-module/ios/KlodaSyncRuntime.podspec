@@ -32,6 +32,18 @@ Pod::Spec.new do |s|
     frameworks << 'NativeSftp/KlodaSftpNative.xcframework'
     conditions << 'KLODA_SFTP_NATIVE'
   end
+  if ENV['KLODA_FTPS_NATIVE'] == '1'
+    frameworks << 'NativeFtps/KlodaFtpsNative.xcframework'
+    conditions << 'KLODA_FTPS_NATIVE'
+  end
+  if ENV['KLODA_S3_NATIVE'] == '1'
+    unless ENV['KLODA_S3_USE_EXISTING_PACKAGE'] == '1'
+      script = File.expand_path('../../../../../tools/build-s3-native.mjs', __dir__)
+      raise 'S3 native package build failed' unless system(ENV['NODE_BINARY'] || 'node', script, 'ios')
+    end
+    frameworks << 'NativeS3/KlodaS3Native.xcframework'
+    conditions << 'KLODA_S3_NATIVE'
+  end
   s.vendored_frameworks = frameworks
   target_config['SWIFT_ACTIVE_COMPILATION_CONDITIONS'] = '$(inherited) ' + conditions.join(' ') unless conditions.empty?
 

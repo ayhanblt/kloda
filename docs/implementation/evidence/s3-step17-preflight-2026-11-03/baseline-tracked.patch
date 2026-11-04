@@ -1,0 +1,1178 @@
+diff --git a/apps/mobile/.expo/dev/logs/start.log b/apps/mobile/.expo/dev/logs/start.log
+deleted file mode 100644
+index 96aeadc..0000000
+--- a/apps/mobile/.expo/dev/logs/start.log
++++ /dev/null
+@@ -1,294 +0,0 @@
+-{"_e":"root:init","_t":1790707765252,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1790707765252,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1790707765253,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1790707765361,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1790707765684,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1790707765744,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1790707765781,"atlas":false,"workers":6,"host":"::","port":8081}
+-{"_e":"root:init","_t":1791916036613,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1791916036614,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1791916036615,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1791916036945,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1791916037899,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1791916037973,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1791916038068,"atlas":false,"workers":6,"host":"::1","port":8093}
+-{"_e":"metro:bundling:started","_t":1791916173173,"id":"1","platform":"android","environment":null,"entry":"node_modules/expo/AppEntry.js"}
+-{"_e":"metro:bundling:done","_t":1791916184328,"id":"1","total":3408,"ms":11153.864875}
+-{"_e":"root:init","_t":1791917825303,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1791917825303,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1791917825305,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1791917825578,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1791917826359,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1791917826439,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1791917826532,"atlas":false,"workers":6,"host":"::1","port":8093}
+-{"_e":"metro:bundling:started","_t":1791917866940,"id":"1","platform":"android","environment":null,"entry":"node_modules/expo/AppEntry.js"}
+-{"_e":"metro:bundling:done","_t":1791917868862,"id":"1","total":3264,"ms":1921.574333}
+-{"_e":"root:init","_t":1791918910135,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1791918910136,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1791918910137,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1791918910445,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1791918911355,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1791918911458,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1791918911571,"atlas":false,"workers":6,"host":"::","port":8093}
+-{"_e":"metro:bundling:started","_t":1791919048876,"id":"1","platform":"android","environment":null,"entry":"node_modules/expo/AppEntry.js"}
+-{"_e":"metro:bundling:done","_t":1791919050583,"id":"1","total":3376,"ms":1707.205125}
+-{"_e":"root:init","_t":1792004268128,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1792004268129,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1792004268131,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1792004268494,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1792004269391,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1792004269509,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1792004269628,"atlas":false,"workers":6,"host":"::","port":8094}
+-{"_e":"metro:bundling:started","_t":1792004430654,"id":"1","platform":"android","environment":null,"entry":"node_modules/expo/AppEntry.js"}
+-{"_e":"metro:bundling:done","_t":1792004432591,"id":"1","total":3401,"ms":1936.614958}
+-{"_e":"metro:bundling:started","_t":1792004654520,"id":"2","platform":"android","environment":null,"entry":"node_modules/expo/AppEntry.js"}
+-{"_e":"metro:bundling:done","_t":1792004654614,"id":"2","total":1,"ms":93.673625}
+-{"_e":"root:init","_t":1793085015263,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1793085015264,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1793085015265,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1793085015507,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1793085016366,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1793085016432,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1793085016517,"atlas":false,"workers":6,"host":"::1","port":8087}
+-{"_e":"metro:bundling:started","_t":1793085137521,"id":"1","platform":"ios","environment":null,"entry":"apps/mobile/.expo/kloda-step5-entry.js"}
+-{"_e":"metro:bundling:done","_t":1793085141086,"id":"1","total":734,"ms":3563.027291}
+-{"_e":"metro:bundling:started","_t":1793085141491,"id":"2","platform":"ios","environment":null,"entry":"apps/mobile/.expo/kloda-step5-entry.js"}
+-{"_e":"metro:bundling:done","_t":1793085141522,"id":"2","total":1,"ms":30.519375}
+-{"_e":"metro:client_log","_t":1793085144877,"level":"error","data":["[Error: Uncaught (in promise, id: 0): \"Error: fetch failed: UnexpectedException: Could not connect to the server. (at ExpoModulesCore/Promise.swift:56)\"]"]}
+-{"_e":"metro:bundling:started","_t":1793085156965,"id":"5","platform":"ios","environment":null,"entry":"apps/mobile/.expo/kloda-step5-entry.js"}
+-{"_e":"metro:bundling:done","_t":1793085156987,"id":"5","total":1,"ms":21.923333}
+-{"_e":"metro:bundling:started","_t":1793085157525,"id":"6","platform":"ios","environment":null,"entry":"apps/mobile/.expo/kloda-step5-entry.js"}
+-{"_e":"metro:bundling:done","_t":1793085157555,"id":"6","total":1,"ms":29.619084}
+-{"_e":"metro:bundling:started","_t":1793085221567,"id":"7","platform":"ios","environment":null,"entry":"apps/mobile/.expo/kloda-step5-entry.js"}
+-{"_e":"metro:bundling:done","_t":1793085221608,"id":"7","total":1,"ms":40.453291}
+-{"_e":"metro:bundling:started","_t":1793085222323,"id":"8","platform":"ios","environment":null,"entry":"apps/mobile/.expo/kloda-step5-entry.js"}
+-{"_e":"metro:bundling:done","_t":1793085222364,"id":"8","total":1,"ms":41.117667}
+-{"_e":"root:init","_t":1793085240446,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1793085240447,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1793085240447,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1793085240665,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1793085241354,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1793085241417,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1793085241487,"atlas":false,"workers":6,"host":"::1","port":8087}
+-{"_e":"metro:bundling:started","_t":1793085256167,"id":"1","platform":"ios","environment":null,"entry":"apps/mobile/.expo/kloda-step5-entry.js"}
+-{"_e":"metro:bundling:done","_t":1793085256911,"id":"1","total":562,"ms":743.550209}
+-{"_e":"metro:bundling:started","_t":1793085257245,"id":"2","platform":"ios","environment":null,"entry":"apps/mobile/.expo/kloda-step5-entry.js"}
+-{"_e":"metro:bundling:done","_t":1793085257266,"id":"2","total":1,"ms":20.83375}
+-{"_e":"root:init","_t":1793101827130,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1793101827130,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1793101827130,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1793101827273,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1793101827821,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1793101827865,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1793101827905,"atlas":false,"workers":6,"host":"::1","port":8087}
+-{"_e":"metro:bundling:started","_t":1793101875275,"id":"1","platform":"ios","environment":null,"entry":"apps/mobile/.expo/kloda-step6-entry.js"}
+-{"_e":"metro:bundling:done","_t":1793101876156,"id":"1","total":734,"ms":881.037291}
+-{"_e":"metro:bundling:started","_t":1793101876612,"id":"2","platform":"ios","environment":null,"entry":"apps/mobile/.expo/kloda-step6-entry.js"}
+-{"_e":"metro:bundling:done","_t":1793101876627,"id":"2","total":1,"ms":15.491583}
+-{"_e":"metro:bundling:started","_t":1793101878726,"id":"3","platform":"ios","environment":null,"entry":"apps/mobile/.expo/kloda-step6-entry.js"}
+-{"_e":"metro:bundling:done","_t":1793101878740,"id":"3","total":1,"ms":14.040667}
+-{"_e":"metro:bundling:started","_t":1793101879360,"id":"4","platform":"ios","environment":null,"entry":"apps/mobile/.expo/kloda-step6-entry.js"}
+-{"_e":"metro:bundling:done","_t":1793101879377,"id":"4","total":1,"ms":16.879125}
+-{"_e":"root:init","_t":1793145578099,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1793145578100,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1793145578101,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1793145578375,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1793145580194,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1793145580367,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1793145580521,"atlas":false,"workers":6,"host":"::1","port":8087}
+-{"_e":"root:init","_t":1793145834255,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1793145834256,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1793145834257,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1793145834520,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1793145835339,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1793145835416,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1793145835495,"atlas":false,"workers":6,"host":"::1","port":8087}
+-{"_e":"metro:bundling:started","_t":1793145854884,"id":"1","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-automatic-step8.js"}
+-{"_e":"metro:bundling:done","_t":1793145855677,"id":"1","total":703,"ms":793.235083}
+-{"_e":"metro:bundling:started","_t":1793145870047,"id":"2","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-automatic-step8.js"}
+-{"_e":"metro:bundling:done","_t":1793145870070,"id":"2","total":1,"ms":23.585958}
+-{"_e":"metro:bundling:started","_t":1793145871550,"id":"3","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-automatic-step8.js"}
+-{"_e":"metro:bundling:done","_t":1793145871575,"id":"3","total":1,"ms":24.802458}
+-{"_e":"metro:bundling:started","_t":1793145874438,"id":"4","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-automatic-step8.js"}
+-{"_e":"metro:bundling:done","_t":1793145874453,"id":"4","total":1,"ms":15.53825}
+-{"_e":"metro:bundling:started","_t":1793145875641,"id":"5","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-automatic-step8.js"}
+-{"_e":"metro:bundling:done","_t":1793145875658,"id":"5","total":1,"ms":17.320666}
+-{"_e":"metro:bundling:started","_t":1793145994968,"id":"6","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-automatic-step8.js"}
+-{"_e":"metro:bundling:done","_t":1793145994988,"id":"6","total":1,"ms":19.83125}
+-{"_e":"metro:bundling:started","_t":1793145996509,"id":"7","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-automatic-step8.js"}
+-{"_e":"metro:bundling:done","_t":1793145996534,"id":"7","total":1,"ms":24.633084}
+-{"_e":"metro:bundling:started","_t":1793145999202,"id":"8","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-automatic-step8.js"}
+-{"_e":"metro:bundling:done","_t":1793145999219,"id":"8","total":1,"ms":16.854542}
+-{"_e":"metro:bundling:started","_t":1793146000248,"id":"9","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-automatic-step8.js"}
+-{"_e":"metro:bundling:done","_t":1793146000289,"id":"9","total":1,"ms":40.5875}
+-{"_e":"root:init","_t":1793167662193,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1793167662193,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1793167662194,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1793167662422,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1793167663128,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1793167663201,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1793167663271,"atlas":false,"workers":6,"host":"::1","port":8087}
+-{"_e":"metro:bundling:started","_t":1793167708736,"id":"1","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-webdav-step9.js"}
+-{"_e":"metro:bundling:done","_t":1793167709963,"id":"1","total":718,"ms":1226.414417}
+-{"_e":"metro:bundling:started","_t":1793167710585,"id":"2","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-webdav-step9.js"}
+-{"_e":"metro:bundling:done","_t":1793167710611,"id":"2","total":1,"ms":26.064416}
+-{"_e":"metro:bundling:started","_t":1793167801583,"id":"3","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-webdav-step9.js"}
+-{"_e":"metro:bundling:done","_t":1793167801614,"id":"3","total":1,"ms":29.916666}
+-{"_e":"metro:bundling:started","_t":1793167803246,"id":"4","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-webdav-step9.js"}
+-{"_e":"metro:bundling:done","_t":1793167803263,"id":"4","total":1,"ms":17.092}
+-{"_e":"metro:bundling:started","_t":1793167806206,"id":"5","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-webdav-step9.js"}
+-{"_e":"metro:bundling:done","_t":1793167806222,"id":"5","total":1,"ms":15.818458}
+-{"_e":"metro:bundling:started","_t":1793167807245,"id":"6","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-webdav-step9.js"}
+-{"_e":"metro:bundling:done","_t":1793167807260,"id":"6","total":1,"ms":15.101833}
+-{"_e":"root:init","_t":1793167905263,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1793167905263,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1793167905264,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1793167905471,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1793167906112,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1793167906179,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1793167906252,"atlas":false,"workers":6,"host":"::1","port":8087}
+-{"_e":"metro:bundling:started","_t":1793167924429,"id":"1","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-webdav-step9.js"}
+-{"_e":"metro:bundling:done","_t":1793167925372,"id":"1","total":680,"ms":942.256709}
+-{"_e":"metro:bundling:started","_t":1793167925919,"id":"2","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-webdav-step9.js"}
+-{"_e":"metro:bundling:done","_t":1793167925936,"id":"2","total":1,"ms":16.555}
+-{"_e":"metro:bundling:started","_t":1793167928351,"id":"3","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-webdav-step9.js"}
+-{"_e":"metro:bundling:done","_t":1793167928363,"id":"3","total":1,"ms":12.51375}
+-{"_e":"metro:bundling:started","_t":1793167929318,"id":"4","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-webdav-step9.js"}
+-{"_e":"metro:bundling:done","_t":1793167929334,"id":"4","total":1,"ms":16.326166}
+-{"_e":"root:init","_t":1793169044225,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1793169044225,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1793169044226,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1793169044456,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1793169045148,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1793169045217,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1793169045292,"atlas":false,"workers":6,"host":"::1","port":8087}
+-{"_e":"metro:bundling:started","_t":1793169093444,"id":"1","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793169101335,"id":"1","total":3439,"ms":7889.798833}
+-{"_e":"metro:bundling:started","_t":1793169101917,"id":"2","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793169101977,"id":"2","total":1,"ms":59.331083}
+-{"_e":"root:init","_t":1793169154782,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1793169154783,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1793169154784,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1793169155013,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1793169155776,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1793169155882,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1793169155996,"atlas":false,"workers":6,"host":"::1","port":8087}
+-{"_e":"metro:bundling:started","_t":1793169157567,"id":"1","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793169158984,"id":"1","total":3305,"ms":1416.629208}
+-{"_e":"metro:bundling:started","_t":1793169159529,"id":"2","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793169159596,"id":"2","total":1,"ms":66.463875}
+-{"_e":"root:init","_t":1793169291201,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1793169291201,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1793169291202,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1793169291466,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1793169292253,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1793169292330,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1793169292424,"atlas":false,"workers":6,"host":"::1","port":8087}
+-{"_e":"metro:bundling:started","_t":1793169300733,"id":"1","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793169312945,"id":"1","total":3460,"ms":12211.406833}
+-{"_e":"metro:bundling:started","_t":1793169328503,"id":"2","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793169328582,"id":"2","total":1,"ms":78.85925}
+-{"_e":"metro:bundling:started","_t":1793169329254,"id":"3","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793169329302,"id":"3","total":1,"ms":47.436417}
+-{"_e":"metro:client_log","_t":1793169330439,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+-{"_e":"root:init","_t":1793169454439,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1793169454440,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1793169454441,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1793169454837,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1793169456761,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1793169456871,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1793169457034,"atlas":false,"workers":6,"host":"::1","port":8087}
+-{"_e":"metro:bundling:started","_t":1793169463268,"id":"1","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793169464315,"id":"1","total":3363,"ms":1046.969291}
+-{"_e":"metro:bundling:started","_t":1793169476386,"id":"2","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793169476439,"id":"2","total":1,"ms":53.187}
+-{"_e":"metro:bundling:started","_t":1793169477917,"id":"3","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793169478009,"id":"3","total":1,"ms":91.647208}
+-{"_e":"metro:client_log","_t":1793169479196,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+-{"_e":"root:init","_t":1793169735529,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1793169735529,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1793169735530,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1793169735783,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1793169736703,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1793169736792,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1793169736894,"atlas":false,"workers":6,"host":"::1","port":8087}
+-{"_e":"metro:bundling:started","_t":1793169793813,"id":"1","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793169795143,"id":"1","total":3337,"ms":1330.005709}
+-{"_e":"metro:bundling:started","_t":1793169796746,"id":"2","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793169796790,"id":"2","total":1,"ms":44.360333}
+-{"_e":"metro:bundling:started","_t":1793169798005,"id":"3","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793169798061,"id":"3","total":1,"ms":55.724667}
+-{"_e":"metro:client_log","_t":1793169799204,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+-{"_e":"root:init","_t":1793170097214,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1793170097215,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1793170097216,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1793170097463,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1793170098258,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1793170098332,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1793170098411,"atlas":false,"workers":6,"host":"::1","port":8087}
+-{"_e":"metro:bundling:started","_t":1793170184448,"id":"1","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793170185522,"id":"1","total":3242,"ms":1074.155709}
+-{"_e":"metro:bundling:started","_t":1793170186786,"id":"2","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793170186857,"id":"2","total":1,"ms":71.384917}
+-{"_e":"metro:bundling:started","_t":1793170187856,"id":"3","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793170187912,"id":"3","total":1,"ms":56.043542}
+-{"_e":"metro:client_log","_t":1793170189082,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+-{"_e":"root:init","_t":1793170737936,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1793170737937,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1793170737938,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1793170738230,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1793170739177,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1793170739261,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1793170739345,"atlas":false,"workers":6,"host":"::1","port":8087}
+-{"_e":"metro:bundling:started","_t":1793170740781,"id":"1","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793170742054,"id":"1","total":3363,"ms":1272.762625}
+-{"_e":"metro:bundling:started","_t":1793170743734,"id":"2","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793170743782,"id":"2","total":1,"ms":47.523916}
+-{"_e":"metro:bundling:started","_t":1793170745083,"id":"3","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793170745141,"id":"3","total":1,"ms":57.842125}
+-{"_e":"metro:client_log","_t":1793170746279,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+-{"_e":"metro:bundling:started","_t":1793171806498,"id":"4","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793171806597,"id":"4","total":1,"ms":97.485583}
+-{"_e":"metro:bundling:started","_t":1793171807240,"id":"5","platform":"ios","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793171807322,"id":"5","total":1,"ms":82.077416}
+-{"_e":"metro:client_log","_t":1793171808599,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+-{"_e":"metro:server_log","_t":1793171873200,"level":"error","data":["[timeout] connection terminated with Device for app='%s' on device='%s' after not responding for %s seconds.","com.kloda.app","Kloda-Photos-Step7-20261027T135116Z","60"]}
+-{"_e":"root:init","_t":1793171965336,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1793171965337,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1793171965338,"mode":"development","files":[],"env":{}}
+-{"_e":"root:init","_t":1793173042592,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1793173042593,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1793173042594,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1793173042855,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1793173043765,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1793173043851,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1793173043936,"atlas":false,"workers":6,"host":"::","port":8087}
+-{"_e":"metro:bundling:started","_t":1793173203399,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793173211672,"id":"1","total":3462,"ms":8272.566583}
+-{"_e":"metro:bundling:started","_t":1793173213933,"id":"2","platform":"android","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793173214439,"id":"2","total":3316,"ms":505.059167}
+-{"_e":"metro:client_log","_t":1793173227030,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+-{"_e":"root:init","_t":1793173281396,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1793173281397,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1793173281398,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1793173281625,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1793173282286,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1793173282362,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1793173282445,"atlas":false,"workers":6,"host":"::","port":8087}
+-{"_e":"metro:bundling:started","_t":1793173291444,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793173292634,"id":"1","total":3413,"ms":1189.59925}
+-{"_e":"metro:bundling:started","_t":1793173293529,"id":"2","platform":"android","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793173293977,"id":"2","total":2998,"ms":448.467625}
+-{"_e":"metro:client_log","_t":1793173304539,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+-{"_e":"root:init","_t":1793173352616,"format":"v0-jsonl","version":"57.0.27"}
+-{"_e":"env:mode","_t":1793173352617,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+-{"_e":"env:load","_t":1793173352618,"mode":"development","files":[],"env":{}}
+-{"_e":"devserver:start","_t":1793173352814,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+-{"_e":"metro:config","_t":1793173353456,"serverRoot":"../../../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":true,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+-{"_e":"expo:dev-tools-plugin:load","_t":1793173353522,"plugins":[]}
+-{"_e":"metro:instantiate","_t":1793173353586,"atlas":false,"workers":6,"host":"::","port":8087}
+-{"_e":"metro:bundling:started","_t":1793173371931,"id":"1","platform":"android","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793173373208,"id":"1","total":3329,"ms":1276.694666}
+-{"_e":"metro:bundling:started","_t":1793173374367,"id":"2","platform":"android","environment":null,"entry":"apps/mobile/.expo/ios-integrated-step10.js"}
+-{"_e":"metro:bundling:done","_t":1793173374834,"id":"2","total":3436,"ms":467.027625}
+-{"_e":"metro:client_log","_t":1793173392421,"level":"warn","data":["SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/AppAndFlow/react-native-safe-area-context"]}
+diff --git a/apps/mobile/app.json b/apps/mobile/app.json
+index a58e291..1d692e7 100644
+--- a/apps/mobile/app.json
++++ b/apps/mobile/app.json
+@@ -32,7 +32,8 @@
+           "com.kloda.app.backup.processing",
+           "com.kloda.app.webdav.processing",
+           "com.kloda.app.smb.processing",
+-          "com.kloda.app.sftp.processing"
++          "com.kloda.app.sftp.processing",
++          "com.kloda.app.ftps.processing"
+         ]
+       }
+     },
+diff --git a/apps/mobile/modules/my-module/android/build.gradle b/apps/mobile/modules/my-module/android/build.gradle
+index f87b658..f334040 100644
+--- a/apps/mobile/modules/my-module/android/build.gradle
++++ b/apps/mobile/modules/my-module/android/build.gradle
+@@ -21,6 +21,7 @@ android {
+   defaultConfig {
+     buildConfigField "boolean", "KLODA_SMB_NATIVE", (providers.gradleProperty("klodaSmbNative").orNull == "true").toString()
+     buildConfigField "boolean", "KLODA_SFTP_NATIVE", (providers.gradleProperty("klodaSftpNative").orNull == "true").toString()
++    buildConfigField "boolean", "KLODA_FTPS_NATIVE", (providers.gradleProperty("klodaFtpsNative").orNull == "true").toString()
+     minSdkVersion 24
+     consumerProguardFiles "consumer-rules.pro"
+     testInstrumentationRunner "com.kloda.sync.AndroidFilesQueueRecoveryInstrumentation"
+@@ -97,3 +98,16 @@ if (providers.gradleProperty("klodaSftpNative").orNull == "true") {
+   }
+   tasks.matching { it.name == 'preBuild' }.configureEach { dependsOn buildSftpNative }
+ }
++
++if (providers.gradleProperty("klodaFtpsNative").orNull == "true") {
++  def ftpsCrate = new File(pairingRepo, "packages/ftps-native")
++  def buildFtpsNative = tasks.register('buildFtpsNative', Exec) {
++    workingDir pairingRepo
++    inputs.files(fileTree(ftpsCrate) { include 'src/**', 'vendor/**', 'Cargo.toml', 'Cargo.lock', 'build.rs' }).withPathSensitivity(PathSensitivity.RELATIVE)
++    inputs.files(new File(pairingRepo, 'tools/build-ftps-native.mjs'), new File(pairingRepo, 'tools/check-ftps-native.mjs')).withPathSensitivity(PathSensitivity.RELATIVE)
++    inputs.property('rustToolchain', '1.99.0'); inputs.property('ndkVersion', '27.1.12297006')
++    outputs.files(pairingAbis.collect { file("src/main/jniLibs/${it}/libkloda_ftps_native.so") })
++    commandLine(System.getenv('NODE_BINARY') ?: 'node', new File(pairingRepo, 'tools/build-ftps-native.mjs').absolutePath, 'android')
++  }
++  tasks.matching { it.name == 'preBuild' }.configureEach { dependsOn buildFtpsNative }
++}
+diff --git a/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt b/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt
+index d0295fa..bfa44eb 100644
+--- a/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt
++++ b/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt
+@@ -23,7 +23,7 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
+   }
+ 
+   override fun onStart() {
+-    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore", "smb-files", "smb-product", "smb-photos-owned", "smb-profile", "sftp-files", "sftp-sources", "sftp-photos-owned", "sftp-product", "cloud18-nextcloud", "cloud18-destination", "cloud18-oauth", "cloud18-targets")) {
++    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore", "smb-files", "smb-product", "smb-photos-owned", "smb-profile", "sftp-files", "sftp-sources", "sftp-photos-owned", "sftp-product", "ftps-files", "ftps-sources", "ftps-product", "ftps-photos-owned", "cloud18-nextcloud", "cloud18-destination", "cloud18-oauth", "cloud18-targets")) {
+       finish(Activity.RESULT_CANCELED, Bundle().apply { putString("stream", "Explicit scope required: local-files, media-fixture or webdav-journal\n") })
+       return
+     }
+@@ -69,6 +69,28 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
+         group("sftp-owned-photos-restore") { AndroidSftpPhotosRestoreChecks.run(this, IsolatedContext(targetContext, scratch)) }
+         finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "SFTP owned Photos source/publication/download/restore/reopen PASS\n") }); return
+       }
++      if (scope == "ftps-files" || scope == "ftps-sources") {
++        if (scope == "ftps-files") {
++          group("ftps-owned-files") { AndroidFtpsFilesChecks.run(this, scratch) }
++          group("ftps-profile-owner") { AndroidFtpsProfileChecks.run(this, scratch) }
++        } else { AndroidFtpsFixture.load(this, scratch) }
++        group("ftps-owned-sources") { AndroidFtpsSourceChecks.run(this, scratch) }
++        group("ftps-photos-codec-authority") { AndroidFtpsPhotosChecks.run(scratch) }
++        group("ftps-product-factory-service") { AndroidFtpsProductChecks.run(this) }
++        group("ftps-owned-os-files") { AndroidFtpsOsChecks.run(this) }
++        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "FTPS owned Files/profile/source/codec PASS\n") }); return
++      }
++      if (scope == "ftps-product") {
++        AndroidFtpsFixture.load(this, scratch)
++        group("ftps-product-factory-service") { AndroidFtpsProductChecks.run(this) }
++        group("ftps-owned-os-files") { AndroidFtpsOsChecks.run(this) }
++        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "FTPS owned product/OS PASS\n") }); return
++      }
++      if (scope == "ftps-photos-owned") {
++        AndroidFtpsFixture.load(this, scratch)
++        group("ftps-owned-photos-restore") { AndroidFtpsPhotosRestoreChecks.run(this, IsolatedContext(targetContext, scratch)) }
++        finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "FTPS owned Photos source/publication/download/restore/reopen PASS\n") }); return
++      }
+       if (scope == "cloud18-destination") {
+         group("cloud18-destination-migration") { AndroidDestinationMigrationChecks.run(scratch) }
+         finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "backup_destination shared kind migration: rows kept, new kinds accepted, unknown refused, idempotent, fresh create, rollback PASS; production upgrade on device, queue wiring and iOS NOT_RUN here\n") })
+diff --git a/apps/mobile/modules/my-module/android/src/main/AndroidManifest.xml b/apps/mobile/modules/my-module/android/src/main/AndroidManifest.xml
+index a540920..32bcbd2 100644
+--- a/apps/mobile/modules/my-module/android/src/main/AndroidManifest.xml
++++ b/apps/mobile/modules/my-module/android/src/main/AndroidManifest.xml
+@@ -21,6 +21,8 @@
+       android:permission="android.permission.BIND_JOB_SERVICE" />
+     <service android:name=".AndroidSftpJob" android:exported="true"
+       android:permission="android.permission.BIND_JOB_SERVICE" />
++    <service android:name=".AndroidFtpsJob" android:exported="true"
++      android:permission="android.permission.BIND_JOB_SERVICE" />
+     <!-- ADR0028: Dropbox, OneDrive and Yandex PKCE redirects; the code is useless without the verifier held by the waiting sign-in. -->
+     <activity android:name=".KlodaOAuthRedirectActivity" android:exported="true" android:noHistory="true"
+       android:excludeFromRecents="true" android:theme="@android:style/Theme.Translucent.NoTitleBar">
+diff --git a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupReceiver.kt b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupReceiver.kt
+index e68762f..5051d23 100644
+--- a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupReceiver.kt
++++ b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupReceiver.kt
+@@ -13,6 +13,7 @@ class AndroidBackupReceiver : BroadcastReceiver() {
+       AndroidWebDavScheduler.reconcile(context.applicationContext, changed)
+       AndroidSmbScheduler.reconcile(context.applicationContext, changed)
+       AndroidSftpScheduler.reconcile(context.applicationContext, changed)
++      AndroidFtpsScheduler.reconcile(context.applicationContext, changed)
+     } finally { pending.finish() } }, "kloda-backup-reconcile").start()
+   }
+ }
+diff --git a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt
+index d72a4c9..d4ed7fb 100644
+--- a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt
++++ b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt
+@@ -61,14 +61,25 @@ internal object AndroidBackupScheduler {
+     AndroidPairingRuntime.files?.requestPause()
+     val saved = prefs(context).edit().putBoolean("automaticPaused", true).commit()
+     try { AndroidWebDavRuntime.pause() }
+-    finally { try { AndroidSmbRuntime.pause() } finally { try { AndroidSftpRuntime.pause() } finally { context.getSystemService(JobScheduler::class.java).apply { cancel(JOB); cancel(WATCH) }; AndroidWebDavScheduler.cancel(context); AndroidSmbScheduler.cancel(context); AndroidSftpScheduler.cancel(context) } } }
++    finally {
++      try { AndroidSmbRuntime.pause() }
++      finally { try { AndroidSftpRuntime.pause() }
++        finally { try { AndroidFtpsRuntime.pause() }
++          finally {
++            context.getSystemService(JobScheduler::class.java).apply { cancel(JOB); cancel(WATCH) }
++            AndroidWebDavScheduler.cancel(context); AndroidSmbScheduler.cancel(context)
++            AndroidSftpScheduler.cancel(context); AndroidFtpsScheduler.cancel(context)
++          }
++        }
++      }
++    }
+     if (!saved) throw FilesFailure("automatic_pause_not_saved")
+   }
+   fun resume(context: Context) {
+     pauseBarrier = true
+     if (!prefs(context).edit().putBoolean("automaticPaused", false).commit()) throw FilesFailure("storage_failure")
+     pauseBarrier = false
+-    reconcile(context); AndroidWebDavScheduler.reconcile(context); AndroidSmbScheduler.reconcile(context); AndroidSftpScheduler.reconcile(context)
++    reconcile(context); AndroidWebDavScheduler.reconcile(context); AndroidSmbScheduler.reconcile(context); AndroidSftpScheduler.reconcile(context); AndroidFtpsScheduler.reconcile(context)
+   }
+   fun reconcileAsync(context: Context) { Thread({ reconcile(context.applicationContext) }, "kloda-backup-reconcile").start() }
+ 
+diff --git a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesSnapshots.kt b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesSnapshots.kt
+index 7476110..2110a23 100644
+--- a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesSnapshots.kt
++++ b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFilesSnapshots.kt
+@@ -21,15 +21,15 @@ internal class FilesFailure(val code: String) : Exception(code)
+ internal data class FilesDigest(val sha256: String, val size: Long)
+ internal data class FilesSnapshot(val id: String, val digest: FilesDigest)
+ 
+-internal class AndroidFilesSnapshots(private val context: Context, val webdav: Boolean = false, val smb: Boolean = false, val sftp: Boolean = false, private val checkPaused: () -> Unit) {
++internal class AndroidFilesSnapshots(private val context: Context, val webdav: Boolean = false, val smb: Boolean = false, val sftp: Boolean = false, val ftps: Boolean = false, private val checkPaused: () -> Unit) {
+   private val scanner = AndroidSafSourceScanner(context.contentResolver)
+   private val photos = AndroidPhotosSources(context)
+   private val signal = AtomicReference<CancellationSignal?>()
+   private val input = AtomicReference<InputStream?>()
+-  private val directory = File(context.noBackupFilesDir, if (sftp) "kloda-sftp-snapshots" else if (smb) "kloda-smb-snapshots" else if (webdav) "kloda-webdav-snapshots" else "kloda-files")
++  private val directory = File(context.noBackupFilesDir, if (ftps) "kloda-ftps-snapshots" else if (sftp) "kloda-sftp-snapshots" else if (smb) "kloda-smb-snapshots" else if (webdav) "kloda-webdav-snapshots" else "kloda-files")
+ 
+-  init { require(listOf(webdav, smb, sftp).count { it } <= 1) { "invalid_snapshot_namespace" } }
+-  private fun snapshotId() = if (smb || sftp) java.util.UUID.randomUUID().toString() else randomId()
++  init { require(listOf(webdav, smb, sftp, ftps).count { it } <= 1) { "invalid_snapshot_namespace" } }
++  private fun snapshotId() = if (smb || sftp || ftps) java.util.UUID.randomUUID().toString() else randomId()
+ 
+   companion object {
+     private val random = SecureRandom()
+@@ -126,7 +126,7 @@ internal class AndroidFilesSnapshots(private val context: Context, val webdav: B
+ 
+   fun stageMetadata(bytes: ByteArray): FilesSnapshot {
+     checkPaused()
+-    if ((!webdav && !smb && !sftp) || bytes.size > 65536) throw FilesFailure("invalid_request")
++    if ((!webdav && !smb && !sftp && !ftps) || bytes.size > 65536) throw FilesFailure("invalid_request")
+     ensureDirectory()
+     val id = snapshotId(); val file = path(id)
+     val descriptor = Os.open(file.path, OsConstants.O_CREAT or OsConstants.O_EXCL or OsConstants.O_WRONLY or OsConstants.O_NOFOLLOW, 384)
+@@ -139,7 +139,7 @@ internal class AndroidFilesSnapshots(private val context: Context, val webdav: B
+ 
+   fun stageDownload(expected: FilesDigest, receive: (FileOutputStream) -> Unit): FilesSnapshot {
+     checkPaused()
+-    if ((!webdav && !smb && !sftp) || expected.size < 0 || !Regex("[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]").matches(expected.sha256)) throw FilesFailure("invalid_request")
++    if ((!webdav && !smb && !sftp && !ftps) || expected.size < 0 || !Regex("[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]").matches(expected.sha256)) throw FilesFailure("invalid_request")
+     ensureDirectory()
+     val id = snapshotId(); val file = path(id)
+     val descriptor = Os.open(file.path, OsConstants.O_CREAT or OsConstants.O_EXCL or OsConstants.O_WRONLY or OsConstants.O_NOFOLLOW, 384)
+@@ -159,7 +159,7 @@ internal class AndroidFilesSnapshots(private val context: Context, val webdav: B
+   fun discard(snapshot: FilesSnapshot) { path(snapshot.id).delete() }
+ 
+   fun recover(journal: AndroidSyncJournal) = synchronized(AndroidSyncJournal.sourceLock) {
+-    if (smb || sftp) throw FilesFailure("invalid_request")
++    if (smb || sftp || ftps) throw FilesFailure("invalid_request")
+     if (directory.exists()) {
+       val files = directory.listFiles() ?: throw FilesFailure("queue_unavailable")
+       for (file in files) {
+@@ -204,8 +204,8 @@ internal class AndroidFilesSnapshots(private val context: Context, val webdav: B
+   }
+ 
+   private fun path(id: String): File {
+-    if ((smb || sftp) && runCatching { java.util.UUID.fromString(id).toString() == id }.getOrDefault(false).not() ||
+-      !(smb || sftp) && (id.length != 22 || id.any { !(it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' || it == '-' || it == '_') })) {
++    if ((smb || sftp || ftps) && runCatching { java.util.UUID.fromString(id).toString() == id }.getOrDefault(false).not() ||
++      !(smb || sftp || ftps) && (id.length != 22 || id.any { !(it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' || it == '-' || it == '_') })) {
+       throw FilesFailure("snapshot_unavailable")
+     }
+     return File(directory, "$id.snapshot")
+diff --git a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt
+index 5644ee2..b3e9a6b 100644
+--- a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt
++++ b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt
+@@ -169,7 +169,7 @@ class KlodaSyncRuntimeModule : Module() {
+   }
+ 
+   private fun reconcileSources() { appContext.reactContext?.applicationContext?.let {
+-    AndroidWebDavRuntime.settingsChanged(); AndroidSmbRuntime.settingsChanged(); AndroidSftpRuntime.settingsChanged(); AndroidBackupScheduler.reconcile(it); AndroidWebDavScheduler.reconcile(it); AndroidSmbScheduler.reconcile(it); AndroidSftpScheduler.reconcile(it)
++    AndroidWebDavRuntime.settingsChanged(); AndroidSmbRuntime.settingsChanged(); AndroidSftpRuntime.settingsChanged(); AndroidFtpsRuntime.settingsChanged(); AndroidBackupScheduler.reconcile(it); AndroidWebDavScheduler.reconcile(it); AndroidSmbScheduler.reconcile(it); AndroidSftpScheduler.reconcile(it); AndroidFtpsScheduler.reconcile(it)
+   } }
+ 
+   private fun preferences() = appContext.reactContext?.getSharedPreferences("kloda-sync", 0)
+diff --git a/apps/mobile/modules/my-module/expo-module.config.json b/apps/mobile/modules/my-module/expo-module.config.json
+index 8bb7eea..eea9fbb 100644
+--- a/apps/mobile/modules/my-module/expo-module.config.json
++++ b/apps/mobile/modules/my-module/expo-module.config.json
+@@ -10,6 +10,7 @@
+       "KlodaBackupModule",
+       "KlodaSmbModule",
+       "KlodaSftpModule",
++      "KlodaFtpsModule",
+       "KlodaCloudModule"
+     ],
+     "appDelegateSubscribers": [
+@@ -24,6 +25,7 @@
+       "com.kloda.sync.KlodaBackupModule",
+       "com.kloda.sync.KlodaSmbModule",
+       "com.kloda.sync.KlodaSftpModule",
++      "com.kloda.sync.KlodaFtpsModule",
+       "com.kloda.sync.KlodaCloudModule"
+     ]
+   }
+diff --git a/apps/mobile/modules/my-module/ios/IosAutomaticCoordinator.swift b/apps/mobile/modules/my-module/ios/IosAutomaticCoordinator.swift
+index 7c1c27e..380b35d 100644
+--- a/apps/mobile/modules/my-module/ios/IosAutomaticCoordinator.swift
++++ b/apps/mobile/modules/my-module/ios/IosAutomaticCoordinator.swift
+@@ -61,6 +61,9 @@ final class IosAutomaticCoordinator {
+ #endif
+ #if KLODA_SFTP_NATIVE
+     actions.append { defer { IosSftpAutomaticCoordinator.shared.reconcile(allowForeground: false) }; try IosSftpQueue.shared.pause() }
++#endif
++#if KLODA_FTPS_NATIVE
++    actions.append { defer { IosFtpsAutomaticCoordinator.shared.reconcile(allowForeground: false) }; try IosFtpsQueue.shared.pause() }
+ #endif
+     actions.append { defer { IosWebDavAutomaticCoordinator.shared.reconcile(allowForeground: false) }; try IosWebDavQueue.shared.pause() }
+     try IosAutomaticPause.stop(actions)
+@@ -78,6 +81,9 @@ final class IosAutomaticCoordinator {
+ #endif
+ #if KLODA_SFTP_NATIVE
+     IosSftpAutomaticCoordinator.shared.reconcile()
++#endif
++#if KLODA_FTPS_NATIVE
++    IosFtpsAutomaticCoordinator.shared.reconcile()
+ #endif
+   }
+   func status() throws -> [String: Any] {
+diff --git a/apps/mobile/modules/my-module/ios/IosAutomaticSubscriber.swift b/apps/mobile/modules/my-module/ios/IosAutomaticSubscriber.swift
+index 4e227b6..3c75d3e 100644
+--- a/apps/mobile/modules/my-module/ios/IosAutomaticSubscriber.swift
++++ b/apps/mobile/modules/my-module/ios/IosAutomaticSubscriber.swift
+@@ -15,6 +15,10 @@ public final class IosAutomaticSubscriber: ExpoAppDelegateSubscriber {
+ #if KLODA_SFTP_NATIVE
+     IosSftpQueue.shared.setProtected(application.isProtectedDataAvailable)
+     IosSftpAutomaticCoordinator.shared.register()
++#endif
++#if KLODA_FTPS_NATIVE
++    IosFtpsQueue.shared.setProtected(application.isProtectedDataAvailable)
++    IosFtpsAutomaticCoordinator.shared.register()
+ #endif
+     IosBackupNotifications.refresh()
+     observers.append(NotificationCenter.default.addObserver(forName: NSNotification.Name.NSSystemTimeZoneDidChange,
+@@ -24,6 +28,9 @@ public final class IosAutomaticSubscriber: ExpoAppDelegateSubscriber {
+ #endif
+ #if KLODA_SFTP_NATIVE
+         IosSftpAutomaticCoordinator.shared.reconcile(clockChanged: true)
++#endif
++#if KLODA_FTPS_NATIVE
++        IosFtpsAutomaticCoordinator.shared.reconcile(clockChanged: true)
+ #endif
+     })
+     observers.append(NotificationCenter.default.addObserver(forName: UIApplication.protectedDataWillBecomeUnavailableNotification,
+@@ -35,6 +42,9 @@ public final class IosAutomaticSubscriber: ExpoAppDelegateSubscriber {
+ #endif
+ #if KLODA_SFTP_NATIVE
+         IosSftpQueue.shared.setProtected(false); try? IosSftpQueue.shared.pause(code: "credential_locked")
++#endif
++#if KLODA_FTPS_NATIVE
++        IosFtpsQueue.shared.setProtected(false); try? IosFtpsQueue.shared.pause(code: "credential_locked")
+ #endif
+       })
+     observers.append(NotificationCenter.default.addObserver(forName: UIApplication.protectedDataDidBecomeAvailableNotification,
+@@ -45,6 +55,9 @@ public final class IosAutomaticSubscriber: ExpoAppDelegateSubscriber {
+ #endif
+ #if KLODA_SFTP_NATIVE
+         IosSftpQueue.shared.setProtected(true); IosSftpAutomaticCoordinator.shared.reconcile(allowForeground: false)
++#endif
++#if KLODA_FTPS_NATIVE
++        IosFtpsQueue.shared.setProtected(true); IosFtpsAutomaticCoordinator.shared.reconcile(allowForeground: false)
+ #endif
+       })
+     return true
+@@ -56,6 +69,9 @@ public final class IosAutomaticSubscriber: ExpoAppDelegateSubscriber {
+ #endif
+ #if KLODA_SFTP_NATIVE
+     IosSftpAutomaticCoordinator.shared.reconcile(clockChanged: true)
++#endif
++#if KLODA_FTPS_NATIVE
++    IosFtpsAutomaticCoordinator.shared.reconcile(clockChanged: true)
+ #endif
+   }
+   deinit { for observer in observers { NotificationCenter.default.removeObserver(observer) } }
+diff --git a/apps/mobile/modules/my-module/ios/IosFilesSnapshot.swift b/apps/mobile/modules/my-module/ios/IosFilesSnapshot.swift
+index 4c5cd1e..7459d9b 100644
+--- a/apps/mobile/modules/my-module/ios/IosFilesSnapshot.swift
++++ b/apps/mobile/modules/my-module/ios/IosFilesSnapshot.swift
+@@ -62,6 +62,11 @@ final class IosFilesSnapshot {
+     let support = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+     return try IosFilesSnapshot(directoryURL: support.appendingPathComponent("kloda-sftp-snapshots", isDirectory: true))
+   }
++  var isFtps: Bool { rootURL.lastPathComponent == "kloda-ftps-snapshots" }
++  static func ftps() throws -> IosFilesSnapshot {
++    let support = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
++    return try IosFilesSnapshot(directoryURL: support.appendingPathComponent("kloda-ftps-snapshots", isDirectory: true))
++  }
+   deinit { Darwin.close(directory) }
+ 
+   func createStaging() throws -> (String, FileHandle) {
+diff --git a/apps/mobile/modules/my-module/ios/IosWebDavContext.swift b/apps/mobile/modules/my-module/ios/IosWebDavContext.swift
+index 748b26e..ab79ae3 100644
+--- a/apps/mobile/modules/my-module/ios/IosWebDavContext.swift
++++ b/apps/mobile/modules/my-module/ios/IosWebDavContext.swift
+@@ -21,6 +21,9 @@ enum IosWebDavContext {
+ #endif
+ #if KLODA_SFTP_NATIVE
+       try? IosSftpQueue.shared.pause(code: "settings_changed"); IosSftpAutomaticCoordinator.shared.reconcile()
++#endif
++#if KLODA_FTPS_NATIVE
++      try? IosFtpsQueue.shared.pause(code: "settings_changed"); IosFtpsAutomaticCoordinator.shared.reconcile()
+ #endif
+     }
+     return try synchronized {
+diff --git a/apps/mobile/modules/my-module/ios/KlodaSyncRuntime.podspec b/apps/mobile/modules/my-module/ios/KlodaSyncRuntime.podspec
+index 633a023..7fa8d77 100644
+--- a/apps/mobile/modules/my-module/ios/KlodaSyncRuntime.podspec
++++ b/apps/mobile/modules/my-module/ios/KlodaSyncRuntime.podspec
+@@ -32,6 +32,10 @@ Pod::Spec.new do |s|
+     frameworks << 'NativeSftp/KlodaSftpNative.xcframework'
+     conditions << 'KLODA_SFTP_NATIVE'
+   end
++  if ENV['KLODA_FTPS_NATIVE'] == '1'
++    frameworks << 'NativeFtps/KlodaFtpsNative.xcframework'
++    conditions << 'KLODA_FTPS_NATIVE'
++  end
+   s.vendored_frameworks = frameworks
+   target_config['SWIFT_ACTIVE_COMPILATION_CONDITIONS'] = '$(inherited) ' + conditions.join(' ') unless conditions.empty?
+ 
+diff --git a/apps/mobile/src/app/App.spec.tsx b/apps/mobile/src/app/App.spec.tsx
+index 7cc8826..bc759fb 100644
+--- a/apps/mobile/src/app/App.spec.tsx
++++ b/apps/mobile/src/app/App.spec.tsx
+@@ -232,4 +232,15 @@ describe('App', () => {
+     await surface.unmount();
+   });
+ 
++  it('routes FTP to the explicit FTPS form without enabling or saving an unsupported native target', async () => {
++    const surface = await render(<App />);
++    await fireEvent.press(surface.getByText(i18n.t('ui.common.skip')));
++    await fireEvent.press(surface.getByRole('tab', { name: i18n.t('statusUi.targets') }));
++    await fireEvent.press(surface.getByText(i18n.t('ui.conn.add')));
++    await fireEvent.press(surface.getByRole('button', { name: i18n.t('ui.providers.ftp') }));
++    await waitFor(() => expect(surface.getByLabelText(i18n.t('ui.providerFields.hostname')).props.editable).toBe(false));
++    expect(surface.getByRole('button', { name: i18n.t('destinations.ftps.saveEnable') }).props.accessibilityState.disabled).toBe(true);
++    await surface.unmount();
++  });
++
+ });
+diff --git a/apps/mobile/src/app/App.tsx b/apps/mobile/src/app/App.tsx
+index c20e8b2..7d79c49 100644
+--- a/apps/mobile/src/app/App.tsx
++++ b/apps/mobile/src/app/App.tsx
+@@ -14,6 +14,7 @@ import { WebDavPage } from '../pages/setup/ui/webdav-page';
+ import { ConnectionsPage } from '../pages/connections/ui/connections-page';
+ import { SmbPage } from '../pages/connections/ui/smb-page';
+ import { SftpPage } from '../pages/connections/ui/sftp-page';
++import { FtpsPage } from '../pages/connections/ui/ftps-page';
+ import { ProviderPage } from '../pages/connections/ui/provider-page';
+ import { SettingsPage } from '../pages/settings/ui/settings-page';
+ import { ComputerPage } from '../pages/computer/ui/computer-page';
+@@ -45,7 +46,7 @@ export function App() {
+     {page === 'activity' && <ActivityPage embedded onBack={back} />}
+     {page === 'backups' && <ActivityPage embedded view="backups" onBack={back} />}
+     {(page === 'connections' || page === 'add-connection') && <ConnectionsPage adding={page === 'add-connection'} navigate={navigate} openProvider={openProvider} saved={model.savedStorage} />}
+-    {page === 'provider' && (provider === 'smb' ? <SmbPage onBack={() => navigate('add-connection')} /> : provider === 'sftp' ? <SftpPage onBack={() => navigate('add-connection')} /> : <ProviderPage provider={provider} onBack={() => navigate('add-connection')} />)}
++    {page === 'provider' && (provider === 'smb' ? <SmbPage onBack={() => navigate('add-connection')} /> : provider === 'sftp' ? <SftpPage onBack={() => navigate('add-connection')} /> : provider === 'ftp' ? <FtpsPage onBack={() => navigate('add-connection')} /> : <ProviderPage provider={provider} onBack={() => navigate('add-connection')} />)}
+     {page === 'settings' && <SettingsPage navigate={navigate} />}
+   </MobileShell>;
+ }
+diff --git a/apps/mobile/src/pages/activity/ui/activity-page.tsx b/apps/mobile/src/pages/activity/ui/activity-page.tsx
+index a3d70c3..4f08760 100644
+--- a/apps/mobile/src/pages/activity/ui/activity-page.tsx
++++ b/apps/mobile/src/pages/activity/ui/activity-page.tsx
+@@ -2,6 +2,7 @@ import { ArrowLeft, FolderSync, Pause } from 'lucide-react-native';
+ import { useEffect } from 'react';
+ import { SmbItemsPanel } from './smb-items-panel';
+ import { SftpItemsPanel } from './sftp-items-panel';
++import { FtpsItemsPanel } from './ftps-items-panel';
+ import { WebDavBackupsPanel } from './webdav-backups-panel';
+ import { WebDavReviewPanel } from './webdav-review-panel';
+ import { useWebDavBackup } from '../../../features/backup-setup/model/use-webdav-backup';
+@@ -60,7 +61,7 @@ export function ActivityPage({ onBack, view = 'activity', embedded = false }: {
+           </>}
+           {(transfer.webdavActionError || webdav.error || webdav.status?.run?.errorCode || webdav.status?.automaticError) && <Text accessibilityRole="alert" className="font-sans text-sm text-danger-text">{t(`transfer.errors.${transfer.webdavActionError ?? webdav.error ?? webdav.status?.run?.errorCode ?? webdav.status?.automaticError}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
+         </View>}
+-        {view === 'activity' && <><WebDavReviewPanel /><SmbItemsPanel issues /><SftpItemsPanel issues /></>}
++        {view === 'activity' && <><WebDavReviewPanel /><SmbItemsPanel issues /><SftpItemsPanel issues /><FtpsItemsPanel issues /></>}
+         {view === 'activity' && <Text accessibilityRole="header" className="text-lg font-inter-semibold text-primary-text">{t('destinations.pc')}</Text>}
+         <Text className="font-sans text-sm leading-5 text-secondary-text">{t(view === 'backups' ? 'transfer.backups.description' : 'transfer.description')}</Text>
+         {view === 'activity' && <>
+@@ -116,7 +117,7 @@ export function ActivityPage({ onBack, view = 'activity', embedded = false }: {
+         {queue?.hasMore && <Text className="font-sans text-sm leading-5 text-secondary-text">{t('transfer.more', { count: queue.totalJobs })}</Text>}
+         </>}
+         {view === 'backups' && error && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-danger-text">{t(`transfer.errors.${error}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
+-        {view === 'backups' && <><WebDavBackupsPanel /><SmbItemsPanel /><SftpItemsPanel /></>}
++        {view === 'backups' && <><WebDavBackupsPanel /><SmbItemsPanel /><SftpItemsPanel /><FtpsItemsPanel /></>}
+         {(view === 'backups' || !embedded) && <OwnBackups transfer={transfer} />}
+         {scrollChrome && controls}
+       </ScrollView>
+diff --git a/apps/mobile/src/pages/connections/ui/connections-page.tsx b/apps/mobile/src/pages/connections/ui/connections-page.tsx
+index ec1be57..5498908 100644
+--- a/apps/mobile/src/pages/connections/ui/connections-page.tsx
++++ b/apps/mobile/src/pages/connections/ui/connections-page.tsx
+@@ -8,6 +8,7 @@ import { MobilePanel, MobileSurface } from '../../../widgets/mobile-surface/ui';
+ import { PairingButton } from '../../../features/pairing/ui/pairing-button';
+ import { useSmbBackup } from '../../../features/backup-setup/model/use-smb-backup';
+ import { useSftpBackup } from '../../../features/backup-setup/model/use-sftp-backup';
++import { useFtpsBackup } from '../../../features/backup-setup/model/use-ftps-backup';
+ import { useThemeColors } from '../../../shared/theme/theme-provider';
+ 
+ export function ConnectionsPage({ adding, navigate, openProvider, saved }: { adding: boolean; navigate: NavigateMobile; openProvider: (id: DestinationProviderId) => void; saved: Omit<MobileStorageForm,'password'> | null }) {
+@@ -15,6 +16,7 @@ export function ConnectionsPage({ adding, navigate, openProvider, saved }: { add
+   const { t } = useTranslation();
+   const smb = useSmbBackup().status;
+   const sftp = useSftpBackup().status;
++  const ftps = useFtpsBackup().status;
+   return <MobileSurface title={t(adding ? 'ui.conn.add' : 'ui.conn.title')} description={t('ui.conn.subtitle')} onBack={() => navigate(adding ? 'connections' : 'home')}>
+     <MobilePanel>
+       <Monitor size={24} color={colors['text-primary']} />
+@@ -43,7 +45,15 @@ export function ConnectionsPage({ adding, navigate, openProvider, saved }: { add
+         <Text selectable className="font-sans text-sm text-secondary-text">{sftp.config?.fingerprint}</Text>
+         <PairingButton variant="secondary" label={t('ui.common.manage')} onPress={() => openProvider('sftp')} />
+       </MobilePanel>}
+-      {!saved && !smb?.configured && !sftp?.configured && <MobilePanel><FolderPlus size={24} color={colors['text-secondary']} /><Text className="font-sans text-sm leading-5 text-secondary-text">{t('ui.noSavedCloud')}</Text></MobilePanel>}
++      {ftps?.configured && <MobilePanel>
++        <HardDrive size={24} color={colors['text-secondary']} /><Text className="text-base font-inter-semibold text-primary-text">{t('ui.providers.ftp')}</Text>
++        <Text className="font-sans text-sm text-secondary-text">{t(ftps.enabled ? 'destinations.enabled' : 'destinations.disabled')}</Text>
++        <Text selectable className="font-sans text-sm text-primary-text">{ftps.config?.address}:{ftps.config?.port}</Text>
++        <Text selectable className="font-sans text-sm text-secondary-text">{ftps.config?.root}</Text>
++        <Text selectable className="font-sans text-sm text-secondary-text">{ftps.config?.hostname}</Text>
++        <PairingButton variant="secondary" label={t('ui.common.manage')} onPress={() => openProvider('ftp')} />
++      </MobilePanel>}
++      {!saved && !smb?.configured && !sftp?.configured && !ftps?.configured && <MobilePanel><FolderPlus size={24} color={colors['text-secondary']} /><Text className="font-sans text-sm leading-5 text-secondary-text">{t('ui.noSavedCloud')}</Text></MobilePanel>}
+       <PairingButton variant="secondary" icon={<Plus size={20} color={colors['text-primary']} />} label={t('ui.conn.add')} onPress={() => navigate('add-connection')} />
+     </>}
+     {adding && (['protocol','cloud'] as const).map((kind) => <MobilePanel key={kind}>
+diff --git a/apps/mobile/src/shared/i18n/locales/de.json b/apps/mobile/src/shared/i18n/locales/de.json
+index 29456b1..46c31ce 100644
+--- a/apps/mobile/src/shared/i18n/locales/de.json
++++ b/apps/mobile/src/shared/i18n/locales/de.json
+@@ -409,7 +409,7 @@
+     "providers": {
+       "webdav": "WebDAV",
+       "smb": "SMB",
+-      "ftp": "FTP",
++      "ftp": "FTPS",
+       "sftp": "SFTP",
+       "s3-compatible": "S3-kompatibel",
+       "amazon-s3": "Amazon S3",
+@@ -444,7 +444,8 @@
+       "region": "Region",
+       "bucket": "Bucket",
+       "prefix": "Zielpräfix",
+-      "project": "Projekt"
++      "project": "Projekt",
++      "hostname": "Zertifikats-Hostname"
+     },
+     "fontUnavailable": "Die Schrift konnte nicht geladen werden; die Systemschrift wird verwendet."
+   },
+@@ -584,6 +585,43 @@
+       },
+       "lastRun": "Zuletzt protokollierter Lauf",
+       "pinHint": "Prüfen Sie den SHA256-Fingerabdruck des Servers unabhängig, bevor Sie Zugangsdaten eingeben. Diese Version akzeptiert einfache Ed25519-Hostschlüssel; unbekannte oder geänderte Schlüssel stoppen die Verbindung."
++    },
++    "ftps": {
++      "scope": "Explizites FTPS im lokalen Netzwerk. Verwenden Sie eine numerische LAN-IP, den Hostnamen des Zertifikats und einen vorhandenen absoluten Zielordner.",
++      "enableHint": "Speichern und aktivieren wählt dieses Ziel ausdrücklich für Backups der ausgewählten Dateien und Fotos. Speichern bestätigt keine erfolgreiche Verbindung oder Sicherung.",
++      "saveEnable": "FTPS-Backups speichern und aktivieren",
++      "run": "Jetzt auf FTPS sichern",
++      "pause": "Diesen FTPS-Lauf pausieren",
++      "reviewTitle": "Ausstehende FTPS-Veröffentlichungen",
++      "backupsTitle": "Meine FTPS-Backups",
++      "reviewHint": "Unklare Ergebnisse bleiben zur Prüfung erhalten. Beide behalten liest die ausgewählte Datei erneut und erstellt eine getrennte Kopie; frühere Nachweise und entfernte Inhalte bleiben erhalten.",
++      "restoreHint": "Nur verifizierte Übertragungsbelege dieses Geräts werden angezeigt. Vor dem Wiederherstellen im gewählten Ordner oder Fotoarchiv wird der Inhalt erneut geprüft.",
++      "copied": "Getrennte Kopie geprüft: {{name}}",
++      "errors": {
++        "ftps_fields": "Geben Sie LAN-IP, Port, Zertifikats-Hostname, absoluten Ordner, Benutzername und Passwort ein.",
++        "lan_unavailable": "Keine zulässige lokale Netzwerkroute verfügbar.",
++        "integration_unavailable": "Natives FTPS ist in diesem Build oder dieser OS-Version nicht verfügbar.",
++        "profile_missing": "Zuerst ein FTPS-Ziel speichern.",
++        "context_changed": "Einstellungen oder Quellzugriff geändert. Eine neue Aktion starten; frühere Arbeit bleibt zur Prüfung erhalten.",
++        "review_required": "Das Ergebnis muss geprüft werden. Unbekannte entfernte Inhalte wurden nicht übernommen.",
++        "native_3": "Der dauerhafte Vorgangsbeleg konnte nicht gespeichert werden.",
++        "native_4": "Die ausgewählte Quelle hat sich geändert oder konnte nicht gelesen werden.",
++        "native_7": "Entfernte Bytes konnten nicht geprüft werden.",
++        "native_1": "Dieses Ziel oder dieser Dateiname wird nicht unterstützt.",
++        "storage_failure": "Der native Speicher konnte die Aktion nicht sicher protokollieren.",
++        "native_6": "Die sichere FTPS-Aushandlung oder Zertifikats-/Hostnamenprüfung ist fehlgeschlagen.",
++        "native_9": "Der Server hat die Zugangsdaten abgelehnt.",
++        "authentication_failed": "Der Server hat die Zugangsdaten abgelehnt.",
++        "native_10": "Die Zieldatei existiert bereits. Sie wurde nicht geändert; prüfen Sie den Vorgang vor einer separaten Kopie.",
++        "native_11": "Der konfigurierte Zielordner konnte nicht sicher verwendet werden.",
++        "ftps_root_unsafe": "Der konfigurierte Zielordner konnte nicht sicher verwendet werden.",
++        "native_2": "Die native Freigabe hat sich geändert. Das Ergebnis bleibt unbestätigt.",
++        "native_5": "Die private lokale Datei konnte nicht sicher verwendet werden.",
++        "native_8": "Die FTPS-Antwort fehlt oder ist ungewiss. Prüfen Sie diesen Vorgang vor einer weiteren Kopie.",
++        "certificate_invalid": "Serverzertifikat oder Hostname konnten nicht überprüft werden."
++      },
++      "lastRun": "Zuletzt protokollierter Lauf",
++      "trustHint": "Steuer- und Datenverbindungen erfordern TLS mit Zertifikats- und Hostnamenprüfung. Übertragungen werden durch erneutes Lesen geprüft; eine dauerhafte Speicherung bei Stromausfall wird nicht garantiert."
+     }
+   },
+   "statusUi": {
+diff --git a/apps/mobile/src/shared/i18n/locales/en.json b/apps/mobile/src/shared/i18n/locales/en.json
+index 1fee206..a0ca3b8 100644
+--- a/apps/mobile/src/shared/i18n/locales/en.json
++++ b/apps/mobile/src/shared/i18n/locales/en.json
+@@ -409,7 +409,7 @@
+     "providers": {
+       "webdav": "WebDAV",
+       "smb": "SMB",
+-      "ftp": "FTP",
++      "ftp": "FTPS",
+       "sftp": "SFTP",
+       "s3-compatible": "S3 compatible",
+       "amazon-s3": "Amazon S3",
+@@ -444,7 +444,8 @@
+       "region": "Region",
+       "bucket": "Bucket",
+       "prefix": "Destination prefix",
+-      "project": "Project"
++      "project": "Project",
++      "hostname": "Certificate hostname"
+     },
+     "fontUnavailable": "The font could not load; the system font is being used."
+   },
+@@ -584,6 +585,43 @@
+       },
+       "lastRun": "Most recently recorded run",
+       "pinHint": "Verify the server’s SHA256 host fingerprint independently before entering credentials. This version accepts plain Ed25519 host keys; unknown or changed keys stop the connection."
++    },
++    "ftps": {
++      "scope": "Explicit FTPS on your local network. Use a numeric LAN IP, the certificate hostname and an existing absolute destination folder.",
++      "enableHint": "Save and enable explicitly selects this destination for backups of your selected Files and Photos. Saving is not proof of a successful connection or backup.",
++      "saveEnable": "Save and enable FTPS backups",
++      "run": "Back up to FTPS now",
++      "pause": "Pause this FTPS run",
++      "reviewTitle": "Pending FTPS publications",
++      "backupsTitle": "My FTPS backups",
++      "reviewHint": "Unknown results stay in review. Keep both reads the selected file again and publishes a separate copy; it preserves earlier evidence and existing remote content.",
++      "restoreHint": "Only this device’s verified transfer receipts are listed. Restore verifies the content again before writing to your selected folder or photo library.",
++      "copied": "Verified separate copy: {{name}}",
++      "errors": {
++        "ftps_fields": "Enter a numeric LAN IP, port, certificate hostname, absolute folder, username and password.",
++        "lan_unavailable": "A permitted local-network route is unavailable.",
++        "integration_unavailable": "Native FTPS is unavailable in this app build or OS version.",
++        "profile_missing": "Save an FTPS destination first.",
++        "context_changed": "Settings or source access changed. Start a new action; earlier work is retained for review.",
++        "review_required": "The result needs review. No unknown remote content was adopted.",
++        "native_3": "The durable operation receipt could not be preserved.",
++        "native_4": "The selected source changed or could not be read.",
++        "native_7": "Remote bytes could not be verified.",
++        "native_1": "This destination or filename is not supported.",
++        "storage_failure": "Native storage could not preserve the operation safely.",
++        "native_6": "Secure FTPS negotiation or certificate/hostname verification failed.",
++        "native_9": "The server rejected the credentials.",
++        "authentication_failed": "The server rejected the credentials.",
++        "native_10": "The destination file already exists. It was not changed; review before creating a separate copy.",
++        "native_11": "The configured destination folder could not be used safely.",
++        "ftps_root_unsafe": "The configured destination folder could not be used safely.",
++        "native_2": "Native admission changed. The result remains unconfirmed.",
++        "native_5": "The private local file could not be used safely.",
++        "native_8": "The FTPS response is unavailable or uncertain. Review this work before making another copy.",
++        "certificate_invalid": "The server certificate or hostname could not be verified."
++      },
++      "lastRun": "Most recently recorded run",
++      "trustHint": "Control and data connections require TLS with certificate and hostname verification. Transfers are verified by reading back the content; power-loss persistence is not guaranteed."
+     }
+   },
+   "statusUi": {
+diff --git a/apps/mobile/src/shared/i18n/locales/tr.json b/apps/mobile/src/shared/i18n/locales/tr.json
+index 816fee3..5b29f61 100644
+--- a/apps/mobile/src/shared/i18n/locales/tr.json
++++ b/apps/mobile/src/shared/i18n/locales/tr.json
+@@ -409,7 +409,7 @@
+     "providers": {
+       "webdav": "WebDAV",
+       "smb": "SMB",
+-      "ftp": "FTP",
++      "ftp": "FTPS",
+       "sftp": "SFTP",
+       "s3-compatible": "S3 uyumlu",
+       "amazon-s3": "Amazon S3",
+@@ -444,7 +444,8 @@
+       "region": "Bölge",
+       "bucket": "Bucket",
+       "prefix": "Hedef öneki",
+-      "project": "Proje"
++      "project": "Proje",
++      "hostname": "Sertifika sunucu adı"
+     },
+     "fontUnavailable": "Yazı tipi yüklenemedi; sistem yazı tipi kullanılıyor."
+   },
+@@ -584,6 +585,43 @@
+       },
+       "lastRun": "Son kaydedilen çalışma",
+       "pinHint": "Kimlik bilgilerini girmeden önce sunucunun SHA256 parmak izini bağımsız olarak doğrulayın. Bu sürüm düz Ed25519 sunucu anahtarlarını kabul eder; bilinmeyen veya değişen anahtar bağlantıyı durdurur."
++    },
++    "ftps": {
++      "scope": "Yerel ağda explicit FTPS. Sayısal LAN IP adresi, sertifikadaki sunucu adı ve mevcut mutlak hedef klasörü kullanılır.",
++      "enableHint": "Kaydet ve etkinleştir, seçili dosya ve fotoğraf kaynaklarını bu hedefe yedeklemeyi açar. Bağlantı ve yedek durumu çalıştırma sonucunda doğrulanır.",
++      "saveEnable": "FTPS yedeklerini kaydet ve etkinleştir",
++      "run": "Şimdi FTPS’ye yedekle",
++      "pause": "Bu FTPS çalışmasını duraklat",
++      "reviewTitle": "Bekleyen FTPS yayınları",
++      "backupsTitle": "FTPS yedeklerim",
++      "reviewHint": "Belirsiz sonuçlar incelemede kalır. İkisini de tut, seçili dosyayı yeniden okuyup ayrı bir kopya yayımlar; eski kanıtı ve uzaktaki mevcut içeriği korur.",
++      "restoreHint": "Yalnız bu cihazın doğrulanmış aktarım kayıtları listelenir. Geri yükleme, seçtiğiniz klasöre veya fotoğraf arşivine yazmadan önce içeriği yeniden doğrular.",
++      "copied": "Ayrı kopya doğrulandı: {{name}}",
++      "errors": {
++        "ftps_fields": "Sayısal LAN IP, port, sertifika sunucu adı, mutlak klasör, kullanıcı adı ve parola girin.",
++        "lan_unavailable": "İzin verilen bir yerel ağ rotası yok.",
++        "integration_unavailable": "Bu uygulama derlemesinde veya OS sürümünde native FTPS kullanılamıyor.",
++        "profile_missing": "Önce bir FTPS hedefi kaydedin.",
++        "context_changed": "Ayarlar veya kaynak erişimi değişti. Yeni bir işlem başlatın; eski iş inceleme için korunur.",
++        "review_required": "Sonuç inceleme gerektiriyor. Sahipsiz uzak içerik benimsenmedi.",
++        "native_3": "Kalıcı işlem makbuzu korunamadı.",
++        "native_4": "Seçili kaynak değişti veya okunamadı.",
++        "native_7": "Uzak byte’lar doğrulanamadı.",
++        "native_1": "Bu hedef veya dosya adı desteklenmiyor.",
++        "storage_failure": "Native depolama işlemi güvenle kaydedemedi.",
++        "native_6": "Güvenli FTPS görüşmesi veya sunucu sertifikası/adı doğrulaması başarısız oldu.",
++        "native_9": "Sunucu kimlik bilgilerini reddetti.",
++        "authentication_failed": "Sunucu kimlik bilgilerini reddetti.",
++        "native_10": "Hedef dosya zaten var. Mevcut dosya değiştirilmedi; ayrı kopya oluşturmak için inceleyin.",
++        "native_11": "Yapılandırılmış hedef klasör güvenli biçimde kullanılamadı.",
++        "ftps_root_unsafe": "Yapılandırılmış hedef klasör güvenli biçimde kullanılamadı.",
++        "native_2": "Yerel yetkilendirme değişti. Sonuç doğrulanmadı.",
++        "native_5": "Özel yerel dosya güvenli biçimde kullanılamadı.",
++        "native_8": "FTPS yanıtı yok veya belirsiz. Başka kopya oluşturmadan önce bu işi inceleyin.",
++        "certificate_invalid": "Sunucu sertifikası veya adı doğrulanamadı."
++      },
++      "lastRun": "Son kaydedilen çalışma",
++      "trustHint": "Kontrol ve veri bağlantıları TLS ile korunur; sunucu sertifikası ve adı doğrulanır. Aktarım yeniden okunan içerikle doğrulanır; elektrik kesintisinde kalıcılık garantisi verilmez."
+     }
+   },
+   "statusUi": {
+diff --git a/docs/decisions/0022-advanced-destination-transport-and-credential-custody.md b/docs/decisions/0022-advanced-destination-transport-and-credential-custody.md
+index c3d4acf..d518e74 100644
+--- a/docs/decisions/0022-advanced-destination-transport-and-credential-custody.md
++++ b/docs/decisions/0022-advanced-destination-transport-and-credential-custody.md
+@@ -52,3 +52,9 @@ physical acceptance remain open. This ADR does not choose one-vs-many automatic
+ backup destinations when PC and WebDAV coexist; step15 records that product gate.
+ 
+ [Research and remaining checks](../implementation/provider-decision-matrix-step14-2026-10-29.md).
++
++## FTPS practical verification — user decision, 2026-11-03
++
++For FTPS only, the user approved practical transfer checks in place of the previously proposed mandatory atomic no-clobber and explicit remote durability acceptance gates. No custom server extension will be developed. Check for existing names and refuse/choose a fresh job-bound name; require successful transfer completion and a fresh full readback matching size and SHA256 before local transfer-verified admission. This is not an atomic no-overwrite guarantee or proof of persistence after power loss. Existence-check races remain a known protocol limitation. Do not advertise stronger guarantees.
++
++Unknown create/upload/rename results remain in review; no blind retry, hash-only adoption or automatic Completed inference after a lost ACK. Retain request/job/target/source/profile binding and durable local receipts. This FTPS decision does not weaken SMB/SFTP or PC/WebDAV contracts. AUTH TLS/PROT P, full certificate+hostname validation, LAN-only and native control+data route/generation fences remain required. The separate disposable fixture CA permission does not authorize product custom-CA trust.
+diff --git a/docs/implementation/CURRENT.md b/docs/implementation/CURRENT.md
+index bb3133c..e0b5a01 100644
+--- a/docs/implementation/CURRENT.md
++++ b/docs/implementation/CURRENT.md
+@@ -1,8 +1,8 @@
+-# CURRENT — 02.11.2026
++# CURRENT — 03.11.2026
+ 
+ Tarihî PASS taze kabul değildir.
+ 
+-**Task sınırı02.11:** Codex uygulama commit’i `3efe57873a9e`; [Claude18A/3 sözleşme yanıtı](codex-response-18A3-2026-11-02.md). Kullanıcı Claude tarafını commit/hizalayıp merge edecek; bu sohbette16c ilerletilmez. [Yeni sohbet16c checkpoint’i](codex-next-chat-16c-2026-11-02.md). Başarılı testler tekrar çalıştırılmaz; AGENTS task sınırı/az kullanım kararı uygulanır.
++**16c uygulama/izole kapanış03.11:** main67701e7; [tek checkpoint](ftps-native-checkpoint-2026-11-03.md), [manifest](evidence/ftps-native-step16c-2026-11-03/manifest.json). ADR0022 pratik FTPS profiliyle native engine/journal/vault/Files/Photos/restore/queue/OS ve TR/EN/DE ürün bağlantısı tamam, varsayılan kapalı. Yeni scoped testler,6ABI paketleri, Android/iOS app build, owned Files/Photos/restore/reopen/cleanup ve aynı-agent ayrı review PASS. Başarılı eski testler tekrarlanmadı; commit/push yok,17 başlamadı. Gerçek public-CA/LAN, genel12/20/21 ve bağımsız son Claude review açık; izole CA/sentetik route bunları kapatmaz.
+ 
+ ## Steps
+ 
+@@ -23,7 +23,7 @@ Tarihî PASS taze kabul değildir.
+ |13|Dar salt-okunur galeri uygulandı|Android/native/physical açık|
+ |14|16/16 teknik matris+D1–3 onaylı|SDK/fiyat/hesap/platform|
+ |15|WebDAV Files+Photos/own restore izole|picker/UI/BG/signing/20/21|
+-|16|16a+16b uygulama/izole kapanış tamam;16c dar ön eleme aktif|Genel12/20/21 ve son Claude review açık; protokoller varsayılan kapalı|
++|16|16a+16b+16c uygulama/izole kapanış tamam|Genel12/20/21 ve son Claude review açık; protokoller varsayılan kapalı|
+ |17|S3 uyumlu/Amazon S3 başlamadı|multipart/belirsiz commit/integrity|
+ |18|Diğer bulutlar başlamadı|native auth/hesap; Box engelli|
+ |19|Live Activities başlamadı|extension/signing/mahremiyet/SwiftUI|
+@@ -50,7 +50,7 @@ Gerçek Android Files+ürün/OS ve exact onaylı Photos zinciri PASS. Gerçek Wi
+ 
+ Ayrı aynı-agent review’da parent kontrolü sırasında düşen yetkinin rename’e sızması düzeltildi; eski negatif kontrol ve düzeltilmiş bound gerçek sunucu testi PASS, altı mobile artifact yeniden paketlendi. Native TR/EN/DE/maxfont batch ve klavye alan gözlemi scoped PASS; ayrı klavye screenshot eksik. Bağımsız Claude review kullanıcı kararıyla en sonda; genel12/20/21 görsel/a11y/VoiceOver, kalıcı tüm-ekran capture, gerçek BG delivery/lock, production signing/device custody, fiziksel/perf açık. `backup_destination` şema/CHECK/user_version ve Claude worktree değişmedi.
+ 
+-[16c explicit FTPS dar ön elemesi](ftps-native-preflight-2026-11-02.md) başladı: resmî doküman/TLS+socket ve STOR/STOU yayın sınırı incelendi; SDK/ABI/ürün uygulaması/17 başlamadı. Devamda yalnız bu kısa checkpoint ve [ADR0022][a22] FTPS bölümünü oku.
++[16c explicit FTPS dar ön elemesi](ftps-native-preflight-2026-11-02.md)03.11 ilerledi: exact libcurl8.23.0 kaynak/lisans/advisory+iki sentetik host negatif probe; STOU upload/TLS-only API varsayımları elendi. Exclusive/durable publication ve gerçek TLS/control+data route kapıları açık; dependency/ABI/ürün uygulaması/17 başlamadı. Devamda yalnız bu kısa checkpoint ve [ADR0022][a22] D1 bölümünü oku.
+ 
+ ## 16a — korunan kanıt ve açık kabul
+ 
+diff --git a/docs/implementation/ftps-native-preflight-2026-11-02.md b/docs/implementation/ftps-native-preflight-2026-11-02.md
+index 2b9e900..750f275 100644
+--- a/docs/implementation/ftps-native-preflight-2026-11-02.md
++++ b/docs/implementation/ftps-native-preflight-2026-11-02.md
+@@ -1,11 +1,60 @@
+-#16c explicit FTPS — dar ön eleme /02.11.2026
++#16c explicit FTPS — dar ön eleme /03.11.2026
+ 
+-16a+16b uygulama/izole kapanışından sonra yalnız doküman ön elemesi başladı. Ürün kodu, dependency, ABI, test sunucusu veya güven politikası değişmedi. SDK seçilmedi; sürüm/lisans/advisory/platform kabulü henüz yok.
++Merge tamam: main `67701e7`; push yok, origin/main `50ae92e`. Önceden staged start.log silme ve untracked Claude worktree alanı korundu. Ürün/SDK dependency/ABI veya güven politikası değiştirilmedi;17 başlamadı.
+ 
+-Onaylı ADR0022 D1: explicit AUTH TLS, control+data şifreleme/PROT P, tam sertifika+hostname doğrulama, LAN-only. Plain FTP/clear data/CCC/downgrade, implicit FTPS, private-CA/custom pin yok. SFTP Windows kurulumu FTPS sunucusu değildir; yeni kurulum veya kişisel hesap izni varsayılmaz.
++ADR0022 D1 korunur: explicit AUTH TLS, control+data şifreleme/PROT P, tam sertifika+hostname doğrulama, LAN-only. Plain/implicit FTP, CCC/clear data/downgrade, private-CA/custom pin onaylı değil. SFTP sunucusu FTPS fixture değildir; yeni kişisel hesap/cihaz/Photos izni yok.
+ 
+-Mevcut P3 adayı libcurl için Context7 resolve+resmî curl rehberi okundu. [USE_SSL](https://curl.se/libcurl/c/CURLOPT_USE_SSL.html) CURLUSESSL_ALL ile tüm iletişimi zorunlu şifreler; TRY ve yalnız CONTROL onaylı profili karşılamaz. [Açık socket callback](https://curl.se/libcurl/c/CURLOPT_OPENSOCKETFUNCTION.html) resolved adresi reddetmeye veya önceden bağlı socket sağlamaya izin verir. Bunlar mevcut native LAN authority/context/generation sahibinin control ve her passive data socket için korunmasını tek başına kanıtlamaz.
++## Exact aday ve yeni dar kanıt
+ 
+-Kritik ucuz eleme: [RFC959 §4.1.3](https://www.rfc-editor.org/rfc/rfc959#section-4.1.3) STOR mevcut içeriği değiştirir; STOU sunucu tarafından seçilen benzersiz adı yanıtta verir. Buradan standart STOR veya kontrolsüz RNFR/RNTO ile no-overwrite/kalıcı publication sağlandığı çıkarılamaz. Kaybolan yanıt sonrası path/hash adoption veya kör retry yok. STOU, sunucu destekli exclusive publication veya doğrulanmış başka bir mevcut mekanizma ancak durable receipt/fresh readback/kesinti testiyle değerlendirilebilir; henüz çözüm kabul edilmedi.
++[Tek manifest](evidence/ftps-preflight-2026-11-03/manifest.json): resmî kaynak arşivinden **libcurl8.23.0**, SHA256 `8dadd7d2536a314f982ad05a651b713f426bf7d02cc2c76cffb9796f2218e6c5`. COPYING/SPDX curl incelendi; dağıtımda notice korunur. [Exact sürüm advisory sayfası](https://curl.se/docs/vuln-8.23.0.html) gözlem anında0 yayımlanmış curl açığı bildiriyor. PGP imzası bağımsız doğrulanmadı; tam dependency/TLS backend/platform kabulü verilmedi. Context7 sorgusu+exact kaynak/resmî API karşılaştırıldı.
+ 
+-Sıradaki: tek exact adayın kaynak/lisans/advisory elemesi ve tek disposable host üzerinde no-overwrite+lost-ACK/control+data route/TLS negatif kontrollerinin uygulanabilirliğini doğrula. Kritik yayın/trust şartı geçmeden mobile ABI/ürün matrisi açma. Yeni mimari/güven politikası gerekiyorsa somut diff/karar kullanıcıya sunulur.16c tamamlanmadı;17 başlamadı.
++Yeni iki sentetik loopback **negatif davranış doğrulaması** PASS; host C çağırıcısı unmodified8.23.0 statik libcurl ile derlendi. Gerçek hesap yok; upload boş ve sunucu aktarım öncesi550 ile reddediyor. Test fixture’ının plain komut yolu ürün için plain FTP izni veya FTPS kabulü değildir.
++
++- `UPLOAD + CUSTOMREQUEST=STOU` → **STOR candidate**, exit25. Upload kaynakta STOR/APPE; CUSTOMREQUEST FTP listelemesini değiştirir. [API](https://curl.se/libcurl/c/CURLOPT_CUSTOMREQUEST.html). Standart STOR no-overwrite değildir; önce exists kontrolü/UUID veya denetimsiz rename bunu düzeltmez.
++- `USE_SSL=ALL + FTPSSLAUTH=TLS`, AUTH TLS reddi → **AUTH SSL**, ardından exit64. USER/PASS gönderilmedi. Bu seçenek TLS-first sırasıdır, TLS-only değildir. [API](https://curl.se/libcurl/c/CURLOPT_FTPSSLAUTH.html). AUTH SSL fiili tek başına SSLv3 kullanımı demek değildir; ADR’deki exact AUTH TLS/fallback sınırını sessiz genişletme.
++
++Ham kaynak/derleme logları `/private/tmp/kloda-ftps16c-preflight`; küçük C/Python probe ve hashler manifest yanında korunur. Host configure `--disable-everything` bayrağını tanımadı; tüm protokoller derlendi, minimal dependency kabulü yok. Libtool uyarıları var; build/link+iki yeni probe başarılı. İlk CLI harness olmayan bir seçenek kullandı, sunucu bağlantısı kurmadı; C public API ile düzeltilmiş sonuçlar esas. Başarılı eski testler yeniden koşulmadı.
++
++## Açık kapılar / sonraki dar iş
++
++**Libcurl’ün doğrudan STOU ve TLS-only seçenekleri olduğu varsayımı elendi; bütün libcurl+sunucu tasarımları imkânsız ilan edilmedi.** Henüz uygun yayın/trust yolu yok; ürün/mobil matris açılmaz. STOU desteği tek başına flush/durability, yanıt adını makbuza bağlama veya lost-ACK kapanışı değildir.
++
++Sıradaki: SDK yaması olmadan tek sunucu/capability üzerinde atomik exclusive-create+durable publication ve strict AUTH TLS yolunun mümkün olup olmadığını kaynak/sözleşme düzeyinde ele. Genel STOR/rename, path/hash adoption ve kör retry kabul edilmez. Olumlu fixture için onaylı trust profilini karşılayan endpoint/cert ve native control+her passive data socket route/context sahibi ayrıca gerekir. Yeni SDK fork/ABI/güven politikası gerekiyorsa önce somut kapsam/diff ve açık onay; mevcut SMB patch istisnası FTPS’ye taşınmaz. Bu taskta yeni istisna/patch seçilmedi.
++
++Gerçek TLS/cert/hostname/PROT P, route-generation, no-clobber/durable/lost-ACK runtime ve mobile ABI/ürün kabulü NOT_RUN. Genel12/20/21 ve bağımsız son review açık; ayrı aynı-agent değerlendirme bağımsız review değildir.16c tamamlanmadı.
++
++Yeni sohbet mesajı:
++> /Users/ayhanblt/Desktop/projects/kloda içinde AGENTS.md → docs/implementation/CURRENT.md → docs/implementation/ftps-native-preflight-2026-11-02.md oku. Gerçek HEAD/dirty durumunu dar kontrol et;16c’de exact libcurl8.23.0’ın kaydedilmiş iki negatif probe’unu ve başarılı eski testleri tekrarlama. SDK yaması olmadan tek sunucu/capability ile exclusive-create+durable publication ve strict AUTH TLS yolunun uygulanabilirliğini ele. Kritik yol çözülmeden ürün/ABI/matris açma; yeni fork/ABI/politika gerekiyorsa somut kapsam/diff hazırla ve açık onay bekle. Task sonunda tek kısa checkpoint ve yeni sohbet promptu yazıp dur.
++
++## Ek ilerleme — kullanıcı tüm16c’ye devam+izole CA onayı /03.11
++
++Kullanıcı artık ara task sınırında durmadan tüm16c’nin düşük harcamayla ilerletilmesini istedi. Yalnız disposable loopback/test sürecinde CA güveni açık onaylı; ürün/sistem trust istisnası değildir. [TLS fixture kaydı](evidence/ftps-preflight-2026-11-03/tls-fixture.json): pyftpdlib2.1.0+pyOpenSSL25.3.0 isolated venv, exact libcurl8.23.0. Explicit TLS+PROT P listing PASS; unknown CA+hostname mismatch exit60; clear data exit13/550 ile reddedildi. Başarılı sonuçlar kayıttan kullanıldı, tekrar koşulmadı. İlk harness clear-data için yanlışlıkla8 bekledi;13 gerçek güvenli red olarak kaydedildi, yalnız henüz koşulmamış STOR kontrolü devamda çalıştırıldı.
++
++**Standart STOR güvenlik kapısı FAIL:** owned sentinel içeriği overwrite oldu. TLS başarısı exclusive/durable publication kabulü değildir. Server terminate+wait yapıldı; fixture CA/server private keyleri kaldırıldı. Ürün/ABI/Photos/17 başlamadı.
++
++ProFTPD alternatif ön elemesi: upstream master mod_xfer.c normal STOR open yolunda O_CREAT/O_TRUNC kullanır; HiddenStores staging O_EXCL olsa bile final no-clobber/durability buradan çıkmaz. Bu rolling kaynak keşiftir, exact sunucu kabulü değildir. Kaynak: https://raw.githubusercontent.com/proftpd/proftpd/master/modules/mod_xfer.c . AllowOverwrite ayarı tek başına yarış-güvenli exclusive/durable kanıt kabul edilmedi.
++
++Sonraki gerekli çözüm hâlâ exclusive-create+flush/no-replace receipt ve strict AUTH TLS yoludur. SDK fork/yeni sunucu uzantısı veya güven politikasını genişletme uygulanmadı. İzole CA onayı bunları kapsamaz. Genel CA/gerçek LAN+native route+lost-ACK/mobil/bağımsız kabul kapıları açık.
++
++## Mimari kapı /03.11
++
++Kaynak ön elemesi exclusive create ile durability’nin ayrı gereklilikler olduğunu netleştirdi. Gerekli garantiyi sağlayan yayın yolu henüz seçilemedi; [somut karar kapsamı](ftps-publication-decision-2026-11-03.md): A mevcut sözleşmeyle FTPS engelli, B ayrı sunucu uzantısının yalnız tasarım/diff kapsamını açma. Ürün güvenliğini düşürme/fork/ABI yapılmadı. Başarılı kontroller tekrarlanmadı. Mimari karar gelmeden ürün/matris açılmaz.
++
++## Güncel karar ve temsilî pratik yol /03.11
++
++Kullanıcı özel eklentiyi reddetti, pratik kontrol profilini açık onayladı; ADR0022 son bölümü artık FTPS yayın kabulünün yetkili kaynağıdır. Önceki zorunlu atomic no-clobber/remote fsync engeli FTPS için bu kararla aşılmıştır; eski A/B karar belgesi artık karar bekleyen kapı değildir. Native route/generation/TLS ve belirsiz ACK güvenli duruşu korunur.
++
++[Yeni pratik fixture kanıtı](evidence/ftps-preflight-2026-11-03/practical-result.json): Python protokol fixture’ında AUTH TLS+PROT P, mevcut isimde upload yapmama, yeni UUID isimle226 ACK ve taze tam readback size/SHA256 eşleşmesi PASS; sentinel korundu. Bu native libcurl adapter kabulü değildir. İlk koşular test sertifikasındaki AKI/CA keyUsage eksikliği nedeniyle reddedildi; doğrulama kapatılmadan sertifika uzantıları düzeltildi, yalnız başarısız yeni yol tekrarlandı. Server kapandı, özel anahtarlar silindi.
++
++Sıradaki uygulama işi: exact native istemci/sahip sınırını seç; strict AUTH TLS ile control+her passive data socket route/context bağını tek hostta doğrula, ardından ayrı FTPS native journal/vault/Files/restore/queue/ürün bağlantısına geç. Eski başarılı probe’ları tekrar etme.16c henüz tamamlanmadı.
++
++## Native aday —03.11
++
++SDK yamasız exact suppaftp12.2.1 + rustls-ring adayı incelendi. Public connect_with_stream/passive_stream_builder, into_secure içindeki AUTH TLS/PBSZ0/PROT P ile kontrol+her veri socket’ini dış sahibine bırakıyor. [Native aday manifesti](evidence/ftps-preflight-2026-11-03/native-candidate/manifest.json).66 registry bağımlılığı OSV querybatch eşleşme0; declared MIT OR Apache-2.0, tam dependency license/platform kabulü açık. Python OSV isteği yerel CA deposu hatası verdi; TLS doğrulaması kapatılmadan sistem curl güven deposuyla tamamlandı.
++
++Yeni Rust host prototipi build+configured control socket/EPSV callback/upload/fresh full readback PASS. Ayrı data-owner denial ve farklı IP’yi bağlantıdan önce red assertion PASS. Önceden başarılı testler tekrarlanmadı. Bu prototip loopback/test CA ve sentetik owner kullanır; gerçek OS route/generation ya da production trust kabulü değildir. Ürün dependency/ABI eklenmedi; fixture kapandı, private keyler silindi.
++
++Devam: adayı tam license/dependency kabulünden geçir; FTPS’ye özgü bound control/data native sahip kontratını mevcut Android/iOS route ömrüyle uygula; journal/vault/pratik upload+readback/lost-ACK, Files/restore/queue/Photos ve ürün bağlantısını tamamla.16c açık.
++
++
++03.11 kapanış: bu dosya tarihî ön elemedir. Güncel16c uygulama/izole kabul sonucu ve açık genel kapılar yalnız [tek checkpoint](ftps-native-checkpoint-2026-11-03.md) ve onun manifestindedir. Tarihî açık ifadeleri güncel durum sayma.
+diff --git a/packages/pairing-native/apple/include/KlodaPairingNative.h b/packages/pairing-native/apple/include/KlodaPairingNative.h
+index a90393e..744804b 100644
+--- a/packages/pairing-native/apple/include/KlodaPairingNative.h
++++ b/packages/pairing-native/apple/include/KlodaPairingNative.h
+@@ -38,6 +38,8 @@ typedef int32_t (*KlodaIosLanWorker)(void *context, int32_t borrowed_socket, con
+ int32_t kloda_ios_lan_with_socket(const uint8_t *address, size_t length, uint16_t port,
+                                 KlodaIosLanWorker worker, void *context);
+ int32_t kloda_ios_lan_current(const void *borrowed_lease);
++/* Same peer/interface witness; returned FD transfers ownership. */
++int32_t kloda_ios_lan_connect(const void *borrowed_lease, uint16_t port);
+ void kloda_ios_reply_free(char *reply);
+ #ifdef __cplusplus
+ }
+diff --git a/packages/pairing-native/src/ios_lan_socket.rs b/packages/pairing-native/src/ios_lan_socket.rs
+index 8902403..16a5c09 100644
+--- a/packages/pairing-native/src/ios_lan_socket.rs
++++ b/packages/pairing-native/src/ios_lan_socket.rs
+@@ -1,6 +1,6 @@
+ //! Reuse the existing iOS OS-route owner for a synchronous SMB worker.
+ use crate::{qr::LanHint, route};
+-use std::{ffi::c_void, net::IpAddr, os::fd::AsRawFd, panic::AssertUnwindSafe, time::Duration};
++use std::{ffi::c_void, net::IpAddr, os::fd::{AsRawFd, IntoRawFd}, panic::AssertUnwindSafe, time::Duration};
+ 
+ struct Lease {
+     route: route::Route,
+@@ -67,6 +67,23 @@ pub unsafe extern "C" fn kloda_ios_lan_current(raw: *const c_void) -> i32 {
+     .unwrap_or(1)
+ }
+ 
++/// Connect another port to the exact peer using the current borrowed route lease.
++/// # Safety
++/// raw must be the live lease supplied synchronously by kloda_ios_lan_with_socket.
++/// Returned FD transfers ownership; negative means no FD. The lease must never escape its worker.
++#[no_mangle]
++pub unsafe extern "C" fn kloda_ios_lan_connect(raw: *const c_void, port: u16) -> i32 {
++    if raw.is_null() || port == 0 { return -1; }
++    std::panic::catch_unwind(AssertUnwindSafe(|| {
++        let lease = unsafe { &*raw.cast::<Lease>() };
++        if lease.route.check(lease.peer).is_err() { return -1; }
++        let hint = LanHint { ip: lease.peer, port };
++        let Ok(socket) = lease.route.connect(&hint, Duration::from_secs(5)) else { return -1; };
++        if lease.route.check(lease.peer).is_err() { return -1; }
++        socket.into_raw_fd()
++    })).unwrap_or(-1)
++}
++
+ #[cfg(test)]
+ mod tests {
+     use super::*;
+diff --git a/packages/pairing-native/tests/ios_lan_socket.rs b/packages/pairing-native/tests/ios_lan_socket.rs
+index 311efd0..cf0238b 100644
+--- a/packages/pairing-native/tests/ios_lan_socket.rs
++++ b/packages/pairing-native/tests/ios_lan_socket.rs
+@@ -170,3 +170,23 @@ fn borrowed_lifetime_invalidation_and_socket_cleanup() {
+         1
+     );
+ }
++
++unsafe extern "C" fn ftps_data_worker(_: *mut c_void, control: i32, lease: *const c_void) -> i32 {
++    assert!(unsafe { fcntl(control,1) } >= 0);
++    let data=unsafe { bridge::kloda_ios_lan_connect(lease,43210) };
++    assert!(data>=0 && unsafe { fcntl(data,1) } >= 0);
++    drop(unsafe { <std::fs::File as std::os::fd::FromRawFd>::from_raw_fd(data) });
++    assert!(unsafe { fcntl(data,1) } < 0);
++    FIXTURE.with(|f| { let f=f.borrow(); assert_eq!(f.drops,0); f.valid.store(false,Ordering::SeqCst); });
++    assert_eq!(unsafe { bridge::kloda_ios_lan_connect(lease,43211) },-1);
++    assert!(unsafe { fcntl(control,1) } >= 0);
++    0
++}
++#[test]
++fn ftps_data_uses_live_control_lease_and_fails_after_invalidation() {
++    assert_eq!(unsafe { bridge::kloda_ios_lan_connect(std::ptr::null(),21) },-1);
++    FIXTURE.with(|f| *f.borrow_mut()=Fixture {mode:Mode::Admit,valid:Arc::new(AtomicBool::new(true)),fd:-1,drops:0});
++    let address=b"192.168.1.10";
++    assert_eq!(unsafe { bridge::kloda_ios_lan_with_socket(address.as_ptr(),address.len(),445,Some(ftps_data_worker),std::ptr::null_mut()) },0);
++    FIXTURE.with(|f|assert_eq!(f.borrow().drops,1));
++}
+diff --git a/tools/build-native-ios.mjs b/tools/build-native-ios.mjs
+index 353c607..4ad3a09 100644
+--- a/tools/build-native-ios.mjs
++++ b/tools/build-native-ios.mjs
+@@ -29,7 +29,7 @@ const simulator = process.arch === 'arm64' ? 'aarch64-apple-ios-sim' : 'x86_64-a
+ assert(['arm64', 'x64'].includes(process.arch), 'Unsupported build host architecture');
+ const libraries = [];
+ const symbols = ['open', 'request', 'suspend', 'set_foreground', 'transfer', 'reply_free',
+-  'background_begin', 'background_end', 'background_transfer', 'lan_with_socket', 'lan_current'];
++  'background_begin', 'background_end', 'background_transfer', 'lan_with_socket', 'lan_current', 'lan_connect'];
+ for (const [target, sdk] of [['aarch64-apple-ios', 'iphoneos'], [simulator, 'iphonesimulator']]) {
+   const sdkRoot = run('xcrun', ['--sdk', sdk, '--show-sdk-path'], {}, true);
+   run('rustup', ['run', rustToolchain, 'cargo', 'rustc', '--locked', '--offline', '--no-default-features',

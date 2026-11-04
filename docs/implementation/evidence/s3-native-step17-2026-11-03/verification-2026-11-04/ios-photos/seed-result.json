@@ -1,0 +1,12 @@
+{
+  "manifest": "a6121cdf-d530-4d6e-8e8d-341c50ffe8b2",
+  "manifestCount": 1,
+  "mode": "seed",
+  "phase": "finished",
+  "remotePrefix": "photos-d6326543-7299-4220-b9e9-8e30fd44824f",
+  "resourceCount": 1,
+  "restoreNoDuplicate": true,
+  "sourceAndImportedAssets": 2,
+  "status": "PASS",
+  "unchangedReuse": true
+}

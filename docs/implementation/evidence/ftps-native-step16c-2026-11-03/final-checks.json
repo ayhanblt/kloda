@@ -1,0 +1,14 @@
+{
+  "head": "67701e7895ca9d7d5d7efe66d23b09954a8bf690",
+  "originMain": "50ae92ecc168ac0d8a323bbb844627443493fcd8",
+  "sourceHashesVerified": 138,
+  "productionArtifactHashesVerified": 6,
+  "gitDiffCheck": "PASS",
+  "index": "Only pre-existing staged start.log deletion preserved",
+  "ownedAvdAbsentFromAdbDevices": true,
+  "ownedIosSimulatorShutdown": true,
+  "loopbackFtpsPort27449Listening": false,
+  "passingTestsRepeated": false,
+  "committed": false,
+  "pushed": false
+}

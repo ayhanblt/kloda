@@ -21,6 +21,9 @@
       android:permission="android.permission.BIND_JOB_SERVICE" />
     <service android:name=".AndroidSftpJob" android:exported="true"
       android:permission="android.permission.BIND_JOB_SERVICE" />
+    <service android:name=".AndroidS3JobService" android:exported="true" android:permission="android.permission.BIND_JOB_SERVICE" />
+    <service android:name=".AndroidFtpsJob" android:exported="true"
+      android:permission="android.permission.BIND_JOB_SERVICE" />
     <!-- ADR0028: Dropbox, OneDrive and Yandex PKCE redirects; the code is useless without the verifier held by the waiting sign-in. -->
     <activity android:name=".KlodaOAuthRedirectActivity" android:exported="true" android:noHistory="true"
       android:excludeFromRecents="true" android:theme="@android:style/Theme.Translucent.NoTitleBar">

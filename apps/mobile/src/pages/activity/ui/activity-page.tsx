@@ -2,6 +2,7 @@ import { ArrowLeft, FolderSync, Pause } from 'lucide-react-native';
 import { useEffect } from 'react';
 import { SmbItemsPanel } from './smb-items-panel';
 import { SftpItemsPanel } from './sftp-items-panel';
+import { FtpsItemsPanel } from './ftps-items-panel';
 import { WebDavBackupsPanel } from './webdav-backups-panel';
 import { WebDavReviewPanel } from './webdav-review-panel';
 import { useWebDavBackup } from '../../../features/backup-setup/model/use-webdav-backup';
@@ -60,7 +61,7 @@ export function ActivityPage({ onBack, view = 'activity', embedded = false }: { 
           </>}
           {(transfer.webdavActionError || webdav.error || webdav.status?.run?.errorCode || webdav.status?.automaticError) && <Text accessibilityRole="alert" className="font-sans text-sm text-danger-text">{t(`transfer.errors.${transfer.webdavActionError ?? webdav.error ?? webdav.status?.run?.errorCode ?? webdav.status?.automaticError}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
         </View>}
-        {view === 'activity' && <><WebDavReviewPanel /><SmbItemsPanel issues /><SftpItemsPanel issues /></>}
+        {view === 'activity' && <><WebDavReviewPanel /><SmbItemsPanel issues /><SftpItemsPanel issues /><FtpsItemsPanel issues /></>}
         {view === 'activity' && <Text accessibilityRole="header" className="text-lg font-inter-semibold text-primary-text">{t('destinations.pc')}</Text>}
         <Text className="font-sans text-sm leading-5 text-secondary-text">{t(view === 'backups' ? 'transfer.backups.description' : 'transfer.description')}</Text>
         {view === 'activity' && <>
@@ -116,7 +117,7 @@ export function ActivityPage({ onBack, view = 'activity', embedded = false }: { 
         {queue?.hasMore && <Text className="font-sans text-sm leading-5 text-secondary-text">{t('transfer.more', { count: queue.totalJobs })}</Text>}
         </>}
         {view === 'backups' && error && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-danger-text">{t(`transfer.errors.${error}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
-        {view === 'backups' && <><WebDavBackupsPanel /><SmbItemsPanel /><SftpItemsPanel /></>}
+        {view === 'backups' && <><WebDavBackupsPanel /><SmbItemsPanel /><SftpItemsPanel /><FtpsItemsPanel /></>}
         {(view === 'backups' || !embedded) && <OwnBackups transfer={transfer} />}
         {scrollChrome && controls}
       </ScrollView>

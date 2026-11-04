@@ -38,6 +38,8 @@ typedef int32_t (*KlodaIosLanWorker)(void *context, int32_t borrowed_socket, con
 int32_t kloda_ios_lan_with_socket(const uint8_t *address, size_t length, uint16_t port,
                                 KlodaIosLanWorker worker, void *context);
 int32_t kloda_ios_lan_current(const void *borrowed_lease);
+/* Same peer/interface witness; returned FD transfers ownership. */
+int32_t kloda_ios_lan_connect(const void *borrowed_lease, uint16_t port);
 void kloda_ios_reply_free(char *reply);
 #ifdef __cplusplus
 }
