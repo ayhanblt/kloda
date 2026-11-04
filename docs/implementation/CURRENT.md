@@ -1,10 +1,12 @@
-# CURRENT — 03.11.2026
+# CURRENT — 04.11.2026
 
 Tarihî PASS taze kabul değildir.
 
 **16c uygulama/izole kapanış03.11:** main67701e7; [tek checkpoint](ftps-native-checkpoint-2026-11-03.md), [manifest](evidence/ftps-native-step16c-2026-11-03/manifest.json). ADR0022 pratik FTPS profiliyle native engine/journal/vault/Files/Photos/restore/queue/OS ve TR/EN/DE ürün bağlantısı tamam, varsayılan kapalı. Yeni scoped testler,6ABI paketleri, Android/iOS app build, owned Files/Photos/restore/reopen/cleanup ve aynı-agent ayrı review PASS. Başarılı eski testler tekrarlanmadı; commit/push yok,17 başlamadı. Gerçek public-CA/LAN, genel12/20/21 ve bağımsız son Claude review açık; izole CA/sentetik route bunları kapatmaz.
 
-**17 S3 —04.11 uygulama/izole doğrulama tamam:** [checkpoint](s3-step17-checkpoint-2026-11-03.md), [son doğrulama](evidence/s3-native-step17-2026-11-03/verification-2026-11-04/manifest.json). İki platform actual owned Photos upload/full GET/metadata/restore/repeat/reopen/cleanup ve automatic/manual yetki componentleri PASS. iOS Int64 SQLite bind düzeltmesi + normal Xcode27.2 app build PASS. Önceki6ABI/newJS/native kanıtları korunur; başarılı eski AWS/core testleri tekrar edilmedi. JNI14yeni paket advisory0eşleşme;3lisans metni eksik. Dağıtım/P5 production/genel UI/bağımsız review/gerçek OS/fiziksel kabul [tek20–21 listesinde](20-21-acceptance-collection-2026-11-04.md), kapalı sayılmaz.18/19 Claude alanında; kullanıcı nihai bildirimi sonrası hizalama yapılacak, kaynaklarına dokunulmadı. Gerçek-key app/AWS ve gerçek kullanıcı medyası değişmedi. Commit/push yok.
+**17 S3 —04.11 uygulama/izole doğrulama tamam:** [checkpoint](s3-step17-checkpoint-2026-11-03.md), [son doğrulama](evidence/s3-native-step17-2026-11-03/verification-2026-11-04/manifest.json). İki platform actual owned Photos upload/full GET/metadata/restore/repeat/reopen/cleanup ve automatic/manual yetki componentleri PASS. iOS Int64 SQLite bind düzeltmesi + normal Xcode27.2 app build PASS. Önceki6ABI/newJS/native kanıtları korunur; başarılı eski AWS/core testleri tekrar edilmedi. JNI14yeni paket advisory0eşleşme;3lisans metni eksik. Dağıtım/P5 production/genel UI/bağımsız review/gerçek OS/fiziksel kabul [tek20–21 listesinde](20-21-acceptance-collection-2026-11-04.md), kapalı sayılmaz.18/19 Claude alanında; hizalama 04.11'de yapıldı (aşağıda). Gerçek-key app/AWS ve gerçek kullanıcı medyası değişmedi. Commit/push yok.
+
+**18/19/29 Claude —04.11 main'e birleştirildi:** main `66b8300` (Codex 16c/17 dahil; geçmiş co-author satırları temizlenerek yeniden yazıldı, eski hash'ler geçersiz). [Checkpoint](step18-20-checkpoint-2026-10-31.md) "Sıradaki". 18A/4d Android köprü + EN/DE/a11y, 4 metin bulgusu ve Durum sekmesinin tüm hedefleri toplaması tamam. Jest 260/261 (tek başarısız Codex `s3-diagnostic-page.spec.tsx`, temiz main'de de), tsc/ESLint, Android/iOS Simulator derleme PASS. ADR0029 proposed (kabul kullanıcıda). Bağımsız review yok.
 
 ## Steps
 
@@ -27,9 +29,9 @@ Tarihî PASS taze kabul değildir.
 |15|WebDAV Files+Photos/own restore izole|picker/UI/BG/signing/20/21|
 |16|16a+16b+16c uygulama/izole kapanış tamam|Genel12/20/21 ve son Claude review açık; protokoller varsayılan kapalı|
 |17|Uygulama/izole fonksiyonel doğrulama tamam|Dağıtım/P5/genel UI/OS/physical kabul20–21listesinde|
-|18|Diğer bulutlar başlamadı|native auth/hesap; Box engelli|
-|19|Live Activities başlamadı|extension/signing/mahremiyet/SwiftUI|
-|20|Geniş kapanış başlamadı|platform/güvenlik/a11y/perf|
+|18|18A/1–4d + 18B/1, 18B/5 Dropbox, 18B/5r restore uygulama/izole tamam (Claude)|8: Android otomatik JobService, iOS >150 MiB `upload_session`; 9: Dropbox Photos + eklenmiş Nextcloud restore; Android yükseltme; Box engelli|
+|19|Live Activity uygulama/izole tamam (Claude)|signing/fiziksel cihaz/iOS 16 runtime kararı|
+|20|Başlamadı; Claude payı altyapı (2 yakalama betiği hazır)|regresyon iskeleti, platform/güvenlik/a11y/perf, bağımsız review|
 |21|En son toplu fiziksel kabul|yeni açık izin+hazır hesap/cihaz|
 
 ## 16a — tamamlanan uygulama/izole kapanış /01.11
@@ -69,6 +71,27 @@ Ayrı aynı-agent review: step0+native4 “create yok” kanıtı sayılmaktan �
 Taze kontroller: mobil **27 paket/175 test**, TypeScript ve lint PASS. Paketlenmiş release Rust ile disposable Android gerçek OS JobService/lease→SAF Files→şifreli SMB→Completed/sayaç/sonraki plan/disable PASS; kapatma yazma hatasında generation+enabled rollback PASS. iOS gerçek Expo/Pods ile SMB etkin arm64 Simulator **uygulama derleme+link PASS**; ayrı süreç kaynak/restore, Photos/run/CAS ve journal kilidi tutulurken foreground kaybı host testleri PASS. Ortak iOS global pause ilk iki hedef hata verse de bütün hedefleri durdurur; geçici pause fence kalıcı yazma başarısızken de yeni PC/DAV/SMB otomatik işi engeller. Ayrı aynı-agent review; bağımsız review değildir. Owned AVD ve SMB container durduruldu, kanıtlar retained.
 Devam: **16a ürün bağlantısı ve yukarıdaki kaynak/otomatik/izole kapsam uygulandı; TAM KABUL/varsayılan aktivasyon AÇIK.** Ortak migration/table kararı artık engel değildir. Sonraki kabul işi gerçek iOS admitted LAN+seçili bookmark runtime ve tam SMB Photos kaynak/yayın/download zinciri (dar PhotoKit importer bileşeni01.11 PASS), ardından ayrı güvenlik/platform değerlendirmesidir; signing/cihaz custody ve12/20/21 görsel/a11y/perf/fiziksel kapıları korunur. Android medya onayı iOS'a genişlemez. SMB varsayılan build'de kapalı kalır; opt-in derleme/tekrar komutları checkpointtedir. 16b01.11 kullanıcı isteğiyle bekletildi;16c başlamadı.16a tek grup kanıtı üstteki manifestte; geçici çıktılar /tmp/kloda-smb-sources16, release adayları /tmp/kloda-smb16-release.
 16a gerektiğinde okuma: [ADR26][a26] D6–D8; [ADR22][a22] transport/custody; [checkpoint](smb-native-publication-checkpoint-2026-10-30.md) “Sıradaki dar iş”. Hedefli: [D8][d8], [usage](resume-and-usage-plan-2026-10-30.md).16 kabul ölçütlerini raporlamadan17'ye geçme.
+
+## 18/19/20 — Claude alanı açık işler /04.11
+
+Sıra: 8 → 9 → 20 regresyon iskeleti. Ayrıntı ve kanıt: [checkpoint](step18-20-checkpoint-2026-10-31.md).
+
+- **8 (18B/5):** Android otomatik JobService koşusu (elle başlatma 18A/4d'de PASS); iOS >150 MiB `upload_session`.
+- **9 (18B/5r):** Dropbox'tan Photos geri yükleme; eklenmiş Nextcloud hedefinden geri yükleme.
+- **11:** Android kurtarma kodu göster/kopyala (kullanıcı deseniyle); kurtarma ekranları EN/DE/a11y yakalaması.
+- **NOT_RUN:** Android kurulu uygulama yükseltmesi; uygulamadan gerçek Nextcloud girişi (fixture CA yalnız androidTest'te, ayrı karar); TalkBack; iOS EN/DE Bağlantılar; sunucu uyuşmazlığında iptal uçtan uca; 18A/3 Android çok hedefli DAV (Codex HTTPS fixture anahtarları silinmiş).
+- **Bilinen:** `tools/test-ios-webdav-journal.py` host'ta derlenmiyor (29/4 stub yaklaşımıyla düzeltilecek); iOS dev yeniden yüklemede `candidate_stale` (üretimde doğrulanmadı); yeniden etkinleştirmede eski hata satırı (metin/davranış kararı); `pod install` için `LANG=en_US.UTF-8`.
+- **Kullanıcıda:** ADR0029 kabulü, iOS 16 runtime kararı, gate 21 fiziksel test, GitHub contributor önbelleği.
+
+**20 regresyon iskeleti (öneri, tek giriş `tools/regress.py`; ucuzdan pahalıya, başarısız katman üsttekileri durdurur):**
+1. Ön kontrol: `KlodaCloud18` emülatör, Cloud18 simülatör, Nextcloud fixture, Metro.
+2. JS: Jest, tsc, ESLint.
+3. iOS host: `test-ios-recovery-catalog`, `-recovery-code`, `-destination-migration`, `-oauth`, `-live-activity`, `-webdav-journal` (önce düzeltilir).
+4. Derleme: Android app + androidTest APK; `LANG=en_US.UTF-8` pod install + iOS arm64 Simulator.
+5. Android enstrümantasyon: `cloud18-*`, `recovery29`; fixture'lı `test-android-nextcloud`, `-dav-targets` (fixture gelene kadar atlanır).
+6. Görsel: `capture-ios-live-activity.py`, `capture-android-connections.py`; eklenecek iOS Bağlantılar/kurtarma ve Android Durum; her karede dil/ekran doğrulama + e-posta karartma.
+7. Gerçek hesap (ör. `test-android-dropbox-live.py`): varsayılan kapalı, yalnız kullanıcı onayı ve girişiyle.
+8. Manifest: kaynak/varyant hash'i + sonuç; yalnız değişene bağlı testler yeniden koşar; bilinen dış hatalar ayrı listelenir, PASS sayılmaz.
 
 ## Decisions
 

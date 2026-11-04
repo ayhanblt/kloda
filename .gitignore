@@ -43,6 +43,8 @@ apps/mobile/.expo-shared/
 # Expo generated native projects
 apps/mobile/ios/
 apps/mobile/android/
+# Local xcodebuild -derivedDataPath output
+apps/mobile/build/
 
 # Expo builds
 apps/mobile/dist/
