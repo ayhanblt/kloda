@@ -558,7 +558,13 @@ FtpsItemsPanel + hedef başına panel; connections FTPS/S3 kartları + bulut lis
 Aynı commit'te 18A/4d bulgu düzeltmeleri: (1) `plugins/with-alert-case.cjs` — Android `alertDialogTheme` düğmeleri
 `textAllCaps=false` (tüm `Alert.alert`); (2) `transfer.errors.wifi_required` TR/EN/DE hedef adsız; (4) DE `viewBackups`
 "Sicherungen anzeigen" (+ `importBody` atfı). (3) Durum sekmesi kök neden: `home-status.ts`/`use-home-status.ts` yalnız PC +
-ilk WebDAV profilini izliyor; eklenen bulut hedefleri (ve SMB/SFTP/FTPS/S3) toplanmıyor → genişleme, kullanıcı onayı bekliyor.
+ilk WebDAV profilini izliyor; eklenen bulut hedefleri (ve SMB/SFTP/FTPS/S3) toplanmıyordu. Kullanıcı onayı 4.11 ("topla"):
+`use-other-targets.ts` bulut (orijinal WebDAV hariç), SMB, SFTP, FTPS ve iki S3 durumunu salt okur (hata veren modül hedef
+eklemez, çalışan varken 2 sn yenileme); `homeStatus` etkin olanları öncelikle birleştirir (inceleme > hata > yedekleniyor >
+bekleniyor > tamamlandı; `safe` yalnız hatasız bitmiş çalışma); Hedefler listesi her hedefi kendi durumuyla gösterir,
+satır Bağlantılar'a gider. Ana düğme davranışı değişmedi: yalnız PC/WebDAV etkinken (ya da hiç hedef yokken) görünür; diğer
+hedefler kendi kartından başlatılır. Jest 260/261 (tek başarısız yine Codex S3 testi), tsc, ESLint PASS; emülatörde Durum
+"Son çalışma tamamlandı" + Dropbox satırı PASS ([android-status-all-targets](evidence/step18A4-android-2026-11-04/android-status-all-targets.png)).
 Kontroller: tsc, `npm run lint` PASS; Jest 258/259 — tek başarısız `s3-diagnostic-page.spec.tsx` "cancels the exact test…",
 temiz main `4cf38e2`'de de aynı (Codex'e bildirilecek, birleştirmeden kaynaklanmıyor). `expo prebuild` (android, ios) +
 Android `:app:installDebug` arm64 + `:my-module:assembleDebugAndroidTest` PASS; `pod install` (`LANG=en_US.UTF-8` gerekir,

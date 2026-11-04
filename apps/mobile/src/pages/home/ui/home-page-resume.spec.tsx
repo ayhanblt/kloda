@@ -11,7 +11,7 @@ jest.mock('nativewind', () => ({ ...jest.requireActual('nativewind'), useColorSc
 
 const run = jest.fn(async () => undefined), resumeAutomatic = jest.fn(async () => undefined);
 async function show(automaticPaused: boolean, automatic: boolean) {
-  jest.mocked(useHomeStatus).mockReturnValue({ state: 'waiting', pcSelected: false,
+  jest.mocked(useHomeStatus).mockReturnValue({ state: 'waiting', pcSelected: false, others: [],
     transfer: { queue: { automaticPaused }, working: false, run, pause: jest.fn(), resumeAutomatic },
     webdav: { working: false, status: { configured: false, enabled: true, running: false, run: { state: 'paused', automatic } } },
   } as unknown as ReturnType<typeof useHomeStatus>);
@@ -33,4 +33,14 @@ test('Resume of a paused automatic run stays on the automatic path', async () =>
   await show(false, true);
   expect(resumeAutomatic).toHaveBeenCalledTimes(1);
   expect(run).not.toHaveBeenCalled();
+});
+test('other destinations are listed and do not get the PC/WebDAV action', async () => {
+  jest.mocked(useHomeStatus).mockReturnValue({ state: 'safe', pcSelected: false,
+    others: [{ id: 'dbx', label: 'Dropbox', kind: 'cloud', enabled: true, run: { state: 'finished' } }],
+    transfer: { queue: null, working: false, run, pause: jest.fn(), resumeAutomatic },
+    webdav: { working: false, status: { configured: false, enabled: false, running: false } },
+  } as unknown as ReturnType<typeof useHomeStatus>);
+  await render(<ThemeProvider><HomePage sourceCount={1} navigate={jest.fn()} /></ThemeProvider>);
+  expect(screen.getByText('Dropbox')).toBeTruthy();
+  expect(screen.queryByRole('button', { name: 'Back up now' })).toBeNull();
 });

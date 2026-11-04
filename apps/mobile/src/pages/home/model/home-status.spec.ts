@@ -1,4 +1,4 @@
-import { homeStatus, type HomeObservation } from './home-status';
+import { homeStatus, otherTargetState, type HomeObservation } from './home-status';
 import type { FileQueue } from '../../../shared/api/file-transfer';
 import type { WebDavBackupStatus } from '../../../shared/api/backup-destinations';
 const job = { id: 'job', sourceId: 'source', recordId: 'record', name: 'file', state: 'completed' as const, acknowledgedBytes: '9007199254740993', totalBytes: '9007199254740993' };
@@ -31,4 +31,18 @@ test('progress uses exact acknowledged int64 values and never assumes a missing 
   expect(result.state).toBe('syncing'); expect(result.progress?.completed).toBe('4503599627370496'); expect(result.progress?.percent).toBe(49.99);
   expect(homeStatus({ ...input, queue: { ...queue, running: true, jobs: [{ ...job, totalBytes: undefined }] } }).progress).toBeUndefined();
   expect(homeStatus({ ...input, pcSelected: false, webdav: { ...dav, running: true, run: { ...dav.run!, state: 'running', counts: { ...dav.run!.counts, completedOperations: '2' } } } }).progress).toEqual({ kind: 'operations', completed: '2', total: '4', percent: 50 });
+});
+test('other destinations count only when enabled and keep the most urgent state', () => {
+  const dropbox = { id: 'dbx', label: 'Dropbox', kind: 'cloud' as const, enabled: true, run: { state: 'finished' } };
+  const alone = { ...input, pcSelected: false, queue: null };
+  expect(homeStatus({ ...alone, others: [dropbox] }).state).toBe('safe');
+  expect(homeStatus({ ...alone, others: [{ ...dropbox, enabled: false }] }).state).toBe('setup');
+  expect(homeStatus({ ...alone, others: [{ ...dropbox, run: undefined }] }).state).toBe('waiting');
+  expect(homeStatus({ ...alone, others: [dropbox, { ...dropbox, id: 'smb', kind: 'nas', run: { state: 'needs_attention' } }] }).state).toBe('attention');
+  expect(homeStatus({ ...alone, others: [dropbox, { ...dropbox, id: 'sftp', automaticError: 'auth_failed' }] }).state).toBe('error');
+  expect(homeStatus({ ...input, others: [{ ...dropbox, running: true }] })).toEqual({ state: 'syncing' });
+  expect(homeStatus({ ...input, others: [dropbox] }).state).toBe('safe');
+  expect(homeStatus({ ...input, sourceCount: 0, others: [dropbox] }).state).toBe('setup');
+  expect(otherTargetState({ ...dropbox, run: { state: 'finished', errorCode: 'x' } })).toBe('waiting');
+  expect(otherTargetState({ ...dropbox, run: { state: 'exhausted' } })).toBe('error');
 });
