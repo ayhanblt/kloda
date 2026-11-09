@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { View, useColorScheme as useSystemColorScheme } from 'react-native';
+import { Appearance as NativeAppearance, View, useColorScheme as useSystemColorScheme } from 'react-native';
 import { useColorScheme, vars } from 'nativewind';
 import * as SecureStore from 'expo-secure-store';
 import { themeColors, themeVariables, type Appearance } from './tokens';
@@ -22,7 +22,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }).catch(() => undefined);
     return () => { current = false; };
   }, []);
-  useEffect(() => { setColorScheme(preference); }, [preference, setColorScheme]);
+  useEffect(() => {
+    // NativeWind 4 sends null for system; RN 0.86 requires unspecified to follow OS changes.
+    if (preference === 'system') NativeAppearance.setColorScheme('unspecified');
+    else setColorScheme(preference);
+  }, [preference, setColorScheme]);
   const setPreference = (value: ThemePreference) => {
     revision.current += 1; update(value);
     void SecureStore.setItemAsync(key, value).catch(() => undefined);
