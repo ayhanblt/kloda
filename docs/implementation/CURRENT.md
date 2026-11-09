@@ -2,6 +2,8 @@
 
 Tarihî PASS taze kabul değildir.
 
+**09.11 rol/akış:** OpenCode v2; GPT plan+review, Claude kodlama (AGENTS.md "Roles and workflow"). Sıra: geçmiş review → kalan geliştirme (Lovable eksikleri dahil) → tek regresyon → fiziksel kabul. Proje skill'leri `.opencode/skills/`: grill-me, systematic-debugging, verification-before-completion (üçü `opencode/autoinvoke: false`). Açık: OpenCode Desktop'ta üç skill'in yükleme yolu doğrulaması, `.opencode/` commit/gitignore kararı, ana ajan için `opencode api*` deny (#53465). Sıradaki iş: geçmiş işin tek seferlik salt-okunur review'u.
+
 **05.11 gerçek kullanım açık bulguları:** [tek kayıt](field-findings-2026-11-05.md): Android–Mac eşleşme/tekrarlı durma,12PC Completed+1Receiving, fingerprint klasörü/rastgele media kimlikleri/retained part hardlink; WebDAV port URL içinde destekli fakat form açıklığı,TLS/CA/auth ve hata teşhisi eksikleri. İnceleme tamam; aktarım kök nedeni ADB bağlantısı koptuğu için açık. Kullanıcı bu tur geliştirme istemedi; yalnız bulgu kaydı yapıldı.
 
 ## Mobil tema uyumu — 05.11.2026

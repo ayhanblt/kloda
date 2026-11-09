@@ -12,7 +12,7 @@ startup input. They are repository documents, not an OMP runtime dependency. ADR
 
 ADR0018 is the approved Windows/macOS/Linux Desktop background lifecycle: retain authorized native receipt across UI departure; separately invalidate foreground invitation/approval work. Never restore close-on-blur as the receiver lifecycle or bypass foreground grant fences. Linux requires a usable visible control before hiding; provider/signing/storage and physical gates remain open.
 
-OMP-only model/agent aliases (`@smol`, `@default`, `fast`, `good`), internal URIs and tool names below are not assumed configured in Codex CLI. Use available CLI capabilities; preserve the project/security workflow rather than inventing equivalent tools or silently changing model configuration.
+OMP-only model/agent aliases (`@smol`, `@default`, `fast`, `good`), internal URIs and tool names below are not assumed configured in OpenCode or Codex CLI. Use available CLI capabilities; preserve the project/security workflow rather than inventing equivalent tools or silently changing model configuration.
 
 For documentation/audit-only requests, report and stop unless the user explicitly requests a return to already-authorized development afterward.
 
@@ -24,6 +24,24 @@ Do not use for: refactoring, writing scripts from scratch, debugging business lo
 When this policy applies, read the [targeted Context7 command reference](docs/implementation/archive/context7-command-reference.md) for resolution, version selection, quota and network-failure rules.
 <!-- context7 -->
 
+
+## Roles and workflow — user decision, 2026-11-09
+
+- Harness: OpenCode v2. Roles run in separate, user-started sessions:
+  GPT plans and reviews; Claude (Opus) implements. Earlier role splits
+  (Codex implementer, Claude design-only or Claude owning steps 18–20) are void.
+- Order: (1) one-time review of past work, (2) finish remaining development,
+  including Lovable transfer gaps, (3) one full regression run, (4) physical
+  acceptance per the 20–21 collection and field findings.
+- Every work item starts from a GPT plan: goal, files/flows, behavior to
+  preserve, narrowest validation. Open product decisions go through `grill-me`.
+- Implementer handoff to review: start HEAD, diff scope (tracked + untracked),
+  commands run with log paths under `docs/implementation/evidence/`, fresh vs.
+  reused evidence, open gates. Review findings return only as scoped fixes.
+- A GPT review of the real diff in a separate session counts as the
+  independent review gate. A same-session self-review still does not.
+- This section supersedes any conflicting older role or automatic-continuation
+  text in this file or in archived handoffs.
 
 ## Single-agent and usage policy — user decision, 2026-10-29
 
@@ -83,11 +101,8 @@ When this policy applies, read the [targeted Context7 command reference](docs/im
   capture script as pending in CURRENT; do not invent a runnable command.
 
 ## Execution flow
-Continue through roadmap steps without waiting for user confirmation.
-
-Stay within16 until its acceptance criteria are reported before17. Record new
-UI/documentation work as pending in CURRENT and interrupt only on explicit user
-request. Update CURRENT, not a growing history, after a meaningful work group.
+Follow the order in "Roles and workflow"; do not start a work item without
+its GPT plan. Update CURRENT, not a growing history, after a meaningful work group.
 
 After completing a task:
 - report its acceptance using existing successful evidence without rerunning it,
@@ -101,7 +116,7 @@ Stop only if:
 - progress is blocked by missing information or failing infrastructure.
 
 
-## Codex Development Workflow
+## Development Workflow
 
 - Treat the current ADRs and implementation handoff as authoritative.
 - Read the relevant ADR before modifying security-sensitive code.
