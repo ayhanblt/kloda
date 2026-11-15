@@ -4,52 +4,102 @@ import android.app.job.JobParameters
 import android.app.job.JobService
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.atomic.AtomicBoolean
+
+/**
+ * R1 contract §2: RAM lifecycle of one exact E (service + lane + saved params). Worker authority (RUNNING) and the
+ * retained answer to a late OS stop (COMPLETING/RETAINED + `stop`) are separate; phase/stop/ticket/verdict change only
+ * under the Scheduler arbiter. No persistence, timer or terminal-ack assumption.
+ */
+internal open class FtpsSlot(val lane: Int) {
+  enum class Phase { RUNNING, COMPLETING, RETAINED, STOPPED }
+  enum class Stop { RETRY, NO_RETRY, HOLD }
+  @Volatile var phase = Phase.RUNNING
+  @Volatile var stop = Stop.NO_RETRY
+  /** Lane generation at delivery: a newer delivery or an explicit revoke voids this E's retry/recovery. */
+  @Volatile var epoch = 0L
+  /** Claimed run stopped while RUNNING: one recovery decision for the same D/epoch, consumed by its completion. */
+  @Volatile var ticket = false
+  /** WATCH fallback published by an ordinary recovery while this E still owned its unknown replacement. */
+  @Volatile var verdict: AndroidFtpsScheduler.Rewatch? = null
+}
 
 /** The lease exists only for this native JobService callback and exact run. */
 class AndroidFtpsJob : JobService() {
-  private class Execution(val parameters: JobParameters) {
-    val stopped = AtomicBoolean(false)
+  private class Execution(val parameters: JobParameters) : FtpsSlot(parameters.jobId) {
     val done = CountDownLatch(1)
     @Volatile var result: FtpsRun? = null
-    var plan: FtpsPlan? = null
+    /** Claimed P; published together with P.run in the monitor→sourceLock commit, read by stop only under the arbiter. */
+    @Volatile var plan: FtpsPlan? = null
+    /** Pre-admission credential wait: P/run untouched; only this JOB is retried by OS backoff. */
+    @Volatile var locked = false
+    /** WATCH same-URI replacement outcome (§4.8); null = not attempted. Decided by `complete`, never in finally. */
+    @Volatile var watch: AndroidFtpsScheduler.Rewatch? = null
   }
+  /** Lane → at most one slot of this service: a live worker E or a worker-closed E retaining its stop answer. */
   private val executions = java.util.concurrent.ConcurrentHashMap<Int, Execution>()
+  /** Worker side-effect authority: own slot AND RUNNING (volatile snapshot; read lock-free, also under sourceLock). */
+  private fun live(execution: Execution) = executions[execution.lane] === execution && execution.phase == FtpsSlot.Phase.RUNNING
   override fun onStartJob(params: JobParameters): Boolean {
     if (!AndroidFtpsRuntime.supported()) return false
     if (params.jobId !in setOf(AndroidFtpsScheduler.JOB, AndroidFtpsScheduler.WATCH)) return false
     val execution = Execution(params)
-    if (executions.putIfAbsent(params.jobId, execution) != null) return false
+    // A new delivery retires a worker-closed (RETAINED) slot; an active RUNNING/COMPLETING E is never overwritten.
+    val accepted = AndroidFtpsScheduler.arbiter {
+      val prior = executions[params.jobId]?.phase
+      if (prior == FtpsSlot.Phase.RUNNING || prior == FtpsSlot.Phase.COMPLETING) false
+      else { execution.epoch = AndroidFtpsScheduler.started(params.jobId); executions[params.jobId] = execution; true }
+    }
+    if (!accepted) return false
     Thread({
+      val token = params.extras.getString("token")
       try {
-        if (params.jobId == AndroidFtpsScheduler.WATCH) AndroidFtpsScheduler.changed(applicationContext)
-        else execute(execution)
+        if (params.jobId == AndroidFtpsScheduler.WATCH) {
+          AndroidFtpsScheduler.changed(applicationContext, token) { live(execution) }
+          execution.watch = AndroidFtpsScheduler.rewatch(applicationContext, token, execution) { live(execution) }
+        } else execute(execution)
       } catch (failure: Exception) {
-        runCatching { AndroidFtpsScheduler.reportCurrent(applicationContext, params.extras.getString("token"), (failure as? FilesFailure)?.code ?: "automatic_unavailable") }
+        execution.locked = params.jobId == AndroidFtpsScheduler.JOB && execution.plan == null && AndroidFtpsQueue.code(failure) == "credential_locked"
+        val code = if (execution.locked) "credential_locked" else (failure as? FilesFailure)?.code ?: "automatic_unavailable"
+        runCatching { AndroidFtpsScheduler.reportCurrent(applicationContext, token, code, { live(execution) }, params.jobId) }
       } finally {
-        executions.remove(params.jobId, execution)
         AndroidFtpsRuntime.endAutomatic(execution, interrupt = true)
-        if (!execution.stopped.get()) jobFinished(params, false)
-        if (params.jobId == AndroidFtpsScheduler.WATCH) getSystemService(android.app.job.JobScheduler::class.java).cancel(AndroidFtpsScheduler.WATCH)
-        AndroidFtpsScheduler.reconcile(applicationContext)
+        runCatching {
+          val own = { executions[params.jobId] === execution }
+          val retry = AndroidFtpsScheduler.complete(this, params, execution, own, execution.locked, execution.plan != null, execution.watch)
+          // The own finish goes to the OS outside the monitor; the published stop answer stays retained across it.
+          if (retry != null) try { AndroidFtpsScheduler.os.finish(this, params, retry) } finally { AndroidFtpsScheduler.retain(execution) }
+        }
       }
     }, "kloda-ftps-job").start()
     return true
   }
+  /** Platform stop params are matched to the lane's active local E by envelope, never by object identity (§4.6). */
+  private fun envelope(params: JobParameters) = params.extras.let {
+    listOf(it.getString("token"), it.getString("binding"), it.getString("target"), it.getLong("occurrence", -1), it.getLong("dispatch", -1))
+  }
+  /** Decided under the arbiter (§2 table); this E's slot is consumed by its stop answer. Runtime cleanup outside. */
   override fun onStopJob(params: JobParameters): Boolean {
-    executions[params.jobId]?.takeIf { it.parameters.extras.getString("token") == params.extras.getString("token") }?.let {
-      executions.remove(params.jobId, it); it.stopped.set(true)
-      AndroidFtpsRuntime.endAutomatic(it, interrupt = true)
-      it.done.countDown()
+    var stopped: Execution? = null
+    val retry = AndroidFtpsScheduler.arbiter {
+      val execution = executions[params.jobId]?.takeIf { envelope(it.parameters) == envelope(params) } ?: return@arbiter false
+      executions.remove(params.jobId, execution); stopped = execution
+      AndroidFtpsScheduler.stopped(applicationContext, execution, params.extras.getString("token"), execution.plan != null)
     }
-    return false
+    stopped?.let { AndroidFtpsRuntime.endAutomatic(it, interrupt = true); it.done.countDown() }
+    return retry
   }
   override fun onDestroy() {
-    executions.values.forEach { it.stopped.set(true); AndroidFtpsRuntime.endAutomatic(it, interrupt = true); it.done.countDown() }
-    executions.clear(); super.onDestroy()
+    val closed = AndroidFtpsScheduler.arbiter {
+      executions.values.toList().onEach {
+        if (it.phase == FtpsSlot.Phase.RUNNING && it.plan != null) it.ticket = true
+        it.phase = FtpsSlot.Phase.STOPPED
+      }.also { executions.clear() }
+    }
+    closed.forEach { AndroidFtpsRuntime.endAutomatic(it, interrupt = true); it.done.countDown() }
+    super.onDestroy()
   }
-  private fun current(execution: Execution): Boolean = !execution.stopped.get() && !AndroidBackupScheduler.paused(applicationContext) &&
-    AndroidFtpsScheduler.current(applicationContext, execution.parameters.extras.getString("token"))
+  private fun current(execution: Execution): Boolean = live(execution) && !AndroidBackupScheduler.paused(applicationContext) &&
+    AndroidFtpsScheduler.admits() && AndroidFtpsScheduler.current(applicationContext, execution.parameters.extras.getString("token"))
   private fun matches(plan: FtpsPlan): Boolean {
     val header = AndroidFtpsRuntime.queue(applicationContext).destination() ?: return false
     return header.target == plan.target && header.revision == plan.binding
@@ -86,14 +136,17 @@ class AndroidFtpsJob : JobService() {
       }
       val (expected, candidate) = prepared
       if (!queue.available() || !AndroidFtpsRuntime.beginAutomatic(execution, candidate.id) { current(execution) }) {
-        AndroidFtpsScheduler.defer(context, expected); return
+        AndroidFtpsScheduler.defer(context, expected, execution.parameters.extras.getString("token")) { live(execution) }; return
       }
       try {
-        synchronized(AndroidSyncJournal.sourceLock) {
-          if (!current(execution) || queue.schedule.read() != expected || !matches(expected)) throw FilesFailure("settings_changed")
-          val claimed = expected.copy(run = candidate.id)
-          queue.schedule.save(claimed, expected); execution.plan = claimed
-          queue.runs.save(candidate)
+        // §2 claim commit: monitor→sourceLock, so a stop decides on E.plan and P.run from the same critical section.
+        AndroidFtpsScheduler.arbiter {
+          synchronized(AndroidSyncJournal.sourceLock) {
+            if (!current(execution) || queue.schedule.read() != expected || !matches(expected)) throw FilesFailure("settings_changed")
+            val claimed = expected.copy(run = candidate.id)
+            queue.schedule.save(claimed, expected); execution.plan = claimed
+            queue.runs.save(candidate)
+          }
         }
         if (!current(execution)) throw FilesFailure("os_interrupted")
         queue.start(automatic = true, prior = candidate) { result -> execution.result = result; execution.done.countDown() }
@@ -101,17 +154,18 @@ class AndroidFtpsJob : JobService() {
       } catch (failure: Exception) {
         AndroidFtpsRuntime.endAutomatic(execution, interrupt = true)
         val claimed = execution.plan
+        if (claimed == null && AndroidFtpsQueue.code(failure) == "credential_locked") throw failure
         if (claimed != null) {
           val stored = queue.runs.read(id = candidate.id) ?: candidate
           execution.result = if (stored.phase == "running") {
-            val code = if (execution.stopped.get() || failure is InterruptedException) "os_interrupted" else (failure as? FilesFailure)?.code ?: "automatic_unavailable"
+            val code = if (execution.phase == FtpsSlot.Phase.STOPPED || failure is InterruptedException) "os_interrupted" else (failure as? FilesFailure)?.code ?: "automatic_unavailable"
             stored.failed(code, FtpsRun.clock(context)).also { queue.runs.save(it) }
           } else stored
         }
       } finally { AndroidFtpsRuntime.endAutomatic(execution, interrupt = true) }
       val result = execution.result ?: return
       val claimed = execution.plan ?: return
-      AndroidFtpsScheduler.finished(context, claimed, result, execution.parameters.extras.getString("token"))
+      AndroidFtpsScheduler.finished(context, claimed, result, execution.parameters.extras.getString("token")) { live(execution) }
     }
   }
 }

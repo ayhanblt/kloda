@@ -1,0 +1,1300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.12.0">
+
+    <issue
+        id="MissingPermission"
+        severity="Error"
+        message="Missing permissions required by BiometricManager.canAuthenticate: android.permission.USE_BIOMETRIC"
+        category="Correctness"
+        priority="9"
+        summary="Missing Permissions"
+        explanation="This check scans through your code and libraries and looks at the APIs being used, and checks this against the set of permissions required to access those APIs. If the code using those APIs is called at runtime, then the program will crash.&#xA;&#xA;Furthermore, for permissions that are revocable (with `targetSdkVersion` 23), client code must also be prepared to handle the calls throwing an exception if the user rejects the request for permission at runtime."
+        errorLine1="    if (activity.getSystemService(BiometricManager::class.java).canAuthenticate(allowed) != BiometricManager.BIOMETRIC_SUCCESS)"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidDeviceCheck.kt"
+            line="40"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        severity="Error"
+        message="Missing permissions required by BiometricPrompt.authenticate: android.permission.USE_BIOMETRIC"
+        category="Correctness"
+        priority="9"
+        summary="Missing Permissions"
+        explanation="This check scans through your code and libraries and looks at the APIs being used, and checks this against the set of permissions required to access those APIs. If the code using those APIs is called at runtime, then the program will crash.&#xA;&#xA;Furthermore, for permissions that are revocable (with `targetSdkVersion` 23), client code must also be prepared to handle the calls throwing an exception if the user rejects the request for permission at runtime."
+        errorLine1="      BiometricPrompt.Builder(activity).setTitle(title).setSubtitle(reason).setAllowedAuthenticators(allowed).build()"
+        errorLine2="      ^">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidDeviceCheck.kt"
+            line="45"
+            column="7"/>
+    </issue>
+
+    <issue
+        id="AnnotateVersionCheck"
+        severity="Warning"
+        message="This method should be annotated with `@ChecksSdkIntAtLeast(api=android.os.Build.VERSION_CODES.TIRAMISU)`"
+        category="Correctness"
+        priority="6"
+        summary="Annotate SDK_INT checks"
+        explanation="Methods which perform `SDK_INT` version checks (or field constants which reflect the result of a version check) in libraries should be annotated with `@ChecksSdkIntAtLeast`. This makes it possible for lint to correctly check calls into the library later to correctly understand that problematic code which is wrapped within a call into this library is safe after all."
+        errorLine1="  fun supported(): Boolean = BuildConfig.KLODA_FTPS_NATIVE &amp;&amp; android.os.Build.VERSION.SDK_INT >= 33"
+        errorLine2="      ~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsRuntime.kt"
+            line="18"
+            column="7"/>
+    </issue>
+
+    <issue
+        id="AnnotateVersionCheck"
+        severity="Warning"
+        message="This method should be annotated with `@ChecksSdkIntAtLeast(api=android.os.Build.VERSION_CODES.TIRAMISU)`"
+        category="Correctness"
+        priority="6"
+        summary="Annotate SDK_INT checks"
+        explanation="Methods which perform `SDK_INT` version checks (or field constants which reflect the result of a version check) in libraries should be annotated with `@ChecksSdkIntAtLeast`. This makes it possible for lint to correctly check calls into the library later to correctly understand that problematic code which is wrapped within a call into this library is safe after all."
+        errorLine1="  fun supported(): Boolean = BuildConfig.KLODA_SFTP_NATIVE &amp;&amp; android.os.Build.VERSION.SDK_INT >= 33"
+        errorLine2="      ~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpRuntime.kt"
+            line="18"
+            column="7"/>
+    </issue>
+
+    <issue
+        id="AnnotateVersionCheck"
+        severity="Warning"
+        message="This method should be annotated with `@ChecksSdkIntAtLeast(api=android.os.Build.VERSION_CODES.TIRAMISU)`"
+        category="Correctness"
+        priority="6"
+        summary="Annotate SDK_INT checks"
+        explanation="Methods which perform `SDK_INT` version checks (or field constants which reflect the result of a version check) in libraries should be annotated with `@ChecksSdkIntAtLeast`. This makes it possible for lint to correctly check calls into the library later to correctly understand that problematic code which is wrapped within a call into this library is safe after all."
+        errorLine1="  fun supported(): Boolean = BuildConfig.KLODA_SMB_NATIVE &amp;&amp; android.os.Build.VERSION.SDK_INT >= 33"
+        errorLine2="      ~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSmbRuntime.kt"
+            line="18"
+            column="7"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        severity="Warning"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        category="Correctness"
+        priority="6"
+        summary="Use `apply()` on `SharedPreferences`"
+        explanation="Consider using `apply()` instead of `commit` on shared preferences. Whereas `commit` blocks and writes its data to persistent storage immediately, `apply` will handle it in the background."
+        errorLine1="  private fun cleanup(legacy: SharedPreferences) { legacy.edit().remove(&quot;due&quot;).remove(&quot;binding&quot;).remove(&quot;dispatch&quot;).commit() }"
+        errorLine2="                                                                                                                    ~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticPlan.kt"
+            line="114"
+            column="117"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        severity="Warning"
+        message="Field requires API level 33 (current min is 24): `android.Manifest.permission#READ_MEDIA_IMAGES`"
+        category="Correctness"
+        priority="6"
+        summary="Using inlined constants on older versions"
+        explanation="This check scans through all the Android API field references in the application and flags certain constants, such as static final integers and Strings, which were introduced in later versions. These will actually be copied into the class files rather than being referenced, which means that the value is available even when running on older devices. In some cases that&apos;s fine, and in other cases it can result in a runtime crash or incorrect behavior. It depends on the context, so consider the code carefully and decide whether it&apos;s safe and can be suppressed or whether the code needs to be guarded.&#xA;&#xA;If you really want to use this API and don&apos;t need to support older devices just set the `minSdkVersion` in your `build.gradle` or `AndroidManifest.xml` files.&#xA;&#xA;If your code is **deliberately** accessing newer APIs, and you have ensured (e.g. with conditional execution) that this code will only ever be called on a supported platform, then you can annotate your class or method with the `@TargetApi` annotation specifying the local minimum SDK to apply, such as `@TargetApi(11)`, such that this check considers 11 rather than your manifest file&apos;s minimum SDK as the required API level."
+        errorLine1="        add(Manifest.permission.READ_MEDIA_IMAGES); add(Manifest.permission.READ_MEDIA_VIDEO)"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt"
+            line="26"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        severity="Warning"
+        message="Field requires API level 33 (current min is 24): `android.Manifest.permission#READ_MEDIA_VIDEO`"
+        category="Correctness"
+        priority="6"
+        summary="Using inlined constants on older versions"
+        explanation="This check scans through all the Android API field references in the application and flags certain constants, such as static final integers and Strings, which were introduced in later versions. These will actually be copied into the class files rather than being referenced, which means that the value is available even when running on older devices. In some cases that&apos;s fine, and in other cases it can result in a runtime crash or incorrect behavior. It depends on the context, so consider the code carefully and decide whether it&apos;s safe and can be suppressed or whether the code needs to be guarded.&#xA;&#xA;If you really want to use this API and don&apos;t need to support older devices just set the `minSdkVersion` in your `build.gradle` or `AndroidManifest.xml` files.&#xA;&#xA;If your code is **deliberately** accessing newer APIs, and you have ensured (e.g. with conditional execution) that this code will only ever be called on a supported platform, then you can annotate your class or method with the `@TargetApi` annotation specifying the local minimum SDK to apply, such as `@TargetApi(11)`, such that this check considers 11 rather than your manifest file&apos;s minimum SDK as the required API level."
+        errorLine1="        add(Manifest.permission.READ_MEDIA_IMAGES); add(Manifest.permission.READ_MEDIA_VIDEO)"
+        errorLine2="                                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt"
+            line="26"
+            column="57"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        severity="Warning"
+        message="Field requires API level 29 (current min is 24): `android.Manifest.permission#ACCESS_MEDIA_LOCATION`"
+        category="Correctness"
+        priority="6"
+        summary="Using inlined constants on older versions"
+        explanation="This check scans through all the Android API field references in the application and flags certain constants, such as static final integers and Strings, which were introduced in later versions. These will actually be copied into the class files rather than being referenced, which means that the value is available even when running on older devices. In some cases that&apos;s fine, and in other cases it can result in a runtime crash or incorrect behavior. It depends on the context, so consider the code carefully and decide whether it&apos;s safe and can be suppressed or whether the code needs to be guarded.&#xA;&#xA;If you really want to use this API and don&apos;t need to support older devices just set the `minSdkVersion` in your `build.gradle` or `AndroidManifest.xml` files.&#xA;&#xA;If your code is **deliberately** accessing newer APIs, and you have ensured (e.g. with conditional execution) that this code will only ever be called on a supported platform, then you can annotate your class or method with the `@TargetApi` annotation specifying the local minimum SDK to apply, such as `@TargetApi(11)`, such that this check considers 11 rather than your manifest file&apos;s minimum SDK as the required API level."
+        errorLine1="      if (sdk >= 29) add(Manifest.permission.ACCESS_MEDIA_LOCATION)"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt"
+            line="28"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        severity="Warning"
+        message="Field requires API level 34 (current min is 24): `android.Manifest.permission#READ_MEDIA_VISUAL_USER_SELECTED`"
+        category="Correctness"
+        priority="6"
+        summary="Using inlined constants on older versions"
+        explanation="This check scans through all the Android API field references in the application and flags certain constants, such as static final integers and Strings, which were introduced in later versions. These will actually be copied into the class files rather than being referenced, which means that the value is available even when running on older devices. In some cases that&apos;s fine, and in other cases it can result in a runtime crash or incorrect behavior. It depends on the context, so consider the code carefully and decide whether it&apos;s safe and can be suppressed or whether the code needs to be guarded.&#xA;&#xA;If you really want to use this API and don&apos;t need to support older devices just set the `minSdkVersion` in your `build.gradle` or `AndroidManifest.xml` files.&#xA;&#xA;If your code is **deliberately** accessing newer APIs, and you have ensured (e.g. with conditional execution) that this code will only ever be called on a supported platform, then you can annotate your class or method with the `@TargetApi` annotation specifying the local minimum SDK to apply, such as `@TargetApi(11)`, such that this check considers 11 rather than your manifest file&apos;s minimum SDK as the required API level."
+        errorLine1="      if (sdk >= 34) arrayOf(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED) else emptyArray()"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt"
+            line="31"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        severity="Warning"
+        message="Field requires API level 33 (current min is 24): `android.Manifest.permission#READ_MEDIA_IMAGES`"
+        category="Correctness"
+        priority="6"
+        summary="Using inlined constants on older versions"
+        explanation="This check scans through all the Android API field references in the application and flags certain constants, such as static final integers and Strings, which were introduced in later versions. These will actually be copied into the class files rather than being referenced, which means that the value is available even when running on older devices. In some cases that&apos;s fine, and in other cases it can result in a runtime crash or incorrect behavior. It depends on the context, so consider the code carefully and decide whether it&apos;s safe and can be suppressed or whether the code needs to be guarded.&#xA;&#xA;If you really want to use this API and don&apos;t need to support older devices just set the `minSdkVersion` in your `build.gradle` or `AndroidManifest.xml` files.&#xA;&#xA;If your code is **deliberately** accessing newer APIs, and you have ensured (e.g. with conditional execution) that this code will only ever be called on a supported platform, then you can annotate your class or method with the `@TargetApi` annotation specifying the local minimum SDK to apply, such as `@TargetApi(11)`, such that this check considers 11 rather than your manifest file&apos;s minimum SDK as the required API level."
+        errorLine1="      val media = if (sdk >= 33) granted(Manifest.permission.READ_MEDIA_IMAGES) &amp;&amp; granted(Manifest.permission.READ_MEDIA_VIDEO)"
+        errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt"
+            line="34"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        severity="Warning"
+        message="Field requires API level 33 (current min is 24): `android.Manifest.permission#READ_MEDIA_VIDEO`"
+        category="Correctness"
+        priority="6"
+        summary="Using inlined constants on older versions"
+        explanation="This check scans through all the Android API field references in the application and flags certain constants, such as static final integers and Strings, which were introduced in later versions. These will actually be copied into the class files rather than being referenced, which means that the value is available even when running on older devices. In some cases that&apos;s fine, and in other cases it can result in a runtime crash or incorrect behavior. It depends on the context, so consider the code carefully and decide whether it&apos;s safe and can be suppressed or whether the code needs to be guarded.&#xA;&#xA;If you really want to use this API and don&apos;t need to support older devices just set the `minSdkVersion` in your `build.gradle` or `AndroidManifest.xml` files.&#xA;&#xA;If your code is **deliberately** accessing newer APIs, and you have ensured (e.g. with conditional execution) that this code will only ever be called on a supported platform, then you can annotate your class or method with the `@TargetApi` annotation specifying the local minimum SDK to apply, such as `@TargetApi(11)`, such that this check considers 11 rather than your manifest file&apos;s minimum SDK as the required API level."
+        errorLine1="      val media = if (sdk >= 33) granted(Manifest.permission.READ_MEDIA_IMAGES) &amp;&amp; granted(Manifest.permission.READ_MEDIA_VIDEO)"
+        errorLine2="                                                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt"
+            line="34"
+            column="92"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        severity="Warning"
+        message="Field requires API level 29 (current min is 24): `android.Manifest.permission#ACCESS_MEDIA_LOCATION`"
+        category="Correctness"
+        priority="6"
+        summary="Using inlined constants on older versions"
+        explanation="This check scans through all the Android API field references in the application and flags certain constants, such as static final integers and Strings, which were introduced in later versions. These will actually be copied into the class files rather than being referenced, which means that the value is available even when running on older devices. In some cases that&apos;s fine, and in other cases it can result in a runtime crash or incorrect behavior. It depends on the context, so consider the code carefully and decide whether it&apos;s safe and can be suppressed or whether the code needs to be guarded.&#xA;&#xA;If you really want to use this API and don&apos;t need to support older devices just set the `minSdkVersion` in your `build.gradle` or `AndroidManifest.xml` files.&#xA;&#xA;If your code is **deliberately** accessing newer APIs, and you have ensured (e.g. with conditional execution) that this code will only ever be called on a supported platform, then you can annotate your class or method with the `@TargetApi` annotation specifying the local minimum SDK to apply, such as `@TargetApi(11)`, such that this check considers 11 rather than your manifest file&apos;s minimum SDK as the required API level."
+        errorLine1="      return media &amp;&amp; (sdk &lt; 29 || granted(Manifest.permission.ACCESS_MEDIA_LOCATION))"
+        errorLine2="                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt"
+            line="36"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        severity="Error"
+        message="Call requires API level 26 (current min is 24): `android.app.job.JobInfo.Builder#setRequiresBatteryNotLow`"
+        category="Correctness"
+        priority="6"
+        summary="Calling new methods on older versions"
+        explanation="This check scans through all the Android API calls in the application and warns about any calls that are not available on **all** versions targeted by this application (according to its minimum SDK attribute in the manifest).&#xA;&#xA;If you really want to use this API and don&apos;t need to support older devices just set the `minSdkVersion` in your `build.gradle` or `AndroidManifest.xml` files.&#xA;&#xA;If your code is **deliberately** accessing newer APIs, and you have ensured (e.g. with conditional execution) that this code will only ever be called on a supported platform, then you can annotate your class or method with the `@TargetApi` annotation specifying the local minimum SDK to apply, such as `@TargetApi(11)`, such that this check considers 11 rather than your manifest file&apos;s minimum SDK as the required API level.&#xA;&#xA;If you are deliberately setting `android:` attributes in style definitions, make sure you place this in a `values-v`*NN* folder in order to avoid running into runtime conflicts on certain devices where manufacturers have added custom attributes whose ids conflict with the new ones on later platforms.&#xA;&#xA;Similarly, you can use tools:targetApi=&quot;11&quot; in an XML file to indicate that the element will only be inflated in an adequate context."
+        errorLine1="    JobInfo.Builder(AndroidS3Automatic.JOB, component).setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED).setRequiresBatteryNotLow(true)"
+        errorLine2="                                                                                                              ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Automatic.kt"
+            line="46"
+            column="111"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.browser:browser than 1.9.0 is available: 1.10.0"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="  implementation(&apos;androidx.browser:browser:1.9.0&apos;)"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/build.gradle"
+            line="12"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UseRequiresApi"
+        severity="Warning"
+        message="Use `@RequiresApi(Build.VERSION_CODES.R) instead of `@TargetApi` to propagate the requirement to callers of `prompt`"
+        category="Correctness"
+        priority="2"
+        summary="Use `@RequiresApi` instead of `@TargetApi`"
+        explanation="The `@TargetApi` annotation only *suppresses* API warnings locally. `@RequiresApi` on the other hand will propagate the requirement out to any *callers* of this API, making sure that they either perform API level checks (using for example `SDK_INT`), or defining `@RequiresApi` annotations themselves.&#xA;&#xA;(The `@TargetApi` annotation predates `@RequiresApi`, and was introduced as an early way to *suppress* lint API warnings for a particular API level. Accidentally using `@TargetApi` can lead to crashes since there is no check that other calls to this method actually check that the call is safe.)"
+        errorLine1="  @android.annotation.TargetApi(Build.VERSION_CODES.R)"
+        errorLine2="  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidDeviceCheck.kt"
+            line="37"
+            column="3"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 24"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="    if (Build.VERSION.SDK_INT >= 23) {"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/NativeLanRoutes.kt"
+            line="87"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is never &lt; 24"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="    if (Build.VERSION.SDK_INT &lt; 23) return &quot;unsupported&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/NativeLanRoutes.kt"
+            line="103"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        severity="Warning"
+        message="Do not place Android context classes in static fields (static reference to `AndroidFtpsQueue` which has field `app` pointing to `Context`); this is a memory leak"
+        category="Performance"
+        priority="6"
+        summary="Static Field Leaks"
+        explanation="A static field will leak contexts.&#xA;&#xA;Non-static inner classes have an implicit reference to their outer class. If that outer class is for example a `Fragment` or `Activity`, then this reference means that the long-running handler/loader/task will hold a reference to the activity which prevents it from getting garbage collected.&#xA;&#xA;Similarly, direct field references to activities and fragments from these longer running instances can cause leaks.&#xA;&#xA;ViewModel classes should never point to Views or non-application Contexts."
+        errorLine1="  private var sender: AndroidFtpsQueue? = null"
+        errorLine2="  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsRuntime.kt"
+            line="9"
+            column="3"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        severity="Warning"
+        message="Do not place Android context classes in static fields (static reference to `AndroidFilesQueue` which has field `context` pointing to `Context`); this is a memory leak"
+        category="Performance"
+        priority="6"
+        summary="Static Field Leaks"
+        explanation="A static field will leak contexts.&#xA;&#xA;Non-static inner classes have an implicit reference to their outer class. If that outer class is for example a `Fragment` or `Activity`, then this reference means that the long-running handler/loader/task will hold a reference to the activity which prevents it from getting garbage collected.&#xA;&#xA;Similarly, direct field references to activities and fragments from these longer running instances can cause leaks.&#xA;&#xA;ViewModel classes should never point to Views or non-application Contexts."
+        errorLine1="  @Volatile var files: AndroidFilesQueue? = null"
+        errorLine2="  ^">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPairingRuntime.kt"
+            line="12"
+            column="3"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        severity="Warning"
+        message="Do not place Android context classes in static fields (static reference to `AndroidS3Queue` which has field `app` pointing to `Context`); this is a memory leak"
+        category="Performance"
+        priority="6"
+        summary="Static Field Leaks"
+        explanation="A static field will leak contexts.&#xA;&#xA;Non-static inner classes have an implicit reference to their outer class. If that outer class is for example a `Fragment` or `Activity`, then this reference means that the long-running handler/loader/task will hold a reference to the activity which prevents it from getting garbage collected.&#xA;&#xA;Similarly, direct field references to activities and fragments from these longer running instances can cause leaks.&#xA;&#xA;ViewModel classes should never point to Views or non-application Contexts."
+        errorLine1="  @Volatile private var instance: AndroidS3Queue? = null"
+        errorLine2="  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Runtime.kt"
+            line="10"
+            column="3"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        severity="Warning"
+        message="Do not place Android context classes in static fields (static reference to `AndroidSftpQueue` which has field `app` pointing to `Context`); this is a memory leak"
+        category="Performance"
+        priority="6"
+        summary="Static Field Leaks"
+        explanation="A static field will leak contexts.&#xA;&#xA;Non-static inner classes have an implicit reference to their outer class. If that outer class is for example a `Fragment` or `Activity`, then this reference means that the long-running handler/loader/task will hold a reference to the activity which prevents it from getting garbage collected.&#xA;&#xA;Similarly, direct field references to activities and fragments from these longer running instances can cause leaks.&#xA;&#xA;ViewModel classes should never point to Views or non-application Contexts."
+        errorLine1="  private var sender: AndroidSftpQueue? = null"
+        errorLine2="  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpRuntime.kt"
+            line="9"
+            column="3"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        severity="Warning"
+        message="Do not place Android context classes in static fields (static reference to `AndroidSmbQueue` which has field `app` pointing to `Context`); this is a memory leak"
+        category="Performance"
+        priority="6"
+        summary="Static Field Leaks"
+        explanation="A static field will leak contexts.&#xA;&#xA;Non-static inner classes have an implicit reference to their outer class. If that outer class is for example a `Fragment` or `Activity`, then this reference means that the long-running handler/loader/task will hold a reference to the activity which prevents it from getting garbage collected.&#xA;&#xA;Similarly, direct field references to activities and fragments from these longer running instances can cause leaks.&#xA;&#xA;ViewModel classes should never point to Views or non-application Contexts."
+        errorLine1="  private var sender: AndroidSmbQueue? = null"
+        errorLine2="  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSmbRuntime.kt"
+            line="9"
+            column="3"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        severity="Warning"
+        message="Do not place Android context classes in static fields (static reference to `AndroidWebDavQueue` which has field `context` pointing to `Context`); this is a memory leak"
+        category="Performance"
+        priority="6"
+        summary="Static Field Leaks"
+        explanation="A static field will leak contexts.&#xA;&#xA;Non-static inner classes have an implicit reference to their outer class. If that outer class is for example a `Fragment` or `Activity`, then this reference means that the long-running handler/loader/task will hold a reference to the activity which prevents it from getting garbage collected.&#xA;&#xA;Similarly, direct field references to activities and fragments from these longer running instances can cause leaks.&#xA;&#xA;ViewModel classes should never point to Views or non-application Contexts."
+        errorLine1="  private var sender: AndroidWebDavQueue? = null"
+        errorLine2="  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidWebDavRuntime.kt"
+            line="9"
+            column="3"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    if (!prefs(context).edit().remove(&quot;automaticExecutionError&quot;).remove(&quot;automaticExecutionBinding&quot;).commit()) runtimeError = &quot;storage_failure&quot;"
+        errorLine2="         ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt"
+            line="35"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    if (!prefs(context).edit().putBoolean(&quot;automaticPaused&quot;, false).commit()) throw FilesFailure(&quot;storage_failure&quot;)"
+        errorLine2="         ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt"
+            line="81"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        if (!preferences.edit().putString(&quot;automaticDispatchToken&quot;, extras.getString(&quot;token&quot;)).commit()) throw FilesFailure(&quot;storage_failure&quot;)"
+        errorLine2="             ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt"
+            line="135"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      if (!preferences.edit().remove(&quot;automaticError&quot;).commit()) runtimeError = &quot;storage_failure&quot;"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt"
+            line="141"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    if (!preferences.edit().putLong(&quot;automaticDue&quot;, due).putLong(&quot;automaticOccurrence&quot;, if (retry == null) due else occurrence)"
+        errorLine2="         ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt"
+            line="163"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      if (!preferences.edit().putLong(&quot;automaticDue&quot;, now).putLong(&quot;automaticOccurrence&quot;, now).remove(&quot;automaticDueElapsed&quot;).remove(&quot;automaticDueBoot&quot;).commit()) throw FilesFailure(&quot;storage_failure&quot;)"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt"
+            line="175"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      else listOf(DocumentsContract.buildChildDocumentsUriUsingTree(Uri.parse(source), DocumentsContract.getTreeDocumentId(Uri.parse(source))))"
+        errorLine2="                                                                    ~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt"
+            line="188"
+            column="69"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      else listOf(DocumentsContract.buildChildDocumentsUriUsingTree(Uri.parse(source), DocumentsContract.getTreeDocumentId(Uri.parse(source))))"
+        errorLine2="                                                                                                                           ~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidBackupScheduler.kt"
+            line="188"
+            column="124"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    val tree = Uri.parse(treeReference)"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsFilesRestore.kt"
+            line="35"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        val library = media.library(intent?.uri?.let { android.net.Uri.parse(it) })"
+        errorLine2="                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsPhotosImport.kt"
+            line="58"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      (uri != null &amp;&amp; (uri.length > 8192 || android.net.Uri.parse(uri).scheme != &quot;content&quot;)) ||"
+        errorLine2="                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsPhotosJournal.kt"
+            line="24"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      listOfNotNull(directory, document).any { it.toByteArray().size > 8192 || Uri.parse(it).scheme != &quot;content&quot; } ||"
+        errorLine2="                                                                               ~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsRestoreJournal.kt"
+            line="18"
+            column="80"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      val url = Uri.parse(provider.authorize).buildUpon()"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidOAuthLogin.kt"
+            line="172"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      val expected = Uri.parse(request.provider.redirect)"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidOAuthLogin.kt"
+            line="183"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    val uri = Uri.parse(intent.uri ?: return null)"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosMedia.kt"
+            line="76"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        val library = media.library(intent?.uri?.let { android.net.Uri.parse(it) })"
+        errorLine2="                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosRestore.kt"
+            line="60"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      if (!FilesRunContext.stamp(preferences.edit().putString(&quot;photoSources&quot;, values.toString())).commit()) throw FilesFailure(&quot;storage_failure&quot;)"
+        errorLine2="                                 ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt"
+            line="98"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    if (sources.any { it[&quot;id&quot;] == id } &amp;&amp; !FilesRunContext.stamp(preferences.edit().putString(&quot;photoSources&quot;, remaining.toString())).commit()) throw FilesFailure(&quot;storage_failure&quot;)"
+        errorLine2="                                                                 ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt"
+            line="106"
+            column="66"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    val result = query(Uri.parse(reference), projection, null, null, null).use { cursor ->"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt"
+            line="158"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    val uri = Uri.parse(reference)"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidPhotosSources.kt"
+            line="189"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SQLiteDatabase.transaction` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    database.beginTransaction()"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidRecoveryCatalogJournal.kt"
+            line="78"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="  private fun cleanup(legacy: SharedPreferences) { legacy.edit().remove(&quot;due&quot;).remove(&quot;binding&quot;).remove(&quot;dispatch&quot;).commit() }"
+        errorLine2="                                                   ~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticPlan.kt"
+            line="114"
+            column="52"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    val tree = Uri.parse(treeReference)"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3FilesRestore.kt"
+            line="35"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        val library = media.library(intent?.uri?.let { android.net.Uri.parse(it) })"
+        errorLine2="                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3PhotosImport.kt"
+            line="58"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      (uri != null &amp;&amp; (uri.length > 8192 || android.net.Uri.parse(uri).scheme != &quot;content&quot;)) ||"
+        errorLine2="                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3PhotosJournal.kt"
+            line="24"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      listOfNotNull(directory, document).any { it.toByteArray().size > 8192 || Uri.parse(it).scheme != &quot;content&quot; } ||"
+        errorLine2="                                                                               ~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3RestoreJournal.kt"
+            line="18"
+            column="80"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    val tree = Uri.parse(reference)"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSafSourceScanner.kt"
+            line="17"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    val document = Uri.parse(reference)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSafSourceScanner.kt"
+            line="28"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    val tree = Uri.parse(treeReference)"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpFilesRestore.kt"
+            line="35"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        val library = media.library(intent?.uri?.let { android.net.Uri.parse(it) })"
+        errorLine2="                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpPhotosImport.kt"
+            line="58"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      (uri != null &amp;&amp; (uri.length > 8192 || android.net.Uri.parse(uri).scheme != &quot;content&quot;)) ||"
+        errorLine2="                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpPhotosJournal.kt"
+            line="24"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      listOfNotNull(directory, document).any { it.toByteArray().size > 8192 || Uri.parse(it).scheme != &quot;content&quot; } ||"
+        errorLine2="                                                                               ~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpRestoreJournal.kt"
+            line="18"
+            column="80"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="          if (!prefs(context).edit().putString(&quot;sftpDispatchToken&quot;, token).commit()) throw FilesFailure(&quot;storage_failure&quot;)"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSftpScheduler.kt"
+            line="87"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    val tree = Uri.parse(treeReference)"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSmbFilesRestore.kt"
+            line="35"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        val library = media.library(intent?.uri?.let { android.net.Uri.parse(it) })"
+        errorLine2="                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSmbPhotosImport.kt"
+            line="58"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      (uri != null &amp;&amp; (uri.length > 8192 || android.net.Uri.parse(uri).scheme != &quot;content&quot;)) ||"
+        errorLine2="                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSmbPhotosJournal.kt"
+            line="24"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      listOfNotNull(directory, document).any { it.toByteArray().size > 8192 || Uri.parse(it).scheme != &quot;content&quot; } ||"
+        errorLine2="                                                                               ~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSmbRestoreJournal.kt"
+            line="18"
+            column="80"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="          if (!prefs(context).edit().putString(&quot;smbDispatchToken&quot;, token).commit()) throw FilesFailure(&quot;storage_failure&quot;)"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidSmbScheduler.kt"
+            line="87"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    val tree = Uri.parse(treeReference)"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidWebDavFilesRestore.kt"
+            line="34"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SQLiteDatabase.transaction` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    database.beginTransaction()"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidWebDavJournal.kt"
+            line="61"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SQLiteDatabase.transaction` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    database.beginTransaction()"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidWebDavJournal.kt"
+            line="81"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SQLiteDatabase.transaction` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    database.beginTransaction()"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidWebDavJournal.kt"
+            line="110"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        val library = media.library(intent?.uri?.let { android.net.Uri.parse(it) })"
+        errorLine2="                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidWebDavPhotosImport.kt"
+            line="55"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      (uri != null &amp;&amp; (uri.length > 8192 || android.net.Uri.parse(uri).scheme != &quot;content&quot;)) ||"
+        errorLine2="                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidWebDavPhotosJournal.kt"
+            line="24"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    if (!context.getSharedPreferences(&quot;kloda-sync&quot;, 0).edit().putString(&quot;backupContextRevision&quot;, UUID.randomUUID().toString()).commit()) throw FilesFailure(&quot;storage_failure&quot;)"
+        errorLine2="         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidWebDavQueue.kt"
+            line="36"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      listOfNotNull(directory, document).any { it.toByteArray().size > 8192 || Uri.parse(it).scheme != &quot;content&quot; } ||"
+        errorLine2="                                                                               ~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidWebDavRestoreJournal.kt"
+            line="18"
+            column="80"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SQLiteDatabase.transaction` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    database.beginTransaction()"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidWebDavSchedule.kt"
+            line="18"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="          if (!prefs(context).edit().putString(&quot;webdavDispatchToken&quot;, token).commit()) throw FilesFailure(&quot;storage_failure&quot;)"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidWebDavScheduler.kt"
+            line="57"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      if (!context.getSharedPreferences(&quot;kloda-sync&quot;, 0).edit().putString(&quot;filesContextRevision&quot;, UUID.randomUUID().toString()).commit()) throw FilesFailure(&quot;storage_failure&quot;)"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/FilesRunContext.kt"
+            line="20"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        try { CustomTabsIntent.Builder().build().launchUrl(activity, Uri.parse(start.login.toString())) }"
+        errorLine2="                                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaCloudModule.kt"
+            line="170"
+            column="70"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      if (removedReference != null &amp;&amp; !FilesRunContext.stamp(preferences().edit().putString(&quot;directorySources&quot;, remainingSources.toString())).commit()) {"
+        errorLine2="                                                             ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt"
+            line="103"
+            column="62"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="            Uri.parse(reference),"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt"
+            line="110"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="      if (!preferences().edit()"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt"
+            line="140"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="          &amp;&amp; !FilesRunContext.stamp(preferences.edit().putString(&quot;backupMode&quot;, &quot;scheduled&quot;).putInt(&quot;intervalHours&quot;, intervalHours).putString(&quot;localTime&quot;, localTime)).commit()) {"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt"
+            line="155"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="          &amp;&amp; !FilesRunContext.stamp(preferences.edit().putString(&quot;backupMode&quot;, &quot;live&quot;)).commit()) throw FilesFailure(&quot;storage_failure&quot;)"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt"
+            line="165"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    val documentId = DocumentsContract.getTreeDocumentId(Uri.parse(reference))"
+        errorLine2="                                                         ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt"
+            line="205"
+            column="58"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    if (!FilesRunContext.stamp(preferences().edit().putString(&quot;directorySources&quot;, sources.toString())).commit()) {"
+        errorLine2="                               ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/Users/ayhanblt/Desktop/projects/kloda/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSyncRuntimeModule.kt"
+            line="213"
+            column="32"/>
+    </issue>
+
+</issues>

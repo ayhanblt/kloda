@@ -1,0 +1,187 @@
+--- docs/implementation/evidence/f1-ftps-automatic-lock-2026-11-15/fl2/baseline/AndroidFtpsScheduler.kt.start	2026-11-15 20:55:21
++++ apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsScheduler.kt	2026-11-15 20:59:14
+@@ -87,25 +87,47 @@
+         val pending = scheduler.getPendingJob(JOB)
+         if (pending?.extras?.getString("binding") != plan.binding || pending.extras.getLong("dispatch") != plan.due ||
+           pending.extras.getString("token") != prefs(context).getString("ftpsDispatchToken", null)) {
+-          val token = UUID.randomUUID().toString()
+-          val extras = PersistableBundle().apply {
+-            putString("binding", plan.binding); putString("target", plan.target); putLong("occurrence", plan.occurrence)
+-            putLong("dispatch", plan.due); putString("token", token)
+-          }
+-          if (!prefs(context).edit().putString("ftpsDispatchToken", token).commit()) throw FilesFailure("storage_failure")
+-          val job = JobInfo.Builder(JOB, ComponentName(context, AndroidFtpsJob::class.java)).setExtras(extras)
+-            .setMinimumLatency(maxOf(0, plan.due - System.currentTimeMillis())).setPersisted(true).build()
+-          if (scheduler.schedule(job) != JobScheduler.RESULT_SUCCESS) throw FilesFailure("automatic_unavailable")
++          dispatch(context, scheduler, plan, maxOf(0, plan.due - System.currentTimeMillis()))
+         }
+         if (AndroidBackupScheduler.mode(context) == "live") AndroidBackupScheduler.watch(context, FilesRunContext.webdav(context).sources.values.toSet(), scheduler, WATCH, AndroidFtpsJob::class.java)
+         else os.cancel(context, WATCH)
+         report(context, null)
+       }
+     } catch (failure: Exception) {
++      val code = AndroidFtpsQueue.code(failure)
++      val wake = if (code == "credential_locked") runCatching { lockedWake(context) } else null
++      if (wake?.getOrNull() == true) return@synchronized
+       cancel(context)
+-      runCatching { report(context, AndroidFtpsQueue.code(failure)) }
++      runCatching { report(context, (wake?.exceptionOrNull() as? Exception)?.let(AndroidFtpsQueue::code) ?: code) }
+     }
+   }
++  private fun dispatch(context: Context, scheduler: JobScheduler, plan: FtpsPlan, latency: Long) {
++    val token = UUID.randomUUID().toString()
++    val extras = PersistableBundle().apply {
++      putString("binding", plan.binding); putString("target", plan.target); putLong("occurrence", plan.occurrence)
++      putLong("dispatch", plan.due); putString("token", token)
++    }
++    if (!prefs(context).edit().putString("ftpsDispatchToken", token).commit()) throw FilesFailure("storage_failure")
++    val job = JobInfo.Builder(JOB, ComponentName(context, AndroidFtpsJob::class.java)).setExtras(extras)
++      .setMinimumLatency(latency).setPersisted(true).build()
++    if (scheduler.schedule(job) != JobScheduler.RESULT_SUCCESS) throw FilesFailure("automatic_unavailable")
++  }
++  /**
++   * Locked reconcile: P is read-only. Keep the exact current JOB (all P fields + token) or arm a metadata-only
++   * delayed wake carrying the same P; latency never changes P.due. No P/disabled/mismatch → caller fails closed.
++   * WATCH is left untouched. Unlock still requires fresh capture/admission in the callback.
++   */
++  private fun lockedWake(context: Context): Boolean {
++    val plan = AndroidFtpsRuntime.queue(context).retainedPlanForWake() ?: return false
++    val scheduler = context.getSystemService(JobScheduler::class.java)
++    val extras = scheduler.getPendingJob(JOB)?.extras
++    val token = prefs(context).getString("ftpsDispatchToken", null)
++    if (extras == null || token == null || extras.getString("token") != token || extras.getString("binding") != plan.binding ||
++      extras.getString("target") != plan.target || extras.getLong("occurrence", -1) != plan.occurrence || extras.getLong("dispatch", -1) != plan.due)
++      dispatch(context, scheduler, plan, maxOf(300000L, plan.due - System.currentTimeMillis()))
++    report(context, "credential_locked")
++    return true
++  }
+   fun changed(context: Context) = synchronized(lock) {
+     if (!AndroidFtpsRuntime.supported()) return@synchronized
+     if (AndroidBackupScheduler.paused(context) || AndroidBackupScheduler.mode(context) != "live") return@synchronized
+--- docs/implementation/evidence/f1-ftps-automatic-lock-2026-11-15/fl2/baseline/AndroidFtpsQueue.kt.start	2026-11-15 20:55:21
++++ apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsQueue.kt	2026-11-15 20:59:00
+@@ -33,6 +33,19 @@
+     captureFault?.invoke()
+     profiles.capture()?.takeIf { enabled(it.profile) }?.let { Header(it.profile.target.archiveId(), it.context) }
+   }
++  /**
++   * Locked-device wake metadata only: stored P when the confirmed profile is the enabled one for P.target.
++   * Reads no secret/source/route; NEVER an admission or capture substitute — unlock still needs fresh capture.
++   */
++  internal fun retainedPlanForWake(): FtpsPlan? = locked {
++    val plan = schedule.read() ?: return@locked null
++    val stored = journal.database.rawQuery("SELECT e.profile FROM ftps_enabled e JOIN ftps_profile p ON p.id=1 AND p.target=e.profile AND p.ready=1 WHERE e.id=1 AND e.enabled=1", null)
++      .use { if (it.moveToFirst()) it.getString(0) else null } ?: return@locked null
++    val json = org.json.JSONObject(stored)
++    val target = FtpsTarget(json.getString("address"), json.getInt("port"), json.getString("hostname"), json.getString("root"),
++      json.getString("username"), json.getString("profileGeneration"), json.getString("credentialGeneration"))
++    plan.takeIf { it.target == target.archiveId() }
++  }
+   fun pauseRun(id: String, code: String) { val token = locked { active?.takeIf { it.run.id == id }?.token }; if (token != null) pause(code, token) }
+   fun configure(target: FtpsTarget, password: String) {
+     pause("settings_changed")
+--- docs/implementation/evidence/f1-ftps-automatic-lock-2026-11-15/fl2/baseline/AndroidFtpsAutomaticChecks.kt.start	2026-11-15 20:55:21
++++ apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsAutomaticChecks.kt	2026-11-15 20:59:52
+@@ -29,15 +29,22 @@
+       resetRunless(i)
+       group("ftps-product-factory-service") { AndroidFtpsProductChecks.run(i) }
+       group("ftps-fl1-locked-job-keeps-plan") { owned(i) { app, queue -> lockedJob(i, app, queue) } }
+-      "FTPS FL1 locked JOB: plan/run/lease kept, single own OS retry, no cancel/reconcile PASS; synthetic denial, not real Keyguard\n"
++      group("ftps-fl2-locked-reconcile-pending") { owned(i) { app, queue -> lockedReconcile(app, queue, pending = true) } }
++      group("ftps-fl2-locked-reconcile-absent") { owned(i) { app, queue -> lockedReconcile(app, queue, pending = false) } }
++      group("ftps-fl2-locked-reconcile-disabled") { owned(i) { app, queue -> lockedDisabled(app, queue) } }
++      "FTPS FL1 locked JOB + FL2 locked reconcile (pending kept / metadata wake / disabled no wake) PASS; synthetic denial, not real Keyguard\n"
+     }
+     else -> null
+   }
+ 
+   private class Recorder : AndroidFtpsScheduler.Os() {
+     val finishes = CopyOnWriteArrayList<Pair<Int, Boolean>>()
++    /** Callback identity per finish: a natural OS run may precede the forced one; each callback is judged on its own. */
++    val callbacks = CopyOnWriteArrayList<Int>()
+     val cancels = CopyOnWriteArrayList<Int>()
+-    override fun finish(service: JobService, params: JobParameters, retry: Boolean) { finishes += params.jobId to retry; super.finish(service, params, retry) }
++    override fun finish(service: JobService, params: JobParameters, retry: Boolean) {
++      finishes += params.jobId to retry; callbacks += System.identityHashCode(params); super.finish(service, params, retry)
++    }
+     override fun cancel(context: Context, id: Int) { cancels += id; super.cancel(context, id) }
+   }
+ 
+@@ -74,7 +81,10 @@
+       check(AndroidFtpsRuntime.beginAutomatic(probe, "fl1-lease-probe") { false }) { "lease still held" }
+       AndroidFtpsRuntime.endAutomatic(probe)
+       check(recorder.cancels.isEmpty()) { "cancel calls=${recorder.cancels} finishes=${recorder.finishes}" }
+-      check(recorder.finishes == listOf(AndroidFtpsScheduler.JOB to true)) { "finishes=${recorder.finishes} expected=[(${AndroidFtpsScheduler.JOB}, true)]" }
++      check(recorder.finishes.isNotEmpty() && recorder.finishes.all { it == (AndroidFtpsScheduler.JOB to true) } &&
++        recorder.callbacks.toSet().size == recorder.callbacks.size) {
++        "finishes=${recorder.finishes} callbacks=${recorder.callbacks} expected one (${AndroidFtpsScheduler.JOB}, true) per callback"
++      }
+       check(prefs.getString("ftpsDispatchToken", null) == token) { "dispatch token rotated" }
+       check(scheduler.getPendingJob(AndroidFtpsScheduler.JOB)?.extras?.getString("token") == token) { "own JOB not retained for OS backoff" }
+     } finally {
+@@ -83,6 +93,56 @@
+     }
+   }
+ 
++  /** FL2: P present, device locked, ordinary reconcile; own JOB present (kept) or absent (metadata-only delayed wake). */
++  private fun lockedReconcile(app: Context, queue: AndroidFtpsQueue, pending: Boolean) {
++    val scheduler = app.getSystemService(JobScheduler::class.java)
++    val prefs = app.getSharedPreferences("kloda-sync", 0)
++    AndroidFtpsScheduler.reconcile(app)
++    val first = checkNotNull(scheduler.getPendingJob(AndroidFtpsScheduler.JOB)) { "no JOB: ${AndroidFtpsScheduler.error(app)}" }
++    val watch = scheduler.getPendingJob(AndroidFtpsScheduler.WATCH) != null
++    val before = checkNotNull(queue.schedule.read()); val runsBefore = runs(queue)
++    if (!pending) { scheduler.cancel(AndroidFtpsScheduler.JOB); check(scheduler.getPendingJob(AndroidFtpsScheduler.JOB) == null) }
++    val recorder = Recorder(); AndroidFtpsScheduler.os = recorder
++    AndroidFtpsQueue.captureFault = { throw FtpsFailure("credential_locked") }
++    try {
++      AndroidFtpsScheduler.reconcile(app)
++      check(queue.schedule.read() == before) { "P changed: before=$before after=${queue.schedule.read()}" }
++      check(runs(queue) == runsBefore) { "runs changed" }
++      // A due JOB may start naturally meanwhile; it must take the FL1 locked path (own retry only), never cancel.
++      check(recorder.cancels.isEmpty() && recorder.finishes.all { it == (AndroidFtpsScheduler.JOB to true) }) { "cancel=${recorder.cancels} finish=${recorder.finishes}" }
++      check(AndroidFtpsScheduler.error(app) == "credential_locked") { "error=${AndroidFtpsScheduler.error(app)}" }
++      check((scheduler.getPendingJob(AndroidFtpsScheduler.WATCH) != null) == watch) { "WATCH changed" }
++      val job = checkNotNull(scheduler.getPendingJob(AndroidFtpsScheduler.JOB)) { "pending=$pending: no JOB after locked reconcile" }
++      val extras = job.extras
++      check(extras.getString("token") == prefs.getString("ftpsDispatchToken", null)) { "token not current" }
++      check(extras.getString("binding") == before.binding && extras.getString("target") == before.target &&
++        extras.getLong("occurrence", -1) == before.occurrence && extras.getLong("dispatch", -1) == before.due) { "wake extras != P" }
++      if (pending) check(extras.getString("token") == first.extras.getString("token")) { "valid JOB replaced" }
++      else check(job.minLatencyMillis >= 300000L) { "wake latency=${job.minLatencyMillis}" }
++      val deadline = android.os.SystemClock.elapsedRealtime() + 30000
++      while (busy() && android.os.SystemClock.elapsedRealtime() < deadline) Thread.sleep(50)
++      check(!busy() && recorder.cancels.isEmpty()) { "late callback: cancel=${recorder.cancels} finish=${recorder.finishes}" }
++      check(queue.schedule.read() == before && runs(queue) == runsBefore) { "P/runs changed by a late callback" }
++    } finally {
++      AndroidFtpsQueue.captureFault = null
++      AndroidFtpsScheduler.os = AndroidFtpsScheduler.Os()
++    }
++  }
++
++  /** FL2/§4.3: disabled opt-in gives no wake even while locked; existing fail-closed cancel stays. */
++  private fun lockedDisabled(app: Context, queue: AndroidFtpsQueue) {
++    val scheduler = app.getSystemService(JobScheduler::class.java)
++    AndroidFtpsScheduler.reconcile(app)
++    checkNotNull(scheduler.getPendingJob(AndroidFtpsScheduler.JOB)) { "no JOB: ${AndroidFtpsScheduler.error(app)}" }
++    queue.disable()
++    AndroidFtpsQueue.captureFault = { throw FtpsFailure("credential_locked") }
++    try {
++      AndroidFtpsScheduler.reconcile(app)
++      check(scheduler.getPendingJob(AndroidFtpsScheduler.JOB) == null) { "disabled profile kept/armed a wake" }
++      check(AndroidFtpsScheduler.error(app) == "credential_locked") { "error=${AndroidFtpsScheduler.error(app)}" }
++    } finally { AndroidFtpsQueue.captureFault = null }
++  }
++
+   /** Removes only this fixture's own profile/DB left by a failed FL check that produced no FTPS run/upload evidence. */
+   private fun resetRunless(i: Instrumentation) {
+     val app = i.targetContext
+@@ -141,6 +201,8 @@
+         if (keys.containsAlias(alias)) keys.deleteEntry(alias)
+         android.util.AtomicFile(vault).delete()
+         queue.journal.database.close()
++        // Test-only: drop the cached queue bound to the closed fixture DB so the next owned group opens a fresh one.
++        AndroidFtpsRuntime::class.java.getDeclaredField("sender").apply { isAccessible = true }.set(AndroidFtpsRuntime, null)
+         val directory = File(app.noBackupFilesDir, "kloda-ftps")
+         check(SQLiteDatabase.deleteDatabase(File(directory, "journal.sqlite")))
+         File(directory, "owned-product-fixture.json").delete()

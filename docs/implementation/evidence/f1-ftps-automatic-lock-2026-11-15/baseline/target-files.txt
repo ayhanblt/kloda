@@ -1,0 +1,6 @@
+23df8d47b88b37da3df36c3d8dcb9801c97aa8eb42ad38c3a9b8a5c47ad35152  apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsScheduler.kt
+07c247207752c923db170e1d33cf13df734cfdbd84d6f4e1da6131200f8cb387  apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsJob.kt
+05b6362bfa03841cbef0c2beba383fcd27d2b4f23e7cc69069632c919e3b57f2  apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsQueue.kt
+0e7d09cb3dafe4b30f7e8e14819186e30bfa5f36c4df69c096f8792d34bdd3cc  apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsOsChecks.kt
+f41ba44d649bfb47bf0000abf447a4805071c8ee8d86b845eedc0b3fb36cdab9  apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt
+ls: apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsAutomaticChecks.kt: No such file or directory

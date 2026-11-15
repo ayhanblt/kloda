@@ -30,7 +30,21 @@ internal class AndroidFtpsQueue(private val app: Context, val journal: AndroidFt
   data class Header(val target: String, val revision: String)
   fun destination(): Header? = locked {
     AndroidFtpsSources.capture(app, journal)
+    captureFault?.invoke()
     profiles.capture()?.takeIf { enabled(it.profile) }?.let { Header(it.profile.target.archiveId(), it.context) }
+  }
+  /**
+   * Locked-device wake metadata only: stored P when the confirmed profile is the enabled one for P.target.
+   * Reads no secret/source/route; NEVER an admission or capture substitute — unlock still needs fresh capture.
+   */
+  internal fun retainedPlanForWake(): FtpsPlan? = locked {
+    val plan = schedule.read() ?: return@locked null
+    val stored = journal.database.rawQuery("SELECT e.profile FROM ftps_enabled e JOIN ftps_profile p ON p.id=1 AND p.target=e.profile AND p.ready=1 WHERE e.id=1 AND e.enabled=1", null)
+      .use { if (it.moveToFirst()) it.getString(0) else null } ?: return@locked null
+    val json = org.json.JSONObject(stored)
+    val target = FtpsTarget(json.getString("address"), json.getInt("port"), json.getString("hostname"), json.getString("root"),
+      json.getString("username"), json.getString("profileGeneration"), json.getString("credentialGeneration"))
+    plan.takeIf { it.target == target.archiveId() }
   }
   fun pauseRun(id: String, code: String) { val token = locked { active?.takeIf { it.run.id == id }?.token }; if (token != null) pause(code, token) }
   fun configure(target: FtpsTarget, password: String) {
@@ -198,6 +212,8 @@ internal class AndroidFtpsQueue(private val app: Context, val journal: AndroidFt
     }
   }
   companion object {
+    /** Instrumentation-only throw-only denial at the credential capture boundary; never grants. */
+    @Volatile internal var captureFault: (() -> Unit)? = null
     fun code(error: Exception): String = when (error) {
       is FtpsFailure -> if (error.code == "connection_unavailable") "lan_unavailable" else error.code
       is FilesFailure -> error.code

@@ -1,0 +1,231 @@
+package com.kloda.sync
+
+import android.app.Instrumentation
+import android.app.job.JobScheduler
+import android.content.Context
+import java.util.UUID
+import java.util.concurrent.atomic.AtomicInteger
+
+// F1-FTPS FW/FS/FP lifecycle rows (next-plan §3) on the owned disposable test package; synthetic denial, not real Keyguard.
+internal object AndroidFtpsLifecycleChecks {
+  fun run(i: Instrumentation, group: (String, () -> Unit) -> Unit) {
+    group("ftps-fw1-locked-watch-keeps-plan") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> lockedWatch(i, app, queue) } }
+    group("ftps-fw2-open-watch-valid-early") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> validWatch(i, app, queue) } }
+    group("ftps-fw2-open-watch-capture-fail") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> failedCapture(i, app, queue) } }
+    group("ftps-fw2-open-watch-cas-mismatch") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> casMismatch(i, app, queue) } }
+    group("ftps-fw2-open-watch-claimed-run") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> claimedWatch(i, app, queue) } }
+    group("ftps-fs1-stale-job-finally-keeps-b") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> staleJobFinally(i, app, queue) } }
+  }
+
+  /** Holds the first JOB finish (A's finally) at a barrier; records every OS call made after the release. */
+  private class Gate : AndroidFtpsScheduler.Os() {
+    val entered = java.util.concurrent.CountDownLatch(1)
+    val release = java.util.concurrent.CountDownLatch(1)
+    @Volatile var released = false
+    val late = java.util.concurrent.CopyOnWriteArrayList<String>()
+    override fun finish(service: android.app.job.JobService, params: android.app.job.JobParameters, retry: Boolean) {
+      if (params.jobId == AndroidFtpsScheduler.JOB && entered.count > 0) { entered.countDown(); check(release.await(60, java.util.concurrent.TimeUnit.SECONDS)) }
+      else if (released) late += "finish(${params.jobId},$retry)"
+      super.finish(service, params, retry)
+    }
+    override fun cancel(context: Context, id: Int) { if (released) late += "cancel($id)"; super.cancel(context, id) }
+  }
+
+  /**
+   * FS1 (JOB): A = own JOB callback on a future P, held at its finally barrier; B = newer projection (new P, token, JOB,
+   * distinctive error) installed meanwhile. Released A must not change B's P/token/error/JOB/WATCH nor cancel/reconcile.
+   */
+  private fun staleJobFinally(i: Instrumentation, app: Context, queue: AndroidFtpsQueue) {
+    val scheduler = app.getSystemService(JobScheduler::class.java)
+    val prefs = app.getSharedPreferences("kloda-sync", 0)
+    val gate = Gate()
+    try {
+      val armed = future(app, queue)
+      AndroidFtpsQueue.captureFault = null // A: open device, P not due → no claim, ordinary finally.
+      AndroidFtpsScheduler.os = gate
+      AndroidFtpsAutomaticChecks.shell(i, "cmd jobscheduler run -f com.kloda.sync.test ${AndroidFtpsScheduler.JOB}")
+      check(gate.entered.await(30, java.util.concurrent.TimeUnit.SECONDS)) { "A never reached its finally" }
+      // B: newer P and projection while A is held (locked reconcile → new token/JOB, error credential_locked).
+      AndroidFtpsQueue.captureFault = { throw FtpsFailure("credential_locked") }
+      val later = armed.plan.due + 600000L
+      synchronized(AndroidSyncJournal.sourceLock) { queue.schedule.save(armed.plan.copy(occurrence = later, due = later), armed.plan) }
+      AndroidFtpsScheduler.reconcile(app)
+      val b = checkNotNull(queue.schedule.read()); val bToken = prefs.getString("ftpsDispatchToken", null)
+      val bJob = checkNotNull(scheduler.getPendingJob(AndroidFtpsScheduler.JOB)) { "B JOB missing" }
+      check(b.due == later && bToken != armed.token && bJob.extras.getString("token") == bToken) { "B not installed: P=$b" }
+      check(AndroidFtpsScheduler.error(app) == "credential_locked") { "B error=${AndroidFtpsScheduler.error(app)}" }
+      val bWatch = scheduler.getPendingJob(AndroidFtpsScheduler.WATCH)?.extras?.getString("token")
+      // Any reconcile by A would now fail closed (cancel + report) and so become visible.
+      AndroidFtpsQueue.captureFault = { throw SecurityException("fs1 synthetic capture failure") }
+      gate.released = true; gate.release.countDown()
+      val deadline = android.os.SystemClock.elapsedRealtime() + 30000
+      Thread.sleep(500)
+      while (AndroidFtpsAutomaticChecks.busy() && android.os.SystemClock.elapsedRealtime() < deadline) Thread.sleep(50)
+      Thread.sleep(500)
+      check(!AndroidFtpsAutomaticChecks.busy()) { "A still running" }
+      check(gate.late.isEmpty()) { "A late OS calls=${gate.late}" }
+      check(queue.schedule.read() == b && AndroidFtpsAutomaticChecks.runs(queue) == 0L) { "B P changed: $b → ${queue.schedule.read()}" }
+      check(prefs.getString("ftpsDispatchToken", null) == bToken &&
+        scheduler.getPendingJob(AndroidFtpsScheduler.JOB)?.extras?.getString("token") == bToken) { "B JOB/token changed" }
+      check(AndroidFtpsScheduler.error(app) == "credential_locked") { "B error overwritten: ${AndroidFtpsScheduler.error(app)}" }
+      check(scheduler.getPendingJob(AndroidFtpsScheduler.WATCH)?.extras?.getString("token") == bWatch) { "B WATCH changed" }
+    } finally { gate.release.countDown(); restore() }
+  }
+
+  private class Armed(val plan: FtpsPlan, val token: String?, val watchToken: String?, val uris: Set<Pair<android.net.Uri, Int>>)
+
+  private fun uris(job: android.app.job.JobInfo) = job.triggerContentUris.orEmpty().map { it.uri to it.flags }.toSet()
+
+  /** Live future P (run=null) with its JOB (1h) and WATCH armed; leaves captureFault = locked for the caller to replace. */
+  private fun future(app: Context, queue: AndroidFtpsQueue): Armed {
+    val scheduler = app.getSystemService(JobScheduler::class.java)
+    AndroidFtpsScheduler.reconcile(app)
+    AndroidFtpsQueue.captureFault = { throw FtpsFailure("credential_locked") } // A natural latency-0 run stays on the locked path.
+    val created = checkNotNull(queue.schedule.read()) { "no P: ${AndroidFtpsScheduler.error(app)}" }
+    check(created.run == null && AndroidFtpsAutomaticChecks.runs(queue) == 0L) { "precondition P=$created" }
+    val later = System.currentTimeMillis() + 3600000L
+    synchronized(AndroidSyncJournal.sourceLock) { queue.schedule.save(created.copy(occurrence = later, due = later), created) }
+    AndroidFtpsScheduler.reconcile(app) // Locked reconcile arms the same future P (FL2).
+    val deadline = android.os.SystemClock.elapsedRealtime() + 30000
+    while (AndroidFtpsAutomaticChecks.busy() && android.os.SystemClock.elapsedRealtime() < deadline) Thread.sleep(50)
+    val before = checkNotNull(queue.schedule.read())
+    check(before.due == later && before.run == null && !AndroidFtpsAutomaticChecks.busy()) { "future P=$before" }
+    val job = checkNotNull(scheduler.getPendingJob(AndroidFtpsScheduler.JOB)) { "no JOB" }
+    check(job.extras.getLong("dispatch", -1) == later) { "JOB not armed for future P" }
+    val watch = checkNotNull(scheduler.getPendingJob(AndroidFtpsScheduler.WATCH)) { "no WATCH in live mode" }
+    return Armed(before, job.extras.getString("token"), watch.extras.getString("token"), uris(watch).also { check(it.isNotEmpty()) { "WATCH without trigger URIs" } })
+  }
+
+  /** Forces the current WATCH through the production Job path and waits for its completion (replacement or finish). */
+  private fun fire(i: Instrumentation, app: Context, armed: Armed, recorder: AndroidFtpsAutomaticChecks.Recorder) {
+    val scheduler = app.getSystemService(JobScheduler::class.java)
+    AndroidFtpsScheduler.os = recorder
+    AndroidFtpsAutomaticChecks.shell(i, "cmd jobscheduler run -f com.kloda.sync.test ${AndroidFtpsScheduler.WATCH}")
+    val deadline = android.os.SystemClock.elapsedRealtime() + 30000
+    fun replaced() = scheduler.getPendingJob(AndroidFtpsScheduler.WATCH)?.extras?.getString("token").let { it != null && it != armed.watchToken }
+    while (android.os.SystemClock.elapsedRealtime() < deadline &&
+      (AndroidFtpsAutomaticChecks.busy() || (recorder.finishes.none { it.first == AndroidFtpsScheduler.WATCH } && !replaced()))) Thread.sleep(50)
+    Thread.sleep(500)
+    check(!AndroidFtpsAutomaticChecks.busy()) { "callback still running; finishes=${recorder.finishes} cancels=${recorder.cancels}" }
+  }
+
+  /** The consumed WATCH is re-observed: new token, same trigger URIs/flags. */
+  private fun reobserved(app: Context, armed: Armed, recorder: AndroidFtpsAutomaticChecks.Recorder) {
+    val next = checkNotNull(app.getSystemService(JobScheduler::class.java).getPendingJob(AndroidFtpsScheduler.WATCH)) {
+      "WATCH not re-observed: finishes=${recorder.finishes} cancels=${recorder.cancels}"
+    }
+    check(next.extras.getString("token") != armed.watchToken && uris(next) == armed.uris) { "WATCH URIs changed" }
+  }
+
+  /** §4.8 replacement completion: no WATCH finish, no cancel; any natural JOB stays on FL1's own retry. */
+  private fun replacedOnly(recorder: AndroidFtpsAutomaticChecks.Recorder) =
+    check(recorder.cancels.isEmpty() && recorder.finishes.none { it.first == AndroidFtpsScheduler.WATCH } &&
+      recorder.finishes.all { it == (AndroidFtpsScheduler.JOB to true) }) { "cancel=${recorder.cancels} finish=${recorder.finishes}" }
+
+  private fun pendingFor(app: Context, plan: FtpsPlan) {
+    val job = checkNotNull(app.getSystemService(JobScheduler::class.java).getPendingJob(AndroidFtpsScheduler.JOB)) { "no JOB for P=$plan" }
+    check(job.extras.getString("token") == app.getSharedPreferences("kloda-sync", 0).getString("ftpsDispatchToken", null) &&
+      job.extras.getLong("occurrence", -1) == plan.occurrence && job.extras.getLong("dispatch", -1) == plan.due) { "JOB extras != P=$plan" }
+  }
+
+  private fun restore() { AndroidFtpsQueue.captureFault = null; AndroidFtpsScheduler.os = AndroidFtpsScheduler.Os() }
+
+  /** FW1: live future P, run=null, locked; current WATCH → P equal, no early request, JOB kept, WATCH re-observed. */
+  private fun lockedWatch(i: Instrumentation, app: Context, queue: AndroidFtpsQueue) {
+    val scheduler = app.getSystemService(JobScheduler::class.java)
+    val prefs = app.getSharedPreferences("kloda-sync", 0)
+    val recorder = AndroidFtpsAutomaticChecks.Recorder()
+    try {
+      val armed = future(app, queue)
+      val keys = prefs.all.keys.toSet()
+      fire(i, app, armed, recorder)
+      check(queue.schedule.read() == armed.plan) { "P changed: before=${armed.plan} after=${queue.schedule.read()}" }
+      check(AndroidFtpsAutomaticChecks.runs(queue) == 0L) { "runs=${AndroidFtpsAutomaticChecks.runs(queue)}" }
+      check(prefs.all.keys.toSet() == keys) { "stored request keys: before=$keys after=${prefs.all.keys}" }
+      check(prefs.getString("ftpsDispatchToken", null) == armed.token &&
+        scheduler.getPendingJob(AndroidFtpsScheduler.JOB)?.extras?.getString("token") == armed.token) { "JOB not kept" }
+      reobserved(app, armed, recorder)
+      replacedOnly(recorder)
+      check(AndroidFtpsScheduler.error(app) == "credential_locked") { "error=${AndroidFtpsScheduler.error(app)}" }
+    } finally { restore() }
+  }
+
+  /** FW2 valid: open device, same target/binding, run=null → expected-P CAS writes the early occurrence; WATCH re-observed. */
+  private fun validWatch(i: Instrumentation, app: Context, queue: AndroidFtpsQueue) {
+    val recorder = AndroidFtpsAutomaticChecks.Recorder()
+    try {
+      val armed = future(app, queue)
+      // WATCH capture and its reconcile capture succeed; a later natural JOB on the early P stays on FL1's locked path (no transfer).
+      val calls = AtomicInteger()
+      AndroidFtpsQueue.captureFault = { if (calls.incrementAndGet() > 2) throw FtpsFailure("credential_locked") }
+      val start = System.currentTimeMillis()
+      fire(i, app, armed, recorder)
+      val after = checkNotNull(queue.schedule.read())
+      check(after.target == armed.plan.target && after.binding == armed.plan.binding && after.run == null &&
+        after.occurrence == after.due && after.due in start..System.currentTimeMillis()) { "no early occurrence: before=${armed.plan} after=$after" }
+      check(AndroidFtpsAutomaticChecks.runs(queue) == 0L) { "runs=${AndroidFtpsAutomaticChecks.runs(queue)}" }
+      pendingFor(app, after)
+      reobserved(app, armed, recorder)
+      replacedOnly(recorder)
+    } finally { restore() }
+  }
+
+  /** FW2 capture fail: open device, non-lock capture failure → P never written (no early occurrence/JOB); fail-closed code. */
+  private fun failedCapture(i: Instrumentation, app: Context, queue: AndroidFtpsQueue) {
+    val recorder = AndroidFtpsAutomaticChecks.Recorder()
+    try {
+      val armed = future(app, queue)
+      AndroidFtpsQueue.captureFault = { throw SecurityException("fw2 synthetic capture failure") }
+      fire(i, app, armed, recorder)
+      check(queue.schedule.read() == armed.plan) { "P changed: before=${armed.plan} after=${queue.schedule.read()}" }
+      check(AndroidFtpsAutomaticChecks.runs(queue) == 0L) { "runs=${AndroidFtpsAutomaticChecks.runs(queue)}" }
+      val dispatch = app.getSystemService(JobScheduler::class.java).getPendingJob(AndroidFtpsScheduler.JOB)?.extras?.getLong("dispatch", -1)
+      check(dispatch == null || dispatch == armed.plan.due) { "early JOB dispatch=$dispatch" }
+      check(AndroidFtpsScheduler.error(app) == "source_permission_lost") { "error=${AndroidFtpsScheduler.error(app)}" }
+    } finally { restore() }
+  }
+
+  /**
+   * FW2 CAS mismatch: a concurrent writer commits P2 between the WATCH read and its expected-P CAS (test-only TEMP trigger
+   * on the fixture connection, dropped in finally) → the early write loses, P2 is kept and re-armed, WATCH re-observed.
+   */
+  private fun casMismatch(i: Instrumentation, app: Context, queue: AndroidFtpsQueue) {
+    val recorder = AndroidFtpsAutomaticChecks.Recorder()
+    val database = queue.journal.database
+    try {
+      val armed = future(app, queue)
+      AndroidFtpsQueue.captureFault = null
+      database.execSQL("CREATE TEMP TRIGGER fw2_concurrent BEFORE UPDATE ON main.ftps_plan " +
+        "WHEN OLD.run IS NULL AND NEW.run IS NULL AND NEW.occurrence <> OLD.occurrence " +
+        "BEGIN UPDATE ftps_plan SET due = OLD.due + 60000 WHERE id = 1; SELECT RAISE(IGNORE); END")
+      fire(i, app, armed, recorder)
+      val concurrent = armed.plan.copy(due = armed.plan.due + 60000)
+      check(queue.schedule.read() == concurrent) { "CAS loser overwrote P2: expected=$concurrent after=${queue.schedule.read()}" }
+      check(AndroidFtpsAutomaticChecks.runs(queue) == 0L) { "runs=${AndroidFtpsAutomaticChecks.runs(queue)}" }
+      pendingFor(app, concurrent)
+      reobserved(app, armed, recorder)
+      check(recorder.cancels.none { it == AndroidFtpsScheduler.JOB }) { "cancel=${recorder.cancels} finish=${recorder.finishes}" }
+    } finally {
+      database.execSQL("DROP TRIGGER IF EXISTS temp.fw2_concurrent")
+      restore()
+    }
+  }
+
+  /** FW2 run!=null: open device, P already claimed (paused user run) → WATCH never writes the claimed P; WATCH re-observed. */
+  private fun claimedWatch(i: Instrumentation, app: Context, queue: AndroidFtpsQueue) {
+    val recorder = AndroidFtpsAutomaticChecks.Recorder()
+    try {
+      val armed = future(app, queue)
+      AndroidFtpsQueue.captureFault = null
+      val run = FtpsRun(UUID.randomUUID().toString(), armed.plan.target, armed.plan.binding, true, armed.plan.occurrence, phase = "paused", error = "user_pause")
+      val claimed = armed.plan.copy(run = run.id)
+      synchronized(AndroidSyncJournal.sourceLock) { queue.runs.save(run); queue.schedule.save(claimed, armed.plan) }
+      fire(i, app, armed, recorder)
+      check(queue.schedule.read() == claimed) { "claimed P written: before=$claimed after=${queue.schedule.read()}" }
+      check(AndroidFtpsAutomaticChecks.runs(queue) == 1L && queue.runs.read(id = run.id) == run) { "run changed: ${queue.runs.read(id = run.id)}" }
+      check(app.getSystemService(JobScheduler::class.java).getPendingJob(AndroidFtpsScheduler.JOB)?.extras?.getString("token") == armed.token) { "JOB not kept" }
+      reobserved(app, armed, recorder)
+      replacedOnly(recorder)
+    } finally { restore() }
+  }
+}

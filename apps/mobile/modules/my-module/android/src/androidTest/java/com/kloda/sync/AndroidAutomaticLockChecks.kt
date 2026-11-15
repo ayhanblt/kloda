@@ -8,36 +8,32 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.util.UUID
-import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicLong
-import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.*
+import java.util.concurrent.atomic.*
 
-internal const val S3_HOUR = 3_600_000L
-internal const val S3_DEFER = AndroidS3AutomaticCoordinator.DEFER
+internal const val S3_HOUR = 3_600_000L; internal const val S3_DEFER = AndroidS3AutomaticCoordinator.DEFER
 
 // Deterministic OS port: records every call; no real JobScheduler.
 internal class S3AutoFakeOs : S3AutoOs {
   val schedules = CopyOnWriteArrayList<List<Any>>(); val cancels = AtomicInteger()
-  @Volatile var result: Int? = 1; @Volatile var pendingFails = false; @Volatile var hidePending = false; @Volatile var recordOnThrow = false; @Volatile var pending: Map<String, Any?>? = null
+  @Volatile var result: Int? = 1; @Volatile var pendingFails = false; @Volatile var hidePending = false; @Volatile var recordOnThrow = false; @Volatile var pending: Map<String, Any?>? = null; @Volatile var during: (() -> Unit)? = null
   override fun schedule(wake: String, nonce: String, latency: Long, protocol: Int): Int {
     schedules.add(listOf(wake, nonce, latency, protocol))
     val value = mapOf("protocol" to protocol, "provider" to "amazon-s3", "wake" to wake, "nonce" to nonce)
     val code = result ?: run { if (recordOnThrow) pending = value; throw IllegalStateException("synthetic schedule failure") }
-    if (code == 1) pending = value; return code
+    if (code == 1) pending = value; during?.invoke(); return code
   }
   override fun cancel() { cancels.incrementAndGet(); pending = null }
-  override fun pending(): Map<String, Any?>? { if (pendingFails) throw IllegalStateException("synthetic pending failure"); return if (hidePending) null else pending }
-  fun latency() = schedules.last()[2] as Long
+  override fun pending(): Map<String, Any?>? { if (pendingFails) throw IllegalStateException("synthetic pending failure"); return if (hidePending) null else pending }; fun latency() = schedules.last()[2] as Long
 }
 
 // Real transaction boundary; faults only at the acknowledgment/read point.
 internal class S3TestBoundary(private val journal: AndroidS3Journal) : S3PlanBoundary(journal) {
-  @Volatile var commitFault: String? = null; @Volatile var readFault = false
-  override fun <T> commit(block: () -> T): T {
-    val fault = commitFault ?: return super.commit(block); commitFault = null
+  // skip = instance-bound barrier: the next `skip` commits pass, so the fault hits a chosen later commit phase.
+  // clocks = real Plan.clock transaction phases observed on this boundary (stack frame), never a due-derived label.
+  @Volatile var commitFault: String? = null; @Volatile var readFault = false; @Volatile var skip = 0; val clocks = AtomicInteger()
+  override fun <T> commit(block: () -> T): T { if (Thread.currentThread().stackTrace.any { it.className == AndroidS3AutomaticPlan::class.java.name && it.methodName == "clock" }) clocks.incrementAndGet()
+    val fault = commitFault ?: return super.commit(block); if (skip > 0) { skip--; return super.commit(block) }; commitFault = null
     when (fault) {
       "after-commit" -> journal.transaction(block)
       "after-rollback" -> runCatching { journal.transaction { block(); throw IllegalStateException("synthetic rollback") } }
@@ -65,15 +61,11 @@ internal class S3AutoFixture(instrumentation: Instrumentation, root: File, label
     override fun getNoBackupFilesDir() = File(root, "s3-$label-$namespace").apply { check(mkdirs() || isDirectory) }
     override fun getSharedPreferences(name: String, mode: Int) = base.getSharedPreferences("$name.s3-$label.$namespace", mode).also { if (name == "kloda-sync") reads.incrementAndGet() }
   }
-  private val keys = java.security.KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
-  private val alias = app.packageName + ".s3.amazon-s3.profile.v1"
+  private val keys = java.security.KeyStore.getInstance("AndroidKeyStore").apply { load(null) }; private val alias = app.packageName + ".s3.amazon-s3.profile.v1"
   init { check(base.packageName == "com.kloda.sync.test" && !keys.containsAlias(alias) && AndroidS3Runtime.unlocked(app)) }
-  lateinit var journal: AndroidS3Journal; lateinit var profiles: AndroidS3Profiles; lateinit var boundary: S3TestBoundary
-  lateinit var queue: AndroidS3Queue; lateinit var plan: AndroidS3AutomaticPlan
-  val lease = AtomicReference<Any?>(); val foreground = AtomicBoolean(false); val held = CopyOnWriteArrayList<Runnable>()
-  @Volatile var launch: (() -> Unit)? = null
-  val now = AtomicLong(1_700_000_000_000); val deny = AtomicBoolean(false); val paused = AtomicBoolean(false)
-  val lane = ConcurrentLinkedQueue<Runnable>()
+  lateinit var journal: AndroidS3Journal; lateinit var profiles: AndroidS3Profiles; lateinit var boundary: S3TestBoundary; lateinit var queue: AndroidS3Queue; lateinit var plan: AndroidS3AutomaticPlan
+  val lease = AtomicReference<Any?>(); val foreground = AtomicBoolean(false); val held = CopyOnWriteArrayList<Runnable>(); @Volatile var launch: (() -> Unit)? = null
+  val now = AtomicLong(1_700_000_000_000); val deny = AtomicBoolean(false); val paused = AtomicBoolean(false); val lane = ConcurrentLinkedQueue<Runnable>()
   val legacy get() = app.getSharedPreferences(AndroidS3AutomaticPlan.LEGACY, 0)
   init { open() }
   fun open() {
@@ -97,8 +89,7 @@ internal class S3AutoFixture(instrumentation: Instrumentation, root: File, label
     now::get, deny::get, S3AutoLease({ owner -> lease.compareAndSet(null, owner) }, { owner -> lease.compareAndSet(owner, null) }),
     queue, plan, legacy, paused::get) { it + S3_HOUR }
   fun pump() { while (true) (lane.poll() ?: return).run() }
-  fun count(table: String) = journal.text("SELECT COUNT(*) FROM $table").toInt()
-  fun latest() = queue.runs.read(plan.current()!!.target)!!
+  fun count(table: String) = journal.text("SELECT COUNT(*) FROM $table").toInt(); fun latest() = queue.runs.read(plan.current()!!.target)!!
   override fun close() {
     runCatching { journal.database.close() }
     if (keys.containsAlias(alias)) keys.deleteEntry(alias); check(!keys.containsAlias(alias))
@@ -119,10 +110,23 @@ internal object AndroidAutomaticLockChecks {
   }
   fun extras(wake: String?) = mapOf<String, Any?>("protocol" to 1, "provider" to "amazon-s3", "wake" to wake, "nonce" to "synthetic")
   fun run(instrumentation: Instrumentation, root: File) {
-    interleavings(instrumentation, root)
-    revocation(instrumentation, root); ownership(instrumentation, root); storage(instrumentation, root)
-    active(instrumentation, root); projection(instrumentation, root); fold(instrumentation, root)
+    stale(instrumentation, root); interleavings(instrumentation, root); revocation(instrumentation, root); ownership(instrumentation, root); storage(instrumentation, root); active(instrumentation, root); projection(instrumentation, root); fold(instrumentation, root)
   }
+  // R13/G13: old unresolved A (new projection throws / succeeds / proven nonce) or A's in-flight replace (SUCCESS) while a source
+  // revision claims a new ticket; the old stop/result never touches it; only an unproven new throw stays OS_OWNED+unresolved.
+  private fun stale(i: Instrumentation, root: File) = listOf("throw", "success", "nonce", "inflight").forEach { mode -> S3AutoFixture(i, root, "stale").use { f ->
+    f.authorize(); val os = S3AutoFakeOs(); val c = f.coordinator(os); val finishes = CopyOnWriteArrayList<Boolean>(); c.reconcile(); f.pump(); val inflight = mode == "inflight"
+    val p0 = f.plan.current()!!; f.now.set(p0.due); f.deny.set(true); os.result = if (inflight) 1 else null; val a = Any()
+    if (inflight) os.during = { os.during = null; os.result = null; f.deny.set(false); f.sources(); c.reconcile() }
+    check(c.onStart(a, null, extras(p0.wake)) { finishes.add(it) }); f.pump()
+    if (!inflight) { check(c.unresolved && c.owner == Owner.OS_OWNED && os.schedules.size == 2) { "R13 precondition: A not unresolved" }
+      f.deny.set(false); f.sources(); c.reconcile(); val e1 = c.epoch; check(c.owner == Owner.REPLACING && f.lane.size == 1) { "R13 precondition: no queued projection ${c.owner}" }
+      val stopped = c.onStop(a); check(!stopped && c.owner == Owner.REPLACING && c.epoch == e1 && !c.clockPending) { "R13 RED $mode: stale stop(A)=$stopped owner=${c.owner} expected=REPLACING epoch=${c.epoch} expected=$e1" }
+      os.result = if (mode == "success") 1 else null; os.recordOnThrow = mode == "nonce"; f.pump() }
+    check(c.owner == Owner.OS_OWNED && c.unresolved == (mode == "throw" || inflight) && os.schedules.size == 3) { "R13 $mode new projection: owner=${c.owner} unresolved=${c.unresolved} schedules=${os.schedules.size}" }
+    c.reconcile(); f.pump(); os.hidePending = true; c.reconcile(); f.pump()
+    check(os.schedules.size == 3 && os.cancels.get() == 0 && finishes.isEmpty() && f.lease.get() == null && f.count("s3_auto_accept") + f.count("s3_run") == 0) { "R13 $mode re-projection/finish: ${os.schedules.size} ${finishes.size}" }
+  } }
   // §8.1: the original F1 consumed the due before admission; here locked delivery must not.
   fun representative(i: Instrumentation, root: File) = S3AutoFixture(i, root, "lock").use { f ->
     f.authorize(); val os = S3AutoFakeOs(); val c = f.coordinator(os); val finishes = CopyOnWriteArrayList<Boolean>()

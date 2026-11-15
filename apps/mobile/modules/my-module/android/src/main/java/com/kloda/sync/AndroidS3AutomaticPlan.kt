@@ -26,6 +26,12 @@ internal sealed class S3Resolution {
   object ResolvedNotAccepted : S3Resolution()
   object Unresolved : S3Resolution()
 }
+internal sealed class S3Settle {
+  object NoFence : S3Settle()
+  object MigrationSettled : S3Settle()
+  data class ClockCommitted(val expected: S3AutoPlan, val revised: S3AutoPlan) : S3Settle()
+  data class ClockRolledBack(val expected: S3AutoPlan, val revised: S3AutoPlan) : S3Settle()
+}
 internal sealed class S3Refresh {
   data class Updated(val plan: S3AutoPlan, val rotated: Boolean) : S3Refresh()
   data class Same(val plan: S3AutoPlan) : S3Refresh()
@@ -108,18 +114,19 @@ internal class AndroidS3AutomaticPlan(val journal: AndroidS3Journal, private val
   private fun cleanup(legacy: SharedPreferences) { legacy.edit().remove("due").remove("binding").remove("dispatch").commit() }
   // Ends a migration fence only with one consistent proof: committed exact import, or proven absence.
   // A marker with a different plan never settles (no reset/adoption in this process).
-  // Returns true only for a settled clock proof: the caller then keeps the plan armed (no disarm).
-  fun settle(legacy: SharedPreferences): Boolean = synchronized(AndroidSyncJournal.sourceLock) {
-    val pending = uncertain ?: return@synchronized false
+  // R14: a clock proof is an event result (committed vs rolled back), bound by the caller to its exact request;
+  // only a clock result keeps the plan armed (no disarm/cleanup).
+  fun settle(legacy: SharedPreferences): S3Settle = synchronized(AndroidSyncJournal.sourceLock) {
+    val pending = uncertain ?: return@synchronized S3Settle.NoFence
     val seen = boundary.read { if (has()) row() to true else null to false }
     if (pending.old != null) {
-      if (seen.first != pending.plan && seen.first != pending.old) throw S3Failure("storage_failure")
-      uncertain = null; return@synchronized true
+      val result = when (seen.first) { pending.plan -> S3Settle.ClockCommitted(pending.old, pending.plan!!); pending.old -> S3Settle.ClockRolledBack(pending.old, pending.plan!!); else -> throw S3Failure("storage_failure") }
+      uncertain = null; return@synchronized result
     }
     if (seen.second && seen.first != pending.plan) throw S3Failure("storage_failure")
     uncertain = null
     if (seen.second) cleanup(legacy)
-    false
+    S3Settle.MigrationSettled
   }
   // Explicit same-configuration clock revision: exact CAS, wake kept, retry cleared, no run/accept. Our own CAS
   // miss writes nothing; any other throw is proven by one read: exact new = committed, exact old = not, else fenced.

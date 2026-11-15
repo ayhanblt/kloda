@@ -1,0 +1,18 @@
+--- docs/implementation/evidence/f1-ftps-automatic-lock-2026-11-15/fs-rest/LifecycleChecks.green.kt.snap	2026-11-16 00:45:57
++++ apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsLifecycleChecks.kt	2026-11-16 00:47:03
+@@ -9,14 +9,8 @@
+ // F1-FTPS FW/FS/FP lifecycle rows (next-plan §3) on the owned disposable test package; synthetic denial, not real Keyguard.
+ internal object AndroidFtpsLifecycleChecks {
+   fun run(i: Instrumentation, group: (String, () -> Unit) -> Unit) {
+-    group("ftps-fw1-locked-watch-keeps-plan") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> lockedWatch(i, app, queue) } }
+-    group("ftps-fw2-open-watch-valid-early") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> validWatch(i, app, queue) } }
+-    group("ftps-fw2-open-watch-capture-fail") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> failedCapture(i, app, queue) } }
+-    group("ftps-fw2-open-watch-cas-mismatch") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> casMismatch(i, app, queue) } }
+-    group("ftps-fw2-open-watch-claimed-run") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> claimedWatch(i, app, queue) } }
+-    for (branch in listOf("finally", "throw", "locked", "defer", "watch"))
++    for (branch in listOf("watch"))
+       group("ftps-fs1-stale-$branch-keeps-b") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> staleOrigin(i, app, queue, branch) } }
+-    group("ftps-fs2-os-stop-locked-retry") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> osStop(i, app, queue) } }
+   }
+ 
+   /** Test-only barrier: holding the Scheduler arbiter monitor stops a callback at its first arbitrated decision. */

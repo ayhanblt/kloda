@@ -1,0 +1,69 @@
+# F1-FTPS manifest — 15.11.2026 (Opus INITIAL)
+
+Sözleşme: [next-plan §1–6](../../plans/next-plan.md). Goal/tablo yeniden tanımlanmadı.
+Durum: **KISMİ — FL1 temsilcisi RED→GREEN; usage UNKNOWN → genişleme öncesi zorunlu kullanıcı kontrol noktası.**
+Review-ready değil; FL2–FO1 açık.
+
+## Baseline (ilk düzenleme öncesi)
+
+- Start HEAD `f26e425dd808daf206ee7bd8ec6fe9402fbd1119`; staged boş: `baseline/head.txt`, `baseline/status.txt`, `baseline/staged.txt`.
+- CURRENT başlangıç içeriği + o anki dirty diff: `baseline/CURRENT.md.start`, `baseline/CURRENT.start.diff`.
+- Değişecek ürün dosyaları başlangıçta temiz (tracked, HEAD ile aynı); içerik: `baseline/AndroidFtps{Scheduler,Job,Queue}.kt.start`, hash `baseline/target-files.txt`.
+  Runner da başlangıçta temiz (HEAD'den yeniden oluşturulabilir); `AndroidFtpsAutomaticChecks.kt` yoktu.
+- Bu işe ait OLMAYAN başlangıç dirty/untracked: S3 Android dosyaları, AGENTS.md, `.opencode/commands/*`,
+  S3 plan/evidence dosyaları, next-plan/CURRENT önceki düzenlemeleri (`baseline/status.txt`).
+
+## Diff kapsamı (bu iş)
+
+- Tracked: `AndroidFtpsScheduler.kt` (davranış-nötr `Os` portu; cancel/WATCH-cancel porttan), `AndroidFtpsJob.kt`
+  (FL1 düzeltmesi + finish/cancel porttan), `AndroidFtpsQueue.kt` (instrumentation-only throw-only `captureFault`,
+  `destination()` capture sınırında), runner (scope `ftps-automatic-lock` + mevcut `ftps-product` bloğu aynı anlamla delege).
+  Tam diff: `fl1/ftps-tracked.diff`. Untracked yeni: `androidTest/.../AndroidFtpsAutomaticChecks.kt` (`fl1/…snapshot`).
+- Kaynak hash (GREEN): `fl1/source-green.sha256`. Satır (nonblank/noncomment): Scheduler 143, Job 123, Queue 210, Checks 142, runner 295.
+- `retainedPlanForWake`, OsChecks ve onStop/WATCH/changed değişiklikleri henüz YOK (FL2/FW/FS kapsamı).
+
+## FL1 düzeltmesi (minimum)
+
+Pre-admission (`execution.plan == null`) JOB'da `credential_locked`: `locked` işareti; tek `os.finish(params,true)`,
+WATCH-cancel/finally-reconcile yok, teşhis `credential_locked`. `execute` içindeki ikinci (lease sonrası, claim öncesi)
+sourceLock bloğunda yutulan locked hata da aynı yola yeniden fırlatılır. Post-admission yol değişmedi.
+
+## Kanıt eşlemesi
+
+| ID/satır | Test | Sonuç | Kanıt |
+|---|---|---|---|
+| FL1 | `ftps-automatic-lock` / `ftps-fl1-locked-job-keeps-plan` (gerçek JobScheduler `run -f 2710`, üretim Job completion, kayıt portu gerçek OS'a delege) | RED eski ürün: `cancel calls=[2710, 2711] finishes=[(2710, false)]` (P/run/lease assertion'ları geçti) → GREEN fix sonrası: P eşit, runs=0, lease yok, cancel=0, finishes=[(2710,true)], token+pending JOB korunmuş | `fl1/run-red.log` (APK `fl1/apk-red.sha256` 5df2cf70…), `fl1/run-green.log` (APK `fl1/apk-green.sha256` 2df53b34…) — fresh |
+| FL2, FL3 | — | NOT_RUN / açık | — |
+| FW1, FW2 | — | NOT_RUN / açık | — |
+| FS1, FS2 | — | NOT_RUN / açık (stopped-locked için onStop retry kararı §4.7 dahil) | — |
+| FP1, FP2 | — | NOT_RUN / açık | — |
+| FO1 | — (mevcut `ftps-product` delegasyonu derlendi ama koşulmadı; fixture server gerekir) | NOT_RUN / açık | — |
+
+Komutlar: build `apps/mobile/android`: `./gradlew :my-module:compileDebugKotlin :my-module:assembleDebugAndroidTest
+-PklodaFtpsNative=true -PreactNativeArchitectures=arm64-v8a --console=plain` (`fl1/build-red.log`, `fl1/build-green.log`);
+`adb -s emulator-5590 install -r -t <androidTest apk>`; `adb -s emulator-5590 shell am instrument -w -r -e scope
+ftps-automatic-lock com.kloda.sync.test/com.kloda.sync.AndroidFilesQueueRecoveryInstrumentation`.
+Emülatör: emulator-5590 ranchu API35 arm64. Sahte denial gerçek Keyguard/Keystore PASS'i değildir.
+RED koşusu kendi fixture profil/DB/alias'ını bıraktı (runs=0); test `resetRunless` yalnız fixture profili +
+ftps_run/ftps_upload=0 kanıtıyla temizler; GREEN sonrası prefs/no_backup FTPS/JOB 2710 yok doğrulandı.
+Lint/ktlint: NOT_RUN. Bağımsız review: yok.
+
+## Sayaçlar
+
+FL1 invariant (locked pre-admission sahiplik): deneme 1 başarılı. S3 sayaçları değişmedi/sıfırlanmadı.
+
+## Devir — 15.11 kullanıcı DUR kararı
+
+- **FL1 kapalı-yeşil (review bekliyor), yeniden uygulanmaz.** GREEN kaynak hash'leri devir anında yeniden
+  doğrulandı (`shasum -c fl1/source-green.sha256` OK): Scheduler `78f7ef7d…`, Job `87cc926e…`, Queue `7bac6b58…`,
+  AutomaticChecks `69452870…`, runner `cbcea2fb…`; androidTest APK `2df53b34…`.
+- **Tekrar koşmama kuralı:** FL1 testi, Job'un catch/finally/`execute` catch yolu, `destination()`/`captureFault`,
+  `Os` portu veya `AndroidFtpsAutomaticChecks` FL1/`owned`/`resetRunless` bölümü değişmedikçe yeniden koşulmaz;
+  bu GREEN kanıtına referans verilir. Değişirse yalnız FL1 scope'u tekrar koşulur ve hash farkı burada kaydedilir.
+- **Kalan sıra (her ID tüm satırlarıyla kanıtlanmadan kapanmaz):** FL2 → FL3 → FW1 → FW2 → FS1 → FS2 → FP1 → FP2 → FO1.
+  FL2 `retainedPlanForWake` (Queue) + lock-aware reconcile ile başlar; FS2 kilitli-stopped JOB için `onStop` retry
+  kararını içerir; FO1 fixture server readiness ve mevcut `ftps-product` delegasyon koşusu ister.
+- **Bütçe:** usage UNKNOWN (ölçüm yok; uydurulmadı). Yeni sohbet ilk yeni temsilcinin (FL2) RED→GREEN sonunda
+  genişlemeden önce yine kullanıcı kontrol noktası bırakır, farklı bütçe onaylanmadıkça.
+- **Deneme sayacı:** FL1 invariant 1/1 başarılı; diğer ID'ler 0 deneme. Yeni sohbet sayaçları sıfırlamaz.
+- Açık: lint NOT_RUN, bağımsız GPT review yok, fiziksel/üst F1 kapıları açık. Commit/push yok.

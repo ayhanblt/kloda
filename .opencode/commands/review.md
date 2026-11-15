@@ -4,6 +4,15 @@ model: openai/gpt-6.1-sol
 ---
 
 Uygulamadan ayrı GPT oturumunda çalış; bu koşul sağlanmıyorsa bağımsız kabul verme.
+Planın tek goal/bitti ölçütleri ve ortak durum-geçiş tablosunu esas al. Manifestte
+her zorunlu ölçüt/satır ID'nin kanıtını kontrol et; eksik varsa goal kapanmaz.
+Yeni goal üretme; bulguyu mevcut ölçüte bağla. Gerçekten yeni ürün hedefi ayrı
+kapsam kararıdır. Scoped fix kabulünü üst işin bütününün kabulü olarak raporlama.
+Goal'un bütün uygulamasını topluca review et; kabul satırlarına ayrı review açma.
+Hataya ek olarak etkilenen yolları, kod temizliği/sorumluluk sınırlarını, proje
+standartlarını ve gerekli test/lint/typecheck/build kanıtlarını kontrol et.
+Gerekli dış API araştırmasını research-pilot.md ile düşük maliyetli subagent'a ver;
+gerçek kod review'u ve kabul kararı ana GPT'de kalır.
 AGENTS.md → CURRENT.md'nin aktif iş bölümünü oku. İlk uygulama review'unda onaylı
 planı kullan. FIX review'unda önce son bulgular + tur manifesti + düzeltme diff'i;
 plandan yalnız ilgili invariant/onay/kapsam bölümleri. Etkilenen komşu güvenlik
@@ -30,7 +39,11 @@ kaydet: gerçek reviewer modeli/oturumu (bilinmeyeni uydurma), HEAD ve diff
 kapsamı, kabul kararı, bulgular, taze/yeniden kullanılan kanıt ve açık kapılar.
 Kabul ölçütleri karşılanıp bağımsız review kabul edildiyse aynı oturumda yalnız
 CURRENT/ilgili manifest kapanış kayıtlarını güncelle ve maddeyi [x] yap.
-Engelleyici bulgu varsa checkbox açık kalsın ve yalnız scoped düzeltme devri ver.
+Engelleyici bulgu varsa checkbox açık kalsın; tüm bulguları tek gerekçeli listede
+topla, engelleyici bulgularla isteğe bağlı temizlik önerilerini ayır. Onaylı davranış
+içindeki scoped düzeltmeyi mevcut Opus sohbetine devret: kök neden doğrulama →
+regression → minimum fix → etkilenen yollar. Yeni plan/onay yalnız tasarım/kapsam
+kararı gerekiyorsa. Sonucu bu GPT review sohbetinde değerlendir.
 Her bulguyu invariant ailesine bağla (stale ownership, OS handoff, migration
 proof/storage fence vb.); önceki bulgudan kalan mı yeni hata mı belirt. Devirde
 dosya/sembol, başlangıç durumu→olay sırası→beklenen sonuç, dar regression ve
@@ -49,7 +62,7 @@ sonraki planı/uygulamayı başlatmadan dur. Commit/push yok.
 Review açıklamaları, kanıt tamamlama ve belge kapanışı aynı GPT review
 sohbetinde kalır; yalnız bunlar için yeni oturum isteme.
 Kapanış biçimi: Durum; Devam (AYNI SOHBET / YENİ SOHBET / DUR — kullanıcı
-kararı); Rol; tam komut/prompt. Yeni bağımsız iş veya rol değişiminde yeni
-sohbet öner; eksik kanıt için otomatik olarak yeni GPT sohbeti önerme.
+kararı); Rol; tam komut/prompt. Aynı işte mevcut Opus/GPT rol sohbetlerini kullan;
+yeni bağımsız işte veya ilgili rol sohbeti yoksa yeni sohbet öner.
 
 !`git status --short`

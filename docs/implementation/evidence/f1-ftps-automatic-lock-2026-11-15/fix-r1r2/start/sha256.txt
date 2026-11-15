@@ -1,0 +1,9 @@
+e9899c2bc00661baf28380cd636672495ad0199538744af461b030ac043c869e  docs/implementation/evidence/f1-ftps-automatic-lock-2026-11-15/fix-r1r2/start/AndroidFtpsAutomaticChecks.kt.start
+a6638fcda350e3542fa848a1d47a6c5c0071a6d074c014834f65bdf6f1e50b8c  docs/implementation/evidence/f1-ftps-automatic-lock-2026-11-15/fix-r1r2/start/AndroidFtpsJob.kt.start
+57b8dd4d0962e1bd58f4d70df51117407b5e4422d08e5c0542b1cdd5a915b1cc  docs/implementation/evidence/f1-ftps-automatic-lock-2026-11-15/fix-r1r2/start/AndroidFtpsLifecycleChecks.kt.start
+8aa6903a61072d42d7a895ed94155a10b7e8de4aa56e0b4fc7c3691d0a56fdf4  docs/implementation/evidence/f1-ftps-automatic-lock-2026-11-15/fix-r1r2/start/AndroidFtpsPolicyChecks.kt.start
+06b0b00bc195a3faa3468d78d60bd684d6c53e29fe198005528600098a572b15  docs/implementation/evidence/f1-ftps-automatic-lock-2026-11-15/fix-r1r2/start/AndroidFtpsQueue.kt.start
+62532c756d51d829b067d21b8e43f8d2c02ed547f63b0d52815668208fe473b0  docs/implementation/evidence/f1-ftps-automatic-lock-2026-11-15/fix-r1r2/start/AndroidFtpsScheduler.kt.start
+cd392648a745cc29face17986d27c384f0f482777d90af4e03332da10ebb0db5  docs/implementation/evidence/f1-ftps-automatic-lock-2026-11-15/fix-r1r2/start/CURRENT.md.start
+3e44ef03758db66ae09af161184f30eae0de102b394e3d203876eefe2db8c510  docs/implementation/evidence/f1-ftps-automatic-lock-2026-11-15/fix-r1r2/start/MANIFEST.md.start
+4d85cfa5e3778a3bbd47fe5577912f19dfd2c24257b9b9ea0232894fe315f534  docs/implementation/evidence/f1-ftps-automatic-lock-2026-11-15/fix-r1r2/start/head-status.txt

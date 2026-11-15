@@ -4,27 +4,79 @@ Tek başlangıç işaretçisi. Tarihî PASS taze kabul değildir. Kurallar: kök
 
 ## Aktif iş / sıradaki adım
 
-**Durum: FIX / READY — 1.4b/F1 R13/R14 kök neden ve tasarım netleştirildi; uygulama/kabul yok.**
-Güncel sözleşme: [R13/R14 scoped FIX](plans/f1-r13-r14-clock-reconcile-fix.md);
-[önceki onaylı sınır](plans/f1-r12-clock-reconcile-fix.md) korunur (en çok aynı 5 dosya).
-Son review/scoped devir: [clock-reconcile review](evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/review.md).
-Tur manifesti: [clock-reconcile MANIFEST](evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/MANIFEST.md)
-(matris, `round.diff`, baseline `.pre`, loglar). Start/review HEAD `650ec17`; staged boş; 5 sözleşme dosyası
-başlangıçtan beri untracked (tracked-dirty ifadesi düzeltildi); baseline aidiyeti doğrulandı. Diğer dirty kapsam değişmedi.
-Taze kanıt: final APK `bcb65ade…` (S3=true arm64, emulator-5590) `s3-automatic-lock` (representative +
-interleavings/R3/R9) PASS, `s3-automatic-plan` (yeni `clock` CAS/fence/reopen) PASS, `s3-automatic-os`
-(JOB 2712 clock replacement, early capture=0) PASS. Ara FAIL'ler yalnız yeni test beklentisi hatası; kayıtlı.
-Önceki review: [fix-r8-r11/review.md](evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/review.md);
-strict R12 deneme 1 kaydı: [fix-r12/MANIFEST](evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/MANIFEST.md).
-R12 hedefi korunuyor. R13: eski unresolved stop yeni projection owner/throw fence'ini bozuyor;
-R14: committed clock proof context refresh sonrası ikinci clock-CAS/due hesabına dönüşüyor. Dar regression NOT_RUN.
-Sayaçlar: early-capture=1 (çatışma), stale=2 tur (farklı alt yollar; aynı yaklaşımın iki başarısızlığı kanıtlanmadı),
-clock-stop=1, migration=1, yeni clock-proof=1. Aynı yaklaşım ikinci kez başarısızsa DECISION; oturumla reset yok.
-Açık kapılar: R13/R14 scoped FIX + bağımsız kabul; lint NOT_RUN (iki deneme); fiziksel keyguard/Doze/doğal teslim yok;
-RAM intent kaybı/geri saat gecikmesi kabul edilmiş sınırlama; FTPS/Faz3–4/B4/P5 açık. Self-review bağımsız değil.
-**Sıradaki:** ayrı Opus sohbetinde `/implement` — yalnız READY R13/R14 sözleşmesi;
-önce R13 temsilcisi/minimum fix. Usage UNKNOWN ise GREEN sonrası genişletmeden kullanıcı yanıtını bekle.
-Review açıklaması/kanıt/kayıt tamamlama aynı GPT sohbetinde kalır. Commit/push yok.
+**Durum: FIX / KISMİ — R1/R2 onaylı sözleşmenin fix2 uygulaması başladı;
+Opus kullanım limiti nedeniyle yarım kaldı. 16.11 Windows devri: [checkpoint](windows-handoff-2026-11-16.md).
+fix2/start baseline mevcut; Job ve Scheduler kısmen değişti, test dosyaları baseline'a eşit.
+Yeni fix2 build/runtime/regression sonucu kayıtlı değil; mevcut kodun derlendiği iddia edilmez.
+Yeniden başlatma/geri alma yok; Windows Opus bu kısmi diff'i sözleşmeye göre tamamlar. Checkbox açık.
+Dar çözüm sözleşmesi: [R1/R2 stop/recovery](plans/f1-ftps-r1r2-stop-recovery-contract.md)
+**KULLANICI ONAYLI / SCOPED FIX READY**. Worker yetkisi ve retained stop bilgisi ayrıldı;
+slot temizliği stop tüketimi/yeni delivery/kanıtlı replacement/revoke/service teardown ile sınırlı.
+WATCH initial/replace/recovery tek sonuç protokolü; UNKNOWN generic catch ile temizlenmez.
+Son review: [FIX review.md](evidence/f1-ftps-automatic-lock-2026-11-15/fix-r1r2/review.md).
+Son manifest: [FTPS MANIFEST](evidence/f1-ftps-automatic-lock-2026-11-15/MANIFEST.md) §Onaylı scoped FIX devri.
+FTPS-R1: E retire→OS finish teslimi öncesi stop retry penceresi kaldı (FL1/FS2).
+FTPS-R2: WATCH ordinary recovery schedule sonucu shared helper/generic catch ile protokolü bypass ediyor (FP2/FW).
+Final lifecycle 32/32, lock 7/7 ve build PASS reuse; yeni reviewer runtime yok.
+FTPS-R3 dar lint kabul: altı diff dosyası 0/0; tam görev 3 mevcut dış-kapsam error ile exit 1,
+worklets analizi hariç. Teşhisler MANIFEST §R3 dış-kapsam lint bulguları ve Faz3'te açık.
+Yeni ürün hedefi/dosya/fixture yetkisi yok. S3 scoped kabulü korunur.
+FO1 önceki PASS reuse; yeni success-completion zinciri §21/Faz4 fiziksel kabulüne DEFERRED / NOT_RUN.**
+16.11 onaylı süreç: UNKNOWN durma nedeni değil; kalan kapsam tek uygulama işi,
+satır başına onay/sohbet yok. Yeni FO1 koşusu/fixture kurulumu yok. Dosya sınırı sekiz
+  (16.11 kullanıcı onayı `AndroidFtpsPolicyChecks.kt`, FP1); hepsi ≤300 (`fix-r1r2/lines-final.txt`). Kanıt/baseline:
+[FTPS MANIFEST](evidence/f1-ftps-automatic-lock-2026-11-15/MANIFEST.md).
+- [ ] **F1-FTPS:** [onaylı sözleşme](plans/next-plan.md) §1–6; tek goal ve FL1–FO1
+  ortak durum-geçiş tablosu esas alınır. §2'deki sekiz kaynak sınırı (Lifecycle + 16.11 Policy test dosyaları).
+- İlk temsilci FL1 tamamlandı; yeniden uygulama yok. Mevcut Opus `/implement` yalnız
+  onaylı R1/R2 dar sözleşmesine yönelir; kullanıcı bu sohbetten otomatik başlatmayı yasakladı.
+- Kilitli WATCH mevcut occurrence/due/run'ı korur; erken istek ayrıca saklanmaz.
+  Ayrı SP-STOP S3 kaynak kaygısı [araştırma ekinde](plans/f1-ftps-research-2026-11-15.md#s3-kabulü--açık-kapı-ayrımı);
+  FTPS kapsamında S3 düzeltme veya kabulü yeniden açma yetkisi yok.
+- FTPS kanıtı: MANIFEST'te FL1+FL2 RED/GREEN (`fl2/`), final FIX 7/32 GREEN reuse; R3 dar lint kabul, tam görev exit 1. Üst F1 ve fiziksel kapılar açık.
+- **15.11 FS1-JOB checkpoint:** eski A JOB finally→reconcile, B'nin JOB/WATCH'ını iptal ediyordu (RED) → `reconcileCurrent(token)`
+  ile GREEN; FL/FW aynı APK'da fresh. Tarihî: 16.11'de `reconcileCurrent` yerini tek `complete()` arbiter'ına bıraktı (MANIFEST §fs-rest).
+- Önceki FL/FW sonuçları, kaynak/varyant hash'leri ve sayaçlar FTPS MANIFEST'te;
+  etkilenmeyen başarılar yeniden kullanılır. Eski token'sız report FS1 kapsamındadır.
+  **SNAPSHOT-OPEN** ayrı açık bulgu; bu işe eklenmedi. Tarihî UNKNOWN duruşları güncel yetki değildir.
+
+**16.11 FO1 kanıt checkpoint'i:** [önceki PASS / mevcut diff / FO1 eşlemesi](evidence/f1-ftps-automatic-lock-2026-11-15/fo1-evidence-audit-2026-11-16.md).
+03.11 gerçek OS aktarım PASS'i korunur; güncel WATCH/stop/defer gerçek-OS kanıtı reuse.
+Sekiz final kaynak hash'i eşit. Kalan: değişen başarılı JOB completion'ının gerçek
+aktarım/tek completion/UI'sız sonraki JOB zinciri; bütün FO1 kanıtsız değildir.
+**Son kullanıcı kararı:** bu dar açık fiziksel test aşamasına taşındı; eski PASS
+reuse ile geliştirme review'u yapılacak. Yeni fixture planı/kurulumu veya tekrar test yok.
+Plan §1'deki onay §5/§6 eski kapanış engellerini supersede eder; ürün PASS'i uydurulmaz.
+
+### Korunan S3 scoped kabulü — yeniden uygulama yok
+
+- [x] **F1-S3-R13R14 scoped goal:** G13/G14/GP kanıtları kabul edildi; üst 1.4b/F1'in bütünü değildir.
+Son review: [r14-c1/review.md](evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/r13-r14/r14-c1/review.md).
+Son manifest: [r14-c1/MANIFEST.md](evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/r13-r14/r14-c1/MANIFEST.md).
+Üst matris: [r13-r14/MANIFEST.md](evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/r13-r14/MANIFEST.md).
+Start/review HEAD `f26e425`; staged boş; üç-dosya C1 diff'i baseline'dan tam yeniden oluşturuldu.
+Final source ve APK `02488fa5…` hash doğrulandı. İki gerçek reconcile temsilcisi invariant wake
+rotate RED→GREEN; final plan ve lock başarıları Opus kanıtından yeniden kullanıldı.
+Tek recovery critical section ve `blockedAttempt === attempt` cleanup kaynak incelemesinde uygun;
+authority capture/OS dışarıda. Kimlik-eşitsizliği dalı için özel runtime testi NOT_RUN;
+normal attempt recovery final lock kapsamında. Reviewer yeni runtime/build/lint NOT_RUN.
+OS önceki g14c kanıtı/prior-source olarak yeniden kullanıldı; taze C1 OS PASS iddiası yok.
+Onaylı tamamlanan sınır: [R14-C1 sözleşmesi](plans/f1-r14-c1-atomic-recovery-fix.md),
+[G13/G14 korunacak yollar](plans/f1-r13-r14-clock-reconcile-fix.md); yeniden uygulama yok.
+C1 CURRENT başlangıç snapshot'ı yok: idari aidiyet sınırlaması, ürün diff/kanıt doğruluğunu engellemiyor.
+Sayaçlar: early=1 çatışma, stale=2 tarihî tur, clock-stop=1, migration=1, clock-proof=2 tarihî ret;
+atomik yaklaşım deneme 1 kabul, reset yok. Lint iki-deneme NOT_RUN; fiziksel keyguard/Doze/doğal teslim,
+ilk unlock/CE/reboot/force-stop/production signing/storage, RAM intent/geri saat sınırlaması ve
+FTPS/Faz3–4/B4/P5 açık. Scoped kabul tam ürün PASS değildir.
+**Sıradaki / mevcut Opus uygulama sohbeti:** `/implement` — yalnız onaylı
+`plans/f1-ftps-r1r2-stop-recovery-contract.md` §1–4 ve MANIFEST §Onaylı scoped FIX devri.
+Önce yeni baseline ve R1 completion→stop temsilcisi; ardından tek R1/R2 kapsamı.
+Devir hazırdır; bu GPT sohbeti uygulamayı/ajanı başlatmaz. Opus sonucu REVIEW/unchecked
+bırakır; bağımsız değerlendirme bu mevcut GPT review sohbetinde yapılır.
+Start HEAD `f26e425`, final FIX hash'leri `fix-r1r2/source-final.sha256`;
+R1/R2 sayaçları 2, R3 dar kabul. FO1 eski PASS reuse/yeni zincir §21/Faz4 DEFERRED;
+tekrar koşma/fixture yok. S3 kabulü korunur; FTPS/üst F1 checkbox'ları açık.
+S3 review kaydı için ek Opus oturumu gerekmez. Commit/push yok.
 
 ## Teslim backlog'u
 
@@ -33,15 +85,17 @@ Review açıklaması/kanıt/kayıt tamamlama aynı GPT sohbetinde kalır. Commit
 - [x] **1.2/Jest:** AppState listener spec düzeltmesi + bağımsız GPT review kabul.
 - [x] **1.3/B3:** FTPS Drop-zeroize + bağımsız GPT review kabul; P3 belge notu, FTPS/JNI runtime ve fiziksel kapılar açık.
 - [x] **1.4/B4:** vault politikası belge review kabul; bayrak eklenmedi, kalan risk kabul. R1 tarihî CURRENT aidiyeti sınırlaması korundu; runtime güvenlik PASS'i değil.
-- [ ] **1.4b/F1:** S3 clock-reconcile FIX — R13 stale ownership / R14 clock-proof review engelleri; kayıtlı lock/plan/os PASS tam kabul değil. FTPS ayrı kapsam; anında OS çalışma garantisi yok.
+- [ ] **1.4b/F1 geliştirme:** R1/R2 dar tasarım kullanıcı onaylı → FIX devri hazır, uygulama başlamadı; iki ret sayacı korunur. R3 dar lint kabul ve S3 kabulü korunur. FO1 prior PASS reuse/yeni zincir ve diğer fiziksel/release kapıları Faz4'te; yalnız bu ertelemeler geliştirme kapanışını bekletmez.
 - [ ] **1.5:** iOS WebDAV host testini onar; cesu8/instant-xml/instant-xml-macros lisansları; B2 release iOS fixture-CA marker kontrolünü kabul kapısına bağla.
 - [ ] **2.1/G1:** gerçek journal ile Mobil Etkinlik Şu an/Geçmiş.
 - [ ] **2.2/G2–G3:** gerçek Desktop tray, sürüm/kapanış eşlemesi; ADR0018 foreground ve Linux görünür kontrol sınırları.
 - [ ] **2.3/G4–G6:** gerçek mobil ayar yetenek/kapsamı; D10 birleşimini belgele; kilit ekranı step19 kapısında.
 - [ ] **2.4:** eşleşme/aktarım metinleri, WebDAV endpoint/port/yol ve sır sızdırmayan teşhis; kök neden olmadan retry/fence gevşetme yok.
 - [ ] **2.5:** mevcut betiklerle eksik ekran/dil kapsamını kalıcı batch capture'a tamamla.
-- [ ] **3:** tek tam regresyon; önce fixture/tek temsilci; JS/native/build, güvenlik/B2, a11y/görsel/performance. Dropbox Android JobService, iOS >150 MiB upload_session, Dropbox Photos/Nextcloud restore, Android yükseltme ve recovery göster/kopyala açık kontrolleri dahil. Hesaplar ayrı izinli; bağımsız review ve dağıtım kapıları korunur.
+- [ ] **3:** tek tam regresyon; önce fixture/tek temsilci; JS/native/build, güvenlik/B2, a11y/görsel/performance. Lint açık: DeviceCheck:40/45 MissingPermission, S3Automatic:46 NewApi ve worklets bağımlılık analizi (FTPS MANIFEST §R3 dış-kapsam lint bulguları); FTPS dar lint kabulü genel lint PASS'i değil. Dropbox Android JobService, iOS >150 MiB upload_session, Dropbox Photos/Nextcloud restore, Android yükseltme ve recovery göster/kopyala açık kontrolleri dahil. Hesaplar ayrı izinli; bağımsız review ve dağıtım kapıları korunur.
 - [ ] **4:** Android fiziksel tam kapsam; Desktop OS/signing/storage ve saha kesinti teşhisi. iOS Simulator ayrı kanıt; fiziksel iOS yoksa custody/OS/Photos/iCloud/signing açık. Kullanıcı veri/eşleşmesi korunur, cihaz/hesap/medya izni varsayılmaz.
+  F1-FO1 dar kontrol: gerçek success → tek completion → UI'sız sonraki JOB callback'i;
+  16.11 kullanıcı kararıyla buraya taşındı, NOT_RUN. Ayrıntı: 20–21 koleksiyonu §21.
 
 ## Korunan kararlar / açık kapılar
 
@@ -52,17 +106,22 @@ Review açıklaması/kanıt/kayıt tamamlama aynı GPT sohbetinde kalır. Commit
 
 ## Akış / kompakt checkpoint
 
-**15.11 makine devri:** mevcut tüm Git kapsamı kullanıcı talimatıyla commit/push
-checkpoint'ine alınıyor; ürün kabulü değildir. Windows devamı/eksik yerel artifact
-ve loglar: [Windows devir notu](windows-handoff-2026-11-15.md). İlk Windows oturumu
-salt-okunur ortam hazırlık kontrolü, ardından READY R13/R14 scoped uygulaması.
+**16.11 süreç checkpoint'i:** kullanıcı onayıyla AGENTS, plan/implement/review ve
+bütçe/araştırma politikası uyumlandı. Tek goal, tüm kapsam uygulaması, review öncesi
+hazırlık ve toplu bağımsız review. FIX'te kök neden→regression→düzeltme; mevcut rol
+sohbetleri kullanılır. Dış araştırma düşük maliyetli subagent; ana model değişmez.
+Belge/komut tutarlılığı kontrolü kayıtlı; ürün/runtime test yapılmadı. FTPS mevcut kanıtları
+korunur; lint NOT_RUN ve üst F1/fiziksel kapılar açık. Kanıt: evidence/workflow-2026-11-16.md.
+[Windows devir notu](windows-handoff-2026-11-15.md) yalnız ihtiyaç halinde tarihî
+ortam/artifact referansıdır; eski R13/R14 uygulama veya commit/push yönlendirmesi
+güncel yetki değildir. Aktif kapsam bu CURRENT ve onaylı FTPS next-plan'dır.
 
-**12.11 maliyet kapıları:** [uygulama politikası](execution-budget.md) eklendi:
-hazır tasarım, ilk temsilci regression/minimum fix, 15k output soft eşik (usage
-yoksa temsilci sonunda dur), uygun düşük riskli işte kullanıcı seçimiyle tek
+**Güncel maliyet politikası:** [uygulama politikası](execution-budget.md):
+hazır tasarım, ilk temsilci regression/minimum fix, 15k ajan içi verimlilik kontrolü
+(UNKNOWN tek başına durdurmaz), uygun düşük riskli işte kullanıcı seçimiyle tek
 `/implement-pilot` Sonnet denemesi. F1 pilot değil, Opus/model effort değişmez.
-R13/R14 reddi sonrası aynı GPT sohbetinde kök neden/tasarım netleştirildi; scoped
-FIX READY. Sıradaki komut ayrı Opus sohbetinde `/implement`; ürün kabulü verilmedi.
+Önceki R13/R14 FIX yönlendirmesi tamamlanan S3 scoped kabulüyle supersede edildi;
+güncel INITIAL/FIX yetkisi yalnız yukarıdaki aktif iş bölümünden okunur.
 
 OpenCode: GPT plan → ayrı Opus uygulama → ayrı GPT review+kapanış.
 Aynı iş/rolde araştırma, açıklama ve kayıt aynı sohbette. Opus checkbox kapatmaz;
@@ -73,4 +132,4 @@ ve review high. Model/effort otomatik değişmez. İki-deneme sayacı oturumla s
 **11.11 kullanım düzenlemesi:** CURRENT kısaltıldı; geçmiş ayrıntılar
 [tarihî kayda](current-history-2026-11-11.md) taşındı. Bu kayıt topluca okunmaz;
 yalnız ilgili başlık seçilir. Gelecek planlarda tarihî araştırma ayrı ek, uygulama
-sözleşmesi kısa olacak. Aktif F1 onaylı planı değişmedi. Ürün/test kabulü verilmedi.
+sözleşmesi kısa olacak. Aktif FTPS sözleşmesi next-plan'dır; S3 tarihî planı ayrı dosyada korunur.

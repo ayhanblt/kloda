@@ -1,0 +1,391 @@
+diff --git a/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidAutomaticLockChecks.kt b/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidAutomaticLockChecks.kt
+index 194c6a6..ec1d256 100644
+--- a/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidAutomaticLockChecks.kt
++++ b/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidAutomaticLockChecks.kt
+@@ -8,36 +8,31 @@ import org.json.JSONArray
+ import org.json.JSONObject
+ import java.io.File
+ import java.util.UUID
+-import java.util.concurrent.ConcurrentLinkedQueue
+-import java.util.concurrent.CopyOnWriteArrayList
+-import java.util.concurrent.atomic.AtomicBoolean
+-import java.util.concurrent.atomic.AtomicInteger
+-import java.util.concurrent.atomic.AtomicLong
+-import java.util.concurrent.atomic.AtomicReference
++import java.util.concurrent.*
++import java.util.concurrent.atomic.*
+ 
+-internal const val S3_HOUR = 3_600_000L
+-internal const val S3_DEFER = AndroidS3AutomaticCoordinator.DEFER
++internal const val S3_HOUR = 3_600_000L; internal const val S3_DEFER = AndroidS3AutomaticCoordinator.DEFER
+ 
+ // Deterministic OS port: records every call; no real JobScheduler.
+ internal class S3AutoFakeOs : S3AutoOs {
+   val schedules = CopyOnWriteArrayList<List<Any>>(); val cancels = AtomicInteger()
+-  @Volatile var result: Int? = 1; @Volatile var pendingFails = false; @Volatile var hidePending = false; @Volatile var recordOnThrow = false; @Volatile var pending: Map<String, Any?>? = null
++  @Volatile var result: Int? = 1; @Volatile var pendingFails = false; @Volatile var hidePending = false; @Volatile var recordOnThrow = false; @Volatile var pending: Map<String, Any?>? = null; @Volatile var during: (() -> Unit)? = null
+   override fun schedule(wake: String, nonce: String, latency: Long, protocol: Int): Int {
+     schedules.add(listOf(wake, nonce, latency, protocol))
+     val value = mapOf("protocol" to protocol, "provider" to "amazon-s3", "wake" to wake, "nonce" to nonce)
+     val code = result ?: run { if (recordOnThrow) pending = value; throw IllegalStateException("synthetic schedule failure") }
+-    if (code == 1) pending = value; return code
++    if (code == 1) pending = value; during?.invoke(); return code
+   }
+   override fun cancel() { cancels.incrementAndGet(); pending = null }
+-  override fun pending(): Map<String, Any?>? { if (pendingFails) throw IllegalStateException("synthetic pending failure"); return if (hidePending) null else pending }
+-  fun latency() = schedules.last()[2] as Long
++  override fun pending(): Map<String, Any?>? { if (pendingFails) throw IllegalStateException("synthetic pending failure"); return if (hidePending) null else pending }; fun latency() = schedules.last()[2] as Long
+ }
+ 
+ // Real transaction boundary; faults only at the acknowledgment/read point.
+ internal class S3TestBoundary(private val journal: AndroidS3Journal) : S3PlanBoundary(journal) {
+-  @Volatile var commitFault: String? = null; @Volatile var readFault = false
++  // skip = instance-bound barrier: the next `skip` commits pass, so the fault hits a chosen later commit phase.
++  @Volatile var commitFault: String? = null; @Volatile var readFault = false; @Volatile var skip = 0
+   override fun <T> commit(block: () -> T): T {
+-    val fault = commitFault ?: return super.commit(block); commitFault = null
++    val fault = commitFault ?: return super.commit(block); if (skip > 0) { skip--; return super.commit(block) }; commitFault = null
+     when (fault) {
+       "after-commit" -> journal.transaction(block)
+       "after-rollback" -> runCatching { journal.transaction { block(); throw IllegalStateException("synthetic rollback") } }
+@@ -65,15 +60,11 @@ internal class S3AutoFixture(instrumentation: Instrumentation, root: File, label
+     override fun getNoBackupFilesDir() = File(root, "s3-$label-$namespace").apply { check(mkdirs() || isDirectory) }
+     override fun getSharedPreferences(name: String, mode: Int) = base.getSharedPreferences("$name.s3-$label.$namespace", mode).also { if (name == "kloda-sync") reads.incrementAndGet() }
+   }
+-  private val keys = java.security.KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+-  private val alias = app.packageName + ".s3.amazon-s3.profile.v1"
++  private val keys = java.security.KeyStore.getInstance("AndroidKeyStore").apply { load(null) }; private val alias = app.packageName + ".s3.amazon-s3.profile.v1"
+   init { check(base.packageName == "com.kloda.sync.test" && !keys.containsAlias(alias) && AndroidS3Runtime.unlocked(app)) }
+-  lateinit var journal: AndroidS3Journal; lateinit var profiles: AndroidS3Profiles; lateinit var boundary: S3TestBoundary
+-  lateinit var queue: AndroidS3Queue; lateinit var plan: AndroidS3AutomaticPlan
+-  val lease = AtomicReference<Any?>(); val foreground = AtomicBoolean(false); val held = CopyOnWriteArrayList<Runnable>()
+-  @Volatile var launch: (() -> Unit)? = null
+-  val now = AtomicLong(1_700_000_000_000); val deny = AtomicBoolean(false); val paused = AtomicBoolean(false)
+-  val lane = ConcurrentLinkedQueue<Runnable>()
++  lateinit var journal: AndroidS3Journal; lateinit var profiles: AndroidS3Profiles; lateinit var boundary: S3TestBoundary; lateinit var queue: AndroidS3Queue; lateinit var plan: AndroidS3AutomaticPlan
++  val lease = AtomicReference<Any?>(); val foreground = AtomicBoolean(false); val held = CopyOnWriteArrayList<Runnable>(); @Volatile var launch: (() -> Unit)? = null
++  val now = AtomicLong(1_700_000_000_000); val deny = AtomicBoolean(false); val paused = AtomicBoolean(false); val lane = ConcurrentLinkedQueue<Runnable>()
+   val legacy get() = app.getSharedPreferences(AndroidS3AutomaticPlan.LEGACY, 0)
+   init { open() }
+   fun open() {
+@@ -97,8 +88,7 @@ internal class S3AutoFixture(instrumentation: Instrumentation, root: File, label
+     now::get, deny::get, S3AutoLease({ owner -> lease.compareAndSet(null, owner) }, { owner -> lease.compareAndSet(owner, null) }),
+     queue, plan, legacy, paused::get) { it + S3_HOUR }
+   fun pump() { while (true) (lane.poll() ?: return).run() }
+-  fun count(table: String) = journal.text("SELECT COUNT(*) FROM $table").toInt()
+-  fun latest() = queue.runs.read(plan.current()!!.target)!!
++  fun count(table: String) = journal.text("SELECT COUNT(*) FROM $table").toInt(); fun latest() = queue.runs.read(plan.current()!!.target)!!
+   override fun close() {
+     runCatching { journal.database.close() }
+     if (keys.containsAlias(alias)) keys.deleteEntry(alias); check(!keys.containsAlias(alias))
+@@ -119,10 +109,23 @@ internal object AndroidAutomaticLockChecks {
+   }
+   fun extras(wake: String?) = mapOf<String, Any?>("protocol" to 1, "provider" to "amazon-s3", "wake" to wake, "nonce" to "synthetic")
+   fun run(instrumentation: Instrumentation, root: File) {
+-    interleavings(instrumentation, root)
+-    revocation(instrumentation, root); ownership(instrumentation, root); storage(instrumentation, root)
+-    active(instrumentation, root); projection(instrumentation, root); fold(instrumentation, root)
++    stale(instrumentation, root); interleavings(instrumentation, root); revocation(instrumentation, root); ownership(instrumentation, root); storage(instrumentation, root); active(instrumentation, root); projection(instrumentation, root); fold(instrumentation, root)
+   }
++  // R13/G13: old unresolved A (new projection throws / succeeds / proven nonce) or A's in-flight replace (SUCCESS) while a source
++  // revision claims a new ticket; the old stop/result never touches it; only an unproven new throw stays OS_OWNED+unresolved.
++  private fun stale(i: Instrumentation, root: File) = listOf("throw", "success", "nonce", "inflight").forEach { mode -> S3AutoFixture(i, root, "stale").use { f ->
++    f.authorize(); val os = S3AutoFakeOs(); val c = f.coordinator(os); val finishes = CopyOnWriteArrayList<Boolean>(); c.reconcile(); f.pump(); val inflight = mode == "inflight"
++    val p0 = f.plan.current()!!; f.now.set(p0.due); f.deny.set(true); os.result = if (inflight) 1 else null; val a = Any()
++    if (inflight) os.during = { os.during = null; os.result = null; f.deny.set(false); f.sources(); c.reconcile() }
++    check(c.onStart(a, null, extras(p0.wake)) { finishes.add(it) }); f.pump()
++    if (!inflight) { check(c.unresolved && c.owner == Owner.OS_OWNED && os.schedules.size == 2) { "R13 precondition: A not unresolved" }
++      f.deny.set(false); f.sources(); c.reconcile(); val e1 = c.epoch; check(c.owner == Owner.REPLACING && f.lane.size == 1) { "R13 precondition: no queued projection ${c.owner}" }
++      val stopped = c.onStop(a); check(!stopped && c.owner == Owner.REPLACING && c.epoch == e1 && !c.clockPending) { "R13 RED $mode: stale stop(A)=$stopped owner=${c.owner} expected=REPLACING epoch=${c.epoch} expected=$e1" }
++      os.result = if (mode == "success") 1 else null; os.recordOnThrow = mode == "nonce"; f.pump() }
++    check(c.owner == Owner.OS_OWNED && c.unresolved == (mode == "throw" || inflight) && os.schedules.size == 3) { "R13 $mode new projection: owner=${c.owner} unresolved=${c.unresolved} schedules=${os.schedules.size}" }
++    c.reconcile(); f.pump(); os.hidePending = true; c.reconcile(); f.pump()
++    check(os.schedules.size == 3 && os.cancels.get() == 0 && finishes.isEmpty() && f.lease.get() == null && f.count("s3_auto_accept") + f.count("s3_run") == 0) { "R13 $mode re-projection/finish: ${os.schedules.size} ${finishes.size}" }
++  } }
+   // §8.1: the original F1 consumed the due before admission; here locked delivery must not.
+   fun representative(i: Instrumentation, root: File) = S3AutoFixture(i, root, "lock").use { f ->
+     f.authorize(); val os = S3AutoFakeOs(); val c = f.coordinator(os); val finishes = CopyOnWriteArrayList<Boolean>()
+diff --git a/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticPlanChecks.kt b/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticPlanChecks.kt
+index d5f9f2d..c581adc 100644
+--- a/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticPlanChecks.kt
++++ b/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticPlanChecks.kt
+@@ -14,8 +14,39 @@ internal object AndroidS3AutomaticPlanChecks {
+   fun run(instrumentation: Instrumentation, root: File) {
+     provider(instrumentation, root); migration(instrumentation, root); store(instrumentation, root); uncertain(instrumentation, root)
+     fence(instrumentation, root); recovery(instrumentation, root); mismatch(instrumentation, root); stale(instrumentation, root)
+-    clock(instrumentation, root)
++    clock(instrumentation, root); committed(instrumentation, root)
+   }
++  // R14/G14: clock R commits but its ack and proof read are lost while manual M runs; M's exact pause rotates
++  // the context (same target/binding). Recovery proves R once: no second clock-CAS/next(now), fresh context, one projection.
++  // Counterparts: exact-old rollback retries the CAS once; a mismatched proof stays fenced; config/revoke win over the request.
++  private fun committed(i: Instrumentation, root: File) = listOf("commit", "rollback", "mismatch", "config", "revoke").forEach { mode -> S3AutoFixture(i, root, "clock-$mode").use { f ->
++    f.authorize(); val os = S3AutoFakeOs(); val c = f.coordinator(os); c.reconcile(); f.pump(); val p0 = f.plan.current()!!
++    f.foreground.set(true); f.queue.start(); check(f.held.size == 1 && c.owner == Owner.OS_OWNED); val scheduled = os.schedules.size
++    f.now.addAndGet(60_000); val dueR = f.now.get() + S3_HOUR; f.boundary.skip = 1; f.boundary.readFault = true
++    f.boundary.commitFault = if (mode == "rollback") "after-rollback" else "after-commit"
++    c.reconcile(true); f.pump(); val row = { k: String -> f.journal.text("SELECT $k FROM s3_auto_state WHERE id=1") }; val ctxR = row("context")
++    check(c.blocked && f.plan.fenced && c.clockPending && row("due") == (if (mode == "rollback") p0.due else dueR).toString() && row("wake") == p0.wake && os.schedules.size == scheduled) { "R14 $mode precondition: R not fenced" }
++    check(failure { f.queue.start() } != null && f.queue.status()["canRun"] == false) { "R14 $mode fence did not close manual start" }
++    f.queue.pause(); f.foreground.set(false); f.pump(); val ctxM = f.queue.authority()!!.context; check(ctxM != ctxR) { "R14 precondition: M pause kept context" }
++    when (mode) { "mismatch" -> f.journal.database.execSQL("UPDATE s3_auto_state SET due=due+1"); "config" -> f.sources(); "revoke" -> f.queue.setAutomatic(false) }
++    f.now.addAndGet(60_000); f.boundary.readFault = false; c.reconcile(); f.pump()
++    check(f.count("s3_auto_accept") == 0 && f.count("s3_run") == 1 && f.lease.get() == null && f.held.size == 1) { "R14 $mode admitted" }
++    if (mode == "mismatch") {
++      f.foreground.set(true); check(failure { f.queue.start() } == "storage_failure" && f.queue.status()["canRun"] == false); f.foreground.set(false)
++      check(c.blocked && f.plan.fenced && failure { f.plan.current() } == "storage_failure" && os.schedules.size == scheduled) { "R14 mismatch settled" }; return@use
++    }
++    val p = f.plan.current()!!; check(!c.clockPending && !c.blocked && !f.plan.fenced) { "R14 $mode request/fence left: ${c.clockPending} ${c.blocked}" }
++    when (mode) {
++      "revoke" -> check(p.wake == null && p.due == dueR && os.schedules.size == scheduled && os.cancels.get() == 1) { "R14 revoke projected" }
++      "config" -> check(p.binding != p0.binding && p.wake != p0.wake && p.due == f.now.get() + S3_HOUR && os.schedules.size == scheduled + 1) { "R14 config kept the old request" }
++      else -> {
++        val cas = if (p.due == dueR) 1 else 2; val due = if (mode == "rollback") f.now.get() + S3_HOUR else dueR
++        check(p.due == due && p.wake == p0.wake && p.retry == null && p.context == ctxM && p.binding == p0.binding) {
++          "R14 RED $mode: clockCAS=$cas due=${p.due} R.due=$dueR expected=$due ctx old=$ctxR new=$ctxM actual=${p.context}" }
++        check(os.schedules.size == scheduled + 1 && os.pending?.get("wake") == p.wake) { "R14 $mode projection: ${os.schedules.size - scheduled}" }
++      }
++    }
++  } }
+   // Compatible and diagnostic journals never receive automatic authority or plan tables.
+   private fun provider(i: Instrumentation, root: File) = S3AutoFixture(i, root, "provider").use { f ->
+     val compatible = AndroidS3Journal(f.app, "s3-compatible")
+diff --git a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticCoordinator.kt b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticCoordinator.kt
+index 3ab548c..488ecb6 100644
+--- a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticCoordinator.kt
++++ b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticCoordinator.kt
+@@ -30,7 +30,8 @@ internal class AndroidS3AutomaticCoordinator(private val os: S3AutoOs, private v
+     var state = "candidate"; var runId: String? = null; var buffered: S3Run? = null; var carry: S3AutoPlan? = null; var resume = false
+   }
+   // Explicit clock/timezone request, RAM only and bound to its epoch; proof = revision written under a lost ack.
+-  private class Clock(val epoch: Long) { var proof: S3AutoPlan? = null }
++  // R14: proof = the exact (old, new) CAS pair; committed = its proven commit event, bound before any arm can refresh it.
++  private class Clock(val epoch: Long) { var proof: Pair<S3AutoPlan, S3AutoPlan>? = null; var committed: S3AutoPlan? = null }
+   // One projection request: wake, absolute eligible time and envelope protocol (0 = legacy recovery).
+   private sealed class Out { class Replace(val wake: String, val at: Long, val protocol: Int = 1) : Out(); object Cancel : Out(); object Finish : Out() }
+   private val lock = AndroidSyncJournal.sourceLock
+@@ -42,7 +43,8 @@ internal class AndroidS3AutomaticCoordinator(private val os: S3AutoOs, private v
+   private var blockedAttempt: S3Attempt? = null; private var exec: Exec? = null
+   private val candidates = ArrayList<Exec>()
+   // Last proven SQLite wake. Unknown (not read / read failure) never authorizes an OS retry.
+-  private var planWake: String? = null; private var wakeKnown = false; private var clockReq: Clock? = null
++  // ticket = current projection authority (R13): a fresh RAM identity per projection; the owner enum alone is not authority.
++  private var planWake: String? = null; private var wakeKnown = false; private var clockReq: Clock? = null; private var ticket: Any? = null
+   val clockPending: Boolean get() = synchronized(lock) { clockReq?.epoch == epoch }
+   init { queue.attach(plan); runCatching { read() } }
+   private fun halted(e: Exec) = e.state == "stopped" || e.state == "done"
+@@ -177,18 +179,19 @@ internal class AndroidS3AutomaticCoordinator(private val os: S3AutoOs, private v
+   }
+   private fun complete(e: Exec, out: Out) = main(Runnable { apply(e, out) })
+   private fun apply(e: Exec, out: Out) {
+-    synchronized(lock) {
++    val t = synchronized(lock) {
+       if (exec !== e || halted(e) || e.epoch != epoch) { e.state = "done"; return }
+-      e.state = "completing"; if (out is Out.Replace) owner = Owner.REPLACING
++      e.state = "completing"; if (out is Out.Replace) claim() else null
+     }
+     when (out) {
+-      is Out.Replace -> replace(e, out)
++      is Out.Replace -> replace(e, t!!, out)
+       Out.Cancel -> { done(e, Owner.IDLE); e.finish(false); val at = synchronized(lock) { epoch }; if (at == e.epoch) os.cancel() }
+       Out.Finish -> { done(e, if (blocked) Owner.STORAGE_BLOCKED else Owner.IDLE); e.finish(false) }
+     }
+     if (e.resume) resume()
+   }
+   private fun done(e: Exec, value: Owner) = synchronized(lock) { e.state = "done"; owner = value }
++  private fun claim(): Any = Any().also { ticket = it; owner = Owner.REPLACING } // under sourceLock, before the OS call
+   // One uncertainty protocol for every projection: a generic throw counts only with the exact new nonce.
+   private fun submit(out: Out.Replace): Int? {
+     val nonce = UUID.randomUUID().toString()
+@@ -197,17 +200,19 @@ internal class AndroidS3AutomaticCoordinator(private val os: S3AutoOs, private v
+     }
+   }
+   // Schedule-as-completion: SUCCESS replaces the running job and no jobFinished follows.
+-  private fun replace(e: Exec, out: Out.Replace) {
+-    when (submit(out)) {
+-      SUCCESS -> done(e, Owner.OS_OWNED)
++  // R13: the result applies only under the exact ticket; a superseded (retired) execution writes and finishes nothing.
++  private fun replace(e: Exec, t: Any, out: Out.Replace) {
++    val result = submit(out)
++    synchronized(lock) {
++      if (ticket !== t) { e.state = "done"; return }; ticket = null
+       // Unknown schedule outcome: no second schedule or finish(true); only an exact onStop closes it.
+-      null -> synchronized(lock) { e.state = "unresolved"; owner = Owner.OS_OWNED; unresolved = true }
+-      else -> { done(e, Owner.HANDING); e.finish(true); synchronized(lock) { if (owner == Owner.HANDING) owner = Owner.OS_OWNED } }
++      if (result == null) { e.state = "unresolved"; owner = Owner.OS_OWNED; unresolved = true } else { e.state = "done"; owner = if (result == SUCCESS) Owner.OS_OWNED else Owner.HANDING }
+     }
++    if (result != null && result != SUCCESS) { e.finish(true); synchronized(lock) { if (owner == Owner.HANDING) owner = Owner.OS_OWNED } }
+   }
+ 
+   fun onStop(params: Any): Boolean {
+-    var relay: S3AutoPlan? = null; var at = 0L
++    var relay: S3AutoPlan? = null; var at = 0L; var t: Any? = null
+     val (e, retry, installed) = synchronized(lock) {
+       val installed = exec?.takeIf { it.params === params }
+       val e = installed ?: candidates.firstOrNull { it.params === params } ?: return false
+@@ -218,12 +223,13 @@ internal class AndroidS3AutomaticCoordinator(private val os: S3AutoOs, private v
+       // A stop before validation hands off only for the proven current wake and when no other owner exists.
+       val retry = open && relay == null && (if (e.wake != null) planWake == e.wake else planWake == null && legacyCurrent(e.extras))
+       e.state = "stopped"; at = epoch
+-      if (installed != null || retry) owner = when { relay != null -> Owner.REPLACING; retry || unresolved -> Owner.OS_OWNED; blocked -> Owner.STORAGE_BLOCKED; else -> Owner.IDLE }
+-      Triple(e, retry, installed != null)
++      // R13: lifecycle identity is not projection authority; an old-epoch stop never writes the current owner.
++      if (installed != null && e.epoch == at || retry) owner = when { relay != null -> Owner.REPLACING; retry || unresolved -> Owner.OS_OWNED; blocked -> Owner.STORAGE_BLOCKED; else -> Owner.IDLE }
++      if (relay != null) t = claim(); Triple(e, retry, installed != null)
+     }
+     if (installed) { lease.end(e); background(Runnable { runCatching { queue.pauseAutomatic(e, e.runId) } }) }
+-    relay?.let { p -> main(Runnable { schedule(at, out(p)) }) }
+-    if (installed) resume()
++    relay?.let { p -> val tk = t!!; main(Runnable { schedule(at, tk, out(p)) }) }
++    if (installed && e.epoch == at) resume()
+     return retry
+   }
+   // A legacy envelope is current only before the marker and while its own snapshot (protocol 0) or a
+@@ -261,17 +267,18 @@ internal class AndroidS3AutomaticCoordinator(private val os: S3AutoOs, private v
+   // Recorded clock request: only with no execution/projection in flight, no fence and same configuration. Exact
+   // CAS under sourceLock keeps the wake (new occurrence/due); epoch++ fences older executions; one projection.
+   private fun revise(authority: S3AutoAuthority?): Boolean {
+-    val (at, p) = synchronized(lock) {
++    val (at, p, t) = synchronized(lock) {
+       val r = clockReq?.takeIf { it.epoch == epoch } ?: run { clockReq = null; return false }
+       if (authority == null || active() != null || blocked || unresolved || owner != Owner.IDLE && owner != Owner.OS_OWNED) return false
+       val current = read()
+       if (current?.wake == null || current.target != authority.target || current.binding != authority.binding) { clockReq = null; return false }
+-      val proven = r.proof != null && r.proof == current
+-      val revised = if (proven) current else current.copy(occurrence = UUID.randomUUID().toString(), context = authority.context, due = next(clock()), retry = null)
+-      if (!proven) { r.proof = revised; if (!plan.clock(current, revised)) return false }
+-      seen(revised); clockReq = null; epoch++; owner = Owner.REPLACING; epoch to revised
++      // Committed R: the fresh (possibly context-refreshed) row keeps R's due/wake/retry; no second CAS or next(now).
++      val done = r.committed?.also { if (current.due != it.due || current.wake != it.wake || current.retry != it.retry || current.context != authority.context) { clockReq = null; return false } }
++      val revised = done?.let { current } ?: current.copy(occurrence = UUID.randomUUID().toString(), context = authority.context, due = next(clock()), retry = null)
++      if (done == null) { r.proof = current to revised; if (!plan.clock(current, revised)) return false }
++      seen(revised); clockReq = null; epoch++; Triple(epoch, revised, claim())
+     }
+-    main(Runnable { schedule(at, out(p)) })
++    main(Runnable { schedule(at, t, out(p)) })
+     return true
+   }
+   // Separate authorized continuation after a terminal completion, exact stop or projection; never an OS delivery.
+@@ -280,14 +287,17 @@ internal class AndroidS3AutomaticCoordinator(private val os: S3AutoOs, private v
+   private fun fence() { if (plan.fenced) synchronized(lock) { blocked = true; if (owner == Owner.IDLE) owner = Owner.STORAGE_BLOCKED } }
+   private fun unblock(): Boolean {
+     val attempt = synchronized(lock) { if (!blocked) return true; blockedAttempt }
+-    val ok = if (attempt != null) queue.resolveAutomatic(attempt, plan) != S3Resolution.Unresolved else runCatching { if (!plan.settle(legacy)) plan.disarm() }.isSuccess
++    // A clock result binds only to its exact request (epoch + old/new pair); rolled back = no commit yet, CAS may retry.
++    val ok = if (attempt != null) queue.resolveAutomatic(attempt, plan) != S3Resolution.Unresolved else runCatching { when (val s = plan.settle(legacy)) {
++      is S3Settle.ClockCommitted -> synchronized(lock) { clockReq?.takeIf { it.epoch == epoch && it.proof == s.expected to s.revised }?.committed = s.revised }
++      is S3Settle.ClockRolledBack -> Unit; else -> plan.disarm() } }.isSuccess
+     if (ok) synchronized(lock) { blocked = false; blockedAttempt = null; if (owner == Owner.STORAGE_BLOCKED) owner = Owner.IDLE }
+     return ok
+   }
+   // Revocation does not wait: epoch++, wake disarm, exact stop, epoch-tagged cancel.
+   fun revoke() {
+     val (e, at) = synchronized(lock) {
+-      epoch++; unresolved = false; dirty = false
++      epoch++; unresolved = false; dirty = false; ticket = null
+       val e = exec?.takeIf { !halted(it) }?.also { it.state = "done" }
+       if (owner != Owner.STORAGE_BLOCKED) owner = Owner.IDLE; e to epoch
+     }
+@@ -296,32 +306,34 @@ internal class AndroidS3AutomaticCoordinator(private val os: S3AutoOs, private v
+     main(Runnable { if (synchronized(lock) { epoch == at }) os.cancel() })
+   }
+   private fun revision(p: S3AutoPlan) {
+-    val (e, at) = synchronized(lock) {
+-      val active = active(); epoch++; unresolved = false; active?.state = "done"; owner = Owner.REPLACING; active to epoch
++    val (e, at, t) = synchronized(lock) {
++      // R13: the revision retires every installed lifecycle (an unresolved one too); only a real active run is paused.
++      val active = active(); epoch++; unresolved = false; exec?.takeIf { !halted(it) }?.state = "done"; Triple(active, epoch, claim())
+     }
+     e?.let { lease.end(it); runCatching { queue.pauseAutomatic(it, it.runId) } }
+-    main(Runnable { schedule(at, out(p)) })
++    main(Runnable { schedule(at, t, out(p)) })
+   }
+   private fun idleProject(p: S3AutoPlan) {
+     if (p.wake == null) return
+     val at = synchronized(lock) { if (owner != Owner.IDLE) { dirty = true; return }; epoch }
+     main(Runnable {
+       val pending = try { os.pending() } catch (_: Exception) { return@Runnable }
+-      synchronized(lock) {
++      val t = synchronized(lock) {
+         if (owner != Owner.IDLE || epoch != at) return@Runnable
+         if (pending?.get("protocol") == 1 && pending["wake"] == p.wake) { owner = Owner.OS_OWNED; return@Runnable }
+-        owner = Owner.REPLACING
++        claim()
+       }
+-      schedule(at, out(p))
++      schedule(at, t, out(p))
+     })
+   }
+   // Non-execution projection: RESULT_FAILURE is definite (Idle, a later event may project once);
+   // a generic throw without the exact nonce is ProjectionUnresolved under OSOwned.
+-  private fun schedule(at: Long, out: Out.Replace) {
+-    if (synchronized(lock) { epoch != at }) return; val result = submit(out)
++  // R13: exact ticket + epoch before the OS call and when the result is applied; an enum match is not enough.
++  private fun schedule(at: Long, t: Any, out: Out.Replace) {
++    if (synchronized(lock) { epoch != at || ticket !== t }) return; val result = submit(out)
+     synchronized(lock) {
+-      if (epoch != at || owner != Owner.REPLACING) return
+-      owner = if (result == null || result == SUCCESS) Owner.OS_OWNED else Owner.IDLE
++      if (epoch != at || ticket !== t || owner != Owner.REPLACING) return
++      ticket = null; owner = if (result == null || result == SUCCESS) Owner.OS_OWNED else Owner.IDLE
+       if (result == null) unresolved = true
+     }
+     resume()
+@@ -336,11 +348,11 @@ internal class AndroidS3AutomaticCoordinator(private val os: S3AutoOs, private v
+     val at = synchronized(lock) { if (owner != Owner.IDLE) return; epoch }
+     main(Runnable {
+       val pending = try { os.pending() } catch (_: Exception) { return@Runnable }
+-      synchronized(lock) {
++      val t = synchronized(lock) {
+         if (owner != Owner.IDLE || epoch != at || pending?.get("protocol") == 0 && pending["wake"] == recovery.wake) return@Runnable
+-        owner = Owner.REPLACING
++        claim()
+       }
+-      schedule(at, recovery)
++      schedule(at, t, recovery)
+     })
+   }
+   companion object { const val DEFER = 300000L; const val SUCCESS = 1 }
+diff --git a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticPlan.kt b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticPlan.kt
+index ea25285..a7caa93 100644
+--- a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticPlan.kt
++++ b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticPlan.kt
+@@ -26,6 +26,12 @@ internal sealed class S3Resolution {
+   object ResolvedNotAccepted : S3Resolution()
+   object Unresolved : S3Resolution()
+ }
++internal sealed class S3Settle {
++  object NoFence : S3Settle()
++  object MigrationSettled : S3Settle()
++  data class ClockCommitted(val expected: S3AutoPlan, val revised: S3AutoPlan) : S3Settle()
++  data class ClockRolledBack(val expected: S3AutoPlan, val revised: S3AutoPlan) : S3Settle()
++}
+ internal sealed class S3Refresh {
+   data class Updated(val plan: S3AutoPlan, val rotated: Boolean) : S3Refresh()
+   data class Same(val plan: S3AutoPlan) : S3Refresh()
+@@ -108,18 +114,19 @@ internal class AndroidS3AutomaticPlan(val journal: AndroidS3Journal, private val
+   private fun cleanup(legacy: SharedPreferences) { legacy.edit().remove("due").remove("binding").remove("dispatch").commit() }
+   // Ends a migration fence only with one consistent proof: committed exact import, or proven absence.
+   // A marker with a different plan never settles (no reset/adoption in this process).
+-  // Returns true only for a settled clock proof: the caller then keeps the plan armed (no disarm).
+-  fun settle(legacy: SharedPreferences): Boolean = synchronized(AndroidSyncJournal.sourceLock) {
+-    val pending = uncertain ?: return@synchronized false
++  // R14: a clock proof is an event result (committed vs rolled back), bound by the caller to its exact request;
++  // only a clock result keeps the plan armed (no disarm/cleanup).
++  fun settle(legacy: SharedPreferences): S3Settle = synchronized(AndroidSyncJournal.sourceLock) {
++    val pending = uncertain ?: return@synchronized S3Settle.NoFence
+     val seen = boundary.read { if (has()) row() to true else null to false }
+     if (pending.old != null) {
+-      if (seen.first != pending.plan && seen.first != pending.old) throw S3Failure("storage_failure")
+-      uncertain = null; return@synchronized true
++      val result = when (seen.first) { pending.plan -> S3Settle.ClockCommitted(pending.old, pending.plan!!); pending.old -> S3Settle.ClockRolledBack(pending.old, pending.plan!!); else -> throw S3Failure("storage_failure") }
++      uncertain = null; return@synchronized result
+     }
+     if (seen.second && seen.first != pending.plan) throw S3Failure("storage_failure")
+     uncertain = null
+     if (seen.second) cleanup(legacy)
+-    false
++    S3Settle.MigrationSettled
+   }
+   // Explicit same-configuration clock revision: exact CAS, wake kept, retry cleared, no run/accept. Our own CAS
+   // miss writes nothing; any other throw is proven by one read: exact new = committed, exact old = not, else fenced.

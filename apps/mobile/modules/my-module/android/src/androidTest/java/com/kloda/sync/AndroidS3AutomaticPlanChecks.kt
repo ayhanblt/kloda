@@ -4,8 +4,8 @@ import android.app.Instrumentation
 import com.kloda.sync.AndroidS3AutomaticCoordinator.Owner
 import java.io.File
 import java.util.UUID
-import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.*
+import java.util.concurrent.atomic.AtomicReference
 
 // Plan store + uncertain-commit matrix on real isolated SQLite; faults only at the boundary port.
 internal object AndroidS3AutomaticPlanChecks {
@@ -14,7 +14,53 @@ internal object AndroidS3AutomaticPlanChecks {
   fun run(instrumentation: Instrumentation, root: File) {
     provider(instrumentation, root); migration(instrumentation, root); store(instrumentation, root); uncertain(instrumentation, root)
     fence(instrumentation, root); recovery(instrumentation, root); mismatch(instrumentation, root); stale(instrumentation, root)
-    clock(instrumentation, root)
+    clock(instrumentation, root); committed(instrumentation, root)
+  }
+  // R14/G14: clock R commits but its ack and proof read are lost while manual M runs; M's exact pause rotates
+  // the context (same target/binding). Recovery proves R once: no second clock-CAS/next(now), fresh context, one projection.
+  // Counterparts: exact-old rollback retries the CAS once; a mismatched proof stays fenced; config/revoke win over the request.
+  // parallel (R14-C1): two real ordinary reconciles race the same recovery; the expectation equals `commit`.
+  private fun committed(i: Instrumentation, root: File) = listOf("parallel", "commit", "rollback", "mismatch", "config", "revoke").forEach { mode -> S3AutoFixture(i, root, "clock-$mode").use { f ->
+    f.authorize(); val os = S3AutoFakeOs(); val c = f.coordinator(os); c.reconcile(); f.pump(); val p0 = f.plan.current()!!
+    f.foreground.set(true); f.queue.start(); check(f.held.size == 1 && c.owner == Owner.OS_OWNED); val scheduled = os.schedules.size
+    f.now.addAndGet(60_000); val dueR = f.now.get() + S3_HOUR; f.boundary.skip = 1; f.boundary.readFault = true
+    f.boundary.commitFault = if (mode == "rollback") "after-rollback" else "after-commit"
+    c.reconcile(true); f.pump(); val row = { k: String -> f.journal.text("SELECT $k FROM s3_auto_state WHERE id=1") }; val ctxR = row("context")
+    check(c.blocked && f.plan.fenced && c.clockPending && row("due") == (if (mode == "rollback") p0.due else dueR).toString() && row("wake") == p0.wake && os.schedules.size == scheduled && f.boundary.clocks.get() == 1) { "R14 $mode precondition: R not fenced" }
+    check(failure { f.queue.start() } != null && f.queue.status()["canRun"] == false) { "R14 $mode fence did not close manual start" }
+    f.queue.pause(); f.foreground.set(false); f.pump(); val ctxM = f.queue.authority()!!.context; check(ctxM != ctxR) { "R14 precondition: M pause kept context" }
+    when (mode) { "mismatch" -> f.journal.database.execSQL("UPDATE s3_auto_state SET due=due+1"); "config" -> f.sources(); "revoke" -> f.queue.setAutomatic(false) }
+    f.now.addAndGet(60_000); f.boundary.readFault = false; if (mode == "parallel") race(c) else c.reconcile(); f.pump(); val cas = f.boundary.clocks.get()
+    check(f.count("s3_auto_accept") == 0 && f.count("s3_run") == 1 && f.lease.get() == null && f.held.size == 1) { "R14 $mode admitted" }
+    if (mode == "mismatch") {
+      f.foreground.set(true); check(failure { f.queue.start() } == "storage_failure" && f.queue.status()["canRun"] == false); f.foreground.set(false)
+      check(c.blocked && f.plan.fenced && failure { f.plan.current() } == "storage_failure" && os.schedules.size == scheduled) { "R14 mismatch settled" }; return@use
+    }
+    val p = f.plan.current()!!; check(!c.clockPending && !c.blocked && !f.plan.fenced) { "R14 $mode request/fence left: ${c.clockPending} ${c.blocked}" }
+    when (mode) {
+      "revoke" -> check(p.wake == null && p.due == dueR && os.schedules.size == scheduled && os.cancels.get() == 1 && cas == 1) { "R14 revoke projected" }
+      "config" -> check(p.binding != p0.binding && p.wake != p0.wake && p.due == f.now.get() + S3_HOUR && os.schedules.size == scheduled + 1 && cas == 1) { "R14 config kept the old request" }
+      else -> {
+        val due = if (mode == "rollback") f.now.get() + S3_HOUR else dueR; val total = if (mode == "rollback") 2 else 1
+        check(cas == total && p.due == due && p.wake == p0.wake && p.retry == null && p.context == ctxM && p.binding == p0.binding) {
+          "R14 RED $mode: clockCAS=$cas expected=$total due=${p.due} expected=$due wake=${p.wake} expected=${p0.wake} ctx old=$ctxR new=$ctxM actual=${p.context}" }
+        check(os.schedules.size == scheduled + 1 && os.pending?.get("wake") == p.wake && os.cancels.get() == 0) { "R14 $mode projection: ${os.schedules.size - scheduled} cancels=${os.cancels.get()}" }
+      }
+    }
+  } }
+  // T1 parks right after its ClockCommitted settle; T2 is a second real reconcile. If T1 holds sourceLock, T2 must be
+  // BLOCKED entering unblock (state observation, no sleep/timeout guess); otherwise T2 runs to completion first.
+  private fun race(c: AndroidS3AutomaticCoordinator) {
+    val settled = CountDownLatch(1); val release = CountDownLatch(1); val held = AtomicReference<Boolean>(); val errors = CopyOnWriteArrayList<Throwable>()
+    val worker = { Thread { runCatching { c.reconcile() }.onFailure { errors.add(it) } } }; val t1 = worker(); var t2: Thread? = null
+    c.afterPlanSettleForTest = { s -> if (s is S3Settle.ClockCommitted && held.compareAndSet(null, Thread.holdsLock(AndroidSyncJournal.sourceLock))) { settled.countDown(); release.await(30, TimeUnit.SECONDS) } }
+    try {
+      t1.start(); check(settled.await(30, TimeUnit.SECONDS)) { "R14-C1 T1 never reached ClockCommitted" }; val s2 = worker().also { t2 = it; it.start() }
+      val atUnblock = { s2.state == Thread.State.BLOCKED && s2.stackTrace.firstOrNull { it.className.startsWith("com.kloda") }?.methodName == "unblock" }
+      if (held.get() == true) { var n = 0; while (!atUnblock() && s2.isAlive && n++ < 5_000_000) Thread.yield(); check(atUnblock()) { "R14-C1 T2 not blocked at unblock: ${s2.state}" } }
+      else { s2.join(30_000); check(!s2.isAlive) { "R14-C1 T2 did not complete" } }
+    } finally { release.countDown(); t1.join(30_000); t2?.join(30_000); c.afterPlanSettleForTest = null }
+    check(!t1.isAlive && t2?.isAlive != true && errors.isEmpty()) { "R14-C1 workers alive/failed: $errors" }
   }
   // Compatible and diagnostic journals never receive automatic authority or plan tables.
   private fun provider(i: Instrumentation, root: File) = S3AutoFixture(i, root, "provider").use { f ->

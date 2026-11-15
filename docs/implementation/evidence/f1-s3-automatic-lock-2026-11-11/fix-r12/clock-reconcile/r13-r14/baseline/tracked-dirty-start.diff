@@ -1,0 +1,114 @@
+diff --git a/.opencode/commands/implement.md b/.opencode/commands/implement.md
+index f648b10..b06563a 100644
+--- a/.opencode/commands/implement.md
++++ b/.opencode/commands/implement.md
+@@ -13,6 +13,11 @@ CURRENT'tan modu seç; normal yönlendirme kararını kullanıcıya tekrar sorma
+ - Review bekleniyor veya iş kapalı: uygulamayı tekrarlama; doğru rol/komutu ver.
+ - Plan hazır değil/onaysız veya kayıtlar çelişkili: kodlama yapma, somut engeli ver.
+ İlk kısa mesajda mod, iş/bulgu kimlikleri ve kapsam kaynağını bildir.
++Sözleşmedeki tek goal ve ortak durum-geçiş tablosunu kullan; yeniden tanımlama.
++Mevcut manifestte ölçüt/satır ID → test/kanıt → karşılandı/açık eşlemesi tut.
++Tek test yeşil diye goal tamamlandı deme; tüm zorunlu ölçütler ve ilgili
++korunan komşular kanıtlanmalı. Bütçe/engel nedeniyle durursan işi kısmi/açık
++bırak; güvenlik kapılarını atlayarak veya kapsamı sessiz daraltarak kapatma.
+ docs/implementation/execution-budget.md uygula: varsayılan 15000 output token
+ (thinking dahil) kontrol eşiği; usage yoksa UNKNOWN ve ilk temsilci sonunda
+ genişleme öncesi zorunlu kullanıcı kontrol noktası. Tasarım çelişkisinde DECISION;
+diff --git a/.opencode/commands/plan.md b/.opencode/commands/plan.md
+index c75d488..c549695 100644
+--- a/.opencode/commands/plan.md
++++ b/.opencode/commands/plan.md
+@@ -3,8 +3,12 @@ description: Backlog'daki tek iş için GPT planı
+ model: openai/gpt-6.1-sol
+ ---
+ 
+-AGENTS.md → CURRENT.md backlog'unu oku. Yalnız $ARGUMENTS için uygulama planı
+-yaz: hedef, dosyalar/akışlar, korunacak davranış, en dar doğrulama ve durdurma
++AGENTS.md → CURRENT.md backlog'unu oku. Yalnız $ARGUMENTS için uygulama planı yaz.
++Goal'u bu işin sözleşmesinde bir kez tanımla: gözlenebilir sonuç, kapsam dışı
++alanlar ve sabit kimlikli bitti ölçütleri. İlgili durum-geçiş tablosunu aynı belgede
++tut (satır ID / başlangıç / olay / beklenen state ve yan etki / kabul testi).
++Geliştirme ve review bu tek kaynağa referans verir, yeni goal kopyası üretmez.
++İçerik: hedef, dosyalar/akışlar, korunacak davranış, en dar doğrulama ve durdurma
+ kriteri (iki-deneme kuralı). docs/implementation/execution-budget.md uyarınca risk/model önerisi, bütçe
+ eşiği, test önkoşulları ve ilk temsilci kanıt kapısını belirt. Kritik tasarım çatışmasını
+ implementere bırakma; yalnız hazır sözleşme uygulamaya devredilir. İlk uygun
+diff --git a/.opencode/commands/review.md b/.opencode/commands/review.md
+index 5f90a56..cb7f0e9 100644
+--- a/.opencode/commands/review.md
++++ b/.opencode/commands/review.md
+@@ -4,6 +4,10 @@ model: openai/gpt-6.1-sol
+ ---
+ 
+ Uygulamadan ayrı GPT oturumunda çalış; bu koşul sağlanmıyorsa bağımsız kabul verme.
++Planın tek goal/bitti ölçütleri ve ortak durum-geçiş tablosunu esas al. Manifestte
++her zorunlu ölçüt/satır ID'nin kanıtını kontrol et; eksik varsa goal kapanmaz.
++Yeni goal üretme; bulguyu mevcut ölçüte bağla. Gerçekten yeni ürün hedefi ayrı
++kapsam kararıdır. Scoped fix kabulünü üst işin bütününün kabulü olarak raporlama.
+ AGENTS.md → CURRENT.md'nin aktif iş bölümünü oku. İlk uygulama review'unda onaylı
+ planı kullan. FIX review'unda önce son bulgular + tur manifesti + düzeltme diff'i;
+ plandan yalnız ilgili invariant/onay/kapsam bölümleri. Etkilenen komşu güvenlik
+diff --git a/AGENTS.md b/AGENTS.md
+index fdf0c00..4d0e966 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -53,6 +53,15 @@ When this policy applies, read the [targeted Context7 command reference](docs/im
+ 
+ ## Session boundary clarification — user decision, 2026-11-11
+ 
++- Shared goal contract (2026-11-15): GPT defines one observable goal, explicit
++  non-goals, stable acceptance IDs and the relevant state/event/expected-result
++  table in the work item's plan. Implementation and independent review use that
++  same contract; the existing manifest maps IDs to evidence/open status. Do not
++  duplicate or silently redefine the goal. Close only when all required criteria
++  are evidenced; a budget stop is partial, not completion. Existing explicit
++  deferred physical/release gates stay visible. This does not authorize unlimited
++  work, bypassing stops, or changing scope to claim completion.
++
+ - Execution quality/cost gates (2026-11-12): planning and implementation use
+   `docs/implementation/execution-budget.md`: resolved design before coding,
+   one representative regression/minimum fix before expansion, a 15000-output-token
+diff --git a/docs/implementation/CURRENT.md b/docs/implementation/CURRENT.md
+index 78e2ee8..d713ab3 100644
+--- a/docs/implementation/CURRENT.md
++++ b/docs/implementation/CURRENT.md
+@@ -52,6 +52,12 @@ Review açıklaması/kanıt/kayıt tamamlama aynı GPT sohbetinde kalır. Commit
+ 
+ ## Akış / kompakt checkpoint
+ 
++**15.11 ortak goal:** plan/geliştirme/review aynı goal ve durum-geçiş tablosunu
++kullanır; R13/R14 sözleşmesine mevcut ölçütlerin G13/G14/GP indeksi eklendi.
++Uygulama henüz başlamadı; yeni kapsam yok. Sıradaki ayrı Opus `/implement`;
++Windows'a geçildiyse önce devir notundaki ortam kontrolü. Bu süreç güncellemesi
++ürün kabulü veya otomatik commit/push değildir.
++
+ **15.11 makine devri:** mevcut tüm Git kapsamı kullanıcı talimatıyla commit/push
+ checkpoint'ine alınıyor; ürün kabulü değildir. Windows devamı/eksik yerel artifact
+ ve loglar: [Windows devir notu](windows-handoff-2026-11-15.md). İlk Windows oturumu
+diff --git a/docs/implementation/plans/f1-r13-r14-clock-reconcile-fix.md b/docs/implementation/plans/f1-r13-r14-clock-reconcile-fix.md
+index 8dc23f1..22b6e28 100644
+--- a/docs/implementation/plans/f1-r13-r14-clock-reconcile-fix.md
++++ b/docs/implementation/plans/f1-r13-r14-clock-reconcile-fix.md
+@@ -9,6 +9,22 @@ ilk uygulamayı yeniden başlatmaz. Kök neden/tasarım kapısı bu belgeyle tam
+ 
+ ## 1. Sınır ve doğrulanmış başlangıç
+ 
++**Tek goal — F1-S3-R13R14:** eski lifecycle olayının yeni projection yetkisini
++bozmamasını ve kanıtlanmış clock commit'in yeniden tüketilmemesini sağlamak.
++Aşağıdaki tablo mevcut §2–§3 sözleşmesinin ortak indeksidir; yeni kapsam/karar
++eklemez. Opus ve GPT review aynı ID'leri manifestte kanıta bağlar.
++
++| ID | Başlangıç / olay | Beklenen sonuç | Kabul kanıtı |
++|---|---|---|---|
++| G13 | Eski unresolved A; yeni ticket kurulmuş; exact stop(A) | Yeni owner/ticket/fence değişmez; eski olay yeni OS yan etkisi üretmez | §2 ilk temsilci + etkilenen SUCCESS/nonce/current-stop karşıtları |
++| G14 | Clock commit+ack loss; aynı config'te context refresh; recovery | Clock-CAS bir kez; committed due/wake/retry korunur; fresh context ve tek projection | §3 ilk temsilci + rollback/unreadable/mismatch/config karşıtları |
++| GP | R13/R14 değişikliği sonrası ilgili komşu olaylar | R12 capture=0, lease/manual fence, revoke ve migration cleanup korunur | §2–§3'te belirtilen etkilenen negatif yollar |
++
++**Bitti:** G13/G14/GP kanıtları + bağımsız GPT kabulü; test/build yapılmadan
++karşılandı sayılmaz. Bütçe kontrol noktasında kısmi kalabilir, goal kapatılamaz.
++**Kapsam dışı:** FTPS ve üst 1.4b'nin bütünü, fiziksel/production kabul; §1/§4
++sınırları geçerli. Bu goal'un kapanması üst backlog maddesini tek başına kapatmaz.
++
+ K = `apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/`;
+ T = aynı modülün `src/androidTest/java/com/kloda/sync/` dizini.
+ İzinli ürün: K/AndroidS3AutomaticCoordinator.kt ve K/AndroidS3AutomaticPlan.kt.

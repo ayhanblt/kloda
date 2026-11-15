@@ -1,0 +1,29 @@
+f26e425dd808daf206ee7bd8ec6fe9402fbd1119
+ M .opencode/commands/implement-pilot.md
+ M .opencode/commands/implement.md
+ M .opencode/commands/plan.md
+ M .opencode/commands/review.md
+ M AGENTS.md
+ M apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidAutomaticLockChecks.kt
+ M apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt
+ M apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticPlanChecks.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsJob.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsQueue.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsScheduler.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticCoordinator.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticPlan.kt
+ M docs/implementation/20-21-acceptance-collection-2026-11-04.md
+ M docs/implementation/CURRENT.md
+ M docs/implementation/execution-budget.md
+ M docs/implementation/plans/f1-r13-r14-clock-reconcile-fix.md
+ M docs/implementation/plans/next-plan.md
+ M docs/implementation/research-pilot.md
+?? apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsAutomaticChecks.kt
+?? apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsLifecycleChecks.kt
+?? apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsPolicyChecks.kt
+?? docs/implementation/evidence/f1-ftps-automatic-lock-2026-11-15/
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/r13-r14/
+?? docs/implementation/evidence/workflow-2026-11-16.md
+?? docs/implementation/plans/f1-ftps-research-2026-11-15.md
+?? docs/implementation/plans/f1-r14-c1-atomic-recovery-fix.md
+?? docs/implementation/plans/f1-s3-original-plan-2026-11-11.md

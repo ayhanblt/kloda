@@ -1,0 +1,117 @@
+--- docs/implementation/evidence/f1-ftps-automatic-lock-2026-11-15/fl3/baseline/AndroidFtpsAutomaticChecks.kt.start	2026-11-15 21:03:29
++++ apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsAutomaticChecks.kt	2026-11-15 21:09:15
+@@ -32,7 +32,9 @@
+       group("ftps-fl2-locked-reconcile-pending") { owned(i) { app, queue -> lockedReconcile(app, queue, pending = true) } }
+       group("ftps-fl2-locked-reconcile-absent") { owned(i) { app, queue -> lockedReconcile(app, queue, pending = false) } }
+       group("ftps-fl2-locked-reconcile-disabled") { owned(i) { app, queue -> lockedDisabled(app, queue) } }
+-      "FTPS FL1 locked JOB + FL2 locked reconcile (pending kept / metadata wake / disabled no wake) PASS; synthetic denial, not real Keyguard\n"
++      group("ftps-fl3-unlock-due-single-claim") { owned(i) { app, queue -> unlockedDue(i, app, queue) } }
++      group("ftps-fl3-unlock-future-no-early") { owned(i) { app, queue -> unlockedFuture(i, app, queue) } }
++      "FTPS FL1 locked JOB + FL2 locked reconcile (pending kept / metadata wake / disabled no wake) + FL3 unlock (due single claim / future no early) PASS; synthetic denial, not real Keyguard\n"
+     }
+     else -> null
+   }
+@@ -143,6 +145,71 @@
+     } finally { AndroidFtpsQueue.captureFault = null }
+   }
+ 
++  /** Forces the own JOB once and waits until a new callback finished and no FTPS job/reconcile thread is alive. */
++  private fun force(i: Instrumentation, recorder: Recorder) {
++    val seen = recorder.finishes.size
++    shell(i, "cmd jobscheduler run -f com.kloda.sync.test ${AndroidFtpsScheduler.JOB}")
++    val deadline = android.os.SystemClock.elapsedRealtime() + 60000
++    while (android.os.SystemClock.elapsedRealtime() < deadline && (recorder.finishes.size == seen || busy())) Thread.sleep(50)
++    Thread.sleep(500)
++    check(recorder.finishes.size > seen && !busy()) { "no finished callback: finishes=${recorder.finishes} cancels=${recorder.cancels}" }
++  }
++
++  /** FL3 due: after the FL1 locked wait, the next unlocked callback freshly admits the same occurrence with one claim. */
++  private fun unlockedDue(i: Instrumentation, app: Context, queue: AndroidFtpsQueue) {
++    lockedJob(i, app, queue)
++    val before = checkNotNull(queue.schedule.read())
++    check(before.run == null && runs(queue) == 0L) { "precondition P=$before runs=${runs(queue)}" }
++    val recorder = Recorder(); AndroidFtpsScheduler.os = recorder
++    try {
++      force(i, recorder)
++      check(runs(queue) == 1L) { "claims=${runs(queue)} expected exactly one" }
++      val run = checkNotNull(queue.runs.read(automatic = true))
++      check(run.target == before.target && run.binding == before.binding && run.occurrence == before.occurrence && run.phase != "running") {
++        "run=${run.target}/${run.binding}/${run.occurrence}/${run.phase} P=$before"
++      }
++      val after = checkNotNull(queue.schedule.read())
++      check(after.target == before.target && after.binding == before.binding &&
++        ((after.run == run.id && after.occurrence == before.occurrence) || (after.run == null && after.occurrence > before.occurrence))) { "P after=$after" }
++      check(recorder.cancels.isEmpty() && recorder.finishes.all { it == (AndroidFtpsScheduler.JOB to false) }) {
++        "cancel=${recorder.cancels} finish=${recorder.finishes}"
++      }
++    } finally { AndroidFtpsScheduler.os = AndroidFtpsScheduler.Os() }
++  }
++
++  /** FL3 future: a locked then unlocked callback on a future live P never admits it early; P and runs stay equal. */
++  private fun unlockedFuture(i: Instrumentation, app: Context, queue: AndroidFtpsQueue) {
++    val scheduler = app.getSystemService(JobScheduler::class.java)
++    AndroidFtpsScheduler.reconcile(app)
++    AndroidFtpsQueue.captureFault = { throw FtpsFailure("credential_locked") } // Keep a natural latency-0 run on the locked path.
++    val recorder = Recorder(); AndroidFtpsScheduler.os = recorder
++    try {
++      val created = checkNotNull(queue.schedule.read()) { "no P: ${AndroidFtpsScheduler.error(app)}" }
++      check(created.run == null && runs(queue) == 0L) { "precondition P=$created" }
++      val later = System.currentTimeMillis() + 3600000L
++      synchronized(AndroidSyncJournal.sourceLock) { queue.schedule.save(created.copy(occurrence = later, due = later), created) }
++      AndroidFtpsScheduler.reconcile(app) // Locked reconcile re-arms the same future P.
++      val before = checkNotNull(queue.schedule.read())
++      check(before.due == later && before.run == null) { "future P=$before" }
++      force(i, recorder)
++      check(queue.schedule.read() == before && recorder.cancels.isEmpty() && recorder.finishes.all { it == (AndroidFtpsScheduler.JOB to true) }) {
++        "locked: P=${queue.schedule.read()} cancel=${recorder.cancels} finish=${recorder.finishes}"
++      }
++      AndroidFtpsQueue.captureFault = null
++      val seen = recorder.finishes.size
++      force(i, recorder)
++      check(queue.schedule.read() == before) { "P changed: before=$before after=${queue.schedule.read()}" }
++      check(runs(queue) == 0L) { "early claim: runs=${runs(queue)}" }
++      check(recorder.cancels.isEmpty() && recorder.finishes.drop(seen).all { it == (AndroidFtpsScheduler.JOB to false) }) {
++        "cancel=${recorder.cancels} finish=${recorder.finishes}"
++      }
++      check(scheduler.getPendingJob(AndroidFtpsScheduler.JOB)?.extras?.getLong("dispatch", -1) == before.due) { "future JOB not re-armed for P.due" }
++    } finally {
++      AndroidFtpsQueue.captureFault = null
++      AndroidFtpsScheduler.os = AndroidFtpsScheduler.Os()
++    }
++  }
++
+   /** Removes only this fixture's own profile/DB left by a failed FL check that produced no FTPS run/upload evidence. */
+   private fun resetRunless(i: Instrumentation) {
+     val app = i.targetContext
+@@ -170,7 +237,10 @@
+     val snapshots = File(app.noBackupFilesDir, "kloda-ftps-snapshots")
+     val keys = java.security.KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+     val alias = app.packageName + ".ftps.profile.v1"
+-    check(prefs.all.isEmpty() && !vault.exists() && !snapshots.exists() && !keys.containsAlias(alias) && scheduler.allPendingJobs.isEmpty())
++    check(prefs.all.isEmpty() && !vault.exists() && !snapshots.exists() && !keys.containsAlias(alias) && scheduler.allPendingJobs.isEmpty()) {
++      "dirty entry: prefs=${prefs.all.keys} vault=${vault.exists()} snapshots=${snapshots.exists()} alias=${keys.containsAlias(alias)} " +
++        "jobs=${scheduler.allPendingJobs.map { it.id }} busy=${busy()}"
++    }
+     val queue = AndroidFtpsRuntime.queue(app)
+     check(!queue.journal.hasProfile())
+     val token = UUID.randomUUID().toString().replace("-", "")
+@@ -191,6 +261,9 @@
+       completed = true
+     } finally {
+       runCatching { queue.disable() }; AndroidFtpsScheduler.cancel(app)
++      // Test isolation: let an in-flight natural callback of this group finish before its fixture state is cleared.
++      val quiet = android.os.SystemClock.elapsedRealtime() + 60000
++      while (busy() && android.os.SystemClock.elapsedRealtime() < quiet) Thread.sleep(50)
+       if (granted) {
+         app.contentResolver.releasePersistableUriPermission(tree, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+         app.revokeUriPermission(tree, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+@@ -201,6 +274,9 @@
+         if (keys.containsAlias(alias)) keys.deleteEntry(alias)
+         android.util.AtomicFile(vault).delete()
+         queue.journal.database.close()
++        // A claimed FL3 run whose publish fails may leave its staged snapshot; the directory was absent on entry,
++        // so every *.snapshot here was created by this group in this disposable package.
++        snapshots.listFiles()?.filter { it.isFile && it.name.endsWith(".snapshot") }?.forEach { check(it.delete()) }
+         // Test-only: drop the cached queue bound to the closed fixture DB so the next owned group opens a fresh one.
+         AndroidFtpsRuntime::class.java.getDeclaredField("sender").apply { isAccessible = true }.set(AndroidFtpsRuntime, null)
+         val directory = File(app.noBackupFilesDir, "kloda-ftps")

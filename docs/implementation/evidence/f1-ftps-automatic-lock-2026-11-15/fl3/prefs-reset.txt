@@ -1,0 +1,1 @@
+15.11 pre-run-3: test-package kloda-sync prefs had only ftpsAutomaticError=storage_failure (late callback after run-2 teardown); reset to empty map (same as owned() clear)

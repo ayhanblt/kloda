@@ -1,0 +1,7 @@
+     214 AndroidFtpsScheduler.kt
+     124 AndroidFtpsJob.kt
+     218 AndroidFtpsQueue.kt
+     270 AndroidFtpsAutomaticChecks.kt
+     234 AndroidFtpsLifecycleChecks.kt
+     295 AndroidFilesQueueRecoveryInstrumentation.kt
+      77 AndroidFtpsOsChecks.kt

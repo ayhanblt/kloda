@@ -9,6 +9,22 @@ ilk uygulamayı yeniden başlatmaz. Kök neden/tasarım kapısı bu belgeyle tam
 
 ## 1. Sınır ve doğrulanmış başlangıç
 
+**Tek goal — F1-S3-R13R14:** eski lifecycle olayının yeni projection yetkisini
+bozmamasını ve kanıtlanmış clock commit'in yeniden tüketilmemesini sağlamak.
+Aşağıdaki tablo mevcut §2–§3 sözleşmesinin ortak indeksidir; yeni kapsam/karar
+eklemez. Opus ve GPT review aynı ID'leri manifestte kanıta bağlar.
+
+| ID | Başlangıç / olay | Beklenen sonuç | Kabul kanıtı |
+|---|---|---|---|
+| G13 | Eski unresolved A; yeni ticket kurulmuş; exact stop(A) | Yeni owner/ticket/fence değişmez; eski olay yeni OS yan etkisi üretmez | §2 ilk temsilci + etkilenen SUCCESS/nonce/current-stop karşıtları |
+| G14 | Clock commit+ack loss; aynı config'te context refresh; recovery | Clock-CAS bir kez; committed due/wake/retry korunur; fresh context ve tek projection | §3 ilk temsilci + rollback/unreadable/mismatch/config karşıtları |
+| GP | R13/R14 değişikliği sonrası ilgili komşu olaylar | R12 capture=0, lease/manual fence, revoke ve migration cleanup korunur | §2–§3'te belirtilen etkilenen negatif yollar |
+
+**Bitti:** G13/G14/GP kanıtları + bağımsız GPT kabulü; test/build yapılmadan
+karşılandı sayılmaz. Bütçe kontrol noktasında kısmi kalabilir, goal kapatılamaz.
+**Kapsam dışı:** FTPS ve üst 1.4b'nin bütünü, fiziksel/production kabul; §1/§4
+sınırları geçerli. Bu goal'un kapanması üst backlog maddesini tek başına kapatmaz.
+
 K = `apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/`;
 T = aynı modülün `src/androidTest/java/com/kloda/sync/` dizini.
 İzinli ürün: K/AndroidS3AutomaticCoordinator.kt ve K/AndroidS3AutomaticPlan.kt.

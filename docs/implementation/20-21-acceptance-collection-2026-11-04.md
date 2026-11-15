@@ -12,6 +12,14 @@
 
 ## 21 — en son toplu gerçek cihaz/OS kabulü
 
+- [ ] **F1-FO1 success-completion — 16.11 kullanıcı onaylı dar erteleme:** Android
+  fiziksel test aşamasında gerçek başarılı FTPS aktarımı → yeni completion yolunda
+  tek tamamlama → UI açılmadan sonraki JOB callback'i zincirini doğrula. Transfer
+  sonucu, completion/OS yan etkileri ve sonraki callback kanıtını kaynak/varyantla
+  kaydet. Başarısızsa yalnız ilgili bulgu açılır. Şimdi koşu veya fixture kurulumu yok.
+  Önceki PASS ve reuse sınırları: [FO1 audit](evidence/f1-ftps-automatic-lock-2026-11-15/fo1-evidence-audit-2026-11-16.md).
+  Bu kontrol NOT_RUN; F1 geliştirme kapanışından ayrı fiziksel kabul kapısıdır.
+
 - Android/iOS gerçek OS delivery, BG expiry/Doze/lock/reboot/recovery; native automatic component testleri gerçek OS teslimi değildir.
 - Fiziksel cihaz signing/credential custody, sağlayıcı/iCloud/storage davranışı; büyük dosyalar ve Photos formatları/metadata-revision durumları.
 - Gerçek kişisel aktarım yalnız uygulamadaki açık opt-in ve hazır cihaz/hesap kapsamıyla; önceki sentetik AWS izni genişletilmez.

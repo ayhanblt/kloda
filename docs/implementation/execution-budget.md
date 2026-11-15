@@ -1,4 +1,4 @@
-# Uygulama maliyeti ve doğruluk kapıları — 12.11.2026
+# Uygulama maliyeti ve doğruluk kapıları — 16.11.2026
 
 Kullanıcı onaylı dört ilke. Yeni uygulama/fix turlarında geçerli; mevcut planın
 güvenlik kabulünü azaltmaz. Normal devirde ek yönetim sohbeti gerekmez.
@@ -20,26 +20,28 @@ ve ilgili kimlik/deadline/context farkını sırsız göstersin. Sırf hata mesa
 için tekrar APK döngüsünden kaçın. İlk yol geçince yalnız onaylı etkilenen kapsamı
 genişlet. Testin geçmesi için ürün beklentisini değiştirme.
 
-## 3. Bütçe kontrol noktası
+## 3. Ajan içi verimlilik kontrolü
 
-Başlangıç eşiği: uygulama/fix turu başına **15000 output token**, thinking dahil;
-thinking'i ayrıca ekleme. Bu deneysel bir durma eşiği, Pro kota yüzdesi veya
-sağlayıcı tarafından zorlanan sert limit değildir. Bir model yanıtı eşiği aşabilir.
-Plan ihtiyaç varsa farklı eşiği gerekçeyle onaya sunar; ajan kendi yükseltemez.
+**15000 output token**, thinking dahil, ajan içi kontrol işaretidir; durma/onay
+eşiği, Pro kota yüzdesi veya sağlayıcı hard-cap'i değildir. Tek onaylı goal içinde
+her alt test için yeniden bütçe izni istenmez.
 
 - Güvenilir usage araçtan/harness'ten görünüyorsa tur başından itibaren kaydet;
   devam/compaction parçalarında sayacı sıfırlama. Her aşama ve yeni build/araştırma
   öncesi mevcut değeri kontrol et. Ayrı ajan pilot kullanımını ayrıca göster.
-- Usage erişilemiyorsa UNKNOWN yaz; transcript boyutundan token/kota uydurma ve
-  ölçmek için özel servis/veritabanı taraması başlatma. İlk temsilci sonunda zorunlu
-  kontrol noktası bırakıp genişletmeye başlamadan kullanıcı yanıtını bekle.
-- Ölçüm varsa ve eşik altında, temsilci yeşilse onaylı etkilenen kontroller otomatik
-  devam edebilir. Eşik aşıldıysa yeni edit/build/araştırma başlatma; mevcut işlemin
-  sonucunu ve güvenli checkpoint'i kaydet. Başlayan build'i sırf eşik diye öldürme.
-- DUR çıktısı: yapılan/kanıtlanan, harcanan veya UNKNOWN, kalan dar iş ve öneri.
-  Kullanıcı aynı sohbetten devam bütçesini onaylayabilir; yeni sohbet şart değildir.
-- Bütçe nedeniyle atlanan zorunlu kontroller açık kalır; iş PASS/review-ready olmaz.
-  İki başarısız yaklaşım kuralı ayrıca geçerlidir.
+- Usage erişilemiyorsa UNKNOWN yaz; token/kota uydurma veya özel servis/veritabanı
+  taraması başlatma. UNKNOWN tek başına durma/sohbet değiştirme nedeni değildir.
+- Eşikte (ölçüm yoksa ilk temsilci sonunda) tekrar okuma/test, kapsam, ilerleme ve
+  bağlam kalitesini değerlendir; kısa notu mevcut manifestte tut. İlerleme varsa
+  onaylı kapsamı sürdür. Başarılı etkilenmeyen kanıtları tekrar üretme.
+- Temsilci GREEN sonrası bütün onaylı kabul satırlarına devam et; FL/FS/FW ayrı
+  görev/onay/review değildir. Belirgin bağlam bozulursa kompakt devir yap; yalnız
+  token sayısından bozulma veya tasarruf sonucu çıkarma.
+- Gerçek DUR: kapsam/ürün/güvenlik kararı, sözleşme çatışması, eksik bilgi/altyapı,
+  izin gerektiren yıkıcı işlem veya aynı yaklaşım/invariant için iki başarısız fix.
+  Somut engeli belirt; sayaç yeni oturumda sıfırlanmaz. Kullanıcı durdurursa dur.
+- Zorunlu kontrol eksikse KISMİ/BLOCKED; review-ready/PASS değil. Önceden onaylı
+  ertelenmiş fiziksel/release kapıları açık kalır; kendiliğinden yeni erteleme yok.
 
 ## 4. Risk bazlı tek Sonnet pilotu
 

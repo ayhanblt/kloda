@@ -1,0 +1,60 @@
+package com.kloda.sync
+
+import android.app.Instrumentation
+import android.app.job.JobScheduler
+import android.content.Context
+
+// F1-FTPS FW/FS/FP lifecycle rows (next-plan §3) on the owned disposable test package; synthetic denial, not real Keyguard.
+internal object AndroidFtpsLifecycleChecks {
+  fun run(i: Instrumentation, group: (String, () -> Unit) -> Unit) {
+    group("ftps-fw1-locked-watch-keeps-plan") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> lockedWatch(i, app, queue) } }
+  }
+
+  /** FW1: live future P, run=null, locked; current WATCH → P equal, no early request, JOB kept, WATCH re-observed. */
+  private fun lockedWatch(i: Instrumentation, app: Context, queue: AndroidFtpsQueue) {
+    val scheduler = app.getSystemService(JobScheduler::class.java)
+    val prefs = app.getSharedPreferences("kloda-sync", 0)
+    AndroidFtpsScheduler.reconcile(app)
+    AndroidFtpsQueue.captureFault = { throw FtpsFailure("credential_locked") } // A natural latency-0 run stays on the locked path.
+    val recorder = AndroidFtpsAutomaticChecks.Recorder()
+    try {
+      val created = checkNotNull(queue.schedule.read()) { "no P: ${AndroidFtpsScheduler.error(app)}" }
+      check(created.run == null && AndroidFtpsAutomaticChecks.runs(queue) == 0L) { "precondition P=$created" }
+      val later = System.currentTimeMillis() + 3600000L
+      synchronized(AndroidSyncJournal.sourceLock) { queue.schedule.save(created.copy(occurrence = later, due = later), created) }
+      AndroidFtpsScheduler.reconcile(app) // Locked reconcile arms the same future P (FL2).
+      val before = checkNotNull(queue.schedule.read())
+      check(before.due == later && before.run == null) { "future P=$before" }
+      val token = checkNotNull(scheduler.getPendingJob(AndroidFtpsScheduler.JOB)) { "no JOB" }.extras.getString("token")
+      val watch = checkNotNull(scheduler.getPendingJob(AndroidFtpsScheduler.WATCH)) { "no WATCH in live mode" }
+      val watchToken = watch.extras.getString("token")
+      val uris = watch.triggerContentUris.orEmpty().map { it.uri to it.flags }.toSet()
+      check(uris.isNotEmpty()) { "WATCH without trigger URIs" }
+      val keys = prefs.all.keys.toSet()
+      AndroidFtpsScheduler.os = recorder
+      AndroidFtpsAutomaticChecks.shell(i, "cmd jobscheduler run -f com.kloda.sync.test ${AndroidFtpsScheduler.WATCH}")
+      val deadline = android.os.SystemClock.elapsedRealtime() + 30000
+      fun replaced() = scheduler.getPendingJob(AndroidFtpsScheduler.WATCH)?.extras?.getString("token").let { it != null && it != watchToken }
+      while (android.os.SystemClock.elapsedRealtime() < deadline &&
+        (AndroidFtpsAutomaticChecks.busy() || (recorder.finishes.none { it.first == AndroidFtpsScheduler.WATCH } && !replaced()))) Thread.sleep(50)
+      Thread.sleep(500)
+      check(!AndroidFtpsAutomaticChecks.busy()) { "callback still running; finishes=${recorder.finishes} cancels=${recorder.cancels}" }
+      check(queue.schedule.read() == before) { "P changed: before=$before after=${queue.schedule.read()}" }
+      check(AndroidFtpsAutomaticChecks.runs(queue) == 0L) { "runs=${AndroidFtpsAutomaticChecks.runs(queue)}" }
+      check(prefs.all.keys.toSet() == keys) { "stored request keys: before=$keys after=${prefs.all.keys}" }
+      check(prefs.getString("ftpsDispatchToken", null) == token &&
+        scheduler.getPendingJob(AndroidFtpsScheduler.JOB)?.extras?.getString("token") == token) { "JOB not kept" }
+      val next = checkNotNull(scheduler.getPendingJob(AndroidFtpsScheduler.WATCH)) {
+        "WATCH not re-observed: finishes=${recorder.finishes} cancels=${recorder.cancels}"
+      }
+      check(next.extras.getString("token") != watchToken && next.triggerContentUris.orEmpty().map { it.uri to it.flags }.toSet() == uris) { "WATCH URIs changed" }
+      // §4.8: consumed WATCH completes by same-URI replacement; no separate finish/cancel.
+      check(recorder.cancels.isEmpty() && recorder.finishes.none { it.first == AndroidFtpsScheduler.WATCH } &&
+        recorder.finishes.all { it == (AndroidFtpsScheduler.JOB to true) }) { "cancel=${recorder.cancels} finish=${recorder.finishes}" }
+      check(AndroidFtpsScheduler.error(app) == "credential_locked") { "error=${AndroidFtpsScheduler.error(app)}" }
+    } finally {
+      AndroidFtpsQueue.captureFault = null
+      AndroidFtpsScheduler.os = AndroidFtpsScheduler.Os()
+    }
+  }
+}

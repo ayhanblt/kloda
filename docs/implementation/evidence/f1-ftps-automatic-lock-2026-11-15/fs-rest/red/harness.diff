@@ -1,0 +1,2 @@
+30a31
+>     open fun schedule(scheduler: JobScheduler, job: android.app.job.JobInfo): Int = scheduler.schedule(job) // RED harness only

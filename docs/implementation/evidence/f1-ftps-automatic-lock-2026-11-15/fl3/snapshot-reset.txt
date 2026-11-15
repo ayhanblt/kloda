@@ -1,0 +1,18 @@
+total 24
+drwx------ 2 u0_a207 u0_a207 4096 2026-11-15 21:07 .
+drwxrwx--x 3 u0_a207 u0_a207 4096 2026-11-15 21:07 ..
+-r-------- 1 u0_a207 u0_a207 4096 2026-11-15 21:07 fa60dc16-2a2e-4cb9-923f-0e00d19a3b34.snapshot
+kloda-amazon-s3.sqlite
+kloda-amazon-s3.sqlite-shm
+kloda-amazon-s3.sqlite-wal
+kloda-webdav.sqlite
+reason: run-3 FL3 claimed run retained staged snapshot; owned() teardown threw at snapshots check after deleting its DB/vault/alias; orphan test-package file removed before run-4
+total 24
+drwx------ 2 u0_a207 u0_a207 4096 2026-11-15 21:08 .
+drwxrwx--x 3 u0_a207 u0_a207 4096 2026-11-15 21:08 ..
+-r-------- 1 u0_a207 u0_a207 4096 2026-11-15 21:08 9c1e8f81-6e33-4694-860b-c1d932259515.snapshot
+kloda-amazon-s3.sqlite
+kloda-amazon-s3.sqlite-shm
+kloda-amazon-s3.sqlite-wal
+kloda-webdav.sqlite
+run-4 orphan (21:08, same cause) removed before run-5

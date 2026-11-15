@@ -25,6 +25,43 @@ When this policy applies, read the [targeted Context7 command reference](docs/im
 <!-- context7 -->
 
 
+## Balanced delivery — user decision, 2026-11-16
+
+- Simplicity and evidence reuse (user clarification): before proposing a new test,
+  fixture or implementation, check the relevant existing evidence against the diff.
+  Reuse unaffected results; state the concrete changed/uncovered behavior before
+  any repeat. Do not redo work because of a new session or missing old infrastructure.
+  Keep one current next action; internal test branches are not user-managed tasks.
+  Honor explicit deferrals without reopening them as development blockers; distinguish
+  prior PASS, fresh PASS and deferred checks. Prefer the smallest sufficient solution.
+
+- One task, one goal, one shared acceptance/state-transition table: finding → GPT
+  solution plan → Opus implementation and verification → independent GPT review.
+  Acceptance rows (FL/FS/FW etc.) are internal checks, not separate tasks, approvals
+  or review sessions. Continue through the approved scope without per-row prompts.
+- Opus knows review criteria before coding and checks behavior, affected callers,
+  code cleanliness/standards and relevant tests/lint/typecheck/build before handoff.
+  Required missing evidence blocks review-ready; explicitly deferred gates remain
+  visible and are never silently waived. Self-review is not independent acceptance.
+- Review returns one consolidated, evidenced list against the shared contract.
+  Opus verifies root cause, reproduces with a regression, fixes and checks affected
+  paths; external uncertainty uses bounded research under research-pilot.md.
+  No blind patching or guarantee of one-pass success. Design/scope conflicts return
+  to GPT; normal scoped fixes do not require a new plan or another approval.
+- Reuse the existing Opus implementation and GPT review conversations for fixes.
+  Separate the roles, not every turn. New sessions are for a new independent task,
+  a role with no existing conversation, or demonstrated context degradation.
+- execution-budget.md governs cost: 15000 output tokens is an internal efficiency
+  checkpoint, not an approval stop; UNKNOWN alone never stops approved work.
+  Stop for scope/product/security decisions, contract conflicts, missing information
+  or infrastructure, destructive actions requiring permission, or two failed fixes
+  of the same approach/invariant. Counters survive sessions.
+- Report task + phase + remaining scope + whether a user decision is needed;
+  do not make users coordinate individual tests. Preserve parent-task visibility.
+- This decision supersedes conflicting budget, per-substep session/approval and
+  single-documentation-pilot rules in older plans, manifests and global guidance.
+  It does not change product scope, acceptance evidence, model/effort or physical gates.
+
 ## Roles and workflow — user decision, 2026-11-09
 
 - Harness: OpenCode v2. Roles run in separate, user-started sessions:
@@ -53,11 +90,20 @@ When this policy applies, read the [targeted Context7 command reference](docs/im
 
 ## Session boundary clarification — user decision, 2026-11-11
 
+- Shared goal contract (2026-11-15): GPT defines one observable goal, explicit
+  non-goals, stable acceptance IDs and the relevant state/event/expected-result
+  table in the work item's plan. Implementation and independent review use that
+  same contract; the existing manifest maps IDs to evidence/open status. Do not
+  duplicate or silently redefine the goal. Close only when all required criteria
+  are evidenced; a budget stop is partial, not completion. Existing explicit
+  deferred physical/release gates stay visible. This does not authorize unlimited
+  work, bypassing stops, or changing scope to claim completion.
+
 - Execution quality/cost gates (2026-11-12): planning and implementation use
   `docs/implementation/execution-budget.md`: resolved design before coding,
   one representative regression/minimum fix before expansion, a 15000-output-token
-  soft checkpoint (thinking included) or mandatory representative checkpoint when
-  usage is unavailable, and a single explicitly selected low-risk Sonnet pilot.
+  internal efficiency checkpoint (thinking included; UNKNOWN is not a stop),
+  and a single explicitly selected low-risk Sonnet implementation pilot.
   Never invent usage or silently lower security checks/model effort. This policy
   supersedes automatic continuation only at its specified stop gates. Existing
   F1 is not the lightweight-model pilot; a further rejected clock-fix review needs
@@ -97,7 +143,8 @@ When this policy applies, read the [targeted Context7 command reference](docs/im
   implementer rewrite of the approved design.
 - Use a separate GPT session for independent review. Keep review clarification,
   evidence completion and administrative closeout in that review session.
-- Start a new session on role change or a new independent work item. Context
+- Reuse each role's existing session for this work item; create one if absent.
+  Start a new session for a new independent work item. Context
   degradation may justify a compact handoff; do not restart merely for a substep.
   A new session never resets the two-failed-attempt stop rule.
 - End task updates with: `Durum: ...`, `Devam: AYNI SOHBET / YENİ SOHBET / DUR —
@@ -107,16 +154,12 @@ When this policy applies, read the [targeted Context7 command reference](docs/im
 
 ## Single-agent and usage policy — user decision, 2026-10-29
 
-- Narrow exception authorized 2026-11-12: after the user's Pro quota reset,
-  one external-documentation subagent pilot during the next Opus fix is allowed
-  under `docs/implementation/research-pilot.md`. Only load it when an actual
-  external-doc question arises. No coding/review delegation, no permanent
-  multi-agent switch, no synthetic research just to exercise the pilot.
-  This exception supersedes the ban below only for that pilot.
-
-- Work with the main agent only. Do not spawn, resume or delegate to subagents;
-  do not invoke Astra automatically. A new explicit user instruction is required
-  to change this rule. It supersedes older helper/model-routing instructions.
+- Research delegation authorized 2026-11-16 in plan, implementation and review:
+  use lower-cost subagents for bounded external questions independent of private
+  project context, under `docs/implementation/research-pilot.md`. No quota-reset
+  condition or per-question approval. No synthetic research to exercise a pilot.
+- Product-code investigation, implementation and independent review stay with
+  their main agents; no coding/review delegation or automatic Astra invocation.
 - Keep the main model and effort unchanged.
 - Use Serena for targeted symbol/caller/reference discovery when useful; verify
   project activation and available tools first. It does not replace ADRs.
@@ -158,7 +201,8 @@ When this policy applies, read the [targeted Context7 command reference](docs/im
 - Batch independent checks and reads in one tool call. Keep raw logs on disk; return only status and a small relevant error excerpt.
 - Verify fixture/server/permissions and one representative path before expanding a build or platform matrix.
 - Do not repeat successful tests. Reuse their recorded source/variant hashes and results; identify any changed or uncovered behavior explicitly rather than silently treating old evidence as current.
-- At every task boundary, write one compact checkpoint, provide the exact next-chat prompt, and stop. Do not reload the previous transcript into the new chat.
+- At the whole-task/role handoff, write one compact checkpoint and exact prompt;
+  stop before the next independent task. Internal acceptance rows are not task boundaries.
 
 ## Scope and capture discipline
 
