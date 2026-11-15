@@ -1,0 +1,5 @@
+AndroidS3AutomaticCoordinator.kt 296
+AndroidS3AutomaticPlan.kt 173
+AndroidAutomaticLockChecks.kt 300
+AndroidS3AutomaticPlanChecks.kt 253
+AndroidS3AutomaticOsChecks.kt 85

@@ -61,6 +61,7 @@ export function sftpStatusFromNative(value: unknown): SftpStatus {
   if (result.running !== (result.run?.state === 'running')) return invalid(); return result;
 }
 interface NativeSftp {
+  sftpRequest?(): unknown;
   sftpStatus(): Promise<unknown>; configureSftp(address: string, port: number, fingerprint: string, root: string, username: string, password: string): Promise<unknown>;
   enableSftp(): Promise<unknown>; disableSftp(): Promise<unknown>; runSftp(): Promise<unknown>; pauseSftp(): Promise<unknown>;
   sftpBackups(after: string): Promise<unknown>; sftpIssues(after: string): Promise<unknown>;
@@ -69,6 +70,7 @@ interface NativeSftp {
 }
 export function sftpNative(): NativeSftp { const value = requireOptionalNativeModule<NativeSftp>('KlodaSftp'); if (!value) throw new Error('native_unsupported'); return value; }
 export const sftp = {
+  newRequest(): string { const native = requireOptionalNativeModule<NativeSftp>('KlodaSftp'); if (typeof native?.sftpRequest !== 'function') throw new Error('native_unsupported'); return text(native.sftpRequest(), uuid); },
   async status() { const native = requireOptionalNativeModule<NativeSftp>('KlodaSftp'); return typeof native?.sftpStatus === 'function' ? sftpStatusFromNative(await native.sftpStatus()) : { supported: false, configured: false, enabled: false, running: false }; },
   async configure(raw: SftpForm) { const f = validateSftpForm(raw); return sftpStatusFromNative({ ...object(await sftpNative().configureSftp(f.address,Number(f.port),f.fingerprint,f.root,f.username,f.password), ['supported','configured','enabled','running','targetId','config','run','errorCode','automaticError']), supported: true }); },
   async action(action: 'enable' | 'disable' | 'run' | 'pause') {

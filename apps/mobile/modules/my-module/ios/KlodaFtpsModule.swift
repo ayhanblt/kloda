@@ -22,6 +22,7 @@ public final class KlodaFtpsModule: Module {
       self.destroyed = true; self.review.cancel(); self.restore.cancel(); self.photosRestore.cancel(); self.restoreRequest = nil; self.inactive()
       DispatchQueue.main.async { self.observers.forEach(NotificationCenter.default.removeObserver); self.observers = [] }
     }
+    Function("ftpsRequest") { UUID().uuidString.lowercased() }
     AsyncFunction("ftpsStatus") { (promise: Promise) in self.reply(promise) {
       var value = try IosFtpsQueue.shared.status(); value["supported"] = true
       if let code = IosFtpsAutomaticCoordinator.shared.error() { value["automaticError"] = code }

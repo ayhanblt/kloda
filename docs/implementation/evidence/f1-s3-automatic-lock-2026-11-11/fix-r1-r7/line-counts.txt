@@ -1,0 +1,11 @@
+AndroidS3Runtime.kt 22
+AndroidS3Queue.kt 188
+AndroidS3AutomaticPlan.kt 154
+AndroidS3AutomaticCoordinator.kt 300
+AndroidS3Automatic.kt 59
+AndroidS3AutomaticChecks.kt 73
+AndroidS3AutomaticPlanChecks.kt 187
+AndroidAutomaticLockChecks.kt 286
+AndroidS3AutomaticOsChecks.kt 79
+AndroidFilesQueueRecoveryInstrumentation.kt 300
+AndroidManifest.xml 13

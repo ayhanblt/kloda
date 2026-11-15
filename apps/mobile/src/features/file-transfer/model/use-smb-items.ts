@@ -33,7 +33,9 @@ export function useSmbItems(issues: boolean) {
   };
   const act = async (item: SmbItem) => {
     if (!active.current || busy.current || !page || (issues && item.kind !== 'file')) return;
-    const ticket = crypto.randomUUID(), version = ++epoch.current;
+    let ticket: string;
+    try { ticket = smb.newRequest(); } catch (cause) { setError(cause instanceof Error ? cause.message : 'outcome_unknown'); return; }
+    const version = ++epoch.current;
     request.current = ticket; choosing.current = !issues && item.kind === 'file'; busy.current = true; setWorking(true); setError(null); setNotice(null);
     try {
       const result = issues ? await smbBackups.copy(item.id,ticket) : await smbBackups.restore(item,ticket);

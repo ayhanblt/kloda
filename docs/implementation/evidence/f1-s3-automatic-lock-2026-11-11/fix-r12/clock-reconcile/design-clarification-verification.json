@@ -1,0 +1,43 @@
+{
+  "kind": "documentation-only design verification; not runtime acceptance",
+  "HEAD": "650ec17f300ebdeee804bd4218f5b57356eecb21",
+  "source_hashes": {
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticCoordinator.kt": true,
+    "apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticPlan.kt": true,
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidAutomaticLockChecks.kt": true,
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticPlanChecks.kt": true,
+    "apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticOsChecks.kt": true
+  },
+  "links": {
+    "docs/implementation/plans/f1-r13-r14-clock-reconcile-fix.md -> ../evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/review.md": true,
+    "docs/implementation/plans/f1-r13-r14-clock-reconcile-fix.md -> ../evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/MANIFEST.md": true,
+    "docs/implementation/plans/f1-r13-r14-clock-reconcile-fix.md -> f1-r12-clock-reconcile-fix.md": true,
+    "docs/implementation/plans/f1-r13-r14-clock-reconcile-fix.md -> ../execution-budget.md": true,
+    "docs/implementation/plans/f1-r12-clock-reconcile-fix.md -> f1-r13-r14-clock-reconcile-fix.md": true,
+    "docs/implementation/CURRENT.md -> plans/f1-r13-r14-clock-reconcile-fix.md": true,
+    "docs/implementation/CURRENT.md -> plans/f1-r12-clock-reconcile-fix.md": true,
+    "docs/implementation/CURRENT.md -> evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/review.md": true,
+    "docs/implementation/CURRENT.md -> evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/MANIFEST.md": true,
+    "docs/implementation/CURRENT.md -> evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/review.md": true,
+    "docs/implementation/CURRENT.md -> evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/MANIFEST.md": true,
+    "docs/implementation/CURRENT.md -> 20-21-acceptance-collection-2026-11-04.md": true,
+    "docs/implementation/CURRENT.md -> field-findings-2026-11-05.md": true,
+    "docs/implementation/CURRENT.md -> claude-review-2026-11-11.md": true,
+    "docs/implementation/CURRENT.md -> execution-budget.md": true,
+    "docs/implementation/CURRENT.md -> current-history-2026-11-11.md": true,
+    "docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/MANIFEST.md -> review.md": true,
+    "docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/MANIFEST.md -> ../../../../plans/f1-r12-clock-reconcile-fix.md": true,
+    "docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/MANIFEST.md -> ../MANIFEST.md": true,
+    "docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/MANIFEST.md -> ../../../../plans/f1-r13-r14-clock-reconcile-fix.md": true
+  },
+  "lines": {
+    "docs/implementation/plans/f1-r13-r14-clock-reconcile-fix.md": 134,
+    "docs/implementation/plans/f1-r12-clock-reconcile-fix.md": 155,
+    "docs/implementation/CURRENT.md": 71,
+    "docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/MANIFEST.md": 111
+  },
+  "usage": "UNKNOWN (no usage tool consulted or quota inferred)",
+  "checkbox_open": true,
+  "stale_next_review_removed": true,
+  "staged_empty": true
+}

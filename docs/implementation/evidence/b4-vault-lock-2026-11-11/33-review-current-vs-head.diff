@@ -1,0 +1,466 @@
+diff --git a/docs/implementation/CURRENT.md b/docs/implementation/CURRENT.md
+index c4b962c..6147f46 100644
+--- a/docs/implementation/CURRENT.md
++++ b/docs/implementation/CURRENT.md
+@@ -2,7 +2,460 @@
+ 
+ Tarihî PASS taze kabul değildir.
+ 
+-**09.11 rol/akış:** OpenCode v2; GPT plan+review, Claude kodlama (AGENTS.md "Roles and workflow"). Sıra: geçmiş review → kalan geliştirme (Lovable eksikleri dahil) → tek regresyon → fiziksel kabul. Proje skill'leri `.opencode/skills/`: grill-me, systematic-debugging, verification-before-completion (üçü `opencode/autoinvoke: false`). Açık: OpenCode Desktop'ta üç skill'in yükleme yolu doğrulaması, `.opencode/` commit/gitignore kararı, ana ajan için `opencode api*` deny (#53465). Sıradaki iş: geçmiş işin tek seferlik salt-okunur review'u.
++**09.11 rol/akış:** OpenCode v2; GPT plan+review, Claude kodlama (AGENTS.md "Roles and workflow"). Sıra: geçmiş review → kalan geliştirme (Lovable eksikleri dahil) → tek regresyon → fiziksel kabul. Proje skill'leri `.opencode/skills/`: grill-me, systematic-debugging, verification-before-completion (üçü `opencode/autoinvoke: false`). 10.11 kullanıcı doğrulaması: üç skill OpenCode Desktop'ta yükleniyor; `.opencode/` commit edildi (650ec17); global `opencode api`/`opencode api *` shell deny çalışıyor ("Permission denied: shell", #53465; localhost curl'ü engellemez).
++
++**11.11 süreç kuralları (kullanıcı kararı):** Geçmiş tek seferlik review tamam;
++üç geçişin kaydı [claude-review-2026-11-11.md](claude-review-2026-11-11.md)
++(16c/17 güvenlik B1–B4, Jest kök neden + saha eşleştirme, Lovable UI farkları
++G1–G6). Teslim planı: Faz 0 backlog dondurma (GPT + tek grill-me) → Faz 1 küçük
++teknik borçlar (B1, Jest spec, B3, B4, B2→20–21) → Faz 2 Lovable UI kapanışı
++(G1 öncelik) → Faz 3 tek tam regresyon (kod/paket seviyesi güvenlik testleri
++burada) → Faz 4 fiziksel kabul (cihaz/ağ seviyesi güvenlik; Android tam, iOS
++simülatör + açık fiziksel-iOS kapıları, PASS denmez).
++**Model/effort:** varsayılan plan/review GPT 6.1 Sol medium, geliştirme Claude
++Opus 5.5 medium. High'a çıkılacak yerler: Faz 3/4 planları; native/güvenlik
++(custody/journal/TLS) diff'lerinin geliştirmesi ve bağımsız review'u.
++**Backlog disiplini:** Faz 0 çıktısı bu dosyada tek checkbox listesi olur.
++Opus uygulama/doğrulama/devri yapar; maddeyi işaretlemeden "GPT review bekliyor"
++bırakır. Ayrı GPT review'u kabul halinde review kaydını ve ilgili manifesti
++günceller, maddeyi `[x]` yapar. Kapanış için ayrıca Opus oturumu açılmaz.
++Her kapanışta "Sıradaki iş" ve hazır prompt güncellenir; açık kabul kapıları
++korunur. Liste tarihçeye dönüştürülmez; biten fazlar tek satıra sıkıştırılır.
++**Akış checkpoint'i (11.11):** OpenCode korunuyor; proje komutları bu kapanış
++kuralına uyarlandı. Planlar hedef dosya/sembol, değişecek davranış ve kabul
++ölçütünü belirtir. Bu düzenleme ürün backlog maddelerini kapatmaz.
++
++## Teslim backlog'u — 11.11.2026 / kullanıcı onaylı sınır
++
++Tek yürütme sırası aşağıdadır; eski bölümlerdeki "Sıradaki" ve promptlar tarihî
++bağlamdır, bu sırayı değiştirmez. Her geliştirme işi önce ayrı GPT planı, sonra
++Claude uygulaması ve ayrı oturumda gerçek diff üzerinden GPT review'u alır.
++
++- [x] **Faz 0:** kaynakları eşleştir, tek grill-me ile kapsamı netleştir ve backlog'u dondur (11.11).
++- [x] **1.1 / B1:** SMB/SFTP/FTPS UUID üretimi mevcut native desene taşındı; bağımsız GPT diff review kabul (11.11). Kullanıcı kararlı build/link kapsamı; gerçek JS→native runtime kapısı açık, Faz 3 planında ele alınacak.
++- [x] **1.2 / Jest:** `s3-diagnostic-page.spec.tsx` AppState listener spec'i düzeltildi; ürün davranışı değişmedi, bağımsız GPT gerçek-diff review kabul (11.11).
++- [x] **1.3 / B3:** FTPS sahipli parola/JNI JSON kopyalarına Drop-zeroize (zeroize 1.9.1); bağımsız GPT `/review` kabul (11.11), P3 yalnız belge notu. ADR sapması kabul edilmedi; FTPS/JNI runtime ve fiziksel kapılar açık, Faz 3/4.
++- [ ] **1.4 / B4:** Android S3/FTPS vault kilit politikasını arka plan gereksinimleriyle değerlendir/belgele; değişiklik gerekirse scoped plan; high. Değerlendirme + kullanıcı kararı (bayrak yok, kalan risk kabul) yazıldı; GPT review bekliyor.
++- [ ] **1.4b / F1:** Kilitliyken tetiklenen S3/FTPS otomatik işi planı iptal ediyor ([B4 §5](b4-android-vault-lock-policy-2026-11-11.md)). Ayrı GPT planı: kilitliyken güvenli bekleme korunarak kilit açılınca planın kaybolmaması/yeniden çalışabilmesi; OS arka plan sınırında anında çalışma garantisi yok.
++- [ ] **1.5 / regresyon hazırlığı:** iOS WebDAV journal host testini onar; cesu8/instant-xml/instant-xml-macros lisans metinlerini tamamla; B2 iOS S3 fixture-CA marker'ının release app binary'sinde yokluğunu 20–21 dağıtım kontrolüne bağla.
++- [ ] **2.1 / G1:** Mobil Etkinlik'te gerçek journal verisiyle Şu an/Geçmiş segmentleri; demo state kopyalama.
++- [ ] **2.2 / G2–G3:** Desktop tray gerçek kontrolleri, ayarlar sürüm satırı ve kapanış davranışı eşlemesi; ADR0018 foreground fence ve Linux görünür kontrol şartını koru.
++- [ ] **2.3 / G4–G6:** Mobil ayarlar için gerçek native yetenek/kapsam kararını netleştir; D10 kaynak seçimi birleşimini belgele; kilit ekranını mevcut step19 kapısında tut. Demo switch veya yeni native yetenek izni varsayma.
++- [ ] **2.4 / saha ürün açıklığı:** Eşleşme bekleme/onay sırası, aktarım durumları, WebDAV tam endpoint/port/yol ve sır sızdırmayan aşamalı hata sunumu; teşhis olmadan retry/güvenlik fence gevşetme.
++- [ ] **2.5 / yakalama:** Mevcut betikleri kullanarak eksik ekran/dil kapsamını kalıcı toplu capture'a tamamla; hazır olmadan runnable komut iddia etme.
++- [ ] **3 / tek tam regresyon:** high GPT planı; fixture/tek temsilci yolu önce kanıtla, sonra JS/native/build, kod/paket güvenliği (B2 dahil), a11y/görsel ve performans kapsamı. Tek giriş iskeleti/manifest; açık Dropbox Android JobService, iOS >150 MiB upload_session, Dropbox Photos/eklenmiş Nextcloud restore, Android yükseltme ve recovery göster/kopyala kontrollerini kapsa. Gerçek hesaplar ayrı izinli; başarısızlıklar scoped fix/review'a döner, yalnız etkilenen kontroller tekrarlanır. Bağımsız GPT diff review ve dağıtım kapıları görünür kalır.
++- [ ] **4 / fiziksel kabul:** high GPT planı; Android tam cihaz/OS/ağ kapsamı, Desktop lifecycle/signing/storage ve saha kesintisi kök neden teşhisi. iOS Simulator kanıtı ayrı raporlanır; fiziksel iOS yoksa signing/custody/OS/Photos/iCloud kapıları açık kalır, PASS denmez. Mevcut veri/eşleşme korunur; cihaz/hesap/medya kapsamına yeni açık izin gerekir.
++
++**Onaylı teslim sınırı:** Saha açıklık/teşhis iyileştirmeleri dahil. Uzak WebDAV
++klasör gezgini, yeni CA/auth/mTLS desteği ve okunabilir export bu teslimin dışında;
++ayrı tasarım/kapsam onayı gerekir. CloudMe engelli, Kolab Now/Box/MEGA/GCS V1 dışı
++kararları korunur; yeni sağlayıcı/yükleme adaptörü otomatik eklenmez.
++
++**Teslim notuna zorunlu A5 kaydı:** Finder'da özgün dosya adı/uzantısı ve cihaz
++etiketiyle okunabilir sunum/export bu teslimde yok. Arşiv fingerprint/operation-ID
++düzenini kullanır; retained `.part` hardlink'leri ikinci veri kopyası veya otomatik
++silinebilir çöp sayılmaz. Journal/inode/publication bağları korunur; yeniden
++adlandırma/silme yapılmaz. A5 kapanmış veya düzeltilmiş olarak raporlanmayacak.
++
++**Açık karar/kabul kapıları:** ADR0029 kabulü, iOS16 runtime davranışı, P5 production
++sağlayıcı/at-rest, release imzaları/provider/storage ve 20–21 fiziksel kapıları.
++Tarihî PASS taze kabul değildir; kaynak/varyantı eşleşen kanıt yeniden kullanılır.
++
++### 1.1 / B1 — GPT uygulama planı / 11.11.2026
++
++**Amaç ve bulgu:** Üç `use-*-items.ts:36` çağrısı `crypto.randomUUID()` kullanıyor;
++yerel `jest-setup.js` yalnız Reanimated kuruyor. Bu oturum runtime yeniden üretimi
++yapmadı. Review B1'in kaynak karşılığı doğrulandı. Çalışan desen:
++`use-s3-items.ts:37–39` → `s3.newRequest()` → UUID biçimi doğrulanan senkron
++`s3TestRequest`; Android `UUID.randomUUID().toString()`, iOS
++`UUID().uuidString.lowercased()`. Üç protokolün kendi native modüllerinde henüz
++bu fabrika yok. UUID yalnız istek kimliğidir; tek başına yetki vermez.
++
++**Seçilen dar çözüm:** S3 desenini protokolün kendi modülüne taşı. S3 modülüne
++bağımlılık, global polyfill, yeni paket, Math.random/zaman tabanlı fallback veya
++ortak hook refactor'u yok. Native köprüye eklenen üç senkron fonksiyon bu planın
++açık kapsamıdır: `smbRequest`, `sftpRequest`, `ftpsRequest`; mevcut fonksiyonların
++imzaları ve Rust/C/JNI ABI değişmez. Bu ek kapsam uygulama talimatıyla açıkça
++onaylanmadan kodlamaya geçilmez; daha fazla dosya/ABI gerekiyorsa tekrar onay al.
++
++**Hedef dosyalar (brace grupları listedeki üç dosyanın her birini ifade eder):**
++- `apps/mobile/src/features/file-transfer/model/use-{smb,sftp,ftps}-items.ts`
++  (3): yalnız UUID edinimi ve fabrikadan hata gelirse güvenli duruş.
++- `apps/mobile/src/shared/api/{smb,sftp,ftps}.ts` (3): native interface'e ilgili
++  senkron fabrika; API nesnesine `newRequest(): string`. Eksik modül/fonksiyonda
++  mevcut `native_unsupported`, geçersiz UUID'de `outcome_unknown`; native hataları
++  mevcut protokol hata yoluyla göster. UUID'yi mevcut `uuid`/`text` ile doğrula.
++- `apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/Kloda{Smb,Sftp,Ftps}Module.kt`
++  (3): yalnız ilgili senkron UUID `Function` kaydı.
++- `apps/mobile/modules/my-module/ios/Kloda{Smb,Sftp,Ftps}Module.swift` (3): yalnız
++  ilgili senkron UUID `Function` kaydı; mevcut `KLODA_*_NATIVE` sınırını koru.
++- `apps/mobile/src/shared/api/{smb,sftp,ftps}.spec.ts` (3): fabrika kontratı.
++- `apps/mobile/src/pages/activity/ui/{smb,sftp,ftps}-items-panel.spec.tsx` (3):
++  mock'lara `newRequest` ekle; review/restore ve iptal testlerini burada genişlet.
++- Devir belgesi: yalnız bu dosyanın checkpoint/promptu ve
++  `docs/implementation/evidence/b1-uuid-2026-11-11/` altında log/tek manifest.
++  Toplam uygulama sınırı 12 ürün + 6 mevcut test dosyası; yeni test framework'ü yok.
++  S3 dosyaları, `*-backups.ts`, journal/vault/engine ve UI bileşenleri salt-okunur.
++
++**Korunacak davranışlar:**
++- `act` guard'ları (active/busy/page, review'da yalnız file), tek istek ve yeni
++  aksiyonda yeni ticket; `copy`/`restore` ile `cancel` aynı ticket'ı kullanır.
++- Fabrika çağrısı mevcut guard'lardan sonra, request/busy/choosing kurulmadan önce
++  try/catch içinde olur. Başarısızlıkta copy/restore/cancel çağrılmaz; working takılı
++  kalmaz, hata görünür ve sonraki açık aksiyon tekrar denenebilir. SFTP/FTPS kendi
++  hata normalizer'larını, SMB mevcut Error.message/outcome_unknown yolunu korur.
++- Review foreground kaybında iptal edilir; Photos restore da iptal edilir.
++  Files restore'un native picker handoff istisnası aynen kalır; native dönüşteki
++  target/context kontrolü gevşetilmez. Unmount/açık cancel istek yetkisini düşürür.
++- Epoch/mounted/active kontrolleri geç sonucu UI'a taşımaz; issues sonrası mevcut
++  reload, pagination ve targetId birleştirmesi değişmez. UUID fabrikası herhangi
++  bir grant başlatmaz, journal/network/credential işlemi yapmaz.
++- ADR0022 preserved boundaries + FTPS practical verification değişmez: bilinmeyen
++  ACK ile retry/adoption/Completed yok. ADR0025'in açık tek-isteklik review ilkesi
++  korunur; WebDAV fixture izni bu işe genişlemez. TLS/pin/LAN/generation/custody,
++  varsayılan opt-in kapalı hali, PC-local ACL ve kullanıcı verisi değişmez.
++
++**En dar doğrulama (Claude; önce tek temsilci, sonra yalnız etkilenen kapsam):**
++1. Başlangıç HEAD + tracked/untracked diff envanterini al; mevcut node_modules ve
++   test çalıştırıcısını kontrol et, paket kurma/yükseltme. Proje systematic-debugging
++   ve verification-before-completion skill'lerini uygula; iki başarısız denemede dur.
++   Açık ürün kararı yok; yeni grill-me veya tasarım/capture kurulumu gerekmez.
++2. Önce FTPS panel spec'inde global crypto/randomUUID yokken restore aksiyonunu
++   kapsayan regression testi yaz; özgün kodda doğru sebeple kırmızı olduğunu kaydet.
++   Global descriptor'ı test sonunda geri yükle. Factory mock'u benzersiz ticket
++   döndürsün; ürün düzeltmesinden sonra aynı test yeşil olmalı. Mock fabrika eklemek
++   tek başına gerçek native köprü doğrulaması değildir.
++3. Sonra bu üç panel spec'i ve üç API spec'ini tek dar batch'te çalıştır. Her
++   protokolde geçerli UUID, eksik modül/fonksiyon, bozuk tip/UUID, fabrika throw'u;
++   global crypto olmadan Files restore ve file review çağrısında exact ticket;
++   review background iptali + geç başarıyı yok sayma; mevcut Photos iptal testi;
++   Files picker geçişinde JS'in iptal etmemesi, açık cancel/unmount'ta exact ticket;
++   busy/foreground guard'ında yeni ticket üretilmemesi kapsansın. Fabrika hatasında
++   çağrı yok/working false ve sonraki aksiyonla toparlanma doğrulansın.
++   Mevcut testleri yalnız hook/API değişikliğinden etkilendikleri için tekrar koş.
++   `apps/mobile` çalışma dizininde mevcut `npm test -- --runTestsByPath` komutuna
++   yukarıdaki altı spec'in `src/` ile başlayan, brace'leri açılmış yollarını ver.
++   Ardından mobil `tsc --noEmit` ve yalnız değişen TS/TSX için mevcut ESLint'i çalıştır;
++   300 satır sınırı dahil. Komut/exit code/tam çıktı logda kalsın.
++4. Native Function eklendiğinden yalnız Jest ile kapanış yapma. Mevcut kanıtlardaki
++   gerçek build komutlarını/flag'leri manifestten hedefli al; burada yeni runnable
++   native komut veya fixture varmış gibi varsayma. Önce tek Android arm64 Hermes
++   uygulama varyantında üç native modülün etkin/yüklü olduğunu kanıtla; her gerçek
++   fabrikadan iki geçerli/farklı UUID al. Ardından tek iOS arm64 Simulator varyantında
++   aynı üç senkron export'u build/link + köprü üzerinden doğrula. Ağ, gerçek hesap,
++   picker/medya mutasyonu veya fiziksel cihaz gerektirmeyen izole yol kullan.
++   Mevcut smoke aracı bunu yapamıyorsa yeni araç/dosya eklemeden kapsam onayı iste;
++   altyapı/izin yoksa NOT_RUN ve açık köprü kapısı raporla. Yeni binary gerekir;
++   yalnız Metro reload yeterli sayılmaz. Rust yeniden paketleme/6 ABI/tam regresyon yok.
++5. Kaynak taramasında üç hook'ta `crypto.randomUUID` kalmadığını doğrula. Manifest:
++   başlangıç HEAD, değişen kaynak/varyant hash'leri, komutlar, sonuçlar ve açık kapılar.
++   Bu plan oturumunda test/build çalışmadı; eski PASS yeniden kabul edilmedi.
++
++**Claude handoff / review çıkışı:** Ayrı kullanıcı-başlatmalı Claude Opus oturumu;
++native köprü ve güvenlik fence'ine komşu diff nedeniyle CURRENT kuralınca high effort
++önerilir (bu GPT oturumu model/effort değiştirmedi). Sadece yukarıdaki kapsamı uygula;
++önce başlangıç durumunu kaydet. Plan anındaki HEAD
++`650ec17f300ebdeee804bd4218f5b57356eecb21`; önceden değişmiş `CURRENT.md` ve untracked
++`claude-review-2026-11-11.md` kullanıcı girdisidir, sahiplenme/üzerine yazma.
++Review devrinde gerçek tracked+untracked diff kapsamı, başlangıç HEAD, çalıştırılan
++komut/log yolları, taze ve yeniden kullanılan kanıt ayrımı, açık kapılar bırak.
++Bu oturum hiçbir tarihî test kanıtını taze doğrulama yerine kullanmadı; ileride
++reuse ancak kaynak/varyant hash eşleşmesiyle. Ayrı GPT gerçek-diff review'u olmadan
++1.1 kapanmış sayılmaz; checkbox şimdilik açık. B2–B4, Jest 1.2, UI ve tam regresyon
++başlatılmaz; fiziksel/production kabul kapıları aynen açıktır.
++
++**Checkpoint (Claude uygulaması, 11.11):** Başlangıç HEAD `650ec17`; plan kapsamı
++birebir uygulandı (12 ürün + 6 test dosyası, üç senkron `smbRequest`/`sftpRequest`/
++`ftpsRequest`; iOS eklemeleri yalnız `KLODA_*_NATIVE` dalında; ABI/Rust değişmedi).
++Hook'lar S3 desenini izler: fabrika guard'lardan sonra, epoch/request/busy kurulmadan
++önce; hata görünür, native çağrı yok, sonraki aksiyon toparlar. Taze: FTPS regression
++özgün kodda doğru sebeple kırmızı; 6 spec/36 test, tsc, 12 dosya ESLint PASS; üç hook'ta
++`crypto.randomUUID` 0. Android arm64 Hermes debug assembleDebug PASS (Rust UP-TO-DATE,
++dex'te üç Function). iOS üç bayraklı pod install + arm64 Simulator Debug build PASS
++(2. denemede; ilk deneme komut bayrağı), dylib'de üç Function ve native dal sembolleri.
++**Açık:** gerçek runtime JS→native fabrika çağrısı iki platformda NOT_RUN — tek seferlik
++CDP eval iki denemede başarısız (origin reddi; sonra Runtime.evaluate yanıtsız), iki-deneme
++kuralıyla durdu; kullanıcı kararıyla seçenek 2'ye (build/link) düşüldü. Kanıt:
++[manifest](evidence/b1-uuid-2026-11-11/manifest.json) (loglar diskte, `*.log` gitignore).
++Ortam: AVD KlodaFtps16c'ye debug APK kuruldu (veri/aksiyon yok), iOS Pods üç bayrakla
++yeniden üretildi (untracked). Aynı-oturum review'u bağımsız değildir. Commit/push yok;
++1.1 checkbox'ı GPT review'una kadar açık.
++**Checkpoint (bağımsız GPT review, 11.11):** [Review ve kanıt eşlemesi](evidence/b1-uuid-2026-11-11/review.md).
++HEAD `650ec17`; 18 mobil dosya (+354/-54) planla uyumlu, düzeltme gerektiren kod
++bulgusu yok. 18/18 kaynak ve Android APK/iOS dylib hash'i manifestle eşleşti;
++guard/ticket, picker ve foreground fence'leri korunuyor. Kayıtlı 36 test/tsc/lint
++ve build/link kanıtı yeniden kullanıldı; test/build tekrarlanmadı. Kullanıcının
++yukarıda kayıtlı build/link'e düşme kararı kapsamında 1.1 uygulama+review kapandı.
++**Runtime PASS değil:** Android ve iOS gerçek JS→native fabrika çağrıları NOT_RUN;
++Faz 3 planında matris genişlemeden önce ele alınacak. Üçüncü CDP denemesi yapılmadı;
++fiziksel/production kapıları açık. Ürün değişikliği ve commit/push yok.
++### 1.2 / Jest — Claude uygulama checkpoint'i / 11.11.2026
++
++Başlangıç HEAD `650ec17` (1.1 değişiklikleri hâlâ commit'siz, dokunulmadı). Diff: yalnız
++`apps/mobile/src/pages/connections/ui/s3-diagnostic-page.spec.tsx` (+7/-5), ürün kodu
++değişmedi. Kök neden kaynakta teyit: S3Page `use-s3-backup` + iki `S3ItemsPanel`
++listener'ı kaydediyor; spy yalnız sonuncuyu tutuyordu. Düzeltme: handler Set'i, tüm
++canlı handler'lara dağıtım, `remove()` kendi handler'ını siler, unmount sonrası
++`handlers.size===0`. Taze: özgün spec kırmızı (satır 35, `cancelTest` çağrılmadı), sonra
++3/3 PASS (act/console uyarısı 0), mobil tsc ve dosya ESLint PASS. Tam Jest koşulmadı
++(Faz 3). Kanıt: [manifest](evidence/jest-1.2-2026-11-11/manifest.json). Aynı-oturum
++review'u bağımsız değildir; 1.2 checkbox'ı GPT review'una kadar açık. Commit/push yok.
++**Checkpoint (bağımsız GPT gerçek-diff review, 11.11):** 1.2 kabul; düzeltme
++gerektiren bulgu yok. Güncel HEAD başlangıç `650ec17f300ebdeee804bd4218f5b57356eecb21`
++ile aynı. `00-start.log` tracked/untracked envanterine göre ek kapsam yalnız spec
++ve 1.2 kanıt dizini; önceki dosyalardan eksilen yok, 1.1'in 18/18 kaynak hash'i
++manifestiyle eşleşiyor. `05-spec.diff` gerçek diff ile byte düzeyinde aynı (+7/-5).
++Spec HEAD SHA256 `5f90e778714af54de4809ceb66916f4130ec19b7feb3e6386f6c8ee1f487f5f6`,
++güncel SHA256 `587027cf4c93aa3604ccd105d472e0eae5016d228f71e7971bb7d9d86b1ecf55`;
++ikisi de 1.2 manifestiyle eşleşti. `use-s3-backup`, `use-s3-items`, `s3-page` ve
++`s3-items-panel` başlangıç HEAD'iyle aynı: tek handler yerine canlı handler Set'i
++üç listener'a da olay ulaştırıyor; her remove kendi kaydını siliyor, unmount'ta Set
++boşluğu doğrulanıyor. Exact-ticket, ikinci iptal ve geç başarıyı reddetme assertion'ları
++korunmuş; ürün/foreground fence davranışı değişmedi. Taze: salt-okunur HEAD/envanter,
++hash/diff/kaynak incelemesi ve scoped `git diff --check` (exit 0). Yeniden kullanılan:
++`01-red.log` doğru sebeple kırmızı, `02-green.log` 3/3 ve uyarısız, `03-tsc.log` ve
++`04-eslint.log` exit 0; ilgili ürün kaynakları, package/lockfile, mobil tsconfig ve
++Jest setup HEAD ile aynı. Test/lint/typecheck/build tekrar çalıştırılmadı; manifest
++spec hash'i kaydeder, tam dependency ağacı/node_modules hash'i iddiası yok. Tam Jest
++Faz 3'te açık; 1.1 gerçek JS→native runtime NOT_RUN ve fiziksel/production kapıları
++değişmedi. Yalnız CURRENT kabul kaydı güncellendi; ürün/test koduna dokunulmadı,
++commit/push yok. Manifestteki bağımsız-review açık kapısını bu checkpoint kapatır.
++### 1.3 / B3 — GPT uygulama planı / 11.11.2026
++
++**Durum:** Plan anı: salt-okunur keşif. Uygulama yapıldı, aşağıdaki Claude checkpoint'ine bak; checkbox GPT review'una kadar açık.
++Plan başlangıç HEAD `650ec17f300ebdeee804bd4218f5b57356eecb21`. Mevcut 1.1/1.2
++ürün/test/kanıt değişiklikleri, untracked review ve `.opencode/commands/` kullanıcı
++çalışmasıdır; korunur. Bu oturum yalnız CURRENT ve plan devir dosyasını değiştirir.
++`.opencode/plans/next-plan.md` mevcut değil; proje `plan`/`implement` komutlarının
++seçtiği [devir yolu](plans/next-plan.md) kullanılır; komut dosyaları değiştirilmez.
++
++**Amaç / karar sınırı:** Review B3 (`claude-review-2026-11-11.md:15–16`) için
++FTPS motorunun sahip olduğu parola ve JNI JSON tahsislerine Drop-zeroize ekle.
++ADR0022 D1, preserved boundaries ve FTPS practical verification korunur. ADR
++metni açık bir tüm-bellek-zeroize şartı tanımlamaz; review'daki sapma alternatifi
++kullanıcıca kabul edilmiş değildir. ADR'ye kabul/sapma notu ekleme; tüm native veya
++üçüncü-taraf kopyalarını kapsayan yeni güvenlik garantisi verme. Bu plan uygulama
++oturumunda açık kullanıcı talimatıyla yetkilendirilir; kapsam büyürse tekrar onay al.
++
++**Kaynakla doğrulanan sahiplik ve ömürler:**
++- Android: `AndroidFtpsProfile.password` ve `AndroidFtpsPublication.request` /
++  `AndroidFtpsDownload` JSON'u JVM `String`'leridir; native vault/captured profile
++  sahibi ve GC tarafından yaşatılır, Rust bunları temizleyemez. JNI
++  `android_jni.rs:95–101` `get_string` sonucundan ayrı, sahipli Rust `String`
++  üretir; boyut/callback reddi dahil `run` dönüşüne kadar yaşar. Başarılı yolda
++  C köprüye yalnız senkron `as_ptr/len` borcu verilir; çağrı bitmeden temizlenemez.
++- iOS: `IosFtpsPublication.swift:36–58` yerel JSON `Data`'sı ve
++  `IosFtpsDownload.swift:35–58` `ReadOwner.request` verisi Swift sahibinde kalır;
++  `withUnsafeBytes` C'ye senkron borç verir. Rust `bridge.rs:82–85` bu girdiyi
++  değiştirmez/sahiplenmez; `*const` veriye zeroize yazımı veya yeni JSON kopyası yok.
++- İki platform: `Request.password: String` (`request.rs:10`) Serde'nin ayrı
++  sahipli tahsisidir. Request, `bridge::run` içindeki parse → validate → TLS/login
++  → publish/download → close süresince yaşar, normal dönüş/hata ve unwind'da
++  düşer. `Session` parolayı alan olarak tutmaz; `session.rs:95` login'e borç verir.
++  Request tamamlanmadan parse hatasında sıradan String alanı düşebilir; yalnız
++  `impl Drop for Request` bu kısmi deserialize yolunu kapsamaz.
++- Daha kısa ömür zorlamak (login sonrasında temizleme), username silme, JVM/Swift
++  custody refactor'u bu işte yok. Mevcut işlem-süresi ömrü korunur. Drop, abort/kill
++  veya bellek dump'ına karşı garanti değildir. Serde escape/scratch/reallocation,
++  JNI dönüşüm geçicileri, suppaftp `login` → `Command::Pass(String)` → formatlanan
++  `PASS` ve TLS/OS tamponları ayrıca kopya üretebilir; bu plan onları temizlemez.
++  Bunlar kabul edilmiş ADR sapması veya B3'ün tüm süreç belleğini temizlediği iddiası
++  değildir; daha geniş temizlik talebi yeni kapsam kararı gerektirir.
++
++**Bağımlılık / seçilen çözüm:** FTPS Cargo.toml'da doğrudan zeroize yok;
++Cargo.lock'ta rustls/rustls-pki-types üzerinden `zeroize 1.9.1` zaten var. S3'ün
++doğrudan pini de `=1.9.1`. FTPS'ye `zeroize = { version = "=1.9.1", features =
++["serde"] }` ekle; default alloc korunur, derive/new crate/version yükseltmesi yok.
++Lockfile yalnız FTPS doğrudan bağımlılık ve zeroize→serde kenarını yansıtmalı;
++beklenmeyen paket/sürüm/license değişiminde dur. `Request.password` alanını
++`Zeroizing<String>` yap: tam Request ve password alanı başarıyla parse edildikten
++sonraki kısmi-Request hatalarında alan Drop'u korur. JNI sahipli JSON String'i
++oluşturulduğu noktada `Zeroizing::new` ile sar; erken return'ler de aynı korumada
++kalsın. Ek parola/JSON clone'u veya kalıcı global sahibi ekleme.
++
++**Kesin dosya sınırı (6 mevcut dosya; testler iç modüllerde):**
++1. `packages/ftps-native/Cargo.toml` ve `Cargo.lock` (2): yukarıdaki pin/feature.
++2. `packages/ftps-native/src/request.rs`: parola tipi/import ve dar unit testler.
++3. `packages/ftps-native/src/android_jni.rs`: yalnız sahipli JSON RAII sargısı;
++   C/JNI parametreleri, FD/callback sırası ve dönüş kodları değişmez.
++4. `packages/ftps-native/src/session.rs`: login'de username/password için aynı
++   `&str` görünümü (`as_str`; login tek generic S kullanıyor); iki mevcut test
++   Request literal'ında açık `Zeroizing::new(String::from(...))` uyarlaması.
++   Üretim TLS/login/transfer akışını yeniden düzenleme.
++5. `packages/ftps-native/src/bridge.rs`: yalnız `#[cfg(test)]` dar C-boundary
++   negatif/FD kontratı testleri; üretim kodu salt-okunur.
++Ek izinli çıktı: CURRENT, mevcut plan devir dosyası ve
++`docs/implementation/evidence/b3-zeroize-2026-11-11/` altında tek manifest/loglar.
++Yeni test framework/helper/script, Kotlin/Swift/TS, header/ABI, vault/journal,
++paketleme betiği veya başka protokol değişikliği yok. Üretilen native çıktılar
++aşağıdaki kapsamda ayrıca kaydedilir; kaynak dosya sınırına gizlice eklenmez.
++
++**Korunacak davranışlar:** JSON camelCase/deny_unknown_fields, parola UTF-8 byte
++sınırı 1–4096/kontrol-karakter reddi; UUID/path/size/timeouts ve numeric hata
++kodları aynen kalır. C girdisi salt-okunur, çağrı senkron; callback/context yalnız
++çağrı boyunca borçtur. İki FD hata dahil bir kez tüketilir, eşit-FD bir kez kapanır.
++AUTH TLS/PROT P, public-root+hostname, LAN control/data peer+generation/revoke
++fence'leri ve varsayılan opt-in kapalı hali değişmez. Journal Intent→Uploaded→
++Verified ve taze full-readback/size/SHA256 şartı korunur; kayıp ACK review'da,
++kör retry/hash-only adoption/otomatik Completed yok. Vault/recovery/PC-local ACL,
++foreground/picker, kullanıcı verisi/eşleşmesi ve B4 kilit politikası değişmez.
++
++**En dar doğrulama (yalnız sonraki Opus oturumunda):**
++1. Başlangıç HEAD + tracked/untracked envanter/hash'lerini kaydet; proje systematic-
++   debugging ve verification-before-completion kurallarını uygula. Rust1.99.0
++   rustc/rustdoc/Clippy, mevcut registry/toolchain ve NDK27.1.12297006/SDK erişimini
++   bir kez kontrol et; kurulum/yükseltme veya fixture canlandırma yapma. Lock
++   güncellemesini dar/offline çözümle; sonra tüm cargo kontrollerinde `--locked`.
++2. Önce tek host temsilci: geçerli Request JSON decode/validate ve password alanının
++   `ZeroizeOnDrop` kontratını kapsayan yeni unit test. Ardından aynı request modülünde
++   0/4096/4097-byte, multibyte/escape, kontrol karakteri; password sonrasında bozuk/
++   eksik/duplicate/unknown alan parse reddi. Açık `zeroize()` sonrası boşluk kontrolü
++   yalnız primitive davranışını kanıtlar; Drop için upstream1.9.1 uygulaması ve
++   trait/source kontratıyla birlikte raporla. Serbest bırakılmış belleği okumak,
++   UB/allocator gözlem düzeneği veya test için ürün telemetry'si eklemek yok.
++3. Mevcut iç test modüllerinde C publish/read için invalid JSON, validation,
++   callback eksikliği/erken ret ve eşit/ayrı FD tüketimini izole local FD'lerle
++   doğrula; ağ/hesap/medya yok. Error::Invalid kodu ve girdinin değiştirilmediği
++   doğrulansın. Host `cargo test --locked --lib` ve `--features android-jni` dar
++   koşularını ilgili FTPS manifestiyle çalıştır; JNI sargısı iki export'un ortak
++   run yolunda kaynak incelemesi + feature compile ile denetlenir. Bu, gerçek
++   JVM çağrısı veya heap-instrumented zeroization kanıtı sayılmaz.
++4. FTPS için fmt check ve Clippy (`--locked --lib --features android-jni`,
++   `-D warnings`); test-only kod dahil kontrol et. TS/Swift/Kotlin kaynakları
++   değişmediğinden mobil Jest/tsc/lint ve eski medya/LAN/OS matrisini tekrarlama.
++   FTPS Rust hash'i değiştiği için eski engine/runtime PASS'ini yeni binary'ye
++   aktarma. Eski 16c manifest/checkpoint yalnız davranış ve komut referansıdır;
++   değişmeyen kaynak/varyant kanıtı ancak hash eşleştirmesiyle reuse edilir.
++5. Native paketleme: önce `node tools/check-ftps-native.mjs aarch64-linux-android
++   --release`, ardından `aarch64-apple-ios-sim --release` (aynı betik). Bunlar tek
++   temsilci compile/export kontrolleridir, ürün paketini henüz yenilemez. İkisi
++   geçince stabil kaynakta bir kez `node tools/build-ftps-native.mjs android` ve
++   `node tools/build-ftps-native.mjs ios`: dört Android ABI `.so` ve iki arm64
++   iOS archive içeren XCFramework yeniden üretilmeli. Android16KB/C+JNI exports,
++   Apple C exports, fixture marker yokluğu mevcut betiklerin kapılarıdır.
++   Betikler temsilci compile'ları tekrar çağırır; aynı output/cache kullan, ayrı
++   ikinci matris açma. Fixture CA env/owned-fixture üretim paketine giremez.
++6. Paket hedefleri: `apps/mobile/modules/my-module/android/src/main/jniLibs/
++   {arm64-v8a,armeabi-v7a,x86_64,x86}/libkloda_ftps_native.so` ve
++   `apps/mobile/modules/my-module/ios/NativeFtps/KlodaFtpsNative.xcframework`.
++   Kopyalanan `NativeFtps/kloda_ftps.h` byte olarak değişmemeli. Ignored/generated
++   çıktıları da hash/envanterde açıkça göster. Yalnız FTPS yeniden paketlenir;
++   S3/SFTP/SMB/pairing paketlerini yeniden üretme.
++7. Ardından tek FTPS-etkin Android arm64 app build/link ve tek arm64 iOS Simulator
++   app build/link: en son B1 manifest/loglarındaki gerçek komut/flag/output yolunu
++   hedefli oku; build zinciri başka native paketleri gereksiz yenileyecekse dur ve
++   sınırı bildir. Üç mevcut B1 native Function'ı ve feature flag'lerini koru;
++   native yeniden link gerekir, Metro reload yeterli değildir. Yeni ABI/export/
++   Pod dependency yok, pod install/prebuild varsayılan adım değildir. Device iOS
++   archive paketlenir; signed device app/release/fiziksel çalıştırma yapılmaz.
++   Runtime FTPS/JNI/gerçek TLS/LAN ve bütün güvenlik regresyonu Faz3'te taze binary
++   hash'leriyle açık kalır; B1'in runtime NOT_RUN kapısı bu işle kapanmaz.
++8. Her adım komut/exit code/log, kaynak/artifact SHA256, toolchain/features,
++   taze/reuse/NOT_RUN ayrımıyla tek manifestte kalır. Temsilci başarısızsa matris
++   genişletme; aynı yaklaşım iki kez başarısızsa dur. Bağımlılık/ABI/dosya sınırı
++   büyümesi, geniş native bellek garantisi veya ADR değişikliği tekrar onay ister.
++
++**Doküman dayanağı:** Context7 resolve+docs ile Zeroizing Drop/serde ve
++String-capacity/reallocation sınırlamaları kontrol edildi (latest indeks);
++exact yerel registry `zeroize-1.9.1/src/lib.rs:695–732`, `Cargo.toml:52–80`
++ile doğrulandı. serde feature mevcut serde'yi kullanır; derive bağımlılığı gerekmez.
++suppaftp12.2.1 `src/sync_ftp.rs:332` ve `src/command.rs:142,246` login kopyalarını
++doğrular. Bunlar salt-okunur kaynak bulgularıdır, test/build PASS değildir.
++
++**Checkpoint / kabul kapısı:** Bu oturumda test/lint/typecheck/build/paketleme,
++uygulama/fixture/cihaz başlatma yapılmadı. B3 kapanmadı; ürün kodu ve ADR değişmedi.
++Opus uygulaması sonrası ayrı GPT gerçek tracked+untracked diff review'u zorunlu;
++aynı-oturum self-review bağımsız sayılmaz. 1.4/B4, tam regresyon ve physical/
++production/signing kapıları bu işin dışında kalır. Commit/push yok.
++**Checkpoint (Claude uygulaması, 11.11):** Başlangıç HEAD `650ec17` (plan HEAD ile
++aynı). B1 18/18 + 1.2 spec hash-doğrulandı; diğer önceden mevcut untracked içeriklerin
++değişmezliği doğrulanamadı (başlangıç hash'i yok; yalnız varlıkları doğrulandı). Diff yalnız 6 planlı dosya (+237/-6):
++`zeroize =1.9.1` + serde (lock yalnız iki kenar, yeni paket/sürüm yok);
++`Request.password: Zeroizing<String>`; JNI sahipli JSON oluşturulduğu yerde
++`Zeroizing`; session yalnız `login(as_str, as_str)` + iki ignored test literal'i;
++bridge yalnız `#[cfg(test)]` C-boundary testleri. ABI/header (byte-eşit), Kotlin/Swift/
++TS, betikler ve diğer native paketler değişmedi. Taze (rustup 1.99.0; PATH'teki
++Homebrew 1.98.1 kullanılmadı): host temsilci request 4/4 → lib ve `android-jni` 6/6
++(+2 fixture testi ignored), fmt, iki Clippy `-D warnings` PASS. Bridge testlerinin ilk
++koşusu test düzeneği hatasıyla kırmızı (macOS kapalı peer'de `SO_RCVTIMEO` EINVAL),
++kök neden giderilip 2. denemede yeşil. Android arm64 + iOS sim candidate, ardından
++yalnız FTPS 4 ABI + 2 slice paketleme PASS (fixture marker 0); FTPS-etkin Android
++arm64 `assembleDebug` (APK `.so` = yeni paketin strip'i) ve B1 bayraklı Pods ile iOS
++arm64 Simulator Debug build/link PASS. Kanıt: [manifest](evidence/b3-zeroize-2026-11-11/manifest.json)
++(kaynak/artifact önce-sonra hash'leri; loglar diskte). **NOT_RUN/açık:** FTPS/JNI
++runtime, gerçek TLS/LAN/hesap, fixture testleri, heap gözlemi (kapsam dışı), fiziksel/
++imza kapıları; eski engine/runtime PASS yeni binary'ye devredilmedi. Kapsam sınırı:
++yalnız Rust-sahipli iki kopya Drop'ta silinir; JVM/Swift/Serde scratch/suppaftp/TLS
++kopyaları ve abort/kill kapsanmaz; ADR sapması kabul edilmedi. Aynı-oturum review'u
++bağımsız değildir; 1.3 checkbox'ı GPT review'una kadar açık. Commit/push yok.
++**Checkpoint (review kaydı, 11.11):** Kayıt: HEAD `650ec17`; diff yalnız 6 planlı dosya;
++**kabul**, düzeltme gerektiren ürün kodu bulgusu yok; ADR0022 D1/preserved boundaries/
++FTPS practical verification ihlali yok. Salt-okunur taze: kaynak 8/8+9/9, artifact
++10/10, APK/dylib ve APK içi `.so` hash'leri, diff dosyası byte-eşit, B1 18/18 + 1.2 spec,
++`diff --check`, bridge üretim kodu HEAD öneki, lock paket/sürüm listesi. 00–31 logları
++reuse (çoğu yalnız son satır). **P3 (düşük, kanıt kapsamı, engellemiyor):** önceden mevcut
++untracked dosyaların byte düzeyinde korunduğu kanıtlanamıyor; iddia yukarıda ve
++manifestte daraltıldı. Review sınırları: iOS ara slice hash'i taze hesaplanmadı, CURRENT
++diff'i ayrıştırılmadı. **Bağımsız kapı açık:** kayıtta reviewer modeli yok (özeti Claude
++Opus 5.5 oturumu yazdı) ve kullanıcı ilk sorulduğunda ayrı GPT oturumunu teyit edemedi.
++**Checkpoint (bağımsız review kabulü, 11.11):** Kullanıcı teyidi: yukarıdaki review ayrı
++GPT oturumunda `/review` ile yapıldı; bağımsız gerçek-diff review kapısı kapandı, 1.3 kabul
++ve `[x]`. P3 belge notu: B1 18/18 + 1.2 spec hash-doğrulandı; diğer önceden mevcut
++untracked içeriklerin değişmezliği doğrulanamadı (başlangıç hash'i yok). Bu bir değişiklik
++bulgusu değildir; sonradan hash başlangıç kanıtı gibi kullanılmaz. Manifestin `review`/
++`openGates` alanları bu teyitten önce yazıldı; bağımsız-review kapısı için bu checkpoint
++geçerlidir (bu oturum yalnız CURRENT'ı güncelledi). **Açık kalanlar:** FTPS/JNI runtime,
++gerçek TLS/LAN/hesap, ignored fixture testleri, heap gözlemi (kapsam dışı), B1 JS→native
++runtime, tam regresyon (Faz 3) ve fiziksel/production/signing kapıları (Faz 4). Eski
++engine/runtime PASS yeni binary'ye devredilmez. Ürün kodu değişmedi, commit/push yok.
++**Checkpoint (1.4/B4 Claude değerlendirmesi, 11.11):** Başlangıç HEAD `650ec17` (plan HEAD
++ile aynı). Plan: `plans/next-plan.md`. Diff yalnız: yeni
++[b4-android-vault-lock-policy-2026-11-11.md](b4-android-vault-lock-policy-2026-11-11.md),
++yeni `evidence/b4-vault-lock-2026-11-11/` (manifest + ctx7/doküman logları + kaynak
++hash'leri) ve bu checkpoint. Ürün/test kodu, ADR, anahtar politikası değişmedi. Sonuç:
++mevcut uygulama guard'ı (her vault read/write'ta `isDeviceLocked`, S3 admission'da ek
++kilit şartı, FTPS'de vault+native callback üzerinden) onaylı gereksinimle çelişmiyor;
++**bayrak şimdi önerilmiyor** (resmî doküman: API 28+, Android 12–14'te kilit kaldırılınca
++anahtar silinir/güvenli kilitsiz kullanılamaz/zayıf biyometrik yeniden yetkilendirmez;
++mevcut alias'lar etkilenmez, sessiz migration yok; vault'ta reset yolu yok). İleride
++seçenek: yalnız API≥35 + yeni alias, ayrı plan/onay. Ek bulgu F1 (B4 dışı, düzeltilmedi):
++kilitliyken tetiklenen S3/FTPS otomatik işi `reconcile` içinde planı iptal ediyor;
++uygulama açılana/ayar/boot tetikleyicisine kadar düşüyor. Taze: ctx7 library+2 docs,
++resmî sayfa alıntısı, kaynak SHA256; NOT_RUN: test/build, tüm gerçek OS kilit/reboot/
++biyometrik gözlemi, native faz eşlemesi. **Kullanıcı kararı (grill-me):** "Kabul + F1 ayrı
++iş" — bayrak şimdilik yok, guard↔Keystore farkı ve kalan riskler kabul edilerek belgelendi;
++F1 ayrı backlog maddesi 1.4b (bu oturumda uygulanmadı). B4 kapanışı F1'i veya fiziksel
++güvenlik kabulünü kapatmaz. **Açık:** bağımsız GPT review, 1.4b planı, Faz 3/4 runtime.
++1.4 review kabulüne kadar `[ ]`. Aynı-oturum incelemesi bağımsız değil; commit/push yok.
++**Checkpoint (1.4/B4 review düzeltmesi, 11.11):** GPT review (HEAD `650ec17`) 4 belge
++bulgusu kapsamında düzeltildi; yalnız B4 belgesi, B4 evidence ve bu checkpoint değişti.
++(1) §3 tablo kalıcı run fazı / UI durumu / operasyon journal'ı olarak ayrıldı; unlock/retry
++koşullu dallar. (2) S3 `AndroidS3Client` 100 ms programlanmış Timer → check → `call.cancel`
++zinciri eklendi, kesin durdurma/sır silme garantisi yok. (3) İncelenen üretilmiş debug
++BuildConfig (FTPS=true, S3=false) ve merged manifest SHA256'ları `12-build-output-sha256.txt`;
++S3 değerlendirmesi yalnız kaynak. (4) Manifest `result` kullanıcı kararıyla hizalandı.
++Taze: 5 yeni atıf kaynağının hash'i (26/26 OK), build çıktısı hash'leri, kapsam kontrolü
++(`22-fix-scope-check.log`). NOT_RUN: test/build/cihaz/Keystore. 1.4 re-review'a kadar `[ ]`.
++**Checkpoint (1.4/B4 P2 kilitli-status düzeltmesi, 11.11):** GPT re-review P2'si (HEAD `650ec17`)
++düzeltildi; yalnız B4 belgesi §3, manifest `reviewFixPass.p2LockedStatusFix` ve bu checkpoint
++değişti. Kilitliyken iki protokolde `status()` → `capture()` → vault guard `credential_locked`
++ile reddedilir; UI sütunu artık yalnız unlock sonrası okunabilen `run.state`. FTPS manuel
++`waiting → paused` yalnız `active?.run?.id != run.id` iken (`AndroidFtpsQueue.kt:190`). Taze:
++`23-p2-start.log` (HEAD/envanter, 26/26 hash), `24-p2-scope-check.log`. NOT_RUN: test/build/
++cihaz/Keystore, kilitli gerçek ekran gözlemi. 1.4 GPT kabulüne kadar `[ ]`.
++**Sıradaki iş:** 1.4/B4 — ayrı GPT oturumunda gerçek-diff re-review (high önerisi; model/effort
++otomatik değişmez). Ardından 1.4b/F1 için ayrı GPT planı. 1.5'e geçilmez.
++**Hazır sonraki-sohbet promptu (GPT re-review):** “AGENTS.md → CURRENT.md 1.4/B4 P2
++kilitli-status düzeltmesi checkpoint'i → docs/implementation/b4-android-vault-lock-policy-2026-11-11.md
++§3 ve evidence/b4-vault-lock-2026-11-11/manifest.json (`reviewFixPass.p2LockedStatusFix`) oku.
++Başlangıç HEAD 650ec17; yalnız B4 belgesi, B4 evidence klasörü ve CURRENT 1.4 checkpoint
++diff'ini (tracked+untracked) re-review et. P2'nin kapandığını doğrula: `status()` →
++`capture()` → vault guard zinciri (AndroidS3Queue.kt:109–110, AndroidFtpsQueue.kt:182–183,
++*Profiles.kt capture, *Vault.kt unlocked/read), (b)/(d)/(e) UI hücreleri ve
++AndroidFtpsQueue.kt:190 aktif-execution koşulu; 10-source-sha256.txt'yi `shasum -c` ile doğrula.
++Ürün kodu/ADR değiştirme, test/build/cihaz çalıştırma, commit/push yok. Review kaydını yaz;
++yalnız kabulde CURRENT/manifesti güncelleyip 1.4'ü [x] yap, değilse scoped düzeltme bulgusu
++döndür. 1.4b ve 1.5'e geçme.”
+ 
+ **05.11 gerçek kullanım açık bulguları:** [tek kayıt](field-findings-2026-11-05.md): Android–Mac eşleşme/tekrarlı durma,12PC Completed+1Receiving, fingerprint klasörü/rastgele media kimlikleri/retained part hardlink; WebDAV port URL içinde destekli fakat form açıklığı,TLS/CA/auth ve hata teşhisi eksikleri. İnceleme tamam; aktarım kök nedeni ADB bağlantısı koptuğu için açık. Kullanıcı bu tur geliştirme istemedi; yalnız bulgu kaydı yapıldı.
+ 

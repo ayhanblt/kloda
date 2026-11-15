@@ -1,0 +1,12 @@
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=START s3-automatic-lock-interleavings
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=java.lang.IllegalStateException: Check failed.
+	at com.kloda.sync.AndroidAutomaticLockChecks.active(AndroidAutomaticLockChecks.kt:309)
+	at com.kloda.sync.AndroidAutomaticLockChecks.run(AndroidAutomaticLockChecks.kt:126)
+	at com.kloda.sync.AndroidAutomaticLockChecks.scope$lambda$1(AndroidAutomaticLockChecks.kt:114)
+	at com.kloda.sync.AndroidAutomaticLockChecks.$r8$lambda$b0UJTQLmIB-_Kl8QDH0d3GqzU4w(Unknown Source:0)
+	at com.kloda.sync.AndroidAutomaticLockChecks$$ExternalSyntheticLambda14.invoke(D8$$SyntheticClass:0)
+	at com.kloda.sync.AndroidFilesQueueRecoveryInstrumentation.onStart$group(AndroidFilesQueueRecoveryInstrumentation.kt:56)

@@ -1,0 +1,4 @@
+ .../main/java/com/kloda/sync/AndroidS3Automatic.kt | 101 ++++++++++-----------
+ .../src/main/java/com/kloda/sync/AndroidS3Queue.kt | 101 ++++++++++++++++-----
+ .../main/java/com/kloda/sync/AndroidS3Runtime.kt   |  13 +--
+ 3 files changed, 136 insertions(+), 79 deletions(-)

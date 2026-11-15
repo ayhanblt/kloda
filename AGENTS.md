@@ -40,10 +40,79 @@ When this policy applies, read the [targeted Context7 command reference](docs/im
   reused evidence, open gates. Review findings return only as scoped fixes.
 - A GPT review of the real diff in a separate session counts as the
   independent review gate. A same-session self-review still does not.
+- Review closeout clarification (2026-11-11): stay in OpenCode. Opus handles
+  implementation, scoped verification and handoff; it leaves the item unchecked
+  and awaiting GPT review. The separate GPT reviewer records its review and,
+  only on acceptance, updates CURRENT/the relevant manifest and checks the item.
+  No extra Opus session for administrative closeout. Review may edit those
+  records, never product code; unresolved acceptance gates remain explicit.
+  Plans identify target files/symbols, expected behavior changes and acceptance
+  criteria, separating verified findings from assumptions.
 - This section supersedes any conflicting older role or automatic-continuation
   text in this file or in archived handoffs.
 
+## Session boundary clarification — user decision, 2026-11-11
+
+- Execution quality/cost gates (2026-11-12): planning and implementation use
+  `docs/implementation/execution-budget.md`: resolved design before coding,
+  one representative regression/minimum fix before expansion, a 15000-output-token
+  soft checkpoint (thinking included) or mandatory representative checkpoint when
+  usage is unavailable, and a single explicitly selected low-risk Sonnet pilot.
+  Never invent usage or silently lower security checks/model effort. This policy
+  supersedes automatic continuation only at its specified stop gates. Existing
+  F1 is not the lightweight-model pilot; a further rejected clock-fix review needs
+  GPT root-cause/design clarification before another implementation handoff.
+
+- State-aware handoff (2026-11-12): /implement reads CURRENT first and routes to
+  INITIAL or scoped FIX; it must not inject/reapply the whole original plan for
+  a review correction. REVIEW/completed/unapproved states do not authorize coding.
+  Review owns the current state and exact review/manifest pointers. FIX starts
+  with an invariant/event-sequence regression on the shared production path;
+  expected behavior comes from approved acceptance, never from faulty code.
+  Track failed fixes by invariant in the existing manifest, not just finding ID.
+  Two failed fixes of the same approach require design reassessment; new finding
+  IDs and sessions do not reset the count. Preserve security checks and user scope
+  approvals; these routing rules do not automatically launch another session.
+
+- Compact context policy (2026-11-11): CURRENT is only the active checkpoint,
+  backlog and decision/evidence pointers; do not append full plans or history.
+  Historical CURRENT records and research appendices are on-demand, section-only
+  references, never mandatory startup input. Future next-plan files contain the
+  executable contract; long research lives in an item-specific linked appendix.
+  Aim for 100–150 plan lines without omitting safety invariants or acceptance
+  criteria. Do not reread a full plan already injected by a command unless it
+  changed. Discover symbols/callers first, read whole files when necessary for
+  correctness, and keep raw verification logs on disk. Existing approved active
+  F1 plan is not retroactively shortened during implementation.
+
+- This clarification supersedes older instructions requiring a new session at
+  every substep or research checkpoint. One work item per session does not mean
+  one question or tool phase per session.
+- Keep planning, read-only research, design clarification and plan updates for
+  the same item in the same GPT session. A research checkpoint is not an
+  automatic handoff to implementation: state whether the plan is ready.
+- Use a separate Opus session for implementation. Keep scoped coding,
+  verification and fixes to its own implementation within the approved plan in
+  that session. Scope/security-policy changes require a plan decision, not an
+  implementer rewrite of the approved design.
+- Use a separate GPT session for independent review. Keep review clarification,
+  evidence completion and administrative closeout in that review session.
+- Start a new session on role change or a new independent work item. Context
+  degradation may justify a compact handoff; do not restart merely for a substep.
+  A new session never resets the two-failed-attempt stop rule.
+- End task updates with: `Durum: ...`, `Devam: AYNI SOHBET / YENİ SOHBET / DUR —
+  kullanıcı kararı`, `Rol: GPT plan / Opus uygulama / GPT review`, and the exact
+  next command or prompt. For a finished task, give the next step and stop;
+  for an unresolved same-role substep, continue here unless user input is needed.
+
 ## Single-agent and usage policy — user decision, 2026-10-29
+
+- Narrow exception authorized 2026-11-12: after the user's Pro quota reset,
+  one external-documentation subagent pilot during the next Opus fix is allowed
+  under `docs/implementation/research-pilot.md`. Only load it when an actual
+  external-doc question arises. No coding/review delegation, no permanent
+  multi-agent switch, no synthetic research just to exercise the pilot.
+  This exception supersedes the ban below only for that pilot.
 
 - Work with the main agent only. Do not spawn, resume or delegate to subagents;
   do not invoke Astra automatically. A new explicit user instruction is required
@@ -130,5 +199,3 @@ Stop only if:
 - Do not add, commit, push, reset, clean, or stash Git changes
   unless explicitly instructed.
 - Update handoff documentation when completing a meaningful work group.
-
-

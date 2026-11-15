@@ -1,0 +1,442 @@
+diff --git a/apps/mobile/modules/my-module/android/src/androidTest/AndroidManifest.xml b/apps/mobile/modules/my-module/android/src/androidTest/AndroidManifest.xml
+index 045407e..f66ff44 100644
+--- a/apps/mobile/modules/my-module/android/src/androidTest/AndroidManifest.xml
++++ b/apps/mobile/modules/my-module/android/src/androidTest/AndroidManifest.xml
+@@ -7,5 +7,7 @@
+     </provider>
+     <activity android:name="com.kloda.sync.AndroidLifecycleActivity" android:exported="false"
+       android:excludeFromRecents="true" android:theme="@android:style/Theme.Material.Light.NoActionBar" />
++    <service android:name="com.kloda.sync.AndroidS3HarnessJobService" android:exported="true"
++      android:permission="android.permission.BIND_JOB_SERVICE" />
+   </application>
+ </manifest>
+diff --git a/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt b/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt
+index c5bfccc..0980d98 100644
+--- a/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt
++++ b/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt
+@@ -23,7 +23,7 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
+   }
+ 
+   override fun onStart() {
+-    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore", "smb-files", "smb-product", "smb-photos-owned", "smb-profile", "sftp-files", "sftp-sources", "sftp-photos-owned", "sftp-product", "ftps-files", "ftps-sources", "ftps-product", "ftps-photos-owned", "cloud18-nextcloud", "cloud18-destination", "cloud18-oauth", "cloud18-targets", "s3-profile", "s3-journal", "s3-wire", "s3-publisher", "s3-files", "s3-drop-write", "s3-drop-read", "s3-redirect", "s3-diagnostic", "s3-abort", "s3-runs", "s3-pause", "s3-global-pause", "s3-media-contract", "s3-copy-contract", "s3-photos-owned", "s3-photos-cleanup", "s3-automatic-contract", "cloud18-dropbox", "cloud18-dropbox-live", "recovery29")) {
++    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore", "smb-files", "smb-product", "smb-photos-owned", "smb-profile", "sftp-files", "sftp-sources", "sftp-photos-owned", "sftp-product", "ftps-files", "ftps-sources", "ftps-product", "ftps-photos-owned", "cloud18-nextcloud", "cloud18-destination", "cloud18-oauth", "cloud18-targets", "s3-profile", "s3-journal", "s3-wire", "s3-publisher", "s3-files", "s3-drop-write", "s3-drop-read", "s3-redirect", "s3-diagnostic", "s3-abort", "s3-runs", "s3-pause", "s3-global-pause", "s3-media-contract", "s3-copy-contract", "s3-photos-owned", "s3-photos-cleanup", "s3-automatic-contract", "s3-automatic-lock", "s3-automatic-plan", "s3-automatic-os", "cloud18-dropbox", "cloud18-dropbox-live", "recovery29")) {
+       finish(Activity.RESULT_CANCELED, Bundle().apply { putString("stream", "Explicit scope required: local-files, media-fixture or webdav-journal\n") })
+       return
+     }
+@@ -56,6 +56,7 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
+         check()
+         sendStatus(0, Bundle().apply { putString("stream", "PASS $name\n") })
+       }
++      AndroidAutomaticLockChecks.scope(scope, this, scratch, ::group)?.let { finish(Activity.RESULT_OK, Bundle().apply { putString("stream", it) }); return }
+       if (scope == "s3-automatic-contract") {
+         group("s3-automatic-manual-authority") { AndroidS3AutomaticChecks.run(this, scratch) }
+         finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "S3 default-off/automatic survives UI leave/authority revocation/manual pause/callback-once/fake-key cleanup PASS; no network/media\n") }); return
+diff --git a/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticChecks.kt b/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticChecks.kt
+index 6dd7962..fe4d1e6 100644
+--- a/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticChecks.kt
++++ b/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticChecks.kt
+@@ -13,48 +13,70 @@ import org.json.JSONArray
+ import org.json.JSONObject
+ 
+ // Automatic/manual queue authority component, not an OS delivery or network proof.
++// Amazon isolated queue: automatic admission is only the exact-owner startAutomatic path.
+ internal object AndroidS3AutomaticChecks {
+   fun run(instrumentation: Instrumentation, root: File) {
+     val base = instrumentation.targetContext; val namespace = UUID.randomUUID().toString()
+     val app = object : ContextWrapper(base) {
++      override fun getApplicationContext() = this
+       override fun getPackageName() = base.packageName + ".owned.s3.automatic." + namespace
+-      override fun getNoBackupFilesDir() = File(root, "s3-automatic").apply { mkdirs() }
++      override fun getNoBackupFilesDir() = File(root, "s3-automatic-$namespace").apply { mkdirs() }
+       override fun getSharedPreferences(name: String, mode: Int) = base.getSharedPreferences(name + ".s3-auto." + namespace, mode)
+     }
+-    val store = java.security.KeyStore.getInstance("AndroidKeyStore").apply { load(null) }; val alias = app.packageName + ".s3.s3-compatible.profile.v1"; check(!store.containsAlias(alias))
+-    val journal = AndroidS3Journal(app, "s3-compatible")
++    val store = java.security.KeyStore.getInstance("AndroidKeyStore").apply { load(null) }; val alias = app.packageName + ".s3.amazon-s3.profile.v1"; check(!store.containsAlias(alias))
++    val journal = AndroidS3Journal(app, "amazon-s3")
+     try {
+       val profiles = AndroidS3Profiles(app, journal)
+-      profiles.save(S3Target("s3-compatible", "https://owned.example.test", "us-east-1", "owned-bucket", "owned", true, S3Target.hash("synthetic"), namespace, namespace), "synthetic", "synthetic-only", null) {}
++      profiles.save(S3Target("amazon-s3", "https://s3.us-east-1.amazonaws.com", "us-east-1", "owned-bucket", "owned", false, S3Target.hash("synthetic"), namespace, namespace), "synthetic", "synthetic-only", null) {}
+       val rows = JSONArray().put(JSONObject().put("id", UUID.randomUUID().toString()).put("reference", "content://owned.invalid/tree/source"))
+       check(FilesRunContext.stamp(app.getSharedPreferences("kloda-sync", 0).edit().putString("directorySources", rows.toString())).commit())
++      val plan = AndroidS3AutomaticPlan(journal)
+       for (automatic in listOf(true, false)) {
+         journal.setEnabled(true)
+-        val foreground = AtomicBoolean(!automatic); val lease = AtomicBoolean(true); val armed = AtomicBoolean(false); val gated = AtomicBoolean(false)
++        val foreground = AtomicBoolean(!automatic); val lease = AtomicReference<Any?>(); val armed = AtomicBoolean(false); val gated = AtomicBoolean(false)
+         val entered = CountDownLatch(1); val release = CountDownLatch(1); val done = CountDownLatch(1); val callbacks = AtomicInteger(); val outcome = AtomicReference<S3Run?>()
+-        fun allowed(mode: Boolean): Boolean {
+-          if (armed.get() && mode == automatic && Thread.currentThread().name == "kloda-s3-compatible-files" && gated.compareAndSet(false, true)) {
++        fun allowed(mode: Boolean, owner: Any?): Boolean {
++          if (armed.get() && mode == automatic && Thread.currentThread().name == "kloda-amazon-s3-files" && gated.compareAndSet(false, true)) {
+             entered.countDown(); check(release.await(15, TimeUnit.SECONDS))
+           }
+-          return if (mode) lease.get() else foreground.get()
++          return if (mode) owner != null && lease.get() === owner else foreground.get()
+         }
+-        val queue = AndroidS3Queue(app, profiles, mayRunAutomatic = { allowed(true) }, mayRun = { allowed(false) })
++        val queue = AndroidS3Queue(app, profiles, mayRunAutomatic = { allowed(true, it) }, mayRun = { allowed(false, null) })
++        val owner = Any()
+         if (automatic) {
+-          check(!journal.automatic()); check(runCatching { queue.start(automatic = true) }.isFailure); queue.setAutomatic(true)
++          if (!plan.marked()) check(plan.migrate(app.getSharedPreferences(AndroidS3AutomaticPlan.LEGACY, 0), null, 0, { it }) == null)
++          check(!journal.automatic()); check(queue.authority() == null)
++          lease.set(owner)
++          // Feature-off: no capture/admission even with a matching owner.
++          check(plan.current() == null && plan.arm(queue.authority(), 0, { it + 1 }, false) == S3Refresh.Revoked)
++          queue.setAutomatic(true)
++          // A manual start never writes automatic plan/accept records; automatic pause never stops manual work.
++          check(runCatching { queue.start() }.isFailure)
+         }
++        val expected = if (automatic) (plan.arm(queue.authority(), 0, { it + 1 }, false) as S3Refresh.Updated).plan else null
+         armed.set(true)
+-        val starter = Thread { queue.start(automatic = automatic) { outcome.set(it); callbacks.incrementAndGet(); done.countDown() } }
++        val starter = Thread {
++          val finished: (S3Run) -> Unit = { outcome.set(it); callbacks.incrementAndGet(); done.countDown() }
++          if (expected != null) check(queue.startAutomatic(expected, plan, owner, 1, finished) is S3Admission.Accepted) else queue.start(finished)
++        }
+         starter.start(); check(entered.await(10, TimeUnit.SECONDS))
+         val pauser = if (automatic) {
+           val before = android.os.SystemClock.elapsedRealtime(); queue.pauseForeground(); check(android.os.SystemClock.elapsedRealtime() - before < 1000)
+-          check(callbacks.get() == 0); lease.set(false); null
+-        } else { foreground.set(false); Thread { queue.pauseForeground() }.also { it.start() } }
++          check(callbacks.get() == 0); lease.set(null); null
++        } else {
++          // The gated worker holds sourceLock: lock-taking calls run on the pauser thread only.
++          // An automatic exact pause for another owner never matches the manual execution.
++          foreground.set(false); Thread { queue.pauseAutomatic(owner, null); queue.pauseForeground() }.also { it.start() }
++        }
+         release.countDown(); check(done.await(10, TimeUnit.SECONDS)); starter.join(5000); pauser?.join(5000)
+         check(!starter.isAlive && pauser?.isAlive != true && callbacks.get() == 1 && outcome.get()?.phase == "paused")
+         if (automatic) check(outcome.get()?.error == "os_interrupted")
+         check(journal.text("SELECT COUNT(*) FROM s3_job") == "0")
++        queue.status().let { check(it["running"] == false && (it["run"] as Map<*, *>)["state"] == "paused") }
+         queue.disable(); check(!journal.automatic())
+       }
++      // Exactly one acceptance overall: the manual iteration added none.
++      check(journal.text("SELECT COUNT(*) FROM s3_auto_accept") == "1")
+     } finally { journal.database.close(); if (store.containsAlias(alias)) store.deleteEntry(alias); check(!store.containsAlias(alias)) }
+   }
+ }
+diff --git a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Automatic.kt b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Automatic.kt
+index eb376d9..038513e 100644
+--- a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Automatic.kt
++++ b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Automatic.kt
+@@ -6,67 +6,64 @@ import android.app.job.JobScheduler
+ import android.app.job.JobService
+ import android.content.ComponentName
+ import android.content.Context
++import android.os.Handler
++import android.os.Looper
+ import android.os.PersistableBundle
+-import java.util.UUID
+ 
+-// A new scheduled occurrence never resumes an unknown multipart operation.
++// Facade only: plan authority lives in SQLite (AndroidS3AutomaticPlan); OS projection has one
++// owner (AndroidS3AutomaticCoordinator). A new occurrence never resumes unknown multipart work.
+ internal object AndroidS3Automatic {
+   const val JOB = 2712
+-  private val lock = Any()
+-  private fun prefs(app: Context) = app.getSharedPreferences("kloda-s3-automatic", 0)
+-  fun current(app: Context, token: String) = prefs(app).getString("dispatch", null) == token
+-  fun cancel(app: Context) { app.getSystemService(JobScheduler::class.java).cancel(JOB) }
+-  fun reconcileAsync(app: Context, changed: Boolean = false) { Thread({ reconcile(app.applicationContext, changed) }, "kloda-s3-schedule").start() }
+-  private fun next(app: Context, now: Long): Long = if (AndroidBackupScheduler.mode(app) == "live") Math.addExact(now, JobInfo.getMinPeriodMillis()) else AndroidBackupScheduler.nextScheduled(app, now)
+-  fun reconcile(app: Context, changed: Boolean = false) = synchronized(lock) {
+-    if (!BuildConfig.KLODA_S3_NATIVE) return@synchronized
+-    try {
+-      if (AndroidBackupScheduler.paused(app)) { cancel(app); return@synchronized }
+-      val queue = AndroidS3Runtime.queue(app)
+-      val binding = synchronized(AndroidSyncJournal.sourceLock) {
+-        val capture = queue.profiles.capture()
+-        if (capture == null || !queue.journal.enabled() || !queue.journal.automatic() || FilesRunContext.webdav(app).sources.isEmpty()) null
+-        else S3Target.hash(capture.profile.target.profileGeneration + FilesRunContext.webdav(app).binding)
+-      } ?: run { cancel(app); return@synchronized }
+-      val store = prefs(app); val now = System.currentTimeMillis(); val old = store.getLong("due", -1)
+-      val due = if (changed || old < 0 || store.getString("binding", null) != binding) next(app, now) else old
+-      val token = UUID.randomUUID().toString()
+-      if (!store.edit().putLong("due", due).putString("binding", binding).putString("dispatch", token).commit()) throw S3Failure("storage_failure")
+-      val info = JobInfo.Builder(JOB, ComponentName(app, AndroidS3JobService::class.java))
+-        .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED).setRequiresBatteryNotLow(true).setPersisted(true)
+-        .setMinimumLatency(maxOf(0, due - now)).setExtras(PersistableBundle().apply { putString("token", token) }).build()
+-      if (app.getSystemService(JobScheduler::class.java).schedule(info) != JobScheduler.RESULT_SUCCESS) throw S3Failure("automatic_unavailable")
+-    } catch (_: Exception) { cancel(app) }
++  @Volatile private var instance: AndroidS3AutomaticCoordinator? = null
++  internal fun next(app: Context, now: Long): Long =
++    if (AndroidBackupScheduler.mode(app) == "live") Math.addExact(now, JobInfo.getMinPeriodMillis()) else AndroidBackupScheduler.nextScheduled(app, now)
++  fun coordinator(context: Context): AndroidS3AutomaticCoordinator = synchronized(AndroidSyncJournal.sourceLock) {
++    instance ?: run {
++      val app = context.applicationContext; val queue = AndroidS3Runtime.queue(app); val main = Handler(Looper.getMainLooper())
++      AndroidS3AutomaticCoordinator(AndroidS3JobOs(app, ComponentName(app, AndroidS3JobService::class.java)), { main.post(it) },
++        { Thread(it, "kloda-s3-schedule").start() }, System::currentTimeMillis, { !AndroidS3Runtime.unlocked(app) },
++        S3AutoLease(AndroidS3Runtime::begin, AndroidS3Runtime::end), queue, AndroidS3AutomaticPlan(queue.journal),
++        app.getSharedPreferences(AndroidS3AutomaticPlan.LEGACY, 0), { AndroidBackupScheduler.paused(app) }, { next(app, it) }).also { instance = it }
++    }
++  }
++  // Pause/disable revocation: epoch++, wake disarm, exact execution stop, JOB cancel.
++  fun cancel(app: Context) {
++    if (BuildConfig.KLODA_S3_NATIVE && runCatching { coordinator(app).revoke() }.isSuccess) return
++    app.getSystemService(JobScheduler::class.java).cancel(JOB)
+   }
+-  fun consume(app: Context, token: String): Boolean = synchronized(lock) {
+-    if (!current(app, token) || System.currentTimeMillis() < prefs(app).getLong("due", Long.MAX_VALUE)) return@synchronized false
+-    if (!prefs(app).edit().putLong("due", next(app, System.currentTimeMillis())).remove("dispatch").commit()) throw S3Failure("storage_failure")
+-    true
++  fun reconcileAsync(app: Context, changed: Boolean = false) { Thread({ reconcile(app.applicationContext, changed) }, "kloda-s3-schedule").start() }
++  fun reconcile(app: Context, changed: Boolean = false) {
++    if (!BuildConfig.KLODA_S3_NATIVE) return
++    // An unavailable runtime is not a revocation: no cancel of an already-projected plan.
++    runCatching { coordinator(app) }.getOrNull()?.reconcile(changed)
+   }
+ }
+ 
+-class AndroidS3JobService : JobService() {
+-  private val alive = java.util.concurrent.atomic.AtomicBoolean(false)
+-  private var token: String? = null
+-  override fun onStartJob(params: JobParameters): Boolean {
+-    val request = params.extras.getString("token") ?: return false
+-    if (!AndroidS3Automatic.current(this, request) || !AndroidS3Runtime.begin(request)) return false
+-    token = request; alive.set(true)
+-    Thread({
+-      try {
+-        if (!alive.get() || !AndroidS3Automatic.consume(this, request)) { finish(params, request); return@Thread }
+-        val queue = AndroidS3Runtime.queue(this)
+-        if (!alive.get()) { finish(params, request); return@Thread }
+-        queue.start(automatic = true) { finish(params, request) }
+-      } catch (_: Exception) { finish(params, request) }
+-    }, "kloda-s3-os-job").start()
+-    return true
++// Shared real OS adapter: production uses AndroidS3JobService, the harness only its test service.
++internal class AndroidS3JobOs(private val context: Context, private val component: ComponentName) : S3AutoOs {
++  private val scheduler get() = context.getSystemService(JobScheduler::class.java)
++  override fun schedule(wake: String, nonce: String, latency: Long, protocol: Int): Int = scheduler.schedule(
++    JobInfo.Builder(AndroidS3Automatic.JOB, component).setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED).setRequiresBatteryNotLow(true)
++      .setPersisted(true).setMinimumLatency(latency).setExtras(PersistableBundle().apply {
++        putInt("protocol", protocol); putString("provider", "amazon-s3"); putString("wake", wake); putString("nonce", nonce)
++      }).build())
++  override fun cancel() = scheduler.cancel(AndroidS3Automatic.JOB)
++  override fun pending(): Map<String, Any?>? = scheduler.getPendingJob(AndroidS3Automatic.JOB)?.let { job ->
++    if (job.service != component) mapOf("foreign" to job.service.className) else extras(job.extras)
+   }
+-  private fun finish(params: JobParameters, request: String) {
+-    AndroidS3Runtime.end(request)
+-    if (alive.compareAndSet(true, false)) { AndroidS3Automatic.reconcileAsync(this); jobFinished(params, false) }
++  companion object {
++    @Suppress("DEPRECATION")
++    fun extras(bundle: PersistableBundle): Map<String, Any?> = bundle.keySet().associateWith { bundle.get(it) }
+   }
+-  override fun onStopJob(params: JobParameters): Boolean {
+-    alive.set(false); token?.let(AndroidS3Runtime::end); AndroidS3Runtime.stop(); AndroidS3Automatic.reconcileAsync(this); return false
++}
++
++// Thin lifecycle adapter: every decision belongs to the coordinator's exact Execution.
++open class AndroidS3JobService : JobService() {
++  internal open fun coordinator(): AndroidS3AutomaticCoordinator = AndroidS3Automatic.coordinator(this)
++  override fun onStartJob(params: JobParameters): Boolean {
++    val owner = try { coordinator() } catch (_: Exception) { return false }
++    return owner.onStart(params, this, AndroidS3JobOs.extras(params.extras)) { retry -> jobFinished(params, retry) }
+   }
++  override fun onStopJob(params: JobParameters): Boolean = runCatching { coordinator().onStop(params) }.getOrDefault(false)
++  override fun onDestroy() { runCatching { coordinator().onDestroy(this) }; super.onDestroy() }
+ }
+diff --git a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Queue.kt b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Queue.kt
+index c2ab419..f1e1e68 100644
+--- a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Queue.kt
++++ b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Queue.kt
+@@ -3,17 +3,21 @@ package com.kloda.sync
+ import android.content.Context
+ import java.util.UUID
+ 
+-// Manual Files work only; an interrupted multipart job never becomes an automatic retry.
+-internal class AndroidS3Queue(private val app: Context, val profiles: AndroidS3Profiles, private val mayRunAutomatic: () -> Boolean = { false }, private val mayRun: () -> Boolean) {
++// An interrupted multipart job never becomes an automatic retry. Automatic admission is the
++// three-outcome startAutomatic; manual start never writes automatic plan/accept records.
++internal class AndroidS3Queue(private val app: Context, val profiles: AndroidS3Profiles, private val mayRunAutomatic: (Any) -> Boolean = { false },
++  private val executor: (String, Runnable) -> Unit = { name, body -> Thread(body, name).start() }, private val mayRun: () -> Boolean) {
+   val journal = profiles.journal
+   val runs = AndroidS3Runs(journal)
+-  private class Execution(val capture: S3Capture, val sources: AndroidS3Sources, var run: S3Run, val finished: ((S3Run) -> Unit)?, val automatic: Boolean) {
++  private class Execution(val capture: S3Capture, val sources: AndroidS3Sources, var run: S3Run, val finished: ((S3Run) -> Unit)?, val owner: Any?) {
+     val token = UUID.randomUUID(); @Volatile var cancelled = false
+   }
+   private var active: Execution? = null
+     set(value) { field = value; interruptible = value }
+   @Volatile private var interruptible: Execution? = null
+   @Volatile private var pauseFailed = false
++  // Unresolved automatic commit outcome: blocks manual and automatic starts; toggles never clear it.
++  @Volatile private var uncertain: S3Attempt? = null
+   init {
+     journal.transaction { journal.recoverInterrupted(); runs.recover() }
+     synchronized(instances) { instances[this] = Unit }
+@@ -29,11 +33,12 @@ internal class AndroidS3Queue(private val app: Context, val profiles: AndroidS3P
+     pause("settings_changed")
+     locked { journal.setAutomatic(false); journal.setEnabled(false); pauseFailed = false }
+   }
+-  fun pause(code: String = "user_pause") {
+-    cancelInMemory()
++  fun pause(code: String = "user_pause") = pauseWhere(code) { true }
++  private fun pauseWhere(code: String, match: (Execution) -> Boolean) {
++    interruptible?.let { if (match(it)) it.cancelled = true }
+     var failure: Exception? = null
+     val ended = locked {
+-      val value = active ?: return@locked null
++      val value = active?.takeIf(match) ?: return@locked null
+       active = null
+       try {
+         journal.transaction {
+@@ -49,25 +54,77 @@ internal class AndroidS3Queue(private val app: Context, val profiles: AndroidS3P
+   }
+   fun pauseForeground() {
+     val prior = interruptible ?: return
+-    if (prior.automatic) return
+-    prior.cancelled = true
+-    locked { if (active?.token == prior.token) pause("os_interrupted") }
++    if (prior.owner != null) return
++    pauseWhere("os_interrupted") { it === prior }
+   }
++  // Exact automatic pause: only this owner's execution (and run, once known); never manual or newer work.
++  fun pauseAutomatic(owner: Any, runId: String?) = pauseWhere("os_interrupted") { it.owner === owner && (runId == null || it.run.id == runId) }
+   fun setAutomatic(value: Boolean) { pause("settings_changed"); locked { journal.setAutomatic(value) } }
+-  fun start(automatic: Boolean = false, finished: ((S3Run) -> Unit)? = null): Map<String, Any> {
++  fun start(finished: ((S3Run) -> Unit)? = null): Map<String, Any> {
+     val value = locked {
+       if (active != null) throw S3Failure("backup_busy")
+-      if (pauseFailed) throw S3Failure("storage_failure")
+-      if (!(if (automatic) mayRunAutomatic() && journal.automatic() else mayRun())) throw S3Failure("candidate_stale")
++      if (pauseFailed || uncertain != null) throw S3Failure("storage_failure")
++      if (!mayRun()) throw S3Failure("candidate_stale")
+       val sources = AndroidS3Sources.capture(app, journal)
+       if (sources.sources.sources.isEmpty()) throw S3Failure("source_unavailable")
+       val capture = profiles.capture() ?: throw S3Failure("profile_missing")
+       if (!journal.enabled()) throw S3Failure("target_pause")
+       val run = S3Run(UUID.randomUUID().toString(), capture.profile.target.archiveId(), capture.context)
+       journal.transaction { runs.start(run) }
+-      Execution(capture, sources, run, finished, automatic).also { active = it }
++      Execution(capture, sources, run, finished, null).also { active = it }
+     }
+-    Thread({
++    launch(value)
++    return status()
++  }
++  // Fresh authority for the shared Amazon plan; capture runs bindSources before the context is read.
++  fun authority(): S3AutoAuthority? = locked {
++    val sources = AndroidS3Sources.capture(app, journal)
++    val capture = profiles.capture()
++    if (capture == null || sources.sources.sources.isEmpty() || !journal.enabled() || !journal.automatic()) null else S3AutoAuthority.of(sources, capture)
++  }
++  fun startAutomatic(expected: S3AutoPlan, plan: AndroidS3AutomaticPlan, owner: Any, nextDue: Long, finished: (S3Run) -> Unit): S3Admission {
++    if (plan.journal !== journal) throw S3Failure("invalid_request")
++    val prepared: Any = locked {
++      if (active != null) return@locked S3Admission.NotAccepted("backup_busy")
++      if (pauseFailed || uncertain != null) return@locked S3Admission.NotAccepted("storage_failure")
++      if (!mayRunAutomatic(owner) || !journal.automatic()) return@locked S3Admission.NotAccepted("candidate_stale")
++      val sources: AndroidS3Sources; val capture: S3Capture
++      try {
++        sources = AndroidS3Sources.capture(app, journal)
++        if (sources.sources.sources.isEmpty()) return@locked S3Admission.NotAccepted("source_unavailable")
++        capture = profiles.capture() ?: return@locked S3Admission.NotAccepted("profile_missing")
++        if (!journal.enabled()) return@locked S3Admission.NotAccepted("target_pause")
++        if (!plan.matches(expected, S3AutoAuthority.of(sources, capture))) return@locked S3Admission.NotAccepted("plan_stale")
++      } catch (error: Exception) { return@locked S3Admission.NotAccepted(code(error)) }
++      val run = S3Run(UUID.randomUUID().toString(), expected.target, capture.context)
++      try { plan.admit(expected, run, nextDue, runs) } catch (_: Exception) {
++        // The commit/rollback acknowledgment is unknown: no worker, fence until resolved.
++        return@locked S3Admission.OutcomeUnknown(S3Attempt(owner, expected, run.id, nextDue).also { uncertain = it })
++      }
++      Execution(capture, sources, run, finished, owner).also { active = it }
++    }
++    if (prepared is S3Admission) return prepared
++    val value = prepared as Execution
++    launch(value)
++    return S3Admission.Accepted(value.run.id)
++  }
++  fun resolveAutomatic(attempt: S3Attempt, plan: AndroidS3AutomaticPlan): S3Resolution = locked {
++    if (uncertain !== attempt) return@locked S3Resolution.Unresolved
++    when (val result = plan.resolve(attempt)) {
++      is S3Resolution.ResolvedAccepted -> try {
++        // Recovery path never starts the worker; the accepted run is closed as interrupted.
++        val run = S3Run(result.runId, attempt.expected.target, attempt.expected.context)
++        journal.transaction {
++          if (journal.text("SELECT phase FROM s3_run WHERE id=?", arrayOf(run.id)) == "running") runs.finish(run.copy(phase = "paused", error = "os_interrupted"))
++        }
++        uncertain = null; result
++      } catch (_: Exception) { S3Resolution.Unresolved }
++      S3Resolution.ResolvedNotAccepted -> { uncertain = null; result }
++      S3Resolution.Unresolved -> result
++    }
++  }
++  private fun launch(value: Execution) {
++    val body = Runnable {
+       var error: String? = null
+       try {
+         check(value)
+@@ -78,12 +135,14 @@ internal class AndroidS3Queue(private val app: Context, val profiles: AndroidS3P
+         check(value)
+       } catch (failure: Exception) { error = code(failure) }
+       finish(value, error)
+-    }, "kloda-${journal.provider}-files").start()
+-    return status()
++    }
++    // A rejected worker launch closes the accepted run once; the occurrence is never rolled back.
++    try { executor("kloda-${journal.provider}-files", body) } catch (_: Exception) { finish(value, "os_interrupted") }
+   }
++  private fun allowed(value: Execution): Boolean = value.owner?.let { mayRunAutomatic(it) && journal.automatic() } ?: mayRun()
+   private fun check(value: Execution) = locked {
+     if (value.cancelled || active?.token != value.token) throw S3Failure("cancelled")
+-    if (!(if (value.automatic) mayRunAutomatic() && journal.automatic() else mayRun())) throw S3Failure("os_interrupted")
++    if (!allowed(value)) throw S3Failure("os_interrupted")
+     if (!journal.enabled() || !profiles.current(value.capture)) throw S3Failure("settings_changed")
+     value.sources.check(app, journal)
+     if (value.cancelled || active?.token != value.token) throw S3Failure("cancelled")
+@@ -107,14 +166,14 @@ internal class AndroidS3Queue(private val app: Context, val profiles: AndroidS3P
+     if (deliver) value.finished?.invoke(value.run)
+   }
+   fun status(): Map<String, Any> = locked {
+-    val capture = profiles.capture(); val enabled = capture != null && journal.enabled()
++    val capture = profiles.capture(); val enabled = capture != null && journal.enabled(); val blocked = pauseFailed || uncertain != null
+     buildMap {
+       put("automaticEnabled", enabled && journal.automatic()); put("enabled", enabled); put("running", active != null)
+-      put("canRun", enabled && active == null && !pauseFailed && mayRun())
++      put("canRun", enabled && active == null && !blocked && mayRun())
+       if (capture != null) runs.read(capture.profile.target.archiveId())?.let { value ->
+         put("run", buildMap<String, Any> {
+-          put("id", value.id); put("state", if (pauseFailed) "needs_attention" else if (active?.run?.id != value.id && value.phase == "running") "paused" else value.phase)
+-          put("counts", runs.counts(value.id)); if (pauseFailed) put("errorCode", "storage_failure") else value.error?.let { put("errorCode", it) }
++          put("id", value.id); put("state", if (blocked) "needs_attention" else if (active?.run?.id != value.id && value.phase == "running") "paused" else value.phase)
++          put("counts", runs.counts(value.id)); if (blocked) put("errorCode", "storage_failure") else value.error?.let { put("errorCode", it) }
+         })
+       }
+     }
+diff --git a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Runtime.kt b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Runtime.kt
+index fccf46a..e23fad5 100644
+--- a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Runtime.kt
++++ b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Runtime.kt
+@@ -5,20 +5,21 @@ import android.content.Context
+ internal object AndroidS3Runtime {
+   private val ui = java.util.concurrent.ConcurrentHashMap.newKeySet<Any>()
+   private val leaseLock = Any()
+-  private var lease: String? = null
++  // Exact automatic execution identity; never a shared token or a global stop.
++  private var lease: Any? = null
+   @Volatile private var instance: AndroidS3Queue? = null
+-  private fun unlocked(app: Context) = app.getSystemService(android.app.KeyguardManager::class.java)?.isDeviceLocked == false
++  internal fun unlocked(app: Context) = app.getSystemService(android.app.KeyguardManager::class.java)?.isDeviceLocked == false
+   fun queue(context: Context): AndroidS3Queue = synchronized(AndroidSyncJournal.sourceLock) {
+     if (!BuildConfig.KLODA_S3_NATIVE) throw S3Failure("native_unavailable")
+     instance ?: run {
+       val app = context.applicationContext
+       AndroidS3Queue(app, AndroidS3Profiles(app, AndroidS3Journal(app, "amazon-s3")),
+-        mayRunAutomatic = { unlocked(app) && !AndroidBackupScheduler.paused(app) && (ui.isNotEmpty() || synchronized(leaseLock) { lease != null }) },
++        mayRunAutomatic = { owner -> unlocked(app) && !AndroidBackupScheduler.paused(app) && leased(owner) },
+         mayRun = { ui.isNotEmpty() && unlocked(app) }).also { instance = it }
+     }
+   }
+   fun foreground(owner: Any, active: Boolean) { if (active) ui.add(owner) else { ui.remove(owner); instance?.pauseForeground() } }
+-  fun begin(token: String): Boolean = synchronized(leaseLock) { if (lease != null) false else { lease = token; true } }
+-  fun end(token: String) = synchronized(leaseLock) { if (lease == token) lease = null }
+-  fun stop() { instance?.cancelInMemory(); instance?.pause("os_interrupted") }
++  fun begin(owner: Any): Boolean = synchronized(leaseLock) { if (lease != null) false else { lease = owner; true } }
++  fun end(owner: Any) = synchronized(leaseLock) { if (lease === owner) lease = null }
++  fun leased(owner: Any): Boolean = synchronized(leaseLock) { lease === owner }
+ }

@@ -1,0 +1,11 @@
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Runtime.kt: OK
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Queue.kt: OK
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticPlan.kt: OK
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticCoordinator.kt: OK
+apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Automatic.kt: OK
+apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticChecks.kt: OK
+apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticPlanChecks.kt: OK
+apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidAutomaticLockChecks.kt: OK
+apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticOsChecks.kt: OK
+apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt: OK
+apps/mobile/modules/my-module/android/src/androidTest/AndroidManifest.xml: OK

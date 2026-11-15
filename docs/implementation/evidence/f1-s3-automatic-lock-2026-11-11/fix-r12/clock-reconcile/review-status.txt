@@ -1,0 +1,52 @@
+ M AGENTS.md
+ M apps/mobile/modules/my-module/android/src/androidTest/AndroidManifest.xml
+ M apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt
+ M apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticChecks.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Automatic.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Queue.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Runtime.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaFtpsModule.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSftpModule.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSmbModule.kt
+ M apps/mobile/modules/my-module/ios/KlodaFtpsModule.swift
+ M apps/mobile/modules/my-module/ios/KlodaSftpModule.swift
+ M apps/mobile/modules/my-module/ios/KlodaSmbModule.swift
+ M apps/mobile/src/features/file-transfer/model/use-ftps-items.ts
+ M apps/mobile/src/features/file-transfer/model/use-sftp-items.ts
+ M apps/mobile/src/features/file-transfer/model/use-smb-items.ts
+ M apps/mobile/src/pages/activity/ui/ftps-items-panel.spec.tsx
+ M apps/mobile/src/pages/activity/ui/sftp-items-panel.spec.tsx
+ M apps/mobile/src/pages/activity/ui/smb-items-panel.spec.tsx
+ M apps/mobile/src/pages/connections/ui/s3-diagnostic-page.spec.tsx
+ M apps/mobile/src/shared/api/ftps.spec.ts
+ M apps/mobile/src/shared/api/ftps.ts
+ M apps/mobile/src/shared/api/sftp.spec.ts
+ M apps/mobile/src/shared/api/sftp.ts
+ M apps/mobile/src/shared/api/smb.spec.ts
+ M apps/mobile/src/shared/api/smb.ts
+ M docs/implementation/CURRENT.md
+ M packages/ftps-native/Cargo.lock
+ M packages/ftps-native/Cargo.toml
+ M packages/ftps-native/src/android_jni.rs
+ M packages/ftps-native/src/bridge.rs
+ M packages/ftps-native/src/request.rs
+ M packages/ftps-native/src/session.rs
+?? .opencode/commands/
+?? apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidAutomaticLockChecks.kt
+?? apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticOsChecks.kt
+?? apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticPlanChecks.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticCoordinator.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticPlan.kt
+?? docs/implementation/b4-android-vault-lock-policy-2026-11-11.md
+?? docs/implementation/claude-review-2026-11-11.md
+?? docs/implementation/current-history-2026-11-11.md
+?? docs/implementation/evidence/b1-uuid-2026-11-11/
+?? docs/implementation/evidence/b3-zeroize-2026-11-11/
+?? docs/implementation/evidence/b4-vault-lock-2026-11-11/
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/
+?? docs/implementation/evidence/jest-1.2-2026-11-11/
+?? docs/implementation/evidence/opus-usage-audit-2026-11-11.md
+?? docs/implementation/evidence/opus-usage-audit-2026-11-12.md
+?? docs/implementation/evidence/workflow-root-cause-2026-11-12.md
+?? docs/implementation/plans/
+?? docs/implementation/research-pilot.md

@@ -56,6 +56,7 @@ class KlodaFtpsModule : Module() {
     OnActivityEntersBackground { cancelRestore(includePicker = false); reviews?.cancel(); AndroidFtpsRuntime.foreground(token, false) }
     OnActivityDestroys { cancelRestore(); reviews?.cancel(); AndroidFtpsRuntime.foreground(token, false) }
     OnDestroy { destroyed = true; cancelRestore(); reviews?.cancel(); AndroidFtpsRuntime.detach(token) }
+    Function("ftpsRequest") { UUID.randomUUID().toString() }
     AsyncFunction("ftpsStatus") { guarded { if (!AndroidFtpsRuntime.supported()) mapOf("supported" to false, "configured" to false, "enabled" to false, "running" to false) else queue().status() + mapOf("supported" to true) + (AndroidFtpsScheduler.error(context())?.let { mapOf("automaticError" to it) } ?: emptyMap()) } }
     AsyncFunction("configureFtps") { address: String, port: Int, hostname: String, root: String, username: String, password: String -> guarded {
       checkUi(); cancelRestore(); reviews?.cancel(); queue().configure(FtpsTarget(address, port, hostname, root, username, "native", "native"), password); AndroidFtpsScheduler.reconcileAsync(context()); queue().status()

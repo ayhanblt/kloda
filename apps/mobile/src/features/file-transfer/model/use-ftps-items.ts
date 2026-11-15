@@ -33,7 +33,9 @@ export function useFtpsItems(issues: boolean) {
   };
   const act = async (item: FtpsItem) => {
     if (!active.current || busy.current || !page || (issues && item.kind !== 'file')) return;
-    const ticket = crypto.randomUUID(), version = ++epoch.current;
+    let ticket: string;
+    try { ticket = ftps.newRequest(); } catch (cause) { setError(ftpsErrorCode(cause)); return; }
+    const version = ++epoch.current;
     request.current = ticket; choosing.current = !issues && item.kind === 'file'; busy.current = true; setWorking(true); setError(null); setNotice(null);
     try {
       const result = issues ? await ftpsBackups.copy(item.id,ticket) : await ftpsBackups.restore(item,ticket);

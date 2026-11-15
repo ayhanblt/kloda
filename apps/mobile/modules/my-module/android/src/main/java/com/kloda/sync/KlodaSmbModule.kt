@@ -56,6 +56,7 @@ class KlodaSmbModule : Module() {
     OnActivityEntersBackground { cancelRestore(includePicker = false); reviews?.cancel(); AndroidSmbRuntime.foreground(token, false) }
     OnActivityDestroys { cancelRestore(); reviews?.cancel(); AndroidSmbRuntime.foreground(token, false) }
     OnDestroy { destroyed = true; cancelRestore(); reviews?.cancel(); AndroidSmbRuntime.detach(token) }
+    Function("smbRequest") { UUID.randomUUID().toString() }
     AsyncFunction("smbStatus") { guarded { if (!AndroidSmbRuntime.supported()) mapOf("supported" to false, "configured" to false, "enabled" to false, "running" to false) else queue().status() + mapOf("supported" to true) + (AndroidSmbScheduler.error(context())?.let { mapOf("automaticError" to it) } ?: emptyMap()) } }
     AsyncFunction("configureSmb") { address: String, port: Int, share: String, root: String, username: String, domain: String, password: String -> guarded {
       checkUi(); cancelRestore(); reviews?.cancel(); queue().configure(SmbTarget(address, port, share, root, username, domain, "native", "native"), password); AndroidSmbScheduler.reconcileAsync(context()); queue().status()

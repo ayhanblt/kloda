@@ -1,5 +1,6 @@
 use crate::{Error, Result};
 use serde::Deserialize;
+use zeroize::Zeroizing;
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Request {
@@ -7,7 +8,8 @@ pub struct Request {
     pub port: u16,
     pub hostname: String,
     pub username: String,
-    pub password: String,
+    // Owned credential copy is wiped on Drop; JVM/Swift, Serde scratch and suppaftp/TLS copies are not covered.
+    pub password: Zeroizing<String>,
     pub root: String,
     pub operation_id: String,
     pub final_path: String,
@@ -71,6 +73,54 @@ impl Request {
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn json(password: &str, tail: &str) -> String {
+        format!(
+            r#"{{"address":"127.0.0.1","port":990,"hostname":"nas.local","username":"probe","password":{password},"root":"/","operationId":"12345678-1234-4321-8765-123456789abc","finalPath":"a/b.bin","size":"3","sha256":[{zeros}],"responseTimeoutMs":5000{tail}}}"#,
+            zeros = ["0"; 32].join(",")
+        )
+    }
+    fn parse(text: &str) -> Option<Request> {
+        serde_json::from_str(text).ok()
+    }
+    fn wipes_on_drop<T: zeroize::ZeroizeOnDrop>(_: &T) {}
+    #[test]
+    fn password_is_owned_zeroizing_and_valid_request_decodes() {
+        let mut r = parse(&json(r#""s3cr\u00e7t""#, "")).unwrap();
+        assert_eq!(r.validate(), Ok(3));
+        assert_eq!(r.password.as_str(), "s3cr\u{e7}t");
+        wipes_on_drop(&r.password);
+        // Primitive behaviour only; Drop runs the same Zeroize::zeroize (zeroize 1.9.1 lib.rs:695-704).
+        zeroize::Zeroize::zeroize(&mut *r.password);
+        assert!(r.password.is_empty());
+    }
+    #[test]
+    fn password_byte_bounds_and_control_rejected() {
+        let ok = |p: String| {
+            parse(&json(&serde_json::to_string(&p).unwrap(), ""))
+                .unwrap()
+                .validate()
+        };
+        assert_eq!(ok(String::new()), Err(Error::Invalid));
+        assert_eq!(ok("a".repeat(4096)), Ok(3));
+        assert_eq!(ok("a".repeat(4097)), Err(Error::Invalid));
+        assert_eq!(ok("\u{11f}".repeat(2048)), Ok(3));
+        assert_eq!(ok("\u{11f}".repeat(2049)), Err(Error::Invalid));
+        for c in ["a\nb", "a\u{0}b", "a\u{7f}b", "a\rPASS b"] {
+            assert_eq!(ok(c.into()), Err(Error::Invalid));
+        }
+        assert!(parse(&json("\"a\nb\"", "")).is_none());
+    }
+    #[test]
+    fn parse_failures_after_password_are_rejected() {
+        let p = r#""secret""#;
+        assert!(parse(&json(p, "")).is_some());
+        assert!(parse(&json(p, r#","extra":1"#)).is_none());
+        assert!(parse(&json(p, r#","password":"again""#)).is_none());
+        assert!(parse(&json(p, r#","port":"#)).is_none());
+        assert!(parse(&json(p, "").replace(r#","responseTimeoutMs":5000"#, "")).is_none());
+        assert!(parse(&json(p, "").replace(r#""size":"3""#, r#""size":3"#)).is_none());
+        assert!(parse(&json("1", "")).is_none());
+    }
     #[test]
     fn literal_paths() {
         for p in ["", "/a", "a//b", "a/../b", "a\\b", "a\r\nDELE b"] {

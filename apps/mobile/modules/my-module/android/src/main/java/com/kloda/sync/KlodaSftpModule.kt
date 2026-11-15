@@ -56,6 +56,7 @@ class KlodaSftpModule : Module() {
     OnActivityEntersBackground { cancelRestore(includePicker = false); reviews?.cancel(); AndroidSftpRuntime.foreground(token, false) }
     OnActivityDestroys { cancelRestore(); reviews?.cancel(); AndroidSftpRuntime.foreground(token, false) }
     OnDestroy { destroyed = true; cancelRestore(); reviews?.cancel(); AndroidSftpRuntime.detach(token) }
+    Function("sftpRequest") { UUID.randomUUID().toString() }
     AsyncFunction("sftpStatus") { guarded { if (!AndroidSftpRuntime.supported()) mapOf("supported" to false, "configured" to false, "enabled" to false, "running" to false) else queue().status() + mapOf("supported" to true) + (AndroidSftpScheduler.error(context())?.let { mapOf("automaticError" to it) } ?: emptyMap()) } }
     AsyncFunction("configureSftp") { address: String, port: Int, fingerprint: String, root: String, username: String, password: String -> guarded {
       checkUi(); cancelRestore(); reviews?.cancel(); queue().configure(SftpTarget(address, port, fingerprint, root, username, "native", "native"), password); AndroidSftpScheduler.reconcileAsync(context()); queue().status()

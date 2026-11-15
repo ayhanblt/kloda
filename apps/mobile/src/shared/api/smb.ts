@@ -55,6 +55,7 @@ export function smbStatusFromNative(value: unknown): SmbStatus {
   if (result.running !== (result.run?.state === 'running')) return invalid(); return result;
 }
 interface NativeSmb {
+  smbRequest?(): unknown;
   smbStatus(): Promise<unknown>; configureSmb(address: string, port: number, share: string, root: string, username: string, domain: string, password: string): Promise<unknown>;
   enableSmb(): Promise<unknown>; disableSmb(): Promise<unknown>; runSmb(): Promise<unknown>; pauseSmb(): Promise<unknown>;
   smbBackups(after: string): Promise<unknown>; smbIssues(after: string): Promise<unknown>;
@@ -63,6 +64,7 @@ interface NativeSmb {
 }
 export function smbNative(): NativeSmb { const value = requireOptionalNativeModule<NativeSmb>('KlodaSmb'); if (!value) throw new Error('native_unsupported'); return value; }
 export const smb = {
+  newRequest(): string { const native = requireOptionalNativeModule<NativeSmb>('KlodaSmb'); if (typeof native?.smbRequest !== 'function') throw new Error('native_unsupported'); return text(native.smbRequest(), uuid); },
   async status() { const native = requireOptionalNativeModule<NativeSmb>('KlodaSmb'); return typeof native?.smbStatus === 'function' ? smbStatusFromNative(await native.smbStatus()) : { supported: false, configured: false, enabled: false, running: false }; },
   async configure(raw: SmbForm) { const f = validateSmbForm(raw); return smbStatusFromNative({ ...object(await smbNative().configureSmb(f.address,Number(f.port),f.share,f.root,f.username,f.domain,f.password), ['supported','configured','enabled','running','targetId','config','run','errorCode','automaticError']), supported: true }); },
   async action(action: 'enable' | 'disable' | 'run' | 'pause') {

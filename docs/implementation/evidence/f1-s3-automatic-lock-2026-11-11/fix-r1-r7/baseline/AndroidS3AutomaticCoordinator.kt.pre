@@ -1,0 +1,277 @@
+package com.kloda.sync
+
+import android.content.SharedPreferences
+import java.util.UUID
+
+// OS port: real JobScheduler in production/harness, deterministic fake in component tests.
+internal interface S3AutoOs {
+  fun schedule(wake: String, nonce: String, latency: Long, protocol: Int): Int
+  fun cancel()
+  // null = verified absent; a throw = unknown (never treated as absent).
+  fun pending(): Map<String, Any?>?
+}
+internal class S3AutoLease(val begin: (Any) -> Boolean, val end: (Any) -> Unit)
+
+/**
+ * Single owner of plan state, queue admission, the execution lease and OS projection.
+ * Decisions are serialized on AndroidSyncJournal.sourceLock; OS calls run only on the main
+ * lane outside that monitor; DB/queue preparation runs on the background executor.
+ */
+internal class AndroidS3AutomaticCoordinator(private val os: S3AutoOs, private val main: (Runnable) -> Unit, private val background: (Runnable) -> Unit,
+  private val clock: () -> Long, private val locked: () -> Boolean, private val lease: S3AutoLease, val queue: AndroidS3Queue,
+  val plan: AndroidS3AutomaticPlan, private val legacy: SharedPreferences, private val paused: () -> Boolean, private val next: (Long) -> Long) {
+  enum class Owner { IDLE, EXECUTING, REPLACING, HANDING, OS_OWNED, STORAGE_BLOCKED }
+  // One JobService execution: exact params identity, wake envelope and epoch at entry.
+  class Exec(val params: Any, val service: Any?, val wake: String, val epoch: Long, val finish: (Boolean) -> Unit) {
+    var state = "starting"; var runId: String? = null; var buffered: S3Run? = null
+  }
+  private sealed class Out {
+    class Replace(val plan: S3AutoPlan) : Out()
+    object Cancel : Out()
+    object Finish : Out()
+    object Stale : Out()
+  }
+  private val lock = AndroidSyncJournal.sourceLock
+  var epoch = 0L; private set
+  var owner = Owner.IDLE; private set
+  var dirty = false; private set
+  var unresolved = false; private set
+  var blocked = false; private set
+  private var blockedAttempt: S3Attempt? = null
+  private var exec: Exec? = null
+  private var liveWake: String? = null
+  private var clockChanged = false
+  private fun halted(e: Exec) = e.state == "stopped" || e.state == "done"
+  private fun current(e: Exec) = synchronized(lock) { exec === e && e.epoch == epoch && !halted(e) }
+
+  fun onStart(params: Any, service: Any?, extras: Map<String, Any?>, finish: (Boolean) -> Unit): Boolean {
+    val wake = extras["wake"] as? String
+    if (extras["protocol"] != 1 || extras["provider"] != "amazon-s3" || wake == null) {
+      // Legacy/recovery envelope: may only trigger fresh reevaluation, never admission.
+      background(Runnable { runCatching { if (!plan.marked()) reconcile(false) } })
+      return false
+    }
+    val e = synchronized(lock) {
+      if (exec?.params === params) return false
+      exec?.state = "done"
+      Exec(params, service, wake, epoch, finish).also { exec = it; owner = Owner.EXECUTING; unresolved = false }
+    }
+    background(Runnable { evaluate(e) })
+    return true
+  }
+  private fun evaluate(e: Exec) {
+    val out = try { admit(e) } catch (_: Exception) { lease.end(e); Out.Finish }
+    if (out != null) complete(e, out)
+  }
+  private fun admit(e: Exec): Out? {
+    val now = clock()
+    val p = plan.current()
+    if (p == null || p.wake != e.wake || !current(e)) return Out.Stale
+    synchronized(lock) { liveWake = p.wake; if (blocked) return Out.Finish }
+    // Early wake: no lease, capture or admission; the same retryNotBefore is kept.
+    if (now < p.eligibleAt()) return Out.Replace(p)
+    if (paused()) return terminal()
+    if (locked()) return defer(p, now)
+    val nextDue = next(now)
+    val began = synchronized(lock) { if (halted(e)) return null; lease.begin(e) }
+    if (!began) return defer(p, now)
+    return when (val result = queue.startAutomatic(p, plan, e, nextDue) { run -> onRun(e, run) }) {
+      is S3Admission.Accepted -> { accepted(e, result.runId); null }
+      is S3Admission.NotAccepted -> { lease.end(e); rejected(e, p, result.reason, now) }
+      is S3Admission.OutcomeUnknown -> { synchronized(lock) { if (!halted(e)) e.state = "resolving" }; resolve(e, result.attempt) }
+    }
+  }
+  private fun accepted(e: Exec, runId: String) {
+    val (stop, drain) = synchronized(lock) {
+      e.runId = runId; if (e.state == "starting") e.state = "running"
+      val value = e.buffered; e.buffered = null; halted(e) to value
+    }
+    if (stop) runCatching { queue.pauseAutomatic(e, runId) }
+    if (drain == null) return
+    if (drain.id == runId) finished(e) else { synchronized(lock) { blocked = true }; lease.end(e); complete(e, Out.Finish) }
+  }
+  private fun onRun(e: Exec, run: S3Run) {
+    val ready = synchronized(lock) {
+      when {
+        e.state == "done" || e.state == "completing" -> false
+        e.runId == null -> { if (e.buffered == null) e.buffered = run; false }
+        else -> e.runId == run.id
+      }
+    }
+    if (ready) finished(e)
+  }
+  private fun finished(e: Exec) {
+    val stopped = synchronized(lock) { val value = halted(e); e.state = if (value) "done" else "completing"; value }
+    lease.end(e)
+    if (!stopped) background(Runnable { complete(e, project()) })
+  }
+  private fun project(): Out = try {
+    val changed = synchronized(lock) { val value = dirty; dirty = false; if (value) clockChanged.also { clockChanged = false } else null }
+    if (changed != null && !locked()) runCatching { plan.arm(queue.authority(), clock(), next, changed) }
+    plan.current()?.takeIf { it.wake != null }?.let { Out.Replace(it) } ?: Out.Cancel
+  } catch (_: Exception) { Out.Finish }
+  private fun rejected(e: Exec, p: S3AutoPlan, reason: String, now: Long): Out {
+    if (synchronized(lock) { e.buffered != null }) { synchronized(lock) { blocked = true }; return Out.Finish }
+    return when (reason) {
+      "backup_busy", "credential_locked" -> defer(p, now)
+      "candidate_stale" -> if (locked()) defer(p, now) else refresh(p, now)
+      "storage_failure" -> terminal()
+      else -> refresh(p, now)
+    }
+  }
+  private fun refresh(p: S3AutoPlan, now: Long): Out {
+    val result = try { plan.arm(queue.authority(), clock(), next, false) } catch (error: Exception) {
+      return if (locked() || AndroidS3Queue.code(error) == "credential_locked") defer(p, now) else terminal()
+    }
+    return when (result) {
+      is S3Refresh.Updated -> Out.Replace(result.plan)
+      is S3Refresh.Same -> if (result.plan != p) Out.Replace(result.plan) else terminal()
+      S3Refresh.Revoked -> Out.Cancel
+    }
+  }
+  // No blind retry: disarm and cancel; a failed disarm becomes a storage gate.
+  private fun terminal(): Out = try { plan.disarm(); synchronized(lock) { liveWake = null }; Out.Cancel }
+    catch (_: Exception) { synchronized(lock) { blocked = true }; Out.Finish }
+  private fun defer(p: S3AutoPlan, now: Long): Out = try { Out.Replace(plan.defer(p, Math.addExact(now, DEFER))) } catch (_: Exception) {
+    val latest = runCatching { plan.current() }.getOrNull()
+    if (latest?.wake != null && latest != p) Out.Replace(latest) else Out.Finish
+  }
+  private fun resolve(e: Exec, attempt: S3Attempt): Out {
+    val result = queue.resolveAutomatic(attempt, plan)
+    lease.end(e)
+    return when (result) {
+      is S3Resolution.ResolvedAccepted -> project()
+      S3Resolution.ResolvedNotAccepted -> terminal()
+      S3Resolution.Unresolved -> { synchronized(lock) { blocked = true; blockedAttempt = attempt }; Out.Finish }
+    }
+  }
+  private fun complete(e: Exec, out: Out) = main(Runnable { apply(e, out) })
+  private fun apply(e: Exec, out: Out) {
+    synchronized(lock) {
+      if (exec !== e || halted(e) || e.epoch != epoch) { e.state = "done"; return }
+      e.state = "completing"
+      if (out is Out.Replace) owner = Owner.REPLACING
+    }
+    when (out) {
+      is Out.Replace -> replace(e, out.plan)
+      Out.Cancel -> { done(e, Owner.IDLE); e.finish(false); val at = synchronized(lock) { epoch }; if (at == e.epoch) os.cancel() }
+      Out.Finish, Out.Stale -> { done(e, if (blocked) Owner.STORAGE_BLOCKED else Owner.IDLE); e.finish(false) }
+    }
+  }
+  private fun done(e: Exec, value: Owner) = synchronized(lock) { e.state = "done"; owner = value }
+  // Schedule-as-completion: SUCCESS replaces the running job and no jobFinished follows.
+  private fun replace(e: Exec, p: S3AutoPlan) {
+    val nonce = UUID.randomUUID().toString()
+    val result = try { os.schedule(p.wake!!, nonce, maxOf(0L, p.eligibleAt() - clock()), 1) } catch (_: Exception) { null }
+    val proven = result == SUCCESS || result == null && runCatching { os.pending()?.get("nonce") == nonce }.getOrDefault(false)
+    when {
+      proven -> synchronized(lock) { liveWake = p.wake; done(e, Owner.OS_OWNED) }
+      result != null -> { done(e, Owner.HANDING); e.finish(true); synchronized(lock) { if (owner == Owner.HANDING) owner = Owner.OS_OWNED } }
+      // Unknown schedule outcome: no second schedule or finish(true); only an exact onStop closes it.
+      else -> synchronized(lock) { e.state = "unresolved"; owner = Owner.OS_OWNED; unresolved = true }
+    }
+  }
+
+  fun onStop(params: Any): Boolean {
+    val (e, retry) = synchronized(lock) {
+      val e = exec?.takeIf { it.params === params } ?: return false
+      if (e.state == "done") return false
+      val retry = e.state != "unresolved" && e.epoch == epoch && !blocked && !unresolved && liveWake == e.wake
+      e.state = "stopped"
+      owner = if (retry || unresolved) Owner.OS_OWNED else if (blocked) Owner.STORAGE_BLOCKED else Owner.IDLE
+      e to retry
+    }
+    lease.end(e)
+    background(Runnable { runCatching { queue.pauseAutomatic(e, e.runId) } })
+    return retry
+  }
+  fun onDestroy(service: Any) {
+    val e = synchronized(lock) {
+      exec?.takeIf { it.service === service && !halted(it) && it.state != "unresolved" }?.also { it.state = "stopped"; if (owner == Owner.EXECUTING) owner = Owner.IDLE }
+    } ?: return
+    lease.end(e)
+    background(Runnable { runCatching { queue.pauseAutomatic(e, e.runId) } })
+  }
+
+  // Foreground/receiver/settings entry point; never bypasses eligibleAt or an OS-owned backoff.
+  fun reconcile(changed: Boolean = false) {
+    if (paused()) { revoke(); return }
+    if (!unblock()) return
+    if (locked()) { lockedProjection(); return }
+    val authority = try { queue.authority() } catch (_: Exception) { return }
+    try {
+      if (!plan.marked()) plan.migrate(legacy, authority, clock(), next)
+      when (val result = plan.arm(authority, clock(), next, changed)) {
+        S3Refresh.Revoked -> revoke()
+        is S3Refresh.Updated -> if (result.rotated) revision(result.plan, changed) else idleProject(result.plan)
+        is S3Refresh.Same -> idleProject(result.plan)
+      }
+    } catch (_: Exception) { }
+  }
+  private fun unblock(): Boolean {
+    val attempt = synchronized(lock) { if (!blocked) return true; blockedAttempt }
+    val ok = if (attempt != null) queue.resolveAutomatic(attempt, plan) != S3Resolution.Unresolved else runCatching { plan.disarm() }.isSuccess
+    if (ok) synchronized(lock) { blocked = false; blockedAttempt = null; if (owner == Owner.STORAGE_BLOCKED) owner = Owner.IDLE }
+    return ok
+  }
+  // Revocation does not wait: epoch++, wake disarm, exact stop, epoch-tagged cancel.
+  fun revoke() {
+    val (e, at) = synchronized(lock) {
+      epoch++; liveWake = null; unresolved = false; dirty = false
+      val e = exec?.takeIf { !halted(it) }?.also { it.state = "done" }
+      if (owner != Owner.STORAGE_BLOCKED) owner = Owner.IDLE
+      e to epoch
+    }
+    e?.let { lease.end(it); runCatching { queue.pauseAutomatic(it, it.runId) } }
+    if (runCatching { plan.disarm() }.isFailure) synchronized(lock) { blocked = true; owner = Owner.STORAGE_BLOCKED }
+    main(Runnable { if (synchronized(lock) { epoch == at }) os.cancel() })
+  }
+  private fun revision(p: S3AutoPlan, clockOnly: Boolean) {
+    val (e, at) = synchronized(lock) {
+      val active = exec?.takeIf { !halted(it) && it.state != "unresolved" }
+      if (clockOnly && active != null) { dirty = true; clockChanged = true; return }
+      epoch++; unresolved = false; liveWake = p.wake; active?.state = "done"; owner = Owner.REPLACING
+      active to epoch
+    }
+    e?.let { lease.end(it); runCatching { queue.pauseAutomatic(it, it.runId) } }
+    main(Runnable { schedule(p, at, 1, p.wake!!, maxOf(0L, p.eligibleAt() - clock())) })
+  }
+  private fun idleProject(p: S3AutoPlan) {
+    if (p.wake == null) return
+    val at = synchronized(lock) { if (owner != Owner.IDLE) { dirty = true; return }; epoch }
+    main(Runnable {
+      val pending = try { os.pending() } catch (_: Exception) { return@Runnable }
+      synchronized(lock) {
+        if (owner != Owner.IDLE || epoch != at) return@Runnable
+        if (pending?.get("protocol") == 1 && pending["wake"] == p.wake) { owner = Owner.OS_OWNED; liveWake = p.wake; return@Runnable }
+        owner = Owner.REPLACING
+      }
+      schedule(p, at, 1, p.wake, maxOf(0L, p.eligibleAt() - clock()))
+    })
+  }
+  private fun schedule(p: S3AutoPlan, at: Long, protocol: Int, wake: String, latency: Long) {
+    if (synchronized(lock) { epoch != at }) return
+    val result = runCatching { os.schedule(wake, UUID.randomUUID().toString(), latency, protocol) }.getOrNull()
+    synchronized(lock) {
+      if (epoch != at || owner != Owner.REPLACING) return
+      owner = if (result == SUCCESS) Owner.OS_OWNED else Owner.IDLE
+      if (result == SUCCESS) liveWake = p.wake
+    }
+  }
+  // Locked: no vault access. Only an already-armed plan, or a >=5 min legacy-recovery wake.
+  private fun lockedProjection() {
+    if (plan.marked()) { plan.current()?.let(::idleProject); return }
+    val snapshot = AndroidS3AutomaticPlan.legacySnapshot(legacy) ?: return
+    val due = legacy.getLong("due", 0)
+    if (synchronized(lock) { owner != Owner.IDLE }) return
+    main(Runnable {
+      val pending = try { os.pending() } catch (_: Exception) { return@Runnable }
+      if (pending?.get("protocol") == 0 && pending["wake"] == snapshot) return@Runnable
+      runCatching { os.schedule(snapshot, UUID.randomUUID().toString(), maxOf(DEFER, due - clock()), 0) }
+    })
+  }
+  companion object {
+    const val DEFER = 300000L
+    const val SUCCESS = 1
+  }
+}

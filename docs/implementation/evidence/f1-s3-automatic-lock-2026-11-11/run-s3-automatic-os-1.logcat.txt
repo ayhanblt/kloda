@@ -1,0 +1,6 @@
+11-12 10:03:57.413   572  2242 D JobScheduler: executeRunCommand(): com.kloda.sync.test/null/0 2712 s=false f=true
+11-12 10:03:57.429   572  2242 W JobScheduler: Job didn't exist in JobStore: bdc923d #u0a207/2712 com.kloda.sync.test/com.kloda.sync.AndroidS3HarnessJobService
+11-12 10:03:57.436   572  2031 D JobScheduler: executeRunCommand(): com.kloda.sync.test/null/0 2712 s=false f=true
+11-12 10:03:57.440   572  2031 W JobScheduler: Job didn't exist in JobStore: a324306 #u0a207/2712 com.kloda.sync.test/com.kloda.sync.AndroidS3HarnessJobService
+11-12 10:03:57.443   572  2031 D JobScheduler: executeRunCommand(): com.kloda.sync.test/null/0 2712 s=false f=true
+11-12 10:03:57.455   572  2031 W JobScheduler: Job didn't exist in JobStore: 904898c #u0a207/2712 com.kloda.sync.test/com.kloda.sync.AndroidS3HarnessJobService

@@ -1,0 +1,6 @@
+101,102c101,102
+<       if (seen == null || seen.second && seen.first != plan) { uncertain = Uncertain(plan); throw S3Failure("storage_failure") }
+<       if (!seen.second) throw S3Failure("storage_failure")
+---
+>       if (seen == null) { uncertain = Uncertain(plan); throw S3Failure("storage_failure") }
+>       if (!seen.second || seen.first != plan) throw S3Failure("storage_failure")

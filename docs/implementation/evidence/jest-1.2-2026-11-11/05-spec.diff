@@ -1,0 +1,29 @@
+diff --git a/apps/mobile/src/pages/connections/ui/s3-diagnostic-page.spec.tsx b/apps/mobile/src/pages/connections/ui/s3-diagnostic-page.spec.tsx
+index 4f45439..d04ebda 100644
+--- a/apps/mobile/src/pages/connections/ui/s3-diagnostic-page.spec.tsx
++++ b/apps/mobile/src/pages/connections/ui/s3-diagnostic-page.spec.tsx
+@@ -25,17 +25,19 @@ it('requires saving changed fields before a synthetic test and never enables bac
+   await view.unmount();
+ });
+ it('cancels the exact test on background or unmount and ignores a late successful response',async () => {
+-  let changed: ((state: AppStateStatus) => void) | undefined, resolve: ((value: typeof result) => void) | undefined;
+-  const subscription = jest.spyOn(AppState,'addEventListener').mockImplementation((_event,handler) => { changed = handler; return { remove:jest.fn() }; });
++  // S3Page mounts its own listener plus two S3ItemsPanel listeners; dispatch to every live one.
++  const handlers = new Set<(state: AppStateStatus) => void>(); let resolve: ((value: typeof result) => void) | undefined;
++  const changed = (state: AppStateStatus) => { [...handlers].forEach(handler => handler(state)); };
++  const subscription = jest.spyOn(AppState,'addEventListener').mockImplementation((_event,handler) => { handlers.add(handler); return { remove:() => { handlers.delete(handler); } }; });
+   mocked.test.mockImplementation(() => new Promise(done => { resolve = done; }));
+   const view = await render(<S3Page provider="amazon-s3" onBack={() => undefined} />);
+   const testButton = () => view.getByRole('button',{ name:i18n.t('destinations.s3.test') });
+   await waitFor(() => expect(testButton().props.accessibilityState.disabled).toBe(false));
+-  await fireEvent.press(testButton()); await act(async () => { changed?.('background'); resolve?.(result); });
++  await fireEvent.press(testButton()); await act(async () => { changed('background'); resolve?.(result); });
+   expect(mocked.cancelTest).toHaveBeenCalledWith(id); expect(view.queryByText(i18n.t('destinations.s3.testSuccess'))).toBeNull();
+-  await act(async () => { changed?.('active'); });
++  await act(async () => { changed('active'); });
+   await fireEvent.press(testButton()); await view.unmount(); expect(mocked.cancelTest).toHaveBeenCalledTimes(2);
+-  await act(async () => { resolve?.(result); }); subscription.mockRestore();
++  expect(handlers.size).toBe(0); await act(async () => { resolve?.(result); }); subscription.mockRestore();
+ });
+ 
+ it('handles a missing native request factory without starting network work or leaking a rejected promise',async () => {

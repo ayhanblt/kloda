@@ -1,0 +1,11 @@
+1d6f21376d3d1ef632f082fb1abe4d3c665376ded76bb32dbd57b3b5da7c8c03  apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Runtime.kt
+ee0f54974401d9952c5529138ba9fe1c6ae3b37d26227cf010d0fb1f9cdd8b47  apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Queue.kt
+5a9edc5c442ca4e3cfa1addcd8ba2237307ab06564ac11b06339bff41fe7698d  apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticPlan.kt
+4d1ed13be7e9b0a29cbdba82ac1252b3a9d2834278ebcebe6f3cec54c05d7eeb  apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticCoordinator.kt
+6237c0609a5f6a1053c9782b4b6a31d4a9303b5a8d715df5ec681fafa8e34dac  apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Automatic.kt
+38badfeb2f9461c9ddaf77b4bf671c285ba8074a7820d81daa97af68f9ef3135  apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticChecks.kt
+e33c69ad8fef5725631876a5b4be20d24b7721b8286fc6dd76f5b5634b50cb98  apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticPlanChecks.kt
+b327f4f8c2016aa9c115b19a1096ea5905926a6f55f3a57965bc5ac2ed16f23b  apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidAutomaticLockChecks.kt
+b270b3d319b4db21b740622d095e8179bb06da5d04e3929768cf73430975e343  apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticOsChecks.kt
+f41ba44d649bfb47bf0000abf447a4805071c8ee8d86b845eedc0b3fb36cdab9  apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt
+765d008f2b6cd16e21041b7693f0a5a87755404a56a03b136c4b8b4c8601199d  apps/mobile/modules/my-module/android/src/androidTest/AndroidManifest.xml

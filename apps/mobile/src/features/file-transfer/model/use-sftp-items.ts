@@ -33,7 +33,9 @@ export function useSftpItems(issues: boolean) {
   };
   const act = async (item: SftpItem) => {
     if (!active.current || busy.current || !page || (issues && item.kind !== 'file')) return;
-    const ticket = crypto.randomUUID(), version = ++epoch.current;
+    let ticket: string;
+    try { ticket = sftp.newRequest(); } catch (cause) { setError(sftpErrorCode(cause)); return; }
+    const version = ++epoch.current;
     request.current = ticket; choosing.current = !issues && item.kind === 'file'; busy.current = true; setWorking(true); setError(null); setNotice(null);
     try {
       const result = issues ? await sftpBackups.copy(item.id,ticket) : await sftpBackups.restore(item,ticket);

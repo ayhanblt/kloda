@@ -151,3 +151,177 @@ pub unsafe extern "C" fn kloda_ftps_read_bound(
         )
     }
 }
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::{
+        io::Read,
+        os::{fd::IntoRawFd, unix::net::UnixStream},
+        sync::atomic::{AtomicI32, Ordering},
+    };
+    const VALID: &str = r#"{"address":"127.0.0.1","port":990,"hostname":"nas.local","username":"probe","password":"secret","root":"/","operationId":"12345678-1234-4321-8765-123456789abc","finalPath":"a.bin","size":"0","sha256":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"responseTimeoutMs":5000}"#;
+    static CALLS: AtomicI32 = AtomicI32::new(0);
+    unsafe extern "C" fn reject(context: *mut c_void, event: i32, _: u64) -> i32 {
+        assert_eq!(event, 0);
+        unsafe { &*context.cast::<AtomicI32>() }.fetch_add(1, Ordering::SeqCst);
+        1
+    }
+    unsafe extern "C" fn no_connect(_: *mut c_void, _: *const u8, _: usize, _: u16) -> i32 {
+        CALLS.fetch_add(1, Ordering::SeqCst);
+        -1
+    }
+    fn pair() -> (i32, UnixStream) {
+        let (ours, peer) = UnixStream::pair().unwrap();
+        // Set before the bridge closes `ours`: macOS rejects SO_RCVTIMEO once the peer is gone.
+        peer.set_read_timeout(Some(std::time::Duration::from_secs(2)))
+            .unwrap();
+        (ours.into_raw_fd(), peer)
+    }
+    fn closed(mut peer: UnixStream) -> bool {
+        peer.read(&mut [0; 1]).unwrap() == 0
+    }
+    fn call(json: &[u8], callbacks: (Option<Receipt>, Option<Connect>), writing: bool) -> i32 {
+        let (file, file_peer) = pair();
+        let (socket, socket_peer) = pair();
+        let before = json.to_vec();
+        let mut calls = AtomicI32::new(0);
+        let context = (&mut calls as *mut AtomicI32).cast();
+        let code = unsafe {
+            if writing {
+                kloda_ftps_publish_bound(
+                    json.as_ptr(),
+                    json.len(),
+                    file,
+                    socket,
+                    callbacks.0,
+                    callbacks.1,
+                    context,
+                )
+            } else {
+                kloda_ftps_read_bound(
+                    json.as_ptr(),
+                    json.len(),
+                    file,
+                    socket,
+                    callbacks.0,
+                    callbacks.1,
+                    context,
+                )
+            }
+        };
+        assert_eq!(json, before.as_slice());
+        assert!(closed(file_peer) && closed(socket_peer));
+        code + 100 * calls.load(Ordering::SeqCst)
+    }
+    #[test]
+    fn c_boundary_rejects_without_network_and_consumes_both_fds() {
+        let both = (Some(reject as Receipt), Some(no_connect as Connect));
+        let invalid = Error::Invalid as i32;
+        for writing in [true, false] {
+            assert_eq!(call(b"{", both, writing), invalid);
+            assert_eq!(
+                call(VALID.replace("secret", "").as_bytes(), both, writing),
+                invalid
+            );
+            assert_eq!(
+                call(
+                    VALID
+                        .replace(r#""size":"0""#, r#""size":"0","x":1"#)
+                        .as_bytes(),
+                    both,
+                    writing
+                ),
+                invalid
+            );
+            assert_eq!(
+                call(VALID.as_bytes(), (None, Some(no_connect)), writing),
+                invalid
+            );
+            assert_eq!(
+                call(VALID.as_bytes(), (Some(reject), None), writing),
+                invalid
+            );
+            assert_eq!(
+                call(VALID.as_bytes(), both, writing),
+                Error::Admission as i32 + 100
+            );
+        }
+        assert_eq!(CALLS.load(Ordering::SeqCst), 0);
+    }
+    #[test]
+    fn c_boundary_null_length_and_fd_contract() {
+        let json = VALID.as_bytes();
+        let (file, file_peer) = pair();
+        let (socket, socket_peer) = pair();
+        let code = unsafe {
+            kloda_ftps_publish_bound(
+                std::ptr::null(),
+                1,
+                file,
+                socket,
+                None,
+                None,
+                std::ptr::null_mut(),
+            )
+        };
+        assert_eq!(code, Error::Invalid as i32);
+        assert!(closed(file_peer) && closed(socket_peer));
+        let (file, file_peer) = pair();
+        let (socket, socket_peer) = pair();
+        let code = unsafe {
+            kloda_ftps_read_bound(
+                json.as_ptr(),
+                16385,
+                file,
+                socket,
+                None,
+                None,
+                std::ptr::null_mut(),
+            )
+        };
+        assert_eq!(code, Error::Invalid as i32);
+        assert!(closed(file_peer) && closed(socket_peer));
+        let (same, peer) = pair();
+        let code = unsafe {
+            kloda_ftps_publish_bound(
+                json.as_ptr(),
+                json.len(),
+                same,
+                same,
+                None,
+                None,
+                std::ptr::null_mut(),
+            )
+        };
+        assert_eq!(code, Error::Invalid as i32);
+        assert!(closed(peer));
+        let (file, file_peer) = pair();
+        let code = unsafe {
+            kloda_ftps_read_bound(
+                json.as_ptr(),
+                json.len(),
+                file,
+                -1,
+                None,
+                None,
+                std::ptr::null_mut(),
+            )
+        };
+        assert_eq!(code, Error::Invalid as i32);
+        assert!(closed(file_peer));
+        let (socket, socket_peer) = pair();
+        let code = unsafe {
+            kloda_ftps_publish_bound(
+                json.as_ptr(),
+                json.len(),
+                -1,
+                socket,
+                None,
+                None,
+                std::ptr::null_mut(),
+            )
+        };
+        assert_eq!(code, Error::Invalid as i32);
+        assert!(closed(socket_peer));
+    }
+}

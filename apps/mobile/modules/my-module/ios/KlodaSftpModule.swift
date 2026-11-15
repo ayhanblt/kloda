@@ -22,6 +22,7 @@ public final class KlodaSftpModule: Module {
       self.destroyed = true; self.review.cancel(); self.restore.cancel(); self.photosRestore.cancel(); self.restoreRequest = nil; self.inactive()
       DispatchQueue.main.async { self.observers.forEach(NotificationCenter.default.removeObserver); self.observers = [] }
     }
+    Function("sftpRequest") { UUID().uuidString.lowercased() }
     AsyncFunction("sftpStatus") { (promise: Promise) in self.reply(promise) {
       var value = try IosSftpQueue.shared.status(); value["supported"] = true
       if let code = IosSftpAutomaticCoordinator.shared.error() { value["automaticError"] = code }

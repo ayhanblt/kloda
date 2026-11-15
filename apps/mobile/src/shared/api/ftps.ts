@@ -64,6 +64,7 @@ export function ftpsStatusFromNative(value: unknown): FtpsStatus {
   if (result.running !== (result.run?.state === 'running')) return invalid(); return result;
 }
 interface NativeFtps {
+  ftpsRequest?(): unknown;
   ftpsStatus(): Promise<unknown>; configureFtps(address: string, port: number, hostname: string, root: string, username: string, password: string): Promise<unknown>;
   enableFtps(): Promise<unknown>; disableFtps(): Promise<unknown>; runFtps(): Promise<unknown>; pauseFtps(): Promise<unknown>;
   ftpsBackups(after: string): Promise<unknown>; ftpsIssues(after: string): Promise<unknown>;
@@ -72,6 +73,7 @@ interface NativeFtps {
 }
 export function ftpsNative(): NativeFtps { const value = requireOptionalNativeModule<NativeFtps>('KlodaFtps'); if (!value) throw new Error('native_unsupported'); return value; }
 export const ftps = {
+  newRequest(): string { const native = requireOptionalNativeModule<NativeFtps>('KlodaFtps'); if (typeof native?.ftpsRequest !== 'function') throw new Error('native_unsupported'); return text(native.ftpsRequest(), uuid); },
   async status() { const native = requireOptionalNativeModule<NativeFtps>('KlodaFtps'); return typeof native?.ftpsStatus === 'function' ? ftpsStatusFromNative(await native.ftpsStatus()) : { supported: false, configured: false, enabled: false, running: false }; },
   async configure(raw: FtpsForm) { const f = validateFtpsForm(raw); return ftpsStatusFromNative({ ...object(await ftpsNative().configureFtps(f.address,Number(f.port),f.hostname,f.root,f.username,f.password), ['supported','configured','enabled','running','targetId','config','run','errorCode','automaticError']), supported: true }); },
   async action(action: 'enable' | 'disable' | 'run' | 'pause') {

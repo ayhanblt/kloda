@@ -1,0 +1,104 @@
+--- a/AndroidS3AutomaticPlanChecks.kt
++++ b/AndroidS3AutomaticPlanChecks.kt
+@@ -13,7 +13,7 @@
+   private fun failure(block: () -> Unit): String? = try { block(); null } catch (error: S3Failure) { error.code } catch (error: Exception) { "other" }
+   fun run(instrumentation: Instrumentation, root: File) {
+     provider(instrumentation, root); migration(instrumentation, root); store(instrumentation, root); uncertain(instrumentation, root)
+-    fence(instrumentation, root); recovery(instrumentation, root)
++    fence(instrumentation, root); recovery(instrumentation, root); mismatch(instrumentation, root); stale(instrumentation, root)
+   }
+   // Compatible and diagnostic journals never receive automatic authority or plan tables.
+   private fun provider(i: Instrumentation, root: File) = S3AutoFixture(i, root, "provider").use { f ->
+@@ -180,6 +180,8 @@
+     val row = f.journal.text("SELECT occurrence||'|'||wake FROM s3_auto_state WHERE id=1").split("|")
+     repeat(2) { c.reconcile(); f.pump() }
+     f.queue.disable(); f.queue.enable(); f.queue.setAutomatic(true); c.reconcile(true); f.pump(); f.now.addAndGet(S3_HOUR)
++    // R10: the same unresolved migration proof refuses a manual start; toggles/status cannot open it.
++    f.foreground.set(true); check(failure { f.queue.start() } == "storage_failure" && f.queue.status()["canRun"] == false && f.held.isEmpty())
+     check(c.onStart(Any(), null, AndroidAutomaticLockChecks.extras(row[1])) { finishes.add(it) }); f.pump()
+     val lane = ConcurrentLinkedQueue<Runnable>(); val held = f.coordinator(os) { lane.add(it) }; val x = Any()
+     check(held.onStart(x, null, AndroidAutomaticLockChecks.extras(row[1])) {} && !held.onStop(x))
+@@ -189,7 +191,48 @@
+     f.boundary.readFault = false; c.reconcile(); f.pump(); val p = f.plan.current()!!
+     check(!c.blocked && !f.plan.fenced && f.legacy.all.isEmpty() && p.due == f.now.get() - S3_HOUR - 3 && p.wake != row[1])
+     check(os.schedules.size == 1 && os.pending?.get("wake") == p.wake && c.owner == Owner.OS_OWNED && f.count("s3_auto_accept") == 0)
++    // R10: after the proof the normal manual behavior returns and writes no automatic plan/accept record.
++    f.queue.start(); check(f.held.size == 1 && f.count("s3_run") == 1 && f.count("s3_auto_accept") == 0 && f.plan.current() == p)
++    f.queue.pause(); f.foreground.set(false)
+   }
++  // R11: committed marker + lost ack + mismatched proof is a storage gate, never settled by a later marker read.
++  private fun mismatch(i: Instrumentation, root: File) = S3AutoFixture(i, root, "ack-mismatch").use { f ->
++    f.authorize(); legacy(f, f.now.get() - 3, f.queue.authority()!!.binding, null)
++    val os = S3AutoFakeOs(); val c = f.coordinator(os); val finishes = CopyOnWriteArrayList<Boolean>()
++    f.boundary.commitFault = "state-mismatch"; c.reconcile(); f.pump()
++    check(c.blocked && f.plan.fenced && c.owner == Owner.STORAGE_BLOCKED && f.legacy.contains("due")) { "R11 mismatch not fenced" }
++    val wake = f.journal.text("SELECT wake FROM s3_auto_state WHERE id=1")
++    f.queue.disable(); f.queue.enable(); f.queue.setAutomatic(true); repeat(2) { c.reconcile(); f.pump() }; c.reconcile(true); f.pump()
++    f.now.addAndGet(S3_HOUR); check(c.onStart(Any(), null, AndroidAutomaticLockChecks.extras(wake)) { finishes.add(it) }); f.pump()
++    f.foreground.set(true); check(failure { f.queue.start() } == "storage_failure" && f.queue.status()["canRun"] == false); f.foreground.set(false)
++    check(c.blocked && f.plan.fenced && failure { f.plan.settle(f.legacy) } == "storage_failure" && failure { f.plan.current() } == "storage_failure")
++    check(os.schedules.isEmpty() && os.cancels.get() == 0 && finishes == listOf(false) && f.legacy.contains("due"))
++    check(f.count("s3_run") == 0 && f.count("s3_auto_accept") == 0 && f.held.isEmpty() && f.lease.get() == null)
++  }
++  // R8: after the marker, stale legacy and invalid envelopes never take over an OS-owned backoff or a
++  // ProjectionUnresolved; they finish only themselves and the current new-params callback still works.
++  private fun stale(i: Instrumentation, root: File) = S3AutoFixture(i, root, "stale").use { f ->
++    f.authorize(); val os = S3AutoFakeOs(); val c = f.coordinator(os); val finishes = CopyOnWriteArrayList<Boolean>()
++    c.reconcile(); f.pump(); val p0 = f.plan.current()!!; f.now.set(p0.due); f.deny.set(true)
++    // Cleanup failure leaves a legacy snapshot behind: the marker still makes its protocol-0 envelope stale.
++    legacy(f, f.now.get() - 1, p0.binding, null); val snapshot = AndroidS3AutomaticPlan.legacySnapshot(f.legacy)!!
++    val stale = listOf(AndroidAutomaticLockChecks.extras(snapshot) + ("protocol" to 0), AndroidAutomaticLockChecks.extras(p0.wake) + ("provider" to "s3-compatible"))
++    for (mode in listOf("backoff", "unresolved")) {
++      os.result = if (mode == "backoff") 0 else null
++      check(c.onStart(Any(), null, AndroidAutomaticLockChecks.extras(p0.wake)) { finishes.add(it) }); f.pump()
++      val held = Triple(c.epoch, f.plan.current(), c.unresolved); val scheduled = os.schedules.size; val n = finishes.size
++      check(c.owner == Owner.OS_OWNED && held.third == (mode == "unresolved") && finishes == (if (mode == "backoff") listOf(true) else listOf(true, false, false)))
++      os.hidePending = true
++      for (x in stale) check(c.onStart(Any(), null, x) { finishes.add(it) }); f.pump(); repeat(2) { c.reconcile(); f.pump() }
++      check(Triple(c.epoch, f.plan.current(), c.unresolved) == held && c.owner == Owner.OS_OWNED) { "R8 $mode ownership changed by a stale envelope" }
++      check(os.schedules.size == scheduled && os.cancels.get() == 0 && finishes.drop(n) == listOf(false, false)) { "R8 $mode re-projected" }
++      check(f.count("s3_run") == 0 && f.lease.get() == null); os.hidePending = false
++    }
++    os.result = 1; f.deny.set(false); f.now.set(f.plan.current()!!.eligibleAt())
++    check(c.onStart(Any(), null, AndroidAutomaticLockChecks.extras(p0.wake)) { finishes.add(it) }); f.pump()
++    check(f.count("s3_auto_accept") == 1 && !c.unresolved && c.owner == Owner.EXECUTING && f.held.size == 1)
++    f.queue.pauseAutomatic(f.lease.get()!!, null); f.pump()
++  }
+   // R4: locked legacy recovery rearms its own delivered job; a changed snapshot is a no-op; unlocked migrates.
+   private fun recovery(i: Instrumentation, root: File) = S3AutoFixture(i, root, "legacy-lock").use { f ->
+     f.authorize(); legacy(f, f.now.get() - 1, f.queue.authority()!!.binding, null)
+--- a/AndroidAutomaticLockChecks.kt
++++ b/AndroidAutomaticLockChecks.kt
+@@ -122,7 +122,7 @@
+   fun run(instrumentation: Instrumentation, root: File) {
+     interleavings(instrumentation, root)
+     revocation(instrumentation, root); ownership(instrumentation, root); storage(instrumentation, root)
+-    active(instrumentation, root); projection(instrumentation, root)
++    active(instrumentation, root); projection(instrumentation, root); fold(instrumentation, root)
+   }
+   // §8.1: the original F1 consumed the due before admission; here locked delivery must not.
+   fun representative(i: Instrumentation, root: File) = S3AutoFixture(i, root, "lock").use { f ->
+@@ -318,5 +318,23 @@
+     os.result = 1; c.reconcile(); f.pump(); check(os.schedules.size == 4 && c.owner == Owner.OS_OWNED)
+     c.revoke(); f.pump(); os.result = null; os.pendingFails = true; c.reconcile(); f.pump(); check(c.unresolved && os.schedules.size == 5)
+     c.reconcile(); f.pump(); check(os.schedules.size == 5 && os.cancels.get() == 3)
++  }
++  // R9: the dirty clock fold commits W->W' on the background lane; the exact stop is placed before the
++  // queued main-lane replacement (deterministic barrier). W' must be projected once; W is never retried.
++  private fun fold(i: Instrumentation, root: File) = S3AutoFixture(i, root, "fold").use { f ->
++    f.authorize(); val os = S3AutoFakeOs(); val c = f.coordinator(os); val finishes = CopyOnWriteArrayList<Boolean>()
++    c.reconcile(); f.pump(); var p = f.plan.current()!!; f.now.set(p.due); val a = Any(); val b = Any(); val x = Any()
++    // (b) terminal completion: A active + clock dirty; A's run ends and its completion folds before exact stop(A).
++    check(c.onStart(a, null, extras(p.wake)) { finishes.add(it) }); f.pump(); c.reconcile(true); f.pump(); f.queue.pauseAutomatic(f.lease.get()!!, null)
++    for ((step, params) in listOf("completion" to a, "backoff" to x)) {
++      // (a) OS-owned backoff: B active + clock dirty, exact stop(B) hands W' back; backoff X folds before exact stop(X).
++      if (step == "backoff") { f.now.set(p.eligibleAt()); check(c.onStart(b, null, extras(p.wake)) {}); f.pump(); c.reconcile(true); f.pump()
++        check(c.onStop(b)); f.pump(); check(c.onStart(x, null, extras(p.wake)) { finishes.add(it) }) }
++      val q = f.plan.current()!!; val scheduled = os.schedules.size
++      check(q.wake != p.wake && !c.dirty && !c.onStop(params)) { "R9 $step stale envelope retried" }; f.pump()
++      check(os.schedules.size == scheduled + 1 && os.pending?.get("wake") == q.wake && c.owner == Owner.OS_OWNED && finishes.isEmpty()) { "R9 $step revised plan lost" }
++      check(f.lease.get() == null && f.count("s3_auto_accept") == f.count("s3_run")); p = q
++    }
++    check(f.count("s3_auto_accept") == 2 && os.schedules.size == 3)
+   }
+ }

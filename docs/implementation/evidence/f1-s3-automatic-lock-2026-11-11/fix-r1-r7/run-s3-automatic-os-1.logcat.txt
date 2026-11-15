@@ -1,0 +1,580 @@
+--------- beginning of main
+11-12 10:35:03.721  1660  5021 I NetworkRecognitionRnr: Using pair HTTP connection
+11-12 10:35:03.729  1660  5384 I A       : [Upload] Connected
+11-12 10:35:03.735  1039  1968 E AuthPII : [RequestTokenManager] getToken() -> BAD_AUTHENTICATION. App: com.google.android.googlequicksearchbox, Service: oauth2:https://www.google.com/accounts/OAuthLogin https://www.googleapis.com/auth/assistant
+11-12 10:35:03.735  1039  1968 E AuthPII : amdy: Long live credential not available.
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at uvp.a(:com.google.android.gms@242335038@24.23.35 (190400-646585959):973)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at uvv.b(:com.google.android.gms@242335038@24.23.35 (190400-646585959):28)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at uvt.a(:com.google.android.gms@242335038@24.23.35 (190400-646585959):611)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at uvs.b(:com.google.android.gms@242335038@24.23.35 (190400-646585959):91)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at pcm.f(:com.google.android.gms@242335038@24.23.35 (190400-646585959):224)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at pcm.h(:com.google.android.gms@242335038@24.23.35 (190400-646585959):2)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at pcm.hf(:com.google.android.gms@242335038@24.23.35 (190400-646585959):147)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at oxh.onTransact(:com.google.android.gms@242335038@24.23.35 (190400-646585959):96)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at android.os.Binder.transact(Binder.java:1345)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at bjld.onTransact(:com.google.android.gms@242335038@24.23.35 (190400-646585959):18)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at android.os.Binder.transact(Binder.java:1345)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at bbqp.onTransact(:com.google.android.gms@242335038@24.23.35 (190400-646585959):147)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at android.os.Binder.execTransactInternal(Binder.java:1500)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at android.os.Binder.execTransact(Binder.java:1444)
+11-12 10:35:03.735  1039  1968 E AuthPII : Message is Long live credential not available.
+11-12 10:35:03.735  1039  1968 E AuthPII : amdy: Long live credential not available.
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at uvp.a(:com.google.android.gms@242335038@24.23.35 (190400-646585959):973)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at uvv.b(:com.google.android.gms@242335038@24.23.35 (190400-646585959):28)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at uvt.a(:com.google.android.gms@242335038@24.23.35 (190400-646585959):611)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at uvs.b(:com.google.android.gms@242335038@24.23.35 (190400-646585959):91)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at pcm.f(:com.google.android.gms@242335038@24.23.35 (190400-646585959):224)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at pcm.h(:com.google.android.gms@242335038@24.23.35 (190400-646585959):2)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at pcm.hf(:com.google.android.gms@242335038@24.23.35 (190400-646585959):147)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at oxh.onTransact(:com.google.android.gms@242335038@24.23.35 (190400-646585959):96)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at android.os.Binder.transact(Binder.java:1345)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at bjld.onTransact(:com.google.android.gms@242335038@24.23.35 (190400-646585959):18)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at android.os.Binder.transact(Binder.java:1345)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at bbqp.onTransact(:com.google.android.gms@242335038@24.23.35 (190400-646585959):147)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at android.os.Binder.execTransactInternal(Binder.java:1500)
+11-12 10:35:03.735  1039  1968 E AuthPII : 	at android.os.Binder.execTransact(Binder.java:1444)
+11-12 10:35:03.736  1039  1968 W Auth    : [GetToken] GetToken failed with status code: BadAuthentication  [CONTEXT service_id=343 ]
+11-12 10:35:03.743  1660  5382 W Auth    : [GoogleAuthUtil] [GoogleAuthUtil] error status:BAD_AUTHENTICATION with method:getTokenWithDetails
+11-12 10:35:03.744  1660  5382 W GoogleAuthUtil: Error when getting token
+11-12 10:35:03.744  1660  5382 W GoogleAuthUtil: com.google.android.gms.auth.UserRecoverableAuthException: BadAuthentication
+11-12 10:35:03.744  1660  5382 W GoogleAuthUtil: 	at com.google.android.gms.auth.m.j(PG:221)
+11-12 10:35:03.744  1660  5382 W GoogleAuthUtil: 	at com.google.android.gms.auth.m.o(PG:62)
+11-12 10:35:03.744  1660  5382 W GoogleAuthUtil: 	at com.google.android.gms.auth.i.a(PG:66)
+11-12 10:35:03.744  1660  5382 W GoogleAuthUtil: 	at com.google.android.gms.auth.m.n(PG:46)
+11-12 10:35:03.744  1660  5382 W GoogleAuthUtil: 	at com.google.android.gms.auth.m.r(PG:88)
+11-12 10:35:03.744  1660  5382 W GoogleAuthUtil: 	at com.google.android.libraries.gcoreclient.d.a.b.c(PG:15)
+11-12 10:35:03.744  1660  5382 W GoogleAuthUtil: 	at com.google.android.apps.gsa.search.core.google.gaia.o.b(PG:19)
+11-12 10:35:03.744  1660  5382 W GoogleAuthUtil: 	at com.google.android.apps.gsa.search.core.google.gaia.l.b(PG:12)
+11-12 10:35:03.744  1660  5382 W GoogleAuthUtil: 	at com.google.android.apps.gsa.search.core.google.gaia.g.call(PG:40)
+11-12 10:35:03.744  1660  5382 W GoogleAuthUtil: 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+11-12 10:35:03.744  1660  5382 W GoogleAuthUtil: 	at com.google.android.apps.gsa.shared.util.c.a.e.run(PG:12)
+11-12 10:35:03.744  1660  5382 W GoogleAuthUtil: 	at com.google.android.apps.gsa.shared.util.c.a.bg.run(PG:3)
+11-12 10:35:03.744  1660  5382 W GoogleAuthUtil: 	at com.google.android.apps.gsa.shared.util.c.a.bg.run(PG:3)
+11-12 10:35:03.744  1660  5382 W GoogleAuthUtil: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+11-12 10:35:03.744  1660  5382 W GoogleAuthUtil: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+11-12 10:35:03.744  1660  5382 W GoogleAuthUtil: 	at java.lang.Thread.run(Thread.java:1012)
+11-12 10:35:03.744  1660  5382 W GoogleAuthUtil: 	at com.google.android.apps.gsa.shared.util.c.a.l.run(PG:42)
+11-12 10:35:03.745  1660  1885 W CronetNetworkRqstWrppr: Upload request without a content type.
+11-12 10:35:03.745  1660  5382 W A       : (REDACTED) User recoverable exception for scope: %s
+11-12 10:35:03.745  1660  5382 W A       : com.google.android.libraries.gcoreclient.d.e: User intervention required. Notification has been pushed.
+11-12 10:35:03.745  1660  5382 W A       : 	at com.google.android.libraries.gcoreclient.d.a.b.c(PG:95)
+11-12 10:35:03.745  1660  5382 W A       : 	at com.google.android.apps.gsa.search.core.google.gaia.o.b(PG:19)
+11-12 10:35:03.745  1660  5382 W A       : 	at com.google.android.apps.gsa.search.core.google.gaia.l.b(PG:12)
+11-12 10:35:03.745  1660  5382 W A       : 	at com.google.android.apps.gsa.search.core.google.gaia.g.call(PG:40)
+11-12 10:35:03.745  1660  5382 W A       : 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+11-12 10:35:03.745  1660  5382 W A       : 	at com.google.android.apps.gsa.shared.util.c.a.e.run(PG:12)
+11-12 10:35:03.745  1660  5382 W A       : 	at com.google.android.apps.gsa.shared.util.c.a.bg.run(PG:3)
+11-12 10:35:03.745  1660  5382 W A       : 	at com.google.android.apps.gsa.shared.util.c.a.bg.run(PG:3)
+11-12 10:35:03.745  1660  5382 W A       : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+11-12 10:35:03.745  1660  5382 W A       : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+11-12 10:35:03.745  1660  5382 W A       : 	at java.lang.Thread.run(Thread.java:1012)
+11-12 10:35:03.745  1660  5382 W A       : 	at com.google.android.apps.gsa.shared.util.c.a.l.run(PG:42)
+11-12 10:35:03.745  1660  5382 W A       : Caused by: com.google.android.gms.auth.t: User intervention required. Notification has been pushed.
+11-12 10:35:03.745  1660  5382 W A       : 	at com.google.android.libraries.gcoreclient.d.a.b.c(PG:34)
+11-12 10:35:03.745  1660  5382 W A       : 	... 11 more
+11-12 10:35:03.745  1660  5382 W A       : Caused by: com.google.android.gms.auth.UserRecoverableAuthException: BadAuthentication
+11-12 10:35:03.745  1660  5382 W A       : 	at com.google.android.gms.auth.m.j(PG:221)
+11-12 10:35:03.745  1660  5382 W A       : 	at com.google.android.gms.auth.m.o(PG:62)
+11-12 10:35:03.745  1660  5382 W A       : 	at com.google.android.gms.auth.i.a(PG:66)
+11-12 10:35:03.745  1660  5382 W A       : 	at com.google.android.gms.auth.m.n(PG:46)
+11-12 10:35:03.745  1660  5382 W A       : 	at com.google.android.gms.auth.m.r(PG:88)
+11-12 10:35:03.745  1660  5382 W A       : 	at com.google.android.libraries.gcoreclient.d.a.b.c(PG:15)
+11-12 10:35:03.745  1660  5382 W A       : 	... 11 more
+11-12 10:35:03.752  1660  1660 E A       : onError
+11-12 10:35:03.752  1660  1660 E A       : com.google.android.apps.gsa.shared.speech.b.l: errorCode: 65561, engine: 2
+11-12 10:35:03.752  1660  1660 E A       : 	at com.google.android.apps.gsa.staticplugins.bp.a.f.a(PG:23)
+11-12 10:35:03.752  1660  1660 E A       : 	at com.google.android.apps.gsa.s3.o.hg(PG:13)
+11-12 10:35:03.752  1660  1660 E A       : 	at com.google.ch.g.a.f.e(PG:9)
+11-12 10:35:03.752  1660  1660 E A       : 	at com.google.android.apps.gsa.speech.k.a.g.d(PG:162)
+11-12 10:35:03.752  1660  1660 E A       : 	at com.google.android.apps.gsa.speech.k.a.g.iN(PG:26)
+11-12 10:35:03.752  1660  1660 E A       : 	at com.google.android.apps.gsa.s3.p.c(PG:102)
+11-12 10:35:03.752  1660  1660 E A       : 	at com.google.android.apps.gsa.s3.q.run(PG:1)
+11-12 10:35:03.752  1660  1660 E A       : 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:487)
+11-12 10:35:03.752  1660  1660 E A       : 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+11-12 10:35:03.752  1660  1660 E A       : 	at com.google.android.apps.gsa.shared.util.c.a.e.run(PG:12)
+11-12 10:35:03.752  1660  1660 E A       : 	at com.google.android.apps.gsa.shared.util.c.a.bg.run(PG:3)
+11-12 10:35:03.752  1660  1660 E A       : 	at com.google.android.apps.gsa.shared.util.c.a.bg.run(PG:3)
+11-12 10:35:03.752  1660  1660 E A       : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+11-12 10:35:03.752  1660  1660 E A       : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+11-12 10:35:03.752  1660  1660 E A       : 	at java.lang.Thread.run(Thread.java:1012)
+11-12 10:35:03.752  1660  1660 E A       : 	at com.google.android.apps.gsa.shared.util.c.a.l.run(PG:42)
+11-12 10:35:03.752  1660  1660 E A       : Caused by: com.google.android.apps.gsa.shared.speech.b.n: errorCode: 65586, engine: 2
+11-12 10:35:03.752  1660  1660 E A       : 	at com.google.android.apps.gsa.s3.o.hg(PG:6)
+11-12 10:35:03.752  1660  1660 E A       : 	... 14 more
+11-12 10:35:03.752  1660  1660 E A       : Caused by: com.google.android.apps.gsa.shared.speech.b.j: errorCode: 401, engine: 2
+11-12 10:35:03.752  1660  1660 E A       : 	at com.google.android.apps.gsa.assistant.shared.n.i.b(PG:30)
+11-12 10:35:03.752  1660  1660 E A       : 	at com.google.android.apps.gsa.s3.producers.j.hq(PG:11)
+11-12 10:35:03.752  1660  1660 E A       : 	at com.google.android.apps.gsa.speech.k.a.g.d(PG:135)
+11-12 10:35:03.752  1660  1660 E A       : 	... 12 more
+11-12 10:35:03.752  1660  5384 I NetworkRecognitionRnr: Using pair HTTP connection
+11-12 10:35:03.760  1660  5381 I A       : [Upload] Connected
+11-12 10:35:03.760  1660  1660 W A       : Failed to sync device settings.
+11-12 10:35:03.760  1660  1660 I A       : Retrying to sync device settings.
+11-12 10:35:03.761  1660  1660 W JobInfo : Job 'com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService#-353' has a deadline with functional constraints and an extremely short time window of 0 ms (delay=1920000, deadline=1920000). The functional constraints are not likely to be satisfied when the job runs.
+11-12 10:35:03.762   572   933 W JobInfo : Job 'com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService#-353' has a deadline with functional constraints and an extremely short time window of 0 ms (delay=1920000, deadline=1920000). The functional constraints are not likely to be satisfied when the job runs.
+11-12 10:35:03.762   572   933 W JobInfo : Job 'com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService#-353' has a deadline with functional constraints and an extremely short time window of 0 ms (delay=1920000, deadline=1920000). The functional constraints are not likely to be satisfied when the job runs.
+--------- beginning of system
+11-12 10:35:03.764   572   933 W JobScheduler: Job didn't exist in JobStore: dded96b #u0a143/-353 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService
+11-12 10:35:03.874  5385  5385 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-12 10:35:03.879  5385  5385 I AndroidRuntime: Using default boot image
+11-12 10:35:03.879  5385  5385 I AndroidRuntime: Leaving lock profiling enabled
+11-12 10:35:03.882  5385  5385 I app_process: Core platform API reporting enabled, enforcing=false
+11-12 10:35:03.882  5385  5385 I app_process: Using CollectorTypeCMC GC.
+11-12 10:35:03.931  5385  5385 D nativeloader: InitDefaultPublicLibraries for_preload=1: libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicu.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativehelper.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+11-12 10:35:03.935  5385  5385 D nativeloader: Load libicu_jni.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+11-12 10:35:03.935  5385  5385 D app_process: u_setTimeZoneFilesDirectory("/apex/com.android.tzdata/etc/tz/versioned/8/icu") succeeded. 
+11-12 10:35:03.936  5385  5385 D app_process: I18n APEX ICU file found: /apex/com.android.i18n/etc/icu/icudt75l.dat
+11-12 10:35:03.936  5385  5385 D nativeloader: Load libjavacore.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+11-12 10:35:03.937  5385  5385 D nativeloader: Load libopenjdk.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+11-12 10:35:03.948  5385  5385 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+11-12 10:35:03.948  5385  5385 D AndroidRuntime: Calling main entry com.android.commands.am.Am
+11-12 10:35:03.951  5385  5385 D UiAutomationConnection: Created on user UserHandle{0}
+11-12 10:35:03.951   572   933 I ActivityManager: Force stopping com.kloda.sync.test appid=10207 user=0: start instr
+11-12 10:35:03.953   572   933 V GrammaticalInflectionUtils: AttributionSource: AttributionSource { uid = 10207, packageName = null, attributionTag = null, token = android.os.Binder@ff2a9bc, deviceId = 0, next = null } does not have READ_SYSTEM_GRAMMATICAL_GENDER permission.
+11-12 10:35:03.958   372   372 D Zygote  : Forked child process 5396
+11-12 10:35:03.958   572   615 I ActivityManager: Start proc 5396:com.kloda.sync.test/u0a207 for added application com.kloda.sync.test
+11-12 10:35:03.978  5396  5396 I kloda.sync.test: Late-enabling -Xcheck:jni
+11-12 10:35:03.995  5396  5396 I kloda.sync.test: Using CollectorTypeCMC GC.
+11-12 10:35:03.996   421   441 I adbd    : jdwp connection from 5396
+11-12 10:35:04.000  5396  5396 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+11-12 10:35:04.017  5396  5396 D ApplicationLoaders: Returning zygote-cached class loader: /system/framework/android.test.base.jar
+11-12 10:35:04.019  5396  5396 D nativeloader: Configuring clns-7 for other apk /system/framework/android.test.mock.jar. target_sdk_version=36, uses_libraries=ALL, library_path=/data/app/~~q0CL7U695SuUqMC6pO_EDw==/com.kloda.sync.test-D3tCQrw8qkUNFaXPSAHuRw==/lib/arm64:/data/app/~~q0CL7U695SuUqMC6pO_EDw==/com.kloda.sync.test-D3tCQrw8qkUNFaXPSAHuRw==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/com.kloda.sync.test
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{13a3b37 com.android.cts.priv.ctsshim/10195} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{76028a4 com.google.android.youtube/10167} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{32b760d com.android.internal.display.cutout.emulation.corner/10021} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{28769c2 com.android.internal.display.cutout.emulation.double/10079} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{3ed53d3 com.google.android.googlequicksearchbox/10143} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{3c92b10 com.google.android.onetimeinitializer/10128} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{6266609 com.google.android.ext.shared/10117} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{566600e com.android.virtualmachine.res/10189} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{6af5a2f com.android.managedprovisioning.auto_generated_rro_product__/10016} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{57de83c com.android.carrierconfig.auto_generated_rro_vendor__/10085} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{dc659c5 com.google.android.server.deviceconfig.resources/10188} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{2c6f1a com.android.systemui.emulation.pixel_3_xl/10009} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{4e16a4b com.android.systemui.emulation.pixel_4_xl/10076} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{35f4c28 com.android.systemui.emulation.pixel_fold/10040} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{7b7cd41 com.android.providers.telephony.auto_generated_characteristics_rro/10065} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{b1262e6 com.android.simappdialog.auto_generated_rro_product__/10015} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{4da6027 com.android.htmlviewer/10115} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{f7102d4 com.google.android.health.connect.backuprestore/10191} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{5f2fc7d com.android.systemui.auto_generated_rro_product__/10050} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{711c772 com.google.android.apps.messaging/10137} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{182d7c3 com.google.android.soundpicker/10163} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{6457840 com.google.android.marvin.talkbackoverlay/10090} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{7b7e379 com.google.android.configupdater/10139} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{930e8be com.android.internal.emulation.pixel_3a_xl/10049} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{1b12d1f com.android.internal.emulation.pixel_6_pro/10041} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{929d86c com.android.internal.emulation.pixel_7_pro/10020} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{64a3e35 com.android.internal.emulation.pixel_8_pro/10039} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{e8ed2ca com.android.internal.emulation.pixel_9_pro/10008} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{9457c3b com.android.internal.emulation.pixel_3a/10038} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{f120f58 com.android.internal.emulation.pixel_4a/10023} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{16d88b1 com.android.internal.emulation.pixel_6a/10051} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{52f5196 com.android.internal.emulation.pixel_7a/10063} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{5a117 com.android.internal.emulation.pixel_8a/10006} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{844c904 com.google.android.overlay.googlewebview/10034} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{7a0feed com.google.android.apps.safetyhub/10134} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{586f122 com.google.android.hotspot2.osulogin/10185} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{a3937b3 com.android.simappdialog/10118} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{c77170 com.android.internal.display.cutout.emulation.hole/10031} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{61b9ce9 com.android.internal.display.cutout.emulation.tall/10035} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{8c6fd6e com.android.internal.systemui.navbar.threebutton/10081} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{f059c0f com.android.camera2/10153} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{d8a349c com.android.internal.ranchu.commonoverlay/10060} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{c881ea5 com.android.systemui.auto_generated_rro_vendor__/10086} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{7e9827a com.google.android.deskclock/10151} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{889ea2b com.android.internal.systemui.navbar.twobutton/10062} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{53fe88 com.google.android.as/10132} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{810021 com.google.android.gm/10166} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{f7d4c46 com.android.systemui.emulation.pixel_3/10003} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{9bafe07 com.android.systemui.emulation.pixel_4/10070} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{e6e7b34 com.android.systemui.emulation.pixel_5/10066} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{ccc7d5d com.android.systemui.emulation.pixel_6/10007} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{431e6d2 com.android.systemui.emulation.pixel_7/10075} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{5ff73a3 com.android.systemui.emulation.pixel_8/10077} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{61216a0 com.android.systemui.emulation.pixel_9/10058} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{8589259 com.android.printspooler/10112} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{4239e1e com.google.android.connectivity.resources.goldfish.overlay/10088} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{68ba6ff com.android.dreams.basic/10127} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{e91fccc com.google.android.networkstack.tethering.emulator/10019} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{f6fb15 com.android.providers.settings.auto_generated_rro_product__/10056} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{e77e2a com.google.android.as.oss/10142} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{97db41b com.android.traceur.auto_generated_rro_product__/10018} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{f4819b8 com.android.internal.emulation.pixel_9_pro_fold/10044} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{5d93391 com.google.android.devicelockcontroller/10203} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{e5752f6 com.google.android.dialer/10133} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{6b976f7 com.android.internal.emulation.pixel_3/10061} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{9411964 com.android.internal.emulation.pixel_4/10052} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{dcc77cd com.android.internal.emulation.pixel_5/10001} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{21da882 com.android.internal.emulation.pixel_6/10032} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{6848b93 com.android.internal.emulation.pixel_7/10078} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{fa867d0 com.android.internal.emulation.pixel_8/10022} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{535c3c9 com.android.internal.emulation.pixel_9/10010} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{1cace com.google.android.captiveportallogin/10113} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{5e24def android.auto_generated_characteristics_rro/10011} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{af430fc com.google.android.appsearch.apk/10200} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{fcdd385 com.android.musicfx/10093} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{c13ab9a com.google.android.apps.docs/10158} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{d2aa71d com.google.android.apps.maps/10157} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{4afda0b com.google.android.markup/10155} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{2d160e8 com.google.android.webview/10152} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{a1d2301 com.google.android.rkpdapp/10204} BLOCKED
+11-12 10:35:04.020  5396  5396 D ApplicationLoaders: Returning zygote-cached class loader: /system/framework/android.test.base.jar
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{2d865a6 com.google.android.contacts/10156} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{9800be7 com.android.server.telecom.auto_generated_rro_product__/10030} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{acfa394 com.android.phone.auto_generated_characteristics_rro/10072} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{6b7ee3d com.google.android.overlay.googleconfig/10054} BLOCKED
+11-12 10:35:04.020   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{7153632 com.android.chrome/10146} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{7377f83 com.android.bips.auto_generated_rro_product__/10014} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{dcd6500 com.google.android.apps.customization.pixel/10164} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{33a3139 com.google.android.tag/10098} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{5dc837e com.google.android.overlay.permissioncontroller/10036} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{6890df com.google.android.partnersetup/10131} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{423d12c com.google.android.apps.wallpaper.nexus/10145} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{103a7f5 com.google.android.apps.nexuslauncher/10177} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{839598a com.android.theme.font.notoserifsource/10013} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{46f5bfb com.google.android.safetycenter.resources/10201} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{92d418 com.android.internal.display.cutout.emulation.waterfall/10025} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{db3ce71 com.android.internal.systemui.navbar.transparent/10012} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{adb8456 com.google.android.connectivity.resources/10197} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{24dbcd7 com.android.providers.contacts.auto_generated_rro_product__/10074} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{fed19c4 com.google.android.feedback/10175} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{765e0ad com.google.android.printservice.recommendation/10122} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{3a38fe2 com.google.android.apps.photos/10168} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{cdc0de1 com.google.android.calendar/10161} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{d474f73 com.google.android.documentsui/10108} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{7840e30 com.android.systemui.emulation.pixel_3a_xl/10002} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{8acdaa9 com.android.systemui.emulation.pixel_6_pro/10037} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{3eec82e com.android.systemui.emulation.pixel_7_pro/10024} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{f3d6fcf com.android.systemui.emulation.pixel_8_pro/10000} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{e53dd5c com.android.systemui.emulation.pixel_9_pro/10057} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{84f7865 com.android.carrierconfig.auto_generated_rro_product__/10084} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{3a3393a com.android.devicediagnostics.auto_generated_rro_product__/10026} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{4cb39eb com.android.providers.partnerbookmarks/10125} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{cef7348 com.android.wallpaper.livepicker/10103} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{8c435e1 com.android.providers.telephony.auto_generated_rro_product__/10005} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{fbaf06 com.android.phone.auto_generated_rro_vendor__/10087} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{f2189c7 com.android.imsserviceentitlement/10141} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{2c7bf4 com.android.internal.emulation.pixel_9_pro_xl/10073} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{36d4f1d com.google.android.healthconnect.controller/10190} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{113b592 com.android.internal.emulation.pixel_2_xl/10017} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{7a2fb63 com.android.internal.emulation.pixel_3_xl/10045} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{a8f6360 com.android.internal.emulation.pixel_4_xl/10080} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{b94c019 com.android.internal.emulation.pixel_fold/10064} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{d3398de com.android.bookmarkprovider/10119} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{13feabf com.google.android.overlay.pixelconfigcommon/10028} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{77558c com.android.systemui.accessibility.accessibilitymenu.auto_generated_rro_product__/10082} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{52844d5 com.kloda.app/10208} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{8dc64ea com.android.systemui.emulation.pixel_3a/10069} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{39273db com.android.systemui.emulation.pixel_4a/10043} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{b0a3e78 com.android.systemui.emulation.pixel_6a/10047} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{b355951 com.android.systemui.emulation.pixel_7a/10033} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{c93e5b6 com.android.systemui.emulation.pixel_8a/10042} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{bba72b7 com.google.android.settings.intelligence/10138} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{99210c1 com.google.android.projection.gearhead/10136} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{de0ca24 com.google.android.uwb.resources/10187} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{a922066 com.android.cts.ctsshim/10196} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{225398d com.google.android.wifi.resources/10184} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{170a742 com.google.android.wifi.dialog/10186} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{ef98353 com.android.wallpaper/10174} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{b726490 com.google.android.apps.wallpaper/10180} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{1b8e189 com.google.android.odad/10129} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{965f58e com.android.settings.auto_generated_rro_product__/10029} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{b0f01af com.android.systemui.emulation.pixel_9_pro_xl/10067} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{44139bc com.android.companiondevicemanager.auto_generated_characteristics_rro/10053} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{2c50d45 com.android.internal.systemui.navbar.gestural/10059} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{4fdc9a com.google.android.apps.youtube.music/10159} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{5409cb com.android.bluetoothmidiservice/10110} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{cc635a8 com.android.storagemanager.auto_generated_rro_product__/10083} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{cae38c1 com.google.android.cellbroadcastreceiver/10206} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{1bf2866 com.android.phone.auto_generated_rro_product__/10055} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{19777a7 com.android.systemui.emulation.pixel_9_pro_fold/10048} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{61d0454 android.auto_generated_rro_product__/10071} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{ea49ffd com.google.android.inputmethod.latin/10165} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{f8564f2 android.auto_generated_rro_vendor__/10089} BLOCKED
+11-12 10:35:04.021   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{5b9e743 com.google.android.apps.restore/10135} BLOCKED
+11-12 10:35:04.027  5396  5396 D nativeloader: Configuring clns-8 for other apk /system/framework/android.test.runner.jar. target_sdk_version=36, uses_libraries=ALL, library_path=/data/app/~~q0CL7U695SuUqMC6pO_EDw==/com.kloda.sync.test-D3tCQrw8qkUNFaXPSAHuRw==/lib/arm64:/data/app/~~q0CL7U695SuUqMC6pO_EDw==/com.kloda.sync.test-D3tCQrw8qkUNFaXPSAHuRw==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/com.kloda.sync.test
+11-12 10:35:04.027   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{13a3b37 com.android.cts.priv.ctsshim/10195} BLOCKED
+11-12 10:35:04.027   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{76028a4 com.google.android.youtube/10167} BLOCKED
+11-12 10:35:04.027   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{32b760d com.android.internal.display.cutout.emulation.corner/10021} BLOCKED
+11-12 10:35:04.027   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{28769c2 com.android.internal.display.cutout.emulation.double/10079} BLOCKED
+11-12 10:35:04.027   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{3ed53d3 com.google.android.googlequicksearchbox/10143} BLOCKED
+11-12 10:35:04.027   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{3c92b10 com.google.android.onetimeinitializer/10128} BLOCKED
+11-12 10:35:04.027   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{6266609 com.google.android.ext.shared/10117} BLOCKED
+11-12 10:35:04.027   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{566600e com.android.virtualmachine.res/10189} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{6af5a2f com.android.managedprovisioning.auto_generated_rro_product__/10016} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{57de83c com.android.carrierconfig.auto_generated_rro_vendor__/10085} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{dc659c5 com.google.android.server.deviceconfig.resources/10188} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{2c6f1a com.android.systemui.emulation.pixel_3_xl/10009} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{4e16a4b com.android.systemui.emulation.pixel_4_xl/10076} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{35f4c28 com.android.systemui.emulation.pixel_fold/10040} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{7b7cd41 com.android.providers.telephony.auto_generated_characteristics_rro/10065} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{b1262e6 com.android.simappdialog.auto_generated_rro_product__/10015} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{4da6027 com.android.htmlviewer/10115} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{f7102d4 com.google.android.health.connect.backuprestore/10191} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{5f2fc7d com.android.systemui.auto_generated_rro_product__/10050} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{711c772 com.google.android.apps.messaging/10137} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{182d7c3 com.google.android.soundpicker/10163} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{6457840 com.google.android.marvin.talkbackoverlay/10090} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{7b7e379 com.google.android.configupdater/10139} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{930e8be com.android.internal.emulation.pixel_3a_xl/10049} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{1b12d1f com.android.internal.emulation.pixel_6_pro/10041} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{929d86c com.android.internal.emulation.pixel_7_pro/10020} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{64a3e35 com.android.internal.emulation.pixel_8_pro/10039} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{e8ed2ca com.android.internal.emulation.pixel_9_pro/10008} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{9457c3b com.android.internal.emulation.pixel_3a/10038} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{f120f58 com.android.internal.emulation.pixel_4a/10023} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{16d88b1 com.android.internal.emulation.pixel_6a/10051} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{52f5196 com.android.internal.emulation.pixel_7a/10063} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{5a117 com.android.internal.emulation.pixel_8a/10006} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{844c904 com.google.android.overlay.googlewebview/10034} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{7a0feed com.google.android.apps.safetyhub/10134} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{586f122 com.google.android.hotspot2.osulogin/10185} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{a3937b3 com.android.simappdialog/10118} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{c77170 com.android.internal.display.cutout.emulation.hole/10031} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{61b9ce9 com.android.internal.display.cutout.emulation.tall/10035} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{8c6fd6e com.android.internal.systemui.navbar.threebutton/10081} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{f059c0f com.android.camera2/10153} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{d8a349c com.android.internal.ranchu.commonoverlay/10060} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{c881ea5 com.android.systemui.auto_generated_rro_vendor__/10086} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{7e9827a com.google.android.deskclock/10151} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{889ea2b com.android.internal.systemui.navbar.twobutton/10062} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{53fe88 com.google.android.as/10132} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{810021 com.google.android.gm/10166} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{f7d4c46 com.android.systemui.emulation.pixel_3/10003} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{9bafe07 com.android.systemui.emulation.pixel_4/10070} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{e6e7b34 com.android.systemui.emulation.pixel_5/10066} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{ccc7d5d com.android.systemui.emulation.pixel_6/10007} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{431e6d2 com.android.systemui.emulation.pixel_7/10075} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{5ff73a3 com.android.systemui.emulation.pixel_8/10077} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{61216a0 com.android.systemui.emulation.pixel_9/10058} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{8589259 com.android.printspooler/10112} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{4239e1e com.google.android.connectivity.resources.goldfish.overlay/10088} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{68ba6ff com.android.dreams.basic/10127} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{e91fccc com.google.android.networkstack.tethering.emulator/10019} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{f6fb15 com.android.providers.settings.auto_generated_rro_product__/10056} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{e77e2a com.google.android.as.oss/10142} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{97db41b com.android.traceur.auto_generated_rro_product__/10018} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{f4819b8 com.android.internal.emulation.pixel_9_pro_fold/10044} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{5d93391 com.google.android.devicelockcontroller/10203} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{e5752f6 com.google.android.dialer/10133} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{6b976f7 com.android.internal.emulation.pixel_3/10061} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{9411964 com.android.internal.emulation.pixel_4/10052} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{dcc77cd com.android.internal.emulation.pixel_5/10001} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{21da882 com.android.internal.emulation.pixel_6/10032} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{6848b93 com.android.internal.emulation.pixel_7/10078} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{fa867d0 com.android.internal.emulation.pixel_8/10022} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{535c3c9 com.android.internal.emulation.pixel_9/10010} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{1cace com.google.android.captiveportallogin/10113} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{5e24def android.auto_generated_characteristics_rro/10011} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{af430fc com.google.android.appsearch.apk/10200} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{fcdd385 com.android.musicfx/10093} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{c13ab9a com.google.android.apps.docs/10158} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{d2aa71d com.google.android.apps.maps/10157} BLOCKED
+11-12 10:35:04.028  5396  5396 D ApplicationLoaders: Returning zygote-cached class loader: /system_ext/framework/androidx.window.extensions.jar
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{4afda0b com.google.android.markup/10155} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{2d160e8 com.google.android.webview/10152} BLOCKED
+11-12 10:35:04.028   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{a1d2301 com.google.android.rkpdapp/10204} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{2d865a6 com.google.android.contacts/10156} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{9800be7 com.android.server.telecom.auto_generated_rro_product__/10030} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{acfa394 com.android.phone.auto_generated_characteristics_rro/10072} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{6b7ee3d com.google.android.overlay.googleconfig/10054} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{7153632 com.android.chrome/10146} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{7377f83 com.android.bips.auto_generated_rro_product__/10014} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{dcd6500 com.google.android.apps.customization.pixel/10164} BLOCKED
+11-12 10:35:04.029  5396  5396 D ApplicationLoaders: Returning zygote-cached class loader: /system_ext/framework/androidx.window.sidecar.jar
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{33a3139 com.google.android.tag/10098} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{5dc837e com.google.android.overlay.permissioncontroller/10036} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{6890df com.google.android.partnersetup/10131} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{423d12c com.google.android.apps.wallpaper.nexus/10145} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{103a7f5 com.google.android.apps.nexuslauncher/10177} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{839598a com.android.theme.font.notoserifsource/10013} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{46f5bfb com.google.android.safetycenter.resources/10201} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{92d418 com.android.internal.display.cutout.emulation.waterfall/10025} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{db3ce71 com.android.internal.systemui.navbar.transparent/10012} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{adb8456 com.google.android.connectivity.resources/10197} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{24dbcd7 com.android.providers.contacts.auto_generated_rro_product__/10074} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{fed19c4 com.google.android.feedback/10175} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{765e0ad com.google.android.printservice.recommendation/10122} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{3a38fe2 com.google.android.apps.photos/10168} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{cdc0de1 com.google.android.calendar/10161} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{d474f73 com.google.android.documentsui/10108} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{7840e30 com.android.systemui.emulation.pixel_3a_xl/10002} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{8acdaa9 com.android.systemui.emulation.pixel_6_pro/10037} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{3eec82e com.android.systemui.emulation.pixel_7_pro/10024} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{f3d6fcf com.android.systemui.emulation.pixel_8_pro/10000} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{e53dd5c com.android.systemui.emulation.pixel_9_pro/10057} BLOCKED
+11-12 10:35:04.029   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{84f7865 com.android.carrierconfig.auto_generated_rro_product__/10084} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{3a3393a com.android.devicediagnostics.auto_generated_rro_product__/10026} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{4cb39eb com.android.providers.partnerbookmarks/10125} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{cef7348 com.android.wallpaper.livepicker/10103} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{8c435e1 com.android.providers.telephony.auto_generated_rro_product__/10005} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{fbaf06 com.android.phone.auto_generated_rro_vendor__/10087} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{f2189c7 com.android.imsserviceentitlement/10141} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{2c7bf4 com.android.internal.emulation.pixel_9_pro_xl/10073} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{36d4f1d com.google.android.healthconnect.controller/10190} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{113b592 com.android.internal.emulation.pixel_2_xl/10017} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{7a2fb63 com.android.internal.emulation.pixel_3_xl/10045} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{a8f6360 com.android.internal.emulation.pixel_4_xl/10080} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{b94c019 com.android.internal.emulation.pixel_fold/10064} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{d3398de com.android.bookmarkprovider/10119} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{13feabf com.google.android.overlay.pixelconfigcommon/10028} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{77558c com.android.systemui.accessibility.accessibilitymenu.auto_generated_rro_product__/10082} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{52844d5 com.kloda.app/10208} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{8dc64ea com.android.systemui.emulation.pixel_3a/10069} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{39273db com.android.systemui.emulation.pixel_4a/10043} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{b0a3e78 com.android.systemui.emulation.pixel_6a/10047} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{b355951 com.android.systemui.emulation.pixel_7a/10033} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{c93e5b6 com.android.systemui.emulation.pixel_8a/10042} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{bba72b7 com.google.android.settings.intelligence/10138} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{99210c1 com.google.android.projection.gearhead/10136} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{de0ca24 com.google.android.uwb.resources/10187} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{a922066 com.android.cts.ctsshim/10196} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{225398d com.google.android.wifi.resources/10184} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{170a742 com.google.android.wifi.dialog/10186} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{ef98353 com.android.wallpaper/10174} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{b726490 com.google.android.apps.wallpaper/10180} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{1b8e189 com.google.android.odad/10129} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{965f58e com.android.settings.auto_generated_rro_product__/10029} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{b0f01af com.android.systemui.emulation.pixel_9_pro_xl/10067} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{44139bc com.android.companiondevicemanager.auto_generated_characteristics_rro/10053} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{2c50d45 com.android.internal.systemui.navbar.gestural/10059} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{4fdc9a com.google.android.apps.youtube.music/10159} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{5409cb com.android.bluetoothmidiservice/10110} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{cc635a8 com.android.storagemanager.auto_generated_rro_product__/10083} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{cae38c1 com.google.android.cellbroadcastreceiver/10206} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{1bf2866 com.android.phone.auto_generated_rro_product__/10055} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{19777a7 com.android.systemui.emulation.pixel_9_pro_fold/10048} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{61d0454 android.auto_generated_rro_product__/10071} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{ea49ffd com.google.android.inputmethod.latin/10165} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{f8564f2 android.auto_generated_rro_vendor__/10089} BLOCKED
+11-12 10:35:04.030   572   933 I AppsFilter: interaction: PackageSetting{a807022 com.kloda.sync.test/10207} -> PackageSetting{5b9e743 com.google.android.apps.restore/10135} BLOCKED
+11-12 10:35:04.034  5396  5396 W ziparchive: Unable to open '/data/app/~~q0CL7U695SuUqMC6pO_EDw==/com.kloda.sync.test-D3tCQrw8qkUNFaXPSAHuRw==/base.dm': No such file or directory
+11-12 10:35:04.035  5396  5396 W ziparchive: Unable to open '/data/app/~~q0CL7U695SuUqMC6pO_EDw==/com.kloda.sync.test-D3tCQrw8qkUNFaXPSAHuRw==/base.dm': No such file or directory
+11-12 10:35:04.214  5396  5396 D nativeloader: Configuring clns-9 for other apk /data/app/~~q0CL7U695SuUqMC6pO_EDw==/com.kloda.sync.test-D3tCQrw8qkUNFaXPSAHuRw==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~q0CL7U695SuUqMC6pO_EDw==/com.kloda.sync.test-D3tCQrw8qkUNFaXPSAHuRw==/lib/arm64:/data/app/~~q0CL7U695SuUqMC6pO_EDw==/com.kloda.sync.test-D3tCQrw8qkUNFaXPSAHuRw==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/com.kloda.sync.test
+11-12 10:35:04.220  5396  5396 V GraphicsEnvironment: Currently set values for:
+11-12 10:35:04.220  5396  5396 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
+11-12 10:35:04.220  5396  5396 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
+11-12 10:35:04.220  5396  5396 V GraphicsEnvironment: Global.Settings values are invalid: number of packages: 0, number of values: 0
+11-12 10:35:04.220  5396  5396 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+11-12 10:35:04.343  5396  5410 D nativeloader: Load /data/app/~~q0CL7U695SuUqMC6pO_EDw==/com.kloda.sync.test-D3tCQrw8qkUNFaXPSAHuRw==/base.apk!/lib/arm64-v8a/libkloda_s3_native.so using ns clns-9 from class loader (caller=/data/app/~~q0CL7U695SuUqMC6pO_EDw==/com.kloda.sync.test-D3tCQrw8qkUNFaXPSAHuRw==/base.apk!classes9.dex): ok
+11-12 10:35:04.393  5396  5410 I UiAutomation: Initialized for user 0 on display 0
+11-12 10:35:04.394   572   933 D AccessibilityManagerService: changeCurrentUserForTestAutomationIfNeededLocked(0): ignoring because device doesn't support visible background users
+11-12 10:35:04.394   572   933 I UiAutomationManager: Registering UiTestAutomationService (id=com.android.server.accessibility/UiAutomation, flags=0x0) when called by user 0
+11-12 10:35:04.398   572   933 W MagnificationConnectionManager: requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+11-12 10:35:04.399  1533  1940 I AiAiEcho: Settings changed for uri: content://settings/secure/accessibility_enabled
+11-12 10:35:04.400  1533  1789 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+11-12 10:35:04.400  1533  1789 I AiAiEcho: EchoTargets: 
+11-12 10:35:04.400  1533  1789 I AiAiEcho: Filtered by AiAi flag check: 
+11-12 10:35:04.400  1533  1789 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+11-12 10:35:04.400  1533  1789 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:  [CONTEXT ratelimit_period="10 SECONDS" ]
+11-12 10:35:04.400  1533  1789 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+11-12 10:35:04.400  1533  1789 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+11-12 10:35:04.400  1533  1789 I AiAiEcho: EchoTargets: 
+11-12 10:35:04.400  1533  1789 I AiAiEcho: Filtered by AiAi flag check: 
+11-12 10:35:04.400  1533  1789 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+11-12 10:35:04.400  1533  1789 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:  [CONTEXT ratelimit_period="10 SECONDS" ]
+11-12 10:35:04.400  1533  1789 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+11-12 10:35:04.400  1533  1789 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+11-12 10:35:04.400  1533  1789 I AiAiEcho: EchoTargets: 
+11-12 10:35:04.400  1533  1789 I AiAiEcho: Filtered by AiAi flag check: 
+11-12 10:35:04.400  1533  1789 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+11-12 10:35:04.400  1533  1789 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:  [CONTEXT ratelimit_period="10 SECONDS" ]
+11-12 10:35:04.400  1533  1789 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+11-12 10:35:04.400  1533  1789 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface media_data_manager with targets# 0 (types=[])
+11-12 10:35:04.401  1533  1789 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+11-12 10:35:04.401  1533  1789 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+11-12 10:35:04.401   817   817 D SsMediaDataProvider: Forwarding Smartspace updates []
+11-12 10:35:04.401   817   817 W PageIndicator: Total number of pages invalid: 0. Assuming 1 page.
+11-12 10:35:04.402  1115  1115 D SsBaseTemplateCard: No text view can be set up
+11-12 10:35:04.402  1115  1115 D SsBaseTemplateCard: Passed-in item info is null
+11-12 10:35:04.402  1115  1115 D SsBaseTemplateCard: Passed-in item info is null
+11-12 10:35:04.402  1115  1115 D SsBaseTemplateCard: Passed-in item info is null
+11-12 10:35:04.402  1115  1115 I SsBaseTemplateCard: Secondary card pane is null
+11-12 10:35:04.406   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.406   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.406   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.406  5396  5413 V UiAutomation: Init UiAutomation@811941[id=2, displayId=0, flags=0]
+11-12 10:35:04.406   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.407   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.407   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.407   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.407   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.407   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.407   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.407   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.407   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.409   572   572 D BatterySaverPolicy: accessibility changed to true, updating policy.
+11-12 10:35:04.413  1660  1899 I A       : NGA disabled due to not being eligible.
+11-12 10:35:04.415   572   933 D JobScheduler: executeRunCommand(): com.kloda.sync.test/null/0 2712 s=false f=true
+11-12 10:35:04.453   572   590 W JobScheduler: Job didn't exist in JobStore: 6959a2b #u0a207/2712 com.kloda.sync.test/com.kloda.sync.AndroidS3HarnessJobService
+11-12 10:35:04.464   572   590 D JobScheduler: executeRunCommand(): com.kloda.sync.test/null/0 2712 s=false f=true
+11-12 10:35:04.468   572   590 W JobScheduler: Job didn't exist in JobStore: 7a60964 #u0a207/2712 com.kloda.sync.test/com.kloda.sync.AndroidS3HarnessJobService
+11-12 10:35:04.471   572   933 D JobScheduler: executeRunCommand(): com.kloda.sync.test/null/0 2712 s=false f=true
+11-12 10:35:04.483   572   933 W JobScheduler: Job didn't exist in JobStore: 31835da #u0a207/2712 com.kloda.sync.test/com.kloda.sync.AndroidS3HarnessJobService
+11-12 10:35:04.495   572   590 W MagnificationConnectionManager: requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+11-12 10:35:04.495   572   590 D AccessibilityManagerService: restoreCurrentUserForTestAutomationIfNeededLocked(): ignoring because device doesn't support visible background users
+11-12 10:35:04.496   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.496   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.496   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.496   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.496   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.496   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.496   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.496   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.496  1660  1899 I A       : NGA disabled due to not being eligible.
+11-12 10:35:04.497   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.497   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.497   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.497   572   572 W IPCThreadState: Sending oneway calls to frozen process.
+11-12 10:35:04.497   572   572 D BatterySaverPolicy: accessibility changed to false, updating policy.
+11-12 10:35:04.496  1533  1940 I AiAiEcho: Settings changed for uri: content://settings/secure/accessibility_enabled
+11-12 10:35:04.498  1533  1789 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+11-12 10:35:04.498  1533  1789 I AiAiEcho: EchoTargets: 
+11-12 10:35:04.498  1533  1789 I AiAiEcho: Filtered by AiAi flag check: 
+11-12 10:35:04.498  1533  1789 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+11-12 10:35:04.498  1533  1789 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:  [CONTEXT ratelimit_period="10 SECONDS" ]
+11-12 10:35:04.498  1533  1789 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+11-12 10:35:04.498  1533  1789 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+11-12 10:35:04.498  1533  1789 I AiAiEcho: EchoTargets: 
+11-12 10:35:04.498  1533  1789 I AiAiEcho: Filtered by AiAi flag check: 
+11-12 10:35:04.498  1533  1789 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+11-12 10:35:04.498  1533  1789 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:  [CONTEXT ratelimit_period="10 SECONDS" ]
+11-12 10:35:04.498  1533  1789 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+11-12 10:35:04.498  1533  1789 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+11-12 10:35:04.498  1533  1789 I AiAiEcho: EchoTargets: 
+11-12 10:35:04.498  1533  1789 I AiAiEcho: Filtered by AiAi flag check: 
+11-12 10:35:04.498  1533  1789 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+11-12 10:35:04.498  1533  1789 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:  [CONTEXT ratelimit_period="10 SECONDS" ]
+11-12 10:35:04.498  1533  1789 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+11-12 10:35:04.498  1533  1789 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface media_data_manager with targets# 0 (types=[])
+11-12 10:35:04.499  1533  1789 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+11-12 10:35:04.499  1533  1789 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+11-12 10:35:04.499  1115  1115 D SsBaseTemplateCard: No text view can be set up
+11-12 10:35:04.500  1115  1115 D SsBaseTemplateCard: Passed-in item info is null
+11-12 10:35:04.500  1115  1115 D SsBaseTemplateCard: Passed-in item info is null
+11-12 10:35:04.500  1115  1115 D SsBaseTemplateCard: Passed-in item info is null
+11-12 10:35:04.500  1115  1115 I SsBaseTemplateCard: Secondary card pane is null
+11-12 10:35:04.500   572   933 I ActivityManager: Force stopping com.kloda.sync.test appid=10207 user=0: finished inst
+11-12 10:35:04.500   817   817 D SsMediaDataProvider: Forwarding Smartspace updates []
+11-12 10:35:04.500   572   933 E ActivityManager: Unable to freeze binder for 5396: -11
+11-12 10:35:04.500   817   817 W PageIndicator: Total number of pages invalid: 0. Assuming 1 page.
+11-12 10:35:04.501   572   933 I ActivityManager: Killing 5396:com.kloda.sync.test/u0a207 (adj 0): stop com.kloda.sync.test due to finished inst
+11-12 10:35:04.501  5385  5385 I app_process: System.exit called, status: 0
+11-12 10:35:04.501  5385  5385 I AndroidRuntime: VM exiting with result code 0.
+11-12 10:35:04.501   572   604 D DisplayManagerService: Drop pending events for gone uid 10207
+11-12 10:35:04.502   572   730 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET, states=14
+11-12 10:35:04.502   572   730 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET6, states=14
+11-12 10:35:04.502   572   730 D InetDiagMessage: Destroyed live tcp sockets for uids={10207} in 0ms
+11-12 10:35:04.502   572   730 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET, states=14
+11-12 10:35:04.502   572   730 D InetDiagMessage: Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET6, states=14
+11-12 10:35:04.502   572   730 D InetDiagMessage: Destroyed live tcp sockets for uids={20207} in 1ms
+--------- beginning of kernel
+11-12 10:35:04.502   933   933 I binder  : 572:933 ioctl 400c620e 794eeacf8c returned -11
+11-12 10:35:04.502   933   933 I binder  : 572:933 ioctl 400c620e 794eeacf8c returned -11
+11-12 10:35:04.507   421   421 I adbd    : Remote process closed the socket (on MSG_PEEK)
+11-12 10:35:04.507   372   372 I Zygote  : Process 5396 exited due to signal 9 (Killed)
+11-12 10:35:04.507   572   934 V ActivityManager: Got obituary of 5396:com.kloda.sync.test
+11-12 10:35:04.507   572   616 I libprocessgroup: Removed cgroup /sys/fs/cgroup/uid_10207/pid_5396
+11-12 10:35:04.509  4827  4827 I binder  : undelivered TRANSACTION_COMPLETE
+11-12 10:35:04.509  4827  4827 I binder  : undelivered transaction 507944, process died.

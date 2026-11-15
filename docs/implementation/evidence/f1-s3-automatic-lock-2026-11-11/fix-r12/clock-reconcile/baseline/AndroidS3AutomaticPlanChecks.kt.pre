@@ -1,0 +1,260 @@
+package com.kloda.sync
+
+import android.app.Instrumentation
+import com.kloda.sync.AndroidS3AutomaticCoordinator.Owner
+import java.io.File
+import java.util.UUID
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.CopyOnWriteArrayList
+
+// Plan store + uncertain-commit matrix on real isolated SQLite; faults only at the boundary port.
+internal object AndroidS3AutomaticPlanChecks {
+  private val next: (Long) -> Long = { it + S3_HOUR }
+  private fun failure(block: () -> Unit): String? = try { block(); null } catch (error: S3Failure) { error.code } catch (error: Exception) { "other" }
+  fun run(instrumentation: Instrumentation, root: File) {
+    provider(instrumentation, root); migration(instrumentation, root); store(instrumentation, root); uncertain(instrumentation, root)
+    fence(instrumentation, root); recovery(instrumentation, root); mismatch(instrumentation, root); stale(instrumentation, root)
+  }
+  // Compatible and diagnostic journals never receive automatic authority or plan tables.
+  private fun provider(i: Instrumentation, root: File) = S3AutoFixture(i, root, "provider").use { f ->
+    val compatible = AndroidS3Journal(f.app, "s3-compatible")
+    try {
+      check(failure { AndroidS3AutomaticPlan(compatible) } == "invalid_request")
+      check(compatible.text("SELECT COUNT(*) FROM sqlite_master WHERE name IN('s3_auto_state','s3_auto_accept')") == "0")
+    } finally { compatible.database.close() }
+    f.authorize(); f.plan.migrate(f.legacy, f.queue.authority(), f.now.get(), next)
+    val diagnostic = AndroidS3Journal(f.app, "amazon-s3", diagnostic = true)
+    try { check(diagnostic.text("SELECT COUNT(*) FROM sqlite_master WHERE name IN('s3_auto_state','s3_auto_accept')") == "0") } finally { diagnostic.database.close() }
+  }
+  private fun legacy(f: S3AutoFixture, due: Any?, binding: String?, dispatch: String?) = check(f.legacy.edit().clear().apply {
+    when (due) { is Long -> putLong("due", due); is String -> putString("due", due) }
+    binding?.let { putString("binding", it) }; dispatch?.let { putString("dispatch", it) }
+  }.commit())
+  private fun migration(i: Instrumentation, root: File) {
+    S3AutoFixture(i, root, "ddl").use { f ->
+      // DDL-only interruption: tables without a marker are not authority; reopen keeps it unmarked.
+      check(!f.plan.marked() && f.plan.current() == null); f.reopen(); check(!f.plan.marked())
+      // Malformed legacy type is a storage failure: no marker, prefs untouched.
+      legacy(f, "not-a-long", "x", null)
+      check(failure { f.plan.migrate(f.legacy, null, f.now.get(), next) } == "storage_failure" && !f.plan.marked() && f.legacy.contains("due"))
+      // R6: a negative due is corrupt data, not a missing due: no marker, import or cleanup.
+      legacy(f, -5L, "x", null)
+      check(failure { f.plan.migrate(f.legacy, null, f.now.get(), next) } == "storage_failure" && !f.plan.marked() && f.legacy.contains("due"))
+      // Disabled/unauthorized (unlocked): marker + empty plan, legacy cleaned, never imported later.
+      legacy(f, f.now.get() - 1000, "x", UUID.randomUUID().toString())
+      check(f.plan.migrate(f.legacy, null, f.now.get(), next) == null && f.plan.marked() && f.plan.current() == null && f.legacy.all.isEmpty())
+      f.authorize(); legacy(f, 5L, "ignored", null)
+      check(f.plan.migrate(f.legacy, f.queue.authority(), f.now.get(), next) == null && f.legacy.contains("due"))
+      val armed = f.plan.arm(f.queue.authority(), f.now.get(), next, false) as S3Refresh.Updated
+      check(armed.plan.due == f.now.get() + S3_HOUR)
+    }
+    S3AutoFixture(i, root, "import").use { f ->
+      f.authorize(); val authority = f.queue.authority()!!
+      // Old unknown run and remote journal rows stay untouched by the import.
+      f.journal.transaction { f.queue.runs.start(S3Run(UUID.randomUUID().toString(), authority.target, f.journal.context())) }
+      f.reopen(); val runs = f.journal.text("SELECT group_concat(id||phase||ifnull(error,'')) FROM s3_run"); val jobs = f.count("s3_job")
+      val authorityNow = f.queue.authority()!!
+      // Past due with matching binding is imported; dispatch is never imported.
+      legacy(f, f.now.get() - 1000, authorityNow.binding, UUID.randomUUID().toString())
+      val imported = f.plan.migrate(f.legacy, authorityNow, f.now.get(), next)!!
+      check(imported.due == f.now.get() - 1000 && imported.retry == null && imported.wake != null && f.legacy.all.isEmpty())
+      check(f.journal.text("SELECT group_concat(id||phase||ifnull(error,'')) FROM s3_run") == runs && f.count("s3_job") == jobs && f.count("s3_auto_accept") == 0)
+      // Prefs-cleanup interruption: a marker means prefs are never read again.
+      legacy(f, 1L, authorityNow.binding, null)
+      check(f.plan.migrate(f.legacy, authorityNow, f.now.get(), next) == imported && f.plan.current() == imported)
+      f.reopen(); check(f.plan.current() == imported)
+    }
+    S3AutoFixture(i, root, "consumed").use { f ->
+      // Consumed legacy: next due remains, no dispatch -> that due is preserved; never a lost occurrence.
+      f.authorize(); val authority = f.queue.authority()!!; legacy(f, f.now.get() + 42, authority.binding, null)
+      check(f.plan.migrate(f.legacy, authority, f.now.get(), next)!!.due == f.now.get() + 42)
+    }
+    S3AutoFixture(i, root, "mismatch").use { f ->
+      f.authorize(); val authority = f.queue.authority()!!; legacy(f, -1L, authority.binding, null)
+      check(failure { f.plan.migrate(f.legacy, authority, f.now.get(), next) } == "storage_failure" && !f.plan.marked() && f.legacy.getLong("due", 0) == -1L)
+      legacy(f, f.now.get() - 1, S3Target.hash("other"), null)
+      check(f.plan.migrate(f.legacy, authority, f.now.get(), next)!!.due == f.now.get() + S3_HOUR)
+    }
+    S3AutoFixture(i, root, "ack").use { f ->
+      f.authorize(); val authority = f.queue.authority()!!
+      // Rolled-back marker + lost acknowledgment: storage failure, prefs kept, later import works.
+      legacy(f, f.now.get() - 1, authority.binding, null); f.boundary.commitFault = "after-rollback"
+      check(failure { f.plan.migrate(f.legacy, authority, f.now.get(), next) } == "storage_failure" && !f.plan.marked() && f.legacy.contains("due"))
+      // Committed marker + lost acknowledgment + unreadable proof: no cleanup, no admission claim.
+      f.boundary.commitFault = "after-commit"; f.boundary.readFault = true
+      check(failure { f.plan.migrate(f.legacy, authority, f.now.get(), next) } == "storage_failure" && f.plan.fenced && f.legacy.contains("due"))
+      // R5: a plain marker/current read is not a proof; every authority read/write stays fenced.
+      for (op in listOf<() -> Unit>({ f.plan.marked() }, { f.plan.current() }, { f.plan.migrate(f.legacy, authority, f.now.get(), next) },
+          { f.plan.arm(authority, f.now.get(), next, false) }, { f.plan.disarm() })) check(failure(op) == "storage_failure")
+      check(failure { f.plan.settle(f.legacy) } == "other" && f.plan.fenced && f.legacy.contains("due"))
+      f.boundary.readFault = false; f.plan.settle(f.legacy)
+      check(!f.plan.fenced && f.legacy.all.isEmpty() && f.plan.current()!!.due == f.now.get() - 1)
+    }
+    S3AutoFixture(i, root, "ack2").use { f ->
+      // Committed marker + lost acknowledgment + consistent proof: import accepted, prefs cleaned once.
+      f.authorize(); val authority = f.queue.authority()!!; legacy(f, f.now.get() - 7, authority.binding, null); f.boundary.commitFault = "after-commit"
+      check(f.plan.migrate(f.legacy, authority, f.now.get(), next)!!.due == f.now.get() - 7 && f.legacy.all.isEmpty())
+    }
+  }
+  private fun armed(f: S3AutoFixture): S3AutoPlan {
+    f.authorize(); f.plan.migrate(f.legacy, f.queue.authority(), f.now.get(), next)
+    return f.plan.current()!!
+  }
+  private fun store(i: Instrumentation, root: File) = S3AutoFixture(i, root, "store").use { f ->
+    val p0 = armed(f); val target = p0.target
+    // Partial pending fields violate the store CHECK; malformed wake is a storage failure.
+    check(failure { f.journal.database.execSQL("UPDATE s3_auto_state SET due=NULL WHERE id=1") } == "other" && f.plan.current() == p0)
+    // Failed CAS: stale expected snapshot -> plan_stale, nothing written.
+    val stale = p0.copy(due = p0.due + 1)
+    check(failure { f.plan.admit(stale, S3Run(UUID.randomUUID().toString(), target, p0.context), 9, f.queue.runs) } == "plan_stale")
+    check(f.count("s3_run") == 0 && f.count("s3_auto_accept") == 0 && f.plan.current() == p0)
+    // Run insert failure (duplicate id) rolls back the whole claim.
+    val prior = S3Run(UUID.randomUUID().toString(), target, p0.context); f.journal.transaction { f.queue.runs.start(prior) }
+    check(failure { f.plan.admit(p0, prior, 9, f.queue.runs) } == "other" && f.count("s3_auto_accept") == 0 && f.plan.current() == p0 && f.count("s3_run") == 1)
+    // Accept insert failure (occurrence already accepted) rolls back the new run too.
+    f.journal.database.execSQL("INSERT INTO s3_auto_accept VALUES(?,?,?,?,?,?)", arrayOf<Any>(p0.occurrence, prior.id, target, p0.binding, p0.context, p0.due))
+    val lost = S3Run(UUID.randomUUID().toString(), target, p0.context)
+    check(failure { f.plan.admit(p0, lost, 9, f.queue.runs) } == "other" && f.count("s3_run") == 1 && f.plan.current() == p0)
+    check(failure { f.journal.database.execSQL("DELETE FROM s3_auto_accept") } == "other" && f.count("s3_auto_accept") == 1)
+    f.queue.runs.finish(prior.copy(phase = "paused", error = "user_pause"))
+    // A fresh occurrence commits once; reopen keeps exactly one claim and rejects the old snapshot.
+    val p1 = (f.plan.arm(f.queue.authority(), f.now.get(), next, true) as S3Refresh.Updated).plan
+    val run = S3Run(UUID.randomUUID().toString(), target, p1.context); f.plan.admit(p1, run, 77, f.queue.runs)
+    f.reopen(); val p2 = f.plan.current()!!
+    check(p2.occurrence != p1.occurrence && p2.due == 77L && p2.retry == null && p2.wake == p1.wake && f.count("s3_auto_accept") == 2)
+    check(failure { f.plan.admit(p1, S3Run(UUID.randomUUID().toString(), target, p1.context), 78, f.queue.runs) } == "plan_stale" && f.count("s3_auto_accept") == 2)
+    f.journal.database.execSQL("UPDATE s3_auto_state SET wake='not-a-uuid' WHERE id=1")
+    check(failure { f.plan.current() } == "storage_failure")
+  }
+  private fun admit(f: S3AutoFixture, p: S3AutoPlan, owner: Any) = f.queue.startAutomatic(p, f.plan, owner, p.due + S3_HOUR) {}
+  private fun uncertain(i: Instrumentation, root: File) {
+    S3AutoFixture(i, root, "matrix-a").use { f ->
+      // (a) real COMMIT, lost acknowledgment -> OutcomeUnknown -> ResolvedAccepted; no worker, no duplicate.
+      val p = armed(f); val owner = Any(); f.lease.set(owner); f.boundary.commitFault = "after-commit"
+      val unknown = admit(f, p, owner) as S3Admission.OutcomeUnknown
+      check(f.held.isEmpty() && f.count("s3_auto_accept") == 1 && f.count("s3_run") == 1)
+      check(f.queue.resolveAutomatic(S3Attempt(owner, p, unknown.attempt.candidateRun, unknown.attempt.nextDue), f.plan) == S3Resolution.Unresolved)
+      check(f.queue.resolveAutomatic(unknown.attempt, f.plan) == S3Resolution.ResolvedAccepted(unknown.attempt.candidateRun))
+      check(f.latest().let { it.id == unknown.attempt.candidateRun && it.phase == "paused" && it.error == "os_interrupted" })
+      check(admit(f, p, owner) == S3Admission.NotAccepted("plan_stale") && f.held.isEmpty() && f.count("s3_auto_accept") == 1 && f.count("s3_run") == 1)
+    }
+    S3AutoFixture(i, root, "matrix-b").use { f ->
+      // (b) real rollback, lost acknowledgment -> ResolvedNotAccepted; the next fresh owner is accepted once.
+      val p = armed(f); val owner = Any(); f.lease.set(owner); f.boundary.commitFault = "after-rollback"
+      val unknown = admit(f, p, owner) as S3Admission.OutcomeUnknown
+      check(f.count("s3_auto_accept") == 0 && f.count("s3_run") == 0 && f.plan.current() == p)
+      check(f.queue.resolveAutomatic(unknown.attempt, f.plan) == S3Resolution.ResolvedNotAccepted && f.plan.current() == p)
+      val fresh = Any(); f.lease.set(fresh)
+      check(admit(f, p, fresh) is S3Admission.Accepted && f.held.size == 1 && f.count("s3_auto_accept") == 1)
+      f.queue.pauseAutomatic(fresh, null); check(f.latest().error == "os_interrupted")
+    }
+    S3AutoFixture(i, root, "matrix-c").use { f ->
+      // (c) unreadable proof -> Unresolved; manual/automatic start and toggles cannot clear the fence.
+      val p = armed(f); val owner = Any(); f.lease.set(owner); f.boundary.commitFault = "after-commit"; f.boundary.readFault = true
+      val unknown = admit(f, p, owner) as S3Admission.OutcomeUnknown
+      check(f.queue.resolveAutomatic(unknown.attempt, f.plan) == S3Resolution.Unresolved)
+      f.foreground.set(true); check(failure { f.queue.start() } == "storage_failure")
+      f.queue.disable(); f.queue.enable(); f.queue.setAutomatic(true)
+      check(failure { f.queue.start() } == "storage_failure" && admit(f, f.plan.current()!!, owner) == S3Admission.NotAccepted("storage_failure"))
+      check(f.queue.status()["canRun"] == false && f.held.isEmpty())
+      f.boundary.readFault = false
+      check(f.queue.resolveAutomatic(unknown.attempt, f.plan) == S3Resolution.ResolvedAccepted(unknown.attempt.candidateRun))
+      f.queue.start(); check(f.held.size == 1); f.queue.pause(); f.foreground.set(false)
+    }
+    for (fault in listOf("lone-run", "state-mismatch")) S3AutoFixture(i, root, "matrix-d-$fault").use { f ->
+      // (d) lone run / inconsistent state: fail-closed, no reset, retry or adoption.
+      val p = armed(f); val owner = Any(); f.lease.set(owner); f.boundary.commitFault = fault
+      val unknown = admit(f, p, owner) as S3Admission.OutcomeUnknown
+      repeat(2) { check(f.queue.resolveAutomatic(unknown.attempt, f.plan) == S3Resolution.Unresolved) }
+      check(admit(f, f.plan.current()!!, owner) == S3Admission.NotAccepted("storage_failure") && f.held.isEmpty())
+      if (fault == "lone-run") check(f.count("s3_auto_accept") == 0 && f.count("s3_run") == 1 && f.plan.current() == p)
+      else check(f.count("s3_auto_accept") == 1 && f.plan.current()!!.due == p.due + S3_HOUR + 1)
+    }
+  }
+  // R5: lifecycle view of the migration fence: repeated reconcile, callbacks and toggles open nothing.
+  private fun fence(i: Instrumentation, root: File) = S3AutoFixture(i, root, "ack-fence").use { f ->
+    f.authorize(); legacy(f, f.now.get() - 3, f.queue.authority()!!.binding, null)
+    val os = S3AutoFakeOs(); val c = f.coordinator(os); val finishes = CopyOnWriteArrayList<Boolean>()
+    f.boundary.commitFault = "after-commit"; f.boundary.readFault = true; c.reconcile(); f.pump()
+    check(c.blocked && c.owner == Owner.STORAGE_BLOCKED && f.plan.fenced && os.schedules.isEmpty() && f.legacy.contains("due"))
+    val row = f.journal.text("SELECT occurrence||'|'||wake FROM s3_auto_state WHERE id=1").split("|")
+    repeat(2) { c.reconcile(); f.pump() }
+    f.queue.disable(); f.queue.enable(); f.queue.setAutomatic(true); c.reconcile(true); f.pump(); f.now.addAndGet(S3_HOUR)
+    // R10: the same unresolved migration proof refuses a manual start; toggles/status cannot open it.
+    f.foreground.set(true); check(failure { f.queue.start() } == "storage_failure" && f.queue.status()["canRun"] == false && f.held.isEmpty())
+    check(c.onStart(Any(), null, AndroidAutomaticLockChecks.extras(row[1])) { finishes.add(it) }); f.pump()
+    val lane = ConcurrentLinkedQueue<Runnable>(); val held = f.coordinator(os) { lane.add(it) }; val x = Any()
+    check(held.onStart(x, null, AndroidAutomaticLockChecks.extras(row[1])) {} && !held.onStop(x))
+    check(os.schedules.isEmpty() && os.cancels.get() == 0 && finishes == listOf(false) && f.count("s3_run") == 0 && f.count("s3_auto_accept") == 0)
+    check(c.blocked && f.plan.fenced && failure { f.plan.current() } == "storage_failure")
+    // Proof after the ended transaction: the imported due continues under one projection (toggles may rotate context).
+    f.boundary.readFault = false; c.reconcile(); f.pump(); val p = f.plan.current()!!
+    check(!c.blocked && !f.plan.fenced && f.legacy.all.isEmpty() && p.due == f.now.get() - S3_HOUR - 3 && p.wake != row[1])
+    check(os.schedules.size == 1 && os.pending?.get("wake") == p.wake && c.owner == Owner.OS_OWNED && f.count("s3_auto_accept") == 0)
+    // R10: after the proof the normal manual behavior returns and writes no automatic plan/accept record.
+    f.queue.start(); check(f.held.size == 1 && f.count("s3_run") == 1 && f.count("s3_auto_accept") == 0 && f.plan.current() == p)
+    f.queue.pause(); f.foreground.set(false)
+  }
+  // R11: committed marker + lost ack + mismatched proof is a storage gate, never settled by a later marker read.
+  private fun mismatch(i: Instrumentation, root: File) = S3AutoFixture(i, root, "ack-mismatch").use { f ->
+    f.authorize(); legacy(f, f.now.get() - 3, f.queue.authority()!!.binding, null)
+    val os = S3AutoFakeOs(); val c = f.coordinator(os); val finishes = CopyOnWriteArrayList<Boolean>()
+    f.boundary.commitFault = "state-mismatch"; c.reconcile(); f.pump()
+    check(c.blocked && f.plan.fenced && c.owner == Owner.STORAGE_BLOCKED && f.legacy.contains("due")) { "R11 mismatch not fenced" }
+    val wake = f.journal.text("SELECT wake FROM s3_auto_state WHERE id=1")
+    f.queue.disable(); f.queue.enable(); f.queue.setAutomatic(true); repeat(2) { c.reconcile(); f.pump() }; c.reconcile(true); f.pump()
+    f.now.addAndGet(S3_HOUR); check(c.onStart(Any(), null, AndroidAutomaticLockChecks.extras(wake)) { finishes.add(it) }); f.pump()
+    f.foreground.set(true); check(failure { f.queue.start() } == "storage_failure" && f.queue.status()["canRun"] == false); f.foreground.set(false)
+    check(c.blocked && f.plan.fenced && failure { f.plan.settle(f.legacy) } == "storage_failure" && failure { f.plan.current() } == "storage_failure")
+    check(os.schedules.isEmpty() && os.cancels.get() == 0 && finishes == listOf(false) && f.legacy.contains("due"))
+    check(f.count("s3_run") == 0 && f.count("s3_auto_accept") == 0 && f.held.isEmpty() && f.lease.get() == null)
+  }
+  // R8: after the marker, stale legacy and invalid envelopes never take over an OS-owned backoff or a
+  // ProjectionUnresolved; they finish only themselves and the current new-params callback still works.
+  private fun stale(i: Instrumentation, root: File) = S3AutoFixture(i, root, "stale").use { f ->
+    f.authorize(); val os = S3AutoFakeOs(); val c = f.coordinator(os); val finishes = CopyOnWriteArrayList<Boolean>()
+    c.reconcile(); f.pump(); val p0 = f.plan.current()!!; f.now.set(p0.due); f.deny.set(true)
+    // Cleanup failure leaves a legacy snapshot behind: the marker still makes its protocol-0 envelope stale.
+    legacy(f, f.now.get() - 1, p0.binding, null); val snapshot = AndroidS3AutomaticPlan.legacySnapshot(f.legacy)!!
+    val stale = listOf(AndroidAutomaticLockChecks.extras(snapshot) + ("protocol" to 0), AndroidAutomaticLockChecks.extras(p0.wake) + ("provider" to "s3-compatible"))
+    for (mode in listOf("backoff", "unresolved")) {
+      os.result = if (mode == "backoff") 0 else null
+      check(c.onStart(Any(), null, AndroidAutomaticLockChecks.extras(p0.wake)) { finishes.add(it) }); f.pump()
+      val held = Triple(c.epoch, f.plan.current(), c.unresolved); val scheduled = os.schedules.size; val n = finishes.size
+      check(c.owner == Owner.OS_OWNED && held.third == (mode == "unresolved") && finishes == (if (mode == "backoff") listOf(true) else listOf(true, false, false)))
+      os.hidePending = true
+      for (x in stale) check(c.onStart(Any(), null, x) { finishes.add(it) }); f.pump(); repeat(2) { c.reconcile(); f.pump() }
+      check(Triple(c.epoch, f.plan.current(), c.unresolved) == held && c.owner == Owner.OS_OWNED) { "R8 $mode ownership changed by a stale envelope" }
+      check(os.schedules.size == scheduled && os.cancels.get() == 0 && finishes.drop(n) == listOf(false, false)) { "R8 $mode re-projected" }
+      check(f.count("s3_run") == 0 && f.lease.get() == null); os.hidePending = false
+    }
+    os.result = 1; f.deny.set(false); f.now.set(f.plan.current()!!.eligibleAt())
+    check(c.onStart(Any(), null, AndroidAutomaticLockChecks.extras(p0.wake)) { finishes.add(it) }); f.pump()
+    check(f.count("s3_auto_accept") == 1 && !c.unresolved && c.owner == Owner.EXECUTING && f.held.size == 1)
+    f.queue.pauseAutomatic(f.lease.get()!!, null); f.pump()
+  }
+  // R4: locked legacy recovery rearms its own delivered job; a changed snapshot is a no-op; unlocked migrates.
+  private fun recovery(i: Instrumentation, root: File) = S3AutoFixture(i, root, "legacy-lock").use { f ->
+    f.authorize(); legacy(f, f.now.get() - 1, f.queue.authority()!!.binding, null)
+    val snapshot = AndroidS3AutomaticPlan.legacySnapshot(f.legacy)!!; val os = S3AutoFakeOs(); f.deny.set(true)
+    val c = f.coordinator(os); val finishes = CopyOnWriteArrayList<Boolean>(); c.reconcile(); f.pump()
+    check(!f.plan.marked() && os.schedules.size == 1 && os.latency() == S3_DEFER && os.schedules.last()[3] == 0)
+    val running = os.pending!!; check(running["wake"] == snapshot)
+    // The pending view still shows the delivered envelope, then it is absent: both keep one continuation.
+    for (absent in listOf(false, true)) {
+      if (absent) os.pending = null
+      check(c.onStart(Any(), null, running) { finishes.add(it) }); f.pump()
+      check(os.latency() == S3_DEFER && os.schedules.last()[3] == 0 && finishes.isEmpty()) { "R4 locked recovery lost (absent=$absent)" }
+    }
+    check(os.schedules.size == 3 && !f.plan.marked() && f.legacy.contains("due") && f.count("s3_run") == 0 && f.count("s3_auto_accept") == 0)
+    val lane = ConcurrentLinkedQueue<Runnable>(); val held = f.coordinator(os) { lane.add(it) }; val early = Any(); val other = Any()
+    check(held.onStart(early, null, running) {} && held.onStop(early))
+    check(held.onStart(other, null, running + ("wake" to UUID.randomUUID().toString())) {} && !held.onStop(other))
+    check(c.onStart(Any(), null, running + ("wake" to UUID.randomUUID().toString())) { finishes.add(it) }); f.pump()
+    check(finishes == listOf(false) && os.schedules.size == 3)
+    // Unlocked: fresh migration imports the past due and replaces the job with protocol=1; never admits.
+    f.deny.set(false); check(c.onStart(Any(), null, running) { finishes.add(it) }); f.pump(); val p = f.plan.current()!!
+    check(f.plan.marked() && p.due == f.now.get() - 1 && f.legacy.all.isEmpty() && os.schedules.size == 4 && os.schedules.last()[3] == 1)
+    check(os.pending?.get("wake") == p.wake && f.count("s3_run") == 0 && f.count("s3_auto_accept") == 0 && finishes.size == 1)
+  }
+}

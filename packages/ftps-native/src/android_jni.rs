@@ -8,6 +8,7 @@ use std::{
     fs::File,
     os::fd::{FromRawFd, IntoRawFd},
 };
+use zeroize::Zeroizing;
 struct Owner<'a> {
     env: JNIEnv<'a>,
     callback: JObject<'a>,
@@ -92,8 +93,9 @@ fn run<'a>(
     let (Some(file), Some(socket)) = (file, socket) else {
         return 1;
     };
-    let json: String = match env.get_string(&json) {
-        Ok(value) => value.into(),
+    // Owned Rust copy is wiped on every return; the JVM String and JNI temporaries are not covered.
+    let json: Zeroizing<String> = match env.get_string(&json) {
+        Ok(value) => Zeroizing::new(value.into()),
         Err(_) => {
             let _ = env.exception_clear();
             return 1;

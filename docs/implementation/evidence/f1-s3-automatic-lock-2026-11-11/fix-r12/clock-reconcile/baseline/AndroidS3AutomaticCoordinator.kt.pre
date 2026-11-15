@@ -1,0 +1,344 @@
+package com.kloda.sync
+
+import android.content.SharedPreferences
+import java.util.UUID
+
+// OS port: real JobScheduler in production/harness, deterministic fake in component tests.
+internal interface S3AutoOs {
+  fun schedule(wake: String, nonce: String, latency: Long, protocol: Int): Int
+  fun cancel()
+  // null = verified absent; a throw = unknown (never treated as absent).
+  fun pending(): Map<String, Any?>?
+}
+internal class S3AutoLease(val begin: (Any) -> Boolean, val end: (Any) -> Unit)
+
+/**
+ * Single owner of plan state, queue admission, the execution lease and OS projection.
+ * Decisions are serialized on AndroidSyncJournal.sourceLock; OS calls run only on the main
+ * lane outside that monitor; DB/queue preparation runs on the background executor.
+ * A delivered envelope is only a candidate until the background lane proves its wake current;
+ * a stale candidate finishes only itself and never touches the owner, lease or another execution.
+ */
+internal class AndroidS3AutomaticCoordinator(private val os: S3AutoOs, private val main: (Runnable) -> Unit, private val background: (Runnable) -> Unit,
+  private val clock: () -> Long, private val locked: () -> Boolean, private val lease: S3AutoLease, val queue: AndroidS3Queue,
+  val plan: AndroidS3AutomaticPlan, private val legacy: SharedPreferences, private val paused: () -> Boolean, private val next: (Long) -> Long) {
+  enum class Owner { IDLE, EXECUTING, REPLACING, HANDING, OS_OWNED, STORAGE_BLOCKED }
+  // One JobService execution: exact params identity, wake envelope (null = legacy) and epoch at entry.
+  class Exec(val params: Any, val service: Any?, val wake: String?, val epoch: Long, val extras: Map<String, Any?>, val finish: (Boolean) -> Unit) {
+    // carry = plan revised by this execution's own clock fold (R9); its exact stop projects it once.
+    var state = "candidate"; var runId: String? = null; var buffered: S3Run? = null; var carry: S3AutoPlan? = null
+  }
+  // One projection request: wake, absolute eligible time and envelope protocol (0 = legacy recovery).
+  private sealed class Out { class Replace(val wake: String, val at: Long, val protocol: Int = 1) : Out(); object Cancel : Out(); object Finish : Out() }
+  private val lock = AndroidSyncJournal.sourceLock
+  var epoch = 0L; private set
+  var owner = Owner.IDLE; private set
+  var dirty = false; private set
+  var unresolved = false; private set
+  var blocked = false; private set
+  private var blockedAttempt: S3Attempt? = null; private var exec: Exec? = null
+  private val candidates = ArrayList<Exec>()
+  // Last proven SQLite wake. Unknown (not read / read failure) never authorizes an OS retry.
+  private var planWake: String? = null; private var wakeKnown = false; private var clockChanged = false
+  init { queue.attach(plan); runCatching { read() } }
+  private fun halted(e: Exec) = e.state == "stopped" || e.state == "done"
+  private fun active() = exec?.takeIf { !halted(it) && it.state != "unresolved" }
+  private fun read(): S3AutoPlan? = try { seen(plan.current()) } catch (error: Exception) { synchronized(lock) { wakeKnown = false }; throw error }
+  private fun seen(p: S3AutoPlan?): S3AutoPlan? = p.also { synchronized(lock) { planWake = p?.wake; wakeKnown = true } }
+  private fun out(p: S3AutoPlan) = Out.Replace(p.wake!!, p.eligibleAt())
+
+  fun onStart(params: Any, service: Any?, extras: Map<String, Any?>, finish: (Boolean) -> Unit): Boolean {
+    val wake = (extras["wake"] as? String)?.takeIf { extras["protocol"] == 1 && extras["provider"] == "amazon-s3" }
+    val e = synchronized(lock) {
+      if (exec?.params === params || candidates.any { it.params === params }) return false
+      Exec(params, service, wake, epoch, extras, finish).also { candidates.add(it) }
+    }
+    background(Runnable { evaluate(e) })
+    return true
+  }
+  private fun evaluate(e: Exec) {
+    val p = if (e.wake == null) null else runCatching { read() }.getOrNull()
+    // R8: a legacy/invalid envelope must be proven current (no marker, own snapshot) before any ownership change.
+    when (install(e, p, e.wake == null && legacyCurrent(e.extras))) {
+      null -> return
+      false -> { main(Runnable { e.finish(false) }); return }
+      true -> Unit
+    }
+    val out = try { if (p == null) recover(e.extras) else admit(e, p) } catch (_: Exception) { lease.end(e); fence(); Out.Finish }
+    if (out != null) complete(e, out)
+  }
+  // null = stopped before validation (onStop already chose the OS handoff); false = stale, finishes only itself
+  // and never touches owner, epoch, wake, unresolved or the current execution.
+  private fun install(e: Exec, p: S3AutoPlan?, legacyOk: Boolean): Boolean? = synchronized(lock) {
+    candidates.remove(e)
+    if (halted(e)) return@synchronized null
+    if (e.epoch != epoch || active() != null || (if (e.wake == null) !legacyOk else p?.wake != e.wake)) { e.state = "done"; return@synchronized false }
+    exec?.state = "done"; exec = e; owner = Owner.EXECUTING; unresolved = false; e.state = "starting"; true
+  }
+  private fun admit(e: Exec, current: S3AutoPlan): Out? {
+    val now = clock()
+    if (synchronized(lock) { blocked }) return Out.Finish
+    // Early wake (R12): gated on the current plan before the dirty fold, so no lease, authority capture,
+    // source binding or admission; the same retryNotBefore is kept and dirty waits for an eligible owner.
+    if (now < current.eligibleAt()) return out(current)
+    // A deferred clock/mode change joins this execution's single outcome.
+    val p = fold(e, current); if (p.wake == null) return Out.Cancel
+    // A fold that moved the plan later is still early for the revised plan.
+    if (now < p.eligibleAt()) return out(p)
+    if (paused()) return terminal()
+    if (locked()) return defer(p, now)
+    val nextDue = next(now)
+    val began = synchronized(lock) { if (halted(e)) return null; lease.begin(e) }
+    if (!began) return defer(p, now)
+    return when (val result = queue.startAutomatic(p, plan, e, nextDue) { run -> onRun(e, run) }) {
+      is S3Admission.Accepted -> { accepted(e, result.runId); null }
+      is S3Admission.NotAccepted -> { lease.end(e); rejected(e, p, result.reason, now) }
+      is S3Admission.OutcomeUnknown -> { synchronized(lock) { if (!halted(e)) e.state = "resolving" }; resolve(e, result.attempt) }
+    }
+  }
+  // R9: the revision commits under sourceLock only while this execution still owns the outcome, and is
+  // carried by it; a stop serialized before the commit keeps dirty for the next owner instead.
+  private fun fold(e: Exec, p: S3AutoPlan): S3AutoPlan = synchronized(lock) {
+    if (!dirty || halted(e) || locked()) return@synchronized p
+    if (runCatching { plan.arm(queue.authority(), clock(), next, clockChanged) }.isFailure) return@synchronized p
+    dirty = false; clockChanged = false
+    (read() ?: p).also { e.carry = it }
+  }
+  // Legacy/old envelope: reevaluation only, never admission. Locked keeps one >=5 min continuation.
+  private fun recover(extras: Map<String, Any?>): Out {
+    if (plan.marked()) return Out.Finish
+    if (paused()) return Out.Cancel
+    val snapshot = AndroidS3AutomaticPlan.legacySnapshot(legacy)
+    if (extras["protocol"] == 0 && extras["wake"] != snapshot) return Out.Finish
+    var authority: S3AutoAuthority? = null; var open = !locked()
+    if (open) try { authority = queue.authority() } catch (error: Exception) { if (AndroidS3Queue.code(error) != "credential_locked") throw error; open = false }
+    if (!open) return Out.Replace(snapshot ?: return Out.Finish, maxOf(Math.addExact(clock(), DEFER), legacy.getLong("due", 0)), 0)
+    plan.migrate(legacy, authority, clock(), next)
+    return when (val result = plan.arm(authority, clock(), next, false)) {
+      S3Refresh.Revoked -> { seen(null); Out.Cancel }
+      is S3Refresh.Updated -> out(seen(result.plan)!!)
+      is S3Refresh.Same -> out(seen(result.plan)!!)
+    }
+  }
+  private fun accepted(e: Exec, runId: String) {
+    val (stop, drain) = synchronized(lock) {
+      e.runId = runId; if (e.state == "starting") e.state = "running"
+      val value = e.buffered; e.buffered = null; halted(e) to value
+    }
+    if (stop) runCatching { queue.pauseAutomatic(e, runId) }
+    if (drain == null) return
+    if (drain.id == runId) finished(e) else { synchronized(lock) { blocked = true }; lease.end(e); complete(e, Out.Finish) }
+  }
+  private fun onRun(e: Exec, run: S3Run) {
+    val ready = synchronized(lock) {
+      when {
+        e.state == "done" || e.state == "completing" -> false
+        e.runId == null -> { if (e.buffered == null) e.buffered = run; false }
+        else -> e.runId == run.id
+      }
+    }
+    if (ready) finished(e)
+  }
+  private fun finished(e: Exec) {
+    val stopped = synchronized(lock) { val value = halted(e); e.state = if (value) "done" else "completing"; value }
+    lease.end(e)
+    if (!stopped) background(Runnable { complete(e, project(e)) })
+  }
+  private fun project(e: Exec): Out = try { read()?.let { fold(e, it) }?.takeIf { it.wake != null }?.let(::out) ?: Out.Cancel } catch (_: Exception) { Out.Finish }
+  private fun rejected(e: Exec, p: S3AutoPlan, reason: String, now: Long): Out {
+    if (synchronized(lock) { e.buffered != null }) { synchronized(lock) { blocked = true }; return Out.Finish }
+    return when (reason) {
+      "backup_busy", "credential_locked" -> defer(p, now)
+      "candidate_stale" -> if (locked()) defer(p, now) else refresh(p, now)
+      "storage_failure" -> terminal()
+      else -> refresh(p, now)
+    }
+  }
+  private fun refresh(p: S3AutoPlan, now: Long): Out {
+    val result = try { plan.arm(queue.authority(), clock(), next, false) } catch (error: Exception) {
+      return if (locked() || AndroidS3Queue.code(error) == "credential_locked") defer(p, now) else terminal()
+    }
+    return when (result) {
+      is S3Refresh.Updated -> out(seen(result.plan)!!)
+      is S3Refresh.Same -> if (result.plan != p) out(result.plan) else terminal()
+      S3Refresh.Revoked -> { seen(null); Out.Cancel }
+    }
+  }
+  // No blind retry: disarm and cancel; a failed disarm becomes a storage gate.
+  private fun terminal(): Out = try { plan.disarm(); seen(null); Out.Cancel }
+    catch (_: Exception) { synchronized(lock) { blocked = true }; Out.Finish }
+  private fun defer(p: S3AutoPlan, now: Long): Out = try { out(plan.defer(p, Math.addExact(now, DEFER))) } catch (_: Exception) {
+    val latest = runCatching { read() }.getOrNull()
+    if (latest?.wake != null && latest != p) out(latest) else Out.Finish
+  }
+  private fun resolve(e: Exec, attempt: S3Attempt): Out {
+    val result = queue.resolveAutomatic(attempt, plan)
+    lease.end(e)
+    return when (result) {
+      is S3Resolution.ResolvedAccepted -> project(e)
+      S3Resolution.ResolvedNotAccepted -> terminal()
+      S3Resolution.Unresolved -> { synchronized(lock) { blocked = true; blockedAttempt = attempt }; Out.Finish }
+    }
+  }
+  private fun complete(e: Exec, out: Out) = main(Runnable { apply(e, out) })
+  private fun apply(e: Exec, out: Out) {
+    synchronized(lock) {
+      if (exec !== e || halted(e) || e.epoch != epoch) { e.state = "done"; return }
+      e.state = "completing"
+      if (out is Out.Replace) owner = Owner.REPLACING
+    }
+    when (out) {
+      is Out.Replace -> replace(e, out)
+      Out.Cancel -> { done(e, Owner.IDLE); e.finish(false); val at = synchronized(lock) { epoch }; if (at == e.epoch) os.cancel() }
+      Out.Finish -> { done(e, if (blocked) Owner.STORAGE_BLOCKED else Owner.IDLE); e.finish(false) }
+    }
+  }
+  private fun done(e: Exec, value: Owner) = synchronized(lock) { e.state = "done"; owner = value }
+  // One uncertainty protocol for every projection: a generic throw counts only with the exact new nonce.
+  private fun submit(out: Out.Replace): Int? {
+    val nonce = UUID.randomUUID().toString()
+    return try { os.schedule(out.wake, nonce, maxOf(0L, out.at - clock()), out.protocol) } catch (_: Exception) {
+      if (runCatching { os.pending()?.get("nonce") == nonce }.getOrDefault(false)) SUCCESS else null
+    }
+  }
+  // Schedule-as-completion: SUCCESS replaces the running job and no jobFinished follows.
+  private fun replace(e: Exec, out: Out.Replace) {
+    when (submit(out)) {
+      SUCCESS -> done(e, Owner.OS_OWNED)
+      // Unknown schedule outcome: no second schedule or finish(true); only an exact onStop closes it.
+      null -> synchronized(lock) { e.state = "unresolved"; owner = Owner.OS_OWNED; unresolved = true }
+      else -> { done(e, Owner.HANDING); e.finish(true); synchronized(lock) { if (owner == Owner.HANDING) owner = Owner.OS_OWNED } }
+    }
+  }
+
+  fun onStop(params: Any): Boolean {
+    var relay: S3AutoPlan? = null; var at = 0L
+    val (e, retry, installed) = synchronized(lock) {
+      val installed = exec?.takeIf { it.params === params }
+      val e = installed ?: candidates.firstOrNull { it.params === params } ?: return false
+      if (halted(e)) return false
+      val open = e.state != "unresolved" && e.epoch == epoch && !blocked && !unresolved && (installed != null || active() == null) && wakeKnown && !paused()
+      // R9: this execution's fold revised the plan; the old envelope is stale, so the revised wake is projected once.
+      relay = e.carry?.takeIf { open && it.wake != null && it.wake != e.wake && it.wake == planWake }
+      // A stop before validation hands off only for the proven current wake and when no other owner exists.
+      val retry = open && relay == null && (if (e.wake != null) planWake == e.wake else planWake == null && legacyCurrent(e.extras))
+      e.state = "stopped"; at = epoch
+      if (installed != null || retry) owner = when { relay != null -> Owner.REPLACING; retry || unresolved -> Owner.OS_OWNED; blocked -> Owner.STORAGE_BLOCKED; else -> Owner.IDLE }
+      Triple(e, retry, installed != null)
+    }
+    if (installed) { lease.end(e); background(Runnable { runCatching { queue.pauseAutomatic(e, e.runId) } }) }
+    relay?.let { p -> main(Runnable { schedule(at, out(p)) }) }
+    return retry
+  }
+  // A legacy envelope is current only before the marker and while its own snapshot (protocol 0) or a
+  // pre-protocol job's data still exists; an invalid protocol-1 envelope is never legacy.
+  private fun legacyCurrent(x: Map<String, Any?>) = runCatching { !plan.marked() }.getOrDefault(false) &&
+    AndroidS3AutomaticPlan.legacySnapshot(legacy)?.let { x["protocol"] == null || x["protocol"] == 0 && x["wake"] == it } == true
+  fun onDestroy(service: Any) {
+    val e = synchronized(lock) {
+      candidates.filter { it.service === service }.forEach { it.state = "stopped" }
+      exec?.takeIf { it.service === service && !halted(it) && it.state != "unresolved" }?.also { it.state = "stopped"; if (owner == Owner.EXECUTING) owner = Owner.IDLE }
+    } ?: return
+    lease.end(e)
+    background(Runnable { runCatching { queue.pauseAutomatic(e, e.runId) } })
+  }
+
+  // Foreground/receiver/settings entry point; never bypasses eligibleAt or an OS-owned backoff.
+  fun reconcile(changed: Boolean = false) {
+    if (paused()) { revoke(); return }
+    if (!unblock()) return
+    if (locked()) { lockedProjection(); return }
+    val authority = try { queue.authority() } catch (_: Exception) { return }
+    try {
+      // A fresh unlocked migration replaces any legacy-recovery job with the protocol=1 projection.
+      val migrated = !plan.marked()
+      plan.migrate(legacy, authority, clock(), next)
+      // An active execution owns a clock/mode change: the durable plan is untouched until its outcome.
+      val result = synchronized(lock) {
+        if (changed && active() != null) { dirty = true; clockChanged = true; return }
+        // A clock change left by a stopped execution is applied only while Idle; an OS-owned backoff folds it itself.
+        val effective = changed || dirty && clockChanged && owner == Owner.IDLE && active() == null
+        plan.arm(authority, clock(), next, effective).also { if (effective) { dirty = false; clockChanged = false } }
+      }
+      when (result) {
+        S3Refresh.Revoked -> revoke()
+        is S3Refresh.Updated -> { seen(result.plan); if (result.rotated || migrated) revision(result.plan) else idleProject(result.plan) }
+        is S3Refresh.Same -> { seen(result.plan); if (migrated) revision(result.plan) else idleProject(result.plan) }
+      }
+    } catch (_: Exception) { fence() }
+  }
+  // An uncertain migration acknowledgment is a storage gate until settle() proves it.
+  private fun fence() { if (plan.fenced) synchronized(lock) { blocked = true; if (owner == Owner.IDLE) owner = Owner.STORAGE_BLOCKED } }
+  private fun unblock(): Boolean {
+    val attempt = synchronized(lock) { if (!blocked) return true; blockedAttempt }
+    val ok = if (attempt != null) queue.resolveAutomatic(attempt, plan) != S3Resolution.Unresolved else runCatching { plan.settle(legacy); plan.disarm() }.isSuccess
+    if (ok) synchronized(lock) { blocked = false; blockedAttempt = null; if (owner == Owner.STORAGE_BLOCKED) owner = Owner.IDLE }
+    return ok
+  }
+  // Revocation does not wait: epoch++, wake disarm, exact stop, epoch-tagged cancel.
+  fun revoke() {
+    val (e, at) = synchronized(lock) {
+      epoch++; unresolved = false; dirty = false
+      val e = exec?.takeIf { !halted(it) }?.also { it.state = "done" }
+      if (owner != Owner.STORAGE_BLOCKED) owner = Owner.IDLE
+      e to epoch
+    }
+    e?.let { lease.end(it); runCatching { queue.pauseAutomatic(it, it.runId) } }
+    if (runCatching { plan.disarm() }.isSuccess) seen(null) else synchronized(lock) { blocked = true; owner = Owner.STORAGE_BLOCKED }
+    main(Runnable { if (synchronized(lock) { epoch == at }) os.cancel() })
+  }
+  private fun revision(p: S3AutoPlan) {
+    val (e, at) = synchronized(lock) {
+      val active = active()
+      epoch++; unresolved = false; active?.state = "done"; owner = Owner.REPLACING
+      active to epoch
+    }
+    e?.let { lease.end(it); runCatching { queue.pauseAutomatic(it, it.runId) } }
+    main(Runnable { schedule(at, out(p)) })
+  }
+  private fun idleProject(p: S3AutoPlan) {
+    if (p.wake == null) return
+    val at = synchronized(lock) { if (owner != Owner.IDLE) { dirty = true; return }; epoch }
+    main(Runnable {
+      val pending = try { os.pending() } catch (_: Exception) { return@Runnable }
+      synchronized(lock) {
+        if (owner != Owner.IDLE || epoch != at) return@Runnable
+        if (pending?.get("protocol") == 1 && pending["wake"] == p.wake) { owner = Owner.OS_OWNED; return@Runnable }
+        owner = Owner.REPLACING
+      }
+      schedule(at, out(p))
+    })
+  }
+  // Non-execution projection: RESULT_FAILURE is definite (Idle, a later event may project once);
+  // a generic throw without the exact nonce is ProjectionUnresolved under OSOwned.
+  private fun schedule(at: Long, out: Out.Replace) {
+    if (synchronized(lock) { epoch != at }) return
+    val result = submit(out)
+    synchronized(lock) {
+      if (epoch != at || owner != Owner.REPLACING) return
+      owner = if (result == null || result == SUCCESS) Owner.OS_OWNED else Owner.IDLE
+      if (result == null) unresolved = true
+    }
+  }
+  // Locked: no vault access. Only an already-armed plan, or a >=5 min legacy-recovery wake.
+  private fun lockedProjection() {
+    val recovery = try {
+      if (plan.marked()) { read()?.let(::idleProject); return }
+      val snapshot = AndroidS3AutomaticPlan.legacySnapshot(legacy) ?: return
+      Out.Replace(snapshot, maxOf(Math.addExact(clock(), DEFER), legacy.getLong("due", 0)), 0)
+    } catch (_: Exception) { return }
+    val at = synchronized(lock) { if (owner != Owner.IDLE) return; epoch }
+    main(Runnable {
+      val pending = try { os.pending() } catch (_: Exception) { return@Runnable }
+      synchronized(lock) {
+        if (owner != Owner.IDLE || epoch != at || pending?.get("protocol") == 0 && pending["wake"] == recovery.wake) return@Runnable
+        owner = Owner.REPLACING
+      }
+      schedule(at, recovery)
+    })
+  }
+  companion object {
+    const val DEFER = 300000L
+    const val SUCCESS = 1
+  }
+}

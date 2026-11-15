@@ -1,176 +1,76 @@
-# CURRENT — 04.11.2026
+# CURRENT — 11.11.2026
 
-Tarihî PASS taze kabul değildir.
+Tek başlangıç işaretçisi. Tarihî PASS taze kabul değildir. Kurallar: kök AGENTS.md.
 
-**09.11 rol/akış:** OpenCode v2; GPT plan+review, Claude kodlama (AGENTS.md "Roles and workflow"). Sıra: geçmiş review → kalan geliştirme (Lovable eksikleri dahil) → tek regresyon → fiziksel kabul. Proje skill'leri `.opencode/skills/`: grill-me, systematic-debugging, verification-before-completion (üçü `opencode/autoinvoke: false`). Açık: OpenCode Desktop'ta üç skill'in yükleme yolu doğrulaması, `.opencode/` commit/gitignore kararı, ana ajan için `opencode api*` deny (#53465). Sıradaki iş: geçmiş işin tek seferlik salt-okunur review'u.
+## Aktif iş / sıradaki adım
 
-**05.11 gerçek kullanım açık bulguları:** [tek kayıt](field-findings-2026-11-05.md): Android–Mac eşleşme/tekrarlı durma,12PC Completed+1Receiving, fingerprint klasörü/rastgele media kimlikleri/retained part hardlink; WebDAV port URL içinde destekli fakat form açıklığı,TLS/CA/auth ve hata teşhisi eksikleri. İnceleme tamam; aktarım kök nedeni ADB bağlantısı koptuğu için açık. Kullanıcı bu tur geliştirme istemedi; yalnız bulgu kaydı yapıldı.
+**Durum: FIX / READY — 1.4b/F1 R13/R14 kök neden ve tasarım netleştirildi; uygulama/kabul yok.**
+Güncel sözleşme: [R13/R14 scoped FIX](plans/f1-r13-r14-clock-reconcile-fix.md);
+[önceki onaylı sınır](plans/f1-r12-clock-reconcile-fix.md) korunur (en çok aynı 5 dosya).
+Son review/scoped devir: [clock-reconcile review](evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/review.md).
+Tur manifesti: [clock-reconcile MANIFEST](evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/MANIFEST.md)
+(matris, `round.diff`, baseline `.pre`, loglar). Start/review HEAD `650ec17`; staged boş; 5 sözleşme dosyası
+başlangıçtan beri untracked (tracked-dirty ifadesi düzeltildi); baseline aidiyeti doğrulandı. Diğer dirty kapsam değişmedi.
+Taze kanıt: final APK `bcb65ade…` (S3=true arm64, emulator-5590) `s3-automatic-lock` (representative +
+interleavings/R3/R9) PASS, `s3-automatic-plan` (yeni `clock` CAS/fence/reopen) PASS, `s3-automatic-os`
+(JOB 2712 clock replacement, early capture=0) PASS. Ara FAIL'ler yalnız yeni test beklentisi hatası; kayıtlı.
+Önceki review: [fix-r8-r11/review.md](evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/review.md);
+strict R12 deneme 1 kaydı: [fix-r12/MANIFEST](evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/MANIFEST.md).
+R12 hedefi korunuyor. R13: eski unresolved stop yeni projection owner/throw fence'ini bozuyor;
+R14: committed clock proof context refresh sonrası ikinci clock-CAS/due hesabına dönüşüyor. Dar regression NOT_RUN.
+Sayaçlar: early-capture=1 (çatışma), stale=2 tur (farklı alt yollar; aynı yaklaşımın iki başarısızlığı kanıtlanmadı),
+clock-stop=1, migration=1, yeni clock-proof=1. Aynı yaklaşım ikinci kez başarısızsa DECISION; oturumla reset yok.
+Açık kapılar: R13/R14 scoped FIX + bağımsız kabul; lint NOT_RUN (iki deneme); fiziksel keyguard/Doze/doğal teslim yok;
+RAM intent kaybı/geri saat gecikmesi kabul edilmiş sınırlama; FTPS/Faz3–4/B4/P5 açık. Self-review bağımsız değil.
+**Sıradaki:** ayrı Opus sohbetinde `/implement` — yalnız READY R13/R14 sözleşmesi;
+önce R13 temsilcisi/minimum fix. Usage UNKNOWN ise GREEN sonrası genişletmeden kullanıcı yanıtını bekle.
+Review açıklaması/kanıt/kayıt tamamlama aynı GPT sohbetinde kalır. Commit/push yok.
 
-## Mobil tema uyumu — 05.11.2026
+## Teslim backlog'u
 
-Android gerçek stack: AppearanceModule.setColorScheme null style. Kurulu NativeWind4.2/css-interop0.2 `system` için null gönderirken RN0.86.3 Android `unspecified` bekliyor. ThemeProvider yalnız system dalında doğrudan Appearance.setColorScheme('unspecified') kullanır; açık/koyu NativeWind yolunda kalır, OS dinleyicisi korunur. Kaydedilmiş system ve kullanıcı system/light değişimi için2yeni Jest testi PASS; mobil tsc ve iki değişen tema dosyası lint PASS (yalnız mevcut multiple-tsconfig uyarısı). Fiziksel telefon tekrar açılış/OS tema değişimi henüz doğrulanmadı; native rebuild gerektiren değişiklik yok. İlk Jest koşusu mobil node_modules'taki lockfile-dışı fazla React yüzünden Invalid hook call ile durdu; fazla kopya silinmeden temp yedeğe taşındı, kök locked19.3.0 kullanılarak test geçti. Kaynak package/lockfile değiştirilmedi. Log `/tmp/kloda-mobile-theme-fix.log`. Commit/push yok.
+- [x] **Faz 0:** backlog/kapsam donduruldu.
+- [x] **1.1/B1:** native UUID + bağımsız GPT review kabul; JS→native runtime açık, Faz 3.
+- [x] **1.2/Jest:** AppState listener spec düzeltmesi + bağımsız GPT review kabul.
+- [x] **1.3/B3:** FTPS Drop-zeroize + bağımsız GPT review kabul; P3 belge notu, FTPS/JNI runtime ve fiziksel kapılar açık.
+- [x] **1.4/B4:** vault politikası belge review kabul; bayrak eklenmedi, kalan risk kabul. R1 tarihî CURRENT aidiyeti sınırlaması korundu; runtime güvenlik PASS'i değil.
+- [ ] **1.4b/F1:** S3 clock-reconcile FIX — R13 stale ownership / R14 clock-proof review engelleri; kayıtlı lock/plan/os PASS tam kabul değil. FTPS ayrı kapsam; anında OS çalışma garantisi yok.
+- [ ] **1.5:** iOS WebDAV host testini onar; cesu8/instant-xml/instant-xml-macros lisansları; B2 release iOS fixture-CA marker kontrolünü kabul kapısına bağla.
+- [ ] **2.1/G1:** gerçek journal ile Mobil Etkinlik Şu an/Geçmiş.
+- [ ] **2.2/G2–G3:** gerçek Desktop tray, sürüm/kapanış eşlemesi; ADR0018 foreground ve Linux görünür kontrol sınırları.
+- [ ] **2.3/G4–G6:** gerçek mobil ayar yetenek/kapsamı; D10 birleşimini belgele; kilit ekranı step19 kapısında.
+- [ ] **2.4:** eşleşme/aktarım metinleri, WebDAV endpoint/port/yol ve sır sızdırmayan teşhis; kök neden olmadan retry/fence gevşetme yok.
+- [ ] **2.5:** mevcut betiklerle eksik ekran/dil kapsamını kalıcı batch capture'a tamamla.
+- [ ] **3:** tek tam regresyon; önce fixture/tek temsilci; JS/native/build, güvenlik/B2, a11y/görsel/performance. Dropbox Android JobService, iOS >150 MiB upload_session, Dropbox Photos/Nextcloud restore, Android yükseltme ve recovery göster/kopyala açık kontrolleri dahil. Hesaplar ayrı izinli; bağımsız review ve dağıtım kapıları korunur.
+- [ ] **4:** Android fiziksel tam kapsam; Desktop OS/signing/storage ve saha kesinti teşhisi. iOS Simulator ayrı kanıt; fiziksel iOS yoksa custody/OS/Photos/iCloud/signing açık. Kullanıcı veri/eşleşmesi korunur, cihaz/hesap/medya izni varsayılmaz.
 
-Sonraki sohbet prompt'u: “AGENTS.md → CURRENT.md mobil tema uyumu bölümünü oku. Metro'yu gerekiyorsa temiz önbellekle yeniden başlatıp gerçek Android'de kayıtlı Sistem tercihiyle açılış ve açık/koyu/sistem değişimini doğrula. Başarılı Jest/tsc/lint'i tekrarlama; veriyi sıfırlama, commit/push yapma.”
+## Korunan kararlar / açık kapılar
 
-## macOS Electron geliştirme imzası — 05.11.2026
+- Açıklık/teşhis teslimde; WebDAV uzak klasör gezgini, yeni CA/auth/mTLS ve okunabilir export kapsam dışı. CloudMe engelli; Kolab Now/Box/MEGA/GCS V1 dışı.
+- **A5 teslim notu:** Finder'da özgün ad/uzantı/cihaz etiketiyle export yok. Fingerprint/operation-ID düzeni ve retained `.part` hardlink journal/inode bağları korunur; yeniden adlandırma/silme yok. A5 düzelmiş sayılmaz.
+- ADR0029, iOS16, P5 production/at-rest, sağlayıcı/depolama ve release imzaları açık. Yetkili liste: [20–21 kabul koleksiyonu](20-21-acceptance-collection-2026-11-04.md).
+- [Saha bulguları](field-findings-2026-11-05.md), [geçmiş review](claude-review-2026-11-11.md). Kanıt dizinleri: `evidence/b1-uuid-2026-11-11/`, `evidence/jest-1.2-2026-11-11/`, `evidence/b3-zeroize-2026-11-11/`, `evidence/b4-vault-lock-2026-11-11/`.
 
-**Normal GUI başlangıcı takip kontrolü:** Beyaz ekran renderer React19.2.3/react-dom19.3.0 uyuşmazlığıydı; lockfile her ikisi için19.3.0. Kök React, lockfile SHA512 bütünlüğü doğrulanmış yerel npm arşivinden onarıldı. Desktop node_modules içindeki lockfile-dışı fazladan React kopyası ve Vite önbelleği silinmeden temp yedeğe taşındı; mobil kopyasına dokunulmadı. Genel offline npm onarımı ilgisiz @expo/fingerprint metadata eksikliğiyle durmuştu; başarılı sayılmadı. Kaynak/lockfile değiştirilmedi. Normal `npm run dev:desktop` açıldı; CUA gerçek “Bu bilgisayarı alıcı yap” kurulum ekranını doğruladı. Süreç açık, log `/tmp/kloda-desktop-dev-20261105.log`. QR/telefon eşleştirme kabulü hâlâ açık.
+## Akış / kompakt checkpoint
 
-Kullanıcı ücretli Apple Developer üyeliğine geçti; Xcode Mac kaydı ve `com.kloda.desktop.dev` development profili doğrulandı. Normal Electron ad-hoc hostunda `secd` -34018 görülmüştü. `npm run dev:desktop` artık macOS'ta `tools/run-desktop-dev.mjs` üzerinden ayrı `apps/desktop/dist/macos-development/Kloda Development.app` üretir. Kaynak Electron, kullanıcı authority/veritabanı ve production kimliği değiştirilmez. Windows/Linux mevcut Electron başlatmasını kullanır.
+**15.11 makine devri:** mevcut tüm Git kapsamı kullanıcı talimatıyla commit/push
+checkpoint'ine alınıyor; ürün kabulü değildir. Windows devamı/eksik yerel artifact
+ve loglar: [Windows devir notu](windows-handoff-2026-11-15.md). İlk Windows oturumu
+salt-okunur ortam hazırlık kontrolü, ardından READY R13/R14 scoped uygulaması.
 
-Profil standart Xcode klasörlerinden seçilir; gerektiğinde `KLODA_MAC_PROFILE=/mutlak/yol/profile.provisionprofile` verilir. CMS decode, macOS/expiry/bu Mac/app-ID-prefix/team/Keychain grubu ve yerel sertifika eşleşmesi hazırlıktan önce kontrol edilir. Sertifika/profil repoya girmez. Restricted Keychain hakları yalnız ana hostta; helper'larda yalnız allow-jit, hardened runtime açık, library-validation bypass/software-key fallback yok. Dört mevcut main runtime bağımlılığı paket içine kopyalanır; dış node_modules symlink'i yok. Girdi hash'i değişmediyse yeniden imza yerine strict verify yapılır.
+**12.11 maliyet kapıları:** [uygulama politikası](execution-budget.md) eklendi:
+hazır tasarım, ilk temsilci regression/minimum fix, 15k output soft eşik (usage
+yoksa temsilci sonunda dur), uygun düşük riskli işte kullanıcı seçimiyle tek
+`/implement-pilot` Sonnet denemesi. F1 pilot değil, Opus/model effort değişmez.
+R13/R14 reddi sonrası aynı GPT sohbetinde kök neden/tasarım netleştirildi; scoped
+FIX READY. Sıradaki komut ayrı Opus sohbetinde `/implement`; ürün kabulü verilmedi.
 
-Yeni doğrulama: profil bağlama 2 test (negatif varyantlar dahil) PASS; ayrı uygulama deep/strict imza doğrulaması PASS; signed Electron host gerçek NAPI yükleme + bellek içi SQLite + sync-core import PASS; değişmeyen girdide tekrar imzalama yapılmadı. Özgün Electron hâlâ ad-hoc. İlk iki hazırlık denemesinde framework symlink/harici dependency symlink hataları giderildi; bunlar PASS sayılmaz. Loglar `/tmp/kloda-macos-signing-20261105.log`, `/tmp/kloda-macos-signing-cache.log`. Eski başarılı build/test matrisleri tekrarlanmadı.
+OpenCode: GPT plan → ayrı Opus uygulama → ayrı GPT review+kapanış.
+Aynı iş/rolde araştırma, açıklama ve kayıt aynı sohbette. Opus checkbox kapatmaz;
+GPT kabul ölçütleri sağlandığında kaydı kapatır. Her devir: Durum / AYNI–YENİ–DUR /
+Rol / komut. Varsayılan medium; Faz 3/4 planları ve custody/journal/TLS uygulama
+ve review high. Model/effort otomatik değişmez. İki-deneme sayacı oturumla sıfırlanmaz.
 
-Normal imzalı GUI başlangıcı doğrulandı. Kullanıcı Android–Mac QR eşleştirmesinin PC onayından sonra tamamlandığını bildirdi. Secure Enclave create/reopen, ağ keşfi ve kesintisiz aktarım kabulü açık; [saha bulguları](field-findings-2026-11-05.md) ayrı izleniyor. Deneme Xcode uygulamasının App Sandbox hakkı Electron'a taşınmadı. Release/production/notarization ve bağımsız review açık. Aynı-agent ayrı kaynak incelemesi yapıldı. Commit/push yok.
-
-Sonraki sohbet prompt'u: “AGENTS.md → CURRENT.md macOS Electron geliştirme imzası bölümünü oku. Saha bulgularını oku. Mevcut eşleşmeyi ve kullanıcı verisini koru; yalnız açık Secure Enclave create/reopen, ağ keşfi ve Android aktarım kesintisi kontrollerini değerlendir. Başarılı imza/NAPI/GUI kontrollerini tekrar etme. Commit/push yapma.”
-
-**16c uygulama/izole kapanış03.11:** main67701e7; [tek checkpoint](ftps-native-checkpoint-2026-11-03.md), [manifest](evidence/ftps-native-step16c-2026-11-03/manifest.json). ADR0022 pratik FTPS profiliyle native engine/journal/vault/Files/Photos/restore/queue/OS ve TR/EN/DE ürün bağlantısı tamam, varsayılan kapalı. Yeni scoped testler,6ABI paketleri, Android/iOS app build, owned Files/Photos/restore/reopen/cleanup ve aynı-agent ayrı review PASS. Başarılı eski testler tekrarlanmadı; commit/push yok,17 başlamadı. Gerçek public-CA/LAN, genel12/20/21 ve bağımsız son Claude review açık; izole CA/sentetik route bunları kapatmaz.
-
-**17 S3 —04.11 uygulama/izole doğrulama tamam:** [checkpoint](s3-step17-checkpoint-2026-11-03.md), [son doğrulama](evidence/s3-native-step17-2026-11-03/verification-2026-11-04/manifest.json). İki platform actual owned Photos upload/full GET/metadata/restore/repeat/reopen/cleanup ve automatic/manual yetki componentleri PASS. iOS Int64 SQLite bind düzeltmesi + normal Xcode27.2 app build PASS. Önceki6ABI/newJS/native kanıtları korunur; başarılı eski AWS/core testleri tekrar edilmedi. JNI14yeni paket advisory0eşleşme;3lisans metni eksik. Dağıtım/P5 production/genel UI/bağımsız review/gerçek OS/fiziksel kabul [tek20–21 listesinde](20-21-acceptance-collection-2026-11-04.md), kapalı sayılmaz.18/19 Claude alanında; hizalama 04.11'de yapıldı (aşağıda). Gerçek-key app/AWS ve gerçek kullanıcı medyası değişmedi. Commit/push yok.
-
-**18/19/29 Claude —04.11 main'e birleştirildi:** main `66b8300` (Codex 16c/17 dahil; geçmiş co-author satırları temizlenerek yeniden yazıldı, eski hash'ler geçersiz). [Checkpoint](step18-20-checkpoint-2026-10-31.md) "Sıradaki". 18A/4d Android köprü + EN/DE/a11y, 4 metin bulgusu ve Durum sekmesinin tüm hedefleri toplaması tamam. Jest 260/261 (tek başarısız Codex `s3-diagnostic-page.spec.tsx`, temiz main'de de), tsc/ESLint, Android/iOS Simulator derleme PASS. ADR0029 proposed (kabul kullanıcıda). Bağımsız review yok.
-
-## Steps
-
-|#|Durum|Açık kapı|
-|---|---|---|
-|1|Android context uygulandı|runtime/21|
-|2|Android background owner uygulandı|gerçek OS/21|
-|3|Android schedule/retry uygulandı|eski OS/Doze/21|
-|4|Android izole+dar fiziksel kanıt|gerçek PC/Photos/16KB/performans|
-|5|iOS pairing izole|iPhone/Secure Enclave/PC LAN|
-|6|iOS Files izole|provider/iCloud/restore|
-|7|iOS Photos/izole PhotoKit|LivePhoto/RAW/edited/iCloud/alan|
-|8|iOS background/izole retry|OS delivery/lock/gerçek PC|
-|9|WebDAV ayarlar uygulandı|canlı ürün kabulü15/20/21|
-|10|Mobil bütünleşik izole kanıt|reader/LAN/pil/alan/latency|
-|11|Lovable alımı tamam|native görsel kabulü12|
-|12|UI kodu+web kanıtı tamam|native ABI/görsel/a11y açık|
-|13|Dar salt-okunur galeri uygulandı|Android/native/physical açık|
-|14|16/16 teknik matris+D1–3 onaylı|SDK/fiyat/hesap/platform|
-|15|WebDAV Files+Photos/own restore izole|picker/UI/BG/signing/20/21|
-|16|16a+16b+16c uygulama/izole kapanış tamam|Genel12/20/21 ve son Claude review açık; protokoller varsayılan kapalı|
-|17|Uygulama/izole fonksiyonel doğrulama tamam|Dağıtım/P5/genel UI/OS/physical kabul20–21listesinde|
-|18|18A/1–4d + 18B/1, 18B/5 Dropbox, 18B/5r restore uygulama/izole tamam (Claude)|8: Android otomatik JobService, iOS >150 MiB `upload_session`; 9: Dropbox Photos + eklenmiş Nextcloud restore; Android yükseltme; Box engelli|
-|19|Live Activity uygulama/izole tamam (Claude)|signing/fiziksel cihaz/iOS 16 runtime kararı|
-|20|Başlamadı; Claude payı altyapı (2 yakalama betiği hazır)|regresyon iskeleti, platform/güvenlik/a11y/perf, bağımsız review|
-|21|En son toplu fiziksel kabul|yeni açık izin+hazır hesap/cihaz|
-
-## 16a — tamamlanan uygulama/izole kapanış /01.11
-
-Kullanıcı sırası: önce16a, sonra16b. Bağımsız review kullanıcı kararıyla en sonda Claude’da; mevcut geliştirme/testi durdurmaz. Ajan açılmaz/Claude worktree’sine yazılmaz. [Somut kabul listesi](smb-acceptance-checklist-2026-11-01.md); [ADR26][a26], [ADR22][a22] ve [native checkpoint](smb-native-publication-checkpoint-2026-10-30.md). SMB varsayılan kapalı; genel ürün aktivasyonu/nihai güvenlik kabulü verilmedi.
-
-LAN sunucusu eksikliği giderildi. Kullanıcı Windows11Pro’da boş, ayrı test kullanıcılı `192.168.1.54:445/KlodaTest16a` paylaşımını hazırladı. Darwin kısa IPv4 netmask(sa_len=7) okuyucusu sınır-güvenli düzeltildi; eski negatif kontrol+host4test, gerçek Simulator Windows admission, loopback/gateway reddi, üretim Clippy, native device+Simulator paket ve tam app build PASS. [Tek route kanıtı](evidence/smb-windows-lan-2026-11-01/manifest.json). Ortak `backup_destination` migration’ı beklenmez; SMB kullanıcı kararıyla kendi `smb_enabled` tablosunda, ortak şema/CHECK/user_version’a dokunulmaz.
-
-[Gerçek Files/Windows zinciri](evidence/smb-windows-files-2026-11-01/manifest.json) PASS: SMB3.1.1/AES128GCM/imzalı+şifreli host auth; ayrı owned Simulator’da gerçek Source+Restore picker/bookmark,4097-byte kaynak, üretim route-bound yayın/own Completed+katalog, unchanged aynı-job reuse, byte doğrulanmış restore/tekrar aynı inode ve ayrı süreç reopen. [Exact D7 A onaylı tam Photos zinciri](evidence/smb-windows-photos-2026-11-01/manifest.json) PASS:1PNG kaynak+albüm, gerçek resource/manifest yayın+own download/import, tekrar/no duplicate ve ayrı süreç reopen. OS30albüm cleanup uyarısı ilkinde reddedildi; exact asset üyelikleri1/1 doğrulandı, yalnız cleanup sürdü, seed/import tekrarlanmadı. Son2asset+2albüm cleanup/post-fetch0 PASS. Yeni Keychain/izin girdileri ve asıl600 parola dosyası+boş dizini kaldırıldı; Windows UUID test kökleri+yerel makbuzlar retained. [Exact Photos kapsamı](smb-ios-windows-photos-owned-fixture-2026-11-01.md). Önceki [yerel importer bileşeni](smb-ios-photo-import-owned-fixture-2026-11-01.md) daha dar tarihî kanıttır.
-
-[Native SMB ekranı+önkontrol](evidence/smb-native-ui-2026-11-01/manifest.json) scoped PASS: gerçek API/Inter/theme/MobileShell ile TR/EN/DE, Almanca maxfontScale3.571; klavye üzerinde görünür secure parola/maskeleme, native7 alan etiketi/header/save rolleri. Kaydet/etkinleştir/çalıştır basılmadı; journal quick_check=ok, profile/upload/run/enabled0. İzole Simulator Keychain grubuyla doğrudan status storage_failure giderildi. İki native otomatik koordinatörde hedefsiz başlangıç artık gereksiz ortak PC journal okumaz; gerçek guard negatif kontroller+pause/vault/journal güvenli duruş ve app build/link PASS. Önceki [otomatik/manuel admission yarışı](evidence/ios-automatic-admission-2026-11-01/manifest.json) recursive fence’i korunur; eski0bb96303 kaydı/Claude step19 dalı değişmedi.
-
-Açık kalan genel kapılar: VoiceOver ses/focus ve tam a11y/audit, tüm ekranlar için kalıcı batch capture12/20; gerçek OS BG teslim/lock, production signing/device custody, fiziksel/perf20/21; en sonda gerçek Claude güvenlik incelemesi. Bu kapılar isolated testlerle kapandı sayılmaz. [Review snapshot](evidence/smb-closure-step16a-2026-11-01/README.md) son önkontrol düzeltmesiyle142 kaynak+patch hashleri doğrulanarak tazelendi; henüz bağımsız review yok. Owned uygulamalar/Simulator kapalı, font ayarı geri alındı; kişisel veri/hesap/cihaz ve fiziksel21 izni varsayılmadı.16a nihai ürün aktivasyonu iddiası yok; kullanıcı01.11 kararıyla16b devam ediyor.
-
-## 16b — tamamlanan uygulama/izole kapanış /02.11
-
-Kullanıcının toplu uygulama→test sırası tamamlandı. [Güncel kısa checkpoint](sftp-native-checkpoint-2026-11-02.md), [tek kapanış manifesti](evidence/sftp-closure-step16b-2026-11-01/manifest.json). SFTP native çekirdek/vault/profil/journal/Files/Photos/restore/queue/schedule/OS ve TR/EN/DE ürün bağlantısı uygulandı. Mobil test/lint/TS, Rust+native kontroller, dört Android ABI16KB ve iki iOS arm64 paket+Simulator ürün build PASS.211 dependency OSV eşleşmesi0; notices hazır. Varsayılan aktivasyon kapalıdır.
-
-Gerçek Android Files+ürün/OS ve exact onaylı Photos zinciri PASS. Gerçek Windows LAN iOS Files picker/bookmark4097 byte yayın/download/restore/repeat+ayrı süreç reopen PASS; exact onaylı Photos1PNG resource/manifest/import/repeat/reopen PASS. Son2asset+2albüm kimlik doğrulamalı cleanup/post-fetch0, kendi Keychain/TCC ve kaynak parola dosyası temizliği PASS. Owned Simulator ve Android5584 kapalı; Windows test sunucusu kullanıcı `Stop-Service sshd` komutuna kadar açık, remote test UUID kanıtları retained.
-
-Ayrı aynı-agent review’da parent kontrolü sırasında düşen yetkinin rename’e sızması düzeltildi; eski negatif kontrol ve düzeltilmiş bound gerçek sunucu testi PASS, altı mobile artifact yeniden paketlendi. Native TR/EN/DE/maxfont batch ve klavye alan gözlemi scoped PASS; ayrı klavye screenshot eksik. Bağımsız Claude review kullanıcı kararıyla en sonda; genel12/20/21 görsel/a11y/VoiceOver, kalıcı tüm-ekran capture, gerçek BG delivery/lock, production signing/device custody, fiziksel/perf açık. `backup_destination` şema/CHECK/user_version ve Claude worktree değişmedi.
-
-[16c explicit FTPS dar ön elemesi](ftps-native-preflight-2026-11-02.md)03.11 ilerledi: exact libcurl8.23.0 kaynak/lisans/advisory+iki sentetik host negatif probe; STOU upload/TLS-only API varsayımları elendi. Exclusive/durable publication ve gerçek TLS/control+data route kapıları açık; dependency/ABI/ürün uygulaması/17 başlamadı. Devamda yalnız bu kısa checkpoint ve [ADR0022][a22] D1 bölümünü oku.
-
-## 16a — korunan kanıt ve açık kabul
-
-D8 bağlı-socket handoff; profil değişimi eski işi yetkisiz kılar, yeni generation/pending→ready ve vault-okunamaz güvenli duruş. Android gerçek Keystore/tamper/reopen+eski iş; Swift host ayrı süreç testleri PASS.
-[Kanıt](evidence/smb-native-publication-step16-2026-10-30/profile-owner-2026-10-31.json).
-iOS üretim vault/profil sınıflarıyla ayrı Simulator uygulamasında pozitif Keychain, ayrı süreç reopen, eski generation/pending/tamper/missing güvenli duruş PASS. [Kanıt](evidence/smb-native-publication-step16-2026-10-30/ios-custody-2026-10-31.json). Bu üretim signing/cihaz kilidi kabulü değildir.
-iOS OS route köprüsü açık A onayıyla uygulandı: iki native sembol, mevcut Rust route sahibi+Swift bound yayın. Dar Rust/Swift, Simulator link/ret+witness, Clippy ve device+Simulator paketleme PASS. [Kanıt](evidence/smb-native-publication-step16-2026-10-30/ios-lan-owner-2026-10-31.json).
-16a aktif: Files generation/OS-bound yayın, unchanged reuse/değişen immutable içerik, own katalog/readonly staging ve Android gerçek SAF restore/tekrar kopyalamama PASS. iOS ayrı süreç yerel inode restore ve sahipsiz inode/hash adoption reddi PASS. Açık Files keep-both taze snapshot/yeni UUID+alias/kalıcı request bağıyla Android runtime ve iOS host testinde PASS. [Tek grup kanıtı](evidence/smb-native-publication-step16-2026-10-30/sources-catalog-read-2026-10-31.json).
-Photos exact Android fixture A ile açık onaylandı ve çalıştı: tek owned PNG, unchanged reuse, favorite-only sidecar revision (medya yeniden yüklenmedi), own receipt-bound restore/byte doğrulaması, tekrar restore/no duplicate, stale-context ve unknown-create güvenli duruş **PASS**. [Exact kapsam](smb-photos-owned-fixture-2026-10-31.md). iOS Photos mutation izni/kabulü değildir.
-Ayrı SMB native queue/run/schedule/OS dispatch sınıfları eklendi. Android gerçek Files queue, sayaçlar/disable ve SQLite pause-save failure callback testi; iki platform native run/retry bütçesi/immutable terminal/CAS plan testleri PASS. Startup owner yarım işi eski bağlamla tekrar yetkilendirmez; bilinmeyen ACK otomatik retry olmaz. OS JobService/BG kaydı ve opt-in ürün bağlantısı uygulandı; aşağıdaki taze ürün kontrolleri geçerlidir. Varsayılan dağıtım aktivasyonu kapalıdır.
-Ayrı aynı-agent review: step0+native4 “create yok” kanıtı sayılmaktan çıkarıldı; persistence hatasında callback kaybı ve exhausted retry'da busy kalma düzeltildi. Bağımsız review değildir. Rust14 host, owned8 yayın+5readonly ve Clippy PASS; altı release ABI adayı C/JNI exports ile doğrulandı, Android dört ABI16KB LOAD hizalı; device+Simulator geçici XCFramework ve gerçek Simulator release readonly FD ret/link+witness PASS. Pod/Gradle ürün paketi opt-in bağlantısı ve gerçek ürün derlemeleri aşağıda doğrulandı.
-31.10 kullanıcı kararı: SMB ürün opt-in şimdilik kendi `smb_enabled` tablosunda kalır; profil generation ve job fence aynı SMB veritabanı/transaction içinde korunur. ADR0027 notu Claude'un `worktree-step18-20` dalında yalnız okundu. Ortak migration Claude'un dalında tamamlandı; SMB bunu kullanmaz ve ürün bağlantısı migration'ı beklemez. `backup_destination` şeması/CHECK/user_version bu dalda değiştirilmez; SMB'yi ortak tabloya taşıma ayrı sonraki karardır.
-Ürün bağlantısı uygulandı: ayrı Expo SMB modülü; TR/EN/DE hedef formu, açık kaydet/etkinleştir ve kayıtlı hedef yönetimi; run/pause, son sonuç/sayaç/retry, own katalog/restore/review; Android JobService2706/2707+boot/settings/global pause ve iOS BG kaydı. Profil doğrulaması/opt-in açma ve generation+opt-in kapatma aynı SMB transaction içindedir. Parola native vault'ta kalır; JS kalıcı depolamasına verilmez.
-Taze kontroller: mobil **27 paket/175 test**, TypeScript ve lint PASS. Paketlenmiş release Rust ile disposable Android gerçek OS JobService/lease→SAF Files→şifreli SMB→Completed/sayaç/sonraki plan/disable PASS; kapatma yazma hatasında generation+enabled rollback PASS. iOS gerçek Expo/Pods ile SMB etkin arm64 Simulator **uygulama derleme+link PASS**; ayrı süreç kaynak/restore, Photos/run/CAS ve journal kilidi tutulurken foreground kaybı host testleri PASS. Ortak iOS global pause ilk iki hedef hata verse de bütün hedefleri durdurur; geçici pause fence kalıcı yazma başarısızken de yeni PC/DAV/SMB otomatik işi engeller. Ayrı aynı-agent review; bağımsız review değildir. Owned AVD ve SMB container durduruldu, kanıtlar retained.
-Devam: **16a ürün bağlantısı ve yukarıdaki kaynak/otomatik/izole kapsam uygulandı; TAM KABUL/varsayılan aktivasyon AÇIK.** Ortak migration/table kararı artık engel değildir. Sonraki kabul işi gerçek iOS admitted LAN+seçili bookmark runtime ve tam SMB Photos kaynak/yayın/download zinciri (dar PhotoKit importer bileşeni01.11 PASS), ardından ayrı güvenlik/platform değerlendirmesidir; signing/cihaz custody ve12/20/21 görsel/a11y/perf/fiziksel kapıları korunur. Android medya onayı iOS'a genişlemez. SMB varsayılan build'de kapalı kalır; opt-in derleme/tekrar komutları checkpointtedir. 16b01.11 kullanıcı isteğiyle bekletildi;16c başlamadı.16a tek grup kanıtı üstteki manifestte; geçici çıktılar /tmp/kloda-smb-sources16, release adayları /tmp/kloda-smb16-release.
-16a gerektiğinde okuma: [ADR26][a26] D6–D8; [ADR22][a22] transport/custody; [checkpoint](smb-native-publication-checkpoint-2026-10-30.md) “Sıradaki dar iş”. Hedefli: [D8][d8], [usage](resume-and-usage-plan-2026-10-30.md).16 kabul ölçütlerini raporlamadan17'ye geçme.
-
-## 18/19/20 — Claude alanı açık işler /04.11
-
-Sıra: 8 → 9 → 20 regresyon iskeleti. Ayrıntı ve kanıt: [checkpoint](step18-20-checkpoint-2026-10-31.md).
-
-- **8 (18B/5):** Android otomatik JobService koşusu (elle başlatma 18A/4d'de PASS); iOS >150 MiB `upload_session`.
-- **9 (18B/5r):** Dropbox'tan Photos geri yükleme; eklenmiş Nextcloud hedefinden geri yükleme.
-- **11:** Android kurtarma kodu göster/kopyala (kullanıcı deseniyle); kurtarma ekranları EN/DE/a11y yakalaması.
-- **NOT_RUN:** Android kurulu uygulama yükseltmesi; uygulamadan gerçek Nextcloud girişi (fixture CA yalnız androidTest'te, ayrı karar); TalkBack; iOS EN/DE Bağlantılar; sunucu uyuşmazlığında iptal uçtan uca; 18A/3 Android çok hedefli DAV (Codex HTTPS fixture anahtarları silinmiş).
-- **Bilinen:** `tools/test-ios-webdav-journal.py` host'ta derlenmiyor (29/4 stub yaklaşımıyla düzeltilecek); iOS dev yeniden yüklemede `candidate_stale` (üretimde doğrulanmadı); yeniden etkinleştirmede eski hata satırı (metin/davranış kararı); `pod install` için `LANG=en_US.UTF-8`.
-- **Kullanıcıda:** ADR0029 kabulü, iOS 16 runtime kararı, gate 21 fiziksel test, GitHub contributor önbelleği.
-
-**20 regresyon iskeleti (öneri, tek giriş `tools/regress.py`; ucuzdan pahalıya, başarısız katman üsttekileri durdurur):**
-1. Ön kontrol: `KlodaCloud18` emülatör, Cloud18 simülatör, Nextcloud fixture, Metro.
-2. JS: Jest, tsc, ESLint.
-3. iOS host: `test-ios-recovery-catalog`, `-recovery-code`, `-destination-migration`, `-oauth`, `-live-activity`, `-webdav-journal` (önce düzeltilir).
-4. Derleme: Android app + androidTest APK; `LANG=en_US.UTF-8` pod install + iOS arm64 Simulator.
-5. Android enstrümantasyon: `cloud18-*`, `recovery29`; fixture'lı `test-android-nextcloud`, `-dav-targets` (fixture gelene kadar atlanır).
-6. Görsel: `capture-ios-live-activity.py`, `capture-android-connections.py`; eklenecek iOS Bağlantılar/kurtarma ve Android Durum; her karede dil/ekran doğrulama + e-posta karartma.
-7. Gerçek hesap (ör. `test-android-dropbox-live.py`): varsayılan kapalı, yalnız kullanıcı onayı ve girişiyle.
-8. Manifest: kaynak/varyant hash'i + sonuç; yalnız değişene bağlı testler yeniden koşar; bilinen dış hatalar ayrı listelenir, PASS sayılmaz.
-
-## Decisions
-
-- D6A 30.10: exact ENCRYPTION bit patch; hash/versiyon/upstream kaldırma koşulu [ADR26][a26].
-- D7A 30.10: ayrı Files/SMB Photos makbuz/sidecar; kayıp ACK ile adoption yok [ADR26][a26].
-- D8 31.10: ilk tek-satır geri alındı; iki wrapper+native köprü AYRI açık A onaylı [D8][d8].
-- iOS OS route iki-sembollü native ABI kapsamı A ile açık onaylandı/uygulandı; [somut diff/karar](smb-ios-lan-owner-decision-2026-10-31.md). Exact Android SMB Photos fixture A ve01.11 ayrı exact iOS importer bileşen fixture açık onaylı/PASS; iOS uçtan uca LAN/Photos ve21 fiziksel izni verilmedi. WebDAV istisnaları genişletilmez.
-
-## Gates
-
-SMB ortak migration bekleme kapısı 31.10 kullanıcı kararıyla kaldırıldı; `smb_enabled` üzerinden16a ürün bağlantısı yetkili.
-
-11/12/13/15/20/21 kabulü açık. WindowsD3/provider/startup/SQLite/opened-object, macOS normal uygulama signing, Linux provider+görünür kontrol; gerçek OS/storage/restore/revoke/recovery, bağımsız review, reader/large text/klavye, pil/alan/latency/retry/perf, SDK config olayı ve eski scope-locator kapanmadı.
-Roadmap dışı açık kapsam: hesap/MFA/recovery, public roots/deep-link, Internet/remote/E2EE, iki yönlü sync/versions ve FolderSync migration; otomatik işe ekleme. Her tarihî açık/karar maddesi [kayıpsız eşleştirmede](archive/migration-check.md); kapanış kaynağı yoksa açık kalır.
-
-## ADRs
-
-[ADR dizini](../decisions/). Yazılı kapsam değişir.
-- 01 framework/schedule; SAS ilk trust13 ile değişti.
-- 02 ilk slice; Files/Photos kapsamını05 genişletir.
-- 03 pairing/offline; LAN merkezî önkoşullarını16 kaldırır.
-- 04 cert/authority; Matrix-key12, SAS13, LAN önkoşulları16.
-- 05 PC-first Files/Photos; LAN account/step-up önkoşulları16.
-- 06 hesap/MFA/recovery; yalnız LAN bağımlılığı16 ile kalkar.
-- 07 Matrix sınırı/continuity; LAN central/token/online şartı16.
-- 08 upstream/cert; LAN DER/reissue/KMS şartı16; SDK istisnası26.
-- 09 kanıtlı dilimler; fiziksel eski11 artık21.
-- 10 operation-bound durable proof; değişmedi.
-- 11 in-process native peer session; değişmedi.
-- 12 Kloda P256; Matrix-key identity yerine.
-- 13 QR LAN; SAS/account-first trust yerine.
-- 14 ortak Rust QR core; ayrı engine yerine.
-- 15 Desktop platform/signing isolation.
-- 16 PC-local ACL; LAN JWT/KMS/24h/central-grant/DER-reissue yerine; pin/cert/revoke kalır.
-- 17 Photos sidecar/import recovery; iOS ertelemesi step7 kapsamında kalktı.
-- 18 receiver UI ayrılığında sürer; close-on-blur yerine, grant fence kalır.
-- 19 device remove/trash/recover; bulut silme politikası değildir.
-- 20 iOS LAN/native pairing; stub yerine, physical açık.
-- 21 seçili Photos salt-okunur; geniş medya düzenleme yok.
-- 22 LAN SMB3/FTPS, SFTP pin, native custody; plain FTP/broker yok.
-- 23 açık etkin her hedefe bağımsız yedek; tek-PC dağıtım varsayımı yerine.
-- 24 ayrı WebDAV Photos sidecar; PC Completed-ID sözleşmesini değiştirmez.
-- 25 açık tek-isteklik review yetkisi; sessiz rebind/adoption yerine.
-- 26 ortak Rust SMB/native sahip, D6/7/düzeltilmiş8; genel fork izni değildir.
-
-## Rules
-
-JWT/KMS LAN önkoşulu yok; close-on-blur/Wake-on-LAN yok; %100 yedekli/yansıtıldı iddiası yok. Foreground grant fence bypass yok. Legacy sahipsiz receipt/pending: hedef tahmin/silme yok; ağdan önce dur. Socket+route/generation kanıtı yoksa SMB parolası gönderilmez; şifresiz/DNS fallback yok.
-
-## References
-
-[Lovable](https://kloda-secure-photo-sync.lovable.app), rev `c144e98938da96f698f378972290ff3d1dd311eb`; [proje/snapshot](../ui/lovable-design-reference.md).
-Yakalama: toplu script varsayılan; **kalıcı script/komut yok, bekleyen**. Kanıt [UI checkpoint](lovable-ui-interlude-checkpoint-2026-10-30.md); yeni UI işi araya alınmaz.
-[Arşiv](archive/README.md), [sıra](expanded-execution-plan-2026-10-28.md) yalnız ilgili bölüm okunur.
-
-[a26]: ../decisions/0026-shared-rust-smb-engine.md
-[a22]: ../decisions/0022-advanced-destination-transport-and-credential-custody.md
-[d8]: smb-route-bound-transport-decision-2026-10-31.md
+**11.11 kullanım düzenlemesi:** CURRENT kısaltıldı; geçmiş ayrıntılar
+[tarihî kayda](current-history-2026-11-11.md) taşındı. Bu kayıt topluca okunmaz;
+yalnız ilgili başlık seçilir. Gelecek planlarda tarihî araştırma ayrı ek, uygulama
+sözleşmesi kısa olacak. Aktif F1 onaylı planı değişmedi. Ürün/test kabulü verilmedi.

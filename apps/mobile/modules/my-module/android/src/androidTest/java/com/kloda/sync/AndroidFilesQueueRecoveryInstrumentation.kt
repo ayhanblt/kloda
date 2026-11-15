@@ -23,7 +23,7 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
   }
 
   override fun onStart() {
-    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore", "smb-files", "smb-product", "smb-photos-owned", "smb-profile", "sftp-files", "sftp-sources", "sftp-photos-owned", "sftp-product", "ftps-files", "ftps-sources", "ftps-product", "ftps-photos-owned", "cloud18-nextcloud", "cloud18-destination", "cloud18-oauth", "cloud18-targets", "s3-profile", "s3-journal", "s3-wire", "s3-publisher", "s3-files", "s3-drop-write", "s3-drop-read", "s3-redirect", "s3-diagnostic", "s3-abort", "s3-runs", "s3-pause", "s3-global-pause", "s3-media-contract", "s3-copy-contract", "s3-photos-owned", "s3-photos-cleanup", "s3-automatic-contract", "cloud18-dropbox", "cloud18-dropbox-live", "recovery29")) {
+    if (scope !in listOf("local-files", "media-fixture", "webdav-journal", "webdav-https", "webdav-os", "webdav-files", "webdav-saf", "webdav-photos-restore", "smb-files", "smb-product", "smb-photos-owned", "smb-profile", "sftp-files", "sftp-sources", "sftp-photos-owned", "sftp-product", "ftps-files", "ftps-sources", "ftps-product", "ftps-photos-owned", "cloud18-nextcloud", "cloud18-destination", "cloud18-oauth", "cloud18-targets", "s3-profile", "s3-journal", "s3-wire", "s3-publisher", "s3-files", "s3-drop-write", "s3-drop-read", "s3-redirect", "s3-diagnostic", "s3-abort", "s3-runs", "s3-pause", "s3-global-pause", "s3-media-contract", "s3-copy-contract", "s3-photos-owned", "s3-photos-cleanup", "s3-automatic-contract", "s3-automatic-lock", "s3-automatic-plan", "s3-automatic-os", "cloud18-dropbox", "cloud18-dropbox-live", "recovery29")) {
       finish(Activity.RESULT_CANCELED, Bundle().apply { putString("stream", "Explicit scope required: local-files, media-fixture or webdav-journal\n") })
       return
     }
@@ -56,6 +56,7 @@ class AndroidFilesQueueRecoveryInstrumentation : Instrumentation() {
         check()
         sendStatus(0, Bundle().apply { putString("stream", "PASS $name\n") })
       }
+      AndroidAutomaticLockChecks.scope(scope, this, scratch, ::group)?.let { finish(Activity.RESULT_OK, Bundle().apply { putString("stream", it) }); return }
       if (scope == "s3-automatic-contract") {
         group("s3-automatic-manual-authority") { AndroidS3AutomaticChecks.run(this, scratch) }
         finish(Activity.RESULT_OK, Bundle().apply { putString("stream", "S3 default-off/automatic survives UI leave/authority revocation/manual pause/callback-once/fake-key cleanup PASS; no network/media\n") }); return

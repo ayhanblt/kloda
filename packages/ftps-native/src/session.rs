@@ -92,7 +92,7 @@ impl Session {
             .into_secure(RustlsConnector::from(Arc::new(config)), &r.hostname)
             .map_err(|_| Error::Tls)?;
         owner.current()?;
-        ftp.login(&r.username, &r.password)
+        ftp.login(r.username.as_str(), r.password.as_str())
             .map_err(|_| Error::Authentication)?;
         ftp.set_mode(Mode::ExtendedPassive);
         ftp.transfer_type(suppaftp::types::FileType::Binary)
@@ -160,7 +160,7 @@ mod tests {
             port,
             hostname: "localhost".into(),
             username: "probe".into(),
-            password: "unused".into(),
+            password: zeroize::Zeroizing::new(String::from("unused")),
             root: "/".into(),
             operation_id: "12345678-1234-4321-8765-123456789abc".into(),
             final_path: format!("engine-{}.bin", std::process::id()),
@@ -228,7 +228,7 @@ mod tests {
             port,
             hostname: "localhost".into(),
             username: "probe".into(),
-            password: "unused".into(),
+            password: zeroize::Zeroizing::new(String::from("unused")),
             root: "/".into(),
             operation_id: "12345678-1234-4321-8765-123456789abc".into(),
             final_path: format!("drop-ack-{}.bin", std::process::id()),

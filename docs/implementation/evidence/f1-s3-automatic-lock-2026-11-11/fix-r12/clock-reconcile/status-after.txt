@@ -1,0 +1,192 @@
+ M AGENTS.md
+ M apps/mobile/modules/my-module/android/src/androidTest/AndroidManifest.xml
+ M apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFilesQueueRecoveryInstrumentation.kt
+ M apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticChecks.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Automatic.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Queue.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Runtime.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaFtpsModule.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSftpModule.kt
+ M apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaSmbModule.kt
+ M apps/mobile/modules/my-module/ios/KlodaFtpsModule.swift
+ M apps/mobile/modules/my-module/ios/KlodaSftpModule.swift
+ M apps/mobile/modules/my-module/ios/KlodaSmbModule.swift
+ M apps/mobile/src/features/file-transfer/model/use-ftps-items.ts
+ M apps/mobile/src/features/file-transfer/model/use-sftp-items.ts
+ M apps/mobile/src/features/file-transfer/model/use-smb-items.ts
+ M apps/mobile/src/pages/activity/ui/ftps-items-panel.spec.tsx
+ M apps/mobile/src/pages/activity/ui/sftp-items-panel.spec.tsx
+ M apps/mobile/src/pages/activity/ui/smb-items-panel.spec.tsx
+ M apps/mobile/src/pages/connections/ui/s3-diagnostic-page.spec.tsx
+ M apps/mobile/src/shared/api/ftps.spec.ts
+ M apps/mobile/src/shared/api/ftps.ts
+ M apps/mobile/src/shared/api/sftp.spec.ts
+ M apps/mobile/src/shared/api/sftp.ts
+ M apps/mobile/src/shared/api/smb.spec.ts
+ M apps/mobile/src/shared/api/smb.ts
+ M docs/implementation/CURRENT.md
+ M packages/ftps-native/Cargo.lock
+ M packages/ftps-native/Cargo.toml
+ M packages/ftps-native/src/android_jni.rs
+ M packages/ftps-native/src/bridge.rs
+ M packages/ftps-native/src/request.rs
+ M packages/ftps-native/src/session.rs
+?? .opencode/commands/implement.md
+?? .opencode/commands/plan.md
+?? .opencode/commands/review.md
+?? apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidAutomaticLockChecks.kt
+?? apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticOsChecks.kt
+?? apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticPlanChecks.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticCoordinator.kt
+?? apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticPlan.kt
+?? docs/implementation/b4-android-vault-lock-policy-2026-11-11.md
+?? docs/implementation/claude-review-2026-11-11.md
+?? docs/implementation/current-history-2026-11-11.md
+?? docs/implementation/evidence/b1-uuid-2026-11-11/20-ios-podfile-lock-before.txt
+?? docs/implementation/evidence/b1-uuid-2026-11-11/manifest.json
+?? docs/implementation/evidence/b1-uuid-2026-11-11/review.md
+?? docs/implementation/evidence/b3-zeroize-2026-11-11/40-ftps-native.diff
+?? docs/implementation/evidence/b3-zeroize-2026-11-11/manifest.json
+?? docs/implementation/evidence/b4-vault-lock-2026-11-11/05-keygenparameterspec-excerpt.txt
+?? docs/implementation/evidence/b4-vault-lock-2026-11-11/10-source-sha256.txt
+?? docs/implementation/evidence/b4-vault-lock-2026-11-11/11-source-git-status.txt
+?? docs/implementation/evidence/b4-vault-lock-2026-11-11/12-build-output-sha256.txt
+?? docs/implementation/evidence/b4-vault-lock-2026-11-11/33-review-current-vs-head.diff
+?? docs/implementation/evidence/b4-vault-lock-2026-11-11/manifest.json
+?? docs/implementation/evidence/b4-vault-lock-2026-11-11/review.md
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/MANIFEST.md
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/apk-sha256-build7.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/apk-sha256-build8.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/apk-sha256.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/baseline/AndroidFilesQueueRecoveryInstrumentation.kt.orig
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/baseline/AndroidManifest.xml.orig
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/baseline/AndroidS3Automatic.kt.orig
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/baseline/AndroidS3AutomaticChecks.kt.orig
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/baseline/AndroidS3Queue.kt.orig
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/baseline/AndroidS3Runtime.kt.orig
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/baseline/CURRENT.md.orig
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/baseline/CURRENT.md.start-vs-HEAD.diff
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/baseline/sha256.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/baseline/start-status.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/final-sources.sha256
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/MANIFEST.md
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/apk-sha256-build3.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/apk-sha256-build4.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/apk-sha256-build5.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/apk-sha256.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/baseline/AndroidS3Automatic.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/baseline/AndroidS3AutomaticCoordinator.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/baseline/AndroidS3AutomaticPlan.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/baseline/head.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/baseline/sources.sha256
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/baseline/status.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/baseline/verify.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/changed-files.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/final-sources.sha256
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/line-counts.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/review.md
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/round-product.diff
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/run-s3-automatic-os-1.logcat.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/status-after.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r1-r7/tracked-stat.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/MANIFEST.md
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/apk-sha256-g1.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/apk-sha256-red1.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/baseline/AndroidAutomaticLockChecks.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/baseline/AndroidS3AutomaticCoordinator.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/baseline/CURRENT.md.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/baseline/MANIFEST-parent.md.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/baseline/docs-start.diff
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/baseline/head.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/baseline/pre.sha256
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/baseline/staged.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/baseline/start-hash-check.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/baseline/status.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/baseline/tracked-scope-start.diff
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/MANIFEST.md
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/apk-c2.sha256
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/apk-c3.sha256
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/apk-c4.sha256
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/apk-c5.sha256
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/apk-c6.sha256
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/apk-final.sha256
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/baseline/AndroidAutomaticLockChecks.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/baseline/AndroidS3AutomaticCoordinator.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/baseline/AndroidS3AutomaticOsChecks.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/baseline/AndroidS3AutomaticPlan.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/baseline/AndroidS3AutomaticPlanChecks.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/baseline/CURRENT.md.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/baseline/MANIFEST.md.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/baseline/f1-r12-clock-reconcile-fix.md.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/baseline/head.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/baseline/pre.sha256
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/baseline/staged.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/baseline/start-sources.sha256
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/baseline/status.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/baseline/tracked-scope-start.diff
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/final-sources.sha256
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/line-counts.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/round.diff
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/status-after.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/contract-start-source-hashes.json
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/current-sources.sha256
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/g1-failure-excerpt.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/head-after.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/line-counts.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/round-product.diff
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/round-test.diff
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/staged-after.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/status-after.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/MANIFEST.md
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/apk-sha256-g1.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/apk-sha256-red-r11.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/apk-sha256-red-r8.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/apk-sha256-red1.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/baseline/AndroidAutomaticLockChecks.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/baseline/AndroidFilesQueueRecoveryInstrumentation.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/baseline/AndroidManifest.xml.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/baseline/AndroidS3Automatic.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/baseline/AndroidS3AutomaticChecks.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/baseline/AndroidS3AutomaticCoordinator.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/baseline/AndroidS3AutomaticOsChecks.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/baseline/AndroidS3AutomaticPlan.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/baseline/AndroidS3AutomaticPlanChecks.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/baseline/AndroidS3Queue.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/baseline/AndroidS3Runtime.kt.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/baseline/CURRENT.md.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/baseline/MANIFEST-parent.md.pre
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/baseline/head.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/baseline/pre.sha256
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/baseline/staged.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/baseline/status.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/baseline/tracked-scope-start.diff
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/final-sources.sha256
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/green-src/AndroidS3AutomaticCoordinator.kt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/green-src/AndroidS3AutomaticPlan.kt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/green-src/AndroidS3Queue.kt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/head-after.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/line-counts.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/red-r11-mutation.diff
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/red-r8-mutation.diff
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/review-status.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/review.md
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/round-hash-compare.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/round-product.diff
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/round-test.diff
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/staged-after.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/status-after.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r8-r11/tracked-scope-after.diff
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/red/AndroidS3AutomaticCoordinator.kt.pre-mutation
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/red/f1-mutation.diff
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/red/pre-mutation.sha256
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/review.md
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/run-s3-automatic-os-1.logcat.txt
+?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/tracked-scope.diff
+?? docs/implementation/evidence/jest-1.2-2026-11-11/05-spec.diff
+?? docs/implementation/evidence/jest-1.2-2026-11-11/manifest.json
+?? docs/implementation/evidence/opus-usage-audit-2026-11-11.md
+?? docs/implementation/evidence/opus-usage-audit-2026-11-12.md
+?? docs/implementation/evidence/workflow-root-cause-2026-11-12.md
+?? docs/implementation/plans/f1-r12-clock-reconcile-fix.md
+?? docs/implementation/plans/next-plan.md
+?? docs/implementation/research-pilot.md

@@ -1,0 +1,17 @@
+source: https://developer.android.com/reference/android/security/keystore/KeyGenParameterSpec fetched 2026-11-11T18:02:23Z; original html sha256 60d2496b1d62d6d461e496226dcc6d76caa0dac9d764f373632d6c65fe102e9f (not retained; 2.3 MB)
+--- text lines 33141-33148
+  AlgorithmParameterSpec for initializing a KeyPairGenerator or a
+KeyGenerator of the Android Keystore
+system. The spec determines authorized uses of the key, such as whether user authentication
+is required for using the key, what operations are authorized (e.g., signing, but not
+decryption), with what parameters (e.g., only with a particular padding scheme or digest), and
+the key's validity start and end dates. Key use authorizations expressed in the spec apply
+only to secret keys and private keys -- public keys can be used for any supported operations.
+
+--- text lines 35680-35697
+public boolean isUnlockedDeviceRequired ()
+  Returns true if the key is authorized to be used only while the device is unlocked.
+      Returns
+        boolean
+      See also:
+      Builder.setUnlockedDeviceRequired(boolean)

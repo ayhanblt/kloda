@@ -1,0 +1,2 @@
+AndroidS3AutomaticCoordinator.kt 298 (nonblank, excluding // and KDoc lines)
+AndroidAutomaticLockChecks.kt 300 (nonblank, excluding // and KDoc lines)
