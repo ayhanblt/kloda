@@ -1,0 +1,5 @@
+2ff6c5443569725e202ede23cf964910619df6df185d42ceb3ccf267ae1d16df  .\apps\mobile\src\pages\activity\ui\activity-journal-panel.tsx
+4f5144abc8ca742e7f3cb124274926704f2fb61de2fcab8be732f109bc652eb1  .\apps\mobile\src\pages\activity\ui\activity-journal-panel.spec.tsx
+581956cf91abae6d4df2f72596c4fdc69a3ca7f94b2f1f6983a3bdf66a808315  .\apps\mobile\src\pages\activity\ui\activity-page.tsx
+5e030c281c9680844b32b9b4d487f15099a1a6e7a7045916303b82c2d5124a50  .\docs\implementation\CURRENT.md
+3301c616f59493988ee7861c5168dbf4a3ac2153718e7f72c38a54e10978a13e  .\docs\implementation\evidence\backlog-2.1-g1\MANIFEST.md

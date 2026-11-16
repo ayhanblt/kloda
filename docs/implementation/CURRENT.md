@@ -4,11 +4,23 @@ Tek başlangıç işaretçisi. Tarihî PASS taze kabul değildir. Kurallar: kök
 
 ## Aktif iş / sıradaki adım
 
-**Durum: FIX / KISMİ — R1/R2 onaylı sözleşmenin fix2 uygulaması başladı;
-Opus kullanım limiti nedeniyle yarım kaldı. 16.11 Windows devri: [checkpoint](windows-handoff-2026-11-16.md).
-fix2/start baseline mevcut; Job ve Scheduler kısmen değişti, test dosyaları baseline'a eşit.
-Yeni fix2 build/runtime/regression sonucu kayıtlı değil; mevcut kodun derlendiği iddia edilmez.
-Yeniden başlatma/geri alma yok; Windows Opus bu kısmi diff'i sözleşmeye göre tamamlar. Checkbox açık.
+**16.11 kullanıcı yönlendirmesi:** F1 fix2 ve 1.5 kapanmadan Mac doğrulama kuyruğunda
+bekler; Windows'taki **2.1/G1 INITIAL + G1-R1**, **bağımsız GPT review ile geliştirme kabulü aldı**.
+G1 durumu **REVIEW / ACCEPTED**; görsel Faz3 DEFERRED / NOT_RUN. Son kayıtlar:
+[review](evidence/backlog-2.1-g1/review.md), [manifest](evidence/backlog-2.1-g1/MANIFEST.md).
+Sıradaki bağımsız iş: **2.2/G2–G3 GPT planı**, ayrı GPT plan sohbetinde; burada başlatılmaz.
+Hazır prompt: `AGENTS → CURRENT; 2.2/G2–G3 için gerçek Desktop tray ve sürüm/kapanış
+eşlemesini inceleyip tek goal, kapsam dışı, hedef semboller ve ortak kabul tablosuyla
+GPT planı hazırla. ADR0018 foreground/Linux görünür kontrol sınırlarını ve açık
+F1/1.5/Faz3–4 kapılarını koru. Ürün kodu değiştirme; uygulama başlatma.`
+Mac'te sıra: **F1 fix2 → 1.5 H15/P15**; [güncel kuyruk ve komutlar](windows-handoff-2026-11-16.md#güncel-mac-doğrulama-sırası--1611-kullanıcı-kararı).
+Alttaki F1 uygulama yönlendirmesi yalnız o iş Mac'te sürdürüldüğünde geçerlidir.
+
+**Durum: FIX / KISMİ (BLOCKED-ENV) — fix2 R1/R2 kaynağı + regression testleri Windows'ta
+tamamlandı; compile/androidTest/RED-GREEN/lint NOT_RUN (Windows'ta Android SDK/JDK17/prebuild yok,
+disk yetersiz; kullanıcı kararı: yalnız kaynak). Review-ready DEĞİL. Kayıt: MANIFEST §fix2 Windows
+devamı, `fix2/resume-win/`. Sıradaki: Android ortamında (Mac) kod değiştirmeden build + start-RED +
+final-GREEN + dar lint; aynı Opus uygulama rolü. Önceki devir: [checkpoint](windows-handoff-2026-11-16.md). Checkbox açık.
 Dar çözüm sözleşmesi: [R1/R2 stop/recovery](plans/f1-ftps-r1r2-stop-recovery-contract.md)
 **KULLANICI ONAYLI / SCOPED FIX READY**. Worker yetkisi ve retained stop bilgisi ayrıldı;
 slot temizliği stop tüketimi/yeni delivery/kanıtlı replacement/revoke/service teardown ile sınırlı.
@@ -85,14 +97,26 @@ S3 review kaydı için ek Opus oturumu gerekmez. Commit/push yok.
 - [x] **1.2/Jest:** AppState listener spec düzeltmesi + bağımsız GPT review kabul.
 - [x] **1.3/B3:** FTPS Drop-zeroize + bağımsız GPT review kabul; P3 belge notu, FTPS/JNI runtime ve fiziksel kapılar açık.
 - [x] **1.4/B4:** vault politikası belge review kabul; bayrak eklenmedi, kalan risk kabul. R1 tarihî CURRENT aidiyeti sınırlaması korundu; runtime güvenlik PASS'i değil.
-- [ ] **1.4b/F1 geliştirme:** R1/R2 dar tasarım kullanıcı onaylı → FIX devri hazır, uygulama başlamadı; iki ret sayacı korunur. R3 dar lint kabul ve S3 kabulü korunur. FO1 prior PASS reuse/yeni zincir ve diğer fiziksel/release kapıları Faz4'te; yalnız bu ertelemeler geliştirme kapanışını bekletmez.
+- [ ] **1.4b/F1 geliştirme:** R1/R2 dar tasarım kullanıcı onaylı → fix2 kaynağı tamam, doğrulama BLOCKED-ENV (NOT_RUN); iki ret sayacı korunur. R3 dar lint kabul ve S3 kabulü korunur. FO1 prior PASS reuse/yeni zincir ve diğer fiziksel/release kapıları Faz4'te; yalnız bu ertelemeler geliştirme kapanışını bekletmez.
 - [ ] **1.5:** iOS WebDAV host testini onar; cesu8/instant-xml/instant-xml-macros lisansları; B2 release iOS fixture-CA marker kontrolünü kabul kapısına bağla.
-- [ ] **2.1/G1:** gerçek journal ile Mobil Etkinlik Şu an/Geçmiş.
+  16.11 Opus INITIAL: **KISMİ / BLOCKED-ENV — review-ready değil.** H15 harness kaynağı, L15 notices, B15 §20 kapısı
+  uygulandı; H15/P15 macOS koşusu NOT_RUN (Windows'ta xcrun/swiftc yok). Kanıt: [1.5 MANIFEST](evidence/backlog-1.5/MANIFEST.md).
+  Sıradaki: macOS'ta kod değiştirmeden `python3 -I tools/test-ios-webdav-journal.py` (aynı Opus rolü); GREEN sonrası GPT review.
+- [x] **2.1/G1:** gerçek journal ile Mobil Etkinlik Şu an/Geçmiş. Sözleşme: next-plan §2.1/G1 (D-G1 onaylı).
+  16.11 INITIAL + G1-R1 FIX: **bağımsız GPT geliştirme review KABUL.** G1-01–06 ve G1-07 render/a11y
+  karşılandı; son Jest 40/40, tsc, scoped ESLint ve iOS/Android export uygulama kanıtı REUSE.
+  G1-07 görsel karşılaştırma kullanıcı kararıyla **Faz3 DEFERRED / NOT_RUN**, geliştirme engeli değil.
+  [Review](evidence/backlog-2.1-g1/review.md): G1-R1 M11 header dropdown RESOLVED; 8/8 son hash,
+  INITIAL→FIX baseline zinciri ve komşu yollar taze statik doğrulandı. Reviewer yeni test/build NOT_RUN.
+  [Manifest](evidence/backlog-2.1-g1/MANIFEST.md) §Bağımsız GPT kapanışı; görsel/runtime veya üst F1/1.5 kabulü değil.
 - [ ] **2.2/G2–G3:** gerçek Desktop tray, sürüm/kapanış eşlemesi; ADR0018 foreground ve Linux görünür kontrol sınırları.
 - [ ] **2.3/G4–G6:** gerçek mobil ayar yetenek/kapsamı; D10 birleşimini belgele; kilit ekranı step19 kapısında.
 - [ ] **2.4:** eşleşme/aktarım metinleri, WebDAV endpoint/port/yol ve sır sızdırmayan teşhis; kök neden olmadan retry/fence gevşetme yok.
 - [ ] **2.5:** mevcut betiklerle eksik ekran/dil kapsamını kalıcı batch capture'a tamamla.
 - [ ] **3:** tek tam regresyon; önce fixture/tek temsilci; JS/native/build, güvenlik/B2, a11y/görsel/performance. Lint açık: DeviceCheck:40/45 MissingPermission, S3Automatic:46 NewApi ve worklets bağımlılık analizi (FTPS MANIFEST §R3 dış-kapsam lint bulguları); FTPS dar lint kabulü genel lint PASS'i değil. Dropbox Android JobService, iOS >150 MiB upload_session, Dropbox Photos/Nextcloud restore, Android yükseltme ve recovery göster/kopyala açık kontrolleri dahil. Hesaplar ayrı izinli; bağımsız review ve dağıtım kapıları korunur.
+  **G1-07:** Etkinlik Şu an/Geçmiş + filtreler; TR/EN/DE, light/dark, büyük yazı ve Lovable M11
+  görsel karşılaştırması 16.11 kullanıcı kararıyla burada **DEFERRED / NOT_RUN**. Kalıcı batch capture
+  script açığı 2.5'te açık; hazır olmayan runnable komut varsayılmaz.
 - [ ] **4:** Android fiziksel tam kapsam; Desktop OS/signing/storage ve saha kesinti teşhisi. iOS Simulator ayrı kanıt; fiziksel iOS yoksa custody/OS/Photos/iCloud/signing açık. Kullanıcı veri/eşleşmesi korunur, cihaz/hesap/medya izni varsayılmaz.
   F1-FO1 dar kontrol: gerçek success → tek completion → UI'sız sonraki JOB callback'i;
   16.11 kullanıcı kararıyla buraya taşındı, NOT_RUN. Ayrıntı: 20–21 koleksiyonu §21.

@@ -6,7 +6,10 @@ import android.app.job.JobScheduler
 import android.app.job.JobService
 import android.content.ComponentName
 import android.content.Context
+import android.net.Uri
 import android.os.PersistableBundle
+import android.provider.DocumentsContract
+import android.provider.MediaStore
 import java.util.UUID
 
 internal object AndroidFtpsScheduler {
@@ -44,31 +47,40 @@ internal object AndroidFtpsScheduler {
   fun <T> arbiter(block: () -> T): T = synchronized(lock) { block() }
   /** Per lane delivery/revoke generation; a retained stop answer or recovery ticket is valid only for its own epoch. */
   private val epochs = java.util.concurrent.ConcurrentHashMap<Int, Long>()
-  fun started(lane: Int): Long = epochs.merge(lane, 1L) { a, b -> a + b }!!
+  /** Under the arbiter at onStart: a delivery of the proposed unknown WATCH is its installation proof (§3). */
+  fun started(lane: Int, token: String?): Long {
+    if (lane == WATCH && token != null && watchUnknown?.next?.token == token) watchUnknown = null
+    return epochs.merge(lane, 1L) { a, b -> a + b }!!
+  }
   private fun epoch(lane: Int) = epochs[lane] ?: 0L
   /** §OS protocol: `rejected` = explicit FAILURE with the previous token restored; otherwise acceptance is unknown. */
   private class Unaccepted(val rejected: Boolean) : Exception(if (rejected) "automatic_unavailable" else "outcome_unknown")
   /** JOB replacement (new to previous token) whose schedule threw without provable pending; admission closed until resolved. */
   private val unresolved = java.util.concurrent.ConcurrentHashMap<Int, Pair<String, String?>>()
+  /** WATCH proof (§3): service + token + trigger URIs/flags; a token alone never proves an installation. */
+  private class Proof(val token: String, val uris: Set<JobInfo.TriggerContentUri>)
   /** R2 §3: one WATCH attempt recorded before its install; `origin` = the E whose callback owns the result, null = ordinary. */
-  private class Attempt(val next: String, val previous: String?, val origin: FtpsSlot?, val uris: Set<JobInfo.TriggerContentUri>) {
-    fun owner() = origin?.phase == FtpsSlot.Phase.RUNNING || origin?.phase == FtpsSlot.Phase.COMPLETING
+  private class Attempt(val next: Proof, val previous: Proof?, val origin: FtpsSlot?) {
+    fun owner() = origin?.phase == FtpsSlot.Phase.RUNNING
   }
   @Volatile private var watchUnknown: Attempt? = null
   fun admits() = unresolved.isEmpty() && watchUnknown == null
-  /** Explicit revoke (pause/disable/fail-closed): retires unresolved attempts and every retained retry/recovery epoch. */
-  fun cancel(context: Context) {
-    os.cancel(context, JOB); os.cancel(context, WATCH); unresolved.clear(); watchUnknown = null
+  /**
+   * Explicit revoke (pause/disable/unsupported/no profile) retires unresolved attempts; every revoke voids retained
+   * retry/recovery epochs. `keep` = generic fail-closed: lanes cancelled, but UNKNOWN fences are not cleared by it.
+   */
+  fun cancel(context: Context, keep: Boolean = false) {
+    os.cancel(context, JOB); os.cancel(context, WATCH)
+    if (!keep) { unresolved.clear(); watchUnknown = null }
     epochs.merge(JOB, 1L) { a, b -> a + b }; epochs.merge(WATCH, 1L) { a, b -> a + b }
   }
   /** WATCH replacement outcome (§4.8 + §OS protocol); NONE = no exact consumed WATCH to replace (paused/mode/retired). */
   enum class Rewatch { NONE, INSTALLED, REJECTED, UNKNOWN }
-  /** The own finish was handed to the OS: COMPLETING → RETAINED; a consumed (STOPPED) answer is never reopened. */
-  fun retain(slot: FtpsSlot) = synchronized(lock) { if (slot.phase == FtpsSlot.Phase.COMPLETING) slot.phase = FtpsSlot.Phase.RETAINED }
   /**
    * R1 §2 stop answer of the exact slot (caller removed it under this monitor). RUNNING: pre-admission current JOB is
-   * retried, a claimed run records one recovery ticket. COMPLETING/RETAINED: only the published RETRY of the same epoch
-   * and still-current D; installed successor/revoke/HOLD answer false. finish is never repeated here.
+   * retried, a claimed run records one recovery ticket; a WATCH holding a published REJECTED fallback keeps its backoff.
+   * COMPLETING/RETAINED: only the published RETRY of the same epoch and still-current D; installed successor/revoke/HOLD
+   * answer false. finish is never repeated here.
    */
   fun stopped(context: Context, slot: FtpsSlot, token: String?, claimed: Boolean): Boolean = synchronized(lock) {
     val phase = slot.phase
@@ -76,7 +88,7 @@ internal object AndroidFtpsScheduler {
     when (phase) {
       FtpsSlot.Phase.RUNNING -> {
         if (claimed) slot.ticket = true
-        slot.lane == JOB && !claimed && current(context, token)
+        if (slot.lane == JOB) !claimed && current(context, token) else slot.verdict == Rewatch.REJECTED && watching(context, token)
       }
       FtpsSlot.Phase.COMPLETING, FtpsSlot.Phase.RETAINED -> slot.stop == FtpsSlot.Stop.RETRY && slot.epoch == epoch(slot.lane) &&
         (if (slot.lane == JOB) current(context, token) else watching(context, token))
@@ -94,31 +106,43 @@ internal object AndroidFtpsScheduler {
       extras.getString("target") == plan.target && extras.getLong("occurrence", -1) == plan.occurrence && extras.getLong("dispatch", -1) == plan.due
   }
   /**
-   * §4.5–4.8 single completion decision of one exact callback under the arbiter. `retire` is the atomic removal of the
-   * callback's own lifecycle entry: losing it to onStop/onDestroy means stopped (that decision already went to the OS).
-   * A retired origin (B installed) or an OS-stopped one does only its own cleanup; an ordinary JOB completes by its next
-   * replacement (no extra finish).
+   * §4.5–4.8 + R1 §2 single completion decision of one exact E under the arbiter. RUNNING → COMPLETING closes worker
+   * authority; the stop disposition is published before the own finish goes to the OS, and the slot stays RETAINED so a
+   * late OS stop still finds it (no terminal-ack assumption). A stopped/destroyed E only consumes its recovery ticket.
    */
-  fun complete(service: JobService, params: JobParameters, retire: () -> Boolean, locked: Boolean, claimed: Boolean, watch: Rewatch?) = synchronized(lock) {
-    val stopped = !retire()
+  fun complete(service: JobService, params: JobParameters, slot: FtpsSlot, locked: Boolean, watch: Rewatch?) = synchronized(lock) {
     val context = service.applicationContext
     val token = params.extras.getString("token")
-    if (params.jobId == WATCH) {
-      // Installed or unknown replacement: no finish/cancel (unknown stays unresolved). Rejected: one own backoff retry.
-      if (stopped || watch == Rewatch.INSTALLED || watch == Rewatch.UNKNOWN || !watching(context, token)) return@synchronized
-      if (watch == Rewatch.REJECTED) { os.finish(service, params, true); return@synchronized }
-      // No replacement attempted (paused/scheduled mode, or the WATCH's own failure): ordinary revoke and reconcile.
-      os.finish(service, params, false); os.cancel(context, WATCH); reconcile(context)
-      return@synchronized
+    if (slot.phase != FtpsSlot.Phase.RUNNING) return@synchronized recover(context, slot, token)
+    slot.phase = FtpsSlot.Phase.COMPLETING
+    fun settle(stop: FtpsSlot.Stop, finish: Boolean? = null) {
+      slot.stop = stop
+      try { finish?.let { os.finish(service, params, it) } } finally { slot.phase = FtpsSlot.Phase.RETAINED }
     }
-    if (!current(context, token)) return@synchronized
-    // Stopped before admission: onStopJob already asked the OS for the retry; a claimed run re-projects its recorded result.
-    if (stopped) { if (claimed) reconcile(context); return@synchronized }
-    if (locked) { os.finish(service, params, true); return@synchronized }
-    try { reconcile(context, self = token) } catch (failure: Unaccepted) { os.finish(service, params, true); return@synchronized }
+    // Installed or unknown WATCH replacement: no finish/cancel (unknown stays HOLD). Rejected: one own backoff retry.
+    val outcome = slot.verdict ?: watch
+    if (params.jobId == WATCH) return@synchronized when {
+      outcome == Rewatch.UNKNOWN -> settle(FtpsSlot.Stop.HOLD)
+      outcome == Rewatch.INSTALLED || !watching(context, token) -> settle(FtpsSlot.Stop.NO_RETRY)
+      outcome == Rewatch.REJECTED -> settle(FtpsSlot.Stop.RETRY, true)
+      // No replacement attempted (paused/scheduled mode, or the WATCH's own failure): ordinary revoke and reconcile.
+      else -> { settle(FtpsSlot.Stop.NO_RETRY, false); os.cancel(context, WATCH); reconcile(context) }
+    }
+    if (!current(context, token)) return@synchronized settle(FtpsSlot.Stop.NO_RETRY)
+    if (locked) return@synchronized settle(FtpsSlot.Stop.RETRY, true)
+    try { reconcile(context, self = token) } catch (failure: Unaccepted) { return@synchronized settle(FtpsSlot.Stop.RETRY, true) }
     // Nothing replaced or cancelled the own JOB (e.g. a foreign lease holds P.run): complete it once explicitly.
-    if (!unresolved.containsKey(JOB) && context.getSystemService(JobScheduler::class.java).getPendingJob(JOB)?.extras?.getString("token") == token)
-      os.finish(service, params, false)
+    val own = context.getSystemService(JobScheduler::class.java).getPendingJob(JOB)?.extras?.getString("token") == token
+    if (unresolved.containsKey(JOB)) settle(FtpsSlot.Stop.HOLD) else settle(FtpsSlot.Stop.NO_RETRY, if (own) false else null)
+  }
+  /**
+   * R1 §2 recovery ticket of a claimed E stopped while RUNNING: one asynchronous decision after its Runtime cleanup,
+   * for the same D and epoch only; a newer delivery, revoke or installed B voids it. Never revives the old worker.
+   */
+  private fun recover(context: Context, slot: FtpsSlot, token: String?) {
+    if (!slot.ticket) return
+    slot.ticket = false
+    Thread({ synchronized(lock) { if (epoch(slot.lane) == slot.epoch && current(context, token)) reconcile(context) } }, "kloda-ftps-reconcile").start()
   }
   fun reconcileAsync(context: Context, clockChanged: Boolean = false) {
     Thread({ reconcile(context.applicationContext, clockChanged) }, "kloda-ftps-reconcile").start()
@@ -133,7 +157,6 @@ internal object AndroidFtpsScheduler {
       if (AndroidBackupScheduler.paused(context)) { cancel(context); return@synchronized }
       run {
         val queue = AndroidFtpsRuntime.queue(context)
-        val journal = queue.journal
         val plan = synchronized(AndroidSyncJournal.sourceLock) source@{
           val header = queue.destination() ?: run { cancel(context); return@source null }
           val sources = FilesRunContext.webdav(context)
@@ -174,11 +197,9 @@ internal object AndroidFtpsScheduler {
         } ?: return@run
         val scheduler = context.getSystemService(JobScheduler::class.java)
         if (!projects(context, resolve(context, scheduler), plan, self)) dispatch(context, scheduler, plan, maxOf(0, plan.due - System.currentTimeMillis()))
-        if (AndroidBackupScheduler.mode(context) == "live") {
-          // Unresolved WATCH: exact new kept; exact old (its worker no longer completes it) or null → one fresh projection.
-          if (resolve(context, scheduler, WATCH) == null && scheduler.getPendingJob(WATCH) != null) os.cancel(context, WATCH)
-          AndroidBackupScheduler.watch(context, FilesRunContext.webdav(context).sources.values.toSet(), scheduler, WATCH, AndroidFtpsJob::class.java)
-        } else { os.cancel(context, WATCH); unresolved.remove(WATCH) }
+        // R2: the FTPS WATCH never goes through the shared helper; rejected/unknown/blocked never report success.
+        if (AndroidBackupScheduler.mode(context) == "live") { if (!watch(context, scheduler)) return@run }
+        else { os.cancel(context, WATCH); watchUnknown = null }
         report(context, null)
       }
     } catch (caught: Exception) {
@@ -191,7 +212,7 @@ internal object AndroidFtpsScheduler {
         runCatching { report(context, code) }
         if (failure.rejected) throw failure else return@synchronized
       }
-      cancel(context)
+      cancel(context, keep = true)
       runCatching { report(context, code) }
     }
   }
@@ -256,33 +277,72 @@ internal object AndroidFtpsScheduler {
     } catch (failure: Exception) { if (AndroidFtpsQueue.code(failure) != "credential_locked") throw failure }
     reconcile(context)
   }
-  /**
-   * §4.8 WATCH completion: replace the consumed exact WATCH with the same trigger URIs; success needs no finish/cancel.
-   * §OS protocol: FAILURE or throw with the exact old pending = rejected; throw with the exact new = installed; null/
-   * foreign/unreadable = unknown → unresolved (admission closed) until the next ordinary reconcile, no second OS call.
-   */
-  fun rewatch(context: Context, token: String?, live: () -> Boolean): Rewatch = synchronized(lock) {
+  /** §4.8 WATCH completion: replace the consumed exact WATCH (same trigger URIs/flags) through the §3 protocol. */
+  fun rewatch(context: Context, token: String?, origin: FtpsSlot, live: () -> Boolean): Rewatch = synchronized(lock) {
     if (!live() || token == null || AndroidBackupScheduler.paused(context) || AndroidBackupScheduler.mode(context) != "live") return@synchronized Rewatch.NONE
     val scheduler = context.getSystemService(JobScheduler::class.java)
-    val uris = scheduler.getPendingJob(WATCH)?.takeIf { it.extras.getString("token") == token }?.triggerContentUris ?: return@synchronized Rewatch.NONE
-    val next = UUID.randomUUID().toString()
-    val job = JobInfo.Builder(WATCH, ComponentName(context, AndroidFtpsJob::class.java))
-      .setExtras(PersistableBundle().apply { putString("token", next) })
-    uris.forEach { job.addTriggerContentUri(it) }
-    val outcome = try {
-      if (os.schedule(scheduler, job.build()) == JobScheduler.RESULT_SUCCESS) Rewatch.INSTALLED else Rewatch.REJECTED
-    } catch (failure: Exception) {
-      when (runCatching { scheduler.getPendingJob(WATCH)?.extras?.getString("token") }.getOrNull()) {
-        next -> Rewatch.INSTALLED
-        token -> Rewatch.REJECTED
-        else -> Rewatch.UNKNOWN
-      }
-    }
-    if (outcome == Rewatch.UNKNOWN) unresolved[WATCH] = next to token
-    if (outcome == Rewatch.REJECTED || outcome == Rewatch.UNKNOWN)
-      runCatching { report(context, if (outcome == Rewatch.REJECTED) "automatic_unavailable" else "outcome_unknown") }
-    outcome
+    val consumed = scheduler.getPendingJob(WATCH)?.takeIf { it.extras.getString("token") == token } ?: return@synchronized Rewatch.NONE
+    val uris = consumed.triggerContentUris.orEmpty().toSet()
+    install(context, scheduler, origin, Proof(token, uris), uris)
   }
+  /**
+   * R2 §3 single WATCH install (initial / replace / recovery). The attempt is recorded before the OS call. SUCCESS or
+   * throw with the exact proposed pending = INSTALLED; FAILURE or throw with the exact previous = REJECTED (previous
+   * kept); throw with null/foreign/unreadable = UNKNOWN, kept with admission closed. No finish, cancel or second schedule.
+   */
+  private fun install(context: Context, scheduler: JobScheduler, origin: FtpsSlot?, previous: Proof?, uris: Set<JobInfo.TriggerContentUri>): Rewatch {
+    if (uris.isEmpty()) return Rewatch.NONE
+    val next = Proof(UUID.randomUUID().toString(), uris)
+    val job = JobInfo.Builder(WATCH, ComponentName(context, AndroidFtpsJob::class.java))
+      .setExtras(PersistableBundle().apply { putString("token", next.token) })
+    uris.forEach { job.addTriggerContentUri(it) }
+    val built = job.build()
+    val attempt = Attempt(next, previous, origin).also { watchUnknown = it }
+    val outcome = try {
+      if (os.schedule(scheduler, built) == JobScheduler.RESULT_SUCCESS) Rewatch.INSTALLED else Rewatch.REJECTED
+    } catch (failure: Exception) {
+      // An unreadable pending proves nothing: it is classified like null (UNKNOWN), never as absence or rejection.
+      val pending = runCatching { os.pending(scheduler, WATCH) }.getOrNull()
+      if (proves(pending, next)) Rewatch.INSTALLED else if (proves(pending, previous)) Rewatch.REJECTED else Rewatch.UNKNOWN
+    }
+    if (outcome != Rewatch.UNKNOWN && watchUnknown === attempt) watchUnknown = null
+    if (outcome != Rewatch.INSTALLED) runCatching { report(context, if (outcome == Rewatch.REJECTED) "automatic_unavailable" else "outcome_unknown") }
+    return outcome
+  }
+  private fun proves(job: JobInfo?, proof: Proof?) = proof != null && job != null && job.extras.getString("token") == proof.token &&
+    job.service.className == AndroidFtpsJob::class.java.name && job.triggerContentUris.orEmpty().toSet() == proof.uris
+  /** Same trigger URIs/flags the shared helper derives from the profile sources (meaning preserved, helper not used). */
+  private fun triggers(context: Context): Set<JobInfo.TriggerContentUri> = FilesRunContext.webdav(context).sources.values.toSet().flatMap { source ->
+    if (AndroidPhotosSources.isPhotos(source)) listOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
+    else Uri.parse(source).let { listOf(DocumentsContract.buildChildDocumentsUriUsingTree(it, DocumentsContract.getTreeDocumentId(it))) }
+  }.map { JobInfo.TriggerContentUri(it, JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS) }.toSet()
+  /**
+   * R2 §3 ordinary WATCH reconcile: an open attempt is resolved by proof before anything is installed. true = settled
+   * (installed or kept); false = rejected/unknown/blocked, error already recorded, no success report and no cleanup.
+   */
+  private fun watch(context: Context, scheduler: JobScheduler): Boolean {
+    val uris = triggers(context)
+    val attempt = watchUnknown
+    val read = runCatching { os.pending(scheduler, WATCH) }
+    // No open attempt: an existing WATCH is kept (helper meaning); an unreadable one is a fail-closed read error.
+    if (attempt == null) return read.getOrThrow() != null || settled(install(context, scheduler, null, null, uris))
+    val pending = read.getOrElse { return blocked(context) }
+    return when {
+      proves(pending, attempt.next) -> { watchUnknown = null; true }
+      proves(pending, attempt.previous) && attempt.owner() -> {
+        // The origin callback still owns its completion: it consumes the one REJECTED fallback; no install here.
+        attempt.origin!!.verdict = Rewatch.REJECTED; watchUnknown = null
+        runCatching { report(context, "automatic_unavailable") }; false
+      }
+      // Worker-closed origin with the exact previous: one replacement, the previous is replaced, never blindly cancelled.
+      proves(pending, attempt.previous) -> settled(install(context, scheduler, null, attempt.previous, uris))
+      // Proven absence with no owning callback: the old attempt is handed over to exactly one new attempt.
+      pending == null && !attempt.owner() -> settled(install(context, scheduler, null, null, uris))
+      else -> blocked(context)
+    }
+  }
+  private fun settled(outcome: Rewatch) = outcome == Rewatch.INSTALLED || outcome == Rewatch.NONE
+  private fun blocked(context: Context): Boolean { runCatching { report(context, "outcome_unknown") }; return false }
   fun defer(context: Context, expected: FtpsPlan, token: String?, live: () -> Boolean) = synchronized(lock) {
     if (live() && current(context, token)) run {
       val schedule = AndroidFtpsRuntime.queue(context).schedule
@@ -293,7 +353,6 @@ internal object AndroidFtpsScheduler {
     if (!live() || !current(context, token)) return@synchronized
     run {
       val queue = AndroidFtpsRuntime.queue(context)
-      val journal = queue.journal
       if (queue.runs.read(id = result.id) != result) throw FilesFailure("storage_failure")
       val header = queue.destination() ?: return@run
       if (header.target != expected.target || header.revision != expected.binding) return@run

@@ -47,7 +47,7 @@ class AndroidFtpsJob : JobService() {
     val accepted = AndroidFtpsScheduler.arbiter {
       val prior = executions[params.jobId]?.phase
       if (prior == FtpsSlot.Phase.RUNNING || prior == FtpsSlot.Phase.COMPLETING) false
-      else { execution.epoch = AndroidFtpsScheduler.started(params.jobId); executions[params.jobId] = execution; true }
+      else { execution.epoch = AndroidFtpsScheduler.started(params.jobId, params.extras.getString("token")); executions[params.jobId] = execution; true }
     }
     if (!accepted) return false
     Thread({
@@ -63,12 +63,8 @@ class AndroidFtpsJob : JobService() {
         runCatching { AndroidFtpsScheduler.reportCurrent(applicationContext, token, code, { live(execution) }, params.jobId) }
       } finally {
         AndroidFtpsRuntime.endAutomatic(execution, interrupt = true)
-        runCatching {
-          val own = { executions[params.jobId] === execution }
-          val retry = AndroidFtpsScheduler.complete(this, params, execution, own, execution.locked, execution.plan != null, execution.watch)
-          // The own finish goes to the OS outside the monitor; the published stop answer stays retained across it.
-          if (retry != null) try { AndroidFtpsScheduler.os.finish(this, params, retry) } finally { AndroidFtpsScheduler.retain(execution) }
-        }
+        // One completion decision; the slot stays RETAINED with its published stop answer across the own finish.
+        runCatching { AndroidFtpsScheduler.complete(this, params, execution, execution.locked, execution.watch) }
       }
     }, "kloda-ftps-job").start()
     return true

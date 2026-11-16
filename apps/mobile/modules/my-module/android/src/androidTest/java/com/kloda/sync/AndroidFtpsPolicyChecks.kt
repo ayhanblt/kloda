@@ -2,9 +2,12 @@ package com.kloda.sync
 
 import android.app.Instrumentation
 import android.app.job.JobInfo
+import android.app.job.JobParameters
 import android.app.job.JobScheduler
+import android.app.job.JobService
 import android.content.Context
 import java.util.UUID
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
 
 // F1-FTPS FP1 policy rows (next-plan §3; file added by the 16.11 user decision) on the owned disposable test package;
@@ -15,43 +18,115 @@ internal object AndroidFtpsPolicyChecks {
     group("ftps-fp1-retry-elapsed-budget") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> retry(i, app, queue) } }
     for (case in listOf("busy-defer", "pause", "disable", "revision"))
       group("ftps-fp1-old-wake-$case") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> wake(i, app, queue, case) } }
-    for (case in listOf("finalization", "report"))
+    group("ftps-fl1-stop-after-decision") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> stopAfterDecision(i, app, queue) } }
+    for (case in listOf("finalization", "report", "same-token-b"))
       group("ftps-fs2-stop-held-$case") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> stopHeld(i, app, queue, case) } }
     group("ftps-fs1-destroyed-watch") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> destroyedWatch(i, app, queue) } }
-    for (case in listOf("failure", "old-throw", "new-throw", "null-throw"))
-      group("ftps-fp2-watch-$case") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> watchFault(i, app, queue, case) } }
+    for (case in listOf("failure", "old-throw", "new-throw"))
+      group("ftps-fp2-watch-$case") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> watchFault(i, app, queue, case, null) } }
+    for (recovery in listOf("clean", "accepted", "unknown", "rejected", "unreadable", "foreign"))
+      group("ftps-fp2-watch-null-throw-$recovery") { AndroidFtpsAutomaticChecks.owned(i) { app, queue -> watchFault(i, app, queue, "null-throw", recovery) } }
   }
 
   /**
-   * FS1/FS2 (R1): the exact current JOB A waits at the arbiter while a real OS stop (`timeout`) asks the retry for the same
-   * token. finalization: A returned without admission (future P, open capture) and waits in its completion. report: A
-   * threw and waits in its catch report while B's distinctive error is set on the same token. Released A: no OS call and
-   * no write; the same token/JOB/P stay for the OS retry.
+   * R1 barrier off the arbiter: the callback's first capture waits on [gate], then runs [after]. A real OS stop can make
+   * its arbitrated main-thread decision meanwhile; the test never holds the monitor while awaiting the platform.
+   */
+  internal fun gated(i: Instrumentation, lane: Int, gate: CountDownLatch, after: () -> Unit) {
+    AndroidFtpsQueue.captureFault = { gate.await(); after() }
+    AndroidFtpsLifecycleChecks.held(i, lane, Thread.State.WAITING)
+  }
+
+  /** Waits until the platform no longer reports [lane] active (after a real `cmd jobscheduler timeout`). */
+  internal fun inactive(i: Instrumentation, lane: Int) {
+    val deadline = android.os.SystemClock.elapsedRealtime() + 15000
+    fun active() = String(AndroidFtpsAutomaticChecks.shell(i, "cmd jobscheduler get-job-state com.kloda.sync.test $lane")).contains("active")
+    while (active() && android.os.SystemClock.elapsedRealtime() < deadline) Thread.sleep(50)
+    check(!active()) { "OS stop not delivered" }
+  }
+
+  /**
+   * FL1/FS2 (R1 representative): locked due A has made its completion decision (RETRY) and is held inside its own
+   * finish, before that finish reaches the OS, when a real OS stop arrives. The stop must still answer the retry: same
+   * P/token JOB pending, no run/attempt; the late finish is no substitute. A next same-token delivery replaces the
+   * RETAINED slot instead of being refused as an active duplicate.
+   */
+  private fun stopAfterDecision(i: Instrumentation, app: Context, queue: AndroidFtpsQueue) {
+    val entered = CountDownLatch(1)
+    val release = CountDownLatch(1)
+    val recorder = object : AndroidFtpsAutomaticChecks.Recorder() {
+      override fun finish(service: JobService, params: JobParameters, retry: Boolean) {
+        entered.countDown(); release.await(); super.finish(service, params, retry)
+      }
+    }
+    try {
+      val armed = AndroidFtpsLifecycleChecks.future(app, queue) // captureFault stays locked.
+      val due = System.currentTimeMillis().let { armed.plan.copy(occurrence = it, due = it) }
+      synchronized(AndroidSyncJournal.sourceLock) { queue.schedule.save(due, armed.plan) }
+      AndroidFtpsScheduler.reconcile(app) // Locked: metadata wake carrying the due P (FL1).
+      val token = app.getSharedPreferences("kloda-sync", 0).getString("ftpsDispatchToken", null)
+      AndroidFtpsScheduler.os = recorder
+      AndroidFtpsAutomaticChecks.shell(i, "cmd jobscheduler run -f com.kloda.sync.test ${AndroidFtpsScheduler.JOB}")
+      check(entered.await(30, java.util.concurrent.TimeUnit.SECONDS)) { "A never reached its own finish" }
+      AndroidFtpsAutomaticChecks.shell(i, "cmd jobscheduler timeout com.kloda.sync.test ${AndroidFtpsScheduler.JOB}")
+      // Asynchronous barrier: the platform main stop waits at the arbiter while A's finish is held; then A is released.
+      val deadline = android.os.SystemClock.elapsedRealtime() + 5000
+      while (android.os.Looper.getMainLooper().thread.state != Thread.State.BLOCKED && android.os.SystemClock.elapsedRealtime() < deadline) Thread.sleep(20)
+      release.countDown()
+      inactive(i, AndroidFtpsScheduler.JOB)
+      AndroidFtpsLifecycleChecks.quiet()
+      val state = "finish=${recorder.finishes} cancel=${recorder.cancels} schedule=${recorder.schedules} JOB=${pending(app)?.extras}"
+      check(recorder.finishes == listOf(AndroidFtpsScheduler.JOB to true) && recorder.cancels.isEmpty() && recorder.schedules.isEmpty()) { state }
+      check(queue.schedule.read() == due && AndroidFtpsAutomaticChecks.runs(queue) == 0L && AndroidFtpsScheduler.admits()) { "P/run: ${queue.schedule.read()}" }
+      check(pending(app)?.extras?.getString("token") == token) { "stop after the decision lost the retry: $state" }
+      force(i) { recorder.finishes.size == 2 }
+      check(recorder.callbacks.distinct().size == 2 && pending(app)?.extras?.getString("token") == token) { "next delivery: $state" }
+    } finally { release.countDown(); AndroidFtpsLifecycleChecks.restore() }
+  }
+
+  /**
+   * FS1/FS2 (R1): the exact current JOB A is gated in its first capture while a real OS stop (`timeout`) asks the retry for
+   * the same token. finalization: released A returns without admission (future P) into its completion. report: released
+   * A throws into its catch report while B's distinctive error is set. same-token-b: a real B Execution of the retried
+   * same token runs (locked) while A is released; every error write is observed. A: no OS call and no write.
    */
   private fun stopHeld(i: Instrumentation, app: Context, queue: AndroidFtpsQueue, case: String) {
     val recorder = AndroidFtpsAutomaticChecks.Recorder()
+    val gate = CountDownLatch(1)
+    val prefs = app.getSharedPreferences("kloda-sync", 0)
+    val written = java.util.concurrent.CopyOnWriteArrayList<String?>()
+    val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { p, key -> if (key == "ftpsAutomaticError") written += p.getString(key, null) }
     try {
       val armed = AndroidFtpsLifecycleChecks.future(app, queue)
-      AndroidFtpsQueue.captureFault = if (case == "report") ({ throw SecurityException("fs2 A capture failure") }) else null
-      synchronized(AndroidFtpsLifecycleChecks.monitor) {
-        AndroidFtpsLifecycleChecks.held(i, AndroidFtpsScheduler.JOB)
-        AndroidFtpsScheduler.os = recorder
-        AndroidFtpsAutomaticChecks.shell(i, "cmd jobscheduler timeout com.kloda.sync.test ${AndroidFtpsScheduler.JOB}")
-        val deadline = android.os.SystemClock.elapsedRealtime() + 15000
-        fun active() = String(AndroidFtpsAutomaticChecks.shell(i, "cmd jobscheduler get-job-state com.kloda.sync.test ${AndroidFtpsScheduler.JOB}")).contains("active")
-        while (active() && android.os.SystemClock.elapsedRealtime() < deadline) Thread.sleep(50)
-        check(!active()) { "OS stop not delivered" }
-        AndroidFtpsScheduler.report(app, "credential_locked") // B's distinctive state under the retried same token.
+      val calls = AtomicInteger()
+      // A's own capture: open (finalization) or a non-lock failure; any later capture (B) is locked.
+      AndroidFtpsScheduler.os = recorder
+      gated(i, AndroidFtpsScheduler.JOB, gate) {
+        if (calls.incrementAndGet() > 1) throw FtpsFailure("credential_locked")
+        if (case != "finalization") throw SecurityException("fs2 A capture failure")
       }
+      AndroidFtpsAutomaticChecks.shell(i, "cmd jobscheduler timeout com.kloda.sync.test ${AndroidFtpsScheduler.JOB}")
+      inactive(i, AndroidFtpsScheduler.JOB)
+      if (case == "same-token-b") {
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        AndroidFtpsAutomaticChecks.shell(i, "cmd jobscheduler run -f com.kloda.sync.test ${AndroidFtpsScheduler.JOB}")
+      } else AndroidFtpsScheduler.report(app, "credential_locked") // B's distinctive state under the retried same token.
+      gate.countDown()
+      val deadline = android.os.SystemClock.elapsedRealtime() + 30000
+      while (case == "same-token-b" && recorder.finishes.isEmpty() && android.os.SystemClock.elapsedRealtime() < deadline) Thread.sleep(50)
       AndroidFtpsLifecycleChecks.quiet()
-      check(recorder.finishes.isEmpty() && recorder.cancels.isEmpty() && recorder.schedules.isEmpty()) {
+      i.waitForIdleSync()
+      val b = if (case == "same-token-b") listOf(AndroidFtpsScheduler.JOB to true) else emptyList()
+      check(recorder.finishes == b && recorder.callbacks.size == b.size && recorder.cancels.isEmpty() && recorder.schedules.isEmpty()) {
         "A after stop: finish=${recorder.finishes} cancel=${recorder.cancels} schedule=${recorder.schedules}"
       }
       check(queue.schedule.read() == armed.plan && AndroidFtpsAutomaticChecks.runs(queue) == 0L) { "P changed: ${queue.schedule.read()}" }
-      check(app.getSharedPreferences("kloda-sync", 0).getString("ftpsDispatchToken", null) == armed.token &&
+      check(prefs.getString("ftpsDispatchToken", null) == armed.token &&
         pending(app)?.extras?.getString("token") == armed.token) { "stopped JOB not retried: ${pending(app)?.extras}" }
-      check(AndroidFtpsScheduler.error(app) == "credential_locked") { "B error overwritten: ${AndroidFtpsScheduler.error(app)}" }
-    } finally { AndroidFtpsLifecycleChecks.restore() }
+      check(AndroidFtpsScheduler.error(app) == "credential_locked" && "automatic_unavailable" !in written) {
+        "B error overwritten: ${AndroidFtpsScheduler.error(app)} writes=$written"
+      }
+    } finally { gate.countDown(); prefs.unregisterOnSharedPreferenceChangeListener(listener); AndroidFtpsLifecycleChecks.restore() }
   }
 
   /** FS1 (R1): WATCH A waits in `changed`; onDestroy retires it while its pending token stays. Released A writes/arms nothing. */
@@ -84,17 +159,28 @@ internal object AndroidFtpsPolicyChecks {
    * pending → one own finish(true) backoff, no cancel, old WATCH kept; throw after acceptance (exact new) → installed,
    * no finish; throw with nothing pending → unknown: no finish/cancel/second schedule, admission closed and
    * outcome_unknown until the next ordinary reconcile re-observes. JOB/token/P untouched throughout.
+   * R2 recovery (fault port kept installed): that ordinary reconcile goes through the same classified OS path:
+   * clean/accepted-then-throw → installed; null-throw again → still unknown; FAILURE → rejected; unreadable or foreign
+   * pending → blocked, nothing installed. No recovery result finishes, cancels or reports success unless installed.
    */
-  private fun watchFault(i: Instrumentation, app: Context, queue: AndroidFtpsQueue, case: String) {
+  private fun watchFault(i: Instrumentation, app: Context, queue: AndroidFtpsQueue, case: String, recovery: String?) {
     val scheduler = app.getSystemService(JobScheduler::class.java)
     val recorder = object : AndroidFtpsAutomaticChecks.Recorder() {
+      @Volatile var recovering = false
       override fun schedule(scheduler: JobScheduler, job: JobInfo): Int {
         if (job.id != AndroidFtpsScheduler.WATCH) return super.schedule(scheduler, job)
         schedules += job.id
-        if (case == "new-throw") scheduler.schedule(job)
-        if (case == "null-throw") scheduler.cancel(job.id)
-        if (case == "failure") return JobScheduler.RESULT_FAILURE
-        throw IllegalStateException("fp2 watch $case")
+        when (if (recovering) recovery else case) {
+          "clean" -> return scheduler.schedule(job)
+          "failure", "rejected" -> return JobScheduler.RESULT_FAILURE
+          "new-throw", "accepted" -> scheduler.schedule(job)
+          "null-throw", "unknown" -> scheduler.cancel(job.id)
+        }
+        throw IllegalStateException("fp2 watch $case/$recovery")
+      }
+      override fun pending(scheduler: JobScheduler, id: Int): JobInfo? {
+        if (recovering && recovery == "unreadable") throw IllegalStateException("fp2 unreadable WATCH")
+        return super.pending(scheduler, id)
       }
     }
     try {
@@ -117,10 +203,24 @@ internal object AndroidFtpsPolicyChecks {
           AndroidFtpsScheduler.admits()) { state }
         else -> {
           check(finishes.isEmpty() && watch == null && !AndroidFtpsScheduler.admits() && error == "outcome_unknown") { state }
-          AndroidFtpsLifecycleChecks.restore()
-          AndroidFtpsScheduler.reconcile(app) // Next ordinary (open) reconcile: a fresh serial arbiter turn re-observes.
-          check(AndroidFtpsScheduler.admits() && AndroidFtpsScheduler.error(app) == null && scheduler.getPendingJob(AndroidFtpsScheduler.WATCH) != null) {
-            "unknown WATCH not resolved: admits=${AndroidFtpsScheduler.admits()} error=${AndroidFtpsScheduler.error(app)}"
+          if (recovery == "foreign") scheduler.schedule(JobInfo.Builder(AndroidFtpsScheduler.WATCH, android.content.ComponentName(app, AndroidFtpsJob::class.java))
+            .setExtras(android.os.PersistableBundle().apply { putString("token", "fp2-foreign") })
+            .apply { armed.uris.forEach { addTriggerContentUri(JobInfo.TriggerContentUri(it.first, it.second)) } }.build())
+          recorder.recovering = true
+          AndroidFtpsQueue.captureFault = null // Next ordinary (open) reconcile: a fresh serial arbiter turn re-observes.
+          AndroidFtpsScheduler.reconcile(app)
+          val next = scheduler.getPendingJob(AndroidFtpsScheduler.WATCH)
+          val admits = AndroidFtpsScheduler.admits()
+          val after = "schedule=${recorder.schedules} cancel=${recorder.cancels} finish=${recorder.finishes} watch=${next?.extras} " +
+            "error=${AndroidFtpsScheduler.error(app)} admits=$admits"
+          check(recorder.cancels.isEmpty() && recorder.finishes.none { it.first == AndroidFtpsScheduler.WATCH } &&
+            recorder.schedules.size == (if (recovery == "unreadable" || recovery == "foreign") 1 else 2)) { after }
+          when (recovery) {
+            "clean", "accepted" -> check(admits && AndroidFtpsScheduler.error(app) == null && next != null &&
+              next.extras.getString("token") != armed.watchToken && next.triggerContentUris.orEmpty().map { it.uri to it.flags }.toSet() == armed.uris) { after }
+            "rejected" -> check(admits && AndroidFtpsScheduler.error(app) == "automatic_unavailable" && next == null) { after }
+            "foreign" -> check(!admits && AndroidFtpsScheduler.error(app) == "outcome_unknown" && next?.extras?.getString("token") == "fp2-foreign") { after }
+            else -> check(!admits && AndroidFtpsScheduler.error(app) == "outcome_unknown" && next == null) { after }
           }
         }
       }

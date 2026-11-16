@@ -5,7 +5,21 @@
 ## 20 — Claude bildirimi sonrası hizalama ve genel kapanış
 
 - 18/19 Claude alanında: kullanıcı nihai durumu bildirecek; bu ajan kodlarına dokunmadı. Bildirimden sonra gerçek HEAD/diff, ortak API/schema/build/lifecycle bağlantıları birlikte hizalanacak.
-- S3 dağıtım lisans metinleri: cesu8, instant-xml, instant-xml-macros için3metin eksik; JNI macros exact upstream MIT metni eklendi. Dağıtım kabulü açık.
+- S3 dağıtım lisans metinleri (16.11, 1.5/L15): cesu8 1.1.0, instant-xml 0.7.7, instant-xml-macros 0.7.2 için
+  Apache-2.0 seçimi + resmî standart metin + paketteki gerçek bildirimler `packages/s3-native/THIRD_PARTY_NOTICES.md`
+  içinde; belge boşluğu kapandı ([kanıt](evidence/backlog-1.5/MANIFEST.md)). JNI macros exact upstream MIT metni korunur.
+  Dağıtım kabul şartı: bu notices metni dağıtılan uygulamanın lisans materyallerinde bulunmalı; yalnız repoda
+  bulunması PASS değildir. Gerçek release paketinde bulunurluk denetlenmedi → dağıtım kabulü açık.
+- **B2 iOS fixture-CA dışlama kapısı (16.11, 1.5/B15; Claude review B2):** dağıtım kabulü yalnız gerçek Release
+  `.app`/archive kanıtıyla verilir. Kaydedilecekler: Info.plist `CFBundleExecutable` ile çözülen app executable yolu,
+  Release configuration/SDK/architecture, kaynak revision'ı, executable SHA256 ve build settings çıktısı.
+  Swift `SWIFT_ACTIVE_COMPILATION_CONDITIONS`/`OTHER_SWIFT_FLAGS` içinde `KLODA_S3_OWNED_FIXTURE` ve Rust build
+  feature'larında fixture/owned-fixture bulunamaz. `xcrun nm --no-llvm-bc <app-executable>` çıktısı ve exit kodu
+  saklanır; tam sembol `_kloda_s3_owned_fixture_marker` bulunursa veya fixture bayrağı varsa **FAIL**.
+  `tools/check-s3-native.mjs` Rust archive sonucu app kanıtının yerine geçmez. Strip edilmiş/okunamayan sembol
+  tablosu veya nm hatası "marker yok/PASS" değildir: aynı link'in strip öncesi executable kanıtı ve final artifact
+  bağı yoksa **OPEN**. PASS için bayrak yokluğu + kullanılabilir sembol çıktısında marker yokluğu + artifact/config/
+  revision bağı birlikte gerekir; artifact veya kanıt eksikse **OPEN**. Gerçek release koşusu yapılmadı → açık.
 - P5 production sağlayıcı ve at-rest seçimi/doğrulaması; production activation kapalı kalır. Yerel MinIO işlev kanıtı provider qualification değildir.
 - Normal native ürün UI uçtan uca, görsel/erişilebilirlik, performans/pil/alan ve hata sunumu; son bağımsız Claude review. Aynı-agent review bağımsız sayılmaz.
 - Ortak SDK/build durumu: son doğrulama Xcode27.2/SDK27.2; önceki6ABI kanıtı kendi kaynak/toolchain varyantında korunur. Hizalama sonrası yalnız değişen/etkilenen kontroller seçilir.

@@ -1,0 +1,3 @@
+67  apps/mobile/src/pages/activity/ui/activity-journal-panel.tsx
+204  apps/mobile/src/pages/activity/ui/activity-journal-panel.spec.tsx
+136  apps/mobile/src/pages/activity/ui/activity-page.tsx

@@ -1,0 +1,7 @@
+78e66dd24c12e0ac858e7524cdd7d51d1eee753c1e9c32e5b915dc9f1d767870  cesu8-1.1.0\Cargo.toml
+5ca77347e58205d3b543c04a9c5bdd11d20a9f3108a7b246640edffa999b5f35  cesu8-1.1.0\COPYRIGHT-RUST.txt
+4fcc5d9b5db444ad3c33c79aebe18de4fa6351982646da0b78830fbad67f9e8f  cesu8-1.1.0\README.md
+271b3c58f3a5188e15aaebc6e90aa80fb5a706ab1c2a9b499d9d3085dbac83f7  instant-xml-0.7.7\Cargo.toml
+3e3079404affd083fb1a403ff6af71fe4bbc9a28a7e3f88dbd91b0d233820fd3  instant-xml-0.7.7\README.md
+e5b44f37dbe64d1177eaf0181765971b846c40408044981dd2dfd76be5f98125  instant-xml-macros-0.7.2\Cargo.toml
+3e3079404affd083fb1a403ff6af71fe4bbc9a28a7e3f88dbd91b0d233820fd3  instant-xml-macros-0.7.2\README.md

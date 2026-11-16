@@ -195,3 +195,293 @@ uygulamada sözleşme/fixture çelişirse DECISION ile bu GPT sohbetine dön, be
 Mevcut RAM-intent/geri-saat sınırlamaları saklanmaz; fiziksel/release notlarında açık kalır.
 **Devam / Opus:** mevcut kanıtı yeniden kullanarak review devrini tamamla;
 FO1 koşusu/fixture kurulumu yok. Sonra toplu bağımsız GPT review ve geliştirme kapanışı.
+
+---
+
+## 1.5 — Regresyon hazırlığı uygulama sözleşmesi / 16.11.2026
+
+### Durum ve yetki
+**KULLANICI ONAYLI / UYGULAMAYA HAZIR — INITIAL (16.11.2026).**
+Kullanıcı bu sohbet içinde §1.5 sözleşmesinin tamamını onayladı ve yalnız Opus devri istedi.
+L15 yolu Apache-2.0'dır. Bu yetki yalnız §1.5 içindir; yukarıdaki onaylı F1 §1–6
+aynen korunur. CURRENT önce okunur; aktif F1 yönlendirmesi bu açık kullanıcı
+onayını F1 uygulama yetkisine çeviremez. F1'in mevcut işi/diff'i devralınmaz.
+Bu bölüm 1.5'in tek goal/kabul kaynağıdır; uygulama ve bağımsız review buna referans verir.
+Satırlar tek işin ajan içi kontrolleridir; ayrı görev/onay/sohbet değildir.
+
+### Tek goal / kapsam dışı
+**Goal:** mevcut iOS WebDAV journal host kontrolü üretim kalıcılık kurallarını
+yeniden çalıştırabilir olsun; üç eksik S3 lisans metni doğrulanmış kaynakla tamamlansın;
+B2 Swift fixture-CA dışlama kontrolü gerçek release app artifact kabulüne bağlansın.
+Kapsam dışı: ürün journal/TLS/custody/transport değişikliği, migration, yeni CA/auth,
+dependency sürüm/lock değişikliği, yeni test sunucusu/fixture, tam regresyon,
+Android F1/S3 kabulünü yeniden açma, signing/P5/gerçek cihaz/hesap/medya çalıştırma.
+Release kontrolünü tanımlamak gerçek release PASS'i değildir; mevcut erteleme korunur.
+
+### Doğrulanmış başlangıç ve kanıt/diff karşılaştırması
+Planlama anındaki dirty ürün diff'i yalnız beş Android FTPS dosyasıdır;
+diğer değişiklikler CURRENT/FTPS manifesti ve `fix2/resume-win/` kanıtıdır.
+1.5 kaynakları bu dirty diff'te yoktur; bu tek başına eski PASS'in güncelliğini kanıtlamaz.
+Kanıt kökü aşağıdaki kısa yollarda `docs/implementation/evidence/` demektir.
+
+| Sınıf | Eski kanıt / mevcut kaynak karşılığı | Tekrar veya reuse kararı |
+|---|---|---|
+| Yeniden kullanılacak | `s3-native-step17-2026-11-03/verification-2026-11-04/manifest.json` lisans 78/81 ve `license-source.json` | Notices, inventory ve JNI MIT byte hash'i CRLF yüzünden farklı; LF-normalize üçü de kayıtla eşit. Mevcut üç açık boşluk doğrulandı; eski JNI metnini yeniden arama. |
+| Değişiklikten etkilenmiş | `cloud18-nextcloud-2026-10-31/multi-target-queue-2026-11-02.json` iosJournal PASS | Sonraki `recovery29-2-2026-11-03.json` açık host kırılması kaydeder; 02.11 PASS güncel harness PASS'i sayılamaz. |
+| Eksik | Aynı recovery29-2 kaydı: URLSession/macOS host ve IosCloudTarget kırılması | Güncel script hâlâ client derliyor; journal `queueKinds` için OAuth kinds, init için `createImports()` ister. Script import-journal kaynağını almıyor. Onarım sonrası yalnız bu host koşusu gerekir. |
+| Yeniden kullanılacak | `tools/test-ios-recovery-catalog.py` mevcut host izolasyon deseni ve recovery29-2 ios_host PASS | Üretim journal, transport dışı seam ve gerçek initializers yaklaşımı kullanılır; catalog suite sırf yeni sohbet diye tekrarlanmaz. Eski PASS WebDAV publication testinin yerine geçmez. |
+| Eksik | `claude-review-2026-11-11.md` B2; `tools/check-s3-native.mjs:69–73` | Kontrol Rust `.a` içindir; Swift marker `IosS3Client.swift:110–113` içindedir. App-level release kapısı eksik; Rust kontrolünü tekrar koşmak açığı kapatmaz. |
+| Yeniden kullanılacak / açık | S3 04.11 Photos/automatic/build ve §20–21 sınırları | Bu plan ürün davranışı değiştirmiyor; eski scoped PASS korunur, güncel bütün ürün PASS'i iddia edilmez. Fixture kaybı tekrar gerekçesi değildir. |
+
+Üç dağıtım bildirimi henüz tamamlanmadı; seçilen Apache-2.0 yolu ve kaynaklar:
+[1.5 araştırma eki §L15](backlog-1.5-research.md#l15--kaynak-engeli).
+Varsayım: macOS'ta aynı dar compile closure onarımı yeterlidir; bu oturumda runtime
+kanıtı yoktur. Yeni SDK hatası ürün değişikliği yetkisi vermez.
+
+### Dosya / sembol / kesin değişiklik sınırı
+`ios/` aşağıda `apps/mobile/modules/my-module/ios/` kısaltmasıdır.
+
+| Hedef dosya / sembol | Mevcut sorun → seçilen değişiklik | Kabul |
+|---|---|---|
+| `tools/test-ios-webdav-journal.py` / sources, generated stub, seed/reopen | HTTP client host derlemesini çıkar; yalnız kullanılan `IosWebDavClient.encode` gövdesini üretimden aynen çıkarıp host seam'e koy; eşleşme yoksa açık hata. `IosCloudTarget.oauthKinds` deklarasyonunu recovery scriptindeki gibi üretimden al; `IosRecoveryImportJournal.swift` gerçek kaynağını closure'a ekle. | H15, P15 |
+| `packages/pairing-native/apple/tests/IosWebDavPublicationChecks.swift` / main | Mevcut seed/reopen assertion'ları korunur; plan yeni test dosyası/assertion gerektirmiyor. Beklenti gevşetme veya satır silme yok. | P15 |
+| `packages/s3-native/THIRD_PARTY_NOTICES.md` / üç eksik bölüm | Apache-2.0 seçimini, resmî tam metni ve paket/sürüm/kaynak bağını ekle; mevcut gerçek bildirimleri koru (cesu8 Rust atıfları dahil). Mevcut JNI/diğer metinlere dokunma. | L15 |
+| `docs/implementation/20-21-acceptance-collection-2026-11-04.md` / §20 dağıtım kapısı | B2 için aşağıdaki artifact/flags/nm/kayıt koşullarını bağla; lisans açık/kapalı durumunu yalnız L15 kanıtına göre güncelle. | B15 |
+| `docs/implementation/evidence/backlog-1.5/MANIFEST.md` ve dar loglar | Uygulamada tek kanıt haritası: bu sözleşmenin ID'si → hash/komut/log/fresh/reuse/open; goal kopyalama yok. | V15 |
+
+Üretim Swift dosyaları, `tools/check-s3-native.mjs`, diğer host scriptleri
+**değişmeyecek**. Sibling destination host scriptindeki benzer borç bu işe eklenmez.
+L15 metni mevcut notices dosyasına eklenir; yeni lisans dosyası/bağımlılık gerekmez.
+
+### L15 seçilen çözüm — Apache-2.0, risk feragati değil
+Üç paketin sunulan Apache-2.0 seçeneği kullanılır; orijinal çift lisans beyanı da
+kaynak bilgisi olarak korunur. Paketin kendi lisansı değiştirilmez.
+Tam metin `https://www.apache.org/licenses/LICENSE-2.0.txt` kaynağından aynen alınır;
+paketten çıkmış bir dosya diye sunulmaz. Her eksik bölüm bu metni ve seçimi açıkça taşır.
+Paket/sürüm beyanı ile standart metnin kaynağı ayrı kaydedilir; exact upstream LICENSE
+dosyasının bulunması artık önkoşul değildir. Copyright sahibi/tarih uydurulmaz.
+Mevcut sürüm kaynaklarındaki ilgili copyright/atıf ve varsa NOTICE korunur;
+cesu8 1.1.0 README ve COPYRIGHT-RUST.txt içindeki Rust kökeni/çift lisans bildirimi
+esas alınır. Rust'ın ilgisiz bileşen listesinden yeni bağımlılık/izin sonucu çıkarılmaz.
+Bu dar bildirim kontrolü implementasyon içidir; yeni sunucu/test/fixture araştırması değildir.
+Değiştirilmiş bağımlılık dosyası varsa Apache §4(b) değişiklik bildirimi gerekir;
+plan bağımlılık değiştirmez. Çelişen gerçek lisans bildirimi çıkarsa GPT'ye dönülür.
+§20, bu notices metninin dağıtılan uygulamanın lisans materyallerinde bulunmasını
+kabul şartı yapar: yalnız repoda bulunması dağıtım PASS'i değildir. Gerçek release
+paketinde bulunurluk kontrolü mevcut release kapısında açık kalır; yeni paketleme işi yok.
+
+### Invariant / olay-sırası ve ortak kabul tablosu
+Ürün concurrency/kalıcılık algoritması değişmez. Test seam'i sadece kullanılmayan
+HTTP/PC bağlantılarını ayırır; production journal/publication/schedule/restore aynen derlenir.
+Sahte `createImports/createCatalog`, sahte CAS/ACK, sabit kopya OAuth listesi yok.
+
+| ID | Başlangıç | Olay / kesinti / geç callback | Beklenen state ve kalıcı/OS yan etki | Kabul testi / kanıt |
+|---|---|---|---|---|
+| H15 | Güncel host kaynak listesi compile olamıyor | macOS'ta mevcut komut; ardından yalnız harness düzeltmesi | Aynı üretim journal/publication derlenir; network, Keychain, OS dispatch yok | `python3 -I tools/test-ios-webdav-journal.py`; ilk compile teşhisi ve final GREEN logu |
+| P15 | prepared / uploaded / moving; eski target planı | PUT/MOVE yanıt kaybı, ACK sonrası context değişimi, stale plan callback; sonra yeni süreç reopen | Kayıp PUT prepared, kayıp MOVE moving; ACK sonrası moved, sahte Completed yok; yeni plan stale callback ile ezilmez; OS işi yok | Mevcut seed/reopen, rejects/CAS, immutable/keep-both/restore kimliği assertion'larının tümü korunarak H15 GREEN |
+| L15 | Üç lisans bölümünde unavailable | Apache-2.0 seçimi, standart tam metin ve mevcut gerçek bildirimlerin eklenmesi | Üç belge boşluğu kapanır; copyright atfı uydurulmaz; dependency/ürün/OS etkisi yok; release paketinde sunum ayrı açık kapıdır | Her paket için sürüm/lisans beyanı kaynağı, resmî Apache metni URL/hash'i, gerçek bildirim kontrolü ve notices karşılaştırması; §20 dağıtıma dahil etme şartı |
+| B15 | Rust marker kontrolü var, app kontrolü yok | Release artifact kabul talebi veya fixture bayrağı/artifact eksikliği | App kanıtı olmadan dağıtım kabulü verilmez; marker/fixture bayrağı varsa FAIL; belirsiz/eksik kanıt OPEN; OS etkisi yok | §20 prosedürünün temiz/marker bulunan/araç hatası/eksik artifact durumlarını kapsayan review'u; gerçek release koşusu ertelenmiş |
+| V15 | H15/P15/L15/B15 kanıtları derlendi | Uygulama devri ve ayrı GPT gerçek-diff review | Zorunlu eksik varken REVIEW-ready değil; Opus checkbox kapatmaz; bağımsız kabul ayrı | Tek manifestte ID eşlemesi, tam tracked+untracked kapsamı, fresh/reuse/deferred ayrımı |
+
+### B15 kesin kabul prosedürü (yeni script yok)
+§20, gerçek `.app`/archive içindeki CFBundleExecutable yolunu, Release config/SDK/
+architecture ve kaynak revision'ını, app executable SHA256'sını ve build settings
+kanıtını ister. Swift `KLODA_S3_OWNED_FIXTURE` ve Rust owned-fixture etkin olamaz.
+`xcrun nm --no-llvm-bc <app-executable>` çıktısı/exit'i saklanır; tam sembol
+`_kloda_s3_owned_fixture_marker` bulunursa FAIL. Rust archive sonucu app yerine geçmez.
+Strip edilmiş/okunamayan semboller veya nm başarısızlığı “marker yok/PASS” değildir:
+aynı link'in strip öncesi executable kanıtı ve final artifact bağı gerekir; yoksa OPEN.
+Flag yokluğu + kullanılabilir sembol çıktısı + artifact/config bağı birlikte aranır.
+Bu iş yalnız kapıyı bağlar; yeni release build/signing/kurulum veya fixture-CA koşusu istemez.
+
+### En dar doğrulama ve uygulama sırası
+1. Onaydan sonra HEAD/status/işe ait diff/hash baseline'ını kaydet; mevcut F1'e dokunma.
+   Önkoşul: macOS + xcrun/swiftc + SQLite3/CryptoKit, yazılabilir disposable temp,
+   mevcut golden JSON. Sunucu/cihaz/CA gerekli değil; eksikse kurulum icat etme.
+2. İlk temsilci: mevcut H15 komutunun compile hatasını bir kez yakala; yalnız
+   yukarıdaki harness closure/seam onarımı → aynı mevcut seed/reopen GREEN.
+   Somut tekrar gerekçesi: bozuk compile bağlantısı değişti; journal geçişleri artık yürümeli.
+3. Temsilci GREEN sonrası seçilen L15 Apache-2.0 çözümü uygulanır ve B15 belge kapısı bağlanır;
+   H15/P15 ürün veya closure değişmediyse tekrar koşulmaz. Geniş fixture matrisi yok.
+4. Zorunlu: değişen Python için AST/sözdizimi kontrolü (pycache bırakmadan),
+   H15/P15 derleme+çalışma, L15 kaynak/metin karşılaştırması, B15 negatif koşul review'u,
+   `git diff --check`, hedef diff/standart incelemesi. Swift typecheck/build H15 içindedir.
+   TS/JS/Kotlin/Rust değişmediğinden Jest/ESLint/tsc/Android/native ABI ve tam app
+   build tekrarına gerek yok; kaynak değişirse kapsam kararı için GPT'ye dön.
+   Bu planlama oturumunda ürün test/build koşulmadı; fresh runtime PASS yok.
+
+### Review, model, bütçe ve durdurma
+Review: davranış ve etkilenen callers/compile closure kanıtı; assertion kaybı yokluğu;
+test-only seam'in üretimden alındığı; temiz kod/FSD/i18n/stil/300 satır kurallarına
+uygunluk (UI değişmiyor); ilgili test/lint/typecheck/build'in yukarıdaki gerekçeli kapsamı.
+Zorunlu H15/P15/L15/B15/V15 eksikleri review-ready'yi engeller. Fiziksel/release
+çalıştırması, signing/storage/P5 ve Faz3–4 önceki açık kapılardır; yeniden açılmaz/waive edilmez.
+Risk: orta, güvenlik/release kanıtı içerir; normal **Opus `/implement`**, effort otomatik
+değişmez. B15 nedeniyle bu iş Sonnet pilotu değildir; ilk uygun düşük riskli işte
+kullanıcı seçimiyle `/implement-pilot` önerisi korunur, modeli kendiliğinden değiştirme.
+Usage UNKNOWN; 15000 thinking-dahil output ajan içi verimlilik kontrolüdür.
+Ölçüm yoksa ilk temsilci sonunda kapsam/tekrar/ilerleme notu; onaylı tüm satırlara devam.
+UNKNOWN/eşik/tek satır bitişi onay veya sohbet duruşu değildir.
+Aynı yaklaşım/invariant iki başarısız fix'te DUR; sayaç manifestte ve oturumlar arası korunur.
+Ürün/güvenlik kararı, sözleşme çatışması, eksik gerçek altyapı veya yıkıcı işlem de DUR.
+**Açık karar:** kritik tasarım kararı yok; §1.5 uygulama onayı bu sohbette alındı.
+macOS önkoşulu uygulama kanıtı için zorunlu; Windows'ta H15 PASS'i ileri sürülmez.
+**Tek sonraki adım / Opus uygulama:** bu işin mevcut Opus sohbeti varsa onu kullan;
+yoksa ayrı Opus sohbeti aç. Devir hazırlayan GPT uygulama/ajan başlatmaz.
+Tam komut/prompt:
+`/implement — Kullanıcı onaylı INITIAL kapsam yalnız docs/implementation/plans/next-plan.md §1.5.
+AGENTS.md → CURRENT.md oku; CURRENT'teki F1 yönlendirmesini bu işe uygulama.
+§1.5 tek goal/kabul kaynağıdır; H15/P15/L15/B15/V15 tek işin iç kontrolleridir.
+Mevcut kanıtı/diff'i eşleştir; ilk H15 temsilcisi → dar onarım → kalan onaylı kapsam.
+F1 §1–6, mevcut F1 diff'i ve diğer backlog işleri kapsam dışı; kanıt/erteleme sınırlarını koru.
+macOS önkoşulu yoksa H15'i PASS sayma; somut engeli kaydet, altyapı kurulumunu varsayma.
+Tek manifestte fresh/reuse/deferred ve ilgili doğrulamaları kaydet; REVIEW/unchecked bırak.
+Bağımsız GPT review gerekir. Commit/push yok.`
+
+<a id="21g1--mobil-etkinlik-uygulama-sözleşmesi-taslağı--16112026"></a>
+## 2.1/G1 — Mobil Etkinlik uygulama sözleşmesi / 16.11.2026
+
+### 16.11 kullanıcı kararı — görsel kapının Faz3'e devri
+G1-07'nin cihaz/emülatör/Simulator üzerinde TR/EN/DE, light/dark ve büyük yazı
+görsel karşılaştırması **Faz3'e DEFERRED / NOT_RUN**. Bu eksiklik tek başına
+geliştirme review'unu engellemez; görsel PASS veya bilinen tasarım sapmasına onay değildir.
+Bu karar aşağıdaki görsel kanıtı review öncesi zorunlu tutan hükümleri yalnız
+bu kapsamda supersede eder. Goal, G1-01–07 tablosu, M11 segment/filter biçimi,
+JS/render kontrolleri ve bağımsız review gereği değişmez.
+
+### Durum / yetki / tek kaynak
+**KULLANICI ONAYLI / INITIAL / UYGULAMAYA HAZIR — D-G1 kabul edildi (16.11.2026).**
+Kullanıcı tarihsiz, sınırlı PC journal görünümü uyarlamasını onayladı; bu tur yalnız
+sözleşmeyi hazırlar, uygulama/ajan/model başlatmaz. Sonraki uygulama kullanıcı başlatmalıdır.
+Yalnız bu bölüm G1 sözleşmesidir; F1 §1–6 ve §1.5 aynen korunur, bu işe taşınmaz.
+CURRENT/backlog/checkbox kullanıcı sınırı gereği değiştirilmedi; CURRENT'teki G1
+“henüz onaylı değil” notunu yalnız bu iş için yukarıdaki açık onay supersede eder.
+F1/1.5 INITIAL/FIX yönlendirmeleri G1'e uygulanmaz; G1 bu bölümden INITIAL olarak yürütülür.
+Doğrulanmış keşif ve eski kanıt eşlemesi: [araştırma §1–4](g1-activity-research.md).
+HEAD `586a2fd51e61058053119dd8b1f3ecb65c4f7676`; ürün/test değişikliği ve taze test PASS yok.
+
+### Tek goal / kapsam dışı
+**G1:** Mobil Etkinlik kullanıcısı Şu an ve Geçmiş segmentlerinde gerçek native journal
+kayıtlarının durumunu ayırt edebilsin; tamamlanma, geçmiş kapsamı ve zaman bilgisi uydurulmasın.
+Onaylı en küçük çözüm aşağıdaki bounded/latest-state sunumudur; G1 kapanışı bu uyarlanmış
+kapsama göre değerlendirilir. Tam Lovable tarihli veya birleşik provider geçmişi iddiası yoktur.
+Kapsam dışı: F1/1.5 diff/kanıt/ertelemeleri, scheduler/OS ownership, transfer/ACK politikası,
+journal yazımı/migration/event store, yeni native API, uzak yedek kataloğunu geçmişe çevirme,
+provider birleşik tarihçesi, export/restore/retry yetkisi değişimi ve yeni fixture/hesap/SDK.
+Kabul satırları tek işin iç kontrolleridir; ayrı görev, onay veya sohbet değildir.
+
+### Doğrulanmış bulgu / onaylı çözüm / karar
+Mevcut queueStatus gerçektir; FileQueue en çok 100 job + totalJobs/hasMore verir.
+Timestamp/cursor/geçmiş query yok; Android rowid ağırlıklı, iOS ID sıralı; tarih sırası yok.
+Android Photos publication ek listesi yalnız tombstone'dur; tüm provider geçmişi değildir.
+**D-G1 — KABUL:** Native-free, tarihsiz ve sınırlı **PC aktarım kayıtları** uyarlaması.
+M11 segment/filter biçimini koru; geçmişte “journal'daki mevcut son durum”
+kapsamını açıkla; tarih/saat/gün grubu/toplam oturum özeti gösterme, native sırayı koru.
+Şu an = completed dışındaki tüm queue job'ları; Geçmiş = completed/paused/blocked/owner_deleted.
+Paused/blocked/owner_deleted iki görünümde bulunabilir: bekleyen sorun ve retained sonuçtur;
+ayrı olay veya başarısız tamamlanmış oturum olarak adlandırılmaz. done = yalnız completed;
+issues = paused/blocked/owner_deleted; all = bu geçmiş kümesinin tamamı.
+Provider durum/review panelleri Şu an'da mevcut davranışlarıyla kalır; Geçmiş bunları kapsadığını söylemez.
+hasMore varsa her segment/filter'da sayımın tüm journal değil dönen pencere olduğu görünür;
+boş filtre sonucu “geçmiş yok” değildir. Kayıt sayısından oturum/başarı toplamı türetilmez.
+Bu görünür kapsam/görsel uyarlama açık kullanıcı onayıdır; çözülmemiş kritik ürün kararı yoktur.
+Tarihli event API/migration/provider birleşimi sonradan gerekirse kapsam genişletme sayılır;
+implementer tasarlamaz, aynı GPT plan sohbetine döner. Bu sözleşme native yığınına yetki vermez.
+
+### Hedef dosya / sembol / sorun → beklenen değişiklik / kabul
+M = `apps/mobile/src/`; native üretim dosyaları bu sözleşmede salt-okunur.
+
+| Hedef | Sorun → beklenen dar değişiklik | Kabul |
+|---|---|---|
+| M/features/file-transfer/model/activity-journal.ts (yeni saf selector) | Ayrım yok → doğrulanmış FileQueue'dan now/past/filter projection; kaynak sıra/ID/ACK değişmez | G1-01/02/03 |
+| Aynı yerde activity-journal.spec.ts (yeni, mevcut queue nesnelerini kullan) | Sınıflama kanıtı yok → tek karma snapshot, sonra sınır/null/truncation karşıtları | G1-01/02/03/04 |
+| M/pages/activity/ui/activity-page.tsx — ActivityPage | Tek scroll → yalnız view=activity için now/past state ve segment; queue/hook filtrelenmez | G1-01/05/06 |
+| Aynı dizinde activity-journal-panel.tsx (yeni) | Geçmiş yok → read-only satırlar/filter/empty/limited/error; mevcut Text/ByteProgress/ikon örüntüsü | G1-02/03/04/07 |
+| Aynı dizinde activity-page.spec.tsx; activity-journal-panel.spec.tsx (yeni) | Segment erişimi ve geç yanıt görünürlüğü yok → dar render/event kontrolleri | G1-01–07 |
+| M/shared/i18n/locales/{tr,en,de}.json | Segment/filter/kapsam/empty/limited metinleri yok → eş anahtarlar; JSX literal yok | G1-03/07 |
+| Mevcut activity-{automatic,destinations}.spec.tsx ve backups-page.spec.tsx | Ortak page etkilenecek → mevcut beklentiler korunur; yalnız gerekli segment seçimi uyarlanır | G1-05/06 |
+
+`useFileTransfer`, file-transfer parser/API, Home hook ve native kod değişikliği kapsam dışıdır.
+Geçmiş yeni hook/poll/listBackups/persisted JS cache kullanmaz; tek queue snapshot'ını paylaşır.
+Yeni UI dosyası sorumluluk ayrımıdır; katmanların tümünü tek seferde geliştirme yetkisi değildir.
+
+### Invariant ve ortak durum–olay–beklenen sonuç / bitti ölçütleri
+Journal/ACK/kimlik ve mevcut OS yan etkileri G1 tarafından değiştirilmez; sunum completion üretmez.
+Yalnız native completed + parser'ın exact ACK/size kanıtı başarılı satırdır; %100 finalizing değildir.
+Hook instance sekmede yeniden kurulmaz; Now panelleri mounted kalıp hidden/a11y olarak gizlenir.
+Bu, provider cleanup/cancel tetiklememek içindir; Geçmiş'te görünmez action/focus erişimi olmaz.
+Mevcut hook foreground/epoch/mounted ve native recovery davranışı aynen korunur.
+Tab/filter değişimi ek status/run/pause/resume/rebackup/restore çağrısı ve kalıcı yazım üretmez.
+
+| ID | Başlangıç | Olay / kesinti veya geç callback | Beklenen state ve kalıcı/OS yan etki | Dar kabul testi |
+|---|---|---|---|---|
+| G1-01 | Karma doğrulanmış queue, now | Past seç; all/done/issues; now'a dön | Yukarıdaki kesin kümeler; sıralama/ID korunur; queue mutasyonu/ek native işlem yok | Selector + segment render; ilk temsilci |
+| G1-02 | uploading, ACK=size | finalizing poll; ardından native completed | İlk iki state past success değil; yalnız completed done'a girer; ACK/journal yazımı G1'de yok | Mevcut exact-progress testini koru; yeni geçiş beklentisi |
+| G1-03 | hasMore=true ve geçmiş kümesi boş veya filtre boş | Past/filter seç | “Dönen kayıtlarda yok” + sınırlılık; tam geçmiş boş/başarı iddiası yok; hayalî load-more yok | 100 queued + total101 ve boş filtre; false hasMore karşıtı |
+| G1-04 | Queue okunuyor veya önceki veri var | status hata/null; background→geç yanıt; reopen | Loading/error boş başarı değildir; eski yanıt epoch kontrolünü aşamaz; yeni native pause/iş yok | Deferred promise + tüm AppState listener'ları; önceki stale-read testini kullan |
+| G1-05 | Native upload/review sürüyor | Tab değiştir; arka plan veya page departure | Tab provider unmount/cancel yaratmaz; background/departure mevcut cleanup'ını korur; upload pause eklenmez | Tab için call-count; mevcut lifecycle/automatic spec'leri |
+| G1-06 | view=backups/embedded/target veya Home | Page render / Now'da sync/rebackup | Backups'a segment/queue sızmaz; başlık/geri/restore korunur; current authority ve confirmation aynı; Home ham queue alır | Mevcut backups/destinations/owner_deleted/automatic testleri |
+| G1-07 | TR/EN/DE, light/dark, büyük yazı | Segment/filter erişimi ve render | Lovable segment/filter biçimi; seçili tab erişilebilir; gizli Now odaklanmaz; kapsam metni görünür; demo tarih/sayaç yok | Dar render/a11y ve mevcut batch-capture yolu ile görsel karşılaştırma |
+
+G1-01–07 geliştirme kabulüdür; bağımsız review hepsini aynı tabloya karşı değerlendirir.
+Tarihsel kanıt yeni sekme PASS'i değildir; uygulama manifesti yalnız ID→kanıt/durum eşler,
+goal veya tabloyu kopyalayıp yeniden tanımlamaz. Her gerekli eksik açık raporlanır.
+
+### Kanıt yeniden kullanımı → en dar doğrulama → etkilenen genişletme
+Önce [araştırma §3](g1-activity-research.md#3-eski-kanıt--mevcut-kaynakdiff-eşlemesi):
+eş LF hash'li native journal/ACK/tombstone yolları prior PASS REUSE; Queue/JS aradan beri
+değişmiş, eski tüm-suite PASS'i bugüne taşınmaz; yeni segment/filter/truncation kanıtı EKSİK.
+1. Uygulama önkoşulu: HEAD/dirty sınırı, Node/pnpm/node_modules ve mevcut workspace
+   Jest/tsc/ESLint/export kullanılabilirliğini bir kez doğrula; kurulum/cihaz erişimi varsayma.
+2. İlk temsilci G1-01: mevcut spec queue örüntüsüyle karma job snapshot'ı ve segment seçimi
+   regression'ı → saf selector + minimum UI bağlantısı → yalnız bu testin RED/GREEN'i.
+   Regression üretim page/selector yolunu çağırır; expected sonuç bu tablodan gelir.
+3. GREEN sonrası G1-02–07 ve mevcut etkilenen callers; bütün satırlar aynı işte devam eder.
+   Mevcut activity-page spec'i 300-satır eşiğine yakın: yeni testleri yeni scoped spec'e koy;
+   unrelated test taşıma/sıkıştırma ve yeni genel fixture katmanı yok.
+4. `apps/mobile` içinde mevcut `pnpm test -- --runTestsByPath ...` ile yalnız değişen
+   spec'ler + activity-page/automatic/destinations/backups; parser değişmezse parser suite
+   tekrarı zorunlu değil. UI branch değişimi bu page testlerinin somut tekrar gerekçesidir.
+5. `pnpm exec tsc --noEmit`; değişen TS/TSX için scoped ESLint; son JS/i18n halinde bir kez
+   `pnpm run build` (iki platform JS export). Yeni import/render/i18n paketleme etkisi gerekçedir.
+   Tam repo Jest/native/build matrisi Faz3'te; ilk temsilci öncesi geniş build yok.
+6. Test/lint/typecheck/export ve görsel sonuç logları `docs/implementation/evidence/backlog-2.1-g1/`
+   altında tek manifestte fresh/prior reuse/NOT_RUN/DEFERRED olarak; başarısız exit örtülmez.
+
+### Windows / Mac / zorunlu ve ertelenmiş kapılar
+Windows: onaylı selector/UI/çeviri + scoped JS test/lint/tsc/export; native kod yazılmaz.
+JS export Swift/Kotlin derlemesi veya journal→Expo runtime kanıtı değildir.
+Bu native-free çözümde eski native invariants kanıtı reuse edilir; G1 mock testleri
+yeni gerçek-OS journal PASS'i sayılmaz. B1 gerçek JS→native runtime/tam entegrasyon Faz3'te kalır.
+Mac gerektiren: iOS native değişikliği seçilirse Swift compile/Simulator build/runtime;
+bu sözleşme buna yetki vermez. iOS native ekran/a11y capture da Mac/Simulator gerektirir.
+G1 scoped görsel kontrolü eksikse fresh görsel PASS yazma; G1-07 açıkken review-ready deme.
+Mevcut kalıcı batch capture script açığı CURRENT'te korunur; runnable komut uydurma,
+ayrı capture altyapısı işi açma. Gerçek altyapı yoksa gereken scoped kanıtı BLOCKED-ENV kaydet.
+Fiziksel keyguard/Doze/OS, gerçek provider/iCloud/custody, FO1 success zinciri, signing/P5,
+release ve tam a11y/performance matrisleri mevcut Faz3–4 kapılarıdır; tekrar açılmaz/waive edilmez.
+F1 fix2 → 1.5 H15/P15 Mac kuyruğunun sırası ve açık checkbox'ları değişmez.
+
+### Review / risk-model / bütçe / durdurma / devir
+Review: tablo davranışı + etkilenen callers kanıtı; action/cancel/poll yan etki yokluğu;
+temiz FSD sınırları, NativeWind/global token/Lucide/TR-EN-DE/300-satır standardı;
+ilgili scoped test/lint/typecheck/build ve G1-07 görsel kanıtı zorunlu. Self-review bağımsız kabul değildir.
+Onaylı JS-only uyarlama **düşük riskli Sonnet pilot adayıdır**: kullanıcı açıkça seçerse
+`/implement-pilot`; aksi halde ayrı Opus `/implement`. Model/effort kendiliğinden değişmez.
+Journal/migration/OS ownership genişlemesi pilot değildir; yeni GPT tasarımı + normal Opus gerekir.
+Usage UNKNOWN; 15000 thinking-dahil output ajan içi verimlilik kontrolüdür, onay/duruş değildir.
+Ölçüm yoksa ilk temsilci sonunda tekrar/kapsam/ilerleme notu; sonra tüm onaylı satırlara devam.
+Aynı yaklaşım/invariant iki başarısız fix'te DUR; sayaç manifestte ve sohbetler arası korunur.
+Ürün/güvenlik/scope kararı, sözleşme çatışması, eksik gerçek altyapı veya izinsiz yıkıcı işlem de DUR.
+**Tek sonraki adım (kullanıcı başlatır):** G1'in mevcut Opus uygulama sohbeti varsa onu
+kullan; yoksa ayrı Opus sohbetinde aşağıdaki komutu ver. Bu GPT turunda uygulama yok.
+Tam komut/prompt:
+`/implement — AGENTS.md → CURRENT.md oku. Kullanıcı onaylı INITIAL kapsam yalnız
+docs/implementation/plans/next-plan.md §2.1/G1; CURRENT'in eski onaysız G1 notu için
+bu bölümdeki 16.11 onayı esas alınır. Tek goal ve G1-01–07 tablosunu uygula:
+ilk temsilci regression → dar uygulama → etkilenen kapsamın tamamı ve zorunlu kontroller.
+Eski kanıtı diff ile eşle; F1/1.5 diff/sözleşme/ertelemelerine ve native koda dokunma.
+Tek manifestte fresh/reuse/deferred/eksikleri kaydet; REVIEW/unchecked bırak.
+Bağımsız GPT review gerekir. Commit/push yok.`
+Sonnet pilotu ayrıca kullanıcı `/implement-pilot` seçerse aynı sözleşmeyle yürür;
+bu kapsam onayı model seçimi değildir. Varsayılan devir Opus'tur; otomatik başlatma yok.

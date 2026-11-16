@@ -1,0 +1,5 @@
+18  apps/mobile/src/features/file-transfer/model/activity-journal.ts
+25  apps/mobile/src/features/file-transfer/model/activity-journal.spec.ts
+53  apps/mobile/src/pages/activity/ui/activity-journal-panel.tsx
+173  apps/mobile/src/pages/activity/ui/activity-journal-panel.spec.tsx
+136  apps/mobile/src/pages/activity/ui/activity-page.tsx

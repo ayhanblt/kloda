@@ -16,6 +16,19 @@
     "count": "{{count}} retained jobs",
     "bytes": "{{acknowledged}} / {{total}} bytes acknowledged by PC",
     "more": "Showing up to 100 jobs; {{count}} remain in the durable journal.",
+    "journal": {
+      "segments": "Activity view",
+      "now": "Now",
+      "past": "History",
+      "filters": "Filter history",
+      "filterAll": "All",
+      "filterDone": "Completed",
+      "filterIssues": "Issues",
+      "scope": "PC transfer records: the latest state kept in this phone’s journal. Transfer times are not recorded, so the journal order is kept. Cloud destinations stay under Now.",
+      "empty": "No matching records in the journal.",
+      "emptyLimited": "No matching records among the returned jobs. Older records may still exist.",
+      "limited": "Only {{shown}} returned jobs out of {{count}} were checked; this is not the full journal."
+    },
     "pause": "Pause Syncing",
     "syncNow": "Sync Now",
     "backups": {

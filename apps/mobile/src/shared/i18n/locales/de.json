@@ -16,6 +16,19 @@
     "count": "{{count}} dauerhaft gespeicherte Aufträge",
     "bytes": "{{acknowledged}} / {{total}} vom PC bestätigte Bytes",
     "more": "Bis zu 100 Aufträge werden angezeigt; {{count}} bleiben im dauerhaften Journal.",
+    "journal": {
+      "segments": "Aktivitätsansicht",
+      "now": "Jetzt",
+      "past": "Verlauf",
+      "filters": "Verlauf filtern",
+      "filterAll": "Alle",
+      "filterDone": "Abgeschlossen",
+      "filterIssues": "Probleme",
+      "scope": "PC-Übertragungseinträge: der letzte im Journal dieses Telefons gespeicherte Stand. Übertragungszeiten werden nicht erfasst; die Journal-Reihenfolge bleibt erhalten. Cloud-Ziele bleiben unter Jetzt.",
+      "empty": "Keine passenden Einträge im Journal.",
+      "emptyLimited": "Keine passenden Einträge unter den zurückgegebenen Aufträgen. Ältere Einträge können existieren.",
+      "limited": "Nur {{shown}} zurückgegebene von {{count}} Aufträgen wurden geprüft; das ist nicht das vollständige Journal."
+    },
     "pause": "Synchronisierung pausieren",
     "syncNow": "Jetzt synchronisieren",
     "backups": {

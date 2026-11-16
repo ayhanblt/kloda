@@ -1,0 +1,6 @@
+AndroidFtpsJob.kt code=145 total=167
+AndroidFtpsScheduler.kt code=298 total=369
+AndroidFtpsQueue.kt code=218 total=226
+AndroidFtpsAutomaticChecks.kt code=271 total=301
+AndroidFtpsLifecycleChecks.kt code=296 total=352
+AndroidFtpsPolicyChecks.kt code=300 total=361

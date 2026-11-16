@@ -1,5 +1,30 @@
 # Windows devam — 16.11.2026 / F1-FTPS fix2 kısmi
 
+## Güncel Mac doğrulama sırası — 16.11 kullanıcı kararı
+
+Kullanıcı F1 ve 1.5'in eksik ortam doğrulamalarını Mac'te sırayla deneyecek.
+Aşağıdaki sıra günceldir; bu dosyanın eski Windows devam metni tarihî checkpoint'tir.
+İşler kapanmadı; bu kayıt test PASS'i veya bağımsız review yerine geçmez.
+
+1. **F1-FTPS fix2:** CURRENT + FTPS MANIFEST §fix2 Windows devamı ve
+   `fix2/resume-win/` üzerinden mevcut tamamlanmış kaynakları kullan.
+   Kod değiştirmeden build + start-RED + final-GREEN + dar lint; yalnız değişen/eksik
+   kanıt. Eski yarım-kod checkpoint'ini yeniden uygulama. İki-ret sayaçları,
+   S3/R3 kabulü, FO1 fiziksel ertelemesi korunur. Sonra mevcut GPT review sohbeti.
+2. **1.5 H15/P15:** [1.5 MANIFEST](evidence/backlog-1.5/MANIFEST.md) ve
+   [sözleşme §1.5](plans/next-plan.md#15--regresyon-hazırlığı-uygulama-sözleşmesi--16112026).
+   macOS/xcrun/swiftc/SQLite3/CryptoKit, disposable temp ve mevcut golden JSON'u
+   doğrula; `python3 -I tools/test-ios-webdav-journal.py` koşusunun log/exit'ini
+   `evidence/backlog-1.5/` altına kaydet. Üretim kodu/assertion değiştirme;
+   hata varsa önce teşhis, yalnız onaylı harness sınırı. Eksik başlangıç compile
+   teşhisi için kayıtlı `baseline/test-ios-webdav-journal.py.start` kullanılır;
+   çalışan dosyayı körlemesine geri alma. L15/B15 etkilenmeyen kanıtları tekrar koşma.
+   Zorunlu kanıt tamamlanınca REVIEW/unchecked ve ayrı GPT review; şimdilik KISMİ.
+
+Gerçek release B2/notices paket kontrolü, signing/P5 ve fiziksel kapılar bu dar
+sıranın parçası değildir; önceki release/fiziksel aşamalarında açık kalır.
+Yeni fixture/CA/SDK kurulumu veya commit/push yetkisi yok.
+
 ## Tek aktif iş
 
 Opus limiti bitti; kullanıcı bütün mevcut değişikliklerin checkpoint commit/push'ını

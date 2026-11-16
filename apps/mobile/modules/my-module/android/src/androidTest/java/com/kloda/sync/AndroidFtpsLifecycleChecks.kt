@@ -89,12 +89,13 @@ internal object AndroidFtpsLifecycleChecks {
     services.values.filterIsInstance<AndroidFtpsJob>().single().onDestroy()
   }
 
-  internal fun held(i: Instrumentation, lane: Int) {
+  /** Forces [lane]; waits until its callback is BLOCKED at the held monitor, or WAITING at a test gate off the arbiter. */
+  internal fun held(i: Instrumentation, lane: Int, state: Thread.State = Thread.State.BLOCKED) {
     AndroidFtpsAutomaticChecks.shell(i, "cmd jobscheduler run -f com.kloda.sync.test $lane")
     val deadline = android.os.SystemClock.elapsedRealtime() + 30000
-    fun blocked() = Thread.getAllStackTraces().keys.any { it.name == "kloda-ftps-job" && it.state == Thread.State.BLOCKED }
+    fun blocked() = Thread.getAllStackTraces().keys.any { it.name == "kloda-ftps-job" && it.state == state }
     while (!blocked() && android.os.SystemClock.elapsedRealtime() < deadline) Thread.sleep(20)
-    check(blocked()) { "callback never reached the arbiter" }
+    check(blocked()) { "callback never reached the barrier ($state)" }
   }
 
   internal fun quiet() {
@@ -106,7 +107,7 @@ internal object AndroidFtpsLifecycleChecks {
   }
 
   /**
-   * FS1: A = own JOB (finally/throw/locked/defer/result=claimed-run completion/destroy) or WATCH callback held at its
+   * FS1: A = own JOB (finally/throw/locked/defer/result=claim commit/destroy) or WATCH callback held at its
    * first arbitrated decision; B = newer
    * projection (P, JOB token, WATCH, distinctive error) installed meanwhile, which also OS-stops A. Released A may do only
    * its own cleanup: B's P/token/error/JOB/WATCH and a foreign lease unchanged; A makes no finish/cancel/schedule.
@@ -129,7 +130,7 @@ internal object AndroidFtpsLifecycleChecks {
       AndroidFtpsQueue.captureFault = when (branch) {
         "throw", "destroy" -> { { throw SecurityException("fs1 A capture failure") } }
         "locked" -> { { throw FtpsFailure("credential_locked") } }
-        else -> null // result: A claims P and completes its run with a recorded result (no fixture server) → finished().
+        else -> null // result: admitted A (lease held) waits at its arbitrated monitor→sourceLock claim commit (R1 §2).
       }
       var bRun: FtpsRun? = null
       val (b, bToken, bWatch) = synchronized(monitor) {
@@ -145,7 +146,7 @@ internal object AndroidFtpsLifecycleChecks {
         val bToken = prefs.getString("ftpsDispatchToken", null)
         val b = checkNotNull(queue.schedule.read()); bRun = b.run?.let { queue.runs.read(id = it) }
         check((branch == "result" || b == next) && bToken != armed.token && scheduler.getPendingJob(AndroidFtpsScheduler.JOB)?.extras?.getString("token") == bToken) { "B not installed" }
-        check(branch != "result" || bRun != null) { "A never claimed: P=$b" }
+        check(bRun == null) { "A claimed past the arbiter: P=$b" }
         val bWatch = scheduler.getPendingJob(AndroidFtpsScheduler.WATCH)?.extras?.getString("token")
         check(branch != "watch" || (bWatch != null && bWatch != armed.watchToken)) { "B WATCH not installed" }
         AndroidFtpsQueue.captureFault = { throw SecurityException("fs1 visible reconcile") } // Any A reconcile would fail closed.
@@ -173,17 +174,15 @@ internal object AndroidFtpsLifecycleChecks {
   private fun osStop(i: Instrumentation, app: Context, queue: AndroidFtpsQueue) {
     val scheduler = app.getSystemService(JobScheduler::class.java)
     val recorder = AndroidFtpsAutomaticChecks.Recorder()
+    val gate = java.util.concurrent.CountDownLatch(1)
     try {
-      val armed = future(app, queue) // captureFault = locked: A blocks in its locked report.
-      synchronized(monitor) {
-        held(i, AndroidFtpsScheduler.JOB)
-        AndroidFtpsScheduler.os = recorder
-        AndroidFtpsAutomaticChecks.shell(i, "cmd jobscheduler timeout com.kloda.sync.test ${AndroidFtpsScheduler.JOB}")
-        val deadline = android.os.SystemClock.elapsedRealtime() + 15000
-        fun active() = String(AndroidFtpsAutomaticChecks.shell(i, "cmd jobscheduler get-job-state com.kloda.sync.test ${AndroidFtpsScheduler.JOB}")).contains("active")
-        while (active() && android.os.SystemClock.elapsedRealtime() < deadline) Thread.sleep(50)
-        check(!active()) { "OS stop not delivered" }
-      }
+      val armed = future(app, queue)
+      // A gated off the arbiter in its first capture (then locked); the arbitrated main-thread stop is never awaited under the monitor.
+      AndroidFtpsScheduler.os = recorder
+      AndroidFtpsPolicyChecks.gated(i, AndroidFtpsScheduler.JOB, gate) { throw FtpsFailure("credential_locked") }
+      AndroidFtpsAutomaticChecks.shell(i, "cmd jobscheduler timeout com.kloda.sync.test ${AndroidFtpsScheduler.JOB}")
+      AndroidFtpsPolicyChecks.inactive(i, AndroidFtpsScheduler.JOB)
+      gate.countDown()
       quiet()
       check(recorder.finishes.isEmpty() && recorder.cancels.isEmpty() && recorder.schedules.isEmpty()) {
         "after stop: finish=${recorder.finishes} cancel=${recorder.cancels} schedule=${recorder.schedules}"
@@ -191,7 +190,7 @@ internal object AndroidFtpsLifecycleChecks {
       check(queue.schedule.read() == armed.plan && AndroidFtpsAutomaticChecks.runs(queue) == 0L) { "P changed: ${queue.schedule.read()}" }
       check(app.getSharedPreferences("kloda-sync", 0).getString("ftpsDispatchToken", null) == armed.token &&
         scheduler.getPendingJob(AndroidFtpsScheduler.JOB)?.extras?.getString("token") == armed.token) { "stopped JOB not retried: ${scheduler.getPendingJob(AndroidFtpsScheduler.JOB)?.extras}" }
-    } finally { restore() }
+    } finally { gate.countDown(); restore() }
   }
 
   internal class Armed(val plan: FtpsPlan, val token: String?, val watchToken: String?, val uris: Set<Pair<android.net.Uri, Int>>)

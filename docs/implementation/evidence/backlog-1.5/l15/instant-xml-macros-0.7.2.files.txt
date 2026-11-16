@@ -1,0 +1,10 @@
+instant-xml-macros-0.7.2/.cargo_vcs_info.json
+instant-xml-macros-0.7.2/Cargo.lock
+instant-xml-macros-0.7.2/Cargo.toml
+instant-xml-macros-0.7.2/Cargo.toml.orig
+instant-xml-macros-0.7.2/README.md
+instant-xml-macros-0.7.2/src/case.rs
+instant-xml-macros-0.7.2/src/de.rs
+instant-xml-macros-0.7.2/src/lib.rs
+instant-xml-macros-0.7.2/src/meta.rs
+instant-xml-macros-0.7.2/src/ser.rs

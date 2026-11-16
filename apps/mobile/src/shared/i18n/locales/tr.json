@@ -16,6 +16,19 @@
     "count": "{{count}} kalıcı iş",
     "bytes": "PC tarafından onaylanan {{acknowledged}} / {{total}} byte",
     "more": "En fazla 100 iş gösteriliyor; {{count}} iş kalıcı journal'da tutuluyor.",
+    "journal": {
+      "segments": "Etkinlik görünümü",
+      "now": "Şu an",
+      "past": "Geçmiş",
+      "filters": "Geçmişi filtrele",
+      "filterAll": "Tümü",
+      "filterDone": "Tamamlananlar",
+      "filterIssues": "Sorunlar",
+      "scope": "PC aktarım kayıtları: bu telefonun journal'ında tutulan son durum. Aktarım zamanı kaydedilmez; journal sırası korunur. Bulut hedefleri Şu an bölümünde kalır.",
+      "empty": "Journal'da eşleşen kayıt yok.",
+      "emptyLimited": "Dönen işler arasında eşleşen kayıt yok. Daha eski kayıtlar olabilir.",
+      "limited": "{{count}} işten yalnız dönen {{shown}} iş incelendi; bu tüm journal değildir."
+    },
     "pause": "Senkronizasyonu duraklat",
     "syncNow": "Şimdi senkronize et",
     "backups": {

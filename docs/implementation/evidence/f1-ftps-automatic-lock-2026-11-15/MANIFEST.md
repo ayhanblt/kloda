@@ -5,13 +5,50 @@ Araştırma kaydı öneri düzeyindedir; son dar sözleşme aşağıda. Alt ajan
 ve reddedilen kalıcılık çıkarımı kayıtta; ana model değişmedi.
 
 Sözleşme: [next-plan §1–6](../../plans/next-plan.md). Goal/tablo yeniden tanımlanmadı.
-Durum: **FIX / KISMİ — fix2 başladı, Opus kullanım limiti nedeniyle Windows'a devrediliyor.
-Job/Scheduler değişti; yeni fix2 build/test kanıtı yok. R1/R2 ret sayaçları 2 ve checkbox açık.
+Durum: **FIX / KISMİ (BLOCKED-ENV) — fix2 kaynağı Windows'ta tamamlandı, compile/test NOT_RUN.
+Review-ready değil; ayrıntı §fix2 Windows devamı. R1/R2 ret sayaçları 2 ve checkbox açık.
 Son review: [fix-r1r2/review.md](fix-r1r2/review.md); statik kanıt `fix-r1r2/review-checks.log`.
 R1 retire→OS finish öncesi stop penceresi, R2 WATCH ordinary recovery outcome bypass açık.
 R3 dar FTPS lint kanıtı kabul; tam görev exit 1 ve üç mevcut dış-kapsam error açık izlenir.
 Final FIX lock 7/7, lifecycle 32/32 ve build PASS reuse; bu sonuçlar açık interleaving'leri
 PASS'e çevirmez. FO1 prior PASS reused; delta §21/Faz4 DEFERRED/NOT_RUN. Goal kapanmadı.**
+
+## fix2 Windows devamı — 16.11.2026 (Opus FIX, kaynak tamam / doğrulama BLOCKED)
+
+- Resume HEAD `586a2fd` (Mac checkpoint commit'i, kısmi diff dahil), staged boş, status temiz:
+  `fix2/resume-win/{head,status,staged}.txt`. Altı kaynak CRLF (autocrlf=true); LF-normalize
+  hash'ler `windows-resume.sha256` ile birebir (`hash-check-lf.txt`); fark yalnız EOL.
+  CURRENT başlangıç kopyası `resume-win/CURRENT.md.start`. Mac kısmi diff'i `job/scheduler-partial.diff`.
+- **Ortam engeli:** Windows'ta Android SDK/adb/emulator yok, JDK yalnız 1.8, `apps/mobile/android`
+  prebuild yok; C: 10.7 GB boş (tahmini ihtiyaç ~13–16 GB). Kullanıcı kararı: yalnız kaynak
+  tamamla. Hiçbir kurulum yapılmadı. **Kotlin compile, androidTest build, RED/GREEN, lint NOT_RUN.**
+- Diff: `resume-win/fix2-start-to-final.patch` (fix2/start→final, CR yok sayılır) ve
+  `resume-win/windows-session.patch` (HEAD kısmi→final). Final LF hash `resume-win/source-final-lf.sha256`.
+  Satır (yorum/boş hariç) `resume-win/lines-final.txt`: Job 145, Scheduler 298, Queue 218 (değişmedi),
+  Automatic 271, Lifecycle 296, Policy 300; `diff-check.txt` temiz. Yeni dosya/dependency yok.
+
+| Bulgu | Invariant | Olay sırası | Sembol | Regression | Önce → sonra |
+|---|---|---|---|---|---|
+| R1 (FL1/FS2) | Karar sonrası, finish OS'a ulaşmadan gelen stop yayımlanmış RETRY'ı bulur | locked due A → complete RETRY → finish barrier → gerçek `timeout` → release | `complete/settle`, `stopped`, `onStopJob` arbiter | `ftps-fl1-stop-after-decision` | start: stop lock-free false beklenir (RED) → NOT_RUN |
+| R1 RETAINED temizliği | Yeni delivery RETAINED slotu değiştirir; stop tüketir; revoke epoch'u düşürür; destroy temizler | yukarıdaki A sonrası aynı-token `run -f` | `onStartJob`, `cancel` epoch, `onDestroy` | aynı test 2. delivery; destroy `ftps-fs1-destroyed-watch` | NOT_RUN; revoke yalnız kaynak |
+| R1 aynı-token B | A'nın geç report/cleanup'ı gerçek B'ye dokunmaz | A gate → stop → B delivery → A release; error yazımları listener'la | `live(E)`, `reportCurrent` | `ftps-fs2-stop-held-same-token-b` | NOT_RUN (start'ta da GREEN beklenir, karşıt) |
+| R1 claimed ticket | Claimed stop recovery'si tek, D/epoch'a bağlı, async | stop RUNNING claimed → complete → `recover` | `stopped` ticket, `recover` | mevcut FS1/FL kapsamı | NOT_RUN |
+| R2 (FP2/FW) | Ordinary WATCH recovery aynı sınıflı OS yolundan; UNKNOWN generic catch'le temizlenmez | rewatch null-throw → port kurulu ordinary reconcile | `install`, `watch`, `proves`, `cancel(keep)` | `ftps-fp2-watch-null-throw-{clean,accepted,unknown,rejected,unreadable,foreign}` | start: helper bypass → 2. schedule port'ta yok (RED) → NOT_RUN |
+| R2 owner fallback / delivery | Sahip E'ye REJECTED verdict; önerilen token teslimi kurulum kanıtı | ordinary reconcile, origin RUNNING / `onStart` token=next | `Attempt.owner`, `verdict`, `started` | yok — **yalnız kaynak eşlemesi, runtime NOT_RUN** | — |
+
+- Barrier uyumu (sözleşme §4 "monitor tutup OS stop'u bekleme"): `onStopJob` artık arbiter'da,
+  bu yüzden monitor altında stop bekleyen eski `osStop`/`stopHeld` kurulumları capture gate'ine
+  (`PolicyChecks.gated`, `held(…, WAITING)`) taşındı; beklenen sonuçlar aynı.
+- **Reviewer'a açık anlam değişikliği:** kısmi diff'teki monitor→sourceLock claim commit'i (§2)
+  nedeniyle `ftps-fs1-stale-result-keeps-b` A'yı artık claim commit'inde tutar (stale claim reddi, run yok).
+  "Claim edilmiş run sonucu sonrası emekli E'nin geç `finished()`'i" runtime kapsamı kayboldu;
+  kaynakta `finished` live+current korumalı. Production'da off-monitor post-claim barrier yok.
+- Generic catch artık `cancel(keep = true)`: şeritler fail-closed iptal, UNKNOWN/unresolved fence'leri
+  kalır (sözleşme §3/CURRENT); sonraki ordinary tur çözer. Explicit pause/disable tam temizler.
+- Gerekli sonraki doğrulama (Android ortamında, kod değişmeden): compileDebugKotlin +
+  assembleDebugAndroidTest; `fix2/start` kaynaklarıyla yeni testler RED; final ile
+  `-e scope ftps-automatic-lifecycle` ve `ftps-automatic-lock` GREEN; dar lint (R3 komutu).
+  Derleme hatası çıkarsa bu aynı Opus sohbetinde scoped düzeltme; iki-deneme sayacı korunur.
 
 ## Onaylı scoped FIX devri — 16.11.2026
 

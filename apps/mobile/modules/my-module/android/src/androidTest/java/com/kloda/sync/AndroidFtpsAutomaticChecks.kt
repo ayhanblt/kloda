@@ -41,7 +41,7 @@ internal object AndroidFtpsAutomaticChecks {
       resetRunless(i)
       AndroidFtpsLifecycleChecks.run(i, group)
       AndroidFtpsPolicyChecks.run(i, group)
-      "FTPS FW1 locked WATCH (P kept / JOB kept / WATCH re-observed) + FW2 open WATCH (valid early / capture fail / CAS mismatch / run!=null) + FS1 stale JOB finally/throw/locked/defer/result/destroy + WATCH keep B + FS2 OS stop locked retry + FP2 OS failure/old/new/null(+pause)/storage + FP1 busy/retry/old-wake(busy-defer/pause/disable/revision) + FS2 stop held finalization/same-token report + FS1 destroyed WATCH + FP2 WATCH failure/old/new/null PASS; synthetic faults, not real Keyguard\n"
+      "FTPS FW1 locked WATCH (P kept / JOB kept / WATCH re-observed) + FW2 open WATCH (valid early / capture fail / CAS mismatch / run!=null) + FS1 stale JOB finally/throw/locked/defer/claim/destroy + WATCH keep B + FS2 OS stop locked retry + FP2 OS failure/old/new/null(+pause)/storage + FP1 busy/retry/old-wake(busy-defer/pause/disable/revision) + FL1 stop after decision + next delivery + FS2 stop held finalization/report/same-token B + FS1 destroyed WATCH + FP2 WATCH failure/old/new/null + recovery clean/accepted/unknown/rejected/unreadable/foreign PASS; synthetic faults, not real Keyguard\n"
     }
     else -> null
   }
