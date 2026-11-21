@@ -69,8 +69,13 @@ export function App() {
           <h1>{t('receiver.title')}</h1><p>{t('receiver.description')}</p>
         </header>}
         {route === 'settings' && <h1 className="receiver-settings-title">{t('receiver.settingsNavigation')}</h1>}
-        {route === 'settings' && <AppearanceSettings preference={appearance.preference} onChange={appearance.choose} />}
-        <div hidden={route === 'welcome'}><DesktopBackground settings={route === 'settings'} /></div>
+        {route === 'tray' && <header className="pairing-page-header receiver-heading">
+          <h1>{t('ui.tray')}</h1><p>{t('ui.trayDescription')}</p>
+        </header>}
+        <div hidden={route === 'welcome'}>
+          <DesktopBackground onOpen={() => navigate('receiver')} settings={route === 'settings'} tray={route === 'tray'}
+            general={route === 'settings' ? <AppearanceSettings preference={appearance.preference} onChange={appearance.choose} /> : undefined} />
+        </div>
         {route === 'receiver' && <ReceiverHome onNavigate={navigate} />}
         {backupVisible && <p className="advanced-notice">{t('receiver.advancedDescription')}</p>}
         <div hidden={!backupVisible}><BackupSetup visible={backupVisible} showActivity={route === 'jobs'} /></div>
@@ -79,7 +84,6 @@ export function App() {
         {route === 'devices' && <DeviceManagement />}
         {(route === 'backups' || route === 'trash') && <BackupVersions key={route} initialTrash={route === 'trash'} onViewChange={(trash) => navigate(trash ? 'trash' : 'backups')} />}
         {(route === 'connections' || route === 'connection-add' || route === 'connection-detail') && <ConnectionsPage location={location} onNavigate={navigateTo} />}
-        {route === 'tray' && <main className="pairing-card"><h1 className="text-3xl font-semibold">{t('ui.tray')}</h1><p className="mt-4 text-secondary-text">{t('ui.trayDescription')}</p></main>}
       </div>
     </DesktopShell>
     <Toaster closeButton containerAriaLabel={t('pairing.notificationsLabel')} hotkey={[]} position="bottom-right" theme={appearance.mode}

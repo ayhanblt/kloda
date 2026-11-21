@@ -84,6 +84,7 @@ export class DesktopBackground {
       canHide: this.canHide(),
       environmentLimited: !this.canHide(),
       shutdownError: this.shutdownError,
+      appVersion: app.getVersion(),
     };
   }
 

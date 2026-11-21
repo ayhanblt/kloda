@@ -1,0 +1,8 @@
+src/app/App.tsx total=92 code=85
+src/features/desktop-background/DesktopBackground.tsx total=100 code=94
+src/features/desktop-background/DesktopTray.tsx total=62 code=54
+electron/runtime/background.ts total=204 code=189
+src/shared/api/desktop.ts total=149 code=134
+src/features/desktop-background/DesktopBackground.spec.tsx total=175 code=162
+src/app/App.spec.tsx total=195 code=186
+electron/runtime/background.spec.ts total=224 code=207

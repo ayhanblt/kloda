@@ -1,0 +1,28 @@
+import json,re,sys
+root=sys.argv[1]
+def flat(o,p=''):
+    out={}
+    for k,v in o.items():
+        key=f'{p}.{k}' if p else k
+        if isinstance(v,dict): out.update(flat(v,key))
+        else: out[key]=v
+    return out
+vr=re.compile(r'\{\{\s*([^}\s,]+)[^}]*\}\}')
+bad=0
+for app in ('mobile','desktop'):
+    d={l:flat(json.load(open(f'{root}/apps/{app}/src/shared/i18n/locales/{l}.json'))) for l in('tr','en','de')}
+    ks={l:set(v) for l,v in d.items()}
+    allk=set().union(*ks.values())
+    miss={l:sorted(allk-ks[l]) for l in ks}
+    varbad=[]
+    for k in sorted(allk):
+        vs={l:set(vr.findall(str(d[l].get(k,'')))) for l in d}
+        if len({frozenset(x) for x in vs.values()})>1: varbad.append(k)
+    empty=[(l,k) for l in d for k,v in d[l].items() if not str(v).strip()]
+    nonstr=[(l,k) for l in d for k,v in d[l].items() if not isinstance(v,str)]
+    print(app,'keys',{l:len(ks[l]) for l in ks},'missing',{l:len(m) for l,m in miss.items()},'varMismatch',len(varbad),'empty',len(empty),'nonString',len(nonstr))
+    for l,m in miss.items():
+        for k in m[:5]: print('  MISSING',l,k)
+    for k in varbad[:5]: print('  VARDIFF',k)
+    bad+=sum(len(m) for m in miss.values())+len(varbad)+len(empty)
+sys.exit(1 if bad else 0)

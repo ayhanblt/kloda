@@ -2,17 +2,176 @@
 
 Tek başlangıç işaretçisi. Tarihî PASS taze kabul değildir. Kurallar: kök AGENTS.md.
 
+**Model kararı (18.11):** ileriye dönük GPT plan/review seçimi **GPT-6.2 Sol**
+(`openai/gpt-6.2-sol`, Fast değil). Proje/global komutlar ve repodaki Codex model
+seçimleri güncellendi; mevcut effort korunur.
+Tarihî review kayıtları gerçek reviewer modelini göstermeye devam eder.
+**Son model kararı (18.11):** mevcut Opus çalışması tamamlandıktan sonra ana
+uygulama/FIX **Sonnet 5.5**, geliştirme araştırma/düşük-riskli alt işler **Haiku 5.5**.
+Çalışan Opus turu ve onun Sonnet desteği korunur. Sonraki devirlerde eski Opus/Sonnet
+rol etiketleri bu karara göre okunur; plan/review Sol 6.2, destek Luna olarak kalır.
+
 ## Aktif iş / sıradaki adım
+
+### Güncel ekip checkpoint'i — 20.11.2026
+
+Kullanıcı kararı: Faz3–Faz4 ekip uygulayıcısı Sonnet 5.5 **medium**.
+Mevcut çalışma, kapsam, kanıt ve sayaçlar sıfırlanmaz; GPT rolleri değişmez.
+Dropbox dilimi eski oturumda bitti. Tek yeni Sonnet alt oturumu P3-09 için
+`claude-agent/sonnet#medium` açık çağrı seçimiyle başlatıldı; ID manifestte.
+Eski oturuma yeni iş yok. Çağrı seçimi ile etkin çalışma metadata'sı ayrıdır;
+sayısal `reasoning_effort` değerinden Medium/High sonucu çıkarma.
+
+**Faz3 KISMİ / UYGULAMA.** P3-04 FL1/R2 RED→GREEN ve lock 7/7; onaylı
+iki dosya düzeltmesinden sonra altı JOB senaryosu geçti, iki WATCH açık.
+WATCH gerçek teslimi ve post-claim kanıtı açık; fail-fast kabul değildir.
+P3-02 build/link kanıtı (runtime değil) korunur. P3-05 Android lint exit 1:
+iki tarihî kök neden ailesi açık; yeniden aynı lint koşusu yok.
+P3-06 host kontrolleri geçti; gerçek FTPS ağ testi eksik fixture nedeniyle açık.
+P3-12 kısmi: iki Android DAV temsilcisi geçti; çok-hedef/Files/iOS açık.
+Sahipli test scratch'ı yalnız bağlı DAV kontrolleri için geçici tutulur.
+P3-07/08 Dropbox: sahipli test girişi ve üç senaryonun test desteği eksik;
+koşu yapılmadı. Android Nextcloud güven engeli değişmedi.
+P3-09 paket/imza eşleşti, ancak sentetik eski durum yok; yükseltme koşulmadı.
+Aynı versionCode ile yalnız veri korunumu sınanabilir, sürüm artışı değil.
+P3-11 sentetik host kaynak ölçümü önceki değerle eşleşti; eşik yok, PASS değil.
+Erişilebilirlik ve gerçek arayüz ölçümü açık. P3-03 JS→native UUID Android/iOS
+Debug kapsamında geçti. P3-01 paketleme ve dar statik kontroller geçti.
+P3-10 Desktop Ayarlar temsilcisi temiz render verdi; Lovable eşleşmesi açık.
+iOS capture-only kayıt uyumu düzeltildi; `check` temiz, 48/600 hücre hazır.
+P3-10 iOS temsilcisi NOT_RUN: hazır ekranların eşleşen frozen görüntüsü
+yok ve mevcut fixture güncel tarifle kimlik doğrulamasından geçmedi.
+Yerel envanter uzlaştırıldı: altı eski önizleme cb1143'e ait; beş hedef için
+uygun c144 görüntüsü yok. Kullanıcı eksik görsellerin onaylı revizyondan
+alınmasını onayladı; kendi hesabıyla giriş tamamlandı. Önizleme yanıtı c144
+olarak doğrulandı ve beş referans kaydedildi. Masaüstü görüntüleri dar
+viewport'ta; 1440 px karşılaştırması için eşleşen referans hâlâ gerekli.
+Masaüstü Ayarlar tek dar temsilcisi 521×849/TR/koyu koşulda karşılaştırıldı:
+render temiz, bölüm/düğme yerleşimi eşleşmiyor. [Kanıt](evidence/faz3/p3-10/desktop-settings-matched/RESULT.md).
+D12 Lovable uyarlaması **bağımsız ACCEPTED (D12-1/2/3, 521×849/TR/koyu)**:
+[review](evidence/faz3/p3-10/d12-lovable-fix/fix/review.md).
+1440 px, native OS, M13-alt, matris ve Faz3/Faz4 açık. M13-alt için
+mevcut otomatik araç Simulator'a kaydırma girdisi veremiyor. Tek seferlik
+manuel Simulator temsilcisi tamamlandı: TR/koyu/normal koşulda gerçek kullanıcı
+kaydırmasıyla Hakkında/Yapılandırma sürümü tamamen görünür oldu; üst ve alt
+PNG ile doğrulandı, Simulator ve Metro kapandı. M13-alt görsel kabulü,
+`state_unavailable` ve 5 tarihî FAIL değişmedi.
+Üst/alt PNG'ler c144 M13 ile [yapısal karşılaştırıldı](evidence/faz3/p3-10/m13-bottom-manual/comparison.md);
+ana sıra ve görülen onaylı uyarlamalar tutarlı, yerleşim farkları ve orta bölüm
+açık. Tekrar çekim yok. P3-05 biyometrik bildirim FIX'i bağımsız **ACCEPTED**;
+birleşik Debug manifesti byte-eş, iki lint hatası giderildi. Android 7.0/7.1
+otomatik S3 desteklenmiyor mesajı ve API sınırı **bağımsız ACCEPTED**
+(yalnız P3-05-S3-1/2/3). Dar modül lint'i 0 hata; gerçek API24/25 ve
+API26+ JobScheduler koşuları ile tam lint açık.
+P3-11 Desktop Ayarlar klavye/odak 21/21, betik-yerel düz nesne bridge
+ile; standart Proxy stub iki kez takıldı, kök neden açık, tekrar koşulmaz.
+P3-10 D13 dar tray karşılaştırması kaydedildi; render temiz, görsel farklar
+açık. Duraklatma ve gerçek durum davranışı korunur. Tekrar çekim yok.
+P3-11 Desktop renderer açılışı ölçüldü: ilk içerik 128 ms, hazır ekran
+144,3 ms (üst sınır); tek örnek, eşik ve baseline yok, PASS değil.
+Mevcut araçlarla seçilen bağımsız kontroller
+tamamlandı; kalanlar [kök grupları](evidence/faz3/MANIFEST.md#kalan-engeller--21-kasım)
+altında, Faz3 açık. İki düzeltme sonrası tam K1 app/modül lint exit 0;
+worklets ana analiz UP-TO-DATE, iki test analizi başarılı. Varsayılan K2 ve
+gerçek sürüm davranışı açık, aynı lint tekrarlanmaz. P3-06: eski yerel
+FTPS düzeneği yok; gömülü test kütüphanesi güncel adayla eşleşmiyor.
+Dar FTPS düzeneği kullanıcı onaylı. [Önkoşul denetimi](evidence/faz3/p3-06/ftps-fixture-preflight.md)
+tamamlandı; kurulu/cache'li sunucu yok. Ubuntu 24.04 arm64 geçici konteyneri
+için Ubuntu deposunda `vsftpd 3.0.5-0ubuntu3.1` doğrulandı; kullanıcı yalnız
+bu geçici konteyner için edinimi onayladı. Kota sonrası aynı Sonnet host explicit
+TLS aktarımında sentetik dosyanın boyut+SHA eşleşmesini kanıtladı; vsftpd TLS veri
+oturumu sonunda SIGSEGV/139 (kararlılıkta iki başarısız deneme). FTPS-1 PARTIAL;
+restart döngüsü ve Android koşusu yok. Tek kontrollü tanı, çöküşü veri bağlantısı
+kapanışından değil QUIT sonrası kontrol oturumu/çocuk çıkışı aralığından sonra
+gözledi; sinyal alan PID ve işlev kanıtlanmadı. Kullanıcı geçici tanıyı ve kapsam
+içi rutin fixture kurulumlarını onayladı; debugger koşusu yapılmayacak.
+Alternatif [ProFTPD host kanıtı](evidence/faz3/p3-06/ftps-host-representative/proftpd/RESULT.md):
+iki normal explicit TLS aktarımı ve sağlıklı kapanış doğrulandı. Session reuse
+zorunluluğu yalnız loopback fixture'da kapalı; ürün TLS güveni değişmedi.
+[FTPS-2…4 Android kanıtı](evidence/faz3/p3-06/ftps-android/RESULT.md) incelendi:
+ayrı test kopyasında güncel arm64 APK/JNI ile tek sentetik aktarım ve temizlik
+kanıtı var. Seçici yalnız test kopyasında; canlı ürün değişmedi. Son
+[bağımsız review DECISION](evidence/faz3/p3-06/review.md): FTPS-4'te üst son
+tarih tüm temizlik akışına taşınmıyor. İlk yaklaşım başarısız=2; yeni
+yürütücü mutlak süre FIX başarısız=2; sayaçlar ayrı. Üçüncü aynı yaklaşım,
+gerçek koşu, commit/push yok. Önceki host/Android runtime kanıtı geçerli;
+dar FTPS kabulü, iOS ve Faz3 açık. Tek sonraki adım: GPT tasarım kararı.
+D12 yeniden açılmaz; sonraki iş kısa disk devriyle, sayaçlar korunarak yürür.
+Kaynak incelemesi görsel PASS sayılmaz; referans çözülmeden build/capture veya
+M13-alt tekrarı yok.
+Tek giriş: `/ekip devam` (Kloda proje sohbetinde; GPT koordinatör seçilir).
+Faz3 sözleşmesi: [next-plan §3](plans/next-plan.md#3--faz3-tek-tam-regresyon--19112026);
+güncel sonuçlar: [Faz3 manifest](evidence/faz3/MANIFEST.md).
+P3-00 reuse; P3-01 JS/host, Android/iOS export, TR/EN/DE parity ve dar statik kanıt mevcut.
+P3-10 M13-alt beş FAIL-TEST/FIXTURE sonrası state_unavailable; görsel kabul açık,
+hostRef null kök nedeni kanıtlanmadı. Matris 35/35 ve araç 73/73 görsel PASS değildir.
+Zorunlu açıklar manifestte; yeniden baştan koşma.
+Ekip devri: **bul → kök nedene göre grupla → çöz → dar doğrula**.
+P3-10 çözüm yolu GPT'de; dosya sınırı dışı çözüm onay ister.
+Teknik belirsizlik GPT'ye, rutin test sırası kullanıcıya değil. Zorunlu engeller
+faz sonuna sessiz taşınamaz ve yeni durum etiketiyle tamamlanmış sayılamaz.
+Sonnet alt oturumu başlatıldı; gerçek ID ve sıradaki adım faz manifestinde.
+Review henüz başlamadı. Eski Sonnet sohbetiyle eşzamanlı yazma/koşu yok.
+Faz3 bağımsız kabulünden sonra raporla ve dur; `/ekip Faz4` ile fiziksel plan ve
+aynı ekip düzeni başlar. Kullanıcı cihaz eylemleri Sonnet'ten ana sohbet üzerinden
+istenir; fiziksel kapılar otomatik geçilmiş sayılmaz.
+**Aşağıdaki eski “tek sonraki adım” kayıtları tarihîdir; güncel yönlendirme bu bölümdür.**
+
+**17.11 kullanıcı kararı ve sonuç:** F1 fix2 compile/RED-GREEN/dar lint doğrulaması
+**Faz3'e DEFERRED / NOT_RUN**; aşağıdaki eski Mac F1→1.5 sırası artık yürütülmez.
+1.5 için onaylı 10 dakikalık pencerede host testi **6.01 saniye / exit 0**: H15/P15
+derleme+seed/reopen PASS. [Kanıt](evidence/backlog-1.5/mac-2026-11-17/result.txt),
+ham log aynı dizinde `host-check.log`. Kod değişikliği/tekrar koşu yok.
+**1.5 REVIEW / ACCEPTED — bağımsız GPT review ile goal kapandı:**
+H15/P15 Mac PASS reuse; L15 kaynak/metin ve B15 release kapısı statik doğrulandı.
+[Review](evidence/backlog-1.5/review.md), [manifest](evidence/backlog-1.5/MANIFEST.md).
+Gerçek release/lisans paketleme/fiziksel kapılar açık. **2.2/G2–G3: GPT planı onaylandı,
+18.11 INITIAL + FIX-R1 bağımsız GPT review ACCEPTED; 2.2 geliştirme goal'u kapandı**;
+[review §FIX-R1](evidence/backlog-2.2-g2-g3/review.md#fix-r1-bağımsız-devam-reviewu--18112026),
+[manifest](evidence/backlog-2.2-g2-g3/MANIFEST.md). G23-R1 RESOLVED; G23-01–08 karşılandı.
+Reviewer probe 3/3 GREEN; uygulayıcı regression RED→GREEN/19 test ve dar kontroller reuse.
+INITIAL ret=1, başarısız FIX=0. Gerçek OS/native/release kapıları açık.
+**2.3/G4–G6 (18.11): REVIEW / ACCEPTED — bağımsız GPT geliştirme kabulü.**
+D-G456 (next-plan §2.3) G456-01–06 ve 07 render/a11y karşılandı; engelleyici bulgu yok.
+Spec 8/8, tsc, scoped ESLint, locale ve iki export REUSE; final hash 6/6 taze doğrulandı.
+G456-07 scripted M13 görsel karşılaştırması 18.11 kullanıcı kararıyla **Faz3 DEFERRED / NOT_RUN**
+(izole capture yolu yok). Reviewer yeni test/build NOT_RUN; üst ürün/fiziksel kapılar açık.
+[Review](evidence/backlog-2.3-g4-g6/review.md), [manifest](evidence/backlog-2.3-g4-g6/MANIFEST.md).
+INITIAL ret=0, başarısız FIX=0. **Tek sonraki adım: yeni GPT plan sohbetinde 2.4**; hazır prompt:
+`2.3/G4–G6 geliştirme kabul edildi. CURRENT'teki 2.4 eşleşme/aktarım metinleri,
+WebDAV endpoint/port/yol ve sır sızdırmayan teşhis için mevcut kanıtı kullanarak
+tek goal/ortak kabul tablosuyla GPT planı hazırla; kök neden olmadan retry/fence
+gevşetme. F1/Faz3–4/step19 ertelemelerini koru. Ürün kodu değiştirme.`
+Burada sonraki iş başlatılmadı. F1 fix2 PASS/kabul değildir;
+2.1 kabulü, R3 önceki scoped lint ve FO1 Faz4 ertelemesi korunur. Token/kota UNKNOWN.
+**Güncel (18.11): 2.4 INITIAL + FIX-R1 + FIX-R1b → REVIEW / ACCEPTED.**
+G24-R1 RESOLVED; G24-01–06 ve 07 render/a11y karşılandı. Tek sunum sınırı
+Back/jobs/activity/hide yollarını kapsıyor. RED3→GREEN15, reviewer probe5,
+desktop377/scoped lint/build REUSE; reviewer yeni runtime koşmadı.
+2/2 final hash/diff→FIX-R1 zinciri ve etkilenmeyen 20/20 code + 6/6 locale taze doğrulandı.
+[Son review §FIX-R1b](evidence/backlog-2.4/review.md#fix-r1b-devam-reviewu-ve-kapanış--18112026),
+[manifest](evidence/backlog-2.4/MANIFEST.md). INITIAL ret=1, stale ownership failed FIX=1 korunur.
+G24-07 visual kullanıcı onayıyla 2.5 hazırlığı sonrası **Faz3 DEFERRED / NOT_RUN**.
+Genel renderer tsc iki başlangıç CSS TS2882 ile exit2; tam typecheck/ürün PASS değil.
+**Güncel (19.11): 2.5 D25-M FIX-R5 bağımsız REVIEW / ACCEPTED — runner geliştirme goal'u kapandı.**
+[Son review](evidence/backlog-2.5/review.md#fix-r5-bağımsız-devam-reviewu--19112026),
+[manifest](evidence/backlog-2.5/MANIFEST.md#1911-bağımsız-fix-r5-kapanışı).
+G25-R2/G25-05 çözüldü; G25-01–06 birikimli karşılandı. 17/17 hash ve üç cihazsız
+iOS retry karşıtı taze; 71/71, smoke/resume ve fixture reuse. Nonterminal
+Metro sahipliği kanıtlanamazsa RESTORE_PENDING/exit 3 ve sinyal yok.
+INITIAL ret=1, R2 tarihî başarısız FIX=4; diğer sayaçlar korunur.
+**Tek sonraki adım:** yeni GPT plan sohbetinde Faz3 tek tam regresyon planı.
+`2.5 D25-M runner geliştirme kabul edildi. CURRENT Faz3 için kayıtlı kanıtı
+yeniden kullanarak tek tam regresyon planını hazırla: önce fixture ve bir
+temsilci, sonra gerekli matris. F1 fix2 ve G1-07/G456-07/G24-07 Faz3,
+FO1 Faz4, step19/OS/fiziksel/release kapılarını koru. Ürün kodu değiştirme.`
 
 **16.11 kullanıcı yönlendirmesi:** F1 fix2 ve 1.5 kapanmadan Mac doğrulama kuyruğunda
 bekler; Windows'taki **2.1/G1 INITIAL + G1-R1**, **bağımsız GPT review ile geliştirme kabulü aldı**.
 G1 durumu **REVIEW / ACCEPTED**; görsel Faz3 DEFERRED / NOT_RUN. Son kayıtlar:
 [review](evidence/backlog-2.1-g1/review.md), [manifest](evidence/backlog-2.1-g1/MANIFEST.md).
-Sıradaki bağımsız iş: **2.2/G2–G3 GPT planı**, ayrı GPT plan sohbetinde; burada başlatılmaz.
-Hazır prompt: `AGENTS → CURRENT; 2.2/G2–G3 için gerçek Desktop tray ve sürüm/kapanış
-eşlemesini inceleyip tek goal, kapsam dışı, hedef semboller ve ortak kabul tablosuyla
-GPT planı hazırla. ADR0018 foreground/Linux görünür kontrol sınırlarını ve açık
-F1/1.5/Faz3–4 kapılarını koru. Ürün kodu değiştirme; uygulama başlatma.`
+16.11 tarihî 2.2 plan yönlendirmesi karşılandı; güncel tek sonraki adım üstteki
+**2.4 GPT planı**dır; 2.2 ve 2.3 geliştirme review'ları kapandı.
 Mac'te sıra: **F1 fix2 → 1.5 H15/P15**; [güncel kuyruk ve komutlar](windows-handoff-2026-11-16.md#güncel-mac-doğrulama-sırası--1611-kullanıcı-kararı).
 Alttaki F1 uygulama yönlendirmesi yalnız o iş Mac'te sürdürüldüğünde geçerlidir.
 
@@ -98,10 +257,12 @@ S3 review kaydı için ek Opus oturumu gerekmez. Commit/push yok.
 - [x] **1.3/B3:** FTPS Drop-zeroize + bağımsız GPT review kabul; P3 belge notu, FTPS/JNI runtime ve fiziksel kapılar açık.
 - [x] **1.4/B4:** vault politikası belge review kabul; bayrak eklenmedi, kalan risk kabul. R1 tarihî CURRENT aidiyeti sınırlaması korundu; runtime güvenlik PASS'i değil.
 - [ ] **1.4b/F1 geliştirme:** R1/R2 dar tasarım kullanıcı onaylı → fix2 kaynağı tamam, doğrulama BLOCKED-ENV (NOT_RUN); iki ret sayacı korunur. R3 dar lint kabul ve S3 kabulü korunur. FO1 prior PASS reuse/yeni zincir ve diğer fiziksel/release kapıları Faz4'te; yalnız bu ertelemeler geliştirme kapanışını bekletmez.
-- [ ] **1.5:** iOS WebDAV host testini onar; cesu8/instant-xml/instant-xml-macros lisansları; B2 release iOS fixture-CA marker kontrolünü kabul kapısına bağla.
-  16.11 Opus INITIAL: **KISMİ / BLOCKED-ENV — review-ready değil.** H15 harness kaynağı, L15 notices, B15 §20 kapısı
-  uygulandı; H15/P15 macOS koşusu NOT_RUN (Windows'ta xcrun/swiftc yok). Kanıt: [1.5 MANIFEST](evidence/backlog-1.5/MANIFEST.md).
-  Sıradaki: macOS'ta kod değiştirmeden `python3 -I tools/test-ios-webdav-journal.py` (aynı Opus rolü); GREEN sonrası GPT review.
+- [x] **1.5:** iOS WebDAV host onarımı + üç lisans metni + B2 gerçek release app kabul kapısı.
+  **17.11 REVIEW / ACCEPTED:** H15/P15 macOS compile+seed/reopen PASS reuse, 6.01 sn / exit0;
+  L15/B15/V15 bağımsız GPT review kabul. [Review](evidence/backlog-1.5/review.md),
+  [MANIFEST](evidence/backlog-1.5/MANIFEST.md). Üç kaynak baseline/hash zinciri doğrulandı;
+  eksik tarihî yardımcı loglar yeni statik audit ile karşılandı, tarihî RED uydurulmadı.
+  Reviewer host testi/build tekrar etmedi. Release/fiziksel kapılar ve F1 ertelemeleri açık.
 - [x] **2.1/G1:** gerçek journal ile Mobil Etkinlik Şu an/Geçmiş. Sözleşme: next-plan §2.1/G1 (D-G1 onaylı).
   16.11 INITIAL + G1-R1 FIX: **bağımsız GPT geliştirme review KABUL.** G1-01–06 ve G1-07 render/a11y
   karşılandı; son Jest 40/40, tsc, scoped ESLint ve iOS/Android export uygulama kanıtı REUSE.
@@ -109,14 +270,45 @@ S3 review kaydı için ek Opus oturumu gerekmez. Commit/push yok.
   [Review](evidence/backlog-2.1-g1/review.md): G1-R1 M11 header dropdown RESOLVED; 8/8 son hash,
   INITIAL→FIX baseline zinciri ve komşu yollar taze statik doğrulandı. Reviewer yeni test/build NOT_RUN.
   [Manifest](evidence/backlog-2.1-g1/MANIFEST.md) §Bağımsız GPT kapanışı; görsel/runtime veya üst F1/1.5 kabulü değil.
-- [ ] **2.2/G2–G3:** gerçek Desktop tray, sürüm/kapanış eşlemesi; ADR0018 foreground ve Linux görünür kontrol sınırları.
-- [ ] **2.3/G4–G6:** gerçek mobil ayar yetenek/kapsamı; D10 birleşimini belgele; kilit ekranı step19 kapısında.
-- [ ] **2.4:** eşleşme/aktarım metinleri, WebDAV endpoint/port/yol ve sır sızdırmayan teşhis; kök neden olmadan retry/fence gevşetme yok.
-- [ ] **2.5:** mevcut betiklerle eksik ekran/dil kapsamını kalıcı batch capture'a tamamla.
+- [x] **2.2/G2–G3:** gerçek Desktop tray, sürüm/kapanış eşlemesi; ADR0018 foreground ve Linux görünür kontrol sınırları.
+  **18.11 INITIAL + FIX-R1 bağımsız GPT REVIEW / ACCEPTED.** next-plan §2.2 D-G23/G23-01–08 karşılandı.
+  G23-R1 RESOLVED: hata+aktif gözlemi doğru; mounted regression RED→GREEN, FIX 19/19 test,
+  scoped ESLint/renderer tsc/build/tek capture reuse; reviewer probe 3/3 GREEN.
+  INITIAL 334 test/main tsc/26 capture kendi kaynaklarında reuse; final tam suite iddiası yok.
+  Start/review HEAD `508b3f0`, 11/11 final hash/diff zinciri doğrulandı; INITIAL ret=1, başarısız FIX=0.
+  Yalnız 2.2 geliştirme kabulü; F1/native/OS/Faz3–4/release kapıları açık. Sonraki ayrı iş 2.3 GPT planı.
+  [Review](evidence/backlog-2.2-g2-g3/review.md), [MANIFEST](evidence/backlog-2.2-g2-g3/MANIFEST.md).
+- [x] **2.3/G4–G6:** gerçek mobil ayar yetenek/kapsamı; D10 birleşimi belgeli; kilit ekranı step19 kapısında.
+  18.11 INITIAL bağımsız GPT REVIEW / ACCEPTED; G456-01–06 ve 07 render/a11y karşılandı.
+  Final hash 6/6 taze; spec 8/8/tsc/scoped lint/locale/iki export REUSE, reviewer yeni koşu yok.
+  G456-07 görsel Faz3 DEFERRED / NOT_RUN; tam ürün PASS değil.
+  [Review](evidence/backlog-2.3-g4-g6/review.md), [manifest](evidence/backlog-2.3-g4-g6/MANIFEST.md).
+- [x] **2.4:** eşleşme/aktarım metinleri, WebDAV endpoint/port/yol ve sır sızdırmayan teşhis; retry/fence gevşetilmedi.
+  **18.11 INITIAL + FIX-R1 + FIX-R1b bağımsız GPT REVIEW / ACCEPTED.**
+  G24-R1 RESOLVED; G24-01–06 ve 07 render/a11y karşılandı.
+  Regression15/reviewer5/desktop377/lint/build REUSE; final hash/diff zinciri taze, yeni reviewer runtime yok.
+  G24-07 visual G24-V1 kullanıcı onayıyla **Faz3 DEFERRED / NOT_RUN**.
+  [Review](evidence/backlog-2.4/review.md), [manifest](evidence/backlog-2.4/MANIFEST.md).
+  INITIAL ret=1, stale ownership başarısız FIX=1 korunur; yalnız 2.4 geliştirme kabulü.
+  Renderer tsc başlangıçtaki iki CSS TS2882 ile exit2; genel typecheck/ürün/fiziksel kapılar açık.
+- [x] **2.5:** D25-M kalıcı batch capture runner geliştirme kabulü (G25-01–06).
+  [FIX-R5 bağımsız kapanış](evidence/backlog-2.5/MANIFEST.md#1911-bağımsız-fix-r5-kapanışı); tam görsel/ürün kabulü değil.
 - [ ] **3:** tek tam regresyon; önce fixture/tek temsilci; JS/native/build, güvenlik/B2, a11y/görsel/performance. Lint açık: DeviceCheck:40/45 MissingPermission, S3Automatic:46 NewApi ve worklets bağımlılık analizi (FTPS MANIFEST §R3 dış-kapsam lint bulguları); FTPS dar lint kabulü genel lint PASS'i değil. Dropbox Android JobService, iOS >150 MiB upload_session, Dropbox Photos/Nextcloud restore, Android yükseltme ve recovery göster/kopyala açık kontrolleri dahil. Hesaplar ayrı izinli; bağımsız review ve dağıtım kapıları korunur.
+  **F1 fix2 — 17.11 kullanıcı onaylı erteleme:** Kotlin compile/AndroidTest build,
+  R1/R2 start-RED→final-GREEN ve değişen kapsamın dar lint'i burada yapılacak;
+  mevcut fix2 runtime NOT_RUN, geliştirme kabulü verilmedi. Eski PASS'ler yalnız
+  kendi kaynak/varyantlarında korunur. FO1 delta ayrıca Faz4'tedir.
   **G1-07:** Etkinlik Şu an/Geçmiş + filtreler; TR/EN/DE, light/dark, büyük yazı ve Lovable M11
   görsel karşılaştırması 16.11 kullanıcı kararıyla burada **DEFERRED / NOT_RUN**. Kalıcı batch capture
-  script açığı 2.5'te açık; hazır olmayan runnable komut varsayılmaz.
+  runner hazırlığı 2.5'te kabul edildi; güvenli üretilemeyen M11 hücreleri matris
+  engeli olarak kalır, hazır olmayan runnable komut varsayılmaz.
+  **G456-07 (2.3 M13):** frozen M13'e karşı TR/EN/DE, light/dark, büyük yazı scripted görsel
+  karşılaştırma 18.11 kullanıcı kararıyla burada **DEFERRED / NOT_RUN**.
+  **P3-10 M13-alt:** `mobile.settings-bottom` satırı `state_unavailable`; 5/5 tarihî
+  `FAIL-TEST/FIXTURE` korunur, alt görünüm kabulü açık. [Faz3 manifesti](evidence/faz3/MANIFEST.md#L14-L21).
+  **G24-07 (2.4):** yeni WebDAV form/pairing metinleri TR/EN/DE, light/dark, büyük yazı
+  dar scripted görsel karşılaştırması aynı GPT review sohbetindeki 18.11 kullanıcı
+  onayıyla burada **DEFERRED / NOT_RUN**; 2.5 capture hazırlığı sonrası. G24-R1 kod bulgusu çözüldü.
 - [ ] **4:** Android fiziksel tam kapsam; Desktop OS/signing/storage ve saha kesinti teşhisi. iOS Simulator ayrı kanıt; fiziksel iOS yoksa custody/OS/Photos/iCloud/signing açık. Kullanıcı veri/eşleşmesi korunur, cihaz/hesap/medya izni varsayılmaz.
   F1-FO1 dar kontrol: gerçek success → tek completion → UI'sız sonraki JOB callback'i;
   16.11 kullanıcı kararıyla buraya taşındı, NOT_RUN. Ayrıntı: 20–21 koleksiyonu §21.
@@ -141,9 +333,16 @@ ortam/artifact referansıdır; eski R13/R14 uygulama veya commit/push yönlendir
 güncel yetki değildir. Aktif kapsam bu CURRENT ve onaylı FTPS next-plan'dır.
 
 **Güncel maliyet politikası:** [uygulama politikası](execution-budget.md):
+18.11 plan sadeleştirmesi §1 ve `/plan` içinde birleştirildi: küçük çözüm,
+net kritik olay sırası, uygulanabilir dosya dağılımı, tekrarda tasarım sadeleştirme.
+Yeni süreç katmanı yok; mevcut FIX-R4 sözleşmesi/devri aynı.
 hazır tasarım, ilk temsilci regression/minimum fix, 15k ajan içi verimlilik kontrolü
-(UNKNOWN tek başına durdurmaz), uygun düşük riskli işte kullanıcı seçimiyle tek
-`/implement-pilot` Sonnet denemesi. F1 pilot değil, Opus/model effort değişmez.
+(UNKNOWN tek başına durdurmaz). **18.11 sonraki iş döngüsü:** düşük riskli net iş
+normal `/implement` altında Sonnet 5.5'e devredilebilir (§4); ayrı pilot komutu kaldırıldı.
+Tek doğrulama seçimi, dar compile→runtime ve review öncesi çağıran/hata yolu taraması
+§5'te; 18.11 araç/teşhis disiplini ve `/implement` referansı güncellendi.
+Plan/review destek Luna; uygulama destek Sonnet. Mevcut review/devir kapsamı
+değişmez; F1 hassas uygulaması Opus'ta, ana model/effort aynı kalır.
 Önceki R13/R14 FIX yönlendirmesi tamamlanan S3 scoped kabulüyle supersede edildi;
 güncel INITIAL/FIX yetkisi yalnız yukarıdaki aktif iş bölümünden okunur.
 

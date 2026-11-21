@@ -1,0 +1,2 @@
+apps/desktop/src/features/desktop-background/DesktopTray.tsx total=      64 code=      55
+apps/desktop/src/features/desktop-background/DesktopBackground.spec.tsx total=     204 code=     190

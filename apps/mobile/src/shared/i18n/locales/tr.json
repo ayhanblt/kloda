@@ -75,7 +75,7 @@
       "destination_permission_lost": "Geri yükleme hedefi erişimi kayboldu. Yeni dosya seçip tekrar deneyin.",
       "destination_not_empty": "Hedef boş değil. Üzerine yazılmadı veya silinmedi; yeni dosya seçin.",
       "restore_cleanup_failed": "Geri yükleme tamamlanmadı ve yeni oluşturulan hedef silinemedi. Eksik dosya kalabilir; yeni dosyaya tekrar denemeden önce kendiniz silin.",
-      "os_interrupted": "İşletim sistemi işi durdurdu. İlerleme korunuyor; uygun yürütme fırsatı beklenecek.",
+      "os_interrupted": "İş kesintiye uğradı. Kesin neden bu durumdan belirlenemez. İlerleme korunuyor; işletim sisteminin sonraki yürütme fırsatı bekleniyor.",
       "automatic_pause_not_saved": "Otomatik duraklatma diske kaydedilemedi. Bu oturumda işler durduruldu; yeniden açılışta otomatik başlayabilir. Depolamayı kontrol edin.",
       "background_unavailable": "İşletim sistemi arka plan yedekleme servisini başlatamadı. Uygulamayı açık tutup yeniden deneyin.",
       "native_unsupported": "Bu platformda gerekli native yedekleme modülü yok.",
@@ -117,7 +117,7 @@
       "review_required": "Photos geri yüklemesi inceleme gerektiriyor. Otomatik ikinci kopya oluşturulmaz.",
       "organization_review": "Medya veya albüm ilişkileri inceleme gerektiriyor; tam geri yükleme varsayılmaz.",
       "destination_required": "Önce en az bir yedekleme hedefini açıkça etkinleştir.",
-      "webdav_auth": "WebDAV sunucusu kullanıcı adı veya parolayı reddetti.",
+      "webdav_auth": "WebDAV sunucusu erişimi reddetti (HTTP erişim reddi).",
       "webdav_storage": "Cihazdaki güvenli WebDAV kaydı okunamadı veya kaydedilemedi.",
       "webdav_missing": "Kayıtlı native WebDAV profili yok.",
       "destination_disabled": "Bu yedekleme hedefi devre dışı.",
@@ -199,6 +199,31 @@
     },
     "storageTested": "Kaydedilen ayarlar önceki bağlantı testini geçti. Bu, güncel erişilebilirlik garantisi değildir.",
     "testError": "WebDAV bağlantısı doğrulanamadı.",
+    "webdavHints": {
+      "endpoint": "Portu (varsa) ve sunucunun WebDAV kök yolunu içeren tam HTTPS adresini girin. Örnek: https://server.example:8083/webdav/",
+      "targetPath": "Bu WebDAV kökü altında önceden var olan ve erişilebilen bir alt klasör; Kloda onu oluşturmaz. Örnek: Kloda → https://server.example:8083/webdav/Kloda/",
+      "security": "Yalnızca işletim sisteminin güvendiği sertifikaya sahip HTTPS ve Basic oturum açma desteklenir. Test yalnızca kendi geçici verisini yazar, geri okur ve siler."
+    },
+    "webdavDiagnostic": {
+      "summary": "Başarısız adım: {{stage}}. {{reason}}",
+      "stages": {
+        "propfind": "Klasör erişim denetimi (PROPFIND)",
+        "mkcol": "Geçici test klasörü oluşturuluyor (MKCOL)",
+        "put": "Test dosyası yazılıyor (PUT)",
+        "move": "Test dosyası sonlandırılıyor (MOVE)",
+        "get": "Test dosyası geri okunuyor (GET)",
+        "delete_file": "Test dosyası siliniyor (DELETE)",
+        "delete_directory": "Geçici test klasörü siliniyor (DELETE)"
+      },
+      "reasons": {
+        "access_denied": "Sunucu erişimi reddetti (HTTP {{status}}).",
+        "not_found": "Klasör veya yolun erişilebilir olduğu doğrulanamadı (HTTP {{status}}).",
+        "method_rejected": "Sunucu bu yöntemi reddetti (HTTP {{status}}).",
+        "http_other": "Sunucu HTTP {{status}} döndürdü.",
+        "transport_unknown": "Bağlantı, kullanılabilir bir sunucu yanıtı alınamadan başarısız oldu. Kesin neden (ağ, DNS, TLS veya zaman aşımı) bu testten belirlenemez.",
+        "readback_mismatch": "Geri okunan içerik yazılanla eşleşmedi."
+      }
+    },
     "localStartTime": "Yerel başlangıç saati",
     "saveSchedule": "Kaydet ve bilgisayara bağlan",
     "invalidTime": "Yerel başlangıç saati için SS:dd kullanın.",
@@ -240,7 +265,11 @@
     "leaveConsequences": "Çıkış bu görünümü ve bağlantısını kapatır. Eşleştirmeyi tamamlamaz, kayıtlı bekleyen veya sabit kayıtları silmez.",
     "repairTitle": "Bu bilgisayarla tekrar eşleştirilsin mi?",
     "repairDescription": "Bu bilgisayarın önceki yerel güveni iptal edilmiş. Tekrar eşleştirmeye açıkça izin vermeden önce kimliği doğrulanmış bilgisayar parmak izini kontrol edin.",
-    "repairConsequences": "Eski iptal kaydı ve tüm dosya erişim retleri değişmeden kalır. Yeni girişim için de bilgisayardan onay gerekir.",
+    "repairConsequences": "Önce bu telefonda açıkça onay verirsiniz, ardından bilgisayarın onaylaması gerekir. Bu onay eşleştirmeyi tamamlamaz ve dosya erişimi vermez. Eski iptal kaydı ve tüm dosya erişim retleri değişmeden kalır.",
+    "repairWorking": {
+      "title": "Kararınız gönderiliyor",
+      "description": "Kararınız gönderiliyor. Bu, tamamlanmış bir eşleştirme değildir. Onay verdiyseniz bilgisayarın yine de onaylaması gerekir; dosya erişimi ayrı kalır."
+    },
     "pairAgain": "Bu bilgisayarla tekrar eşleştir",
     "denyRepair": "Tekrar eşleştirme",
     "helpTitle": "Yerel eşleştirme nasıl çalışır?",
@@ -435,7 +464,17 @@
       "title": "Ayarlar",
       "backup": "Yedekleme",
       "rerunSetup": "Kurulumu yeniden başlat",
-      "background": "Arka plan çalışma"
+      "background": "Arka plan çalışma",
+      "cellular": "Hücresel yedekleme",
+      "cellularDesc": "Bu sürümde hücresel yedekleme seçeneği yok.",
+      "privacy": "Gizlilik",
+      "photoAccess": "Fotoğraf erişimi",
+      "photoAccessDesc": "Fotoğraf kaynağı seçimini Kaynaklar'da yönet.",
+      "notifications": "Bildirimler",
+      "notificationsDesc": "Yedekleme bildirimleri mevcut aktarım akışında istenir; Etkinlik'i aç.",
+      "about": "Hakkında",
+      "configVersion": "Yapılandırma sürümü",
+      "versionUnknown": "Bilinmiyor"
     },
     "tray": {},
     "dialogs": {},
@@ -718,6 +757,7 @@
       "catalogHint": "Yalnız bu cihazın bu hedefe ait doğrulanmış tamamlanma kayıtları listelenir. Geri yükleme, buluttaki dosyayı yeniden doğrular ve seçtiğiniz klasöre yazar.",
       "reviewHint": "Yanıtı belirsiz işler otomatik tamamlanmış sayılmaz veya yeniden gönderilmez. Mevcut dosya ve kayıtlar korunur.",
       "automaticHint": "Otomatik çalışma seçili kaynakları mevcut zamanlama ayarlarıyla yedekler. Başlama zamanı işletim sistemine, ağ ve kilit durumuna bağlıdır; belirsiz işler otomatik tekrarlanmaz.",
+      "automaticUnsupported": "Otomatik S3 yedekleme Android 7.0/7.1'de desteklenmez; Android 8 veya üzeri gerekir. Elle yedekleme ve geri yükleme kullanılabilir.",
       "automaticOn": "Otomatik yedeklemeyi etkinleştir",
       "automaticOff": "Otomatik yedeklemeyi kapat",
       "copied": "Yeni ayrı kopya doğrulandı: {{name}}. Eski belirsiz kayıt korunuyor."

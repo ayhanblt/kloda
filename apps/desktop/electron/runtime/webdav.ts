@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 
 import type { StorageForm } from './types.js';
-import { httpFailure, networkFailure, WebDavFailure } from './webdav-errors.js';
+import { atStage, httpFailure, networkFailure, WebDavFailure, type WebDavDiagnosticStage } from './webdav-errors.js';
 
 export class NodeWebDavClient {
   private readonly preparedDirectories = new Set<string>();
@@ -17,29 +17,35 @@ export class NodeWebDavClient {
     let finalized = false;
     let operationFailure: unknown;
 
-    const directory = await this.request(baseUrl, 'PROPFIND', { Depth: '0' });
-    if (!directory.ok && directory.status !== 207) throw httpFailure(directory.status, `WebDAV directory access failed (${directory.status}).`);
+    let directory: Response;
+    try { directory = await this.request(baseUrl, 'PROPFIND', { Depth: '0' }); }
+    catch (reason) { throw reason instanceof WebDavFailure ? atStage(reason, 'propfind') : reason; }
+    if (!directory.ok && directory.status !== 207) throw atStage(httpFailure(directory.status, `WebDAV directory access failed (${directory.status}).`), 'propfind', directory.status);
 
     let createProbeDirectory: Response;
     try { createProbeDirectory = await this.request(probeDirectoryUrl, 'MKCOL'); }
-    catch (cause) { throw new WebDavFailure('review_required', 'WebDAV probe directory creation result is uncertain.', { cause }); }
-    if (!createProbeDirectory.ok) throw httpFailure(createProbeDirectory.status, `WebDAV probe directory creation failed (${createProbeDirectory.status}).`);
+    catch (cause) { throw atStage(new WebDavFailure('review_required', 'WebDAV probe directory creation result is uncertain.', { cause }), 'mkcol'); }
+    if (!createProbeDirectory.ok) throw atStage(httpFailure(createProbeDirectory.status, `WebDAV probe directory creation failed (${createProbeDirectory.status}).`), 'mkcol', createProbeDirectory.status);
+    // Diagnostic stage of the request in flight; it never influences classification or cleanup.
+    let stage: WebDavDiagnosticStage = 'put';
     try {
       const upload = await this.probeMutation(uploadUrl, 'PUT', { 'Content-Type': 'text/plain' }, probePayload);
-      if (!upload.ok) throw httpFailure(upload.status, `WebDAV write failed (${upload.status}).`);
+      if (!upload.ok) throw atStage(httpFailure(upload.status, `WebDAV write failed (${upload.status}).`), stage, upload.status);
       uploaded = true;
 
+      stage = 'move';
       const move = await this.probeMutation(uploadUrl, 'MOVE', { Destination: finalUrl.toString(), Overwrite: 'F' });
-      if (!move.ok) throw httpFailure(move.status, `WebDAV finalize failed (${move.status}).`);
+      if (!move.ok) throw atStage(httpFailure(move.status, `WebDAV finalize failed (${move.status}).`), stage, move.status);
       finalized = true;
 
+      stage = 'get';
       const read = await this.request(finalUrl, 'GET');
-      if (!read.ok) throw httpFailure(read.status, 'WebDAV read-back verification failed.');
+      if (!read.ok) throw atStage(httpFailure(read.status, 'WebDAV read-back verification failed.'), stage, read.status);
       let text: string;
       try { text = await read.text(); } catch (cause) { throw networkFailure(cause); }
-      if (text !== probePayload) throw new WebDavFailure('review_required', 'WebDAV read-back verification failed.');
+      if (text !== probePayload) throw new WebDavFailure('review_required', 'WebDAV read-back verification failed.', { diagnostic: { stage, kind: 'readback_mismatch' } });
     } catch (reason) {
-      operationFailure = reason;
+      operationFailure = reason instanceof WebDavFailure ? atStage(reason, stage) : reason;
     }
 
     const cleanupFailure = await this.cleanupProbe(finalized ? finalUrl : uploaded ? uploadUrl : undefined, probeDirectoryUrl);
@@ -115,15 +121,17 @@ export class NodeWebDavClient {
   }
 
   private async cleanupProbe(fileUrl: URL | undefined, directoryUrl: URL): Promise<Error | undefined> {
+    let stage: WebDavDiagnosticStage = 'delete_file';
     try {
       if (fileUrl) {
         const cleanupFile = await this.request(fileUrl, 'DELETE');
-        if (!cleanupFile.ok && cleanupFile.status !== 404) return new WebDavFailure('review_required', `WebDAV probe file cleanup failed (${cleanupFile.status}).`);
+        if (!cleanupFile.ok && cleanupFile.status !== 404) return atStage(new WebDavFailure('review_required', `WebDAV probe file cleanup failed (${cleanupFile.status}).`), stage, cleanupFile.status);
       }
+      stage = 'delete_directory';
       const cleanupDirectory = await this.request(directoryUrl, 'DELETE');
-      if (!cleanupDirectory.ok && cleanupDirectory.status !== 404) return new WebDavFailure('review_required', `WebDAV probe directory cleanup failed (${cleanupDirectory.status}).`);
+      if (!cleanupDirectory.ok && cleanupDirectory.status !== 404) return atStage(new WebDavFailure('review_required', `WebDAV probe directory cleanup failed (${cleanupDirectory.status}).`), stage, cleanupDirectory.status);
     } catch (reason) {
-      return new WebDavFailure('review_required', 'WebDAV probe cleanup result is uncertain.', { cause: reason });
+      return atStage(new WebDavFailure('review_required', 'WebDAV probe cleanup result is uncertain.', { cause: reason }), stage);
     }
     return undefined;
   }

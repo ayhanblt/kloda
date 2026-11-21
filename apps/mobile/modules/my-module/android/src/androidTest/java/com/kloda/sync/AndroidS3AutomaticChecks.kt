@@ -16,6 +16,9 @@ import org.json.JSONObject
 // Amazon isolated queue: automatic admission is only the exact-owner startAutomatic path.
 internal object AndroidS3AutomaticChecks {
   fun run(instrumentation: Instrumentation, root: File) {
+    // Boundary contract only (runs on the test device's API, not on API 24/25): 7.0/7.1 are unsupported, 8.0+ is not.
+    check(!AndroidS3Automatic.automaticSupported(24) && !AndroidS3Automatic.automaticSupported(25))
+    check(AndroidS3Automatic.automaticSupported(26) && AndroidS3Automatic.automaticSupported(35))
     val base = instrumentation.targetContext; val namespace = UUID.randomUUID().toString()
     val app = object : ContextWrapper(base) {
       override fun getApplicationContext() = this

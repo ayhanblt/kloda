@@ -57,7 +57,7 @@ describe('App', () => {
       }),
       getProgress: vi.fn().mockResolvedValue(null), pickSources: vi.fn(),
       saveSchedule: vi.fn().mockResolvedValue(undefined), saveStorage: vi.fn().mockResolvedValue(undefined),
-      testStorage: vi.fn().mockReturnValueOnce(pendingTest).mockResolvedValue(undefined), startSync: vi.fn(),
+      testStorage: vi.fn().mockReturnValueOnce(pendingTest).mockResolvedValue({ ok: true }), startSync: vi.fn(),
     };
     render(<App />);
     await screen.findByText('Documents');
@@ -106,6 +106,51 @@ describe('App', () => {
     expect(screen.queryByText(i18n.t('onboarding.filesSynced', { completed: 1, total: 2 }))).not.toBeInTheDocument();
   });
 
+  it('G23-03/08 opens the receiver from the D13 tray and shows D12 version on the same status poller', async () => {
+    const status = vi.fn().mockResolvedValue({
+      receiver: { available: true, activeTransfers: 0 }, backup: { active: false, failed: false },
+      autostart: { enabled: false, supported: true }, autostartChoice: false, canHide: true,
+      environmentLimited: false, shutdownError: false, appVersion: '0.0.0',
+    });
+    const background = { status, setAutostart: vi.fn(), quit: vi.fn() };
+    window.kloda = {
+      getProgress: vi.fn().mockResolvedValue(null), background,
+      getDraft: vi.fn().mockResolvedValue({ intervalHours: 12, localTime: '12:00', sources: [], storage: null, storageTested: false }),
+      pickSources: vi.fn(), saveSchedule: vi.fn(), saveStorage: vi.fn(), startSync: vi.fn(), testStorage: vi.fn(),
+    };
+    window.history.replaceState(null, '', '#/tray');
+    render(<App />);
+    expect(screen.getByRole('heading', { level: 1, name: i18n.t('ui.tray') })).toBeInTheDocument();
+    const menu = screen.getByRole('group', { name: i18n.t('tray.menuLabel') });
+    await waitFor(() => expect(within(menu).getByRole('status')).toHaveTextContent(i18n.t('tray.state.listening')));
+    fireEvent.click(within(menu).getByRole('button', { name: i18n.t('tray.open') }));
+    expect(window.location.hash).toBe('#/receiver');
+    expect(screen.queryByRole('group', { name: i18n.t('tray.menuLabel') })).not.toBeInTheDocument();
+    await act(async () => { window.location.hash = '#/settings'; await Promise.resolve(); });
+    expect(await screen.findByText('0.0.0')).toBeInTheDocument();
+    expect(screen.getByText(i18n.t('background.closeHides'))).toBeInTheDocument();
+    const order = (name: string) => screen.getByText(name).compareDocumentPosition.bind(screen.getByText(name));
+    const after = (first: string, second: string) => expect(order(first)(screen.getByText(second)) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    after(i18n.t('background.title'), i18n.t('appearance.general'));
+    after(i18n.t('appearance.general'), i18n.t('appearance.title'));
+    after(i18n.t('appearance.title'), i18n.t('ui.language'));
+    after(i18n.t('ui.language'), i18n.t('background.version'));
+    after(i18n.t('background.version'), i18n.t('background.quit'));
+    const radios = screen.getAllByRole('radio').map((radio) => (radio as HTMLInputElement).value);
+    expect(radios).toEqual(['system', 'light', 'dark', 'tr', 'en', 'de']);
+    const themeGroup = screen.getByRole('radiogroup', { name: i18n.t('appearance.title') });
+    expect(themeGroup.closest('.pairing-card')).not.toBeNull();
+    expect(themeGroup).toHaveAccessibleDescription(i18n.t('appearance.systemHint'));
+    expect(screen.getByRole('radiogroup', { name: i18n.t('ui.language') }).closest('.pairing-card')).toBeNull();
+    const heading = screen.getByRole('heading', { level: 2, name: i18n.t('background.title') });
+    expect(heading.closest('.pairing-card')).toBeNull();
+    expect(heading.nextElementSibling).toHaveClass('desktop-background');
+    expect(screen.getAllByRole('button', { name: i18n.t('background.quit') })).toHaveLength(1);
+    expect(status).toHaveBeenCalledOnce();
+    expect(background.quit).not.toHaveBeenCalled();
+    expect(background.setAutostart).not.toHaveBeenCalled();
+  });
+
   it.each(['approve', 'deny', 'cancel'] as const)('keeps a reserved candidate mounted across Back and navigation until %s resolves', async (decision) => {
     const reserved = {
       phase: 'reserved' as const, operationId: 'AAAAAAAAAAAAAAAAAAAAAA', candidateGeneration: '1',
@@ -142,6 +187,14 @@ describe('App', () => {
     expect(window.location.hash).toBe('#/pairing');
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(pairing.close).not.toHaveBeenCalled();
+    await act(async () => {
+      const changed = new Promise<void>((resolve) => window.addEventListener('hashchange', () => resolve(), { once: true }));
+      window.location.hash = '#/tray';
+      await changed;
+    });
+    expect(window.location.hash).toBe('#/pairing');
+    expect(screen.queryByRole('group', { name: i18n.t('tray.menuLabel') })).not.toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
 
     const label = decision === 'cancel' ? 'pairing.cancelInvitation' : `pairing.${decision}`;
     const decisionButton = within(screen.getByRole('dialog')).getByRole('button', { name: i18n.t(label) });

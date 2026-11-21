@@ -1,0 +1,5 @@
+document diff --check exit=0
+
+logs/g24-r1-fix2-final.sha256: 2/2 final hashes unchanged after reviewer records
+logs/locale-final-sonnet.sha256: 6/6 final hashes unchanged after reviewer records
+CURRENT 2.4 checked; visual DEFERRED/NOT_RUN retained; no product edit

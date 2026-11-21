@@ -1,0 +1,45 @@
+Reviewer static audit only; no host/runtime/build rerun
+HEAD 508b3f0486a7ce04628ec0c3681d995573e5721d
+start 586a2fd51e61058053119dd8b1f3ecb65c4f7676
+SOURCE+BASELINE MATCH (CRLF-normalized) tools/test-ios-webdav-journal.py current LF sha256 d089bd641dada35738f4e04efc617313a216f3f942e3988c041078e80d6bb980
+SOURCE+BASELINE MATCH (CRLF-normalized) packages/s3-native/THIRD_PARTY_NOTICES.md current LF sha256 4126e64858fd63ab6a27686302b8aa88ab2ee4e7953031f5ce67ae7d4b920794
+SOURCE+BASELINE MATCH (CRLF-normalized) docs/implementation/20-21-acceptance-collection-2026-11-04.md current LF sha256 9215c997f2b1e356c16fe1212d465cd616f327e626f657c2b9a60bd4ddb6d54d
+AST valid; script lines 45
+UNCHANGED HOST INPUT 2aaba689218fba631dceb1a63155d143bef41cf341a18d4528836dd05b23d0e3 apps/mobile/modules/my-module/ios/IosSyncJournal.swift
+UNCHANGED HOST INPUT 5bbcb0c4fabe843acdf08cc43e000d5cfc854aafe80500ea429b82c4305341ba apps/mobile/modules/my-module/ios/IosWebDavProfile.swift
+UNCHANGED HOST INPUT 7920804c92b22662401452c036e612cae540c09344de4816cf7106738f7884f4 apps/mobile/modules/my-module/ios/IosWebDavJournal.swift
+UNCHANGED HOST INPUT 4b259221c408ffa7cfb1d57596b8b644564c6938a181e427233fd27c6a7e035b apps/mobile/modules/my-module/ios/IosWebDavPublication.swift
+UNCHANGED HOST INPUT fd9524ac05fc6351e0a4f875a4ca1785202d1d5fa68e5d5bc2a3d79fba10527c apps/mobile/modules/my-module/ios/IosPhotoJson.swift
+UNCHANGED HOST INPUT a7057032343285e65155bfdef6568b30105a8ced2636cc3b90822c432b83cb2e apps/mobile/modules/my-module/ios/IosPhotoManifest.swift
+UNCHANGED HOST INPUT 7d77d181b103442bf4f962b885bb670898731aab3a576b460282b222b544d3ad apps/mobile/modules/my-module/ios/IosWebDavPhotoManifest.swift
+UNCHANGED HOST INPUT c4109cfe04426352463dcd1f9935ed8483fe3d50bfd34e925f2f739897252b9d apps/mobile/modules/my-module/ios/IosWebDavRuns.swift
+UNCHANGED HOST INPUT f0db66cf7734eb1e40a5d1a83fab9bad626218088da4bf6a36591794fd971f71 apps/mobile/modules/my-module/ios/IosWebDavSchedule.swift
+UNCHANGED HOST INPUT 2b20f2c09e6c06c82e3109bd88b36e5e1970218ba0c4a37ad6e0086f39df6ea2 apps/mobile/modules/my-module/ios/IosWebDavPublicationPath.swift
+UNCHANGED HOST INPUT 62f6dbb9de9059cfaaf5fb469dd2a70934233a896a45692fdc20a55c1b5620f0 apps/mobile/modules/my-module/ios/IosWebDavReviewAuthorization.swift
+UNCHANGED HOST INPUT 0020ad9a232c5716e65c950fbaf256cb1204a36050bb85b5128eae586211c7de apps/mobile/modules/my-module/ios/IosFilesRestoreJournal.swift
+UNCHANGED HOST INPUT 9160784ad42f130171b7f99a0b6b62d88863b724c5c929bc88c9c6c62af46f14 apps/mobile/modules/my-module/ios/IosLocalRestorePublication.swift
+UNCHANGED HOST INPUT 84e3ba8d843576f168ef974b2b5d7405c1c271c00742a6fea47aa47b51d8f695 apps/mobile/modules/my-module/ios/IosWebDavRestoreJournal.swift
+UNCHANGED HOST INPUT 65dab711f9798c1e10e7fcebd9e07cb231c24dcd20e27dba7140b1ca0ea48cd7 apps/mobile/modules/my-module/ios/IosAutomaticPolicy.swift
+UNCHANGED HOST INPUT b7910dc164a96fca741d9ce0c5d04a3af8969e22507b4fc878fa9887531aa6cb apps/mobile/modules/my-module/ios/IosRecoveryCode.swift
+UNCHANGED HOST INPUT 660daeeb5a056b04bf410515a8afbac3aeeda16118de21b0f981555512f71af9 apps/mobile/modules/my-module/ios/IosRecoveryCatalog.swift
+UNCHANGED HOST INPUT 6e2a7928b7fc4bb16c1485835db9f98cf976ac87a47a9ec931fe25d4aef9d0d6 apps/mobile/modules/my-module/ios/IosRecoveryCatalogJournal.swift
+UNCHANGED HOST INPUT d17abbc29f0b54f292571f1b47240836d000de736d436e967cd0e89dbee26dea apps/mobile/modules/my-module/ios/IosRecoveryImportJournal.swift
+UNCHANGED HOST INPUT 77352167c7fbf52d795fa64804bb56c38e0c514f368e89e794f62acf6ab3a456 packages/pairing-native/apple/tests/IosWebDavPublicationChecks.swift
+UNCHANGED HOST INPUT b0ceeb9b228269b5a76f27c1c079b4a09b772989f0d3cf190eccdc704a6d7026 apps/mobile/modules/my-module/android/src/androidTest/assets/webdav-photo-v1.json
+UNCHANGED HOST INPUT 6c35a67b93c38b08e714e7c3c178b1ec58ad861adc73f067611e99b6548c2f44 apps/mobile/modules/my-module/ios/IosWebDavClient.swift
+UNCHANGED HOST INPUT aaf30312e5ad6368b3873e0bcdec6a694ac3bf1847719da1afbeb1d216cb058a apps/mobile/modules/my-module/ios/IosCloudTarget.swift
+UNIQUE VERBATIM SEAM IosWebDavClient.swift '  static func encode(_ data: Data) -> String {\n    data.base64EncodedString().replacingOccurrences(of: "+", with: "-")\n      .replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")\n  }\n'
+UNIQUE VERBATIM SEAM IosCloudTarget.swift '  static let oauthKinds: Set<String> = ["dropbox"]\n'
+19 real production Swift sources; existing checks/assertions/golden unchanged; no fake import/catalog initializer
+ONLY NOTICE CHANGES ['cesu8 1.1.0', 'instant-xml 0.7.7', 'instant-xml-macros 0.7.2'] + approved intro; other sections incl JNI unchanged; Apache hash verified
+LICENSE SOURCE MATCH cesu8-1.1.0 6d43a04d8753f35258c91f8ec639f792891f748a1edbd759cf1dcea3382ad83c Cargo.lock + archive declaration + extracted hashes + full Apache text + retained notices
+ATTRIBUTION SCAN instant-xml-0.7.7 []
+LICENSE SOURCE MATCH instant-xml-0.7.7 2c32db75b7c16c5051ea7b6605eea01f7b5a25abe84c20473c9e7c7987f5850c Cargo.lock + archive declaration + extracted hashes + full Apache text + retained notices
+ATTRIBUTION SCAN instant-xml-macros-0.7.2 []
+LICENSE SOURCE MATCH instant-xml-macros-0.7.2 ac3c2e6cbd6e0579ee53a8290fc0015a438cfff0139c8359d5891cae130815d7 Cargo.lock + archive declaration + extracted hashes + full Apache text + retained notices
+Missing historical logs: ['h15-ast.log', 'h15-seam-extract.log', 'diff-check.log', 'l15/apply.log', 'l15/compare.log']
+Mac log lines 8
+exit=0
+elapsed_seconds=6.01
+Scoped committed diff-check exit 0
+END audit

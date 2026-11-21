@@ -1,0 +1,948 @@
+--- fix-r1/tools/capture-ui.py
++++ fix-r2/tools/capture-ui.py
+@@ -112,13 +112,33 @@
+             supervisor.stdin.close()  # EOF tells the supervisor to stop and clean up
+     signal.signal(signal.SIGINT, interrupt)
+     signal.signal(signal.SIGTERM, interrupt)
+-    return _report(run.root, supervisor.wait())
++    return _settle(run.root, supervisor.wait())
+ 
+ 
+-def _report(root, supervisor_exit=None):
++def _settle(root, supervisor_exit):
++    """The durable result only counts when the supervisor exited with exactly that result's code."""
+     record = json.loads((root / RECORD).read_text(encoding='utf-8'))
++    expected = EXIT_CODES.get(record.get('result'))
++    if supervisor_exit != expected:
++        try:
++            run = Run.open(root)
++        except CaptureError:
++            return _report(root, supervisor_exit, abnormal=True)
++        run.record['supervisorAbnormal'] = supervisor_exit
++        run.record['runError'] = run.record.get('runError') or f'supervisor exit {supervisor_exit}'
++        if run.record['phase'] == 'CLEANED':
++            run.record['result'] = final_status(run.record)
++        run.event('SUPERVISOR_ABNORMAL', exit=supervisor_exit)
++        run.close()
++    return _report(root, supervisor_exit, abnormal=supervisor_exit != expected)
++
++
++def _report(root, supervisor_exit=None, abnormal=False):
++    record = json.loads((root / RECORD).read_text(encoding='utf-8'))
+     status = record.get('result') if record.get('phase') == 'CLEANED' else 'CLEANUP_FAILED'
+     status = status if status in EXIT_CODES else 'CLEANUP_FAILED'
++    if abnormal and status in ('PASS', 'BLOCKED'):
++        status = 'FAIL'  # never report success from a supervisor that did not exit normally
+     print(json.dumps({'result': status, 'phase': record.get('phase'), 'run': str(root),
+                       'supervisorExit': supervisor_exit,
+                       'interrupted': bool(record.get('interrupted')),
+@@ -128,16 +148,16 @@
+ 
+ 
+ def cmd_supervise(args):
++    supervision.install()  # before the EOF watcher: an early CLI loss is kept pending, not fatal
+     run = Run.open(args.run, lock_fd=args.lock_fd)
+     parent_gone = supervision.watch_parent(sys.stdin.fileno())
+-    for sig in (signal.SIGTERM, signal.SIGUSR1, signal.SIGINT, signal.SIGHUP):
+-        signal.signal(sig, supervision.on_signal)
+     driver, opts = driver_module(run.record['driver']), run.record['selection']['args']
+     run.record['supervisor'] = {'pid': os.getpid()}
+     run.event('SUPERVISING')
+-    ready = []
+-    supervision.arm(True)
+     try:
++        supervision.arm(True)  # raises a signal that arrived during bootstrap
++        if parent_gone.is_set():
++            raise Interrupted('public CLI closed before capture')
+         matrix = mx.load(MATRIX)
+         cells = _select(matrix, opts, run.record['driver'])
+         if [c.id for c in cells] != run.record['selection']['cells']:
+@@ -151,11 +171,12 @@
+         if ready:
+             driver.capture(run, REPO, ready, {row['id']: row for row in matrix['rows']}, opts)
+     except Exception as error:  # noqa: BLE001 - every failure must still reach cleanup and the record
++        supervision.arm(False)
+         detail = f'{type(error).__name__}: {str(getattr(error, "stderr", None) or error)[:300]}'
+         run.record['interrupted' if isinstance(error, Interrupted) else 'runError'] = detail
+-        for cell in ready:
+-            if cell.id not in run.record['cells']:
+-                run.set_cell(cell.id, 'FAIL', reasons=[detail])
++        for cell_id in run.record['selection']['cells']:
++            if cell_id not in run.record['cells']:
++                run.set_cell(cell_id, 'FAIL', reasons=[detail])
+         run.event('error', detail=detail)
+     finally:
+         supervision.arm(False)
+@@ -196,6 +217,8 @@
+     row = rows.get(row_id)
+     if old.get('status') != 'PASS':
+         return {'decision': 'recapture', 'changed': ['status']}
++    if run.record.get('supervisorAbnormal') is not None:
++        return {'decision': 'recapture', 'changed': ['supervisor']}
+     if row is None or row['status'] != 'ready' or row['driver'] != run.record['driver'] or row['screen'] != old.get('screen'):
+         return {'decision': 'recapture', 'changed': ['row']}
+     decision = mx.reuse_decision(old.get('fingerprint'), mx.fingerprint(matrix, row_id, locale, REPO))
+--- fix-r1/tools/ui-capture/common.py
++++ fix-r2/tools/ui-capture/common.py
+@@ -24,6 +24,7 @@
+ RECORD, LOCK = 'run.json', 'run.lock'
+ PNG_SIGNATURE = b'\x89PNG\r\n\x1a\n'
+ PNG_CHANNELS = {0: 1, 2: 3, 3: 1, 4: 2, 6: 4}
++PNG_DEPTHS = {0: (1, 2, 4, 8, 16), 2: (8, 16), 3: (1, 2, 4, 8), 4: (8, 16), 6: (8, 16)}
+ 
+ 
+ class CaptureError(RuntimeError):
+@@ -75,13 +76,16 @@
+     if not complete or ihdr is None or len(ihdr) != 13 or not idat:
+         return None
+     width, height, depth, color = int.from_bytes(ihdr[:4], 'big'), int.from_bytes(ihdr[4:8], 'big'), ihdr[8], ihdr[9]
+-    if not width or not height or color not in PNG_CHANNELS or ihdr[12]:
++    if not width or not height or depth not in PNG_DEPTHS.get(color, ()) or any(ihdr[10:13]):
+         return None
+     try:
+         raw = zlib.decompress(b''.join(idat))
+     except zlib.error:
+         return None
+-    return (width, height) if len(raw) == (1 + (width * PNG_CHANNELS[color] * depth + 7) // 8) * height else None
++    stride = 1 + (width * PNG_CHANNELS[color] * depth + 7) // 8
++    if len(raw) != stride * height or any(raw[row * stride] > 4 for row in range(height)):
++        return None  # every scanline must start with a defined filter type (0-4)
++    return width, height
+ 
+ 
+ class Run:
+@@ -236,14 +240,18 @@
+     return all(report.get(key) == expected.get(key) for key in ('runID', 'phase', 'nonce'))
+ 
+ 
+-REPORT_KEYS = frozenset(('runID', 'phase', 'nonce', 'sample', 'screen', 'language', 'themeMode', 'fontScale',
++REPORT_KEYS = frozenset(('runID', 'phase', 'nonce', 'probe', 'screen', 'language', 'themeMode', 'fontScale',
+                          'fontsLoaded', 'fontError', 'appState', 'layoutReady', 'width', 'height'))
+ MAX_REPORT_BYTES = 8192
+ 
+ 
+ class PhaseServer:
+-    """Loopback rendezvous: serves the live phase; keeps only reports for that exact phase."""
++    """Loopback rendezvous: serves the live phase; keeps only reports for that exact phase.
+ 
++    Each phase carries a probe token. `reprobe()` replaces it after a screenshot; a report that
++    echoes the new token was measured from a phase fetched after the screenshot finished, so a
++    delayed earlier report of the same phase can never stand in for it."""
++
+     def __init__(self):
+         self._lock = threading.Lock()
+         self._phase, self.reports, self.stale = None, [], 0
+@@ -283,7 +291,7 @@
+ 
+     def offer(self, report):
+         with self._lock:
+-            valid = isinstance(report, dict) and set(report) == REPORT_KEYS and isinstance(report['sample'], int)
++            valid = isinstance(report, dict) and set(report) == REPORT_KEYS and isinstance(report['probe'], str)
+             if valid and match_report(self._phase, report):
+                 self.reports.append(report)
+             else:
+@@ -291,13 +299,20 @@
+ 
+     def announce(self, phase):
+         with self._lock:
+-            self._phase = phase
++            self._phase = phase and {**phase, 'probe': secrets.token_hex(16)}
+             self.reports = []
++            return self._phase and self._phase['probe']
+ 
+-    def latest(self):
++    def reprobe(self):
+         with self._lock:
+-            return self.reports[-1] if self.reports else None
++            self._phase = {**self._phase, 'probe': secrets.token_hex(16)}
++            return self._phase['probe']
+ 
++    def latest(self, probe=None):
++        with self._lock:
++            found = [r for r in self.reports if probe is None or r['probe'] == probe]
++            return found[-1] if found else None
++
+     def close(self):
+         self.announce(None)
+         self._server.shutdown()
+--- fix-r1/tools/ui-capture/desktop.py
++++ fix-r2/tools/ui-capture/desktop.py
+@@ -16,10 +16,13 @@
+ from pathlib import Path
+ 
+ from common import CaptureError, atomic_write_json, png_info, sha256_file
+-from supervision import critical, stop_owned
++from supervision import critical, process_table, stop_owned, verify_absent
+ 
++# Every input the Vite renderer build reads, incl. the Inter files global.css imports from the repo root.
+ SOURCE_ROOTS = ('apps/desktop/src', 'apps/desktop/index.html', 'apps/desktop/vite.config.ts',
+-                'apps/desktop/package.json', 'packages/sync-core/src', 'package-lock.json')
++                'apps/desktop/package.json', 'apps/desktop/tsconfig.json', 'packages/sync-core/src',
++                'packages/sync-core/package.json', 'assets/fonts/inter', 'package-lock.json')
++MARKER = '--kloda-capture-run='
+ RENDERER = Path('apps/desktop/dist/renderer')
+ STAMP = '.kloda-capture-build.json'
+ READY = {'settings': '.appearance-settings', 'tray': '[role=group] [role=status]'}
+@@ -71,16 +74,22 @@
+     return digest.hexdigest()
+ 
+ 
+-def source_hash(repo):
++def source_hash(repo, roots=SOURCE_ROOTS):
+     """Digest of every build input (tests excluded: they are not bundled)."""
+     files = []
+-    for root in SOURCE_ROOTS:
++    for root in roots:
+         base = Path(repo) / root
+         files += [base] if base.is_file() else [p for p in sorted(base.rglob('*')) if p.is_file()
+                                                 and '.spec.' not in p.name and '.test.' not in p.name]
+     return _tree_digest(Path(repo), files)
+ 
+ 
++def global_hash(repo):
++    """Build inputs outside apps/desktop/src (fonts, toolchain config, lockfile, shared package):
++    not covered by per-row fingerprints, so any change there invalidates reuse."""
++    return source_hash(repo, tuple(root for root in SOURCE_ROOTS if root != 'apps/desktop/src'))
++
++
+ def renderer_hash(renderer):
+     renderer = Path(renderer)
+     return _tree_digest(renderer, [p for p in sorted(renderer.rglob('*')) if p.is_file() and p.name != STAMP])
+@@ -110,7 +119,8 @@
+         return {'fresh': False, 'reason': 'renderer has no capture build stamp; run prepare-desktop'}
+     current = {'sourceSha256': source_hash(repo),
+                'rendererSha256': renderer_hash(renderer) if (renderer / 'index.html').is_file() else None}
+-    stale = [key for key, value in current.items() if stamp.get(key) != value]
++    current['globalSha256'] = global_hash(repo)
++    stale = [key for key in ('sourceSha256', 'rendererSha256') if stamp.get(key) != current[key]]
+     return {**current, 'fresh': not stale, 'stamp': stamp,
+             'reason': f'stamp mismatch: {stale}; run prepare-desktop' if stale else None}
+ 
+@@ -155,8 +165,10 @@
+     entry = run.track('browser')
+     with critical():
+         run.live['playwright'] = playwright = sync_playwright().start()
+-        run.live['browser'] = browser = playwright.chromium.launch()
+-        entry['state'] = 'running'
++        marker = f'{MARKER}{run.record["runID"]}'
++        run.live['browser'] = browser = playwright.chromium.launch(args=[marker])
++        # The argv marker only locates the browser this launch started; it never authorises a signal.
++        entry.update(_browser_identity(marker), state='running')
+         run.save()
+     for cell in cells:
+         # Playwright calls are never interrupted mid-flight; each step is bounded by its timeout.
+@@ -164,6 +176,16 @@
+             _capture_cell(run, browser, cell, rows[cell.row], server.server_address[1], opts['width'], PlaywrightError)
+ 
+ 
++def _browser_identity(marker):
++    out = subprocess.run(['ps', '-A', '-o', 'pid=,command='], capture_output=True, text=True, check=True, timeout=30)
++    found = [int(line.split(None, 1)[0]) for line in out.stdout.splitlines()
++             if marker in line and '--type=' not in line and 'python' not in line.lower()]
++    table = process_table()
++    if len(found) != 1 or found[0] not in table:
++        return {'pid': None, 'pgid': None}
++    return {'pid': found[0], 'pgid': table[found[0]][0]}
++
++
+ def _capture_cell(run, browser, cell, row, port, width, playwright_error):
+     errors, ready = [], READY.get(row['screen'])
+     base = {'screen': row['screen'], 'driverKind': 'synthetic-renderer'}
+@@ -204,18 +226,19 @@
+     """Close through the driver's own path; an unverified close stays a cleanup failure."""
+     run.begin_cleanup()
+     playwright, browser = run.live.pop('playwright', None), run.live.pop('browser', None)
+-    tracked = [entry for entry in run.record['processes'] if entry.get('closeBy') == 'driver']
+     if playwright is not None:
+         try:
+             if browser is not None:
+                 browser.close()
+             playwright.stop()
+-            for entry in tracked:
+-                entry['state'] = 'stopped'
+         except Exception as error:  # noqa: BLE001 - any teardown failure must fail the run
+             run.cleanup_step('browser:close', False, f'{type(error).__name__}: {str(error)[:200]}')
+     for entry in run.record['processes']:
+-        stop_owned(run, entry)
++        if entry.get('closeBy') == 'driver' and entry.get('state') not in ('stopped', 'gone'):
++            # Closed only through the driver; success needs the recorded browser PID and group gone.
++            verify_absent(run, entry, f'stop:{entry["role"]}', wait=10.0)
++        else:
++            stop_owned(run, entry)
+     server = run.live.pop('server', None)
+     if server is not None:
+         server.shutdown()
+@@ -224,10 +247,15 @@
+ 
+ 
+ def resume_problems(repo, run, cell, row, old):
++    # Freshness is judged at capture time; what a later edit affects is the cell fingerprint's job,
++    # so an unrelated source or locale change does not force a recapture.
+     recorded = run.record['provenance'].get('renderer', {})
+-    current = renderer_provenance(repo, run.record['selection']['args']['renderer'])
+-    if not current['fresh'] or any(current.get(k) != recorded.get(k) for k in ('sourceSha256', 'rendererSha256')):
+-        return ['renderer build changed or stale']
++    stamp = recorded.get('stamp') or {}
++    if not recorded.get('fresh') or any(stamp.get(k) != recorded.get(k) or not recorded.get(k)
++                                        for k in ('sourceSha256', 'rendererSha256')):
++        return ['capture was not from a stamped fresh renderer']
++    if recorded.get('globalSha256') != global_hash(repo):
++        return ['desktop build inputs outside the row fingerprint changed']
+     measure = old.get('measure') or {}
+     size = tuple(old['pngSize']) if old.get('pngSize') else None
+     return _verdict(cell, row, measure, measure.get('consoleErrors', []), size, (measure.get('viewport') or [0])[0])
+--- fix-r1/tools/ui-capture/ios.py
++++ fix-r2/tools/ui-capture/ios.py
+@@ -4,12 +4,14 @@
+ group is its own identifier, on a Simulator this run creates and deletes. Existing Simulators,
+ apps, containers and Keychains are never adopted. This is not production signing acceptance.
+ """
++import http.client
+ import json
+ import os
+ import socket
+ import subprocess
++import threading
+ import time
+-import urllib.request
++import urllib.parse
+ 
+ from common import CaptureError, PhaseServer, new_phase, png_info, sha256_file
+ from ios_build import FIXTURE_KEYS, verify_fixture
+@@ -74,20 +76,41 @@
+         return sock.getsockname()[1]
+ 
+ 
+-def wait_bundle(url, metro):
+-    """Whole bundle download inside one absolute deadline; Metro exit is seen without reaping."""
+-    deadline = time.monotonic() + METRO_READY_S
+-    while time.monotonic() < deadline:
++def _fetch(conn, target, outcome):
++    try:
++        conn.request('GET', target)
++        response = conn.getresponse()
++        outcome['status'] = response.status
++        while response.read(1 << 16):
++            pass
++        outcome['done'] = time.monotonic()
++    except (OSError, http.client.HTTPException) as error:
++        outcome['error'] = error
++
++
++def wait_bundle(url, metro, limit=None):
++    """The whole bundle, EOF included, must arrive before one absolute deadline. The download runs
++    in a worker whose socket is shut down at the deadline; Metro exit is seen without reaping."""
++    limit = METRO_READY_S if limit is None else limit
++    deadline, parts = time.monotonic() + limit, urllib.parse.urlsplit(url)
++    while deadline - time.monotonic() > 0:
+         if exited(metro):
+             raise CaptureError('Metro exited before the bundle was ready')
+-        try:
+-            with urllib.request.urlopen(url, timeout=max(1, deadline - time.monotonic())) as response:
+-                while response.status == 200 and time.monotonic() < deadline:
+-                    if not response.read(1 << 16):
+-                        return
+-        except OSError:
+-            time.sleep(1)
+-    raise CaptureError(f'Metro bundle not ready in {METRO_READY_S}s')
++        conn, outcome = http.client.HTTPConnection(parts.hostname, parts.port, timeout=limit), {}
++        worker = threading.Thread(target=_fetch, args=(conn, f'{parts.path}?{parts.query}', outcome), daemon=True)
++        worker.start()
++        worker.join(max(0, deadline - time.monotonic()))
++        if worker.is_alive() and conn.sock is not None:
++            try:
++                conn.sock.shutdown(socket.SHUT_RDWR)  # aborts a download still running at the deadline
++            except OSError:
++                pass
++        if not worker.is_alive() and outcome.get('status') == 200 and outcome.get('done', deadline + 1) <= deadline:
++            return
++        if worker.is_alive():
++            break
++        time.sleep(min(1, max(0, deadline - time.monotonic())))
++    raise CaptureError(f'Metro bundle not complete within {limit}s')
+ 
+ 
+ def simulator_listing():
+@@ -138,11 +161,12 @@
+     run.record['provenance']['staleReports'] = server.stale
+ 
+ 
+-def _await_report(server, cell, screen, after):
++def _await_report(server, cell, screen, probe):
++    """Wait for a passing report that echoes exactly this probe token."""
+     deadline, report, problems = time.monotonic() + PHASE_S, None, ['no current-phase report']
+     while time.monotonic() < deadline:
+-        latest = server.latest()
+-        if latest and latest['sample'] > after:
++        latest = server.latest(probe)
++        if latest:
+             report, problems = latest, report_problems(cell, screen, latest)
+             if not problems:
+                 break
+@@ -153,18 +177,19 @@
+ def _capture_cell(run, udid, server, index, cell, screen):
+     simctl('ui', udid, 'appearance', cell.theme)
+     simctl('ui', udid, 'content_size', SIZES[cell.size])
+-    server.announce(new_phase(run.record['runID'], index, {'screen': screen, 'locale': cell.locale,
+-                                                           'theme': cell.theme, 'size': cell.size}))
++    probe = server.announce(new_phase(run.record['runID'], index, {'screen': screen, 'locale': cell.locale,
++                                                                   'theme': cell.theme, 'size': cell.size}))
+     base = {'screen': screen, 'driverKind': 'native-component-fixture'}
+-    before, problems = _await_report(server, cell, screen, -1)
++    before, problems = _await_report(server, cell, screen, probe)
+     if problems:
+         return run.set_cell(cell.id, 'FAIL', reasons=problems, measure=before, **base)
+     name = cell.id.replace('/', '__') + '.png'
+     target = run.path(name)
+     simctl('io', udid, 'screenshot', str(target))
+     size = png_info(target)
+-    # A fresh sample after the screenshot proves the measured state held while it was taken.
+-    after, problems = _await_report(server, cell, screen, before['sample'])
++    # A new probe is issued only after the screenshot completed; a report echoing it was measured
++    # from a phase fetched afterwards, so the state shown held across the screenshot.
++    after, problems = _await_report(server, cell, screen, server.reprobe())
+     problems = problems + png_problems(size, after or before)
+     run.set_cell(cell.id, 'FAIL' if problems else 'PASS', reasons=problems, png=name, pngSize=size,
+                  pngSha256=sha256_file(target) if size else None, measure=after, before=before, **base)
+--- fix-r1/tools/ui-capture/ios_build.py
++++ fix-r2/tools/ui-capture/ios_build.py
+@@ -11,6 +11,7 @@
+ import re
+ import shutil
+ import subprocess
++import sys
+ import uuid
+ from pathlib import Path
+ 
+@@ -40,9 +41,10 @@
+ 
+ 
+ def _recipe():
+-    """Build identity: the source of every build step and its settings, not runtime helpers."""
+-    steps = (_stage_mirror, _entitlements, _readback, _sign, _build, prepare)
+-    return _digest(('\n'.join(inspect.getsource(step) for step in steps) + json.dumps(BUILD_SETTINGS)).encode())
++    """Build identity: this whole build module (every helper and constant a build step can reach),
++    minus only the read-only run-time check `verify_fixture`. Runtime ios.py/JS edits are outside."""
++    source = inspect.getsource(sys.modules[__name__])
++    return _digest(source.replace(inspect.getsource(verify_fixture), '').encode())
+ 
+ 
+ def input_hashes(repo):
+--- fix-r1/tools/ui-capture/supervision.py
++++ fix-r2/tools/ui-capture/supervision.py
+@@ -4,6 +4,8 @@
+ authorises a signal (its PID and process group cannot be reused while unreaped, and processes
+ from other sessions cannot join the group). Without that handle nothing is signalled: a
+ recorded process is accepted as gone only when no process with its PID or group remains.
++Signals that arrive before the supervisor is armed or inside a critical section are kept
++pending and raised at the next safe point; they are never dropped.
+ """
+ import os
+ import signal
+@@ -23,16 +25,23 @@
+ 
+ 
+ def on_signal(signum, _frame):
+-    if not _signals['armed']:
++    if not _signals['armed'] or _signals['critical']:
++        _signals['pending'] = _signals['pending'] or signum
+         return
+-    if _signals['critical']:
+-        _signals['pending'] = signum
+-        return
+     raise Interrupted(signal.Signals(signum).name)
+ 
+ 
++def _raise_pending():
++    pending, _signals['pending'] = _signals['pending'], None
++    if pending:
++        raise Interrupted(signal.Signals(pending).name)
++
++
+ def arm(enabled):
+-    _signals['armed'], _signals['pending'] = enabled, None
++    """Arming raises a signal that arrived during bootstrap; disarming keeps later ones pending."""
++    _signals['armed'] = enabled
++    if enabled and not _signals['critical']:
++        _raise_pending()
+ 
+ 
+ @contextmanager
+@@ -43,15 +52,18 @@
+         yield
+     finally:
+         _signals['critical'] -= 1
+-        pending = _signals['pending']
+-        if not _signals['critical'] and pending and _signals['armed']:
+-            _signals['pending'] = None
+-            raise Interrupted(signal.Signals(pending).name)
++        if not _signals['critical'] and _signals['armed']:
++            _raise_pending()
+ 
+ 
++def install(handled=(signal.SIGTERM, signal.SIGUSR1, signal.SIGINT, signal.SIGHUP)):
++    for sig in handled:
++        signal.signal(sig, on_signal)
++
++
+ def watch_parent(fd):
+     """EOF on the public CLI pipe (closed on CLI signal or death) interrupts the supervisor.
+-    Raw reads: a daemon thread must not hold a buffered-reader lock at interpreter shutdown."""
++    Handlers must be installed first; raw reads so no buffered-reader lock is held at shutdown."""
+     gone = threading.Event()
+ 
+     def loop():
+@@ -71,20 +83,32 @@
+ 
+ 
+ def process_table():
+-    out = subprocess.run(['ps', '-A', '-o', 'pid=,pgid=,stat='], capture_output=True, text=True,
++    """{pid: (pgid, zombie, ppid)}."""
++    out = subprocess.run(['ps', '-A', '-o', 'pid=,pgid=,ppid=,stat='], capture_output=True, text=True,
+                          check=True, timeout=30)
+     table = {}
+     for line in out.stdout.splitlines():
+         fields = line.split()
+-        if len(fields) == 3:
+-            table[int(fields[0])] = (int(fields[1]), fields[2].startswith('Z'))
++        if len(fields) == 4:
++            table[int(fields[0])] = (int(fields[1]), fields[3].startswith('Z'), int(fields[2]))
+     return table
+ 
+ 
+-def _members(pgid):
+-    return sorted(pid for pid, (group, zombie) in process_table().items() if group == pgid and not zombie)
++def _members(pgid, table=None):
++    table = process_table() if table is None else table
++    return sorted(pid for pid, (group, zombie, _) in table.items() if group == pgid and not zombie)
+ 
+ 
++def escaped(table, pgid):
++    """Live descendants of the group that moved to another process group (never signalled)."""
++    found, frontier = set(), {pid for pid, (group, _, _) in table.items() if group == pgid}
++    while frontier:
++        children = {pid for pid, (_, _, ppid) in table.items() if ppid in frontier} - found - frontier
++        found |= children
++        frontier = children
++    return sorted(pid for pid in found if table[pid][0] != pgid and not table[pid][1])
++
++
+ def stop_owned(run, entry, grace=15.0):
+     """Stop one recorded process group; only an unreaped live handle authorises signals."""
+     name = f'stop:{entry["role"]}'
+@@ -92,8 +116,9 @@
+         return run.cleanup_step(name, True, entry['state'])
+     live = run.live.get(entry.get('pid'))
+     if live is None or live.returncode is not None:
+-        return _verify_absent(run, entry, name)
+-    pgid = entry['pgid']
++        return verify_absent(run, entry, name)
++    pgid, table = entry['pgid'], process_table()
++    outside = escaped(table, pgid)
+     for sig in (signal.SIGTERM, signal.SIGKILL):
+         try:
+             os.killpg(pgid, sig)
+@@ -110,18 +135,27 @@
+             live.wait(timeout=grace)
+         except subprocess.TimeoutExpired:
+             left = [live.pid]
+-    entry['state'] = 'alive' if left else 'stopped'
+-    return run.cleanup_step(name, not left, f'alive {left}' if left else None)
++    table = process_table()
++    stray = [pid for pid in outside if pid in table and not table[pid][1]]
++    entry['state'] = 'alive' if left or stray else 'stopped'
++    if stray:
++        entry['escaped'] = stray
++    detail = (f'alive {left}' if left else '') + (f' descendants left the group, not signalled {stray}' if stray else '')
++    return run.cleanup_step(name, not detail, detail or None)
+ 
+ 
+-def _verify_absent(run, entry, name):
++def verify_absent(run, entry, name, wait=0.0):
+     """No owning handle: never signal; accept only proven absence of the PID and its group."""
+     if entry.get('pid') is None:
+-        ok, detail = False, ('driver close not verified' if entry.get('closeBy') == 'driver'
+-                             else 'launch outcome unrecorded') + '; ownership unprovable, not signalled'
+-    else:
++        entry['state'] = 'unverified'
++        return run.cleanup_step(name, False, ('driver close not verified' if entry.get('closeBy') == 'driver'
++                                              else 'launch outcome unrecorded') + '; ownership unprovable, not signalled')
++    deadline = time.monotonic() + wait
++    while True:
+         table = process_table()
+-        present = entry['pid'] in table or any(group == entry['pgid'] for group, _ in table.values())
+-        ok, detail = not present, 'supervisor lost; process present, ownership unprovable, not signalled'
+-    entry['state'] = 'gone' if ok else 'unverified'
+-    return run.cleanup_step(name, ok, None if ok else detail)
++        present = entry['pid'] in table or bool(_members(entry['pgid'], table))
++        if not present or time.monotonic() >= deadline:
++            break
++        time.sleep(0.2)
++    entry['state'] = 'unverified' if present else 'gone'
++    return run.cleanup_step(name, not present, 'process present, ownership unprovable, not signalled' if present else None)
+--- fix-r1/tools/ui-capture/test_capture.py
++++ fix-r2/tools/ui-capture/test_capture.py
+@@ -3,10 +3,16 @@
+ 
+ sys.dont_write_bytecode = True
+ 
++import hashlib  # noqa: E402
++import http.server  # noqa: E402
++import inspect  # noqa: E402
+ import json  # noqa: E402
+ import os  # noqa: E402
+ import signal  # noqa: E402
++import subprocess  # noqa: E402
+ import tempfile  # noqa: E402
++import threading  # noqa: E402
++import time  # noqa: E402
+ import unittest  # noqa: E402
+ import urllib.request  # noqa: E402
+ import zlib  # noqa: E402
+@@ -28,11 +34,11 @@
+     return SimpleNamespace(locale=locale, theme=theme, size=size, id=f'x/{locale}/{theme}/{size}')
+ 
+ 
+-def _png(width=4, height=3, trailing=b''):
++def _png(width=4, height=3, trailing=b'', filter_byte=0):
+     def chunk(kind, body):
+         return len(body).to_bytes(4, 'big') + kind + body + zlib.crc32(kind + body).to_bytes(4, 'big')
+     ihdr = width.to_bytes(4, 'big') + height.to_bytes(4, 'big') + bytes([8, 6, 0, 0, 0])
+-    raw = zlib.compress(b''.join(b'\0' + b'\x80' * width * 4 for _ in range(height)))
++    raw = zlib.compress(b''.join(bytes([filter_byte]) + b'\x80' * width * 4 for _ in range(height)))
+     return common.PNG_SIGNATURE + chunk(b'IHDR', ihdr) + chunk(b'IDAT', raw) + chunk(b'IEND', b'') + trailing
+ 
+ 
+@@ -118,6 +124,14 @@
+                                (_png()[:24] + b'\0' * 30, None), (b'\x89PNG\r\n\x1a\n' + b'\0' * 16, None)):
+                 path.write_bytes(data)
+                 self.assertEqual(common.png_info(path), want)
++            for ihdr_byte, value in ((24, 3), (26, 1)):  # depth 3 for RGBA, filter method 1
++                patched = bytearray(_png())
++                patched[ihdr_byte] = value
++                patched[29:33] = zlib.crc32(bytes(patched[12:29])).to_bytes(4, 'big')
++                path.write_bytes(bytes(patched))
++                self.assertIsNone(common.png_info(path), ihdr_byte)
++            path.write_bytes(_png(filter_byte=255))
++            self.assertIsNone(common.png_info(path))
+             broken = bytearray(_png())
+             broken[40] ^= 1
+             path.write_bytes(bytes(broken))
+@@ -150,17 +164,24 @@
+         self.assertFalse(common.match_report(None, phase))
+         server = common.PhaseServer()
+         try:
+-            full = {**{key: None for key in common.REPORT_KEYS}, **{k: phase[k] for k in ('runID', 'phase', 'nonce')},
+-                    'sample': 3}
+-            server.offer(full)
+-            server.announce(phase)
+-            for stale in ({**full, 'nonce': 'old'}, {**full, 'extra': 1}, {**full, 'sample': '3'}):
++            full = {**{key: None for key in common.REPORT_KEYS}, **{k: phase[k] for k in ('runID', 'phase', 'nonce')}}
++            server.offer({**full, 'probe': 'p'})
++            first = server.announce(phase)
++            for stale in ({**full, 'nonce': 'old', 'probe': first}, {**full, 'extra': 1, 'probe': first},
++                          {**full, 'probe': 3}):
+                 server.offer(stale)
+-            self.assertIsNone(server.latest())
++            self.assertIsNone(server.latest(first))
++            served = json.loads(urllib.request.urlopen(f'http://127.0.0.1:{server.port}/phase', timeout=5).read())
++            self.assertEqual(served['probe'], first)
+             request = urllib.request.Request(f'http://127.0.0.1:{server.port}/report',
+-                                             data=json.dumps(full).encode(), method='POST')
++                                             data=json.dumps({**full, 'probe': first}).encode(), method='POST')
+             urllib.request.urlopen(request, timeout=5).read()
+-            self.assertEqual((server.latest()['sample'], server.stale), (3, 4))
++            self.assertEqual((server.latest(first)['probe'], server.stale), (first, 4))
++            after = server.reprobe()  # screenshot finished
++            server.offer({**full, 'probe': first})  # a delayed pre-screenshot report arrives late
++            self.assertIsNone(server.latest(after))
++            server.offer({**full, 'probe': after})
++            self.assertEqual(server.latest(after)['probe'], after)
+         finally:
+             server.close()
+ 
+@@ -195,7 +216,48 @@
+         self.assertEqual(ios.png_problems((1206, 2622), self.GOOD), [])
+         for size in (None, (402, 900), (300, 652), (1206, 2000)):
+             self.assertTrue(ios.png_problems(size, self.GOOD), size)
++
++    def test_recipe_covers_build_helpers_only(self):
++        hashed = inspect.getsource(ios_build).replace(inspect.getsource(ios_build.verify_fixture), '')
++        self.assertIn(inspect.getsource(ios_build._link_all), hashed)
++        self.assertNotIn('def verify_fixture', hashed)
++        self.assertEqual(ios_build._recipe(), hashlib.sha256(hashed.encode()).hexdigest())
++        self.assertNotIn('ios.py', ios_build.TREE_INPUTS)
++
++    def test_metro_deadline_is_absolute(self):
++        def handler(delay):
++            class Slow(http.server.BaseHTTPRequestHandler):
++                def log_message(self, *args):
++                    pass
+ 
++                def do_GET(self):
++                    self.send_response(200)
++                    self.end_headers()
++                    for _ in range(4):
++                        self.wfile.write(b'x' * 10)
++                        self.wfile.flush()
++                        time.sleep(delay)
++            return Slow
++        metro = subprocess.Popen(['sleep', '30'])
++        try:
++            for delay, ok in ((0.0, True), (0.6, False)):  # 4 x 0.6 s drip / late EOF against a 1 s limit
++                server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), handler(delay))
++                threading.Thread(target=server.serve_forever, daemon=True).start()
++                url, start = f'http://localhost:{server.server_address[1]}/b?x=1', time.monotonic()
++                try:
++                    if ok:
++                        ios.wait_bundle(url, metro, limit=1)
++                    else:
++                        with self.assertRaises(common.CaptureError):
++                            ios.wait_bundle(url, metro, limit=1)
++                    self.assertLess(time.monotonic() - start, 1.5)
++                finally:
++                    server.shutdown()
++                    server.server_close()
++        finally:
++            metro.kill()
++            metro.wait()
++
+     def test_fixture_identity(self):
+         with tempfile.TemporaryDirectory() as tmp:
+             fid = 'a' * 32
+@@ -232,6 +294,26 @@
+         self.assertTrue(self.run.record['cleanup']['errors'])
+         self.assertEqual(common.final_status(self.run.record), 'CLEANUP_FAILED')
+ 
++    def test_inputs_outside_src_and_resume(self):
++        repo = self.dir / 'repo'
++        for rel in ('apps/desktop/src/app/global.css', 'apps/desktop/src/shared/i18n/locales/tr.json',
++                    'assets/fonts/inter/Inter-Regular.ttf'):
++            (repo / rel).parent.mkdir(parents=True, exist_ok=True)
++            (repo / rel).write_text(rel)
++        source, base = desktop.source_hash(repo), desktop.global_hash(repo)
++        self.run.record['provenance']['renderer'] = {'fresh': True, 'sourceSha256': source, 'rendererSha256': 'r',
++                                                     'globalSha256': base, 'stamp': {'sourceSha256': source,
++                                                                                     'rendererSha256': 'r'}}
++        cell, row = _cell(), {'ref': {'hash': '#/settings'}}
++        old = {'pngSize': [1440, 1000], 'measure': {**self.MEASURE, 'viewport': [1440, 1000]}}
++        self.assertEqual(desktop.resume_problems(repo, self.run, cell, row, old), [])
++        (repo / 'apps/desktop/src/shared/i18n/locales/tr.json').write_text('unrelated key edit')
++        self.assertNotEqual(desktop.source_hash(repo), source)  # a new run needs a rebuild ...
++        self.assertEqual(desktop.resume_problems(repo, self.run, cell, row, old), [])  # ... reuse is kept
++        (repo / 'assets/fonts/inter/Inter-Regular.ttf').write_text('changed font')
++        self.assertNotEqual(desktop.global_hash(repo), base)
++        self.assertTrue(desktop.resume_problems(repo, self.run, cell, row, old))
++
+     def test_build_stamp(self):
+         renderer = self.dir / 'renderer'
+         renderer.mkdir()
+--- fix-r1/tools/ui-capture/test_supervision.py
++++ fix-r2/tools/ui-capture/test_supervision.py
+@@ -5,6 +5,8 @@
+ 
+ import importlib.util  # noqa: E402
+ import json  # noqa: E402
++import os  # noqa: E402
++import signal  # noqa: E402
+ import subprocess  # noqa: E402
+ import time  # noqa: E402
+ import unittest  # noqa: E402
+@@ -31,7 +33,7 @@
+ 
+ class OwnershipTests(Tmp):
+     def group(self, pgid):
+-        return [p for p, (g, z) in supervision.process_table().items() if g == pgid and not z]
++        return [p for p, (g, z, _) in supervision.process_table().items() if g == pgid and not z]
+ 
+     def test_live_group_stopped_after_leader_exit(self):
+         proc = self.run.spawn('tree', ['sh', '-c', 'sleep 60 & sleep 60 & sleep 0.3'])
+@@ -71,6 +73,42 @@
+         self.assertTrue(supervision.stop_owned(self.run, entry, grace=1))
+         self.assertEqual(entry['state'], 'gone')
+ 
++    def test_escaped_descendants_found(self):
++        table = {10: (10, False, 1), 11: (10, False, 10), 12: (12, False, 11), 13: (13, True, 11),
++                 14: (14, False, 12), 20: (20, False, 1)}
++        self.assertEqual(supervision.escaped(table, 10), [12, 14])
++
++    def test_escaped_descendant_fails_cleanup_unsignalled(self):
++        proc = self.run.spawn('metro', [sys.executable, '-c', 'import subprocess,time;'
++                                        "subprocess.Popen(['sleep','60'],start_new_session=True);time.sleep(60)"])
++        self.procs.append(proc)
++        time.sleep(0.8)
++        stray = supervision.escaped(supervision.process_table(), proc.pid)
++        self.assertEqual(len(stray), 1)
++        try:
++            self.assertFalse(supervision.stop_owned(self.run, self.run.record['processes'][0], grace=5))
++            self.assertIn(stray[0], supervision.process_table())  # left alive: never signalled
++            self.assertEqual(self.run.record['processes'][0]['escaped'], stray)
++        finally:
++            os.kill(stray[0], signal.SIGKILL)
++
++    def test_bootstrap_signal_kept_pending(self):
++        supervision.install((signal.SIGUSR2,))
++        reached = False
++        try:
++            os.kill(os.getpid(), signal.SIGUSR2)  # before arming: kept, not dropped
++            with self.assertRaises(supervision.Interrupted):
++                supervision.arm(True)
++            with self.assertRaises(supervision.Interrupted):
++                with supervision.critical():
++                    os.kill(os.getpid(), signal.SIGUSR2)  # deferred until the critical section ends
++                    reached = True
++            self.assertTrue(reached)
++        finally:
++            supervision.arm(False)
++            supervision._signals['pending'] = None
++            signal.signal(signal.SIGUSR2, signal.SIG_DFL)
++
+     def test_foreign_cannot_join_owned_group(self):
+         proc = self.run.spawn('leader', ['sleep', '60'])
+         self.procs.append(proc)
+@@ -106,6 +144,39 @@
+         self.assertEqual((done.returncode, record['phase'], record['result']), (1, 'CLEANED', 'FAIL'))
+         self.assertTrue(record['interrupted'])
+ 
++    def test_abnormal_supervisor_exit_never_pass(self):
++        self.record(phase='CLEANED', result='PASS', cells={'a/tr/light/normal': {'status': 'PASS'}})
++        self.assertEqual(cli._settle(self.out, -6), common.EXIT_CODES['FAIL'])
++        record = json.loads((self.out / 'run.json').read_text())
++        self.assertEqual((record['result'], record['supervisorAbnormal']), ('FAIL', -6))
++        self.run = common.Run.open(self.out)
++        self.assertEqual(cli._resume_cell(self.run, {}, {}, 'a/tr/light/normal')['changed'], ['supervisor'])
++
++    def test_normal_supervisor_exit_kept(self):
++        self.record(phase='RESTORE_PENDING', result='CLEANUP_FAILED')
++        self.assertEqual(cli._settle(self.out, 3), common.EXIT_CODES['CLEANUP_FAILED'])
++        self.assertNotIn('supervisorAbnormal', json.loads((self.out / 'run.json').read_text()))
++
++    def test_early_cli_loss_launches_nothing(self):
++        renderer = self.dir / 'renderer'
++        renderer.mkdir()
++        (renderer / 'index.html').write_text('<p>x</p>')
++        common.atomic_write_json(renderer / desktop.STAMP, {'sourceSha256': desktop.source_hash(REPO),
++                                                            'rendererSha256': desktop.renderer_hash(renderer)})
++        opts = {'screen': 'settings', 'locale': 'tr', 'theme': 'light', 'size': 'normal', 'width': 1440,
++                'renderer': str(renderer), 'fixture': None, 'runtime': None, 'deviceType': None}
++        out = self.dir / 'early'
++        run = common.Run.create(out, 'desktop-renderer', {'cells': ['desktop.settings/tr/light/normal'], 'args': opts})
++        fd = run.lock_fileno()
++        done = subprocess.run([sys.executable, '-I', '-B', str(CLI), '_supervise', '--run', str(run.root),
++                               '--lock-fd', str(fd)], stdin=subprocess.DEVNULL, pass_fds=(fd,), timeout=120)
++        run.close()
++        record = json.loads((out / 'run.json').read_text())
++        self.assertEqual((done.returncode, record['phase'], record['result']), (1, 'CLEANED', 'FAIL'))
++        self.assertTrue(record['interrupted'])
++        self.assertEqual((record['processes'], record['cells']['desktop.settings/tr/light/normal']['status']),
++                         ([], 'FAIL'))
++
+     def test_resume_rejects_changed_row(self):
+         old = {'status': 'PASS', 'screen': 'other-screen', 'fingerprint': {}}
+         self.run.record.update(driver='ios-native-entry', cells={'mobile.settings/tr/light/normal': old})
+@@ -143,7 +214,8 @@
+         record = state()
+         self.assertEqual((record['phase'], record['result']), ('CLEANED', 'FAIL'))
+         self.assertTrue(record['interrupted'])
+-        self.assertEqual([e['state'] for e in record['processes']], ['stopped'])
++        self.assertEqual([e['state'] for e in record['processes']], ['gone'])
++        self.assertIsNotNone(record['processes'][0]['pid'])  # browser identity was recorded at launch
+ 
+ 
+ if __name__ == '__main__':
+--- fix-r1/apps/mobile/capture/entry.tsx
++++ fix-r2/apps/mobile/capture/entry.tsx
+@@ -31,7 +31,7 @@
+       try {
+         const response = await fetch(binding.phaseUrl);
+         const next = parsePhase(await response.json(), binding.runID, captureScreenNames);
+-        if (alive) setPhase((current) => (current?.nonce === next?.nonce ? current : next));
++        if (alive) setPhase((current) => (current?.nonce === next?.nonce && current?.probe === next?.probe ? current : next));
+       } catch {
+         if (alive) setPhase(null);
+       }
+@@ -52,14 +52,15 @@
+   return state;
+ }
+ 
+-function useSample(nonce: string | undefined): number {
+-  const [sample, setSample] = useState(0);
++// Resend tick so a lost report is retried; not part of the report itself.
++function useTick(nonce: string | undefined): number {
++  const [tick, setTick] = useState(0);
+   useEffect(() => {
+     if (!nonce) return;
+-    const timer = setInterval(() => setSample((value) => value + 1), pollMs);
++    const timer = setInterval(() => setTick((value) => value + 1), pollMs);
+     return () => clearInterval(timer);
+   }, [nonce]);
+-  return sample;
++  return tick;
+ }
+ 
+ function Presented({ phase, binding }: { phase: CapturePhase | null; binding: CaptureHost | null }) {
+@@ -73,7 +74,7 @@
+   const [laidOut, setLaidOut] = useState<string | null>(null);
+   const nonce = phase?.nonce;
+   const appState = useAppState();
+-  const sample = useSample(nonce);
++  const tick = useTick(nonce);
+   useEffect(() => {
+     if (!phase) return;
+     let alive = true;
+@@ -85,18 +86,18 @@
+   useEffect(() => {
+     if (!phase || !binding || applied !== phase.nonce || laidOut !== phase.nonce) return;
+     const report: CaptureReport = {
+-      runID: phase.runID, phase: phase.phase, nonce: phase.nonce, sample, screen: phase.screen,
++      runID: phase.runID, phase: phase.phase, nonce: phase.nonce, probe: phase.probe, screen: phase.screen,
+       language: i18n.language, themeMode: theme.mode, fontScale, fontsLoaded,
+       fontError: Boolean(fontError), appState, layoutReady: true, width, height,
+     };
+-    // Re-measured on every sample tick and AppState change; two frames after layout so the
+-    // reported state is the one on screen.
++    // Re-measured on every probe, tick and AppState change, from state rendered after the phase
++    // carrying that probe was fetched; two frames after layout so it is the state on screen.
+     const frame = requestAnimationFrame(() => requestAnimationFrame(() => {
+       void fetch(binding.reportUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify(report) }).catch(() => undefined);
+     }));
+     return () => cancelAnimationFrame(frame);
+-  }, [phase, binding, applied, laidOut, sample, appState, theme.mode, fontScale, fontsLoaded, fontError, width,
++  }, [phase, binding, applied, laidOut, tick, appState, theme.mode, fontScale, fontsLoaded, fontError, width,
+     height]);
+   if (!phase || !(fontsLoaded || fontError)) return <View className="flex-1 bg-background" />;
+   return <SafeAreaProvider>
+--- fix-r1/apps/mobile/capture/protocol.ts
++++ fix-r2/apps/mobile/capture/protocol.ts
+@@ -10,6 +10,8 @@
+   runID: string;
+   phase: number;
+   nonce: string;
++  /** Host token, replaced after each screenshot; echoed by reports measured from this phase. */
++  probe: string;
+   screen: string;
+   locale: (typeof captureLocales)[number];
+   theme: (typeof captureThemes)[number];
+@@ -20,8 +22,7 @@
+   runID: string;
+   phase: number;
+   nonce: string;
+-  /** Increases with every report so the host can demand a measurement newer than a screenshot. */
+-  sample: number;
++  probe: string;
+   screen: string;
+   language: string;
+   themeMode: string;
+@@ -42,9 +43,10 @@
+ export function parsePhase(value: unknown, runID: string, screens: readonly string[]): CapturePhase | null {
+   if (typeof value !== 'object' || value === null) return null;
+   const phase = value as Record<string, unknown>;
+-  const keys = ['runID', 'phase', 'nonce', 'screen', 'locale', 'theme', 'size'];
++  const keys = ['runID', 'phase', 'nonce', 'probe', 'screen', 'locale', 'theme', 'size'];
+   if (Object.keys(phase).some((key) => !keys.includes(key))) return null;
+   if (phase.runID !== runID || typeof phase.nonce !== 'string' || !token.test(phase.nonce)) return null;
++  if (typeof phase.probe !== 'string' || !token.test(phase.probe)) return null;
+   if (typeof phase.phase !== 'number' || !Number.isInteger(phase.phase) || phase.phase < 1) return null;
+   if (!oneOf(screens, phase.screen) || !oneOf(captureLocales, phase.locale)) return null;
+   if (!oneOf(captureThemes, phase.theme) || !oneOf(captureSizes, phase.size)) return null;

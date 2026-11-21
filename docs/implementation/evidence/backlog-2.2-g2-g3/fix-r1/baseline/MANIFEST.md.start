@@ -1,0 +1,107 @@
+# 2.2/G2–G3 — Desktop tray/sürüm/kapanış — uygulama manifesti
+
+Sözleşme (tek kaynak, kopyalanmadı): `plans/next-plan.md` §2.2/G2–G3 (D-G23, G23-01–08).
+Durum: **FIX — INITIAL bağımsız GPT review REQUEST CHANGES (18.11.2026).**
+G23-01, G23-R1 nedeniyle açık; checkbox kapanmadı. [Review](review.md). Commit/push yok.
+Rol: Opus uygulama (18.11.2026). Self-review bağımsız kabul değildir.
+
+## Başlangıç / diff kapsamı
+
+- Start HEAD `508b3f0486a7ce04628ec0c3681d995573e5721d`; staged başlangıç ve final boş
+  (`baseline/staged.txt`, `staged-final.txt`).
+- Başlangıç dirty/untracked: `baseline/status.txt` (12 satır; 1.5/F1/Windows devir belgeleri,
+  next-plan, 2.2 araştırma eki). Ürün yollarında başlangıç diff'i yoktu.
+  CURRENT başlangıç kopyası `baseline/CURRENT.start.md` + `baseline/CURRENT.start-vs-HEAD.diff`.
+  Başlangıç kaynak hash'leri `baseline/source-start.sha256` (hedef + korunan komşular).
+- Oturum sırasında kullanıcı tarafından değişen, **bu işe ait olmayan** yollar: `AGENTS.md`,
+  `.opencode/commands/{implement,plan,review}.md`, `docs/implementation/research-pilot.md`,
+  `evidence/research-routing-2026-11-18.md`. Dokunulmadı.
+- Bu işin ürün diff'i (10 tracked + 1 untracked; hepsi §Hedef tablosunda):
+  tracked `product-tracked.diff`; untracked `DesktopTray.tsx` → `product-untracked-DesktopTray.diff`.
+  Final hash'ler `source-final.sha256`. Satırlar `lines-final.txt` (en büyük background.spec 207 kod satırı; hepsi ≤300).
+- Korunan komşular HEAD'e eşit: `electron/main.ts`, `preload.cts`, `runtime/pairing.ts`,
+  `src/app/global.css`, `shared/ui/Brand.tsx` (`neighbors-final.sha256`). Native/journal/autostart değişmedi.
+- Bu işin kanıt dizini: bu dizinin tamamı (untracked).
+
+## Uygulanan çözüm (D-G23 sınırında)
+
+- `DesktopTray.tsx` (yeni, saf sunum): `trayState` öncelik hata > bilinmeyen > faaliyet > dinliyor > kullanılamıyor;
+  logo (`Brand`), durum pill'i, gözlenen etkin/boşta satırı, hata alert'leri, Aç, iki açıklamalı **disabled** pause
+  (`aria-describedby`), Çık. Bridge/poll/state/persistence yok; sayaç/ilerleme gösterilmez.
+- `DesktopBackground`: `tray`/`onOpen` prop'ları; aynı mounted poller tray sunumunu besler (ikinci poller yok);
+  settings'te salt-okunur kapanış (`canHide` kaynaklı) + `appVersion` satırı; failure/eksikte "bilinmiyor".
+  Mevcut single-flight/alive/settingsVersion, autostart ve Quit yolu aynen.
+- `App.tsx`: placeholder kaldırıldı; tray rotasında h1/açıklama başlığı; `onOpen` → mevcut `navigate('receiver')`
+  (protectedDecision fence'i korunur).
+- `background.ts::snapshot`: `appVersion: app.getVersion()` (yeni IPC/preload yok). `BackgroundStatus.appVersion`
+  **opsiyonel**: plan dışı `ReceiverFlow.spec.tsx` fixture'ına dokunmamak için; main her zaman sağlar, renderer eksik/boşu
+  "bilinmiyor" gösterir. Kapsam genişlemesi değil, dar tip seçimi — review'da görünür olsun diye kayıtlı.
+- i18n TR/EN/DE: `tray.*`, `background.{closeBehavior,closeHides,closeStaysVisible,closeAutomatic,version,versionUnknown}`;
+  `ui.trayDescription` "kontroller yukarıda" yerine gerçek tray'in aynı Aç/Çık kontrollerini sunduğunu söyler.
+- Görsel düzeltme (capture'da bulundu): katmansız `.pairing-state` rengi utility'yi eziyordu → pill yalnız Tailwind token
+  sınıflarıyla; global `button { font: inherit }` nedeniyle `text-sm` grup kapsayıcısına taşındı. global.css değişmedi.
+
+## Kabul eşlemesi (ID → kanıt → sonuç)
+
+| ID | Kanıt | Sonuç |
+|---|---|---|
+| G23-01 | `DesktopBackground.spec` G23-01: önce RED (`g23-01-red.log`: tray group yok, 1 fail/3 pass), sonra GREEN (`g23-01-green.log` 4/4); final suite | **fresh PASS** — errorCode+available=true → hata pill+alert; idle→active(transfer/backup)→backup hata→shutdown hata→unavailable→recovery; progressbar/sayı yok |
+| G23-02 | G23-02 testi (tray↔settings rerender tek `status` çağrısı; unmount sonrası geç reply/poll yok) + mevcut stale-autostart testi (reuse, aynı koşuda yeşil) | **fresh PASS** |
+| G23-03 | Renderer: Open→onOpen, Quit→tek `background.quit`, reject→unknown + Quit kullanılabilir; App: tray Open→`#/receiver`; main coalesce/Cancel/awaited-close/failure testleri değişmeden suite'te yeşil | **fresh PASS** (yeni Quit controller yok) |
+| G23-04 | İki pause disabled + accessible description; tıklamada quit/setAutostart/onOpen çağrısı yok; capture `calls: []` | **fresh PASS** |
+| G23-05 | main: getVersion mock → snapshot `appVersion` (tam eşitlik); renderer: `0.0.0`, canHide→closeHides/closeStaysVisible, failure→versionUnknown, prototype yok, radio/ek tercih yok, setAutostart çağrısı yok | **fresh PASS** |
+| G23-06 | main G23-05/06/08 testi: Linux doğrulanmamış → görünür + `canHide:false`; tray click → gizlenebilir, receiver/schedule kapanmaz; mevcut Linux/fallback lifecycle testleri suite'te yeşil. Foreground invitation/approval: `pairing.ts` HEAD'e eşit, önceki 16.10 native kanıtı reuse (tarihî, taze HEAD native PASS değil) | **fresh PASS (JS) + reuse (native)** |
+| G23-07 | Renderer TR/EN/DE erişilebilir ad testleri; izole scripted capture `capture/` (26 görüntü: D12/D13 × TR/EN/DE × light/dark × 1440/640 + TR hata durumu); `measurements.json`: tema/dil doğru, sayfa taşması 0, kart dışı/kırpılmış öğe 0, boş olmayan inline stil 0, bridge yan etkisi 0, konsol hatası 0; klavye: Aç odaklanabilir, Tab disabled pause'ları atlayıp Çık'a gider. Görsel karşılaştırma: Lovable `outgoing.tsx.reference` D12:171–197 / D13:209–239 ile ana model inceledi | **fresh PASS (izole renderer)** — sapmalar aşağıda |
+| G23-08 | App: rezervasyon altında `#/tray` → `#/pairing`'e geri, tray görünmez, dialog korunur; settings/receiver geçişinde tek poller; mevcut backup draft/pairing testleri yeşil; main: yalnız üç IPC kanalı, trusted/foreign frame reddi, autostart/journal/close yan etkisi yok; scoped ESLint, iki tsc, renderer build | **fresh PASS** |
+
+Komutlar (cwd `apps/desktop`, loglar bu dizinde):
+- `npx vitest run --config vitest.config.ts` → `desktop-suite.log`: 31 dosya / **334 test PASS** (final kaynakla).
+  Ara dar koşular: `renderer-expand.log` 10/10, `main-expand.log` 11/11, `app-expand.log` 8/8.
+- `npx eslint <8 değişen ts/tsx>` → `eslint-scoped.log` exit 0 (JSON locale'ler lint kapsamı dışında).
+- `npx tsc --noEmit -p tsconfig.json` / `-p tsconfig.main.json` → exit 0.
+- `npx vite build` → `renderer-build.log` exit 0 (renderer production build; `dist/` gitignored).
+- `python3 -I capture/capture_d12_d13.py apps/desktop/dist/renderer capture/out 47913` (repo kökünden) →
+  `capture/capture.log`, `capture/out/`. Tek kullanımlık; kalıcı proje komutu değildir, 2.5 açık kalır.
+
+## Bilinçli sapmalar / sınırlar
+
+- Lovable D13 sahte "receiving" pill'i, pause toast'ları ve `0.9.0 (prototype)` yok (D-G23). D12 close Segmented yerine
+  salt-okunur satır (D-G23). Lovable D13 sağdaki tray ikon varyant paneli eklenmedi: renderer gerçek tray ikon varlığını
+  göstermez; marka paneli işlev/kanıt değildir. Pill, paylaşılan `Brand` bileşeni bölünmediği için adın altında değil sağdadır.
+- Native tray/uygulama menü metinleri Türkçe sabit kalır (native menü yerelleştirmesi kapsam dışı).
+- Mevcut settings bölümünde receiver hata metni (role=alert) renksiz — önceden var, bu işte değiştirilmedi.
+
+## Açık / ertelenmiş kapılar (değişmedi)
+
+- `npm run build` tam zinciri (sync-core + main emit + SQLite/native rebuild) NOT_RUN: native/ABI etkisi yok; main için tsc noEmit koşuldu.
+- Tam `npm run lint` NOT_RUN (scoped lint koşuldu). Native/Rust testleri NOT_RUN (kaynak değişmedi).
+- Gerçek OS tray erişilebilirliği/tema/login/sleep, Windows/macOS/Linux fiziksel kabul → Faz4 açık. Pixel-diff yok.
+- F1 fix2 compile/RED-GREEN/dar lint Faz3 DEFERRED/NOT_RUN; FO1 delta Faz4; S3/G1/1.5 scoped kabulleri,
+  G1-07 Faz3 ertelemesi, B2/release/P5/provider/signing/storage ve 20–21 fiziksel kapılar aynen açık.
+
+## Sayaçlar
+
+- Başarısız düzeltme sayacı: 0 (G23-01 ilk düzeltmede GREEN). Görsel düzeltme ilk yeniden capture'da temiz.
+- Capture betiği iki kez düzeltildi (tema localStorage varsayılanı, boş `style=""` ölçüm hatası) — ürün değil, ölçüm aracı.
+- Usage/token: UNKNOWN (harness ölçüm vermiyor). 
+
+## Bağımsız GPT INITIAL review / dar FIX
+
+- Reviewer: GPT-6.1 Sol (`openai/gpt-6.1-sol`), Opus uygulamasından ayrı GPT sohbeti;
+  session ID UNKNOWN. Review HEAD başlangıçla aynı `508b3f0486a7ce04628ec0c3681d995573e5721d`.
+- [review.md](review.md): tüm INITIAL goal/diff birlikte incelendi; **REQUEST CHANGES**.
+  11/11 final, 13/13 başlangıç ve 5/5 komşu hash doğrulandı; tracked/untracked
+  gerçek diff kayıtlara byte-eşit, staged boş (`review-audit.txt`).
+- **G23-01 sonucu supersede:** yukarıdaki uygulama fresh PASS'i yalnız eski
+  assertion kapsamındadır. G23-R1 / P2 / observed-status projection ailesi:
+  `DesktopTray.tsx:48–50` hata pill'inden idle türetiyor; gerçek aktif iş gizleniyor.
+  `review-probe.log`: üç bağımsız hata+faaliyet bileşimi **3/3 RED / exit1**.
+- G23-02–08 incelemesi uygun; 26 capture ölçümü/klavye ayrıca statik doğrulandı
+  (`review-capture-audit.txt`). Bu satır uygunluğu goal veya üst iş kabulü değildir.
+  Uygulama suite/lint/tsc/build reuse; reviewer yeniden koşmadı. Açık kapılar aynen korunur.
+- Sıradaki: **mevcut Opus uygulama sohbetinde `/implement`**, yalnız review.md
+  §Mevcut Opus sohbetine dar FIX devri. Kök neden→mounted regression→minimum fix→
+  etkilenen yollar. Yeni plan/onay gerektiren kapsam kararı yok; ürün kodu reviewer tarafından değiştirilmedi.
+- Invariant sayacı: observed-status projection **INITIAL ret=1, başarısız FIX=0**;
+  implementer'ın ilk regression GREEN kaydı başarısız FIX sayacı değildir.
+  Sonraki tur REVIEW/unchecked; kabul bu mevcut GPT review sohbetinde değerlendirilecek.

@@ -1,0 +1,8 @@
+59fa49f3ef5b1ef11a6a5e46b5d63f4022b059df6c050f0992e48408a00fc9f0  ./app/App.tsx
+53476aad925f71e8a9488198171ddf00020ed5623b76a21587f75d76ec850045  ./app/global.css
+40734b832a953edafab1cf3bbe2633594674f9b8f69975f5a9bd77661aa3e9de  ./app/App.spec.tsx
+75db2a960596f92b988d72981f1ee6ee50e0506da8ce0d048df16771e5e13e0a  ./features/desktop-background/DesktopBackground.tsx
+fe5bd0d370c06b0882030f3168ed0106917413a55e3d3c086d095f9c730e1649  ./features/desktop-background/AppearanceSettings.tsx
+22b9a0ae21238e1a01a8625e5b8faf4ad4b28fb8683b9198ca64abc131e73691  ./shared/i18n/locales/tr.json
+faafecf6b1dbbe8382305524a1b8c81e9afb4d599cd1a47fbb2cac5020292f10  ./shared/i18n/locales/de.json
+479ae727e8ddf413fe4ac642fe2f0b741f57defb7286f4fa2cabd5fd7175ce43  ./shared/i18n/locales/en.json

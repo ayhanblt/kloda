@@ -1,0 +1,79 @@
+--- a/apps/desktop/src/pages/backup/BackupSetup.tsx
++++ b/apps/desktop/src/pages/backup/BackupSetup.tsx
+@@ -1,4 +1,4 @@
+-import { useEffect, useRef, useState } from 'react';
++import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+ import { useTranslation } from 'react-i18next';
+ 
+ import { WebDavActivity } from './WebDavActivity';
+@@ -31,9 +31,14 @@
+   const progressVersion = useRef(0);
+   const storageVersion = useRef(0);
+   const [storage, setStorage] = useState({ endpoint: '', password: '', targetPath: 'Kloda', username: '' });
+-  // Leaving, hiding or unmounting the form ends ownership of any pending test and its shown diagnostic.
+-  const releaseStorageTest = () => { storageVersion.current += 1; setDiagnostic(null); };
+-  useEffect(() => { if (!visible) releaseStorageTest(); }, [visible]);
++  // Any end of the presented storage form (Back, jobs/activity, hide, unmount) ends ownership of a pending
++  // test and clears its shown diagnostic. Layout timing: no late reply can run between commit and release.
++  const storagePresented = visible && step === 'storage';
++  useLayoutEffect(() => {
++    if (storagePresented) return;
++    storageVersion.current += 1;
++    setDiagnostic(null);
++  }, [storagePresented]);
+   useEffect(() => () => { storageVersion.current += 1; }, []);
+ 
+   useEffect(() => {
+@@ -159,7 +164,7 @@
+           <button className="mt-6 rounded-xl border border-border-subtle bg-surface-1 px-4 py-3 font-semibold" onClick={() => void testStorage()} type="button">{t('onboarding.testConnection')}</button>
+           {draft.storageTested && <p className="mt-3 text-emerald-700" role="status">{t('onboarding.verified')}</p>}
+           <button className="mt-3 rounded-xl bg-button-brand px-4 py-3 font-semibold text-on-brand disabled:opacity-40" disabled={!draft.storageTested} onClick={() => void startSync()} type="button">{t('onboarding.startBackup')}</button>
+-          <button className="mt-3 text-secondary-text underline" onClick={() => { releaseStorageTest(); setStep('sources'); }} type="button">{t('onboarding.back')}</button>
++          <button className="mt-3 text-secondary-text underline" onClick={() => setStep('sources')} type="button">{t('onboarding.back')}</button>
+         </>
+       )}
+       {error && <p className="mt-4 text-danger-text" role="alert">{error}</p>}
+--- a/apps/desktop/src/pages/backup/BackupSetup.spec.tsx
++++ b/apps/desktop/src/pages/backup/BackupSetup.spec.tsx
+@@ -156,6 +156,41 @@
+     expect(screen.getByRole('button', { name: i18n.t('onboarding.startBackup') })).toBeDisabled();
+   });
+ 
++  // App keeps visible=true on both /backup and /jobs and only toggles showActivity.
++  const routeJobs = (showActivity: boolean) => mounted?.rerender(<BackupSetup visible showActivity={showActivity} />);
++
++  it.each([failure, { ok: true }])('backup→jobs→backup ignores a late reply %# on sources and the reopened form', async (reply) => {
++    const { finish } = await pending();
++    routeJobs(true);
++    await waitFor(() => expect(screen.queryByRole('textbox', { name: i18n.t('onboarding.endpoint') })).not.toBeInTheDocument());
++    await finish(reply);
++    routeJobs(false);
++    await screen.findByText('Documents');
++    noResult();
++    await reopen();
++    noResult();
++    expect(screen.queryByText(i18n.t('onboarding.verified'))).not.toBeInTheDocument();
++    expect(screen.getByRole('button', { name: i18n.t('onboarding.startBackup') })).toBeDisabled();
++  });
++
++  it('backup→jobs→backup clears a shown diagnostic and keeps form values; a fresh test still reports', async () => {
++    bridge({ testStorage: vi.fn().mockResolvedValue(failure) });
++    const endpoint = await openStorage();
++    fireEvent.change(endpoint, { target: { value: 'https://fixture.example:8083/webdav/' } });
++    test();
++    expect(await screen.findByText(summary('put', 'access_denied', 403))).toBeInTheDocument();
++    routeJobs(true);
++    await waitFor(() => expect(screen.queryByRole('textbox', { name: i18n.t('onboarding.endpoint') })).not.toBeInTheDocument());
++    routeJobs(false);
++    await screen.findByText('Documents');
++    expect(screen.queryByText(summary('put', 'access_denied', 403))).not.toBeInTheDocument();
++    await reopen();
++    expect(screen.getByRole('textbox', { name: i18n.t('onboarding.endpoint') })).toHaveValue('https://fixture.example:8083/webdav/');
++    expect(screen.queryByText(summary('put', 'access_denied', 403))).not.toBeInTheDocument();
++    test();
++    expect(await screen.findByText(summary('put', 'access_denied', 403))).toBeInTheDocument();
++  });
++
+   it('hiding clears an already shown diagnostic; a fresh test after reopening still reports', async () => {
+     bridge({ testStorage: vi.fn().mockResolvedValue(failure) });
+     await openStorage();

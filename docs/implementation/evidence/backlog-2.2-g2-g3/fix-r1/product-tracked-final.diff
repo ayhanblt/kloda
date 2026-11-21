@@ -1,0 +1,497 @@
+diff --git a/apps/desktop/electron/runtime/background.spec.ts b/apps/desktop/electron/runtime/background.spec.ts
+index 5e3de0fb..45f0bb6f 100644
+--- a/apps/desktop/electron/runtime/background.spec.ts
++++ b/apps/desktop/electron/runtime/background.spec.ts
+@@ -23,6 +23,7 @@ const electron = vi.hoisted(() => {
+   const app = {
+     on: vi.fn((name: string, callback: (event: { preventDefault(): void }) => void) => { appEvents.set(name, callback); }),
+     quit: vi.fn(() => { appEvents.get('before-quit')?.({ preventDefault: vi.fn() }); }),
++    getVersion: vi.fn(() => '0.0.0'),
+   };
+   return { appEvents, handlers, trays, image, app,
+     dialog: { showMessageBox: vi.fn() },
+@@ -198,4 +199,26 @@ describe('DesktopBackground lifecycle', () => {
+     expect(autostart.setEnabled).toHaveBeenCalledWith(true);
+     expect(journal.saveAutostartChoice).toHaveBeenCalledWith(true);
+   });
++
++  it('G23-05/06/08 adds only the read-only app version to the trusted status snapshot', async () => {
++    const { background, event, close, window, autostart, journal, closeReceiver, stopSchedule } = fixture('linux');
++    await settle();
++    expect([...electron.handlers.keys()]).toEqual(['kloda:background:status', 'kloda:background:autostart', 'kloda:background:quit']);
++    const status = electron.handlers.get('kloda:background:status')!;
++    await expect(status(event)).resolves.toEqual({
++      receiver: { available: true, activeTransfers: 0 }, backup: { active: false, failed: false },
++      autostart: { enabled: false, supported: true }, autostartChoice: null,
++      canHide: false, environmentLimited: true, shutdownError: false, appVersion: '0.0.0',
++    });
++    await expect(status({ ...event, senderFrame: { url: 'https://foreign.example/' } })).rejects.toThrow('Untrusted');
++    close(); expect(window.visible).toBe(true);
++    electron.trays[0].events.get('click')!();
++    await expect(status(event)).resolves.toMatchObject({ canHide: true, environmentLimited: false, appVersion: '0.0.0' });
++    close(); expect(window.visible).toBe(false);
++    expect(autostart.setEnabled).not.toHaveBeenCalled();
++    expect(journal.saveAutostartChoice).not.toHaveBeenCalled();
++    expect(closeReceiver).not.toHaveBeenCalled();
++    expect(stopSchedule).not.toHaveBeenCalled();
++    expect(background.canHide()).toBe(true);
++  });
+ });
+diff --git a/apps/desktop/electron/runtime/background.ts b/apps/desktop/electron/runtime/background.ts
+index 51d07e6b..fff2d461 100644
+--- a/apps/desktop/electron/runtime/background.ts
++++ b/apps/desktop/electron/runtime/background.ts
+@@ -84,6 +84,7 @@ export class DesktopBackground {
+       canHide: this.canHide(),
+       environmentLimited: !this.canHide(),
+       shutdownError: this.shutdownError,
++      appVersion: app.getVersion(),
+     };
+   }
+ 
+diff --git a/apps/desktop/src/app/App.spec.tsx b/apps/desktop/src/app/App.spec.tsx
+index 54523774..555c13d2 100644
+--- a/apps/desktop/src/app/App.spec.tsx
++++ b/apps/desktop/src/app/App.spec.tsx
+@@ -106,6 +106,34 @@ describe('App', () => {
+     expect(screen.queryByText(i18n.t('onboarding.filesSynced', { completed: 1, total: 2 }))).not.toBeInTheDocument();
+   });
+ 
++  it('G23-03/08 opens the receiver from the D13 tray and shows D12 version on the same status poller', async () => {
++    const status = vi.fn().mockResolvedValue({
++      receiver: { available: true, activeTransfers: 0 }, backup: { active: false, failed: false },
++      autostart: { enabled: false, supported: true }, autostartChoice: false, canHide: true,
++      environmentLimited: false, shutdownError: false, appVersion: '0.0.0',
++    });
++    const background = { status, setAutostart: vi.fn(), quit: vi.fn() };
++    window.kloda = {
++      getProgress: vi.fn().mockResolvedValue(null), background,
++      getDraft: vi.fn().mockResolvedValue({ intervalHours: 12, localTime: '12:00', sources: [], storage: null, storageTested: false }),
++      pickSources: vi.fn(), saveSchedule: vi.fn(), saveStorage: vi.fn(), startSync: vi.fn(), testStorage: vi.fn(),
++    };
++    window.history.replaceState(null, '', '#/tray');
++    render(<App />);
++    expect(screen.getByRole('heading', { level: 1, name: i18n.t('ui.tray') })).toBeInTheDocument();
++    const menu = screen.getByRole('group', { name: i18n.t('tray.menuLabel') });
++    await waitFor(() => expect(within(menu).getByRole('status')).toHaveTextContent(i18n.t('tray.state.listening')));
++    fireEvent.click(within(menu).getByRole('button', { name: i18n.t('tray.open') }));
++    expect(window.location.hash).toBe('#/receiver');
++    expect(screen.queryByRole('group', { name: i18n.t('tray.menuLabel') })).not.toBeInTheDocument();
++    await act(async () => { window.location.hash = '#/settings'; await Promise.resolve(); });
++    expect(await screen.findByText('0.0.0')).toBeInTheDocument();
++    expect(screen.getByText(i18n.t('background.closeHides'))).toBeInTheDocument();
++    expect(status).toHaveBeenCalledOnce();
++    expect(background.quit).not.toHaveBeenCalled();
++    expect(background.setAutostart).not.toHaveBeenCalled();
++  });
++
+   it.each(['approve', 'deny', 'cancel'] as const)('keeps a reserved candidate mounted across Back and navigation until %s resolves', async (decision) => {
+     const reserved = {
+       phase: 'reserved' as const, operationId: 'AAAAAAAAAAAAAAAAAAAAAA', candidateGeneration: '1',
+@@ -142,6 +170,14 @@ describe('App', () => {
+     expect(window.location.hash).toBe('#/pairing');
+     expect(screen.getByRole('dialog')).toBeInTheDocument();
+     expect(pairing.close).not.toHaveBeenCalled();
++    await act(async () => {
++      const changed = new Promise<void>((resolve) => window.addEventListener('hashchange', () => resolve(), { once: true }));
++      window.location.hash = '#/tray';
++      await changed;
++    });
++    expect(window.location.hash).toBe('#/pairing');
++    expect(screen.queryByRole('group', { name: i18n.t('tray.menuLabel') })).not.toBeInTheDocument();
++    expect(screen.getByRole('dialog')).toBeInTheDocument();
+ 
+     const label = decision === 'cancel' ? 'pairing.cancelInvitation' : `pairing.${decision}`;
+     const decisionButton = within(screen.getByRole('dialog')).getByRole('button', { name: i18n.t(label) });
+diff --git a/apps/desktop/src/app/App.tsx b/apps/desktop/src/app/App.tsx
+index e7b32d31..222d0ebc 100644
+--- a/apps/desktop/src/app/App.tsx
++++ b/apps/desktop/src/app/App.tsx
+@@ -70,7 +70,12 @@ export function App() {
+         </header>}
+         {route === 'settings' && <h1 className="receiver-settings-title">{t('receiver.settingsNavigation')}</h1>}
+         {route === 'settings' && <AppearanceSettings preference={appearance.preference} onChange={appearance.choose} />}
+-        <div hidden={route === 'welcome'}><DesktopBackground settings={route === 'settings'} /></div>
++        {route === 'tray' && <header className="pairing-page-header receiver-heading">
++          <h1>{t('ui.tray')}</h1><p>{t('ui.trayDescription')}</p>
++        </header>}
++        <div hidden={route === 'welcome'}>
++          <DesktopBackground onOpen={() => navigate('receiver')} settings={route === 'settings'} tray={route === 'tray'} />
++        </div>
+         {route === 'receiver' && <ReceiverHome onNavigate={navigate} />}
+         {backupVisible && <p className="advanced-notice">{t('receiver.advancedDescription')}</p>}
+         <div hidden={!backupVisible}><BackupSetup visible={backupVisible} showActivity={route === 'jobs'} /></div>
+@@ -79,7 +84,6 @@ export function App() {
+         {route === 'devices' && <DeviceManagement />}
+         {(route === 'backups' || route === 'trash') && <BackupVersions key={route} initialTrash={route === 'trash'} onViewChange={(trash) => navigate(trash ? 'trash' : 'backups')} />}
+         {(route === 'connections' || route === 'connection-add' || route === 'connection-detail') && <ConnectionsPage location={location} onNavigate={navigateTo} />}
+-        {route === 'tray' && <main className="pairing-card"><h1 className="text-3xl font-semibold">{t('ui.tray')}</h1><p className="mt-4 text-secondary-text">{t('ui.trayDescription')}</p></main>}
+       </div>
+     </DesktopShell>
+     <Toaster closeButton containerAriaLabel={t('pairing.notificationsLabel')} hotkey={[]} position="bottom-right" theme={appearance.mode}
+diff --git a/apps/desktop/src/features/desktop-background/DesktopBackground.spec.tsx b/apps/desktop/src/features/desktop-background/DesktopBackground.spec.tsx
+index 49fc7421..c01a15ba 100644
+--- a/apps/desktop/src/features/desktop-background/DesktopBackground.spec.tsx
++++ b/apps/desktop/src/features/desktop-background/DesktopBackground.spec.tsx
+@@ -1,11 +1,11 @@
+-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
++import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+ import { afterEach, expect, it, vi } from 'vitest';
+ 
+ import { DesktopBackground } from './DesktopBackground';
+ import { i18n } from '../../shared/i18n';
+ import type { BackgroundStatus } from '../../shared/api/desktop';
+ 
+-afterEach(() => { cleanup(); window.kloda = undefined; vi.useRealTimers(); });
++afterEach(async () => { cleanup(); window.kloda = undefined; vi.useRealTimers(); await i18n.changeLanguage('tr'); });
+ 
+ function fixture(initial: BackgroundStatus) {
+   let current = initial;
+@@ -59,6 +59,136 @@ it('shows unsupported Linux controls and real errors, then observes external log
+   expect(screen.getByText(i18n.t('background.loginNotApplied'))).toBeInTheDocument();
+ });
+ 
++async function tick() { await act(async () => { await vi.advanceTimersByTimeAsync(1500); }); }
++const trayMenu = () => screen.getByRole('group', { name: i18n.t('tray.menuLabel') });
++const trayPill = () => within(trayMenu()).getByRole('status');
++
++it('G23-01 shows the observed tray state with errors first and no synthetic progress', async () => {
++  vi.useFakeTimers();
++  const { update } = fixture({ ...initial, receiver: { available: true, activeTransfers: 0, errorCode: 'lan_unavailable' } });
++  await act(async () => { render(<DesktopBackground settings={false} tray onOpen={vi.fn()} />); });
++  expect(trayPill()).toHaveTextContent(i18n.t('tray.state.error'));
++  expect(within(trayMenu()).getByRole('alert')).toHaveTextContent(i18n.t('pairing.errors.lan_unavailable'));
++  expect(trayMenu()).not.toHaveTextContent(i18n.t('tray.state.listening'));
++  const sequence: [BackgroundStatus, string][] = [
++    [initial, 'tray.state.listening'],
++    [{ ...initial, receiver: { available: true, activeTransfers: 2 } }, 'tray.state.active'],
++    [{ ...initial, backup: { active: true, failed: false } }, 'tray.state.active'],
++    [{ ...initial, backup: { active: false, failed: true } }, 'tray.state.error'],
++    [{ ...initial, shutdownError: true }, 'tray.state.error'],
++    [{ ...initial, receiver: { available: false, activeTransfers: 0 } }, 'tray.state.unavailable'],
++    [initial, 'tray.state.listening'],
++  ];
++  for (const [next, key] of sequence) {
++    update(next); await tick();
++    expect(trayPill()).toHaveTextContent(i18n.t(key));
++  }
++  expect(within(trayMenu()).queryByRole('alert')).not.toBeInTheDocument();
++  expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
++  expect(trayMenu()).not.toHaveTextContent('2');
++});
++
++it('G23-R1 keeps observed activity independent of the error-priority pill', async () => {
++  vi.useFakeTimers();
++  const fileFailure = { ...initial, receiver: { available: true, activeTransfers: 1 }, backup: { active: false, failed: true } };
++  const { background, update } = fixture(initial);
++  await act(async () => { render(<DesktopBackground settings={false} tray onOpen={vi.fn()} />); });
++  const expectTray = (pill: string, activity: string) => {
++    expect(trayPill()).toHaveTextContent(i18n.t(pill));
++    expect(trayMenu()).toHaveTextContent(i18n.t(activity));
++  };
++  const sequence: [BackgroundStatus, string, string][] = [
++    [fileFailure, 'tray.state.error', 'background.active'],
++    [{ ...fileFailure, backup: { active: false, failed: false } }, 'tray.state.active', 'background.active'],
++    [initial, 'tray.state.listening', 'background.idle'],
++    [{ ...initial, backup: { active: true, failed: false }, receiver: { available: false, activeTransfers: 0, errorCode: 'lan_unavailable' } },
++      'tray.state.error', 'background.active'],
++    [{ ...initial, receiver: { available: true, activeTransfers: 2 }, shutdownError: true }, 'tray.state.error', 'background.active'],
++  ];
++  for (const [next, pill, activity] of sequence) {
++    update(next); await tick();
++    expectTray(pill, activity);
++    if (pill === 'tray.state.error') expect(within(trayMenu()).getAllByRole('alert').length).toBeGreaterThan(0);
++  }
++  background.status.mockRejectedValueOnce(new Error('bridge failed')); await tick();
++  expect(trayPill()).toHaveTextContent(i18n.t('tray.state.unknown'));
++  expect(trayMenu()).not.toHaveTextContent(i18n.t('background.active'));
++  expect(trayMenu()).not.toHaveTextContent(i18n.t('background.idle'));
++  expect(within(trayMenu()).queryByRole('alert')).not.toBeInTheDocument();
++});
++
++it('G23-02 keeps one poller across tray/settings and ignores replies after unmount', async () => {
++  vi.useFakeTimers();
++  const { background } = fixture(initial);
++  const view = await act(async () => render(<DesktopBackground settings={false} tray onOpen={vi.fn()} />));
++  expect(background.status).toHaveBeenCalledOnce();
++  view.rerender(<DesktopBackground settings />);
++  view.rerender(<DesktopBackground settings={false} tray onOpen={vi.fn()} />);
++  expect(background.status).toHaveBeenCalledOnce();
++  let finish!: (status: BackgroundStatus) => void;
++  background.status.mockReturnValueOnce(new Promise<BackgroundStatus>((resolve) => { finish = resolve; }));
++  await tick();
++  view.unmount();
++  await act(async () => { finish({ ...initial, shutdownError: true }); await vi.advanceTimersByTimeAsync(4500); });
++  expect(background.status).toHaveBeenCalledTimes(2);
++});
++
++it('G23-03/04 opens the window, quits through the single bridge path, and keeps both pauses inert', async () => {
++  const { background } = fixture({ ...initial, receiver: { available: true, activeTransfers: 1 } });
++  const onOpen = vi.fn();
++  render(<DesktopBackground settings={false} tray onOpen={onOpen} />);
++  await waitFor(() => expect(trayPill()).toHaveTextContent(i18n.t('tray.state.active')));
++  for (const key of ['tray.pauseIncoming', 'tray.pauseOutgoing']) {
++    const pause = screen.getByRole('button', { name: i18n.t(key) });
++    expect(pause).toBeDisabled();
++    expect(pause).toHaveAccessibleDescription(i18n.t('tray.pauseUnavailable'));
++    fireEvent.click(pause);
++  }
++  expect(background.quit).not.toHaveBeenCalled();
++  expect(background.setAutostart).not.toHaveBeenCalled();
++  expect(onOpen).not.toHaveBeenCalled();
++  fireEvent.click(screen.getByRole('button', { name: i18n.t('tray.open') }));
++  expect(onOpen).toHaveBeenCalledOnce();
++  background.quit.mockRejectedValueOnce(new Error('quit failed'));
++  fireEvent.click(screen.getByRole('button', { name: i18n.t('background.quit') }));
++  expect(background.quit).toHaveBeenCalledOnce();
++  await waitFor(() => expect(trayPill()).toHaveTextContent(i18n.t('tray.state.unknown')));
++  expect(screen.getByRole('button', { name: i18n.t('background.quit') })).toBeEnabled();
++});
++
++it('G23-05 shows the main-process version and read-only close behavior, unknown on failure', async () => {
++  vi.useFakeTimers();
++  const { background, update } = fixture({ ...initial, appVersion: '0.0.0' });
++  await act(async () => { render(<DesktopBackground />); });
++  expect(screen.getByText('0.0.0')).toBeInTheDocument();
++  expect(screen.getByText(i18n.t('background.closeHides'))).toBeInTheDocument();
++  expect(screen.getByText(i18n.t('background.closeAutomatic'))).toBeInTheDocument();
++  expect(screen.queryByRole('radio')).not.toBeInTheDocument();
++  expect(screen.getAllByRole('checkbox')).toHaveLength(1);
++  update({ ...initial, appVersion: '0.0.0', canHide: false, environmentLimited: true }); await tick();
++  expect(screen.getByText(i18n.t('background.closeStaysVisible'))).toBeInTheDocument();
++  background.status.mockRejectedValueOnce(new Error('bridge failed')); await tick();
++  expect(screen.getByText(i18n.t('background.versionUnknown'))).toBeInTheDocument();
++  expect(screen.queryByText('0.0.0')).not.toBeInTheDocument();
++  expect(screen.queryByText(/prototype/)).not.toBeInTheDocument();
++  expect(screen.queryByText(i18n.t('background.closeStaysVisible'))).not.toBeInTheDocument();
++  expect(background.setAutostart).not.toHaveBeenCalled();
++});
++
++it.each(['tr', 'en', 'de'] as const)('G23-07 translates tray and settings names in %s', async (language) => {
++  await i18n.changeLanguage(language);
++  fixture({ ...initial, appVersion: '0.0.0' });
++  const view = render(<DesktopBackground settings={false} tray onOpen={vi.fn()} />);
++  await waitFor(() => expect(trayPill()).toHaveTextContent(i18n.t('tray.state.listening')));
++  for (const key of ['tray.open', 'tray.pauseIncoming', 'tray.pauseOutgoing', 'background.quit']) {
++    expect(screen.getByRole('button', { name: i18n.t(key) })).toBeInTheDocument();
++    expect(i18n.t(key)).not.toBe(key);
++  }
++  view.rerender(<DesktopBackground settings />);
++  expect(screen.getByText(i18n.t('background.version'))).toBeInTheDocument();
++  expect(i18n.t('background.closeHides')).not.toBe('background.closeHides');
++});
++
+ it('does not let an older status reply undo the observed explicit login-start choice', async () => {
+   vi.useFakeTimers();
+   const { background } = fixture(initial);
+diff --git a/apps/desktop/src/features/desktop-background/DesktopBackground.tsx b/apps/desktop/src/features/desktop-background/DesktopBackground.tsx
+index dc78ccf8..369f1647 100644
+--- a/apps/desktop/src/features/desktop-background/DesktopBackground.tsx
++++ b/apps/desktop/src/features/desktop-background/DesktopBackground.tsx
+@@ -2,8 +2,16 @@ import { useEffect, useRef, useState } from 'react';
+ import { useTranslation } from 'react-i18next';
+ 
+ import { getDesktopBridge, type BackgroundStatus } from '../../shared/api/desktop';
++import { DesktopTray } from './DesktopTray';
+ 
+-export function DesktopBackground({ settings = true }: { settings?: boolean }) {
++interface DesktopBackgroundProps {
++  settings?: boolean;
++  /** D13 presentation of the same observed status; the native tray stays authoritative. */
++  tray?: boolean;
++  onOpen?(): void;
++}
++
++export function DesktopBackground({ settings = true, tray = false, onOpen }: DesktopBackgroundProps) {
+   const { t } = useTranslation();
+   const [status, setStatus] = useState<BackgroundStatus | null>(null);
+   const [failed, setFailed] = useState(false);
+@@ -44,6 +52,10 @@ export function DesktopBackground({ settings = true }: { settings?: boolean }) {
+     try { await getDesktopBridge().background?.quit(); }
+     catch { setFailed(true); }
+   };
++  const unknown = failed || !bridge;
++  if (tray) {
++    return <DesktopTray onOpen={() => onOpen?.()} onQuit={() => void quit()} quitDisabled={!bridge} status={status} unknown={unknown} />;
++  }
+   return <section aria-label={t('background.title')} className="desktop-background pairing-card">
+     <div className="receiver-status-heading">
+       <h2 className="font-semibold">{t(settings ? 'background.title' : 'receiver.statusTitle')}</h2>
+@@ -72,6 +84,17 @@ export function DesktopBackground({ settings = true }: { settings?: boolean }) {
+       </>}
+     </>}
+     {!failed && bridge && !status && <p role="status">{t('receiver.checking')}</p>}
++    {settings && <dl className="mt-2 grid gap-3 border-t border-border-subtle pt-3 text-sm">
++      {!unknown && status && <div>
++        <dt className="font-semibold">{t('background.closeBehavior')}</dt>
++        <dd>{t(status.canHide ? 'background.closeHides' : 'background.closeStaysVisible')}</dd>
++        <dd className="text-secondary-text">{t('background.closeAutomatic')}</dd>
++      </div>}
++      <div className="flex flex-wrap justify-between gap-2">
++        <dt className="font-semibold">{t('background.version')}</dt>
++        <dd className="text-secondary-text">{!unknown && status?.appVersion ? status.appVersion : t('background.versionUnknown')}</dd>
++      </div>
++    </dl>}
+     {!settings && <p className="pairing-caption">{t('receiver.listenerBoundary')}</p>}
+   </section>;
+ }
+diff --git a/apps/desktop/src/shared/api/desktop.ts b/apps/desktop/src/shared/api/desktop.ts
+index 8f198733..30581ad2 100644
+--- a/apps/desktop/src/shared/api/desktop.ts
++++ b/apps/desktop/src/shared/api/desktop.ts
+@@ -59,6 +59,8 @@ export interface BackgroundStatus {
+   canHide: boolean;
+   environmentLimited: boolean;
+   shutdownError: boolean;
++  /** Main-process `app.getVersion()`; read-only metadata, not a release-maturity claim. Missing → unknown. */
++  appVersion?: string;
+ }
+ 
+ export interface DesktopSource {
+diff --git a/apps/desktop/src/shared/i18n/locales/de.json b/apps/desktop/src/shared/i18n/locales/de.json
+index 58b345ea..6acb0e3e 100644
+--- a/apps/desktop/src/shared/i18n/locales/de.json
++++ b/apps/desktop/src/shared/i18n/locales/de.json
+@@ -212,7 +212,13 @@
+       "unavailable": "Der Autostartstatus des Betriebssystems konnte nicht gelesen werden.",
+       "external_entry": "Ein anderer Autostarteintrag wurde gefunden und nicht überschrieben.",
+       "desktop_policy": "Der XDG-Autostarteintrag ist eingerichtet; die Linux-Desktoprichtlinie kann den Start weiterhin verhindern."
+-    }
++    },
++    "closeBehavior": "Beim Schließen des Fensters",
++    "closeHides": "Kloda blendet das Fenster aus und empfängt weiter. Öffnen Sie es erneut über die Taskleiste oder Menüleiste.",
++    "closeStaysVisible": "Das Fenster bleibt geöffnet, da in dieser Sitzung keine Tray- oder Menüsteuerung bestätigt wurde.",
++    "closeAutomatic": "Wird automatisch anhand der beobachteten Tray-/Menüsteuerung bestimmt; dies ist keine eigene Einstellung.",
++    "version": "Version",
++    "versionUnknown": "Unbekannt"
+   },
+   "incoming": {
+     "navigation": "Eingehend",
+@@ -364,7 +370,7 @@
+     "providerUnavailable": "Die tatsächliche Verbindung für diesen Anbieter ist noch nicht implementiert.",
+     "providerFuture": "Die Verbindungsoptionen sind Teil des Designs. Hier werden weder Konten angemeldet noch Übertragungen gestartet.",
+     "connectionFields": "Verbindungsfelder",
+-    "trayDescription": "Auf unterstützten Systemen lässt sich Kloda über die Taskleiste oder Menüleiste öffnen. Die tatsächlichen Empfänger- und Beenden-Steuerungen stehen oben. Ohne Tray-Unterstützung bleibt ein sichtbares Fenster erhalten.",
++    "trayDescription": "Auf unterstützten Systemen lässt sich Kloda über die Taskleiste oder Menüleiste öffnen. Das tatsächliche Tray-Menü bietet dieselben Steuerungen zum Öffnen und Beenden wie unten. Ohne Tray-Unterstützung bleibt ein sichtbares Fenster erhalten.",
+     "brand": "Kloda",
+     "home": "Start",
+     "receiverGroup": "Empfänger",
+@@ -438,5 +444,20 @@
+     "dark": "Dunkel",
+     "light": "Hell",
+     "system": "System"
++  },
++  "tray": {
++    "menuLabel": "Kloda-Tray-Menü",
++    "open": "Kloda öffnen",
++    "pauseIncoming": "Eingehende Sicherungen pausieren",
++    "pauseOutgoing": "Ausgehende Sicherungen pausieren",
++    "pauseUnavailable": "Pausieren wird in dieser Version nicht unterstützt. Diese Steuerungen stoppen oder halten keine Übertragung an; Beenden von Kloda stoppt Empfang und Sicherungen.",
++    "state": {
++      "error": "Aufmerksamkeit nötig",
++      "unknown": "Status unbekannt",
++      "checking": "Wird geprüft",
++      "active": "Aktiv",
++      "listening": "Empfangsbereit",
++      "unavailable": "Nicht verfügbar"
++    }
+   }
+ }
+diff --git a/apps/desktop/src/shared/i18n/locales/en.json b/apps/desktop/src/shared/i18n/locales/en.json
+index abe4162a..b8883456 100644
+--- a/apps/desktop/src/shared/i18n/locales/en.json
++++ b/apps/desktop/src/shared/i18n/locales/en.json
+@@ -212,7 +212,13 @@
+       "unavailable": "Operating system login-start status could not be read.",
+       "external_entry": "Another startup entry was found and was not overwritten.",
+       "desktop_policy": "The XDG startup entry is configured; Linux desktop policy may still prevent launch."
+-    }
++    },
++    "closeBehavior": "When the window is closed",
++    "closeHides": "Kloda hides the window and keeps receiving. Reopen it from the system tray or menu bar.",
++    "closeStaysVisible": "The window stays open because a tray or menu control has not been verified in this session.",
++    "closeAutomatic": "Determined automatically from the observed tray/menu control; this is not a separate preference.",
++    "version": "Version",
++    "versionUnknown": "Unknown"
+   },
+   "incoming": {
+     "navigation": "Incoming",
+@@ -364,7 +370,7 @@
+     "providerUnavailable": "The actual connection for this provider is not implemented yet.",
+     "providerFuture": "Connection options are shown as part of the design. This screen does not sign in to an account or start a transfer.",
+     "connectionFields": "Connection fields",
+-    "trayDescription": "On supported systems Kloda can be reopened from the system tray or menu bar. The actual receiver and quit controls are above. A visible window is retained if the environment has no tray support.",
++    "trayDescription": "On supported systems Kloda can be reopened from the system tray or menu bar. The actual tray menu offers the same Open and Quit controls shown below. A visible window is retained if the environment has no tray support.",
+     "brand": "Kloda",
+     "home": "Home",
+     "receiverGroup": "Receiver",
+@@ -438,5 +444,20 @@
+     "dark": "Dark",
+     "light": "Light",
+     "system": "System"
++  },
++  "tray": {
++    "menuLabel": "Kloda tray menu",
++    "open": "Open Kloda",
++    "pauseIncoming": "Pause incoming backups",
++    "pauseOutgoing": "Pause outgoing backups",
++    "pauseUnavailable": "Pausing is not supported in this version. These controls do not stop or hold any transfer; quitting Kloda stops receiving and backups.",
++    "state": {
++      "error": "Needs attention",
++      "unknown": "Status unknown",
++      "checking": "Checking",
++      "active": "Active",
++      "listening": "Listening",
++      "unavailable": "Unavailable"
++    }
+   }
+ }
+diff --git a/apps/desktop/src/shared/i18n/locales/tr.json b/apps/desktop/src/shared/i18n/locales/tr.json
+index be44fbe3..953a8b9a 100644
+--- a/apps/desktop/src/shared/i18n/locales/tr.json
++++ b/apps/desktop/src/shared/i18n/locales/tr.json
+@@ -212,7 +212,13 @@
+       "unavailable": "İşletim sisteminin otomatik başlatma durumu okunamadı.",
+       "external_entry": "Başka bir başlangıç kaydı bulundu; üzerine yazılmadı.",
+       "desktop_policy": "XDG başlangıç kaydı yapılandırıldı; Linux masaüstü politikası çalıştırmayı yine engelleyebilir."
+-    }
++    },
++    "closeBehavior": "Pencere kapatıldığında",
++    "closeHides": "Kloda pencereyi gizler ve almaya devam eder. Bildirim alanı veya menü çubuğundan yeniden açın.",
++    "closeStaysVisible": "Bu oturumda tray veya menü kontrolü doğrulanmadığı için pencere açık kalır.",
++    "closeAutomatic": "Gözlenen tray/menü kontrolüne göre otomatik belirlenir; ayrı bir tercih değildir.",
++    "version": "Sürüm",
++    "versionUnknown": "Bilinmiyor"
+   },
+   "incoming": {
+     "navigation": "Gelen aktarımlar",
+@@ -364,7 +370,7 @@
+     "providerUnavailable": "Bu sağlayıcının gerçek bağlantısı henüz uygulanmadı.",
+     "providerFuture": "Bağlantı seçenekleri tasarım kapsamında gösteriliyor. Bu ekranda hesap girişi veya aktarım başlatılmaz.",
+     "connectionFields": "Bağlantı alanları",
+-    "trayDescription": "Kloda desteklenen sistemlerde bildirim alanı veya menü çubuğundan açılabilir. Gerçek alıcı ve çıkış kontrolleri yukarıdadır. Ortamda tray desteği yoksa görünür pencere korunur.",
++    "trayDescription": "Kloda desteklenen sistemlerde bildirim alanı veya menü çubuğundan açılabilir. Gerçek tray menüsü aşağıdaki Aç ve Çık kontrollerini sunar. Ortamda tray desteği yoksa görünür pencere korunur.",
+     "brand": "Kloda",
+     "home": "Ana sayfa",
+     "receiverGroup": "Alıcı",
+@@ -438,5 +444,20 @@
+     "dark": "Koyu",
+     "light": "Açık",
+     "system": "Sistem"
++  },
++  "tray": {
++    "menuLabel": "Kloda tray menüsü",
++    "open": "Kloda’yı aç",
++    "pauseIncoming": "Gelen yedeklemeleri duraklat",
++    "pauseOutgoing": "Giden yedeklemeleri duraklat",
++    "pauseUnavailable": "Bu sürümde duraklatma desteklenmiyor. Bu kontroller hiçbir aktarımı durdurmaz veya bekletmez; Kloda’dan çıkmak alımı ve yedeklemeleri durdurur.",
++    "state": {
++      "error": "Dikkat gerekiyor",
++      "unknown": "Durum bilinmiyor",
++      "checking": "Denetleniyor",
++      "active": "Etkin",
++      "listening": "Dinliyor",
++      "unavailable": "Kullanılamıyor"
++    }
+   }
+ }

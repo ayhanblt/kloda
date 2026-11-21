@@ -1,0 +1,27 @@
+{
+  "captured_at": "2026-11-18T22:02:29.607768+03:00",
+  "head": "508b3f0486a7ce04628ec0c3681d995573e5721d",
+  "changed_from_r3": [
+    "tools/capture-ui.py",
+    "tools/ui-capture/common.py",
+    "tools/ui-capture/desktop.py",
+    "tools/ui-capture/ios.py",
+    "tools/ui-capture/supervision.py",
+    "tools/ui-capture/test_capture.py",
+    "tools/ui-capture/test_supervision.py"
+  ],
+  "python_nonblank_noncomment_lines": {
+    "tools/capture-ui.py": 289,
+    "tools/ui-capture/common.py": 227,
+    "tools/ui-capture/desktop.py": 251,
+    "tools/ui-capture/ios.py": 288,
+    "tools/ui-capture/ios_build.py": 166,
+    "tools/ui-capture/matrix.py": 253,
+    "tools/ui-capture/supervision.py": 178,
+    "tools/ui-capture/test_capture.py": 292,
+    "tools/ui-capture/test_matrix.py": 229,
+    "tools/ui-capture/test_supervision.py": 299
+  },
+  "tests_run_in_this_audit": false,
+  "status": "PARTIAL; existing unittest log: 68 tests, 1 failure, exit 1; no acceptance"
+}

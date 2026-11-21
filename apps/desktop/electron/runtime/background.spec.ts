@@ -23,6 +23,7 @@ const electron = vi.hoisted(() => {
   const app = {
     on: vi.fn((name: string, callback: (event: { preventDefault(): void }) => void) => { appEvents.set(name, callback); }),
     quit: vi.fn(() => { appEvents.get('before-quit')?.({ preventDefault: vi.fn() }); }),
+    getVersion: vi.fn(() => '0.0.0'),
   };
   return { appEvents, handlers, trays, image, app,
     dialog: { showMessageBox: vi.fn() },
@@ -197,5 +198,27 @@ describe('DesktopBackground lifecycle', () => {
     setAutostart(event, true);
     expect(autostart.setEnabled).toHaveBeenCalledWith(true);
     expect(journal.saveAutostartChoice).toHaveBeenCalledWith(true);
+  });
+
+  it('G23-05/06/08 adds only the read-only app version to the trusted status snapshot', async () => {
+    const { background, event, close, window, autostart, journal, closeReceiver, stopSchedule } = fixture('linux');
+    await settle();
+    expect([...electron.handlers.keys()]).toEqual(['kloda:background:status', 'kloda:background:autostart', 'kloda:background:quit']);
+    const status = electron.handlers.get('kloda:background:status')!;
+    await expect(status(event)).resolves.toEqual({
+      receiver: { available: true, activeTransfers: 0 }, backup: { active: false, failed: false },
+      autostart: { enabled: false, supported: true }, autostartChoice: null,
+      canHide: false, environmentLimited: true, shutdownError: false, appVersion: '0.0.0',
+    });
+    await expect(status({ ...event, senderFrame: { url: 'https://foreign.example/' } })).rejects.toThrow('Untrusted');
+    close(); expect(window.visible).toBe(true);
+    electron.trays[0].events.get('click')!();
+    await expect(status(event)).resolves.toMatchObject({ canHide: true, environmentLimited: false, appVersion: '0.0.0' });
+    close(); expect(window.visible).toBe(false);
+    expect(autostart.setEnabled).not.toHaveBeenCalled();
+    expect(journal.saveAutostartChoice).not.toHaveBeenCalled();
+    expect(closeReceiver).not.toHaveBeenCalled();
+    expect(stopSchedule).not.toHaveBeenCalled();
+    expect(background.canHide()).toBe(true);
   });
 });

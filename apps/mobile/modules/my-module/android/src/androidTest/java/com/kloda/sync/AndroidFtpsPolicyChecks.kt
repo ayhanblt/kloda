@@ -129,7 +129,11 @@ internal object AndroidFtpsPolicyChecks {
     } finally { gate.countDown(); prefs.unregisterOnSharedPreferenceChangeListener(listener); AndroidFtpsLifecycleChecks.restore() }
   }
 
-  /** FS1 (R1): WATCH A waits in `changed`; onDestroy retires it while its pending token stays. Released A writes/arms nothing. */
+  /**
+   * FS1 (R1): WATCH A waits in `changed`; onDestroy retires it while its pending token stays. Released A writes/arms nothing.
+   * P3-04: holding the monitor while waiting for A deadlocks main's `onStartJob` (ANR), and a WATCH callback captures
+   * inside `changed()` under the arbiter, so no wait point off the arbiter exists: fails fast (DECISION), never passes.
+   */
   private fun destroyedWatch(i: Instrumentation, app: Context, queue: AndroidFtpsQueue) {
     val recorder = AndroidFtpsAutomaticChecks.Recorder()
     try {
@@ -138,7 +142,7 @@ internal object AndroidFtpsPolicyChecks {
       val calls = AtomicInteger()
       AndroidFtpsQueue.captureFault = { if (calls.incrementAndGet() > 1) throw FtpsFailure("credential_locked") }
       synchronized(AndroidFtpsLifecycleChecks.monitor) {
-        AndroidFtpsLifecycleChecks.held(i, AndroidFtpsScheduler.WATCH)
+        error("DECISION P3-04: WATCH A has no wait point off the arbiter (changed() captures under it)")
         AndroidFtpsLifecycleChecks.destroy()
         AndroidFtpsScheduler.os = recorder
       }

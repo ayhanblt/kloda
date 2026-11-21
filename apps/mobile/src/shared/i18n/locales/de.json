@@ -75,7 +75,7 @@
       "destination_permission_lost": "Der Zugriff auf das Wiederherstellungsziel ging verloren. Wähle eine neue Datei und versuche es erneut.",
       "destination_not_empty": "Das Ziel ist nicht leer. Es wurde weder überschrieben noch gelöscht; wähle eine neue Datei.",
       "restore_cleanup_failed": "Die Wiederherstellung ist nicht abgeschlossen und das neu erstellte Ziel konnte nicht entfernt werden. Eine unvollständige Datei kann verbleiben; entferne sie selbst und wähle beim erneuten Versuch eine neue Datei.",
-      "os_interrupted": "Das Betriebssystem hat den Auftrag beendet. Der Fortschritt bleibt bis zur nächsten Ausführungsmöglichkeit erhalten.",
+      "os_interrupted": "Der Auftrag wurde unterbrochen. Die genaue Ursache lässt sich aus diesem Zustand nicht bestimmen. Der Fortschritt bleibt erhalten, bis das Betriebssystem die nächste Ausführungsmöglichkeit bietet.",
       "automatic_pause_not_saved": "Die automatische Pause konnte nicht gespeichert werden. In dieser Sitzung gestoppt; nach Neustart kann die Sicherung beginnen. Speicher prüfen.",
       "background_unavailable": "Das Betriebssystem konnte den Hintergrunddienst nicht starten. App geöffnet lassen und erneut versuchen.",
       "native_unsupported": "Das erforderliche native Sicherungsmodul ist auf dieser Plattform nicht verfügbar.",
@@ -117,7 +117,7 @@
       "review_required": "Der Photos-Import muss geprüft werden. Es wird keine zweite Kopie automatisch erstellt.",
       "organization_review": "Medien- oder Albumbeziehungen müssen geprüft werden; eine vollständige Wiederherstellung wird nicht angenommen.",
       "destination_required": "Aktiviere zuerst ausdrücklich mindestens ein Sicherungsziel.",
-      "webdav_auth": "Der WebDAV-Server hat Benutzername oder Passwort abgelehnt.",
+      "webdav_auth": "Der WebDAV-Server hat den Zugriff verweigert (HTTP-Zugriffsverweigerung).",
       "webdav_storage": "Das sichere WebDAV-Profil dieses Geräts konnte nicht gelesen oder gespeichert werden.",
       "webdav_missing": "Kein natives WebDAV-Profil gespeichert.",
       "destination_disabled": "Dieses Sicherungsziel ist deaktiviert.",
@@ -199,6 +199,31 @@
     },
     "storageTested": "Die gespeicherten Einstellungen bestanden einen früheren Verbindungstest. Das garantiert keine aktuelle Erreichbarkeit.",
     "testError": "Die WebDAV-Verbindung konnte nicht bestätigt werden.",
+    "webdavHints": {
+      "endpoint": "Gib die vollständige HTTPS-Adresse einschließlich Port (falls vorhanden) und WebDAV-Stammpfad des Servers ein. Beispiel: https://server.example:8083/webdav/",
+      "targetPath": "Ein Unterordner unter diesem WebDAV-Stamm, der bereits existieren und zugänglich sein muss; Kloda legt ihn nicht an. Beispiel: Kloda → https://server.example:8083/webdav/Kloda/",
+      "security": "Unterstützt werden nur HTTPS mit einem vom Betriebssystem als vertrauenswürdig eingestuften Zertifikat und Basic-Anmeldung. Der Test schreibt, liest zurück und löscht ausschließlich seine eigenen temporären Daten."
+    },
+    "webdavDiagnostic": {
+      "summary": "Fehlgeschlagener Schritt: {{stage}}. {{reason}}",
+      "stages": {
+        "propfind": "Prüfung des Ordnerzugriffs (PROPFIND)",
+        "mkcol": "Temporären Testordner anlegen (MKCOL)",
+        "put": "Testdatei schreiben (PUT)",
+        "move": "Testdatei abschließen (MOVE)",
+        "get": "Testdatei zurücklesen (GET)",
+        "delete_file": "Testdatei löschen (DELETE)",
+        "delete_directory": "Temporären Testordner löschen (DELETE)"
+      },
+      "reasons": {
+        "access_denied": "Der Server hat den Zugriff verweigert (HTTP {{status}}).",
+        "not_found": "Ordner oder Pfad konnten nicht als zugänglich bestätigt werden (HTTP {{status}}).",
+        "method_rejected": "Der Server hat diese Methode abgelehnt (HTTP {{status}}).",
+        "http_other": "Der Server hat HTTP {{status}} zurückgegeben.",
+        "transport_unknown": "Die Verbindung ist ohne verwertbare Serverantwort fehlgeschlagen. Die genaue Ursache (Netzwerk, DNS, TLS oder Zeitüberschreitung) lässt sich aus diesem Test nicht bestimmen.",
+        "readback_mismatch": "Der zurückgelesene Inhalt stimmte nicht mit dem Geschriebenen überein."
+      }
+    },
     "localStartTime": "Lokale Startzeit",
     "saveSchedule": "Speichern und mit Computer verbinden",
     "invalidTime": "Verwende HH:mm für die lokale Startzeit.",
@@ -240,7 +265,11 @@
     "leaveConsequences": "Beim Verlassen werden diese Ansicht und ihre Verbindung geschlossen. Es schließt die Kopplung nicht ab und löscht keine ausstehenden oder angehefteten Datensätze.",
     "repairTitle": "Erneut mit diesem Computer koppeln?",
     "repairDescription": "Das frühere lokale Vertrauen dieses Computers wurde widerrufen. Prüfe den authentifizierten Computerfingerabdruck vor einer ausdrücklichen erneuten Kopplung.",
-    "repairConsequences": "Der alte widerrufene Datensatz und alle Dateizugriffsverbote bleiben unverändert. Auch ein neuer Versuch erfordert die Zustimmung am Computer.",
+    "repairConsequences": "Zuerst stimmst du auf diesem Telefon ausdrücklich zu, danach muss der Computer zustimmen. Diese Zustimmung schließt die Kopplung nicht ab und gewährt keinen Dateizugriff. Der alte widerrufene Datensatz und alle Dateizugriffsverbote bleiben unverändert.",
+    "repairWorking": {
+      "title": "Deine Entscheidung wird gesendet",
+      "description": "Deine Entscheidung wird gesendet. Das ist keine abgeschlossene Kopplung. Wenn du zugestimmt hast, muss der Computer noch zustimmen; der Dateizugriff bleibt getrennt."
+    },
     "pairAgain": "Erneut mit diesem Computer koppeln",
     "denyRepair": "Nicht erneut koppeln",
     "helpTitle": "So funktioniert lokale Kopplung",
@@ -435,7 +464,17 @@
       "title": "Einstellungen",
       "backup": "Sicherung",
       "rerunSetup": "Einrichtung erneut starten",
-      "background": "Hintergrundbetrieb"
+      "background": "Hintergrundbetrieb",
+      "cellular": "Mobilfunk-Sicherung",
+      "cellularDesc": "Diese Version bietet keine Sicherung über Mobilfunk.",
+      "privacy": "Datenschutz",
+      "photoAccess": "Fotozugriff",
+      "photoAccessDesc": "Auswahl der Fotoquellen unter Quellen verwalten.",
+      "notifications": "Benachrichtigungen",
+      "notificationsDesc": "Sicherungsbenachrichtigungen werden im bestehenden Übertragungsablauf angefragt; Aktivität öffnen.",
+      "about": "Info",
+      "configVersion": "Konfigurationsversion",
+      "versionUnknown": "Unbekannt"
     },
     "tray": {},
     "dialogs": {},
@@ -718,6 +757,7 @@
       "catalogHint": "Angezeigt werden nur verifizierte Abschlussbelege dieses Geräts für dieses Ziel. Beim Wiederherstellen wird die Cloud-Datei erneut geprüft und in den ausgewählten Ordner geschrieben.",
       "reviewHint": "Aufträge mit unbekannter Antwort werden weder automatisch abgeschlossen noch erneut gesendet. Vorhandene Dateien und Einträge bleiben erhalten.",
       "automaticHint": "Automatische Läufe sichern ausgewählte Quellen mit den vorhandenen Zeitplaneinstellungen. Die Ausführung hängt von Betriebssystem, Netzwerk und Sperrstatus ab; unklare Aufträge werden nicht automatisch wiederholt.",
+      "automaticUnsupported": "Automatische S3-Sicherung wird unter Android 7.0/7.1 nicht unterstützt; Android 8 oder höher ist erforderlich. Manuelle Sicherung und Wiederherstellung bleiben verfügbar.",
       "automaticOn": "Automatische Sicherung aktivieren",
       "automaticOff": "Automatische Sicherung ausschalten",
       "copied": "Neue separate Kopie verifiziert: {{name}}. Der ursprüngliche unklare Eintrag bleibt erhalten."

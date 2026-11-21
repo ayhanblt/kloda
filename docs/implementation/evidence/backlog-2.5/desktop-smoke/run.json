@@ -1,0 +1,156 @@
+{
+ "cells": {
+  "desktop.settings/tr/light/normal": {
+   "driverKind": "synthetic-renderer",
+   "fingerprint": {
+    "digest": "c41c3aa2c447655483b8fb23b36b56fdc6de18a31d301b253abb1e4f270a6dc1",
+    "files": {
+     "apps/desktop/src/app/App.tsx": "ce1ac3002124052b41a36a82272ed635dccedd4b62871b92b32bbc3f1aedd852",
+     "apps/desktop/src/app/global.css": "b0ff233e641472e21c0bfe2818128f1d903e5d812c1d2219c7d21e20b1311392",
+     "apps/desktop/src/features/desktop-background/AppearanceSettings.tsx": "eae1465d403958c76efa4972983069478a5df8b241661891421587fd99286734",
+     "apps/desktop/src/features/desktop-background/DesktopBackground.tsx": "dfb2f13a52e014f87cb74e7971c3aac89ac3398a87aa6d5739fbdf7e897c5625",
+     "apps/desktop/src/shared/i18n/index.ts": "166a901774dae73da3b7ab9bdc530fef78960ed0016eff1058d7e19b11fb1ef3",
+     "apps/desktop/src/shared/theme/tokens.css": "d930736e2735eb2091ff53e4db97edecd0b45b850360b1eb4a26049006df9324",
+     "apps/desktop/src/shared/theme/use-appearance.ts": "58bfbdc0f51490d93b9dea5a1f6b6393b8f9e2efb358493e148899cd31c9a162",
+     "apps/desktop/src/widgets/desktop-shell/DesktopShell.tsx": "b258bbab0270792d56a3b32330c9db82d74d1bff671ed3e1c1fc363c9197e32a"
+    },
+    "localeKeys": {
+     "path": "apps/desktop/src/shared/i18n/locales/tr.json",
+     "prefixes": [
+      "appearance",
+      "background",
+      "receiver.settingsNavigation"
+     ],
+     "sha256": "fe73d40fb6f6be8e6dc5303ce7e1166d8be3b930a15d83777ef4e1ac26c671ad"
+    },
+    "status": "known"
+   },
+   "measure": {
+    "calls": [],
+    "consoleErrors": [],
+    "hash": "#/settings",
+    "headings": [
+     "Ayarlar"
+    ],
+    "lang": "tr",
+    "pageOverflow": false,
+    "rootFontPx": 16,
+    "size": "normal",
+    "theme": "light",
+    "viewport": [
+     1440,
+     1000
+    ]
+   },
+   "png": "desktop.settings__tr__light__normal.png",
+   "pngSha256": "5a6f372e34046411f4ee56c755c12b416ee0c8264eb1076c4fc7aacf521a3594",
+   "pngSize": [
+    1440,
+    1000
+   ],
+   "reasons": [],
+   "status": "PASS"
+  }
+ },
+ "cleanup": {
+  "attempts": [
+   {
+    "errors": [],
+    "steps": [
+     {
+      "ok": true,
+      "step": "desktop:browser-and-loopback-closed"
+     }
+    ]
+   }
+  ],
+  "errors": [],
+  "steps": [
+   {
+    "ok": true,
+    "step": "desktop:browser-and-loopback-closed"
+   }
+  ]
+ },
+ "driver": "desktop-renderer",
+ "events": [
+  {
+   "at": 1794990741.293875,
+   "event": "PREPARED"
+  },
+  {
+   "at": 1794990741.298571,
+   "event": "RUNNING"
+  },
+  {
+   "at": 1794990744.056538,
+   "event": "RESTORE_PENDING"
+  },
+  {
+   "at": 1794990744.0594811,
+   "event": "CLEANED"
+  }
+ ],
+ "phase": "CLEANED",
+ "processes": [],
+ "provenance": {
+  "fingerprints": {
+   "desktop.settings/tr/light/normal": {
+    "digest": "c41c3aa2c447655483b8fb23b36b56fdc6de18a31d301b253abb1e4f270a6dc1",
+    "files": {
+     "apps/desktop/src/app/App.tsx": "ce1ac3002124052b41a36a82272ed635dccedd4b62871b92b32bbc3f1aedd852",
+     "apps/desktop/src/app/global.css": "b0ff233e641472e21c0bfe2818128f1d903e5d812c1d2219c7d21e20b1311392",
+     "apps/desktop/src/features/desktop-background/AppearanceSettings.tsx": "eae1465d403958c76efa4972983069478a5df8b241661891421587fd99286734",
+     "apps/desktop/src/features/desktop-background/DesktopBackground.tsx": "dfb2f13a52e014f87cb74e7971c3aac89ac3398a87aa6d5739fbdf7e897c5625",
+     "apps/desktop/src/shared/i18n/index.ts": "166a901774dae73da3b7ab9bdc530fef78960ed0016eff1058d7e19b11fb1ef3",
+     "apps/desktop/src/shared/theme/tokens.css": "d930736e2735eb2091ff53e4db97edecd0b45b850360b1eb4a26049006df9324",
+     "apps/desktop/src/shared/theme/use-appearance.ts": "58bfbdc0f51490d93b9dea5a1f6b6393b8f9e2efb358493e148899cd31c9a162",
+     "apps/desktop/src/widgets/desktop-shell/DesktopShell.tsx": "b258bbab0270792d56a3b32330c9db82d74d1bff671ed3e1c1fc363c9197e32a"
+    },
+    "localeKeys": {
+     "path": "apps/desktop/src/shared/i18n/locales/tr.json",
+     "prefixes": [
+      "appearance",
+      "background",
+      "receiver.settingsNavigation"
+     ],
+     "sha256": "fe73d40fb6f6be8e6dc5303ce7e1166d8be3b930a15d83777ef4e1ac26c671ad"
+    },
+    "status": "known"
+   }
+  },
+  "loopbackPort": 65196,
+  "renderer": {
+   "fresh": true,
+   "newerCount": 0,
+   "newerSources": [],
+   "rendererFiles": 8,
+   "rendererSha256": "477e940aa396c4dd1ab59beeca08d077f156e28f73ddee5ba13218d409f476e6"
+  }
+ },
+ "result": "PASS",
+ "root": "/Users/ayhanblt/Desktop/projects/kloda/docs/implementation/evidence/backlog-2.5/desktop-smoke",
+ "runID": "834b19418a4b4585ad778b1a33d49ac7",
+ "selection": {
+  "args": {
+   "command": "run",
+   "device_type": "com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro",
+   "driver": "desktop-renderer",
+   "fixture": null,
+   "func": null,
+   "locale": "tr",
+   "out": "docs/implementation/evidence/backlog-2.5/desktop-smoke",
+   "renderer": "apps/desktop/dist/renderer",
+   "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-26-5",
+   "screen": "settings",
+   "size": "normal",
+   "theme": "light",
+   "width": 1440
+  },
+  "cells": [
+   "desktop.settings/tr/light/normal"
+  ]
+ },
+ "settings": {},
+ "simulator": null
+}

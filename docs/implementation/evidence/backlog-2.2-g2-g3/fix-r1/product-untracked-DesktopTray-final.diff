@@ -1,0 +1,70 @@
+diff --git a/apps/desktop/src/features/desktop-background/DesktopTray.tsx b/apps/desktop/src/features/desktop-background/DesktopTray.tsx
+new file mode 100644
+index 0000000..0f2fcd1
+--- /dev/null
++++ b/apps/desktop/src/features/desktop-background/DesktopTray.tsx
+@@ -0,0 +1,64 @@
++import { LogOut } from 'lucide-react';
++import { useId } from 'react';
++import { useTranslation } from 'react-i18next';
++
++import type { BackgroundStatus } from '../../shared/api/desktop';
++import { Brand } from '../../shared/ui/Brand';
++
++export type TrayState = 'error' | 'unknown' | 'checking' | 'active' | 'listening' | 'unavailable';
++
++/** Presentation only: priority error > unknown > observed activity > listening > unavailable. */
++export function trayState(status: BackgroundStatus | null, unknown: boolean): TrayState {
++  if (unknown) return 'unknown';
++  if (!status) return 'checking';
++  if (status.receiver.errorCode || status.backup.failed || status.shutdownError) return 'error';
++  if (status.backup.active || status.receiver.activeTransfers > 0) return 'active';
++  return status.receiver.available ? 'listening' : 'unavailable';
++}
++
++const pillTone: Record<TrayState, string> = {
++  error: 'bg-surface-2 text-danger-text', unknown: 'bg-surface-2 text-attention-text', checking: 'bg-surface-2 text-secondary-text',
++  active: 'pairing-state-complete', listening: 'pairing-state-complete', unavailable: 'bg-surface-2 text-attention-text',
++};
++
++interface DesktopTrayProps {
++  status: BackgroundStatus | null;
++  unknown: boolean;
++  onOpen(): void;
++  onQuit(): void;
++  quitDisabled: boolean;
++}
++
++export function DesktopTray({ status, unknown, onOpen, onQuit, quitDisabled }: DesktopTrayProps) {
++  const { t } = useTranslation();
++  const pauseHint = useId();
++  const state = trayState(status, unknown);
++  const errors = state === 'error' && status ? [
++    status.receiver.errorCode && t(`pairing.errors.${status.receiver.errorCode}`),
++    status.backup.failed && t('background.backupFailed'),
++    status.shutdownError && t('background.shutdownFailed'),
++  ].filter(Boolean) : [];
++  // Global `button { font: inherit }` wins over utilities, so menu groups set the text size.
++  const item = 'flex min-h-11 w-full items-center gap-2 rounded-lg px-3 py-2 text-start hover:bg-surface-2 disabled:text-tertiary-text disabled:hover:bg-transparent';
++  return <div aria-label={t('tray.menuLabel')} className="w-72 rounded-2xl border border-border-subtle bg-surface-1 p-2 shadow-lg" role="group">
++    <div className="flex items-center gap-3 p-2">
++      <Brand />
++      <p className={`ml-auto w-fit rounded-full px-2.5 py-1 text-xs ${pillTone[state]}`} role="status">{t(`tray.state.${state}`)}</p>
++    </div>
++    <p className="px-2 pb-2 text-xs text-secondary-text">
++      {/* Activity is an independent observation; error priority only selects the pill. */}
++      {state === 'unknown' ? t('background.unknown')
++        : status && t(status.backup.active || status.receiver.activeTransfers > 0 ? 'background.active' : 'background.idle')}
++    </p>
++    {errors.map((text) => <p className="px-2 pb-2 text-xs text-danger-text" key={text as string} role="alert">{text}</p>)}
++    <div className="border-t border-border-subtle py-1 text-sm">
++      <button className={item} onClick={onOpen} type="button">{t('tray.open')}</button>
++      <button aria-describedby={pauseHint} className={item} disabled type="button">{t('tray.pauseIncoming')}</button>
++      <button aria-describedby={pauseHint} className={item} disabled type="button">{t('tray.pauseOutgoing')}</button>
++      <p className="px-3 pb-1 text-xs text-secondary-text" id={pauseHint}>{t('tray.pauseUnavailable')}</p>
++    </div>
++    <div className="border-t border-border-subtle pt-1 text-sm">
++      <button className={item} disabled={quitDisabled} onClick={onQuit} type="button"><LogOut aria-hidden="true" className="size-4" />{t('background.quit')}</button>
++    </div>
++  </div>;
++}

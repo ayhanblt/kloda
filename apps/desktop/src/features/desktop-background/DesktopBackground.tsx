@@ -1,9 +1,20 @@
-import { useEffect, useRef, useState } from 'react';
+import { LogOut } from 'lucide-react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getDesktopBridge, type BackgroundStatus } from '../../shared/api/desktop';
+import { DesktopTray } from './DesktopTray';
 
-export function DesktopBackground({ settings = true }: { settings?: boolean }) {
+interface DesktopBackgroundProps {
+  settings?: boolean;
+  /** D13 presentation of the same observed status; the native tray stays authoritative. */
+  tray?: boolean;
+  onOpen?(): void;
+  /** Settings-only slot rendered between the background panel and the version/quit footer. */
+  general?: ReactNode;
+}
+
+export function DesktopBackground({ settings = true, tray = false, onOpen, general }: DesktopBackgroundProps) {
   const { t } = useTranslation();
   const [status, setStatus] = useState<BackgroundStatus | null>(null);
   const [failed, setFailed] = useState(false);
@@ -44,11 +55,19 @@ export function DesktopBackground({ settings = true }: { settings?: boolean }) {
     try { await getDesktopBridge().background?.quit(); }
     catch { setFailed(true); }
   };
-  return <section aria-label={t('background.title')} className="desktop-background pairing-card">
-    <div className="receiver-status-heading">
-      <h2 className="font-semibold">{t(settings ? 'background.title' : 'receiver.statusTitle')}</h2>
-      <button className="pairing-button" disabled={!bridge} onClick={() => void quit()} type="button">{t('background.quit')}</button>
-    </div>
+  const unknown = failed || !bridge;
+  if (tray) {
+    return <DesktopTray onOpen={() => onOpen?.()} onQuit={() => void quit()} quitDisabled={!bridge} status={status} unknown={unknown} />;
+  }
+  const quitButton = (className: string) => <button className={className} disabled={!bridge} onClick={() => void quit()} type="button">
+    {settings && <LogOut aria-hidden="true" size={16} />}{t('background.quit')}</button>;
+  return <>
+  {settings && <h2 className="settings-section-title">{t('background.title')}</h2>}
+  <section aria-label={t('background.title')} className="desktop-background pairing-card">
+    {!settings && <div className="receiver-status-heading">
+      <h2 className="font-semibold">{t('receiver.statusTitle')}</h2>
+      {quitButton('pairing-button')}
+    </div>}
     {failed || !bridge ? <p role="alert">{t('background.unknown')}</p> : status && <>
       <p className={`pairing-state ${status.receiver.available && !status.receiver.errorCode ? 'pairing-state-complete' : ''}`} role="status">{t(status.receiver.available ? 'background.listening' : 'background.unavailable')}</p>
       {status.receiver.errorCode && <p role="alert">{t(`pairing.errors.${status.receiver.errorCode}`)}</p>}
@@ -72,6 +91,24 @@ export function DesktopBackground({ settings = true }: { settings?: boolean }) {
       </>}
     </>}
     {!failed && bridge && !status && <p role="status">{t('receiver.checking')}</p>}
+    {settings && !unknown && status && <dl className="mt-2 grid gap-3 border-t border-border-subtle pt-3 text-sm">
+      <div>
+        <dt className="font-semibold">{t('background.closeBehavior')}</dt>
+        <dd>{t(status.canHide ? 'background.closeHides' : 'background.closeStaysVisible')}</dd>
+        <dd className="text-secondary-text">{t('background.closeAutomatic')}</dd>
+      </div>
+    </dl>}
     {!settings && <p className="pairing-caption">{t('receiver.listenerBoundary')}</p>}
-  </section>;
+  </section>
+  {settings && <>
+    {general}
+    <section aria-label={t('background.version')} className="settings-version pairing-card">
+      <dl className="flex flex-wrap justify-between gap-2 text-sm">
+        <dt className="font-semibold">{t('background.version')}</dt>
+        <dd className="text-secondary-text">{!unknown && status?.appVersion ? status.appVersion : t('background.versionUnknown')}</dd>
+      </dl>
+    </section>
+    <div className="settings-quit">{quitButton('pairing-button')}</div>
+  </>}
+  </>;
 }

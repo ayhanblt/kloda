@@ -1,0 +1,45 @@
+{
+  "kind": "observational-renderer-not-matrix-run",
+  "viewport": [
+    521,
+    849
+  ],
+  "capture": [
+    521,
+    1302
+  ],
+  "sha256": "b93ec228c5583a51b1d6ff221aed674966255ff2c3f7c9abb904530a48999ae1",
+  "measure": {
+    "lang": "tr",
+    "theme": "dark",
+    "hash": "#/settings",
+    "innerWidth": 521,
+    "rootFontPx": 16,
+    "fontsStatus": "loaded",
+    "interLoaded": true,
+    "headings": [
+      "Ayarlar"
+    ],
+    "pageOverflow": false,
+    "calls": [],
+    "innerHeight": 849,
+    "dpr": 1,
+    "documentWidth": 521,
+    "documentHeight": 1302
+  },
+  "rendererProvenance": {
+    "sourceSha256": "286fb4ed6962f5308ebec3a98b8a7d92f32b195d78d82bf3d5220090695d8e6e",
+    "rendererSha256": "477e940aa396c4dd1ab59beeca08d077f156e28f73ddee5ba13218d409f476e6",
+    "globalSha256": "e0f6528cb1d3dddce14c9ac38383f0edc6c6ccf9d9a0eae4975fae5e0ac16af5",
+    "fresh": true,
+    "stamp": {
+      "builtAt": 1795074283.605633,
+      "command": "npx vite build (apps/desktop)",
+      "rendererSha256": "477e940aa396c4dd1ab59beeca08d077f156e28f73ddee5ba13218d409f476e6",
+      "sourceSha256": "286fb4ed6962f5308ebec3a98b8a7d92f32b195d78d82bf3d5220090695d8e6e"
+    },
+    "reason": null
+  },
+  "cleanup": "browser, context, and owned loopback server closed",
+  "consoleErrors": []
+}

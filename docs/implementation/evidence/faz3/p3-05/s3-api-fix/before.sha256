@@ -1,0 +1,11 @@
+38badfeb2f9461c9ddaf77b4bf671c285ba8074a7820d81daa97af68f9ef3135  ./apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticChecks.kt
+9d037a63cb81e94e17997139801d31231de7a749d70aa5e0c92d32b8ca4c52de  ./apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticPlanChecks.kt
+6237c0609a5f6a1053c9782b4b6a31d4a9303b5a8d715df5ec681fafa8e34dac  ./apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Automatic.kt
+a76529bb4b293329511fd2f124f74ee647112613616d1655356729c9d8764574  ./apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaS3Module.kt
+40e346cb978f9e647209e459aadfb50b3a8ba687758d33fd2951011f6c57ef0e  ./apps/mobile/src/pages/connections/ui/s3-page.tsx
+e97e5391966aa21205227bbe7840451a5ac5bde6254a64305e674c0abca4e843  ./apps/mobile/src/pages/connections/ui/s3-queue-page.spec.tsx
+838704ec5fab08dcc7a3c96b740d78bdd2a0b79c083f58a7dbad61ca5dc147d6  ./apps/mobile/src/shared/api/s3-product.spec.ts
+5d87c8350db9f5cf32a72d8d28a539146fa473c912003ed63af15d9c4368328a  ./apps/mobile/src/shared/api/s3.ts
+df3baad100e04f8bbabeeea9c2da0df60a035ec249c5aaee3b80955cc5d6563a  ./apps/mobile/src/shared/i18n/locales/de.json
+6b5a8e918645f71d5739dc21b64062796b1649a6514148b15d1c0940272920e7  ./apps/mobile/src/shared/i18n/locales/en.json
+111546c91873c40fb7ba563dbfcc3b9ffb0f913000cd00c0709d48f4642e978f  ./apps/mobile/src/shared/i18n/locales/tr.json

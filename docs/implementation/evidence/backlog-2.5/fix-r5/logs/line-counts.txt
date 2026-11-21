@@ -1,0 +1,11 @@
+289 tools/capture-ui.py
+227 tools/ui-capture/common.py
+251 tools/ui-capture/desktop.py
+288 tools/ui-capture/ios.py
+166 tools/ui-capture/ios_build.py
+253 tools/ui-capture/matrix.py
+176 tools/ui-capture/supervision.py
+292 tools/ui-capture/test_capture.py
+229 tools/ui-capture/test_matrix.py
+89 tools/ui-capture/test_recovery.py
+263 tools/ui-capture/test_supervision.py

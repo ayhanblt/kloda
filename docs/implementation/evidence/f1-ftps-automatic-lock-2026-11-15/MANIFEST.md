@@ -1,5 +1,13 @@
 # F1-FTPS manifest — 15.11.2026 (Opus INITIAL)
 
+## 17.11 kullanıcı kararı — güncel doğrulama devri
+
+F1 fix2 Kotlin compile/AndroidTest build, R1/R2 RED→GREEN ve ilgili dar lint
+**Faz3 regresyon aşamasına DEFERRED / NOT_RUN**. Mac'te şimdi çalıştırılmayacak;
+aşağıdaki "sıradaki Mac doğrulaması" yönlendirmeleri bu kararla ertelendi.
+Fix2 geliştirme kabulü/bağımsız review verilmedi, checkbox açık. Önceki 7/32
+kanıtları fix2 PASS'i yapılmaz. R3 scoped kabul ve S3 korunur; FO1 delta Faz4'te.
+
 16.11 R1/R2 yöntem araştırması: [skill + dar dış araştırma](fix-r1r2/design-research.md).
 Araştırma kaydı öneri düzeyindedir; son dar sözleşme aşağıda. Alt ajan model/kanıt
 ve reddedilen kalıcılık çıkarımı kayıtta; ana model değişmedi.

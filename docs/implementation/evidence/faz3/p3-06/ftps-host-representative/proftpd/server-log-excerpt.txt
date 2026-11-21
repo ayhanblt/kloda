@@ -1,0 +1,4 @@
+/var/log/proftpd/tls.log:2026-11-21 08:34:41,622 mod_tls/2.9.2[22]: TLSv1.2 connection accepted, using cipher ECDHE-RSA-AES256-GCM-SHA384 (256 bits)
+/var/log/proftpd/tls.log:2026-11-21 08:34:41,648 mod_tls/2.9.2[22]: TLSv1.2 data connection accepted, using cipher ECDHE-RSA-AES256-GCM-SHA384 (256 bits)
+/var/log/proftpd/tls.log:2026-11-21 08:34:43,965 mod_tls/2.9.2[23]: TLSv1.2 connection accepted, using cipher ECDHE-RSA-AES256-GCM-SHA384 (256 bits)
+/var/log/proftpd/tls.log:2026-11-21 08:34:43,997 mod_tls/2.9.2[23]: TLSv1.2 data connection accepted, using cipher ECDHE-RSA-AES256-GCM-SHA384 (256 bits)

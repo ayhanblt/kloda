@@ -1,0 +1,10 @@
+2026-11-20T09:16:33Z
+508b3f0486a7ce04628ec0c3681d995573e5721d
+-- git diff --stat on the two files (empty = equal to HEAD):
+-- raw sha256 / LF-normalized sha256
+c1bf4a2c59458d01ee583cf4b4aa28b8d9af679a68d4d21409a7533d494d7157  apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsLifecycleChecks.kt
+c1bf4a2c59458d01ee583cf4b4aa28b8d9af679a68d4d21409a7533d494d7157  -
+     352 apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsLifecycleChecks.kt
+43fe1aabb34dbeecd0a4aeac89867b2cf42540edd8df20f09ade3109b43aac2d  apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsPolicyChecks.kt
+43fe1aabb34dbeecd0a4aeac89867b2cf42540edd8df20f09ade3109b43aac2d  -
+     361 apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsPolicyChecks.kt

@@ -4,7 +4,7 @@ export const s3ErrorCode = ftpsErrorCode;
 export type S3Provider = 'amazon-s3' | 's3-compatible';
 export interface S3Form { endpoint: string; region: string; bucket: string; prefix: string; pathStyle: boolean; accessKey: string; secret: string; token: string }
 export const emptyS3Form: S3Form = { endpoint:'',region:'',bucket:'',prefix:'',pathStyle:true,accessKey:'',secret:'',token:'' };
-export interface S3Status { provider: S3Provider; supported: boolean; configured: boolean; enabled: boolean; canRun: boolean; automaticEnabled?: boolean; canAutomatic?: boolean; canEnable?: boolean; running?: boolean; run?: S3Run; canTest?: boolean; profile?: Omit<S3Form,'accessKey' | 'secret' | 'token'> }
+export interface S3Status { provider: S3Provider; supported: boolean; configured: boolean; enabled: boolean; canRun: boolean; automaticEnabled?: boolean; canAutomatic?: boolean; automaticSupported?: boolean; canEnable?: boolean; running?: boolean; run?: S3Run; canTest?: boolean; profile?: Omit<S3Form,'accessKey' | 'secret' | 'token'> }
 export interface S3Run { id: string; state: 'running' | 'paused' | 'finished' | 'needs_attention'; counts: { verifiedFiles: string; verifiedBytes: string }; errorCode?: string }
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 function runFromNative(value: unknown): S3Run {
@@ -30,17 +30,19 @@ export function validateS3Form(provider: S3Provider, form: S3Form): S3Form {
   } catch { return invalid(); }
 }
 export function s3StatusFromNative(value: unknown, provider: S3Provider): S3Status {
-  const row = object(value,['provider','supported','configured','enabled','canRun','profile','canTest','canEnable','running','run','automaticEnabled','canAutomatic']);
+  const row = object(value,['provider','supported','configured','enabled','canRun','profile','canTest','canEnable','running','run','automaticEnabled','canAutomatic','automaticSupported']);
   if (row.provider !== provider || typeof row.supported !== 'boolean' || typeof row.configured !== 'boolean' || typeof row.enabled !== 'boolean' || typeof row.canRun !== 'boolean') return invalid();
   if (row.canTest !== undefined && (typeof row.canTest !== 'boolean' || (row.canTest && (!row.supported || !row.configured)))) return invalid();
-  for (const key of ['canEnable','running','automaticEnabled','canAutomatic'] as const) if (row[key] !== undefined && typeof row[key] !== 'boolean') return invalid();
+  for (const key of ['canEnable','running','automaticEnabled','canAutomatic','automaticSupported'] as const) if (row[key] !== undefined && typeof row[key] !== 'boolean') return invalid();
   const personal = provider === 'amazon-s3' && row.supported && row.configured && row.canEnable === true;
   if ((row.enabled || row.canRun || row.running || row.canEnable) && !personal) return invalid();
   if ((row.automaticEnabled || row.canAutomatic) && (!personal || !row.enabled)) return invalid();
+  if (row.automaticSupported === false && (row.automaticEnabled || row.canAutomatic)) return invalid();
   if ((row.canRun && (!row.enabled || row.running)) || (row.running && !row.enabled)) return invalid();
   const result: S3Status = { provider,supported:row.supported,configured:row.configured,enabled:row.enabled,canRun:row.canRun };
   if (row.automaticEnabled !== undefined) result.automaticEnabled = row.automaticEnabled as boolean;
   if (row.canAutomatic !== undefined) result.canAutomatic = row.canAutomatic as boolean;
+  if (row.automaticSupported !== undefined) result.automaticSupported = row.automaticSupported as boolean;
   if (row.canEnable !== undefined) result.canEnable = row.canEnable as boolean;
   if (row.running !== undefined) result.running = row.running as boolean;
   if (row.run !== undefined) {

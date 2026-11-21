@@ -38,3 +38,24 @@ it.each(['background', 'error', 'uncertain', 'repair', 'missingRecord', 'missing
   expect(surface.queryByText(i18n.t('computer.continue'))).toBeNull();
   await surface.unmount();
 });
+
+it.each(['tr', 'en', 'de'])('G24-01: repair approval in flight reads as working, not as a new instruction, in %s', async (language) => {
+  await i18n.changeLanguage(language);
+  try {
+    mockSnapshot = { status: { phase: 'connecting', repairRequired: true, operationId: 'operation-1', candidateGeneration: 'generation-1',
+      peerFingerprint: 'fixture-pc' }, error: null, uncertain: false, action: null, scanLocked: true };
+    const idle = await render(<PairingPage onBack={jest.fn()} onContinue={jest.fn()} />);
+    expect(idle.getByText(i18n.t('pairing.repairDescription'))).toBeTruthy();
+    expect(idle.getByText(i18n.t('pairing.repairConsequences'))).toBeTruthy();
+    await idle.unmount();
+    mockSnapshot = { ...mockSnapshot, action: 'approve' };
+    const working = await render(<PairingPage onBack={jest.fn()} onContinue={jest.fn()} />);
+    expect(working.getByText(i18n.t('pairing.repairWorking.title'))).toBeTruthy();
+    expect(working.getByText(i18n.t('pairing.repairWorking.description'))).toBeTruthy();
+    expect(working.queryByText(i18n.t('pairing.repairDescription'))).toBeNull();
+    expect(working.getByText(i18n.t('pairing.noFileGrant'))).toBeTruthy();
+    expect(working.queryByText(i18n.t('computer.continue'))).toBeNull();
+    expect(working.queryByText(/pairing\.\w/)).toBeNull();
+    await working.unmount();
+  } finally { await i18n.changeLanguage('tr'); }
+});

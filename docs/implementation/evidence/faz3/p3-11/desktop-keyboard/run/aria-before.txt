@@ -1,0 +1,19 @@
+Görünüm
+- radiogroup "Görünüm":
+  - text: Görünüm
+  - radio "Sistem"
+  - text: Sistem
+  - radio "Açık"
+  - text: Açık
+  - radio "Koyu" [checked]
+  - text: Koyu
+---
+Dil
+- radiogroup "Dil":
+  - text: Dil
+  - radio "Türkçe" [checked]
+  - text: Türkçe
+  - radio "English"
+  - text: English
+  - radio "Deutsch"
+  - text: Deutsch

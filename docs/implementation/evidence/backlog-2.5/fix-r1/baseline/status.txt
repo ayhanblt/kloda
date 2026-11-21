@@ -1,0 +1,271 @@
+ M .codex/agents/architext.toml
+ M .codex/agents/config.toml
+ M .codex/agents/reviewer.toml
+ D .opencode/commands/implement-pilot.md
+ M .opencode/commands/implement.md
+ M .opencode/commands/plan.md
+ M .opencode/commands/review.md
+ M AGENTS.md
+ M apps/desktop/electron/main.ts
+ M apps/desktop/electron/runtime/background.spec.ts
+ M apps/desktop/electron/runtime/background.ts
+ M apps/desktop/electron/runtime/webdav-errors.ts
+ M apps/desktop/electron/runtime/webdav.ts
+ M apps/desktop/src/app/App.spec.tsx
+ M apps/desktop/src/app/App.tsx
+ M apps/desktop/src/features/desktop-background/DesktopBackground.spec.tsx
+ M apps/desktop/src/features/desktop-background/DesktopBackground.tsx
+ M apps/desktop/src/pages/backup/BackupSetup.tsx
+ M apps/desktop/src/pages/pairing/PairingPage.spec.tsx
+ M apps/desktop/src/shared/api/desktop.ts
+ M apps/desktop/src/shared/i18n/locales/de.json
+ M apps/desktop/src/shared/i18n/locales/en.json
+ M apps/desktop/src/shared/i18n/locales/tr.json
+ M apps/mobile/src/app/App.spec.tsx
+ M apps/mobile/src/features/backup-setup/model/use-backup-setup.ts
+ M apps/mobile/src/features/pairing/ui/pairing-modal.tsx
+ M apps/mobile/src/pages/activity/ui/activity-automatic.spec.tsx
+ M apps/mobile/src/pages/pairing/ui/pairing-page.spec.tsx
+ M apps/mobile/src/pages/settings/ui/settings-page.tsx
+ M apps/mobile/src/pages/setup/ui/webdav-page.tsx
+ M apps/mobile/src/shared/api/webdav-settings.spec.ts
+ M apps/mobile/src/shared/api/webdav.ts
+ M apps/mobile/src/shared/i18n/locales/de.json
+ M apps/mobile/src/shared/i18n/locales/en.json
+ M apps/mobile/src/shared/i18n/locales/tr.json
+ M docs/implementation/CURRENT.md
+ M docs/implementation/evidence/backlog-1.5/MANIFEST.md
+ M docs/implementation/evidence/f1-ftps-automatic-lock-2026-11-15/MANIFEST.md
+ M docs/implementation/execution-budget.md
+ M docs/implementation/plans/next-plan.md
+ M docs/implementation/research-pilot.md
+ M docs/implementation/windows-handoff-2026-11-16.md
+ M docs/ui/lovable-design-reference.md
+?? apps/desktop/electron/runtime/webdav-test-result.spec.ts
+?? apps/desktop/electron/runtime/webdav-test-result.ts
+?? apps/desktop/src/features/desktop-background/DesktopTray.tsx
+?? apps/desktop/src/pages/backup/BackupSetup.spec.tsx
+?? apps/desktop/src/shared/api/webdav-test-result.spec.tsx
+?? apps/desktop/src/shared/api/webdav-test-result.ts
+?? apps/mobile/capture/entry.tsx
+?? apps/mobile/capture/protocol.ts
+?? apps/mobile/capture/screens.tsx
+?? apps/mobile/capture/tsconfig.json
+?? apps/mobile/src/pages/settings/ui/settings-page.spec.tsx
+?? apps/mobile/src/shared/api/webdav-diagnostics.spec.ts
+?? apps/mobile/src/shared/api/webdav-diagnostics.ts
+?? apps/mobile/src/shared/config/app-version.ts
+?? docs/implementation/evidence/backlog-1.5/mac-2026-11-17/result.txt
+?? docs/implementation/evidence/backlog-1.5/review-audit.txt
+?? docs/implementation/evidence/backlog-1.5/review-closeout-check.txt
+?? docs/implementation/evidence/backlog-1.5/review.md
+?? docs/implementation/evidence/backlog-2.2-g2-g3/MANIFEST.md
+?? docs/implementation/evidence/backlog-2.2-g2-g3/baseline/CURRENT.start-vs-HEAD.diff
+?? docs/implementation/evidence/backlog-2.2-g2-g3/baseline/CURRENT.start.md
+?? docs/implementation/evidence/backlog-2.2-g2-g3/baseline/head.txt
+?? docs/implementation/evidence/backlog-2.2-g2-g3/baseline/source-start.sha256
+?? docs/implementation/evidence/backlog-2.2-g2-g3/baseline/staged.txt
+?? docs/implementation/evidence/backlog-2.2-g2-g3/baseline/status.txt
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/capture_d12_d13.py
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/measurements.json
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/settings-de-dark-1440.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/settings-de-dark-640.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/settings-de-light-1440.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/settings-de-light-640.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/settings-en-dark-1440.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/settings-en-dark-640.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/settings-en-light-1440.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/settings-en-light-640.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/settings-tr-dark-1440.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/settings-tr-dark-640.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/settings-tr-light-1440-error.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/settings-tr-light-1440.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/settings-tr-light-640.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/tray-de-dark-1440.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/tray-de-dark-640.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/tray-de-light-1440.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/tray-de-light-640.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/tray-en-dark-1440.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/tray-en-dark-640.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/tray-en-light-1440.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/tray-en-light-640.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/tray-tr-dark-1440.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/tray-tr-dark-640.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/tray-tr-light-1440-error.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/tray-tr-light-1440.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/capture/out/tray-tr-light-640.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/baseline/CURRENT.md.start
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/baseline/DesktopBackground.spec.tsx.start
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/baseline/DesktopTray.tsx.start
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/baseline/MANIFEST.md.start
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/baseline/head.txt
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/baseline/staged.txt
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/baseline/start.sha256
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/baseline/status.txt
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/capture/measurements.json
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/capture/tray-tr-light-1440-erroractive.png
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/capture_r1.py
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/fix-DesktopTray.diff
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/fix-spec.diff
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/lines-final.txt
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/product-tracked-final.diff
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/product-untracked-DesktopTray-final.diff
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/review-audit.txt
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/review-closeout-check.txt
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/source-final.sha256
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/staged-final.txt
+?? docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/status-final.txt
+?? docs/implementation/evidence/backlog-2.2-g2-g3/lines-final.txt
+?? docs/implementation/evidence/backlog-2.2-g2-g3/neighbors-final.sha256
+?? docs/implementation/evidence/backlog-2.2-g2-g3/product-tracked.diff
+?? docs/implementation/evidence/backlog-2.2-g2-g3/product-untracked-DesktopTray.diff
+?? docs/implementation/evidence/backlog-2.2-g2-g3/review-audit.txt
+?? docs/implementation/evidence/backlog-2.2-g2-g3/review-capture-audit.txt
+?? docs/implementation/evidence/backlog-2.2-g2-g3/review-closeout-check.txt
+?? docs/implementation/evidence/backlog-2.2-g2-g3/review-probe.cjs
+?? docs/implementation/evidence/backlog-2.2-g2-g3/review.md
+?? docs/implementation/evidence/backlog-2.2-g2-g3/source-final.sha256
+?? docs/implementation/evidence/backlog-2.2-g2-g3/staged-final.txt
+?? docs/implementation/evidence/backlog-2.2-g2-g3/status-final.txt
+?? docs/implementation/evidence/backlog-2.3-g4-g6/MANIFEST.md
+?? docs/implementation/evidence/backlog-2.3-g4-g6/baseline/2.3-research.md.start
+?? docs/implementation/evidence/backlog-2.3-g4-g6/baseline/CURRENT.diff-vs-HEAD
+?? docs/implementation/evidence/backlog-2.3-g4-g6/baseline/CURRENT.md.start
+?? docs/implementation/evidence/backlog-2.3-g4-g6/baseline/head.txt
+?? docs/implementation/evidence/backlog-2.3-g4-g6/baseline/next-plan.md.start
+?? docs/implementation/evidence/backlog-2.3-g4-g6/baseline/staged.txt
+?? docs/implementation/evidence/backlog-2.3-g4-g6/baseline/status.txt
+?? docs/implementation/evidence/backlog-2.3-g4-g6/baseline/target-files.txt
+?? docs/implementation/evidence/backlog-2.3-g4-g6/caller-check.md
+?? docs/implementation/evidence/backlog-2.3-g4-g6/review-audit.txt
+?? docs/implementation/evidence/backlog-2.3-g4-g6/review-closeout-check.txt
+?? docs/implementation/evidence/backlog-2.3-g4-g6/review.md
+?? docs/implementation/evidence/backlog-2.3-g4-g6/sonnet/HANDOFF.md
+?? docs/implementation/evidence/backlog-2.3-g4-g6/sonnet/source-final.sha256
+?? docs/implementation/evidence/backlog-2.4/MANIFEST.md
+?? docs/implementation/evidence/backlog-2.4/baseline/HEAD.txt
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/desktop/electron/main.ts
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/desktop/electron/preload.cts
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/desktop/electron/runtime/webdav-connection-test.ts
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/desktop/electron/runtime/webdav-errors.spec.ts
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/desktop/electron/runtime/webdav-errors.ts
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/desktop/electron/runtime/webdav.spec.ts
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/desktop/electron/runtime/webdav.ts
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/desktop/src/app/App.spec.tsx
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/desktop/src/pages/backup/BackupSetup.tsx
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/desktop/src/pages/pairing/PairingPage.spec.tsx
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/desktop/src/pages/pairing/PairingPage.tsx
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/desktop/src/shared/api/desktop.ts
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/desktop/src/shared/i18n/locales/de.json
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/desktop/src/shared/i18n/locales/en.json
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/desktop/src/shared/i18n/locales/tr.json
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/mobile/src/app/App.spec.tsx
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/mobile/src/features/backup-setup/model/use-backup-setup.ts
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/mobile/src/features/pairing/ui/pairing-modal.tsx
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/mobile/src/pages/activity/ui/activity-automatic.spec.tsx
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/mobile/src/pages/activity/ui/activity-page.tsx
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/mobile/src/pages/pairing/ui/pairing-page.spec.tsx
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/mobile/src/pages/setup/ui/webdav-page.tsx
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/mobile/src/shared/api/webdav-settings.spec.ts
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/mobile/src/shared/api/webdav-settings.ts
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/mobile/src/shared/api/webdav.ts
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/mobile/src/shared/i18n/locales/de.json
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/mobile/src/shared/i18n/locales/en.json
+?? docs/implementation/evidence/backlog-2.4/baseline/apps/mobile/src/shared/i18n/locales/tr.json
+?? docs/implementation/evidence/backlog-2.4/baseline/docs/implementation/CURRENT.md
+?? docs/implementation/evidence/backlog-2.4/baseline/source.sha256
+?? docs/implementation/evidence/backlog-2.4/baseline/staged.txt
+?? docs/implementation/evidence/backlog-2.4/baseline/status.txt
+?? docs/implementation/evidence/backlog-2.4/changed-code-files.txt
+?? docs/implementation/evidence/backlog-2.4/code-2.4-delta.diff
+?? docs/implementation/evidence/backlog-2.4/final-code.sha256
+?? docs/implementation/evidence/backlog-2.4/fix-r1.diff
+?? docs/implementation/evidence/backlog-2.4/fix-r1b.diff
+?? docs/implementation/evidence/backlog-2.4/locale-2.4-delta.diff
+?? docs/implementation/evidence/backlog-2.4/logs/g24-r1-final.sha256
+?? docs/implementation/evidence/backlog-2.4/logs/g24-r1-fix2-final.sha256
+?? docs/implementation/evidence/backlog-2.4/logs/locale-final-sonnet.sha256
+?? docs/implementation/evidence/backlog-2.4/review-audit.txt
+?? docs/implementation/evidence/backlog-2.4/review-closeout-check.txt
+?? docs/implementation/evidence/backlog-2.4/review-endpoint.spec.tsx
+?? docs/implementation/evidence/backlog-2.4/review-fix-r1-audit.txt
+?? docs/implementation/evidence/backlog-2.4/review-fix-r1-neighbor.spec.tsx
+?? docs/implementation/evidence/backlog-2.4/review-fix-r1-record-check.txt
+?? docs/implementation/evidence/backlog-2.4/review-fix-r1b-audit.txt
+?? docs/implementation/evidence/backlog-2.4/review-fix-r1b-closeout-check.txt
+?? docs/implementation/evidence/backlog-2.4/review-fix-r1b-status.txt
+?? docs/implementation/evidence/backlog-2.4/review-probe.config.ts
+?? docs/implementation/evidence/backlog-2.4/review-probe.spec.tsx
+?? docs/implementation/evidence/backlog-2.4/review.md
+?? docs/implementation/evidence/backlog-2.5/MANIFEST.md
+?? docs/implementation/evidence/backlog-2.5/baseline/CURRENT.start.diff
+?? docs/implementation/evidence/backlog-2.5/baseline/CURRENT.start.md
+?? docs/implementation/evidence/backlog-2.5/baseline/allowlist-start.txt
+?? docs/implementation/evidence/backlog-2.5/baseline/head.txt
+?? docs/implementation/evidence/backlog-2.5/baseline/inputs.sha256
+?? docs/implementation/evidence/backlog-2.5/baseline/staged.txt
+?? docs/implementation/evidence/backlog-2.5/baseline/status.txt
+?? docs/implementation/evidence/backlog-2.5/desktop-smoke/desktop.settings__tr__light__normal.png
+?? docs/implementation/evidence/backlog-2.5/desktop-smoke/run.json
+?? docs/implementation/evidence/backlog-2.5/desktop-smoke/run.lock
+?? docs/implementation/evidence/backlog-2.5/desktop-stale-negative/run.json
+?? docs/implementation/evidence/backlog-2.5/desktop-stale-negative/run.lock
+?? docs/implementation/evidence/backlog-2.5/final-files.sha256
+?? docs/implementation/evidence/backlog-2.5/fix-r1/baseline/head.txt
+?? docs/implementation/evidence/backlog-2.5/fix-r1/baseline/staged.txt
+?? docs/implementation/evidence/backlog-2.5/fix-r1/baseline/status.txt
+?? docs/implementation/evidence/backlog-2.5/ios-fixture-r2/fixture.json
+?? docs/implementation/evidence/backlog-2.5/ios-fixture/fixture.json
+?? docs/implementation/evidence/backlog-2.5/ios-hardkill/run.json
+?? docs/implementation/evidence/backlog-2.5/ios-hardkill/run.lock
+?? docs/implementation/evidence/backlog-2.5/ios-interrupt/run.json
+?? docs/implementation/evidence/backlog-2.5/ios-interrupt/run.lock
+?? docs/implementation/evidence/backlog-2.5/ios-smoke/mobile.settings__tr__light__normal.png
+?? docs/implementation/evidence/backlog-2.5/ios-smoke/resume-1794991804083.json
+?? docs/implementation/evidence/backlog-2.5/ios-smoke/run.json
+?? docs/implementation/evidence/backlog-2.5/ios-smoke/run.lock
+?? docs/implementation/evidence/backlog-2.5/logs/check-2.exit
+?? docs/implementation/evidence/backlog-2.5/logs/desktop-smoke.exit
+?? docs/implementation/evidence/backlog-2.5/logs/desktop-stale-negative.exit
+?? docs/implementation/evidence/backlog-2.5/logs/desktop-vite-build.exit
+?? docs/implementation/evidence/backlog-2.5/logs/eslint-capture.exit
+?? docs/implementation/evidence/backlog-2.5/logs/ios-hardkill-cleanup.exit
+?? docs/implementation/evidence/backlog-2.5/logs/ios-hardkill.exit
+?? docs/implementation/evidence/backlog-2.5/logs/ios-interrupt-cleanup.exit
+?? docs/implementation/evidence/backlog-2.5/logs/ios-interrupt.exit
+?? docs/implementation/evidence/backlog-2.5/logs/ios-smoke-resume.exit
+?? docs/implementation/evidence/backlog-2.5/logs/ios-smoke.exit
+?? docs/implementation/evidence/backlog-2.5/logs/prepare-ios.attempt1.exit
+?? docs/implementation/evidence/backlog-2.5/logs/prepare-ios.exit
+?? docs/implementation/evidence/backlog-2.5/logs/product-ios-status.after.txt
+?? docs/implementation/evidence/backlog-2.5/logs/product-ios-status.after2.txt
+?? docs/implementation/evidence/backlog-2.5/logs/product-ios-status.before.txt
+?? docs/implementation/evidence/backlog-2.5/logs/ruby-syntax.exit
+?? docs/implementation/evidence/backlog-2.5/logs/simulators.after-hardkill.txt
+?? docs/implementation/evidence/backlog-2.5/logs/simulators.after-interrupt.txt
+?? docs/implementation/evidence/backlog-2.5/logs/simulators.after.txt
+?? docs/implementation/evidence/backlog-2.5/logs/simulators.before.txt
+?? docs/implementation/evidence/backlog-2.5/logs/unittest.exit
+?? docs/implementation/evidence/backlog-2.5/review-tsc.exit
+?? docs/implementation/evidence/backlog-2.5/review.md
+?? docs/implementation/evidence/backlog-2.5/sonnet/files.sha256
+?? docs/implementation/evidence/backlog-2.5/sonnet/test_matrix.exit
+?? docs/implementation/evidence/backlog-2.5/staged-final.txt
+?? docs/implementation/evidence/backlog-2.5/status-final.txt
+?? docs/implementation/evidence/continuation-handoff-2026-11-18.md
+?? docs/implementation/evidence/delegation-workflow-2026-11-18.md
+?? docs/implementation/evidence/mac-validation-cost-2026-11-17.md
+?? docs/implementation/evidence/research-routing-2026-11-18.md
+?? docs/implementation/plans/2.2-g2-g3-research.md
+?? docs/implementation/plans/2.3-g4-g6-research.md
+?? docs/implementation/plans/2.4-clarity-diagnostics-research.md
+?? docs/implementation/plans/2.5-batch-capture-research.md
+?? tools/capture-ui.py
+?? tools/ui-capture/common.py
+?? tools/ui-capture/desktop.py
+?? tools/ui-capture/ios.py
+?? tools/ui-capture/ios_fixture.rb
+?? tools/ui-capture/matrix.json
+?? tools/ui-capture/matrix.py
+?? tools/ui-capture/test_capture.py
+?? tools/ui-capture/test_matrix.py

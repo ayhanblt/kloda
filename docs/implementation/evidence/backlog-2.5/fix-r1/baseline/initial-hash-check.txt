@@ -1,0 +1,13 @@
+tools/capture-ui.py: OK
+tools/ui-capture/common.py: OK
+tools/ui-capture/desktop.py: OK
+tools/ui-capture/ios.py: OK
+tools/ui-capture/matrix.py: OK
+tools/ui-capture/test_capture.py: OK
+tools/ui-capture/test_matrix.py: OK
+tools/ui-capture/ios_fixture.rb: OK
+tools/ui-capture/matrix.json: OK
+apps/mobile/capture/entry.tsx: OK
+apps/mobile/capture/protocol.ts: OK
+apps/mobile/capture/screens.tsx: OK
+apps/mobile/capture/tsconfig.json: OK

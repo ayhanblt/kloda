@@ -1,0 +1,363 @@
+--- a/apps/desktop/src/shared/i18n/locales/de.json
++++ b/apps/desktop/src/shared/i18n/locales/de.json
+@@ -71,6 +71,44 @@
+     "sourceRequired": "Wähle mindestens einen Ordner aus.",
+     "scheduleError": "Zeitplan konnte nicht gespeichert werden.",
+     "testError": "WebDAV-Test fehlgeschlagen.",
++    "webdavHints": {
++      "endpoint": "Gib die vollständige HTTPS-Adresse einschließlich Port (falls vorhanden) und WebDAV-Stammpfad des Servers ein. Beispiel: https://server.example:8083/webdav/",
++      "targetPath": "Ein Unterordner unter diesem WebDAV-Stamm, der bereits existieren und zugänglich sein muss; Kloda legt ihn nicht an. Beispiel: Kloda → https://server.example:8083/webdav/Kloda/",
++      "security": "Unterstützt werden nur HTTPS mit einem vom Betriebssystem als vertrauenswürdig eingestuften Zertifikat und Basic-Anmeldung. Der Test schreibt, liest zurück und löscht ausschließlich seine eigenen temporären Daten."
++    },
++    "webdavDiagnostic": {
++      "summary": "Fehlgeschlagener Schritt: {{stage}}. {{reason}}",
++      "stages": {
++        "propfind": "Prüfung des Ordnerzugriffs (PROPFIND)",
++        "mkcol": "Temporären Testordner anlegen (MKCOL)",
++        "put": "Testdatei schreiben (PUT)",
++        "move": "Testdatei abschließen (MOVE)",
++        "get": "Testdatei zurücklesen (GET)",
++        "delete_file": "Testdatei löschen (DELETE)",
++        "delete_directory": "Temporären Testordner löschen (DELETE)"
++      },
++      "reasons": {
++        "access_denied": "Der Server hat den Zugriff verweigert (HTTP {{status}}).",
++        "not_found": "Ordner oder Pfad konnten nicht als zugänglich bestätigt werden (HTTP {{status}}).",
++        "method_rejected": "Der Server hat diese Methode abgelehnt (HTTP {{status}}).",
++        "http_other": "Der Server hat HTTP {{status}} zurückgegeben.",
++        "transport_unknown": "Die Verbindung ist ohne verwertbare Serverantwort fehlgeschlagen. Die genaue Ursache (Netzwerk, DNS, TLS oder Zeitüberschreitung) lässt sich aus diesem Test nicht bestimmen.",
++        "readback_mismatch": "Der zurückgelesene Inhalt stimmte nicht mit dem Geschriebenen überein."
++      }
++    },
++    "testErrors": {
++      "connection_unavailable": "Der Server ist nicht erreichbar oder vorübergehend nicht verfügbar.",
++      "access_denied": "Der Server hat den Zugriff verweigert.",
++      "storage_full": "Der Speicher ist voll.",
++      "review_required": "Das Ergebnis ist unsicher. Temporäre Kloda-Testdaten können zurückbleiben und müssen geprüft werden.",
++      "configuration_required": "Adresse oder Einstellungen sind ungültig; die Adresse muss HTTPS verwenden.",
++      "settings_changed": "Die Einstellungen haben sich während des Tests geändert. Teste erneut.",
++      "interrupted": "Der Test wurde unterbrochen.",
++      "retry_exhausted": "Das Limit für Wiederholungen wurde erreicht.",
++      "backup_busy": "Ein anderer Sicherungsvorgang ist ausgelastet.",
++      "source_changed": "Eine Quelle hat sich während des Tests geändert.",
++      "unknown": "Der Verbindungstest ist fehlgeschlagen."
++    },
+     "startError": "Backup konnte nicht gestartet werden."
+   },
+   "pairing": {
+@@ -130,7 +168,7 @@
+     "approve": "Lokales Vertrauen genehmigen",
+     "deny": "Dieses Telefon ablehnen",
+     "repairTitle": "Dieses widerrufene Telefon erneut koppeln?",
+-    "repairDescription": "Das bisherige lokale Vertrauen für genau diesen Telefonschlüssel wurde widerrufen. Erneut koppeln stellt nur neues Gerätevertrauen her; bestehende Dateisperren werden nicht aufgehoben und Dateizugriff wird nicht gewährt.",
++    "repairDescription": "Das Telefon hat der erneuten Kopplung bereits ausdrücklich zugestimmt. Deine Genehmigung hier ist weiterhin erforderlich. Sie stellt nur neues Gerätevertrauen her, hebt bestehende Dateisperren nicht auf und gewährt keinen Dateizugriff.",
+     "pairAgain": "Erneut koppeln",
+     "resume": "Kopplung fortsetzen",
+     "resumeDescription": "Die Kopplung ist nicht abgeschlossen. Fortsetzen fordert ausdrücklich die Wiederherstellung des gespeicherten Eintrags über eine neue authentifizierte LAN-Verbindung an. Keine automatischen Netzwerk-Wiederholungen.",
+--- a/apps/desktop/src/shared/i18n/locales/en.json
++++ b/apps/desktop/src/shared/i18n/locales/en.json
+@@ -71,6 +71,44 @@
+     "sourceRequired": "Select at least one folder.",
+     "scheduleError": "Unable to save schedule.",
+     "testError": "WebDAV test failed.",
++    "webdavHints": {
++      "endpoint": "Enter the full HTTPS address including the port (if any) and the server's WebDAV root. Example: https://server.example:8083/webdav/",
++      "targetPath": "A subfolder under that WebDAV root which must already exist and be accessible; Kloda does not create it. Example: Kloda → https://server.example:8083/webdav/Kloda/",
++      "security": "Only HTTPS with a certificate trusted by the operating system and Basic sign-in is supported. The test writes, reads back and deletes its own temporary data only."
++    },
++    "webdavDiagnostic": {
++      "summary": "Failed step: {{stage}}. {{reason}}",
++      "stages": {
++        "propfind": "Folder access check (PROPFIND)",
++        "mkcol": "Creating the temporary test folder (MKCOL)",
++        "put": "Writing the test file (PUT)",
++        "move": "Finalizing the test file (MOVE)",
++        "get": "Reading the test file back (GET)",
++        "delete_file": "Deleting the test file (DELETE)",
++        "delete_directory": "Deleting the temporary test folder (DELETE)"
++      },
++      "reasons": {
++        "access_denied": "The server denied access (HTTP {{status}}).",
++        "not_found": "The folder or path could not be verified as accessible (HTTP {{status}}).",
++        "method_rejected": "The server rejected this method (HTTP {{status}}).",
++        "http_other": "The server returned HTTP {{status}}.",
++        "transport_unknown": "The connection failed without a usable server response. The exact cause (network, DNS, TLS or timeout) cannot be determined from this test.",
++        "readback_mismatch": "The read-back content did not match what was written."
++      }
++    },
++    "testErrors": {
++      "connection_unavailable": "The server is unreachable or temporarily unavailable.",
++      "access_denied": "The server denied access.",
++      "storage_full": "The storage is full.",
++      "review_required": "The result is uncertain. Temporary Kloda test data may remain and needs review.",
++      "configuration_required": "The endpoint or settings are invalid; the address must use HTTPS.",
++      "settings_changed": "The settings changed during the test. Test again.",
++      "interrupted": "The test was interrupted.",
++      "retry_exhausted": "The retry limit was reached.",
++      "backup_busy": "Another backup operation is busy.",
++      "source_changed": "A source changed during the test.",
++      "unknown": "The connection test failed."
++    },
+     "startError": "Backup could not start."
+   },
+   "pairing": {
+@@ -130,7 +168,7 @@
+     "approve": "Approve local trust",
+     "deny": "Deny this phone",
+     "repairTitle": "Pair this revoked phone again?",
+-    "repairDescription": "Previous local trust for this exact phone key was revoked. Pair again establishes new device trust only; it does not clear existing file denies or grant file access.",
++    "repairDescription": "The phone has already explicitly agreed to pair again. Your approval here is still required. It creates new device trust only, does not clear existing file denies and grants no file access.",
+     "pairAgain": "Pair again",
+     "resume": "Resume pairing",
+     "resumeDescription": "Pairing is not complete. Resume explicitly requests recovery of the retained record on a fresh authenticated LAN connection. No automatic network retry is started.",
+--- a/apps/desktop/src/shared/i18n/locales/tr.json
++++ b/apps/desktop/src/shared/i18n/locales/tr.json
+@@ -71,6 +71,44 @@
+     "sourceRequired": "En az bir klasör seçin.",
+     "scheduleError": "Program kaydedilemedi.",
+     "testError": "WebDAV testi başarısız.",
++    "webdavHints": {
++      "endpoint": "Portu (varsa) ve sunucunun WebDAV kök yolunu içeren tam HTTPS adresini girin. Örnek: https://server.example:8083/webdav/",
++      "targetPath": "Bu WebDAV kökü altında önceden var olan ve erişilebilen bir alt klasör; Kloda onu oluşturmaz. Örnek: Kloda → https://server.example:8083/webdav/Kloda/",
++      "security": "Yalnızca işletim sisteminin güvendiği sertifikaya sahip HTTPS ve Basic oturum açma desteklenir. Test yalnızca kendi geçici verisini yazar, geri okur ve siler."
++    },
++    "webdavDiagnostic": {
++      "summary": "Başarısız adım: {{stage}}. {{reason}}",
++      "stages": {
++        "propfind": "Klasör erişim denetimi (PROPFIND)",
++        "mkcol": "Geçici test klasörü oluşturuluyor (MKCOL)",
++        "put": "Test dosyası yazılıyor (PUT)",
++        "move": "Test dosyası sonlandırılıyor (MOVE)",
++        "get": "Test dosyası geri okunuyor (GET)",
++        "delete_file": "Test dosyası siliniyor (DELETE)",
++        "delete_directory": "Geçici test klasörü siliniyor (DELETE)"
++      },
++      "reasons": {
++        "access_denied": "Sunucu erişimi reddetti (HTTP {{status}}).",
++        "not_found": "Klasör veya yolun erişilebilir olduğu doğrulanamadı (HTTP {{status}}).",
++        "method_rejected": "Sunucu bu yöntemi reddetti (HTTP {{status}}).",
++        "http_other": "Sunucu HTTP {{status}} döndürdü.",
++        "transport_unknown": "Bağlantı, kullanılabilir bir sunucu yanıtı alınamadan başarısız oldu. Kesin neden (ağ, DNS, TLS veya zaman aşımı) bu testten belirlenemez.",
++        "readback_mismatch": "Geri okunan içerik yazılanla eşleşmedi."
++      }
++    },
++    "testErrors": {
++      "connection_unavailable": "Sunucuya ulaşılamıyor veya geçici olarak kullanılamıyor.",
++      "access_denied": "Sunucu erişimi reddetti.",
++      "storage_full": "Depolama alanı dolu.",
++      "review_required": "Sonuç belirsiz. Geçici Kloda test verisi kalmış olabilir ve gözden geçirilmelidir.",
++      "configuration_required": "Adres veya ayarlar geçersiz; adres HTTPS kullanmalıdır.",
++      "settings_changed": "Test sırasında ayarlar değişti. Testi yeniden yapın.",
++      "interrupted": "Test kesintiye uğradı.",
++      "retry_exhausted": "Yeniden deneme sınırına ulaşıldı.",
++      "backup_busy": "Başka bir yedekleme işlemi meşgul.",
++      "source_changed": "Test sırasında bir kaynak değişti.",
++      "unknown": "Bağlantı testi başarısız oldu."
++    },
+     "startError": "Yedekleme başlatılamadı."
+   },
+   "pairing": {
+@@ -130,7 +168,7 @@
+     "approve": "Yerel güveni onayla",
+     "deny": "Bu telefonu reddet",
+     "repairTitle": "Güveni iptal edilen bu telefon yeniden eşleştirilsin mi?",
+-    "repairDescription": "Tam olarak bu telefon anahtarına ait önceki yerel güven iptal edildi. Yeniden eşleştirme yalnızca yeni cihaz güveni oluşturur; mevcut dosya retlerini kaldırmaz ve dosya erişimi vermez.",
++    "repairDescription": "Telefon yeniden eşleştirmeyi zaten açıkça kabul etti. Burada sizin onayınız hâlâ gerekiyor. Yalnızca yeni cihaz güveni oluşturur, mevcut dosya retlerini kaldırmaz ve dosya erişimi vermez.",
+     "pairAgain": "Yeniden eşleştir",
+     "resume": "Eşleştirmeyi sürdür",
+     "resumeDescription": "Eşleştirme tamamlanmadı. Sürdürme, saklanan kaydı yeni, kimliği doğrulanmış bir yerel ağ bağlantısında açıkça kurtarmayı ister. Otomatik ağ yeniden denemesi başlatılmaz.",
+--- a/apps/mobile/src/shared/i18n/locales/de.json
++++ b/apps/mobile/src/shared/i18n/locales/de.json
+@@ -75,7 +75,7 @@
+       "destination_permission_lost": "Der Zugriff auf das Wiederherstellungsziel ging verloren. Wähle eine neue Datei und versuche es erneut.",
+       "destination_not_empty": "Das Ziel ist nicht leer. Es wurde weder überschrieben noch gelöscht; wähle eine neue Datei.",
+       "restore_cleanup_failed": "Die Wiederherstellung ist nicht abgeschlossen und das neu erstellte Ziel konnte nicht entfernt werden. Eine unvollständige Datei kann verbleiben; entferne sie selbst und wähle beim erneuten Versuch eine neue Datei.",
+-      "os_interrupted": "Das Betriebssystem hat den Auftrag beendet. Der Fortschritt bleibt bis zur nächsten Ausführungsmöglichkeit erhalten.",
++      "os_interrupted": "Der Auftrag wurde unterbrochen. Die genaue Ursache lässt sich aus diesem Zustand nicht bestimmen. Der Fortschritt bleibt erhalten, bis das Betriebssystem die nächste Ausführungsmöglichkeit bietet.",
+       "automatic_pause_not_saved": "Die automatische Pause konnte nicht gespeichert werden. In dieser Sitzung gestoppt; nach Neustart kann die Sicherung beginnen. Speicher prüfen.",
+       "background_unavailable": "Das Betriebssystem konnte den Hintergrunddienst nicht starten. App geöffnet lassen und erneut versuchen.",
+       "native_unsupported": "Das erforderliche native Sicherungsmodul ist auf dieser Plattform nicht verfügbar.",
+@@ -117,7 +117,7 @@
+       "review_required": "Der Photos-Import muss geprüft werden. Es wird keine zweite Kopie automatisch erstellt.",
+       "organization_review": "Medien- oder Albumbeziehungen müssen geprüft werden; eine vollständige Wiederherstellung wird nicht angenommen.",
+       "destination_required": "Aktiviere zuerst ausdrücklich mindestens ein Sicherungsziel.",
+-      "webdav_auth": "Der WebDAV-Server hat Benutzername oder Passwort abgelehnt.",
++      "webdav_auth": "Der WebDAV-Server hat den Zugriff verweigert (HTTP-Zugriffsverweigerung).",
+       "webdav_storage": "Das sichere WebDAV-Profil dieses Geräts konnte nicht gelesen oder gespeichert werden.",
+       "webdav_missing": "Kein natives WebDAV-Profil gespeichert.",
+       "destination_disabled": "Dieses Sicherungsziel ist deaktiviert.",
+@@ -199,6 +199,31 @@
+     },
+     "storageTested": "Die gespeicherten Einstellungen bestanden einen früheren Verbindungstest. Das garantiert keine aktuelle Erreichbarkeit.",
+     "testError": "Die WebDAV-Verbindung konnte nicht bestätigt werden.",
++    "webdavHints": {
++      "endpoint": "Gib die vollständige HTTPS-Adresse einschließlich Port (falls vorhanden) und WebDAV-Stammpfad des Servers ein. Beispiel: https://server.example:8083/webdav/",
++      "targetPath": "Ein Unterordner unter diesem WebDAV-Stamm, der bereits existieren und zugänglich sein muss; Kloda legt ihn nicht an. Beispiel: Kloda → https://server.example:8083/webdav/Kloda/",
++      "security": "Unterstützt werden nur HTTPS mit einem vom Betriebssystem als vertrauenswürdig eingestuften Zertifikat und Basic-Anmeldung. Der Test schreibt, liest zurück und löscht ausschließlich seine eigenen temporären Daten."
++    },
++    "webdavDiagnostic": {
++      "summary": "Fehlgeschlagener Schritt: {{stage}}. {{reason}}",
++      "stages": {
++        "propfind": "Prüfung des Ordnerzugriffs (PROPFIND)",
++        "mkcol": "Temporären Testordner anlegen (MKCOL)",
++        "put": "Testdatei schreiben (PUT)",
++        "move": "Testdatei abschließen (MOVE)",
++        "get": "Testdatei zurücklesen (GET)",
++        "delete_file": "Testdatei löschen (DELETE)",
++        "delete_directory": "Temporären Testordner löschen (DELETE)"
++      },
++      "reasons": {
++        "access_denied": "Der Server hat den Zugriff verweigert (HTTP {{status}}).",
++        "not_found": "Ordner oder Pfad konnten nicht als zugänglich bestätigt werden (HTTP {{status}}).",
++        "method_rejected": "Der Server hat diese Methode abgelehnt (HTTP {{status}}).",
++        "http_other": "Der Server hat HTTP {{status}} zurückgegeben.",
++        "transport_unknown": "Die Verbindung ist ohne verwertbare Serverantwort fehlgeschlagen. Die genaue Ursache (Netzwerk, DNS, TLS oder Zeitüberschreitung) lässt sich aus diesem Test nicht bestimmen.",
++        "readback_mismatch": "Der zurückgelesene Inhalt stimmte nicht mit dem Geschriebenen überein."
++      }
++    },
+     "localStartTime": "Lokale Startzeit",
+     "saveSchedule": "Speichern und mit Computer verbinden",
+     "invalidTime": "Verwende HH:mm für die lokale Startzeit.",
+@@ -240,7 +265,11 @@
+     "leaveConsequences": "Beim Verlassen werden diese Ansicht und ihre Verbindung geschlossen. Es schließt die Kopplung nicht ab und löscht keine ausstehenden oder angehefteten Datensätze.",
+     "repairTitle": "Erneut mit diesem Computer koppeln?",
+     "repairDescription": "Das frühere lokale Vertrauen dieses Computers wurde widerrufen. Prüfe den authentifizierten Computerfingerabdruck vor einer ausdrücklichen erneuten Kopplung.",
+-    "repairConsequences": "Der alte widerrufene Datensatz und alle Dateizugriffsverbote bleiben unverändert. Auch ein neuer Versuch erfordert die Zustimmung am Computer.",
++    "repairConsequences": "Zuerst stimmst du auf diesem Telefon ausdrücklich zu, danach muss der Computer zustimmen. Diese Zustimmung schließt die Kopplung nicht ab und gewährt keinen Dateizugriff. Der alte widerrufene Datensatz und alle Dateizugriffsverbote bleiben unverändert.",
++    "repairWorking": {
++      "title": "Deine Entscheidung wird gesendet",
++      "description": "Deine Entscheidung wird gesendet. Das ist keine abgeschlossene Kopplung. Wenn du zugestimmt hast, muss der Computer noch zustimmen; der Dateizugriff bleibt getrennt."
++    },
+     "pairAgain": "Erneut mit diesem Computer koppeln",
+     "denyRepair": "Nicht erneut koppeln",
+     "helpTitle": "So funktioniert lokale Kopplung",
+--- a/apps/mobile/src/shared/i18n/locales/en.json
++++ b/apps/mobile/src/shared/i18n/locales/en.json
+@@ -75,7 +75,7 @@
+       "destination_permission_lost": "Restore destination access was lost. Choose a new file and retry.",
+       "destination_not_empty": "The destination is not empty. It was not overwritten or deleted; choose a new file.",
+       "restore_cleanup_failed": "Restore did not complete and the newly created destination could not be removed. An incomplete file may remain; remove it yourself before retrying to a new file.",
+-      "os_interrupted": "The operating system stopped the job. Progress is retained while waiting for an execution opportunity.",
++      "os_interrupted": "The work was interrupted. The exact cause cannot be determined from this state. Progress is retained while waiting for the next operating system execution opportunity.",
+       "automatic_pause_not_saved": "The automatic pause could not be saved. Work stopped for this session; it may restart after reopening. Check storage.",
+       "background_unavailable": "The operating system could not start the background backup service. Keep the app open and try again.",
+       "native_unsupported": "The required native backup module is unavailable on this platform.",
+@@ -117,7 +117,7 @@
+       "review_required": "Photos import needs review. No automatic second copy will be created.",
+       "organization_review": "The media or album relationships need review; full restoration is not assumed.",
+       "destination_required": "Explicitly enable at least one backup destination first.",
+-      "webdav_auth": "The WebDAV server rejected the username or password.",
++      "webdav_auth": "The WebDAV server denied access (HTTP access refusal).",
+       "webdav_storage": "The device’s secure WebDAV profile could not be read or saved.",
+       "webdav_missing": "No native WebDAV profile is saved.",
+       "destination_disabled": "This backup destination is disabled.",
+@@ -199,6 +199,31 @@
+     },
+     "storageTested": "Saved settings passed a previous connection test. This is not a current reachability guarantee.",
+     "testError": "WebDAV connection could not be verified.",
++    "webdavHints": {
++      "endpoint": "Enter the full HTTPS address including the port (if any) and the server's WebDAV root. Example: https://server.example:8083/webdav/",
++      "targetPath": "A subfolder under that WebDAV root which must already exist and be accessible; Kloda does not create it. Example: Kloda → https://server.example:8083/webdav/Kloda/",
++      "security": "Only HTTPS with a certificate trusted by the operating system and Basic sign-in is supported. The test writes, reads back and deletes its own temporary data only."
++    },
++    "webdavDiagnostic": {
++      "summary": "Failed step: {{stage}}. {{reason}}",
++      "stages": {
++        "propfind": "Folder access check (PROPFIND)",
++        "mkcol": "Creating the temporary test folder (MKCOL)",
++        "put": "Writing the test file (PUT)",
++        "move": "Finalizing the test file (MOVE)",
++        "get": "Reading the test file back (GET)",
++        "delete_file": "Deleting the test file (DELETE)",
++        "delete_directory": "Deleting the temporary test folder (DELETE)"
++      },
++      "reasons": {
++        "access_denied": "The server denied access (HTTP {{status}}).",
++        "not_found": "The folder or path could not be verified as accessible (HTTP {{status}}).",
++        "method_rejected": "The server rejected this method (HTTP {{status}}).",
++        "http_other": "The server returned HTTP {{status}}.",
++        "transport_unknown": "The connection failed without a usable server response. The exact cause (network, DNS, TLS or timeout) cannot be determined from this test.",
++        "readback_mismatch": "The read-back content did not match what was written."
++      }
++    },
+     "localStartTime": "Local start time",
+     "saveSchedule": "Save and connect to computer",
+     "invalidTime": "Use HH:mm for the local start time.",
+@@ -240,7 +265,11 @@
+     "leaveConsequences": "Leaving closes this view and its connection. It does not complete pairing or delete saved pending or pinned records.",
+     "repairTitle": "Pair with this computer again?",
+     "repairDescription": "This computer's previous local trust was revoked. Check the authenticated computer fingerprint before explicitly pairing again.",
+-    "repairConsequences": "The old revoked record and all file-access denies remain unchanged. A new attempt still requires approval on the computer.",
++    "repairConsequences": "First you explicitly consent on this phone, then the computer must approve. This consent does not complete pairing and grants no file access. The old revoked record and all file-access denies remain unchanged.",
++    "repairWorking": {
++      "title": "Sending your decision",
++      "description": "Your decision is being sent. This is not a completed pairing. If you agreed, the computer must still approve, and file access stays separate."
++    },
+     "pairAgain": "Pair again with this computer",
+     "denyRepair": "Do not pair again",
+     "helpTitle": "How local pairing works",
+--- a/apps/mobile/src/shared/i18n/locales/tr.json
++++ b/apps/mobile/src/shared/i18n/locales/tr.json
+@@ -75,7 +75,7 @@
+       "destination_permission_lost": "Geri yükleme hedefi erişimi kayboldu. Yeni dosya seçip tekrar deneyin.",
+       "destination_not_empty": "Hedef boş değil. Üzerine yazılmadı veya silinmedi; yeni dosya seçin.",
+       "restore_cleanup_failed": "Geri yükleme tamamlanmadı ve yeni oluşturulan hedef silinemedi. Eksik dosya kalabilir; yeni dosyaya tekrar denemeden önce kendiniz silin.",
+-      "os_interrupted": "İşletim sistemi işi durdurdu. İlerleme korunuyor; uygun yürütme fırsatı beklenecek.",
++      "os_interrupted": "İş kesintiye uğradı. Kesin neden bu durumdan belirlenemez. İlerleme korunuyor; işletim sisteminin sonraki yürütme fırsatı bekleniyor.",
+       "automatic_pause_not_saved": "Otomatik duraklatma diske kaydedilemedi. Bu oturumda işler durduruldu; yeniden açılışta otomatik başlayabilir. Depolamayı kontrol edin.",
+       "background_unavailable": "İşletim sistemi arka plan yedekleme servisini başlatamadı. Uygulamayı açık tutup yeniden deneyin.",
+       "native_unsupported": "Bu platformda gerekli native yedekleme modülü yok.",
+@@ -117,7 +117,7 @@
+       "review_required": "Photos geri yüklemesi inceleme gerektiriyor. Otomatik ikinci kopya oluşturulmaz.",
+       "organization_review": "Medya veya albüm ilişkileri inceleme gerektiriyor; tam geri yükleme varsayılmaz.",
+       "destination_required": "Önce en az bir yedekleme hedefini açıkça etkinleştir.",
+-      "webdav_auth": "WebDAV sunucusu kullanıcı adı veya parolayı reddetti.",
++      "webdav_auth": "WebDAV sunucusu erişimi reddetti (HTTP erişim reddi).",
+       "webdav_storage": "Cihazdaki güvenli WebDAV kaydı okunamadı veya kaydedilemedi.",
+       "webdav_missing": "Kayıtlı native WebDAV profili yok.",
+       "destination_disabled": "Bu yedekleme hedefi devre dışı.",
+@@ -199,6 +199,31 @@
+     },
+     "storageTested": "Kaydedilen ayarlar önceki bağlantı testini geçti. Bu, güncel erişilebilirlik garantisi değildir.",
+     "testError": "WebDAV bağlantısı doğrulanamadı.",
++    "webdavHints": {
++      "endpoint": "Portu (varsa) ve sunucunun WebDAV kök yolunu içeren tam HTTPS adresini girin. Örnek: https://server.example:8083/webdav/",
++      "targetPath": "Bu WebDAV kökü altında önceden var olan ve erişilebilen bir alt klasör; Kloda onu oluşturmaz. Örnek: Kloda → https://server.example:8083/webdav/Kloda/",
++      "security": "Yalnızca işletim sisteminin güvendiği sertifikaya sahip HTTPS ve Basic oturum açma desteklenir. Test yalnızca kendi geçici verisini yazar, geri okur ve siler."
++    },
++    "webdavDiagnostic": {
++      "summary": "Başarısız adım: {{stage}}. {{reason}}",
++      "stages": {
++        "propfind": "Klasör erişim denetimi (PROPFIND)",
++        "mkcol": "Geçici test klasörü oluşturuluyor (MKCOL)",
++        "put": "Test dosyası yazılıyor (PUT)",
++        "move": "Test dosyası sonlandırılıyor (MOVE)",
++        "get": "Test dosyası geri okunuyor (GET)",
++        "delete_file": "Test dosyası siliniyor (DELETE)",
++        "delete_directory": "Geçici test klasörü siliniyor (DELETE)"
++      },
++      "reasons": {
++        "access_denied": "Sunucu erişimi reddetti (HTTP {{status}}).",
++        "not_found": "Klasör veya yolun erişilebilir olduğu doğrulanamadı (HTTP {{status}}).",
++        "method_rejected": "Sunucu bu yöntemi reddetti (HTTP {{status}}).",
++        "http_other": "Sunucu HTTP {{status}} döndürdü.",
++        "transport_unknown": "Bağlantı, kullanılabilir bir sunucu yanıtı alınamadan başarısız oldu. Kesin neden (ağ, DNS, TLS veya zaman aşımı) bu testten belirlenemez.",
++        "readback_mismatch": "Geri okunan içerik yazılanla eşleşmedi."
++      }
++    },
+     "localStartTime": "Yerel başlangıç saati",
+     "saveSchedule": "Kaydet ve bilgisayara bağlan",
+     "invalidTime": "Yerel başlangıç saati için SS:dd kullanın.",
+@@ -240,7 +265,11 @@
+     "leaveConsequences": "Çıkış bu görünümü ve bağlantısını kapatır. Eşleştirmeyi tamamlamaz, kayıtlı bekleyen veya sabit kayıtları silmez.",
+     "repairTitle": "Bu bilgisayarla tekrar eşleştirilsin mi?",
+     "repairDescription": "Bu bilgisayarın önceki yerel güveni iptal edilmiş. Tekrar eşleştirmeye açıkça izin vermeden önce kimliği doğrulanmış bilgisayar parmak izini kontrol edin.",
+-    "repairConsequences": "Eski iptal kaydı ve tüm dosya erişim retleri değişmeden kalır. Yeni girişim için de bilgisayardan onay gerekir.",
++    "repairConsequences": "Önce bu telefonda açıkça onay verirsiniz, ardından bilgisayarın onaylaması gerekir. Bu onay eşleştirmeyi tamamlamaz ve dosya erişimi vermez. Eski iptal kaydı ve tüm dosya erişim retleri değişmeden kalır.",
++    "repairWorking": {
++      "title": "Kararınız gönderiliyor",
++      "description": "Kararınız gönderiliyor. Bu, tamamlanmış bir eşleştirme değildir. Onay verdiyseniz bilgisayarın yine de onaylaması gerekir; dosya erişimi ayrı kalır."
++    },
+     "pairAgain": "Bu bilgisayarla tekrar eşleştir",
+     "denyRepair": "Tekrar eşleştirme",
+     "helpTitle": "Yerel eşleştirme nasıl çalışır?",

@@ -2,11 +2,26 @@ export type WebDavFailureCode =
   | 'connection_unavailable' | 'access_denied' | 'storage_full' | 'source_changed' | 'review_required'
   | 'configuration_required' | 'settings_changed' | 'interrupted' | 'retry_exhausted' | 'backup_busy' | 'unknown';
 
+export type WebDavDiagnosticStage = 'propfind' | 'mkcol' | 'put' | 'move' | 'get' | 'delete_file' | 'delete_directory';
+// Connection-test presentation only; never a retry input and never copied without the safe projection.
+export type WebDavDiagnostic =
+  | { stage: WebDavDiagnosticStage; kind: 'http'; status: number }
+  | { stage: WebDavDiagnosticStage; kind: 'transport_unknown' | 'readback_mismatch' };
+
 export class WebDavFailure extends Error {
-  constructor(readonly code: WebDavFailureCode, message: string = code, options?: ErrorOptions) {
+  readonly diagnostic?: WebDavDiagnostic;
+  constructor(readonly code: WebDavFailureCode, message: string = code, options?: ErrorOptions & { diagnostic?: WebDavDiagnostic }) {
     super(message, options);
     this.name = 'WebDavFailure';
+    if (options?.diagnostic) this.diagnostic = options.diagnostic;
   }
+}
+
+// Attaches the observed probe boundary once; code, message and cause stay unchanged.
+export function atStage(failure: WebDavFailure, stage: WebDavDiagnosticStage, status?: number): WebDavFailure {
+  if (failure.diagnostic) return failure;
+  const diagnostic: WebDavDiagnostic = status === undefined ? { stage, kind: 'transport_unknown' } : { stage, kind: 'http', status };
+  return new WebDavFailure(failure.code, failure.message, { cause: failure.cause, diagnostic });
 }
 
 export function failureCode(error: unknown): WebDavFailureCode {

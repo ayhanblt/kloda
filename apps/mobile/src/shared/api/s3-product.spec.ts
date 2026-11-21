@@ -16,6 +16,16 @@ it('requires enabled C1 capability for automatic work and validates its native r
   expect(() => s3StatusFromNative({ ...status,enabled:false },'amazon-s3')).toThrow();
   expect(() => s3StatusFromNative({ ...status,canEnable:false },'amazon-s3')).toThrow();
 });
+it('keeps the automatic support flag optional for older bridges and rejects contradictory API 24/25 status',() => {
+  const base = { provider:'amazon-s3',supported:true,configured:true,enabled:true,canRun:true,canEnable:true,canAutomatic:true,automaticEnabled:true,
+    profile:{ endpoint:'https://s3.eu-north-1.amazonaws.com',region:'eu-north-1',bucket:'owned-bucket',prefix:'owned',pathStyle:false } };
+  expect(s3StatusFromNative(base,'amazon-s3').automaticSupported).toBeUndefined();
+  expect(s3StatusFromNative({ ...base,automaticSupported:true },'amazon-s3').canAutomatic).toBe(true);
+  const old = s3StatusFromNative({ ...base,canAutomatic:false,automaticEnabled:false,automaticSupported:false },'amazon-s3');
+  expect(old).toMatchObject({ supported:true,enabled:true,canRun:true,canEnable:true,canAutomatic:false,automaticEnabled:false,automaticSupported:false });
+  for (const bad of [{ canAutomatic:true },{ automaticEnabled:true }]) expect(() => s3StatusFromNative({ ...base,automaticSupported:false,canAutomatic:false,automaticEnabled:false,...bad },'amazon-s3')).toThrow();
+  expect(() => s3StatusFromNative({ ...base,automaticSupported:'no' },'amazon-s3')).toThrow();
+});
 it('rejects provider confusion, credential echo, duplicate rows and unbounded catalogue pages',async () => {
   const s3BackupsNative = jest.fn(); jest.mocked(requireOptionalNativeModule).mockReturnValue({ s3Backups:s3BackupsNative });
   for (const value of [{ provider:'s3-compatible',page },{ provider:'amazon-s3',page,secret:'no' },

@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { WebDavActivity } from './WebDavActivity';
 
 import { getDesktopBridge, type BackupDraft, type SyncProgress } from '../../shared/api/desktop';
+import { diagnosticReasonKey, parseStorageTestResult, type StorageTestDiagnostic } from '../../shared/api/webdav-test-result';
 
 const emptyDraft: BackupDraft = {
   intervalHours: 12,
@@ -25,10 +26,20 @@ export function BackupSetup({ visible, showActivity = false }: { visible: boolea
     previousActivity.current = showActivity;
   }, [visible, showActivity]);
   const [error, setError] = useState<string | null>(null);
+  const [diagnostic, setDiagnostic] = useState<StorageTestDiagnostic | null>(null);
   const [progress, setProgress] = useState<SyncProgress | null>(null);
   const progressVersion = useRef(0);
   const storageVersion = useRef(0);
   const [storage, setStorage] = useState({ endpoint: '', password: '', targetPath: 'Kloda', username: '' });
+  // Any end of the presented storage form (Back, jobs/activity, hide, unmount) ends ownership of a pending
+  // test and clears its shown diagnostic. Layout timing: no late reply can run between commit and release.
+  const storagePresented = visible && step === 'storage';
+  useLayoutEffect(() => {
+    if (storagePresented) return;
+    storageVersion.current += 1;
+    setDiagnostic(null);
+  }, [storagePresented]);
+  useEffect(() => () => { storageVersion.current += 1; }, []);
 
   useEffect(() => {
     void (async () => {
@@ -39,7 +50,7 @@ export function BackupSetup({ visible, showActivity = false }: { visible: boolea
       setProgress(snapshot);
       if (nextDraft.storage) setStorage((current) => ({ ...current, ...nextDraft.storage }));
       if (snapshot && nextDraft.storageTested && nextDraft.sources.length > 0) setStep('activity');
-    }).catch((reason: unknown) => setError(reason instanceof Error ? reason.message : t('onboarding.loadError')));
+    }).catch(() => setError(t('onboarding.loadError')));
   }, []);
 
   useEffect(() => {
@@ -67,7 +78,7 @@ export function BackupSetup({ visible, showActivity = false }: { visible: boolea
       const sources = await getDesktopBridge().pickSources();
       setDraft((current) => ({ ...current, sources }));
       setError(null);
-    } catch (reason) { setError(reason instanceof Error ? reason.message : t('onboarding.selectError')); }
+    } catch { setError(t('onboarding.selectError')); }
   };
 
   const continueToStorage = async () => {
@@ -76,7 +87,7 @@ export function BackupSetup({ visible, showActivity = false }: { visible: boolea
       await getDesktopBridge().saveSchedule(draft.intervalHours, draft.localTime);
       setStep('storage');
       setError(null);
-    } catch (reason) { setError(reason instanceof Error ? reason.message : t('onboarding.scheduleError')); }
+    } catch { setError(t('onboarding.scheduleError')); }
   };
 
   const editStorage = (field: keyof typeof storage, value: string) => {
@@ -84,20 +95,24 @@ export function BackupSetup({ visible, showActivity = false }: { visible: boolea
     setStorage((current) => ({ ...current, [field]: value }));
     setDraft((current) => ({ ...current, storageTested: false }));
     setError(null);
+    setDiagnostic(null);
   };
 
   const testStorage = async () => {
     const version = ++storageVersion.current;
     setDraft((current) => ({ ...current, storageTested: false }));
     setError(null);
+    setDiagnostic(null);
     try {
       await getDesktopBridge().saveStorage(storage);
       if (version !== storageVersion.current) return;
-      await getDesktopBridge().testStorage();
+      const result = parseStorageTestResult(await getDesktopBridge().testStorage());
       if (version !== storageVersion.current) return;
-      setDraft((current) => ({ ...current, storageTested: true }));
-    } catch (reason) {
-      if (version === storageVersion.current) setError(reason instanceof Error ? reason.message : t('onboarding.testError'));
+      if (result.ok) return setDraft((current) => ({ ...current, storageTested: true }));
+      setError(t(`onboarding.testErrors.${result.code}`));
+      setDiagnostic(result.diagnostic ?? null);
+    } catch {
+      if (version === storageVersion.current) setError(t('onboarding.testError'));
     }
   };
 
@@ -110,10 +125,10 @@ export function BackupSetup({ visible, showActivity = false }: { visible: boolea
       if (version !== progressVersion.current) return;
       progressVersion.current += 1;
       setProgress(next);
-    } catch (reason) {
+    } catch {
       if (version !== progressVersion.current) return;
       const failedVersion = ++progressVersion.current;
-      setError(reason instanceof Error ? reason.message : t('onboarding.startError'));
+      setError(t('onboarding.startError'));
       void getDesktopBridge().getProgress().then((snapshot) => {
         if (failedVersion === progressVersion.current) setProgress(snapshot);
       }, () => {
@@ -144,7 +159,8 @@ export function BackupSetup({ visible, showActivity = false }: { visible: boolea
         <>
           <h1 className="mt-4 text-3xl font-bold">{t('onboarding.storageTitle')}</h1>
           <p className="mt-2 text-secondary-text">{t('onboarding.storageDescription')}</p>
-          <div className="mt-6 grid gap-3">{(['endpoint', 'targetPath', 'username', 'password'] as const).map((field) => <label className="grid gap-1 capitalize" key={field}>{t(`onboarding.${field}`)}<input aria-label={t(`onboarding.${field}`)} className="rounded-lg border border-border-subtle bg-surface-1 p-3" onChange={(event) => editStorage(field, event.target.value)} type={field === 'password' ? 'password' : 'text'} value={storage[field]} /></label>)}</div>
+          <div className="mt-6 grid gap-3">{(['endpoint', 'targetPath', 'username', 'password'] as const).map((field) => <label className="grid gap-1 capitalize" key={field}>{t(`onboarding.${field}`)}<input aria-describedby={field === 'endpoint' || field === 'targetPath' ? `desktop-webdav-hint-${field}` : undefined} aria-label={t(`onboarding.${field}`)} className="rounded-lg border border-border-subtle bg-surface-1 p-3" onChange={(event) => editStorage(field, event.target.value)} type={field === 'password' ? 'password' : 'text'} value={storage[field]} />{(field === 'endpoint' || field === 'targetPath') && <span className="text-sm normal-case text-secondary-text" id={`desktop-webdav-hint-${field}`}>{t(`onboarding.webdavHints.${field}`)}</span>}</label>)}</div>
+          <p className="mt-3 text-sm text-secondary-text">{t('onboarding.webdavHints.security')}</p>
           <button className="mt-6 rounded-xl border border-border-subtle bg-surface-1 px-4 py-3 font-semibold" onClick={() => void testStorage()} type="button">{t('onboarding.testConnection')}</button>
           {draft.storageTested && <p className="mt-3 text-emerald-700" role="status">{t('onboarding.verified')}</p>}
           <button className="mt-3 rounded-xl bg-button-brand px-4 py-3 font-semibold text-on-brand disabled:opacity-40" disabled={!draft.storageTested} onClick={() => void startSync()} type="button">{t('onboarding.startBackup')}</button>
@@ -152,6 +168,7 @@ export function BackupSetup({ visible, showActivity = false }: { visible: boolea
         </>
       )}
       {error && <p className="mt-4 text-danger-text" role="alert">{error}</p>}
+      {error && diagnostic && <p className="mt-2 text-sm text-danger-text">{t('onboarding.webdavDiagnostic.summary', { reason: t(`onboarding.webdavDiagnostic.reasons.${diagnosticReasonKey(diagnostic)}`, { status: diagnostic.kind === 'http' ? diagnostic.status : undefined }), stage: t(`onboarding.webdavDiagnostic.stages.${diagnostic.stage}`) })}</p>}
     </main>
   );
 }

@@ -57,7 +57,8 @@ class KlodaS3Module : Module() {
     val captured = owner(provider).capture()
     return buildMap {
       put("provider", provider); put("supported", true); put("configured", captured != null); put("enabled", state["enabled"] ?: false); put("canRun", state["canRun"] ?: false); put("running", state["running"] ?: false)
-      put("automaticEnabled", state["automaticEnabled"] ?: false); put("canAutomatic", personal && captured != null && state["enabled"] == true)
+      val auto = AndroidS3Automatic.automaticSupported()
+      put("automaticEnabled", auto && state["automaticEnabled"] == true); put("canAutomatic", auto && personal && captured != null && state["enabled"] == true); put("automaticSupported", auto)
       put("canEnable", personal && captured != null); put("canTest", state["running"] != true && captured != null && captured.profile.target.prefix.isNotEmpty())
       state["run"]?.let { put("run", it) }
       captured?.profile?.target?.let { t -> put("profile", mapOf("endpoint" to t.endpoint, "region" to t.region, "bucket" to t.bucket, "prefix" to t.prefix, "pathStyle" to t.pathStyle)) }
@@ -87,7 +88,8 @@ class KlodaS3Module : Module() {
     AsyncFunction("runS3") { provider: String -> safe { checkUi(); requirePersonal(provider); queue(provider).start(); status(provider) } }
     AsyncFunction("pauseS3") { provider: String -> safe { queue(provider).pause(); queue(provider).setAutomatic(false); appContext.reactContext?.let { AndroidS3Automatic.reconcileAsync(it) }; status(provider) } }
     AsyncFunction("automaticS3") { provider: String, enabled: Boolean -> safe {
-      checkUi(); requirePersonal(provider); cancelRestore(); queue(provider).setAutomatic(enabled)
+      checkUi(); requirePersonal(provider); if (enabled && !AndroidS3Automatic.automaticSupported()) throw S3Failure("automatic_unsupported")
+      cancelRestore(); queue(provider).setAutomatic(enabled)
       appContext.reactContext?.let { AndroidS3Automatic.reconcileAsync(it) }; status(provider)
     } }
     AsyncFunction("reviewS3") { provider: String, id: String, request: String -> safe {

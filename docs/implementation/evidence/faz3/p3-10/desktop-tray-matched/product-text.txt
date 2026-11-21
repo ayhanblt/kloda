@@ -1,0 +1,31 @@
+Kloda
+Ana sayfa
+Telefon eşleştir
+Cihazlar
+Gelen aktarımlar
+Yedekler
+Çöp kutusu
+Bağlantılar
+Kaynaklar ve program
+Giden işler
+Ayarlar
+Tray menüsü
+Bu bilgisayar
+Kuruluma başla
+Tray menüsü
+
+Kloda desteklenen sistemlerde bildirim alanı veya menü çubuğundan açılabilir. Gerçek tray menüsü aşağıdaki Aç ve Çık kontrollerini sunar. Ortamda tray desteği yoksa görünür pencere korunur.
+
+Kloda
+
+Dinliyor
+
+Etkin yedekleme yok.
+
+Kloda’yı aç
+Gelen yedeklemeleri duraklat
+Giden yedeklemeleri duraklat
+
+Bu sürümde duraklatma desteklenmiyor. Bu kontroller hiçbir aktarımı durdurmaz veya bekletmez; Kloda’dan çıkmak alımı ve yedeklemeleri durdurur.
+
+Kloda’dan çık

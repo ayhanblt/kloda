@@ -5,6 +5,7 @@ import { AppState } from 'react-native';
 import type { NativeDirectorySource, NativePhotoAlbum, NativePhotoSource, NativeSchedule, NativeSourceAccess, NativeStorageConfig } from '../../../../modules/my-module/src/KlodaSyncRuntimeModule';
 import { loadWebDavSettings, testAndSaveWebDavSettings } from '../../../shared/api/webdav-settings';
 import type { MobileStorageForm } from '../../../shared/api/webdav';
+import { webDavDiagnostic, type WebDavDiagnostic } from '../../../shared/api/webdav-diagnostics';
 
 interface NativeScheduleRuntime {
   loadDirectorySources(): Promise<NativeDirectorySource[]>;
@@ -38,6 +39,8 @@ export function useBackupSetup() {
   const [savedStorage, setSavedStorage] = useState<Omit<MobileStorageForm, 'password'> | null>(null);
   const [storageTested, setStorageTested] = useState(false);
   const [storageWarning, setStorageWarning] = useState(false);
+  // RAM-only detail of the current failed test; never reconstructed on reopen.
+  const [storageDiagnostic, setStorageDiagnostic] = useState<WebDavDiagnostic | null>(null);
   const storageVersion = useRef(0);
   const testingStorage = useRef(false);
   const [storageTesting, setStorageTesting] = useState(false);
@@ -66,7 +69,7 @@ export function useBackupSetup() {
 
   useEffect(() => {
     const listener = AppState.addEventListener('change', (state) => {
-      if (state !== 'active') { storageVersion.current += 1; storageAbort.current?.abort(); setStorageTested(false); }
+      if (state !== 'active') { storageVersion.current += 1; storageAbort.current?.abort(); setStorageTested(false); setStorageDiagnostic(null); }
     });
     return () => { storageVersion.current += 1; storageAbort.current?.abort(); listener.remove(); };
   }, []);
@@ -133,6 +136,7 @@ export function useBackupSetup() {
     storageAbort.current?.abort();
     setStorage((current) => ({ ...current, [field]: value }));
     setStorageTested(false);
+    setStorageDiagnostic(null);
     setMessage(null);
   };
 
@@ -143,6 +147,7 @@ export function useBackupSetup() {
     const version = ++storageVersion.current;
     const controller = new AbortController(); storageAbort.current = controller;
     setStorageTested(false);
+    setStorageDiagnostic(null);
     setMessage(null);
     try {
       const saved = await testAndSaveWebDavSettings(storage, () => version === storageVersion.current, controller.signal);
@@ -154,14 +159,15 @@ export function useBackupSetup() {
       if (uncertain) setStorageWarning(true);
       if (version === storageVersion.current) {
         setStorageTested(false);
+        setStorageDiagnostic(webDavDiagnostic(error) ?? null);
         setMessage(uncertain ? null : t(`onboarding.webdavErrors.${error instanceof Error ? error.message : 'webdav_connection'}`, { defaultValue: t('onboarding.testError') }));
       }
     } finally { testingStorage.current = false; setStorageTesting(false); if (storageAbort.current === controller) storageAbort.current = null; }
   };
 
-  const leaveStorage = () => { storageVersion.current += 1; storageAbort.current?.abort(); setStorageTested(false); };
+  const leaveStorage = () => { storageVersion.current += 1; storageAbort.current?.abort(); setStorageTested(false); setStorageDiagnostic(null); };
   return { backupMode, setBackupMode, intervalHours, setIntervalHours, localTime, setLocalTime,
-    sources, message, photoAlbums, sourceAccess, storage, storageTested, storageWarning, storageTesting, savedStorage,
+    sources, message, photoAlbums, sourceAccess, storage, storageTested, storageWarning, storageDiagnostic, storageTesting, savedStorage,
     sourceAction, selectDirectory, selectPhotoLibrary, removeSource, loadPhotoAlbums, selectPhotoAlbum,
     saveSchedule, editStorage, testStorage, leaveStorage,
     supportsLive: !!runtime?.saveLiveSchedule, supportsPhotos: !!runtime?.selectPhotoLibrary,

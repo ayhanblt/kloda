@@ -3,7 +3,7 @@ import { AppState } from 'react-native';
 import { S3Page } from './s3-page';
 import { s3 } from '../../../shared/api/s3';
 import { i18n } from '../../../shared/i18n';
-jest.mock('../../../shared/api/s3',() => ({ emptyS3Form:{ endpoint:'',region:'',bucket:'',prefix:'',pathStyle:true,accessKey:'',secret:'',token:'' },s3:{ status:jest.fn(),action:jest.fn(),cancelTest:jest.fn() },s3ErrorCode:() => 'storage_failure' }));
+jest.mock('../../../shared/api/s3',() => ({ emptyS3Form:{ endpoint:'',region:'',bucket:'',prefix:'',pathStyle:true,accessKey:'',secret:'',token:'' },s3:{ status:jest.fn(),action:jest.fn(),automatic:jest.fn(),cancelTest:jest.fn() },s3ErrorCode:() => 'storage_failure' }));
 const mocked = jest.mocked(s3), original = Object.getOwnPropertyDescriptor(AppState,'currentState')!;
 const status = { provider:'amazon-s3' as const,supported:true,configured:true,enabled:false,canEnable:true,canRun:false,running:false,canTest:true,
   profile:{ endpoint:'https://s3.eu-north-1.amazonaws.com',region:'eu-north-1',bucket:'owned-bucket',prefix:'owned',pathStyle:false } };
@@ -47,4 +47,21 @@ it('ignores a delayed running status after an explicit pause',async () => {
   await act(async () => { release?.({ ...status,enabled:true,running:true }); });
   expect(view.queryByRole('button',{ name:i18n.t('destinations.s3.pause') })).toBeNull();
   await view.unmount();
+});
+it('explains unsupported automatic S3 on Android 7 without disabling manual controls',async () => {
+  const old = { ...status,enabled:true,canRun:true,canAutomatic:false,automaticEnabled:false,automaticSupported:false };
+  mocked.status.mockResolvedValue(old);
+  const page = await render(<S3Page provider="amazon-s3" onBack={jest.fn()} />);
+  expect(await page.findByText(i18n.t('destinations.s3.automaticUnsupported'))).toBeTruthy();
+  expect(page.queryByText(i18n.t('destinations.s3.automaticHint'))).toBeNull();
+  expect(page.getByText(i18n.t('destinations.s3.automaticOn'))).toBeTruthy(); expect(page.queryByText(i18n.t('destinations.s3.automaticOff'))).toBeNull();
+  await fireEvent.press(page.getByText(i18n.t('destinations.s3.automaticOn'))); expect(mocked.automatic).not.toHaveBeenCalled(); expect(mocked.action).not.toHaveBeenCalled();
+  await fireEvent.press(page.getByText(i18n.t('destinations.s3.run'))); await waitFor(() => expect(mocked.action).toHaveBeenCalledWith('amazon-s3','runS3'));
+});
+it('keeps the automatic hint and an enabled control when support is reported or absent',async () => {
+  mocked.status.mockResolvedValue({ ...status,enabled:true,canRun:true,canAutomatic:true,automaticEnabled:false });
+  const page = await render(<S3Page provider="amazon-s3" onBack={jest.fn()} />);
+  expect(await page.findByText(i18n.t('destinations.s3.automaticHint'))).toBeTruthy(); expect(page.queryByText(i18n.t('destinations.s3.automaticUnsupported'))).toBeNull();
+  mocked.automatic.mockResolvedValue({ ...status,enabled:true,canRun:true,canAutomatic:true,automaticEnabled:true,automaticSupported:true });
+  await fireEvent.press(page.getByText(i18n.t('destinations.s3.automaticOn'))); await waitFor(() => expect(mocked.automatic).toHaveBeenCalledWith('amazon-s3',true));
 });

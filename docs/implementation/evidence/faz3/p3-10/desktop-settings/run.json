@@ -1,0 +1,199 @@
+{
+ "cells": {
+  "desktop.settings/tr/light/normal": {
+   "driverKind": "synthetic-renderer",
+   "fingerprint": {
+    "digest": "99c0ceea4cfc219c57546e50a4d0fb8b4b7b110c04c777d085b932c9fd1f29ae",
+    "files": {
+     "apps/desktop/src/app/App.tsx": "ce1ac3002124052b41a36a82272ed635dccedd4b62871b92b32bbc3f1aedd852",
+     "apps/desktop/src/app/global.css": "b0ff233e641472e21c0bfe2818128f1d903e5d812c1d2219c7d21e20b1311392",
+     "apps/desktop/src/features/desktop-background/AppearanceSettings.tsx": "eae1465d403958c76efa4972983069478a5df8b241661891421587fd99286734",
+     "apps/desktop/src/features/desktop-background/DesktopBackground.tsx": "dfb2f13a52e014f87cb74e7971c3aac89ac3398a87aa6d5739fbdf7e897c5625",
+     "apps/desktop/src/shared/i18n/index.ts": "166a901774dae73da3b7ab9bdc530fef78960ed0016eff1058d7e19b11fb1ef3",
+     "apps/desktop/src/shared/theme/tokens.css": "d930736e2735eb2091ff53e4db97edecd0b45b850360b1eb4a26049006df9324",
+     "apps/desktop/src/shared/theme/use-appearance.ts": "58bfbdc0f51490d93b9dea5a1f6b6393b8f9e2efb358493e148899cd31c9a162",
+     "apps/desktop/src/widgets/desktop-shell/DesktopShell.tsx": "b258bbab0270792d56a3b32330c9db82d74d1bff671ed3e1c1fc363c9197e32a",
+     "tools/ui-capture/common.py": "12eaf154d82e3b6207a39e7e7fceafa79eefda881c8055bbf1f033a003a58b14",
+     "tools/ui-capture/desktop.py": "396f3c8d87eb86700097fb05febaf3c58f7aeb4707ae1b502299e7a9998c96e5"
+    },
+    "localeKeys": {
+     "path": "apps/desktop/src/shared/i18n/locales/tr.json",
+     "prefixes": [
+      "appearance",
+      "background",
+      "receiver.settingsNavigation",
+      "ui.language",
+      "ui.languages"
+     ],
+     "sha256": "2764fe2945e29140814f9a97c81d4907aa5b5ec58ae4bc594665449eb08bfed9"
+    },
+    "row": "e9aac7ce8f5b5d4b3da28c44e5aeb7a709b8eab14beb36e0340075754ef5aaea",
+    "status": "known"
+   },
+   "measure": {
+    "calls": [],
+    "consoleErrors": [],
+    "fontsStatus": "loaded",
+    "hash": "#/settings",
+    "headings": [
+     "Ayarlar"
+    ],
+    "innerWidth": 1440,
+    "interLoaded": true,
+    "lang": "tr",
+    "pageOverflow": false,
+    "rootFontPx": 16,
+    "size": "normal",
+    "theme": "light",
+    "viewport": [
+     1440,
+     1000
+    ]
+   },
+   "png": "desktop.settings__tr__light__normal.png",
+   "pngSha256": "5a6f372e34046411f4ee56c755c12b416ee0c8264eb1076c4fc7aacf521a3594",
+   "pngSize": [
+    1440,
+    1000
+   ],
+   "reasons": [],
+   "screen": "settings",
+   "status": "PASS"
+  }
+ },
+ "cleanup": {
+  "errors": [],
+  "steps": [
+   {
+    "ok": true,
+    "step": "stop:playwright-driver"
+   },
+   {
+    "ok": true,
+    "step": "stop:browser"
+   },
+   {
+    "ok": true,
+    "step": "loopback:closed"
+   }
+  ]
+ },
+ "confirmation": {
+  "exit": 0,
+  "gen": "37b59c762b3346d5bfdbfafba61e6748",
+  "runID": "ded51a542506411cb340415a5a0ecffd"
+ },
+ "driver": "desktop-renderer",
+ "events": [
+  {
+   "at": 1795184129.114503,
+   "event": "PREPARED"
+  },
+  {
+   "at": 1795184129.183338,
+   "event": "SUPERVISING"
+  },
+  {
+   "at": 1795184129.2016551,
+   "event": "RUNNING"
+  },
+  {
+   "at": 1795184131.705508,
+   "event": "RESTORE_PENDING"
+  },
+  {
+   "at": 1795184132.083549,
+   "event": "CLEANED"
+  }
+ ],
+ "finalization": {
+  "gen": "37b59c762b3346d5bfdbfafba61e6748",
+  "result": "PASS"
+ },
+ "phase": "CLEANED",
+ "processes": [
+  {
+   "closeBy": "driver",
+   "pgid": null,
+   "pid": 96230,
+   "role": "playwright-driver",
+   "state": "gone"
+  },
+  {
+   "closeBy": "driver",
+   "pgid": 96246,
+   "pid": 96246,
+   "role": "browser",
+   "state": "gone"
+  }
+ ],
+ "provenance": {
+  "fingerprints": {
+   "desktop.settings/tr/light/normal": {
+    "digest": "99c0ceea4cfc219c57546e50a4d0fb8b4b7b110c04c777d085b932c9fd1f29ae",
+    "files": {
+     "apps/desktop/src/app/App.tsx": "ce1ac3002124052b41a36a82272ed635dccedd4b62871b92b32bbc3f1aedd852",
+     "apps/desktop/src/app/global.css": "b0ff233e641472e21c0bfe2818128f1d903e5d812c1d2219c7d21e20b1311392",
+     "apps/desktop/src/features/desktop-background/AppearanceSettings.tsx": "eae1465d403958c76efa4972983069478a5df8b241661891421587fd99286734",
+     "apps/desktop/src/features/desktop-background/DesktopBackground.tsx": "dfb2f13a52e014f87cb74e7971c3aac89ac3398a87aa6d5739fbdf7e897c5625",
+     "apps/desktop/src/shared/i18n/index.ts": "166a901774dae73da3b7ab9bdc530fef78960ed0016eff1058d7e19b11fb1ef3",
+     "apps/desktop/src/shared/theme/tokens.css": "d930736e2735eb2091ff53e4db97edecd0b45b850360b1eb4a26049006df9324",
+     "apps/desktop/src/shared/theme/use-appearance.ts": "58bfbdc0f51490d93b9dea5a1f6b6393b8f9e2efb358493e148899cd31c9a162",
+     "apps/desktop/src/widgets/desktop-shell/DesktopShell.tsx": "b258bbab0270792d56a3b32330c9db82d74d1bff671ed3e1c1fc363c9197e32a",
+     "tools/ui-capture/common.py": "12eaf154d82e3b6207a39e7e7fceafa79eefda881c8055bbf1f033a003a58b14",
+     "tools/ui-capture/desktop.py": "396f3c8d87eb86700097fb05febaf3c58f7aeb4707ae1b502299e7a9998c96e5"
+    },
+    "localeKeys": {
+     "path": "apps/desktop/src/shared/i18n/locales/tr.json",
+     "prefixes": [
+      "appearance",
+      "background",
+      "receiver.settingsNavigation",
+      "ui.language",
+      "ui.languages"
+     ],
+     "sha256": "2764fe2945e29140814f9a97c81d4907aa5b5ec58ae4bc594665449eb08bfed9"
+    },
+    "row": "e9aac7ce8f5b5d4b3da28c44e5aeb7a709b8eab14beb36e0340075754ef5aaea",
+    "status": "known"
+   }
+  },
+  "renderer": {
+   "fresh": true,
+   "globalSha256": "e0f6528cb1d3dddce14c9ac38383f0edc6c6ccf9d9a0eae4975fae5e0ac16af5",
+   "reason": null,
+   "rendererSha256": "477e940aa396c4dd1ab59beeca08d077f156e28f73ddee5ba13218d409f476e6",
+   "sourceSha256": "286fb4ed6962f5308ebec3a98b8a7d92f32b195d78d82bf3d5220090695d8e6e",
+   "stamp": {
+    "builtAt": 1795074283.605633,
+    "command": "npx vite build (apps/desktop)",
+    "rendererSha256": "477e940aa396c4dd1ab59beeca08d077f156e28f73ddee5ba13218d409f476e6",
+    "sourceSha256": "286fb4ed6962f5308ebec3a98b8a7d92f32b195d78d82bf3d5220090695d8e6e"
+   }
+  }
+ },
+ "result": "PASS",
+ "root": "/Users/ayhanblt/Desktop/projects/kloda/docs/implementation/evidence/faz3/p3-10/desktop-settings",
+ "runID": "ded51a542506411cb340415a5a0ecffd",
+ "selection": {
+  "args": {
+   "deviceType": "com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro",
+   "fixture": null,
+   "locale": "tr",
+   "renderer": "/Users/ayhanblt/Desktop/projects/kloda/apps/desktop/dist/renderer",
+   "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-26-5",
+   "screen": "settings",
+   "size": "normal",
+   "theme": "light",
+   "width": 1440
+  },
+  "cells": [
+   "desktop.settings/tr/light/normal"
+  ]
+ },
+ "settings": {},
+ "simulator": null,
+ "supervisor": {
+  "pid": 96228
+ }
+}

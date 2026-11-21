@@ -1,0 +1,19 @@
+FIX-R1b current final hashes: 2/2 MATCH
+Reverse exact FIX-R1b diff -> FIX-R1 hash MATCH: apps/desktop/src/pages/backup/BackupSetup.tsx
+Reverse exact FIX-R1b diff -> FIX-R1 hash MATCH: apps/desktop/src/pages/backup/BackupSetup.spec.tsx
+Unaffected INITIAL code hashes: 20/20 MATCH
+Unaffected locale hashes: 6/6 MATCH
+Renderer tsc diagnostics identical to previously proven baseline: YES (exit2, not PASS)
+HEAD unchanged protected runtime/ABI/retry: apps/desktop/electron/runtime/runtime.ts
+HEAD unchanged protected runtime/ABI/retry: apps/desktop/electron/preload.cts
+HEAD unchanged protected runtime/ABI/retry: apps/desktop/electron/runtime/types.ts
+HEAD unchanged protected runtime/ABI/retry: apps/desktop/electron/runtime/webdav-connection-test.ts
+HEAD 508b3f0486a7ce04628ec0c3681d995573e5721d
+Staged: EMPTY
+Scoped status:
+M apps/desktop/src/pages/backup/BackupSetup.tsx
+?? apps/desktop/src/pages/backup/BackupSetup.spec.tsx
+REUSE g24-r1-fix2-green.log: Test Files  1 passed (1) | Tests  15 passed (15)
+REUSE g24-r1-fix2-reviewer-probes.log: Test Files  2 passed (2) | Tests  5 passed (5)
+REUSE g24-r1-fix2-desktop-full-vitest.log: Test Files  34 passed (34) | Tests  377 passed (377)
+REUSE g24-r1-fix2-vite-build.log: ✓ built in 246ms

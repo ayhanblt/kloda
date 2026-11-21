@@ -71,6 +71,44 @@
     "sourceRequired": "Wähle mindestens einen Ordner aus.",
     "scheduleError": "Zeitplan konnte nicht gespeichert werden.",
     "testError": "WebDAV-Test fehlgeschlagen.",
+    "webdavHints": {
+      "endpoint": "Gib die vollständige HTTPS-Adresse einschließlich Port (falls vorhanden) und WebDAV-Stammpfad des Servers ein. Beispiel: https://server.example:8083/webdav/",
+      "targetPath": "Ein Unterordner unter diesem WebDAV-Stamm, der bereits existieren und zugänglich sein muss; Kloda legt ihn nicht an. Beispiel: Kloda → https://server.example:8083/webdav/Kloda/",
+      "security": "Unterstützt werden nur HTTPS mit einem vom Betriebssystem als vertrauenswürdig eingestuften Zertifikat und Basic-Anmeldung. Der Test schreibt, liest zurück und löscht ausschließlich seine eigenen temporären Daten."
+    },
+    "webdavDiagnostic": {
+      "summary": "Fehlgeschlagener Schritt: {{stage}}. {{reason}}",
+      "stages": {
+        "propfind": "Prüfung des Ordnerzugriffs (PROPFIND)",
+        "mkcol": "Temporären Testordner anlegen (MKCOL)",
+        "put": "Testdatei schreiben (PUT)",
+        "move": "Testdatei abschließen (MOVE)",
+        "get": "Testdatei zurücklesen (GET)",
+        "delete_file": "Testdatei löschen (DELETE)",
+        "delete_directory": "Temporären Testordner löschen (DELETE)"
+      },
+      "reasons": {
+        "access_denied": "Der Server hat den Zugriff verweigert (HTTP {{status}}).",
+        "not_found": "Ordner oder Pfad konnten nicht als zugänglich bestätigt werden (HTTP {{status}}).",
+        "method_rejected": "Der Server hat diese Methode abgelehnt (HTTP {{status}}).",
+        "http_other": "Der Server hat HTTP {{status}} zurückgegeben.",
+        "transport_unknown": "Die Verbindung ist ohne verwertbare Serverantwort fehlgeschlagen. Die genaue Ursache (Netzwerk, DNS, TLS oder Zeitüberschreitung) lässt sich aus diesem Test nicht bestimmen.",
+        "readback_mismatch": "Der zurückgelesene Inhalt stimmte nicht mit dem Geschriebenen überein."
+      }
+    },
+    "testErrors": {
+      "connection_unavailable": "Der Server ist nicht erreichbar oder vorübergehend nicht verfügbar.",
+      "access_denied": "Der Server hat den Zugriff verweigert.",
+      "storage_full": "Der Speicher ist voll.",
+      "review_required": "Das Ergebnis ist unsicher. Temporäre Kloda-Testdaten können zurückbleiben und müssen geprüft werden.",
+      "configuration_required": "Adresse oder Einstellungen sind ungültig; die Adresse muss HTTPS verwenden.",
+      "settings_changed": "Die Einstellungen haben sich während des Tests geändert. Teste erneut.",
+      "interrupted": "Der Test wurde unterbrochen.",
+      "retry_exhausted": "Das Limit für Wiederholungen wurde erreicht.",
+      "backup_busy": "Ein anderer Sicherungsvorgang ist ausgelastet.",
+      "source_changed": "Eine Quelle hat sich während des Tests geändert.",
+      "unknown": "Der Verbindungstest ist fehlgeschlagen."
+    },
     "startError": "Backup konnte nicht gestartet werden."
   },
   "pairing": {
@@ -130,7 +168,7 @@
     "approve": "Lokales Vertrauen genehmigen",
     "deny": "Dieses Telefon ablehnen",
     "repairTitle": "Dieses widerrufene Telefon erneut koppeln?",
-    "repairDescription": "Das bisherige lokale Vertrauen für genau diesen Telefonschlüssel wurde widerrufen. Erneut koppeln stellt nur neues Gerätevertrauen her; bestehende Dateisperren werden nicht aufgehoben und Dateizugriff wird nicht gewährt.",
+    "repairDescription": "Das Telefon hat der erneuten Kopplung bereits ausdrücklich zugestimmt. Deine Genehmigung hier ist weiterhin erforderlich. Sie stellt nur neues Gerätevertrauen her, hebt bestehende Dateisperren nicht auf und gewährt keinen Dateizugriff.",
     "pairAgain": "Erneut koppeln",
     "resume": "Kopplung fortsetzen",
     "resumeDescription": "Die Kopplung ist nicht abgeschlossen. Fortsetzen fordert ausdrücklich die Wiederherstellung des gespeicherten Eintrags über eine neue authentifizierte LAN-Verbindung an. Keine automatischen Netzwerk-Wiederholungen.",
@@ -212,7 +250,13 @@
       "unavailable": "Der Autostartstatus des Betriebssystems konnte nicht gelesen werden.",
       "external_entry": "Ein anderer Autostarteintrag wurde gefunden und nicht überschrieben.",
       "desktop_policy": "Der XDG-Autostarteintrag ist eingerichtet; die Linux-Desktoprichtlinie kann den Start weiterhin verhindern."
-    }
+    },
+    "closeBehavior": "Beim Schließen des Fensters",
+    "closeHides": "Kloda blendet das Fenster aus und empfängt weiter. Öffnen Sie es erneut über die Taskleiste oder Menüleiste.",
+    "closeStaysVisible": "Das Fenster bleibt geöffnet, da in dieser Sitzung keine Tray- oder Menüsteuerung bestätigt wurde.",
+    "closeAutomatic": "Wird automatisch anhand der beobachteten Tray-/Menüsteuerung bestimmt; dies ist keine eigene Einstellung.",
+    "version": "Version",
+    "versionUnknown": "Unbekannt"
   },
   "incoming": {
     "navigation": "Eingehend",
@@ -364,7 +408,7 @@
     "providerUnavailable": "Die tatsächliche Verbindung für diesen Anbieter ist noch nicht implementiert.",
     "providerFuture": "Die Verbindungsoptionen sind Teil des Designs. Hier werden weder Konten angemeldet noch Übertragungen gestartet.",
     "connectionFields": "Verbindungsfelder",
-    "trayDescription": "Auf unterstützten Systemen lässt sich Kloda über die Taskleiste oder Menüleiste öffnen. Die tatsächlichen Empfänger- und Beenden-Steuerungen stehen oben. Ohne Tray-Unterstützung bleibt ein sichtbares Fenster erhalten.",
+    "trayDescription": "Auf unterstützten Systemen lässt sich Kloda über die Taskleiste oder Menüleiste öffnen. Das tatsächliche Tray-Menü bietet dieselben Steuerungen zum Öffnen und Beenden wie unten. Ohne Tray-Unterstützung bleibt ein sichtbares Fenster erhalten.",
     "brand": "Kloda",
     "home": "Start",
     "receiverGroup": "Empfänger",
@@ -434,9 +478,26 @@
     }
   },
   "appearance": {
+    "general": "Allgemein",
     "title": "Darstellung",
     "dark": "Dunkel",
     "light": "Hell",
-    "system": "System"
+    "system": "System",
+    "systemHint": "Bei „System“ wird die helle/dunkle Einstellung des Geräts übernommen."
+  },
+  "tray": {
+    "menuLabel": "Kloda-Tray-Menü",
+    "open": "Kloda öffnen",
+    "pauseIncoming": "Eingehende Sicherungen pausieren",
+    "pauseOutgoing": "Ausgehende Sicherungen pausieren",
+    "pauseUnavailable": "Pausieren wird in dieser Version nicht unterstützt. Diese Steuerungen stoppen oder halten keine Übertragung an; Beenden von Kloda stoppt Empfang und Sicherungen.",
+    "state": {
+      "error": "Aufmerksamkeit nötig",
+      "unknown": "Status unbekannt",
+      "checking": "Wird geprüft",
+      "active": "Aktiv",
+      "listening": "Empfangsbereit",
+      "unavailable": "Nicht verfügbar"
+    }
   }
 }

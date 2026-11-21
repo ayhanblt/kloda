@@ -119,6 +119,18 @@ describe('desktop pairing behavior', () => {
     expect(bridge.approve).not.toHaveBeenCalled();
   });
 
+  it.each(['tr', 'en', 'de'])('G24-01: repair copy keeps phone consent, Desktop approval and file grants separate in %s', async (language) => {
+    await i18n.changeLanguage(language);
+    const { bridge } = nativeStatus({ ...reserved, repairRequired: true });
+    render(<PairingPage />);
+    const dialog = await screen.findByRole('dialog', { name: i18n.t('pairing.repairTitle') });
+    expect(within(dialog).getByText(i18n.t('pairing.repairDescription'))).toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: i18n.t('pairing.pairAgain') })).toBeEnabled();
+    expect(dialog.textContent).not.toMatch(/pairing\./);
+    expect(bridge.approve).not.toHaveBeenCalled();
+    await i18n.changeLanguage('tr');
+  });
+
   it('replaces stale candidate consent and does not turn a rejected old generation into trust', async () => {
     const { bridge, update } = nativeStatus(reserved);
     const { promise, reject: rejectApproval } = Promise.withResolvers<PairingStatus>();

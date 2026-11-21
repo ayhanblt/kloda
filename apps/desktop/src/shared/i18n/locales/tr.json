@@ -71,6 +71,44 @@
     "sourceRequired": "En az bir klasör seçin.",
     "scheduleError": "Program kaydedilemedi.",
     "testError": "WebDAV testi başarısız.",
+    "webdavHints": {
+      "endpoint": "Portu (varsa) ve sunucunun WebDAV kök yolunu içeren tam HTTPS adresini girin. Örnek: https://server.example:8083/webdav/",
+      "targetPath": "Bu WebDAV kökü altında önceden var olan ve erişilebilen bir alt klasör; Kloda onu oluşturmaz. Örnek: Kloda → https://server.example:8083/webdav/Kloda/",
+      "security": "Yalnızca işletim sisteminin güvendiği sertifikaya sahip HTTPS ve Basic oturum açma desteklenir. Test yalnızca kendi geçici verisini yazar, geri okur ve siler."
+    },
+    "webdavDiagnostic": {
+      "summary": "Başarısız adım: {{stage}}. {{reason}}",
+      "stages": {
+        "propfind": "Klasör erişim denetimi (PROPFIND)",
+        "mkcol": "Geçici test klasörü oluşturuluyor (MKCOL)",
+        "put": "Test dosyası yazılıyor (PUT)",
+        "move": "Test dosyası sonlandırılıyor (MOVE)",
+        "get": "Test dosyası geri okunuyor (GET)",
+        "delete_file": "Test dosyası siliniyor (DELETE)",
+        "delete_directory": "Geçici test klasörü siliniyor (DELETE)"
+      },
+      "reasons": {
+        "access_denied": "Sunucu erişimi reddetti (HTTP {{status}}).",
+        "not_found": "Klasör veya yolun erişilebilir olduğu doğrulanamadı (HTTP {{status}}).",
+        "method_rejected": "Sunucu bu yöntemi reddetti (HTTP {{status}}).",
+        "http_other": "Sunucu HTTP {{status}} döndürdü.",
+        "transport_unknown": "Bağlantı, kullanılabilir bir sunucu yanıtı alınamadan başarısız oldu. Kesin neden (ağ, DNS, TLS veya zaman aşımı) bu testten belirlenemez.",
+        "readback_mismatch": "Geri okunan içerik yazılanla eşleşmedi."
+      }
+    },
+    "testErrors": {
+      "connection_unavailable": "Sunucuya ulaşılamıyor veya geçici olarak kullanılamıyor.",
+      "access_denied": "Sunucu erişimi reddetti.",
+      "storage_full": "Depolama alanı dolu.",
+      "review_required": "Sonuç belirsiz. Geçici Kloda test verisi kalmış olabilir ve gözden geçirilmelidir.",
+      "configuration_required": "Adres veya ayarlar geçersiz; adres HTTPS kullanmalıdır.",
+      "settings_changed": "Test sırasında ayarlar değişti. Testi yeniden yapın.",
+      "interrupted": "Test kesintiye uğradı.",
+      "retry_exhausted": "Yeniden deneme sınırına ulaşıldı.",
+      "backup_busy": "Başka bir yedekleme işlemi meşgul.",
+      "source_changed": "Test sırasında bir kaynak değişti.",
+      "unknown": "Bağlantı testi başarısız oldu."
+    },
     "startError": "Yedekleme başlatılamadı."
   },
   "pairing": {
@@ -130,7 +168,7 @@
     "approve": "Yerel güveni onayla",
     "deny": "Bu telefonu reddet",
     "repairTitle": "Güveni iptal edilen bu telefon yeniden eşleştirilsin mi?",
-    "repairDescription": "Tam olarak bu telefon anahtarına ait önceki yerel güven iptal edildi. Yeniden eşleştirme yalnızca yeni cihaz güveni oluşturur; mevcut dosya retlerini kaldırmaz ve dosya erişimi vermez.",
+    "repairDescription": "Telefon yeniden eşleştirmeyi zaten açıkça kabul etti. Burada sizin onayınız hâlâ gerekiyor. Yalnızca yeni cihaz güveni oluşturur, mevcut dosya retlerini kaldırmaz ve dosya erişimi vermez.",
     "pairAgain": "Yeniden eşleştir",
     "resume": "Eşleştirmeyi sürdür",
     "resumeDescription": "Eşleştirme tamamlanmadı. Sürdürme, saklanan kaydı yeni, kimliği doğrulanmış bir yerel ağ bağlantısında açıkça kurtarmayı ister. Otomatik ağ yeniden denemesi başlatılmaz.",
@@ -212,7 +250,13 @@
       "unavailable": "İşletim sisteminin otomatik başlatma durumu okunamadı.",
       "external_entry": "Başka bir başlangıç kaydı bulundu; üzerine yazılmadı.",
       "desktop_policy": "XDG başlangıç kaydı yapılandırıldı; Linux masaüstü politikası çalıştırmayı yine engelleyebilir."
-    }
+    },
+    "closeBehavior": "Pencere kapatıldığında",
+    "closeHides": "Kloda pencereyi gizler ve almaya devam eder. Bildirim alanı veya menü çubuğundan yeniden açın.",
+    "closeStaysVisible": "Bu oturumda tray veya menü kontrolü doğrulanmadığı için pencere açık kalır.",
+    "closeAutomatic": "Gözlenen tray/menü kontrolüne göre otomatik belirlenir; ayrı bir tercih değildir.",
+    "version": "Sürüm",
+    "versionUnknown": "Bilinmiyor"
   },
   "incoming": {
     "navigation": "Gelen aktarımlar",
@@ -364,7 +408,7 @@
     "providerUnavailable": "Bu sağlayıcının gerçek bağlantısı henüz uygulanmadı.",
     "providerFuture": "Bağlantı seçenekleri tasarım kapsamında gösteriliyor. Bu ekranda hesap girişi veya aktarım başlatılmaz.",
     "connectionFields": "Bağlantı alanları",
-    "trayDescription": "Kloda desteklenen sistemlerde bildirim alanı veya menü çubuğundan açılabilir. Gerçek alıcı ve çıkış kontrolleri yukarıdadır. Ortamda tray desteği yoksa görünür pencere korunur.",
+    "trayDescription": "Kloda desteklenen sistemlerde bildirim alanı veya menü çubuğundan açılabilir. Gerçek tray menüsü aşağıdaki Aç ve Çık kontrollerini sunar. Ortamda tray desteği yoksa görünür pencere korunur.",
     "brand": "Kloda",
     "home": "Ana sayfa",
     "receiverGroup": "Alıcı",
@@ -434,9 +478,26 @@
     }
   },
   "appearance": {
+    "general": "Genel",
     "title": "Görünüm",
     "dark": "Koyu",
     "light": "Açık",
-    "system": "Sistem"
+    "system": "Sistem",
+    "systemHint": "Sistem seçiliyse cihazınızın açık/koyu görünümü izlenir."
+  },
+  "tray": {
+    "menuLabel": "Kloda tray menüsü",
+    "open": "Kloda’yı aç",
+    "pauseIncoming": "Gelen yedeklemeleri duraklat",
+    "pauseOutgoing": "Giden yedeklemeleri duraklat",
+    "pauseUnavailable": "Bu sürümde duraklatma desteklenmiyor. Bu kontroller hiçbir aktarımı durdurmaz veya bekletmez; Kloda’dan çıkmak alımı ve yedeklemeleri durdurur.",
+    "state": {
+      "error": "Dikkat gerekiyor",
+      "unknown": "Durum bilinmiyor",
+      "checking": "Denetleniyor",
+      "active": "Etkin",
+      "listening": "Dinliyor",
+      "unavailable": "Kullanılamıyor"
+    }
   }
 }

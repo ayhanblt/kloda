@@ -36,6 +36,24 @@ it('shows iOS access retry separately from OS opportunity counts in all three la
 });
 
 
+it('G24-07: os_interrupted and WebDAV auth refusal keep their own states and claim no exact cause in all three languages', async () => {
+  try {
+    for (const language of ['tr', 'en', 'de']) {
+      await i18n.changeLanguage(language);
+      jest.mocked(fileTransfer.status).mockResolvedValue({ running: false, jobs: [], totalJobs: '0', hasMore: false,
+        run: { id: 'run-1', recordId: 'AAAAAAAAAAAAAAAAAAAAAA', attempts: 1, state: 'failed', errorCode: 'webdav_auth' },
+        automaticRun: { attempts: 3, accessAttempts: 1, state: 'waiting', updated: 0, errorCode: 'os_interrupted' } });
+      const surface = await render(<ActivityPage onBack={() => undefined} />);
+      await waitFor(() => expect(surface.getByText(i18n.t('transfer.errors.os_interrupted'))).toBeTruthy());
+      expect(surface.getByText(i18n.t('transfer.osStates.waiting'))).toBeTruthy();
+      expect(surface.queryByText(i18n.t('transfer.retryWaiting'))).toBeNull();
+      expect(surface.getByText(i18n.t('transfer.errors.webdav_auth'))).toBeTruthy();
+      expect(surface.queryByText(/transfer\./)).toBeNull();
+      await surface.unmount();
+    }
+  } finally { await i18n.changeLanguage('tr'); }
+});
+
 it.each([{ fontScale: 1, height: 852 }, { fontScale: 2.643, height: 852 }, { fontScale: 1, height: 393 }])('keeps headers and actions reachable with $fontScale font and $height height', async ({ fontScale, height }) => {
   const original = Native.Dimensions.get('window');
   await act(async () => { Native.Dimensions.set({ window: { width: 393, height, scale: 3, fontScale } }); });

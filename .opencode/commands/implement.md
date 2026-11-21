@@ -1,9 +1,13 @@
 ---
 description: Hazır GPT planını uygula
-model: claude-agent/opus
+model: claude-agent/sonnet
 ---
 
-Önce AGENTS.md → docs/implementation/CURRENT.md aktif iş/durumunu oku.
+Yeni oturum/iş başlangıcında AGENTS.md → docs/implementation/CURRENT.md aktif iş/durumunu oku.
+Aynı uygulama sohbetinde FIX/devam: başlangıcı yeniden yapma; değişen CURRENT bölümü,
+son review'un yeni bulguları ve manifest/diff/kanıt farklarını oku. Bağlamda bulunan
+değişmeyen AGENTS/plan/eski kanıtları tekrar yükleme. Talimat değişmişse veya bağlamda
+yoksa gerekli kısmı oku; güncellik belirsizse hedefli diff/hash ile kontrol et.
 CURRENT'tan modu seç; normal yönlendirme kararını kullanıcıya tekrar sorma:
 - Onaylı ilk uygulama: INITIAL; next-plan.md güncel onaylı sözleşmesini oku.
 - Review düzeltmesi bekleniyor: FIX; son review'un açık bulguları ve scoped kabul
@@ -28,8 +32,25 @@ gereken sözleşme detayı için yalnız bağlantılı bölümü aç. Dosyaları
 sembol/caller aramasıyla daralt; doğruluk için gerekiyorsa tam dosyayı oku.
 Ham test/build loglarını diske yaz; sohbete yalnız sonuç ve ilgili kısa hata gelsin.
 Gerçek dış dokümantasyon belirsizliğini docs/implementation/research-pilot.md uyarınca
-düşük maliyetli subagent'a ver; dar brief ve resmî kanıtı doğrula. Proje içi kök neden
+Haiku 5.5 (`claude-agent/haiku`) subagent'ına ver; ana uygulama modeli Sonnet 5.5'tir.
+18.11 geçişi mevcut Opus çalışması bittikten sonra geçerlidir; çalışan Opus turunun
+modelini/delegasyonunu değiştirme. Sonraki uygulama/FIX'te Sonnet kullan; effort'u koru.
+Dar brief ve resmî kanıtı doğrula. Proje içi kök neden
 araştırmasını kendin yap; yapay dış soru veya aynı soruya tekrar arama yaratma.
+Gerektiğinde aynı Haiku'ya dar salt-okunur kanıt taraması, etkilenen normal/recovery/
+hata çağıranları veya kabul→test eşlemesi ver (research-pilot.md). Karar/kod/test
+çalıştırma bu salt-okunur görevlerde sende kalır. Bağımsız işe devam et; bağlı kararda sonucu bekle, aramayı tekrarlama.
+Sonraki iş döngülerinde execution-budget.md §4 düşük-riskli yazma istisnasını uygula:
+planın ayırdığı net işi doğrudan Haiku 5.5'e devret, önce aynı işi ayrıntılı yeniden
+tasarlama. İzinli dosyalar/başlangıç/ID/komut/log yolları kısa brief olsun; tek yazar.
+Haiku değişikliği ve seçilmiş dar kontrolleri tamamlar; sen gerçek diff/kanıtı doğrula,
+başarılı kontrolü yeniden çalıştırma. Araç desteği yoksa UNAVAILABLE bildir; sessiz
+model fallback yok. Mevcut devam eden review'un devir sözleşmesini değiştirme.
+§5: plandaki kontrol seçimini kullan; dar compile/typecheck ardından runtime.
+Yeni semantic diff veya hata yoksa seçimi/matrisi baştan kurma.
+§5 “Araç ve teşhis disiplini”ni uygula: bağımsız çağrıları toplulaştır; gerçek test
+exit code'u/tam logu koru, ilk ilgili uyarıyı incele. Takılmada sabit bekleme yerine
+süreç durumunu doğrula; kök neden iddiasını tam regression ve etkilenen komşuyla kanıtla.
 İki başarısız denemede dur ve raporla.
 FIX turunda koddan önce mevcut manifestte kısa matris tut: bulgu → invariant →
 olay sırası → sembol → regression testi → önceki/sonraki sonuç.
@@ -56,18 +77,24 @@ alma; mevcut kanıt mekanizmasını kullan. Review öncesi hazırlık:
   NOT_RUN'ı veya self-review'ı kabul sayma. Önceden ertelenmiş kapıları açık göster.
 Yalnız bu hazırlık tamamlanınca:
 CURRENT.md'de işi "uygulandı; bağımsız GPT review bekliyor" olarak belirt;
-checkbox'ı [x] yapma. Hazır prompt ayrı GPT /review olsun; mevcut review sohbeti varsa
-oraya dön. FIX için de mevcut Opus sohbetini kullan; alt test başına sohbet açtırma.
+checkbox'ı [x] yapma. İlk bağımsız review için yeni GPT sohbetinde /review ver;
+mevcut review sohbetine dönüşte komutu yeniden çalıştırmasını isteme. Aynen
+yapıştırılabilir tek kısa mesaj üret: "<iş/bulgu> FIX tamamlandı. Mevcut review'a
+<manifest §bölüm> ve <fix diff/kanıt dizini> üzerinden devam et; önceki goal ve
+kabul ölçütleri geçerli." Yer tutucuları gerçek kimlik/yollarla doldur.
+Bu devam mesajına AGENTS→CURRENT başlangıç zincirini veya review komutunun sabit
+gövdesini ekleme. Yeni karar/kısıt varsa yalnız onu ekle. Kullanıcı metni kısaltmak
+zorunda kalmasın. FIX için mevcut uygulama sohbetini kullan; alt test başına sohbet açtırma.
 verification-before-completion
 skill'iyle devir bilgisi bırak (başlangıç HEAD, diff kapsamı, komutlar, log
 yolları, açık kapılar). Başlangıçtaki mevcut değişiklikleri ayır; tracked,
 staged ve untracked kapsamı ile işe ait diff/kanıt yollarını açıkça kaydet.
-Opus'a ayrıca review sonrası kayıt/kapanış işi devretme. Commit/push yok.
-Plan içindeki uygulama/test/teşhis ve kendi kodunun düzeltmeleri aynı Opus
+Uygulayıcıya ayrıca review sonrası kayıt/kapanış işi devretme. Commit/push yok.
+Plan içindeki uygulama/test/teşhis ve kendi kodunun düzeltmeleri aynı uygulama
 sohbetinde kalır; planın tasarımını/kapsamını kendiliğinden değiştirme.
 Kapanış biçimi: Durum; Devam (AYNI SOHBET / YENİ SOHBET / DUR — kullanıcı
-kararı); Rol; tam komut/prompt. Tamamlanan uygulama için bağımsız GPT /review öner;
-mevcut review sohbeti varsa onu kullan, yoksa yeni sohbet açılır.
+kararı); Rol; tam komut/prompt. İlk review'da /review; mevcut review'a dönüşte yukarıdaki
+kısa devam mesajı. Kullanıcıya komut + aynı talimatları yineleyen uzun açıklama verme.
 iki başarısız denemeyi yeni sohbetle sıfırlama.
 
 Plan/review otomatik shell expansion ile yüklenmez; mod seçiminden sonra

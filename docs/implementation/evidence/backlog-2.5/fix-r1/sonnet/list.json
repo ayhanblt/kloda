@@ -1,0 +1,1802 @@
+{
+ "variants": {
+  "locales": [
+   "tr",
+   "en",
+   "de"
+  ],
+  "themes": [
+   "light",
+   "dark"
+  ],
+  "sizes": [
+   "normal",
+   "large"
+  ]
+ },
+ "rows": [
+  {
+   "id": "desktop.welcome",
+   "platform": "desktop",
+   "family": "desktop-route",
+   "screen": "welcome",
+   "driver": "desktop-renderer",
+   "driverKind": "synthetic-renderer",
+   "runnable": true,
+   "status": "blocked",
+   "reason": "synthetic bridge stub covers only background/draft APIs; route needs additional read-only stub, unknown bridge calls fail closed",
+   "ref": {
+    "source": "DesktopRoute",
+    "route": "welcome",
+    "hash": "#/welcome"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 6,
+    "blocked": 6,
+    "deferred_external": 0
+   },
+   "overrides": [
+    {
+     "cell": "desktop.welcome/tr/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.welcome/tr/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.welcome/en/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.welcome/en/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.welcome/de/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.welcome/de/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    }
+   ]
+  },
+  {
+   "id": "desktop.receiver",
+   "platform": "desktop",
+   "family": "desktop-route",
+   "screen": "receiver",
+   "driver": "desktop-renderer",
+   "driverKind": "synthetic-renderer",
+   "runnable": true,
+   "status": "blocked",
+   "reason": "synthetic bridge stub covers only background/draft APIs; route needs additional read-only stub, unknown bridge calls fail closed",
+   "ref": {
+    "source": "DesktopRoute",
+    "route": "receiver",
+    "hash": "#/receiver"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 6,
+    "blocked": 6,
+    "deferred_external": 0
+   },
+   "overrides": [
+    {
+     "cell": "desktop.receiver/tr/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.receiver/tr/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.receiver/en/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.receiver/en/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.receiver/de/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.receiver/de/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    }
+   ]
+  },
+  {
+   "id": "desktop.pairing",
+   "platform": "desktop",
+   "family": "desktop-route",
+   "screen": "pairing",
+   "driver": "desktop-renderer",
+   "driverKind": "synthetic-renderer",
+   "runnable": true,
+   "status": "blocked",
+   "reason": "synthetic bridge stub covers only background/draft APIs; route needs additional read-only stub, unknown bridge calls fail closed",
+   "ref": {
+    "source": "DesktopRoute",
+    "route": "pairing",
+    "hash": "#/pairing"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 6,
+    "blocked": 6,
+    "deferred_external": 0
+   },
+   "overrides": [
+    {
+     "cell": "desktop.pairing/tr/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.pairing/tr/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.pairing/en/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.pairing/en/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.pairing/de/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.pairing/de/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    }
+   ]
+  },
+  {
+   "id": "desktop.incoming",
+   "platform": "desktop",
+   "family": "desktop-route",
+   "screen": "incoming",
+   "driver": "desktop-renderer",
+   "driverKind": "synthetic-renderer",
+   "runnable": true,
+   "status": "blocked",
+   "reason": "synthetic bridge stub covers only background/draft APIs; route needs additional read-only stub, unknown bridge calls fail closed",
+   "ref": {
+    "source": "DesktopRoute",
+    "route": "incoming",
+    "hash": "#/incoming"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 6,
+    "blocked": 6,
+    "deferred_external": 0
+   },
+   "overrides": [
+    {
+     "cell": "desktop.incoming/tr/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.incoming/tr/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.incoming/en/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.incoming/en/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.incoming/de/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.incoming/de/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    }
+   ]
+  },
+  {
+   "id": "desktop.devices",
+   "platform": "desktop",
+   "family": "desktop-route",
+   "screen": "devices",
+   "driver": "desktop-renderer",
+   "driverKind": "synthetic-renderer",
+   "runnable": true,
+   "status": "blocked",
+   "reason": "synthetic bridge stub covers only background/draft APIs; route needs additional read-only stub, unknown bridge calls fail closed",
+   "ref": {
+    "source": "DesktopRoute",
+    "route": "devices",
+    "hash": "#/devices"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 6,
+    "blocked": 6,
+    "deferred_external": 0
+   },
+   "overrides": [
+    {
+     "cell": "desktop.devices/tr/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.devices/tr/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.devices/en/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.devices/en/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.devices/de/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.devices/de/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    }
+   ]
+  },
+  {
+   "id": "desktop.backups",
+   "platform": "desktop",
+   "family": "desktop-route",
+   "screen": "backups",
+   "driver": "desktop-renderer",
+   "driverKind": "synthetic-renderer",
+   "runnable": true,
+   "status": "blocked",
+   "reason": "synthetic bridge stub covers only background/draft APIs; route needs additional read-only stub, unknown bridge calls fail closed",
+   "ref": {
+    "source": "DesktopRoute",
+    "route": "backups",
+    "hash": "#/backups"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 6,
+    "blocked": 6,
+    "deferred_external": 0
+   },
+   "overrides": [
+    {
+     "cell": "desktop.backups/tr/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.backups/tr/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.backups/en/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.backups/en/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.backups/de/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.backups/de/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    }
+   ]
+  },
+  {
+   "id": "desktop.trash",
+   "platform": "desktop",
+   "family": "desktop-route",
+   "screen": "trash",
+   "driver": "desktop-renderer",
+   "driverKind": "synthetic-renderer",
+   "runnable": true,
+   "status": "blocked",
+   "reason": "synthetic bridge stub covers only background/draft APIs; route needs additional read-only stub, unknown bridge calls fail closed",
+   "ref": {
+    "source": "DesktopRoute",
+    "route": "trash",
+    "hash": "#/trash"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 6,
+    "blocked": 6,
+    "deferred_external": 0
+   },
+   "overrides": [
+    {
+     "cell": "desktop.trash/tr/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.trash/tr/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.trash/en/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.trash/en/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.trash/de/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.trash/de/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    }
+   ]
+  },
+  {
+   "id": "desktop.connections",
+   "platform": "desktop",
+   "family": "desktop-route",
+   "screen": "connections",
+   "driver": "desktop-renderer",
+   "driverKind": "synthetic-renderer",
+   "runnable": true,
+   "status": "blocked",
+   "reason": "synthetic bridge stub covers only background/draft APIs; route needs additional read-only stub, unknown bridge calls fail closed",
+   "ref": {
+    "source": "DesktopRoute",
+    "route": "connections",
+    "hash": "#/connections"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 6,
+    "blocked": 6,
+    "deferred_external": 0
+   },
+   "overrides": [
+    {
+     "cell": "desktop.connections/tr/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.connections/tr/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.connections/en/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.connections/en/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.connections/de/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.connections/de/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    }
+   ]
+  },
+  {
+   "id": "desktop.connection-add",
+   "platform": "desktop",
+   "family": "desktop-route",
+   "screen": "connection-add",
+   "driver": "desktop-renderer",
+   "driverKind": "synthetic-renderer",
+   "runnable": true,
+   "status": "blocked",
+   "reason": "synthetic bridge stub covers only background/draft APIs; route needs additional read-only stub, unknown bridge calls fail closed",
+   "ref": {
+    "source": "DesktopRoute",
+    "route": "connection-add",
+    "hash": "#/connections/new"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 6,
+    "blocked": 6,
+    "deferred_external": 0
+   },
+   "overrides": [
+    {
+     "cell": "desktop.connection-add/tr/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.connection-add/tr/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.connection-add/en/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.connection-add/en/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.connection-add/de/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.connection-add/de/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    }
+   ]
+  },
+  {
+   "id": "desktop.connection-detail",
+   "platform": "desktop",
+   "family": "desktop-route",
+   "screen": "connection-detail",
+   "driver": "desktop-renderer",
+   "driverKind": "synthetic-renderer",
+   "runnable": true,
+   "status": "blocked",
+   "reason": "synthetic bridge stub covers only background/draft APIs; route needs additional read-only stub, unknown bridge calls fail closed",
+   "ref": {
+    "source": "DesktopRoute",
+    "route": "connection-detail",
+    "hash": "#/connections/detail/webdav"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 6,
+    "blocked": 6,
+    "deferred_external": 0
+   },
+   "overrides": [
+    {
+     "cell": "desktop.connection-detail/tr/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.connection-detail/tr/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.connection-detail/en/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.connection-detail/en/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.connection-detail/de/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.connection-detail/de/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    }
+   ]
+  },
+  {
+   "id": "desktop.backup",
+   "platform": "desktop",
+   "family": "desktop-route",
+   "screen": "backup",
+   "driver": "desktop-renderer",
+   "driverKind": "synthetic-renderer",
+   "runnable": true,
+   "status": "blocked",
+   "reason": "synthetic bridge stub covers only background/draft APIs; route needs additional read-only stub, unknown bridge calls fail closed; D10 is the existing combined sources+schedule step of BackupSetup, no new route",
+   "ref": {
+    "source": "DesktopRoute",
+    "route": "backup",
+    "hash": "#/backup",
+    "step": "sources"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 6,
+    "blocked": 6,
+    "deferred_external": 0
+   },
+   "overrides": [
+    {
+     "cell": "desktop.backup/tr/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.backup/tr/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.backup/en/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.backup/en/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.backup/de/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.backup/de/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    }
+   ]
+  },
+  {
+   "id": "desktop.backup-storage",
+   "platform": "desktop",
+   "family": "desktop-route",
+   "screen": "backup-storage",
+   "driver": "desktop-renderer",
+   "driverKind": "synthetic-renderer",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "storage step of BackupSetup opens only after sources are chosen and saveSchedule succeeds through the native bridge; no safe seed in the synthetic stub",
+   "ref": {
+    "source": "DesktopRoute",
+    "route": "backup",
+    "hash": "#/backup",
+    "step": "storage"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": [
+    {
+     "cell": "desktop.backup-storage/tr/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.backup-storage/tr/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.backup-storage/en/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.backup-storage/en/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.backup-storage/de/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.backup-storage/de/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    }
+   ]
+  },
+  {
+   "id": "desktop.jobs",
+   "platform": "desktop",
+   "family": "desktop-route",
+   "screen": "jobs",
+   "driver": "desktop-renderer",
+   "driverKind": "synthetic-renderer",
+   "runnable": true,
+   "status": "blocked",
+   "reason": "synthetic bridge stub covers only background/draft APIs; route needs additional read-only stub, unknown bridge calls fail closed; route mounts BackupSetup with showActivity (App.tsx:81) which opens the WebDavActivity step, not the D10 sources step",
+   "ref": {
+    "source": "DesktopRoute",
+    "route": "jobs",
+    "hash": "#/jobs",
+    "step": "activity"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 6,
+    "blocked": 6,
+    "deferred_external": 0
+   },
+   "overrides": [
+    {
+     "cell": "desktop.jobs/tr/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.jobs/tr/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.jobs/en/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.jobs/en/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.jobs/de/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.jobs/de/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    }
+   ]
+  },
+  {
+   "id": "desktop.settings",
+   "platform": "desktop",
+   "family": "desktop-route",
+   "screen": "settings",
+   "driver": "desktop-renderer",
+   "driverKind": "synthetic-renderer",
+   "runnable": true,
+   "status": "ready",
+   "reason": null,
+   "ref": {
+    "source": "DesktopRoute",
+    "route": "settings",
+    "hash": "#/settings"
+   },
+   "evidence": [
+    "docs/implementation/evidence/backlog-2.2-g2-g3/capture/"
+   ],
+   "cells": {
+    "ready": 6,
+    "interaction_required": 0,
+    "state_unavailable": 6,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": [
+    {
+     "cell": "desktop.settings/tr/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.settings/tr/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.settings/en/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.settings/en/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.settings/de/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.settings/de/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    }
+   ]
+  },
+  {
+   "id": "desktop.tray",
+   "platform": "desktop",
+   "family": "desktop-route",
+   "screen": "tray",
+   "driver": "desktop-renderer",
+   "driverKind": "synthetic-renderer",
+   "runnable": true,
+   "status": "ready",
+   "reason": null,
+   "ref": {
+    "source": "DesktopRoute",
+    "route": "tray",
+    "hash": "#/tray"
+   },
+   "evidence": [
+    "docs/implementation/evidence/backlog-2.2-g2-g3/capture/"
+   ],
+   "cells": {
+    "ready": 6,
+    "interaction_required": 0,
+    "state_unavailable": 6,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": [
+    {
+     "cell": "desktop.tray/tr/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.tray/tr/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.tray/en/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.tray/en/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.tray/de/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.tray/de/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    }
+   ]
+  },
+  {
+   "id": "desktop.tray-os",
+   "platform": "desktop",
+   "family": "os-integration",
+   "screen": "tray-os",
+   "driver": "desktop-renderer",
+   "driverKind": "synthetic-renderer",
+   "runnable": true,
+   "status": "deferred_external",
+   "reason": "real OS tray is a deferred external gate; renderer tray route is only a synthetic page",
+   "ref": {
+    "source": "native-os",
+    "route": "tray",
+    "hash": "#/tray"
+   },
+   "evidence": [
+    "docs/implementation/evidence/backlog-2.2-g2-g3/capture/"
+   ],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 6,
+    "blocked": 0,
+    "deferred_external": 6
+   },
+   "overrides": [
+    {
+     "cell": "desktop.tray-os/tr/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.tray-os/tr/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.tray-os/en/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.tray-os/en/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.tray-os/de/light/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    },
+    {
+     "cell": "desktop.tray-os/de/dark/large",
+     "status": "state_unavailable",
+     "reason": "renderer has no root font-size control; browser zoom is not native large text"
+    }
+   ]
+  },
+  {
+   "id": "mobile.welcome",
+   "platform": "ios",
+   "family": "mobile-page",
+   "screen": "welcome",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "ready",
+   "reason": null,
+   "ref": {
+    "source": "MobilePage",
+    "page": "welcome"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 12,
+    "interaction_required": 0,
+    "state_unavailable": 0,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.home",
+   "platform": "ios",
+   "family": "mobile-page",
+   "screen": "home",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "useHomeStatus reads native transfer/destination status; no safe seed",
+   "ref": {
+    "source": "MobilePage",
+    "page": "home"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.photos",
+   "platform": "ios",
+   "family": "mobile-page",
+   "screen": "photos",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "useGallery needs photo-library permission and native gallery",
+   "ref": {
+    "source": "MobilePage",
+    "page": "photos"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.sources",
+   "platform": "ios",
+   "family": "mobile-page",
+   "screen": "sources",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "needs BackupSetupModel from useBackupSetup (native); no fixture model",
+   "ref": {
+    "source": "MobilePage",
+    "page": "sources"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.schedule",
+   "platform": "ios",
+   "family": "mobile-page",
+   "screen": "schedule",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "needs BackupSetupModel from useBackupSetup (native); no fixture model",
+   "ref": {
+    "source": "MobilePage",
+    "page": "schedule"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.computer",
+   "platform": "ios",
+   "family": "mobile-page",
+   "screen": "computer",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "usePcDestination and native pairing status needed; needs paired peer/seed",
+   "ref": {
+    "source": "MobilePage",
+    "page": "computer"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.pairing",
+   "platform": "ios",
+   "family": "pairing",
+   "screen": "pairing",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "usePairing mounts native pairing calls; QR scan forbidden",
+   "ref": {
+    "source": "MobilePage",
+    "page": "pairing"
+   },
+   "evidence": [
+    "docs/implementation/evidence/backlog-2.4/MANIFEST.md",
+    "G1-07/G456-07/G24-07 Faz3 DEFERRED/NOT_RUN"
+   ],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.pairing-help",
+   "platform": "ios",
+   "family": "pairing",
+   "screen": "pairing-help",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "interaction_required",
+   "reason": "help sheet opens only after a tap; page also mounts native usePairing",
+   "ref": {
+    "source": "MobilePage",
+    "page": "pairing"
+   },
+   "evidence": [
+    "docs/implementation/evidence/backlog-2.4/MANIFEST.md",
+    "G1-07/G456-07/G24-07 Faz3 DEFERRED/NOT_RUN"
+   ],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 12,
+    "state_unavailable": 0,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.pairing-protected",
+   "platform": "ios",
+   "family": "pairing",
+   "screen": "pairing-protected",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "needs paired peer or pending native phase seed; QR scan forbidden",
+   "ref": {
+    "source": "MobilePage",
+    "page": "pairing"
+   },
+   "evidence": [
+    "docs/implementation/evidence/backlog-2.4/MANIFEST.md",
+    "G1-07/G456-07/G24-07 Faz3 DEFERRED/NOT_RUN"
+   ],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.activity",
+   "platform": "ios",
+   "family": "activity",
+   "screen": "activity",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "useFileTransfer and useWebDavBackup are native hooks; needs seed",
+   "ref": {
+    "source": "MobilePage",
+    "page": "activity"
+   },
+   "evidence": [
+    "docs/implementation/evidence/backlog-2.1-g1/MANIFEST.md",
+    "G1-07/G456-07/G24-07 Faz3 DEFERRED/NOT_RUN"
+   ],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.activity-past",
+   "platform": "ios",
+   "family": "activity",
+   "screen": "activity-past",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "interaction_required",
+   "reason": "Past tab needs a tap; native hooks also need seed",
+   "ref": {
+    "source": "MobilePage",
+    "page": "activity"
+   },
+   "evidence": [
+    "docs/implementation/evidence/backlog-2.1-g1/MANIFEST.md",
+    "G1-07/G456-07/G24-07 Faz3 DEFERRED/NOT_RUN"
+   ],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 12,
+    "state_unavailable": 0,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.activity-filter-all",
+   "platform": "ios",
+   "family": "activity",
+   "screen": "activity-filter-all",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "interaction_required",
+   "reason": "needs Past tab tap then filter menu tap; native hooks also need seed",
+   "ref": {
+    "source": "MobilePage",
+    "page": "activity"
+   },
+   "evidence": [
+    "docs/implementation/evidence/backlog-2.1-g1/MANIFEST.md",
+    "G1-07/G456-07/G24-07 Faz3 DEFERRED/NOT_RUN"
+   ],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 12,
+    "state_unavailable": 0,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.activity-filter-done",
+   "platform": "ios",
+   "family": "activity",
+   "screen": "activity-filter-done",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "interaction_required",
+   "reason": "needs Past tab tap then filter menu tap; native hooks also need seed",
+   "ref": {
+    "source": "MobilePage",
+    "page": "activity"
+   },
+   "evidence": [
+    "docs/implementation/evidence/backlog-2.1-g1/MANIFEST.md",
+    "G1-07/G456-07/G24-07 Faz3 DEFERRED/NOT_RUN"
+   ],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 12,
+    "state_unavailable": 0,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.activity-filter-issues",
+   "platform": "ios",
+   "family": "activity",
+   "screen": "activity-filter-issues",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "interaction_required",
+   "reason": "needs Past tab tap then filter menu tap; native hooks also need seed",
+   "ref": {
+    "source": "MobilePage",
+    "page": "activity"
+   },
+   "evidence": [
+    "docs/implementation/evidence/backlog-2.1-g1/MANIFEST.md",
+    "G1-07/G456-07/G24-07 Faz3 DEFERRED/NOT_RUN"
+   ],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 12,
+    "state_unavailable": 0,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.activity-filter-open",
+   "platform": "ios",
+   "family": "activity",
+   "screen": "activity-filter-open",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "interaction_required",
+   "reason": "needs Past tab tap then filter menu tap; native hooks also need seed",
+   "ref": {
+    "source": "MobilePage",
+    "page": "activity"
+   },
+   "evidence": [
+    "docs/implementation/evidence/backlog-2.1-g1/MANIFEST.md",
+    "G1-07/G456-07/G24-07 Faz3 DEFERRED/NOT_RUN"
+   ],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 12,
+    "state_unavailable": 0,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.backups",
+   "platform": "ios",
+   "family": "mobile-page",
+   "screen": "backups",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "ActivityPage backups view mounts native model hooks that need a native bridge and seeded state",
+   "ref": {
+    "source": "MobilePage",
+    "page": "backups"
+   },
+   "evidence": [
+    "docs/implementation/evidence/backlog-2.1-g1/MANIFEST.md",
+    "G1-07/G456-07/G24-07 Faz3 DEFERRED/NOT_RUN"
+   ],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.connections",
+   "platform": "ios",
+   "family": "mobile-page",
+   "screen": "connections",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "ConnectionsPage mounts native model hooks that need a native bridge and seeded state",
+   "ref": {
+    "source": "MobilePage",
+    "page": "connections"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.add-connection",
+   "platform": "ios",
+   "family": "mobile-page",
+   "screen": "add-connection",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "ConnectionsPage (adding) mounts native model hooks that need a native bridge and seeded state",
+   "ref": {
+    "source": "MobilePage",
+    "page": "add-connection"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.provider-smb",
+   "platform": "ios",
+   "family": "provider",
+   "screen": "provider-smb",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "useSmbBackup is a native model hook; no fixture",
+   "ref": {
+    "source": "MobilePage",
+    "page": "provider",
+    "provider": "smb"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.provider-sftp",
+   "platform": "ios",
+   "family": "provider",
+   "screen": "provider-sftp",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "useSftpBackup is a native model hook; no fixture",
+   "ref": {
+    "source": "MobilePage",
+    "page": "provider",
+    "provider": "sftp"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.provider-ftp",
+   "platform": "ios",
+   "family": "provider",
+   "screen": "provider-ftp",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "useFtpsBackup is a native model hook; no fixture",
+   "ref": {
+    "source": "MobilePage",
+    "page": "provider",
+    "provider": "ftp"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.provider-amazon-s3",
+   "platform": "ios",
+   "family": "provider",
+   "screen": "provider-amazon-s3",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "useS3Backup is a native model hook; no fixture",
+   "ref": {
+    "source": "MobilePage",
+    "page": "provider",
+    "provider": "amazon-s3"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.provider-s3-compatible",
+   "platform": "ios",
+   "family": "provider",
+   "screen": "provider-s3-compatible",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "useS3Backup is a native model hook; no fixture",
+   "ref": {
+    "source": "MobilePage",
+    "page": "provider",
+    "provider": "s3-compatible"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.provider-cloud-nextcloud",
+   "platform": "ios",
+   "family": "provider",
+   "screen": "provider-cloud-nextcloud",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "browser sign-in form (server+folder) needs useCloudDestinations native hook; sign-in and accounts forbidden",
+   "ref": {
+    "source": "MobilePage",
+    "page": "provider",
+    "provider": "nextcloud"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.provider-cloud-password",
+   "platform": "ios",
+   "family": "provider",
+   "screen": "provider-cloud-password",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "password form (username+password+folder, Save) needs useCloudDestinations native hook; credentials forbidden",
+   "ref": {
+    "source": "MobilePage",
+    "page": "provider",
+    "provider": "kolab-now"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.provider-cloud-oauth",
+   "platform": "ios",
+   "family": "provider",
+   "screen": "provider-cloud-oauth",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "OAuth form (folder only, browser sign-in) for dropbox/onedrive/yandex-disk/google-drive needs useCloudDestinations native hook; sign-in forbidden",
+   "ref": {
+    "source": "MobilePage",
+    "page": "provider",
+    "provider": "dropbox"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.provider-generic",
+   "platform": "ios",
+   "family": "provider",
+   "screen": "provider-generic",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "ready",
+   "reason": null,
+   "ref": {
+    "source": "MobilePage",
+    "page": "provider",
+    "provider": "box"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 12,
+    "interaction_required": 0,
+    "state_unavailable": 0,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.settings",
+   "platform": "ios",
+   "family": "settings",
+   "screen": "settings",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "ready",
+   "reason": null,
+   "ref": {
+    "source": "MobilePage",
+    "page": "settings"
+   },
+   "evidence": [
+    "docs/implementation/evidence/backlog-2.3-g4-g6/MANIFEST.md",
+    "G1-07/G456-07/G24-07 Faz3 DEFERRED/NOT_RUN"
+   ],
+   "cells": {
+    "ready": 12,
+    "interaction_required": 0,
+    "state_unavailable": 0,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.settings-bottom",
+   "platform": "ios",
+   "family": "settings",
+   "screen": "settings-bottom",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "interaction_required",
+   "reason": "needs scroll to bottom of settings",
+   "ref": {
+    "source": "MobilePage",
+    "page": "settings"
+   },
+   "evidence": [
+    "docs/implementation/evidence/backlog-2.3-g4-g6/MANIFEST.md",
+    "G1-07/G456-07/G24-07 Faz3 DEFERRED/NOT_RUN"
+   ],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 12,
+    "state_unavailable": 0,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.recovery",
+   "platform": "ios",
+   "family": "mobile-page",
+   "screen": "recovery",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "useRecoveryStatus/useCloudDestinations are native; recovery code is protected, no seed",
+   "ref": {
+    "source": "MobilePage",
+    "page": "recovery"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.storage",
+   "platform": "ios",
+   "family": "storage",
+   "screen": "storage",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "needs BackupSetupModel and useWebDavBackup (native); no fixture",
+   "ref": {
+    "source": "MobilePage",
+    "page": "storage"
+   },
+   "evidence": [
+    "docs/implementation/evidence/backlog-2.4/MANIFEST.md",
+    "G1-07/G456-07/G24-07 Faz3 DEFERRED/NOT_RUN"
+   ],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.storage-help",
+   "platform": "ios",
+   "family": "storage",
+   "screen": "storage-help",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "interaction_required",
+   "reason": "needs a field focus/help affordance; native model also required",
+   "ref": {
+    "source": "MobilePage",
+    "page": "storage"
+   },
+   "evidence": [
+    "docs/implementation/evidence/backlog-2.4/MANIFEST.md",
+    "G1-07/G456-07/G24-07 Faz3 DEFERRED/NOT_RUN"
+   ],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 12,
+    "state_unavailable": 0,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.storage-diagnostic",
+   "platform": "ios",
+   "family": "storage",
+   "screen": "storage-diagnostic",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "state_unavailable",
+   "reason": "diagnostic needs a failed native connection test result seed",
+   "ref": {
+    "source": "MobilePage",
+    "page": "storage"
+   },
+   "evidence": [
+    "docs/implementation/evidence/backlog-2.4/MANIFEST.md",
+    "G1-07/G456-07/G24-07 Faz3 DEFERRED/NOT_RUN"
+   ],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 12,
+    "blocked": 0,
+    "deferred_external": 0
+   },
+   "overrides": []
+  },
+  {
+   "id": "mobile.lock-screen-cards",
+   "platform": "ios",
+   "family": "os-integration",
+   "screen": "lock-screen-cards",
+   "driver": "ios-native-entry",
+   "driverKind": "native-component-fixture",
+   "runnable": true,
+   "status": "deferred_external",
+   "reason": "step19 gate",
+   "ref": {
+    "source": "native-os",
+    "note": "iOS Live Activity / lock-screen cards"
+   },
+   "evidence": [],
+   "cells": {
+    "ready": 0,
+    "interaction_required": 0,
+    "state_unavailable": 0,
+    "blocked": 0,
+    "deferred_external": 12
+   },
+   "overrides": []
+  }
+ ],
+ "totals": {
+  "ready": 48,
+  "interaction_required": 96,
+  "state_unavailable": 366,
+  "blocked": 72,
+  "deferred_external": 18
+ },
+ "totalCells": 600
+}

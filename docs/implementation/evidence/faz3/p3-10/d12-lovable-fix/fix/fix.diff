@@ -1,0 +1,125 @@
+--- docs/implementation/evidence/faz3/p3-10/d12-lovable-fix/fix/before/app/global.css	2026-11-20 21:54:32
++++ apps/desktop/src/app/global.css	2026-11-20 21:54:54
+@@ -141,7 +141,12 @@
+ .appearance-settings { display: grid; gap: 16px; margin-bottom: 24px; }
+ .appearance-settings fieldset { display: grid; gap: 8px; }
+ .appearance-settings legend { margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+-.settings-section-title { font-size: 14px; font-weight: 600; color: var(--text-secondary); text-transform: none; }
++.settings-section-title { margin: 0 0 8px; padding-inline: 4px; font-size: 14px; font-weight: 600; color: var(--text-secondary); text-transform: none; }
++.receiver-settings-title + .settings-section-title { margin-top: 24px; }
++.desktop-background + .appearance-settings { margin-top: 24px; }
++.appearance-theme-card { display: grid; gap: 8px; padding: 12px; }
++.appearance-theme-card legend { display: inline-flex; align-items: center; gap: 8px; }
++.appearance-hint { font-size: 12px; color: var(--text-secondary); }
+ .segmented { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border: 1px solid var(--border-subtle); border-radius: 12px; background: var(--surface-2); width: 100%; }
+ .segmented-option { display: inline-flex; flex: 1 1 0; justify-content: center; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border: 1px solid transparent; border-radius: 8px; font-weight: 600; cursor: pointer; }
+ .segmented-option:has(input:checked) { border-color: var(--brand-text); color: var(--brand-text); background: var(--brand-subtle); }
+--- docs/implementation/evidence/faz3/p3-10/d12-lovable-fix/fix/before/app/App.spec.tsx	2026-11-20 21:54:32
++++ apps/desktop/src/app/App.spec.tsx	2026-11-20 21:54:54
+@@ -136,7 +136,15 @@
+     after(i18n.t('appearance.title'), i18n.t('ui.language'));
+     after(i18n.t('ui.language'), i18n.t('background.version'));
+     after(i18n.t('background.version'), i18n.t('background.quit'));
+-    expect(screen.getAllByRole('radio')).toHaveLength(6);
++    const radios = screen.getAllByRole('radio').map((radio) => (radio as HTMLInputElement).value);
++    expect(radios).toEqual(['system', 'light', 'dark', 'tr', 'en', 'de']);
++    const themeGroup = screen.getByRole('radiogroup', { name: i18n.t('appearance.title') });
++    expect(themeGroup.closest('.pairing-card')).not.toBeNull();
++    expect(themeGroup).toHaveAccessibleDescription(i18n.t('appearance.systemHint'));
++    expect(screen.getByRole('radiogroup', { name: i18n.t('ui.language') }).closest('.pairing-card')).toBeNull();
++    const heading = screen.getByRole('heading', { level: 2, name: i18n.t('background.title') });
++    expect(heading.closest('.pairing-card')).toBeNull();
++    expect(heading.nextElementSibling).toHaveClass('desktop-background');
+     expect(screen.getAllByRole('button', { name: i18n.t('background.quit') })).toHaveLength(1);
+     expect(status).toHaveBeenCalledOnce();
+     expect(background.quit).not.toHaveBeenCalled();
+--- docs/implementation/evidence/faz3/p3-10/d12-lovable-fix/fix/before/features/desktop-background/DesktopBackground.tsx	2026-11-20 21:54:32
++++ apps/desktop/src/features/desktop-background/DesktopBackground.tsx	2026-11-20 21:54:46
+@@ -62,11 +62,12 @@
+   const quitButton = (className: string) => <button className={className} disabled={!bridge} onClick={() => void quit()} type="button">
+     {settings && <LogOut aria-hidden="true" size={16} />}{t('background.quit')}</button>;
+   return <>
++  {settings && <h2 className="settings-section-title">{t('background.title')}</h2>}
+   <section aria-label={t('background.title')} className="desktop-background pairing-card">
+-    <div className="receiver-status-heading">
+-      <h2 className="font-semibold">{t(settings ? 'background.title' : 'receiver.statusTitle')}</h2>
+-      {!settings && quitButton('pairing-button')}
+-    </div>
++    {!settings && <div className="receiver-status-heading">
++      <h2 className="font-semibold">{t('receiver.statusTitle')}</h2>
++      {quitButton('pairing-button')}
++    </div>}
+     {failed || !bridge ? <p role="alert">{t('background.unknown')}</p> : status && <>
+       <p className={`pairing-state ${status.receiver.available && !status.receiver.errorCode ? 'pairing-state-complete' : ''}`} role="status">{t(status.receiver.available ? 'background.listening' : 'background.unavailable')}</p>
+       {status.receiver.errorCode && <p role="alert">{t(`pairing.errors.${status.receiver.errorCode}`)}</p>}
+--- docs/implementation/evidence/faz3/p3-10/d12-lovable-fix/fix/before/features/desktop-background/AppearanceSettings.tsx	2026-11-20 21:54:32
++++ apps/desktop/src/features/desktop-background/AppearanceSettings.tsx	2026-11-20 21:54:46
+@@ -1,3 +1,4 @@
++import { SunMoon } from 'lucide-react';
+ import { useTranslation } from 'react-i18next';
+ import type { ThemePreference } from '../../shared/theme/use-appearance';
+ 
+@@ -7,15 +8,18 @@
+   const { t, i18n } = useTranslation();
+   return <section className="appearance-settings" aria-label={t('appearance.general')}>
+     <h2 className="settings-section-title">{t('appearance.general')}</h2>
+-    <fieldset role="radiogroup" aria-label={t('appearance.title')}>
+-      <legend>{t('appearance.title')}</legend>
+-      <div className="segmented">
+-        {(['dark', 'light', 'system'] as const).map((value) => <label className="segmented-option" key={value}>
+-          <input type="radio" name="kloda-appearance" value={value} checked={preference === value} onChange={() => onChange(value)} />
+-          {t(`appearance.${value}`)}
+-        </label>)}
+-      </div>
+-    </fieldset>
++    <div className="pairing-card appearance-theme-card">
++      <fieldset role="radiogroup" aria-label={t('appearance.title')} aria-describedby="appearance-system-hint">
++        <legend><SunMoon aria-hidden="true" size={16} />{t('appearance.title')}</legend>
++        <div className="segmented">
++          {(['system', 'light', 'dark'] as const).map((value) => <label className="segmented-option" key={value}>
++            <input type="radio" name="kloda-appearance" value={value} checked={preference === value} onChange={() => onChange(value)} />
++            {t(`appearance.${value}`)}
++          </label>)}
++        </div>
++      </fieldset>
++      <p className="appearance-hint" id="appearance-system-hint">{t('appearance.systemHint')}</p>
++    </div>
+     <fieldset role="radiogroup" aria-label={t('ui.language')}>
+       <legend>{t('ui.language')}</legend>
+       <div className="segmented">
+--- docs/implementation/evidence/faz3/p3-10/d12-lovable-fix/fix/before/shared/i18n/locales/tr.json	2026-11-20 21:54:32
++++ apps/desktop/src/shared/i18n/locales/tr.json	2026-11-20 21:54:46
+@@ -482,7 +482,8 @@
+     "title": "Görünüm",
+     "dark": "Koyu",
+     "light": "Açık",
+-    "system": "Sistem"
++    "system": "Sistem",
++    "systemHint": "Sistem seçiliyse cihazınızın açık/koyu görünümü izlenir."
+   },
+   "tray": {
+     "menuLabel": "Kloda tray menüsü",
+--- docs/implementation/evidence/faz3/p3-10/d12-lovable-fix/fix/before/shared/i18n/locales/en.json	2026-11-20 21:54:32
++++ apps/desktop/src/shared/i18n/locales/en.json	2026-11-20 21:54:46
+@@ -482,7 +482,8 @@
+     "title": "Appearance",
+     "dark": "Dark",
+     "light": "Light",
+-    "system": "System"
++    "system": "System",
++    "systemHint": "When System is selected, your device's light/dark setting is followed."
+   },
+   "tray": {
+     "menuLabel": "Kloda tray menu",
+--- docs/implementation/evidence/faz3/p3-10/d12-lovable-fix/fix/before/shared/i18n/locales/de.json	2026-11-20 21:54:32
++++ apps/desktop/src/shared/i18n/locales/de.json	2026-11-20 21:54:46
+@@ -482,7 +482,8 @@
+     "title": "Darstellung",
+     "dark": "Dunkel",
+     "light": "Hell",
+-    "system": "System"
++    "system": "System",
++    "systemHint": "Bei „System“ wird die helle/dunkle Einstellung des Geräts übernommen."
+   },
+   "tray": {
+     "menuLabel": "Kloda-Tray-Menü",

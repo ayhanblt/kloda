@@ -71,12 +71,27 @@ Live Activity upload yetkisi/background zamanı yaratmaz; gizli dosya okunmasın
 WhenUnlocked/Complete kontrollerini veya mevcut retry politikasını aşmaz.
 Remote push/APNs veya yeni backend bu tasarımdan otomatik türetilmez.
 
+## M13 / D10 / G6 uyarlama eşlemesi — D-G456, 18.11.2026
+
+Kullanıcı onaylı açık tasarım farkı; goal/kabul tablosu yalnız
+[next-plan §2.3](../implementation/plans/next-plan.md#23g4g6--native-free-m13-ve-kapsam-eşlemesi--18112026)'tedir.
+
+| Lovable öğesi | Kloda karşılığı | Fark / sınır |
+|---|---|---|
+| M13 hücresel switch | `apps/mobile/src/pages/settings/ui/settings-page.tsx::SettingsPage`, kapalı/disabled kontrol + açıklama | Bu sürümde hücresel yedekleme seçeneği yok; ağ politikası değişmez, Wi-Fi/ücretsiz ağ garantisi verilmez. |
+| M13 foto erişim pill'i | Aynı sayfa, açıklama + `navigate('sources')` | Demo izin durumu gösterilmez; izin kaynak sayısından türetilmez. |
+| M13 bildirim switch'i | Aynı sayfa, açıklama + `navigate('activity')` | Bildirim izni mevcut aktarım akışında istenir; bağlantı izin istemez/açıp kapamaz. |
+| M13 `0.9.0 (prototype)` | `apps/mobile/src/shared/config/app-version.ts` → `app.json::expo.version` | “Yapılandırma sürümü”; kurulu binary/release sürümü değildir, eksikse bilinmiyor. |
+| D10 `/d/sources` | `apps/desktop/src/pages/backup/BackupSetup.tsx` `sources` adımı (`pickSources` + `saveSchedule`), `apps/desktop/src/app/App.tsx` mounted `BackupSetup` | Kaynak ve program bilinçli olarak tek adımda birleşik; ayrı rota/ekran eklenmez. |
+| G6 kilit ekranı | Yukarıdaki “Yeni kilit ekranı kapsamı”, geliştirme19 | Live Activity/Android kartı uygulanmış sayılmaz; step19 kapısı açık. |
+
 ## Yerel snapshot ve eski Stitch klasörü
 
-[11. adım alım raporu](../implementation/lovable-design-intake-step11-2026-10-28.md)
-ve [yerel frozen kaynak/asset snapshot’ı](lovable-reference/c144e98938da/README.md)
-hazırdır:151 kaynak,7 doğrulanmış JPEG ve6 web önizleme capture. Kapsam/uyarlama
-bulguları ve native karşılıklar raporda; kaynaklar app içine taşınmadı.
+[Bağlayıcı c144e989 snapshot manifesti](lovable-reference/c144e98938da/manifest.json)
+172 kaynak ve 7 JPEG kaydeder. 151 kaynak ve 6 web önizleme görüntüsü,
+[11. adım alım raporundaki](../implementation/lovable-design-intake-step11-2026-10-28.md)
+emekli cb1143 revizyonuna aittir; c144 için görsel kanıt değildir. Kaynaklar app
+içine taşınmadı.
 
 Kullanıcının kaldırma izniyle `stitch_private_photo_cloud/` kaldırıldı.15tasarım
 ve5Finder metadata önce Git-dışı yerel ZIP’e alınıp hash/readback doğrulandı;

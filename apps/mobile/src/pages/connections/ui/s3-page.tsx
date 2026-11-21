@@ -39,7 +39,7 @@ export function S3Page({ provider,onBack }: { provider: S3Provider; onBack: () =
         <PairingButton disabled={m.working || m.dirty || (!m.status.running && !m.status.canRun)}
           label={t(m.status.running ? 'destinations.s3.pause' : 'destinations.s3.run')}
           onPress={() => { void m.action(m.status?.running ? 'pauseS3' : 'runS3'); }} />
-        <Text className="font-sans text-sm text-secondary-text">{t('destinations.s3.automaticHint')}</Text>
+        <Text className="font-sans text-sm text-secondary-text">{t(m.status.automaticSupported === false ? 'destinations.s3.automaticUnsupported' : 'destinations.s3.automaticHint')}</Text>
         <PairingButton variant="secondary" disabled={m.working || m.dirty || !m.status.canAutomatic}
           label={t(m.status.automaticEnabled ? 'destinations.s3.automaticOff' : 'destinations.s3.automaticOn')}
           onPress={() => { void m.action('automaticS3'); }} />

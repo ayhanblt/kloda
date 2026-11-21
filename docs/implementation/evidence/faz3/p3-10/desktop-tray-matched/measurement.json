@@ -1,0 +1,54 @@
+{
+ "lang": "tr",
+ "theme": "dark",
+ "hash": "#/tray",
+ "innerWidth": 521,
+ "rootFontPx": 16,
+ "fontsStatus": "loaded",
+ "interLoaded": true,
+ "headings": [
+  "Tray men\u00fcs\u00fc"
+ ],
+ "pageOverflow": false,
+ "calls": [],
+ "documentHeight": 1053,
+ "roles": [
+  "BUTTON:Kloda",
+  "BUTTON:Ana sayfa",
+  "BUTTON:Telefon e\u015fle\u015ftir",
+  "BUTTON:Cihazlar",
+  "BUTTON:Gelen aktar\u0131mlar",
+  "BUTTON:Yedekler",
+  "BUTTON:\u00c7\u00f6p kutusu",
+  "BUTTON:Ba\u011flant\u0131lar",
+  "BUTTON:Kaynaklar ve program",
+  "BUTTON:Giden i\u015fler",
+  "BUTTON:Ayarlar",
+  "BUTTON:Tray men\u00fcs\u00fc",
+  "BUTTON:Kuruluma ba\u015fla",
+  "group:KlodaDinliyorEtkin yedekleme yok.Kloda\u2019y",
+  "status:Dinliyor",
+  "BUTTON:Kloda\u2019y\u0131 a\u00e7",
+  "BUTTON:disabled:Gelen yedeklemeleri duraklat",
+  "BUTTON:disabled:Giden yedeklemeleri duraklat",
+  "BUTTON:Kloda\u2019dan \u00e7\u0131k",
+  "BUTTON:Klas\u00f6rleri se\u00e7",
+  "BUTTON:Depolama kurulumuna devam et"
+ ],
+ "consoleErrors": [],
+ "sha256": "8e46bb69000cc0300248f206d90d616dec1106dfc0956c96e206138e4a4dac02",
+ "rendererProvenance": {
+  "sourceSha256": "fb20cf353d7b83a48908d7770865894f4aad3e805d6c0b702863136ab7ca1e78",
+  "rendererSha256": "450e8e5b7b5fed34b09c032b3705d7c4b0c42cdd6a5dcb3d9bc05a3cbc91bd8d",
+  "globalSha256": "e0f6528cb1d3dddce14c9ac38383f0edc6c6ccf9d9a0eae4975fae5e0ac16af5",
+  "fresh": true,
+  "stamp": {
+   "builtAt": 1795200906.567022,
+   "command": "npx vite build (apps/desktop)",
+   "rendererSha256": "450e8e5b7b5fed34b09c032b3705d7c4b0c42cdd6a5dcb3d9bc05a3cbc91bd8d",
+   "sourceSha256": "fb20cf353d7b83a48908d7770865894f4aad3e805d6c0b702863136ab7ca1e78"
+  },
+  "reason": null
+ },
+ "cleanup": "browser, context, and owned loopback server closed"
+}

@@ -1,53 +1,45 @@
 ---
 description: Backlog'daki tek iş için GPT planı
-model: openai/gpt-6.1-sol
+model: openai/gpt-6.2-sol
 ---
 
-AGENTS.md → CURRENT.md backlog'unu oku. Yalnız $ARGUMENTS için uygulama planı yaz.
-Yeni iş/test/fixture önermeden ilgili eski kanıtı mevcut diff ile karşılaştır:
-yeniden kullanılacak / değişiklikten etkilenmiş / eksik. Her tekrar için somut
-gerekçe göster; yeni sohbet veya kayıp fixture tek başına tekrar gerekçesi değildir.
-En küçük yeterli çözümü seç, tek net sonraki adım ver; onaylı ertelemeyi yeniden açma.
-Goal'u bu işin sözleşmesinde bir kez tanımla: gözlenebilir sonuç, kapsam dışı
-alanlar ve sabit kimlikli bitti ölçütleri. İlgili durum-geçiş tablosunu aynı belgede
-tut (satır ID / başlangıç / olay / beklenen state ve yan etki / kabul testi).
-Geliştirme ve review bu tek kaynağa referans verir, yeni goal kopyası üretmez.
-Bir iş için tek onaylı çözüm planı oluştur; kabul satırları ajan içi kontroldür,
-ayrı görev/onay/sohbet değildir. Review ölçütlerini baştan belirt: davranış ve
-etkilenen yolların kanıtı, temiz kod/proje standartları, ilgili test/lint/typecheck/build.
-Zorunlu kontrolleri ertelenmiş fiziksel/release kapılarından açıkça ayır.
-Gerekli dış araştırmayı research-pilot.md uyarınca düşük maliyetli subagent'a ver;
-dar soruyu ve resmî kaynak kanıtını doğrula. Proje içi çözüm/kök neden ana ajandadır.
-İçerik: hedef, dosyalar/akışlar, korunacak davranış, en dar doğrulama ve durdurma
-kriteri (iki-deneme kuralı). docs/implementation/execution-budget.md uyarınca risk/model önerisi, bütçe
-verimlilik kontrolünü, test önkoşulları ve ilk temsilci kanıt kapısını belirt.
-UNKNOWN/15000 eşiğini kullanıcı onayına veya alt görev duruşuna dönüştürme.
-Kritik tasarım çatışmasını
-implementere bırakma; yalnız hazır sözleşme uygulamaya devredilir. İlk uygun
-düşük riskli işte tek Sonnet pilotu için /implement-pilot öner; güvenlik işinde
-normal /implement korunur. Sonnet'in kullanıcı seçimi olmadan model değiştirme.
-Geliştirme noktalarını somutlaştır: hedef dosya ve
-fonksiyon/bileşen, mevcut sorun, beklenen değişiklik ve ilgili kabul ölçütü.
-Concurrency/kalıcılık işinde en küçük değişiklikten önce invariant ve olay-sırası
-tablosu ver: başlangıç durumu, kesinti/geç callback, beklenen kalıcı durum ve OS
-yan etkisi, bunu yakalayan dar test. Birbirine bağlı tüm katmanları tek büyük
-uygulama yığınına bırakma; ilk temsilci test→dar uygulama→etkilenen genişletme
-sırasını belirt. Sadece dosya sayısını küçük tutmak işi küçük yapmaz. Kritik
-tasarım seçimini implementere bırakma; belirsizse hazır/onaylı etiketi verme.
-Doğrulanmış bulguları varsayımlardan ayır; belirsiz kritik konu varsa uygulama
-yerine aynı GPT sohbetinde dar salt-okunur araştırma ve tasarım netleştirmesi
-yap; sırf bu alt adım için yeni sohbet açtırma. Çözülemeyen kritik konu varsa
-somut engeli/karar ihtiyacını belirt ve dur. Gereksiz tam kod/pseudocode üretme.
-Yeni işin planını docs/implementation/plans/next-plan.md dosyasına yaz; aktif onaylı
-işin dar düzeltmesinde planı baştan oluşturma, yalnız ilgili sözleşmeyi güncelle.
-Sonraki işler için plan kısa bir uygulama sözleşmesi olsun: durum/onay, amaç,
-dosya-sembol-değişiklik tablosu, zorunlu invariant ve kabul ölçütleri, dar doğrulama,
-açık kararlar ve devir. Hedef 100–150 satır; güvenlik sözleşmesini kesmek için
-katı limit değildir. Araştırma tarihçesi, elenen seçenekler ve uzun kaynak
-dökümlerini gerekiyorsa docs/implementation/plans/<iş-kimliği>-research.md'ye
-yaz; sözleşmeden yalnız gerekli bölümüne bağlantı ver. Bu araştırma eki dışında
-başka dosya değiştirme, kod yazma, commit yok. Geçmiş planları başlangıç girdisi yapma.
-Sonuçta planın "uygulamaya hazır" veya "hazır değil" durumunu açıkça belirt.
+Yeni oturum/iş başlangıcında AGENTS.md → CURRENT.md backlog'unu oku.
+Aynı işte değişen karar/plan bölümlerinden devam et; bağlamdaki değişmeyen talimatları
+tekrar yükleme. Eksik veya değişmiş bölümü oku; güncellik belirsizse dar diff/hash kontrolü yap.
+Yalnız $ARGUMENTS için çalış; mevcut planın açıklaması/düzeltmesi yeni plan işi değildir.
+
+Tasarımı execution-budget.md §1'deki dört ilkeyle kur: en küçük yeterli çözüm,
+kritik belirsizliği önce çözme, uygulanabilir dosya/sorumluluk dağılımı ve aynı
+invariant tekrar dönüyorsa yama yerine sadeleştirme. Bu ayrı bir onay aşaması değildir.
+Doğrulanmış bulguyla varsayımı ayır; kritik konu açıksa aynı GPT sohbetinde hedefli
+araştırmayla çöz veya somut karar ihtiyacını bildir. Hazır olmayan tasarıma READY verme.
+
+Tek sözleşme yaz: gözlenebilir goal/non-goals; dosya-sembol-değişiklik; korunacak
+davranış; sabit kabul ID'leri; ilgili olay sırası (başlangıç → olay/kesinti → kalıcı
+sonuç/OS yan etkisi → dar test). Uygulama/review aynı tabloyu kullanır; kabul satırları
+ayrı görev veya onay değildir. Temizlik/sorumluluk, proje standartları ve gerekli
+test/lint/typecheck/build kanıtını dahil et; ertelenmiş kapıları ayrı göster.
+
+Yeni kod/test/fixture önermeden mevcut kanıtı diff'e göre reuse/etkilenmiş/eksik ayır.
+§5 uyarınca diff→yol→kontrol→reuse seçimini bir kez yap; hazır komut ve önkoşullarla
+ilk temsilci→dar uygulama→etkilenen genişletme sırasını ver. Yeni sohbet/kayıp fixture
+tekrar gerekçesi değildir. Onaylı ertelemeyi yeniden açma; §3 bütçe/iki-deneme
+kurallarını uygula, UNKNOWN/15000'i ek onay kapısına dönüştürme.
+
+Gereken dış araştırma veya salt-okunur kanıt/caller/test eşlemesini research-pilot.md
+uyarınca Luna'ya (`openai/gpt-6-luna`) ver; kritik iddiayı doğrula, araştırmayı tekrarlama.
+Bağımsız işe devam et; her işte alt ajan şartı yok. Uygulama Sonnet 5.5; §4'e göre
+uygun düşük-riskli işi Haiku'ya ayırıyorsan dosya sınırı/tek yazar/kabul/komutları belirt.
+Hassas iş ana uygulayıcıda; sırf delegasyon için işi bölme.
+
+Planı docs/implementation/plans/next-plan.md'ye kısa sözleşme olarak yaz; aktif
+scoped düzeltmede yalnız ilgili bölümü güncelle. Hedef 100–150 satır üstü yükü azaltmak,
+bu uzunluğu doldurmak değil. Uzun araştırma gerekirse <iş-kimliği>-research.md'ye;
+geçmişi başlangıca yükleme. Bu plan/araştırma eki dışında dosya veya kod değiştirme;
+commit/push yok. Mevcut FIX-R4 sözleşme/devrine yeni süreç şartı ekleme.
+
+Kullanıcıya yalnız iş, tek somut engel (yoksa yok) ve sonraki adımı özetle;
+test/kanıt ayrıntılarını sözleşme ve manifestte tut. Hazır/hazır değil durumunu belirt.
 Kapanış biçimi: Durum; Devam (AYNI SOHBET / YENİ SOHBET / DUR — kullanıcı
-kararı); Rol; tam komut/prompt. Yalnız onaylı hazır planı Opus'a devret;
-aynı işin mevcut Opus sohbetini kullan, yoksa yeni sohbet için /implement öner.
+kararı); Rol; tam komut/prompt. Yalnız onaylı hazır planı ana uygulayıcıya devret;
+aynı işin mevcut uygulama sohbetini kullan, yoksa yeni sohbet için /implement öner.

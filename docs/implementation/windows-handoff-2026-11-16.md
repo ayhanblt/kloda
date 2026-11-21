@@ -1,5 +1,10 @@
 # Windows devam — 16.11.2026 / F1-FTPS fix2 kısmi
 
+**17.11 güncel kullanıcı kararı:** aşağıdaki Mac F1→1.5 kuyruğu supersede edildi.
+F1 fix2 compile/RED-GREEN/lint Faz3'e DEFERRED / NOT_RUN. 1.5 H15/P15 host testi
+Mac'te 6.01 sn / exit0 PASS; bağımsız GPT review bekliyor (CURRENT ve 1.5 manifest).
+Mevcut kodu/testi yeniden başlatma; FO1 Faz4 ertelemesi korunur.
+
 ## Güncel Mac doğrulama sırası — 16.11 kullanıcı kararı
 
 Kullanıcı F1 ve 1.5'in eksik ortam doğrulamalarını Mac'te sırayla deneyecek.

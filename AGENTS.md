@@ -4,6 +4,53 @@ Current UI source of truth is the user-approved [Lovable design](docs/ui/lovable
 
 ## Single startup rule
 
+### Faz3–Faz4 ekip yürütmesi — kullanıcı kararı, 20.11.2026
+
+Faz3/Faz4 için kullanıcı `/ekip devam` ile başlatır; kurulum kendi başına koşu
+yetkisi değildir. Tek ana GPT koordinatör, Sonnet uygulama/test alt oturumu ve
+uygulamadan ayrı GPT reviewer alt oturumu kullanılır. Kullanıcı rol oturumlarını
+açmaz veya aralarında mesaj taşımaz. Yerleşik subagent mekanizması kullanılır;
+eklenti, servis veya ikinci görev takip sistemi eklenmez.
+Bu bölüm, bu iki fazda eski kullanıcı-başlatmalı rol devirleri, alt görevde durma,
+otomatik kabul delegasyonu yasağı ve rutin scoped FIX için tekrar onay istemesiyle
+çelişen kuralları supersede eder. Bağımsız GPT kabulü korunur.
+
+- İşleyiş: **bul → kök nedene göre grupla → çöz → dar doğrula**. Aynı neden için
+  hücre başına FIX açma; çözülebilir hataları faz sonuna yığma. Ürün/test/ortam
+  bulgularını ayır; state_unavailable/blocked çözüm veya PASS değildir.
+- Mevcut sözleşme, kabul ID'leri, kanıtlar ve sayaçlar korunur. Kapsam içi düzeltme
+  için GPT mevcut plana hedef dosya/sembol ve dar doğrulamayı yazar, Sonnet'e
+  otomatik devreder. Yeni özellik, kabul gevşetme, güvenlik/ürün davranış değişimi,
+  geniş refactor veya onaylı dosya sınırı dışı değişiklik kullanıcı kararıdır.
+- Teknik belirsizlik ve iki başarısız aynı yaklaşım önce koordinatöre gelir;
+  üçüncü kör deneme yok. GPT kapsam içinde farklı, kanıtlı tasarımı netleştirebilir;
+  yetki dışında karar gerekiyorsa kullanıcıya tek somut soru sorar. Sayaç sıfırlanmaz.
+- Test sırası, rutin scoped düzeltme, review/FIX devri kullanıcıya sorulmaz.
+  Kullanıcı teyidi (20.11): olağan hata düzeltmesini ekip mevcut kabul ve yetki
+  içinde doğrudan yürütür; yöntem seçimi tek başına kullanıcı kararı değildir.
+  Teknik tasarım seçeneklerini önce koordinatör çözer.
+  Yıkıcı işlem, yeni maliyet/erişim, kapsam/ürün/güvenlik kararı veya gerçek
+  altyapı engelinde durulur. Kullanıcıdan gereken fiziksel eylem ayrıca beklenir.
+- Tek kaynak mevcut plan+faz manifestidir; koordinatör rol oturum ID'lerini,
+  mevcut aday/diff ve tek sonraki adımı orada tutar. Yazıcı ve ortak cihaz/build
+  koşusu aynı anda tektir. Review sırasında Sonnet yazmaz/koşmaz.
+- Bağlamı görev sınırlarında yönet: Aynı odaklı FIX/review devamında mevcut
+  oturumu kullan. Bir bağımsız kontrol bittiğinde bağlam birikmişse ve araç
+  destekliyorsa sıkıştır; eski bağlam yeni işe gerekmiyorsa veya sıkıştırma
+  yeterli değilse mevcut manifestteki kısa checkpoint'ten yeni rol oturumuna
+  geç. Her alt kontrolde otomatik yeni sohbet açma; uzun transcript veya
+  geçmiş ham logları taşıma. Kanıt, sayaç ve model ayarı değişmez; önceki yazıcı
+  bitmeden yenisini başlatma. Rutin geçişi kullanıcıya yaptırma.
+- Faz4 planı mevcut onaylı fiziksel kabul kapsamından hazırlanır; rutin plan
+  onayı için durulmaz. Sonnet gerekli anda telefon/USB/ağ/ekran kilidi adımlarını,
+  beklenen gözlemi ve güvenli komutu kısa sırayla hazırlar; koordinatör kullanıcıya
+  aynen iletir. Kullanıcı yanıtı aynı Sonnet oturumuna döner. PIN/parola istenmez;
+  cihaz sahipliği, veri silme ve hesap izinleri varsayılmaz.
+- Faz3 zorunlu açıklarıyla kapanmaz; bağımsız GPT kabulünden sonra tek sonuç
+  raporu verilir. Faz4 ayrı kullanıcı başlangıcıyla aynı ekip düzeninde yürür.
+  Kota/araç kesintisinde mevcut manifest checkpoint'iyle devam edilir; limitsiz
+  arka plan yürütme veya garantili tamamlanma iddiası yok.
+
 Read in this order: (1) AGENTS.md, (2) [CURRENT.md](docs/implementation/CURRENT.md),
 (3) only the ADR/checkpoint sections CURRENT lists for the active step.
 [archive/omp-AGENTS.md](docs/implementation/archive/omp-AGENTS.md) (former `.omp/AGENTS.md`), Codex migration/old handoffs and the full expanded execution plan
@@ -26,6 +73,44 @@ When this policy applies, read the [targeted Context7 command reference](docs/im
 
 
 ## Balanced delivery — user decision, 2026-11-16
+
+- Implementation model transition (2026-11-18, latest user decision): after the
+  currently running Opus work completes, use Sonnet 5.5 (`claude-agent/sonnet`)
+  as main implementation/FIX agent and Haiku 5.5 (`claude-agent/haiku`) for
+  implementation research/read-only support and bounded low-risk coding under
+  execution-budget.md §4. Keep the current Opus run and its Sonnet delegation intact.
+  Sensitive work stays with main Sonnet; unresolved design returns to GPT.
+  GPT-6.2 Sol planning/independent review and Luna support remain unchanged.
+  Preserve effort, acceptance, single-writer and failed-fix counters; no automatic
+  Opus escalation. This supersedes older Opus-main/Sonnet-support role labels below
+  and in existing handoffs for subsequent work, not historical reviewer evidence.
+  Reuse the existing implementation conversation where appropriate; model changes
+  do not restart the task. Report the actual implementer model in new handoffs.
+
+- Main GPT model update (2026-11-18): use GPT-6.2 Sol (`openai/gpt-6.2-sol`)
+  wherever GPT-6.1 Sol was selected for future planning/review. Use the standard
+  model, not Fast/Ultrafast; preserve existing reasoning effort. Opus, Sonnet
+  and Luna routing stays unchanged. Historical reviewer/model evidence records
+  retain the model that actually performed the work.
+
+- Continuation handoffs (2026-11-18): startup commands are for a new role session
+  or work item. For same-task/role continuation, reuse unchanged instructions and
+  contract already in context; read changed CURRENT/manifest sections and new
+  review/diff/evidence. Check freshness narrowly when uncertain; reload necessary
+  sections if changed or absent from context. Do not blindly trust stale context.
+  Emit one short copy-paste continuation message with actual finding IDs and paths,
+  not AGENTS→CURRENT startup instructions or command + duplicated long body.
+  Users should not have to rewrite handoffs. Reissuing a command does not reset work.
+
+- Research model routing (2026-11-18): planning/design and review research subagents use
+  `openai/gpt-6-luna`; implementation/FIX subagents use `claude-agent/sonnet`
+  (Sonnet 5.5, replacing Haiku). Main model/effort and independent review stay unchanged.
+  Authorized read-only support: prior evidence discovery, affected-caller tracing,
+  acceptance-to-test mapping. Same phase-based models; bounded repository reads
+  under research-pilot.md. These support tasks remain read-only; the bounded low-risk
+  Sonnet implementation exception below is separate. Acceptance is never delegated.
+  Continue independent work in parallel; wait for dependent results, do not duplicate
+  subagent research. No per-subtask approval or mandatory three-agent ceremony.
 
 - Simplicity and evidence reuse (user clarification): before proposing a new test,
   fixture or implementation, check the relevant existing evidence against the diff.
@@ -61,6 +146,23 @@ When this policy applies, read the [targeted Context7 command reference](docs/im
 - This decision supersedes conflicting budget, per-substep session/approval and
   single-documentation-pilot rules in older plans, manifests and global guidance.
   It does not change product scope, acceptance evidence, model/effort or physical gates.
+
+## Low-risk delegation and validation — user decision, 2026-11-18
+
+- Starting with the next work cycle, use execution-budget.md §4–5: plan identifies
+  bounded low-risk work for direct Sonnet 5.5 implementation under `/implement`.
+  Main Opus coordinates and verifies; no duplicate detailed Opus implementation
+  before delegation. One writer per file, no concurrent shared build/device runs.
+  Sensitive/concurrency/recovery work stays with Opus. Independent GPT acceptance
+  remains mandatory. No new approval per routine bounded subtask.
+- Research/read-only limits remain for research tasks; only the explicitly assigned
+  low-risk implementation task may edit allowlisted files and run selected checks.
+- Select validation once from diff/acceptance, reuse evidence/commands, run narrow
+  compile/typecheck before costly runtime, inspect normal/recovery/error callers
+  before review. Update selection only for changed behavior or unresolved findings.
+- Existing in-progress review and its handoff stay unchanged. The old separate
+  implementation pilot command and one-pilot restriction are retired. This section
+  supersedes older coding-delegation bans, not scope/security/failed-attempt gates.
 
 ## Roles and workflow — user decision, 2026-11-09
 
@@ -103,7 +205,7 @@ When this policy applies, read the [targeted Context7 command reference](docs/im
   `docs/implementation/execution-budget.md`: resolved design before coding,
   one representative regression/minimum fix before expansion, a 15000-output-token
   internal efficiency checkpoint (thinking included; UNKNOWN is not a stop),
-  and a single explicitly selected low-risk Sonnet implementation pilot.
+  and bounded low-risk Sonnet delegation under the 18.11 policy.
   Never invent usage or silently lower security checks/model effort. This policy
   supersedes automatic continuation only at its specified stop gates. Existing
   F1 is not the lightweight-model pilot; a further rejected clock-fix review needs
@@ -158,8 +260,9 @@ When this policy applies, read the [targeted Context7 command reference](docs/im
   use lower-cost subagents for bounded external questions independent of private
   project context, under `docs/implementation/research-pilot.md`. No quota-reset
   condition or per-question approval. No synthetic research to exercise a pilot.
-- Product-code investigation, implementation and independent review stay with
-  their main agents; no coding/review delegation or automatic Astra invocation.
+- Product-code decisions and independent review stay with their main agents;
+  read-only support and the 18.11 low-risk implementation exception are allowed.
+  No acceptance delegation or automatic Astra invocation.
 - Keep the main model and effort unchanged.
 - Use Serena for targeted symbol/caller/reference discovery when useful; verify
   project activation and available tools first. It does not replace ADRs.

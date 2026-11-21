@@ -75,7 +75,7 @@
       "destination_permission_lost": "Restore destination access was lost. Choose a new file and retry.",
       "destination_not_empty": "The destination is not empty. It was not overwritten or deleted; choose a new file.",
       "restore_cleanup_failed": "Restore did not complete and the newly created destination could not be removed. An incomplete file may remain; remove it yourself before retrying to a new file.",
-      "os_interrupted": "The operating system stopped the job. Progress is retained while waiting for an execution opportunity.",
+      "os_interrupted": "The work was interrupted. The exact cause cannot be determined from this state. Progress is retained while waiting for the next operating system execution opportunity.",
       "automatic_pause_not_saved": "The automatic pause could not be saved. Work stopped for this session; it may restart after reopening. Check storage.",
       "background_unavailable": "The operating system could not start the background backup service. Keep the app open and try again.",
       "native_unsupported": "The required native backup module is unavailable on this platform.",
@@ -117,7 +117,7 @@
       "review_required": "Photos import needs review. No automatic second copy will be created.",
       "organization_review": "The media or album relationships need review; full restoration is not assumed.",
       "destination_required": "Explicitly enable at least one backup destination first.",
-      "webdav_auth": "The WebDAV server rejected the username or password.",
+      "webdav_auth": "The WebDAV server denied access (HTTP access refusal).",
       "webdav_storage": "The device’s secure WebDAV profile could not be read or saved.",
       "webdav_missing": "No native WebDAV profile is saved.",
       "destination_disabled": "This backup destination is disabled.",
@@ -199,6 +199,31 @@
     },
     "storageTested": "Saved settings passed a previous connection test. This is not a current reachability guarantee.",
     "testError": "WebDAV connection could not be verified.",
+    "webdavHints": {
+      "endpoint": "Enter the full HTTPS address including the port (if any) and the server's WebDAV root. Example: https://server.example:8083/webdav/",
+      "targetPath": "A subfolder under that WebDAV root which must already exist and be accessible; Kloda does not create it. Example: Kloda → https://server.example:8083/webdav/Kloda/",
+      "security": "Only HTTPS with a certificate trusted by the operating system and Basic sign-in is supported. The test writes, reads back and deletes its own temporary data only."
+    },
+    "webdavDiagnostic": {
+      "summary": "Failed step: {{stage}}. {{reason}}",
+      "stages": {
+        "propfind": "Folder access check (PROPFIND)",
+        "mkcol": "Creating the temporary test folder (MKCOL)",
+        "put": "Writing the test file (PUT)",
+        "move": "Finalizing the test file (MOVE)",
+        "get": "Reading the test file back (GET)",
+        "delete_file": "Deleting the test file (DELETE)",
+        "delete_directory": "Deleting the temporary test folder (DELETE)"
+      },
+      "reasons": {
+        "access_denied": "The server denied access (HTTP {{status}}).",
+        "not_found": "The folder or path could not be verified as accessible (HTTP {{status}}).",
+        "method_rejected": "The server rejected this method (HTTP {{status}}).",
+        "http_other": "The server returned HTTP {{status}}.",
+        "transport_unknown": "The connection failed without a usable server response. The exact cause (network, DNS, TLS or timeout) cannot be determined from this test.",
+        "readback_mismatch": "The read-back content did not match what was written."
+      }
+    },
     "localStartTime": "Local start time",
     "saveSchedule": "Save and connect to computer",
     "invalidTime": "Use HH:mm for the local start time.",
@@ -240,7 +265,11 @@
     "leaveConsequences": "Leaving closes this view and its connection. It does not complete pairing or delete saved pending or pinned records.",
     "repairTitle": "Pair with this computer again?",
     "repairDescription": "This computer's previous local trust was revoked. Check the authenticated computer fingerprint before explicitly pairing again.",
-    "repairConsequences": "The old revoked record and all file-access denies remain unchanged. A new attempt still requires approval on the computer.",
+    "repairConsequences": "First you explicitly consent on this phone, then the computer must approve. This consent does not complete pairing and grants no file access. The old revoked record and all file-access denies remain unchanged.",
+    "repairWorking": {
+      "title": "Sending your decision",
+      "description": "Your decision is being sent. This is not a completed pairing. If you agreed, the computer must still approve, and file access stays separate."
+    },
     "pairAgain": "Pair again with this computer",
     "denyRepair": "Do not pair again",
     "helpTitle": "How local pairing works",
@@ -435,7 +464,17 @@
       "title": "Settings",
       "backup": "Backup",
       "rerunSetup": "Run setup again",
-      "background": "Background operation"
+      "background": "Background operation",
+      "cellular": "Cellular backup",
+      "cellularDesc": "This version has no cellular backup option.",
+      "privacy": "Privacy",
+      "photoAccess": "Photo access",
+      "photoAccessDesc": "Manage photo source selection in Sources.",
+      "notifications": "Notifications",
+      "notificationsDesc": "Backup notifications are requested within the existing transfer flow; open Activity.",
+      "about": "About",
+      "configVersion": "Configuration version",
+      "versionUnknown": "Unknown"
     },
     "tray": {},
     "dialogs": {},
@@ -718,6 +757,7 @@
       "catalogHint": "Only this device’s verified completion receipts for this destination are listed. Restore verifies the cloud file again and writes to the folder you select.",
       "reviewHint": "Jobs with unknown responses are never automatically completed or replayed. Existing files and records are retained.",
       "automaticHint": "Automatic work backs up selected sources using the current schedule settings. Delivery depends on the OS, network and lock state; uncertain jobs are never automatically replayed.",
+      "automaticUnsupported": "Automatic S3 backup is not supported on Android 7.0/7.1; Android 8 or later is required. Manual backup and restore remain available.",
       "automaticOn": "Enable automatic backup",
       "automaticOff": "Turn off automatic backup",
       "copied": "New separate copy verified: {{name}}. The original uncertain record is retained."

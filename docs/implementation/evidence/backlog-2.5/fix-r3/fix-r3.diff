@@ -1,0 +1,723 @@
+--- fix-r2/tools/capture-ui.py
++++ fix-r3/tools/capture-ui.py
+@@ -21,6 +21,7 @@
+ import signal  # noqa: E402
+ import subprocess  # noqa: E402
+ import time  # noqa: E402
++import uuid  # noqa: E402
+ from importlib.util import find_spec  # noqa: E402
+ from pathlib import Path  # noqa: E402
+ from types import SimpleNamespace  # noqa: E402
+@@ -31,7 +32,7 @@
+ 
+ import matrix as mx  # noqa: E402
+ import supervision  # noqa: E402
+-from common import EXIT_CODES, RECORD, CaptureError, Run, final_status  # noqa: E402
++from common import EXIT_CODES, RECORD, CaptureError, Run, confirmed, final_status  # noqa: E402
+ from supervision import TERMINAL, Interrupted  # noqa: E402
+ 
+ MATRIX = TOOLS / 'matrix.json'
+@@ -107,30 +108,42 @@
+                                   stdin=subprocess.PIPE, pass_fds=(lock_fd,), start_new_session=True)
+     run.close()  # the supervisor's inherited descriptor keeps the run lock
+ 
++    interrupted = []
++
+     def interrupt(_signum, _frame):
++        interrupted.append(True)
+         if not supervisor.stdin.closed:
+             supervisor.stdin.close()  # EOF tells the supervisor to stop and clean up
+     signal.signal(signal.SIGINT, interrupt)
+     signal.signal(signal.SIGTERM, interrupt)
+-    return _settle(run.root, supervisor.wait())
++    return _settle(run.root, supervisor.wait(), bool(interrupted))
+ 
+ 
+-def _settle(root, supervisor_exit):
+-    """The durable result only counts when the supervisor exited with exactly that result's code."""
+-    record = json.loads((root / RECORD).read_text(encoding='utf-8'))
+-    expected = EXIT_CODES.get(record.get('result'))
+-    if supervisor_exit != expected:
+-        try:
+-            run = Run.open(root)
+-        except CaptureError:
+-            return _report(root, supervisor_exit, abnormal=True)
+-        run.record['supervisorAbnormal'] = supervisor_exit
+-        run.record['runError'] = run.record.get('runError') or f'supervisor exit {supervisor_exit}'
+-        if run.record['phase'] == 'CLEANED':
+-            run.record['result'] = final_status(run.record)
++def _settle(root, supervisor_exit, cli_interrupted=False):
++    """The supervisor's result is provisional. Only this CLI, uninterrupted, holding the run lock, seeing the
++    same result generation as before the lock and the exact exit code of that result, confirms it by writing
++    run ID + generation + exit atomically. Anything else leaves it unconfirmed: cleanup-verified FAIL."""
++    first = json.loads((root / RECORD).read_text(encoding='utf-8'))
++    gen = (first.get('finalization') or {}).get('gen')
++    expected = EXIT_CODES.get(first.get('result'))
++    try:
++        run = Run.open(root)
++    except CaptureError:
++        return _report(root, supervisor_exit, abnormal=True)
++    record, final = run.record, run.record.get('finalization') or {}
++    normal = supervisor_exit == expected and not cli_interrupted and final.get('gen') == gen
++    if normal and record['phase'] == 'CLEANED' and final.get('result') == record.get('result'):
++        record['confirmation'] = {'runID': record['runID'], 'gen': gen, 'exit': supervisor_exit}
++        run.save()
++    elif record['phase'] == 'CLEANED' or supervisor_exit != expected:
++        if supervisor_exit != expected:
++            record['supervisorAbnormal'] = supervisor_exit
++            record['runError'] = record.get('runError') or f'supervisor exit {supervisor_exit}'
++        record['unconfirmed'] = 'CLI interrupted, exit mismatch or result generation changed'
++        record['result'] = final_status(record) if record['phase'] == 'CLEANED' else record.get('result')
+         run.event('SUPERVISOR_ABNORMAL', exit=supervisor_exit)
+-        run.close()
+-    return _report(root, supervisor_exit, abnormal=supervisor_exit != expected)
++    run.close()
++    return _report(root, supervisor_exit, abnormal=not normal)
+ 
+ 
+ def _report(root, supervisor_exit=None, abnormal=False):
+@@ -189,13 +202,17 @@
+     return _finish(run, quiet=True)
+ 
+ 
+-def _finish(run, quiet=False):
++def _finish(run, quiet=False, offline=False):
+     unresolved = [e['role'] for e in run.record['processes'] if e.get('state') not in TERMINAL]
+     if unresolved and not run.record['cleanup']['errors']:
+         run.cleanup_step('processes:unresolved', False, unresolved)
+     if not run.record['cleanup']['errors'] and run.record['phase'] != 'CLEANED':
+         run.advance('CLEANED')
++    if offline and not confirmed(run.record):
++        run.record['unconfirmed'] = 'result was not confirmed by the public CLI; offline cleanup cannot confirm'
+     status = run.record['result'] = final_status(run.record)
++    if not offline:  # a new provisional result generation; only the waiting CLI can confirm it
++        run.record['finalization'], run.record['confirmation'] = {'gen': uuid.uuid4().hex, 'result': status}, None
+     run.save()
+     run.close()
+     return EXIT_CODES[status] if quiet else _report(run.root)
+@@ -208,7 +225,7 @@
+         run.record['interrupted'] = run.record.get('interrupted') or 'supervisor lost before completion'
+     if run.record['phase'] != 'CLEANED':
+         driver_module(run.record['driver']).cleanup(run)
+-    return _finish(run)
++    return _finish(run, offline=True)
+ 
+ 
+ def _resume_cell(run, matrix, rows, cell_id):
+@@ -217,8 +234,8 @@
+     row = rows.get(row_id)
+     if old.get('status') != 'PASS':
+         return {'decision': 'recapture', 'changed': ['status']}
+-    if run.record.get('supervisorAbnormal') is not None:
+-        return {'decision': 'recapture', 'changed': ['supervisor']}
++    if not confirmed(run.record):
++        return {'decision': 'recapture', 'changed': ['unconfirmed']}
+     if row is None or row['status'] != 'ready' or row['driver'] != run.record['driver'] or row['screen'] != old.get('screen'):
+         return {'decision': 'recapture', 'changed': ['row']}
+     decision = mx.reuse_decision(old.get('fingerprint'), mx.fingerprint(matrix, row_id, locale, REPO))
+--- fix-r2/tools/ui-capture/common.py
++++ fix-r3/tools/ui-capture/common.py
+@@ -50,36 +50,50 @@
+     return digest.hexdigest()
+ 
+ 
+-def png_info(path):
+-    """(width, height) only for a complete PNG: chunk CRCs, IHDR first, IEND last, full pixel data."""
+-    try:
+-        data = Path(path).read_bytes()
+-    except OSError:
+-        return None
+-    if data[:8] != PNG_SIGNATURE:
+-        return None
+-    pos, ihdr, idat, complete = 8, None, [], False
++def _png_chunks(data):
++    """[(kind, body)] with every CRC verified and no truncation or trailing bytes, else None."""
++    pos, chunks = 8, []
+     while pos + 12 <= len(data):
+         length, kind = int.from_bytes(data[pos:pos + 4], 'big'), data[pos + 4:pos + 8]
+         body, crc = data[pos + 8:pos + 8 + length], data[pos + 8 + length:pos + 12 + length]
+         if len(body) != length or zlib.crc32(kind + body).to_bytes(4, 'big') != crc:
+             return None
++        chunks.append((kind, body))
+         pos += 12 + length
+-        if ihdr is None and kind != b'IHDR':
+-            return None
+-        ihdr = body if kind == b'IHDR' else ihdr
+-        if kind == b'IDAT':
+-            idat.append(body)
+         if kind == b'IEND':
+-            complete = pos == len(data)
+             break
+-    if not complete or ihdr is None or len(ihdr) != 13 or not idat:
++    return chunks if pos == len(data) and chunks and chunks[-1] == (b'IEND', b'') else None
++
++
++def _png_layout_ok(kinds, color):
++    """Chunk order rules: one IHDR first, one empty IEND last, contiguous IDAT, no unknown critical chunk,
++    PLTE once before IDAT (required for palette images, forbidden for grayscale)."""
++    idat = [i for i, kind in enumerate(kinds) if kind == b'IDAT']
++    critical = [kind for kind in kinds if kind[:1].isupper() and kind not in (b'IHDR', b'PLTE', b'IDAT', b'IEND')]
++    plte = [i for i, kind in enumerate(kinds) if kind == b'PLTE']
++    return (kinds[0] == b'IHDR' and kinds.count(b'IHDR') == 1 and kinds.count(b'IEND') == 1 and idat
++            and idat == list(range(idat[0], idat[-1] + 1)) and not critical and len(plte) <= 1
++            and (color != 3 or plte) and (color not in (0, 4) or not plte) and all(i < idat[0] for i in plte))
++
++
++def png_info(path):
++    """(width, height) only for a complete, well-formed PNG whose pixel data matches its header."""
++    try:
++        data = Path(path).read_bytes()
++    except OSError:
+         return None
++    chunks = _png_chunks(data) if data[:8] == PNG_SIGNATURE else None
++    if not chunks or chunks[0][0] != b'IHDR' or len(chunks[0][1]) != 13:
++        return None
++    ihdr, kinds = chunks[0][1], [kind for kind, _ in chunks]
+     width, height, depth, color = int.from_bytes(ihdr[:4], 'big'), int.from_bytes(ihdr[4:8], 'big'), ihdr[8], ihdr[9]
+-    if not width or not height or depth not in PNG_DEPTHS.get(color, ()) or any(ihdr[10:13]):
++    if not _png_layout_ok(kinds, color) or not width or not height or depth not in PNG_DEPTHS.get(color, ()) or any(ihdr[10:13]):
++        return None
++    plte = next((body for kind, body in chunks if kind == b'PLTE'), b'')
++    if plte and (len(plte) % 3 or len(plte) > 768):
+         return None
+     try:
+-        raw = zlib.decompress(b''.join(idat))
++        raw = zlib.decompress(b''.join(body for kind, body in chunks if kind == b'IDAT'))
+     except zlib.error:
+         return None
+     stride = 1 + (width * PNG_CHANNELS[color] * depth + 7) // 8
+@@ -317,13 +331,21 @@
+         self.announce(None)
+         self._server.shutdown()
+         self._server.server_close()
++
++
++def confirmed(record):
++    """The supervisor's result counts only after the CLI that waited for that exact supervisor exit
++    wrote run ID + result generation + the matching exit code (cleanup/resume can never write it)."""
++    final, proof = record.get('finalization') or {}, record.get('confirmation') or {}
++    return bool(final) and final.get('result') == record.get('result') and proof == {
++        'runID': record.get('runID'), 'gen': final.get('gen'), 'exit': EXIT_CODES.get(final.get('result'))}
+ 
+ 
+ def final_status(record):
+-    """Single result protocol: cleanup failure > interrupted/run error/FAIL > BLOCKED > PASS."""
++    """Single result protocol: cleanup failure > interrupted/unconfirmed/run error/FAIL > BLOCKED > PASS."""
+     if record['cleanup']['errors'] or record['phase'] != 'CLEANED':
+         return 'CLEANUP_FAILED'
+-    if record.get('interrupted') or record.get('runError'):
++    if record.get('interrupted') or record.get('runError') or record.get('unconfirmed'):
+         return 'FAIL'
+     wanted = record['selection'].get('cells', [])
+     statuses = [record['cells'].get(cell, {}).get('status', 'FAIL') for cell in wanted]
+--- fix-r2/tools/ui-capture/desktop.py
++++ fix-r3/tools/ui-capture/desktop.py
+@@ -9,6 +9,7 @@
+ import hashlib
+ import http.server
+ import json
++import os
+ import subprocess
+ import sys
+ import threading
+@@ -16,7 +17,7 @@
+ from pathlib import Path
+ 
+ from common import CaptureError, atomic_write_json, png_info, sha256_file
+-from supervision import critical, process_table, stop_owned, verify_absent
++from supervision import TERMINAL, critical, process_table, stop_owned, verify_absent
+ 
+ # Every input the Vite renderer build reads, incl. the Inter files global.css imports from the repo root.
+ SOURCE_ROOTS = ('apps/desktop/src', 'apps/desktop/index.html', 'apps/desktop/vite.config.ts',
+@@ -160,30 +161,61 @@
+             run.set_cell(cell.id, 'BLOCKED', reason=provenance['reason'])
+         return
+     run.advance('RUNNING')
+-    from playwright.sync_api import Error as PlaywrightError, sync_playwright
++    from playwright.sync_api import Error as PlaywrightError
+     server = run.live['server'] = _serve(opts['renderer'])
+-    entry = run.track('browser')
+-    with critical():
+-        run.live['playwright'] = playwright = sync_playwright().start()
+-        marker = f'{MARKER}{run.record["runID"]}'
+-        run.live['browser'] = browser = playwright.chromium.launch(args=[marker])
+-        # The argv marker only locates the browser this launch started; it never authorises a signal.
+-        entry.update(_browser_identity(marker), state='running')
+-        run.save()
++    browser = launch(run)
+     for cell in cells:
+         # Playwright calls are never interrupted mid-flight; each step is bounded by its timeout.
+         with critical():
+             _capture_cell(run, browser, cell, rows[cell.row], server.server_address[1], opts['width'], PlaywrightError)
+ 
+ 
+-def _browser_identity(marker):
+-    out = subprocess.run(['ps', '-A', '-o', 'pid=,command='], capture_output=True, text=True, check=True, timeout=30)
+-    found = [int(line.split(None, 1)[0]) for line in out.stdout.splitlines()
+-             if marker in line and '--type=' not in line and 'python' not in line.lower()]
++def _ps():
++    out = subprocess.run(['ps', '-A', '-o', 'pid=,ppid=,command='], capture_output=True, text=True, check=True, timeout=30)
++    rows = (line.split(None, 2) for line in out.stdout.splitlines())
++    return [(int(f[0]), int(f[1]), f[2]) for f in rows if len(f) == 3]
++
++
++def _identify(entry, found, failed):
++    """Observation only (never signal authority): exactly one candidate becomes the receipt identity.
++    After a failed launch, no candidate means nothing was started; several mean the outcome is unknown."""
+     table = process_table()
+-    if len(found) != 1 or found[0] not in table:
+-        return {'pid': None, 'pgid': None}
+-    return {'pid': found[0], 'pgid': table[found[0]][0]}
++    if len(found) == 1 and found[0] in table:
++        entry.update(pid=found[0], pgid=table[found[0]][0] if entry['role'] == 'browser' else None, state='running')
++    elif failed and not found:
++        entry['state'] = 'gone'
++    elif found:
++        entry['state'] = 'unverified'
++
++
++def launch(run):
++    """Start the Playwright driver, then Chromium: each has its own intent before the call and its own
++    receipt (observed PID) after it; each is closed and verified separately in cleanup()."""
++    from playwright.sync_api import sync_playwright
++    with critical():
++        driver = run.track('playwright-driver')
++        known = {pid for pid, ppid, _ in _ps() if ppid == os.getpid()}
++        candidates = lambda: [pid for pid, ppid, cmd in _ps()  # noqa: E731
++                              if ppid == os.getpid() and pid not in known and '/playwright/driver/' in cmd]
++        try:
++            run.live['playwright'] = playwright = sync_playwright().start()
++        except Exception:
++            _identify(driver, candidates(), failed=True)
++            run.save()
++            raise
++        _identify(driver, candidates(), failed=False)
++        marker, entry = f'{MARKER}{run.record["runID"]}', run.track('browser')
++        found = lambda: [pid for pid, _, cmd in _ps() if marker in cmd and '--type=' not in cmd  # noqa: E731
++                         and 'python' not in cmd.lower()]
++        try:
++            run.live['browser'] = browser = playwright.chromium.launch(args=[marker])
++        except Exception:
++            _identify(entry, found(), failed=True)
++            run.save()
++            raise
++        _identify(entry, found(), failed=False)
++        run.save()
++    return browser
+ 
+ 
+ def _capture_cell(run, browser, cell, row, port, width, playwright_error):
+@@ -223,20 +255,22 @@
+ 
+ 
+ def cleanup(run):
+-    """Close through the driver's own path; an unverified close stays a cleanup failure."""
++    """Close through the driver's own paths, then verify each receipt separately: Chromium first, then the
++    Playwright driver. An unidentified or still-present process stays a cleanup failure (never signalled)."""
+     run.begin_cleanup()
+-    playwright, browser = run.live.pop('playwright', None), run.live.pop('browser', None)
+-    if playwright is not None:
++    browser, playwright = run.live.pop('browser', None), run.live.pop('playwright', None)
++    for label, close in (('browser:close', browser and browser.close), ('driver:stop', playwright and playwright.stop)):
+         try:
+-            if browser is not None:
+-                browser.close()
+-            playwright.stop()
++            if close:
++                close()
+         except Exception as error:  # noqa: BLE001 - any teardown failure must fail the run
+-            run.cleanup_step('browser:close', False, f'{type(error).__name__}: {str(error)[:200]}')
++            run.cleanup_step(label, False, f'{type(error).__name__}: {str(error)[:200]}')
+     for entry in run.record['processes']:
+-        if entry.get('closeBy') == 'driver' and entry.get('state') not in ('stopped', 'gone'):
+-            # Closed only through the driver; success needs the recorded browser PID and group gone.
+-            verify_absent(run, entry, f'stop:{entry["role"]}', wait=10.0)
++        name = f'stop:{entry["role"]}'
++        if entry.get('state') in TERMINAL:
++            run.cleanup_step(name, True, entry['state'])
++        elif entry.get('closeBy') == 'driver':
++            verify_absent(run, entry, name, wait=10.0)
+         else:
+             stop_owned(run, entry)
+     server = run.live.pop('server', None)
+--- fix-r2/tools/ui-capture/supervision.py
++++ fix-r3/tools/ui-capture/supervision.py
+@@ -118,7 +118,7 @@
+     if live is None or live.returncode is not None:
+         return verify_absent(run, entry, name)
+     pgid, table = entry['pgid'], process_table()
+-    outside = escaped(table, pgid)
++    outside = sorted(set(escaped(table, pgid)) | set(entry.get('escaped', [])))  # earlier attempts' strays stay recorded
+     for sig in (signal.SIGTERM, signal.SIGKILL):
+         try:
+             os.killpg(pgid, sig)
+@@ -145,7 +145,8 @@
+ 
+ 
+ def verify_absent(run, entry, name, wait=0.0):
+-    """No owning handle: never signal; accept only proven absence of the PID and its group."""
++    """No owning handle: never signal. Success needs the recorded PID, its group (when it has one) and every
++    escaped descendant recorded by an earlier attempt to be gone; root absence alone proves nothing else."""
+     if entry.get('pid') is None:
+         entry['state'] = 'unverified'
+         return run.cleanup_step(name, False, ('driver close not verified' if entry.get('closeBy') == 'driver'
+@@ -153,9 +154,11 @@
+     deadline = time.monotonic() + wait
+     while True:
+         table = process_table()
+-        present = entry['pid'] in table or bool(_members(entry['pgid'], table))
++        present = ([entry['pid']] if entry['pid'] in table else []) + (_members(entry['pgid'], table) if entry.get('pgid') else [])
++        present += [pid for pid in entry.get('escaped', []) if pid in table and not table[pid][1]]
+         if not present or time.monotonic() >= deadline:
+             break
+         time.sleep(0.2)
+     entry['state'] = 'unverified' if present else 'gone'
+-    return run.cleanup_step(name, not present, 'process present, ownership unprovable, not signalled' if present else None)
++    return run.cleanup_step(name, not present, f'still present {sorted(set(present))}; ownership unprovable, not signalled'
++                            if present else None)
+--- fix-r2/tools/ui-capture/test_capture.py
++++ fix-r3/tools/ui-capture/test_capture.py
+@@ -34,12 +34,20 @@
+     return SimpleNamespace(locale=locale, theme=theme, size=size, id=f'x/{locale}/{theme}/{size}')
+ 
+ 
+-def _png(width=4, height=3, trailing=b'', filter_byte=0):
++def _png(width=4, height=3, trailing=b'', filter_byte=0, variant=''):
+     def chunk(kind, body):
+         return len(body).to_bytes(4, 'big') + kind + body + zlib.crc32(kind + body).to_bytes(4, 'big')
+-    ihdr = width.to_bytes(4, 'big') + height.to_bytes(4, 'big') + bytes([8, 6, 0, 0, 0])
+-    raw = zlib.compress(b''.join(bytes([filter_byte]) + b'\x80' * width * 4 for _ in range(height)))
+-    return common.PNG_SIGNATURE + chunk(b'IHDR', ihdr) + chunk(b'IDAT', raw) + chunk(b'IEND', b'') + trailing
++    color = {'plte_missing': 3, 'plte_gray': 0}.get(variant, 6)
++    ihdr = width.to_bytes(4, 'big') + height.to_bytes(4, 'big') + bytes([8, color, 0, 0, 0])
++    raw = zlib.compress(b''.join(bytes([filter_byte]) + b'\x80' * width * (4 if color == 6 else 1) for _ in range(height)))
++    idat = [chunk(b'IDAT', raw)]
++    if variant == 'split_idat':
++        idat = [chunk(b'IDAT', raw[:5]), chunk(b'tEXt', b'k\0v'), chunk(b'IDAT', raw[5:])]
++    extra = {'dup_ihdr': chunk(b'IHDR', ihdr), 'critical': chunk(b'ABCD', b''), 'plte_gray': chunk(b'PLTE', b'\0' * 3),
++             'ancillary': chunk(b'tEXt', b'k\0v')}.get(variant, b'')
++    end = chunk(b'IEND', b'\0' if variant == 'iend_data' else b'')
++    after = chunk(b'PLTE', b'\0' * 3) if variant == 'plte_after' else b''
++    return common.PNG_SIGNATURE + chunk(b'IHDR', ihdr) + extra + b''.join(idat) + after + end + trailing
+ 
+ 
+ class Tmp(unittest.TestCase):
+@@ -130,8 +138,14 @@
+                 patched[29:33] = zlib.crc32(bytes(patched[12:29])).to_bytes(4, 'big')
+                 path.write_bytes(bytes(patched))
+                 self.assertIsNone(common.png_info(path), ihdr_byte)
+-            path.write_bytes(_png(filter_byte=255))
+-            self.assertIsNone(common.png_info(path))
++            variants = ('iend_data', 'dup_ihdr', 'split_idat', 'critical', 'plte_gray', 'plte_missing', 'plte_after')
++            for kwargs in ({'filter_byte': 255}, *({'variant': variant} for variant in variants)):
++                path.write_bytes(_png(**kwargs))
++                self.assertIsNone(common.png_info(path), kwargs)
++            path.write_bytes(_png(variant='ancillary'))
++            self.assertEqual(common.png_info(path), (4, 3))  # a CRC-valid ancillary chunk stays valid
++            for real in sorted((HERE.parents[1] / 'docs/implementation/evidence/backlog-2.5').glob('fix-r2/*-smoke/*.png')):
++                self.assertIsNotNone(common.png_info(real), real.name)  # genuine Desktop and iOS output
+             broken = bytearray(_png())
+             broken[40] ^= 1
+             path.write_bytes(bytes(broken))
+--- fix-r2/tools/ui-capture/test_matrix.py
++++ fix-r3/tools/ui-capture/test_matrix.py
+@@ -16,6 +16,10 @@
+ REAL = HERE / "matrix.json"
+ 
+ 
++def m_locale(locale: str) -> str:
++    return f"apps/desktop/src/shared/i18n/locales/{locale}.json"
++
++
+ def union_values(relative: str, type_name: str) -> set[str]:
+     source = (REPO / relative).read_text(encoding="utf-8")
+     declaration = re.search(rf"type {type_name}\s*=\s*([^;]+);", source)
+@@ -31,7 +35,29 @@
+     def test_loads(self):
+         self.assertEqual(self.matrix["version"], 1)
+         self.assertGreater(len(self.matrix["rows"]), 0)
++
++    def test_desktop_settings_fingerprint_covers_rendered_language_keys(self):
++        row = next(r for r in self.matrix["rows"] if r["id"] == "desktop.settings")
++        paths = set(self.matrix["common"]["desktop"]) | set(row["dependencies"]) | set(self.matrix["driverSources"]["desktop-renderer"])
++        locale = json.loads((REPO / m_locale("tr")).read_text(encoding="utf-8"))
++        with tempfile.TemporaryDirectory() as tmp:
++            repo = Path(tmp)
++            for rel in paths | {m_locale("tr")}:
++                (repo / rel).parent.mkdir(parents=True, exist_ok=True)
++                (repo / rel).write_text("x", encoding="utf-8")
+ 
++            def digest(change=lambda data: None):
++                data = copy.deepcopy(locale)
++                change(data)
++                (repo / m_locale("tr")).write_text(json.dumps(data), encoding="utf-8")
++                fingerprint = m.fingerprint(self.matrix, "desktop.settings", "tr", repo)
++                self.assertEqual(fingerprint["status"], "known")
++                return fingerprint["digest"]
++            base = digest()
++            self.assertNotEqual(base, digest(lambda d: d["ui"]["languages"].update(tr="changed name")))
++            self.assertNotEqual(base, digest(lambda d: d["ui"].update(language="changed legend")))
++            self.assertEqual(base, digest(lambda d: d.update(zzUnrelatedKey="x")))
++
+     def test_every_desktop_route_is_listed(self):
+         routes = union_values("apps/desktop/src/shared/navigation/desktop-route.ts", "DesktopRoute")
+         listed = {row["ref"].get("route") for row in m.listing(self.matrix)["rows"] if row["platform"] == "desktop"}
+--- fix-r2/tools/ui-capture/test_supervision.py
++++ fix-r3/tools/ui-capture/test_supervision.py
+@@ -3,6 +3,7 @@
+ 
+ sys.dont_write_bytecode = True
+ 
++import importlib  # noqa: E402
+ import importlib.util  # noqa: E402
+ import json  # noqa: E402
+ import os  # noqa: E402
+@@ -10,6 +11,8 @@
+ import subprocess  # noqa: E402
+ import time  # noqa: E402
+ import unittest  # noqa: E402
++from types import SimpleNamespace  # noqa: E402
++from unittest import mock  # noqa: E402
+ from pathlib import Path  # noqa: E402
+ 
+ HERE = Path(__file__).resolve().parent
+@@ -45,18 +48,16 @@
+         self.assertTrue(supervision.stop_owned(self.run, self.run.record['processes'][0], grace=5))
+         self.assertEqual(self.group(proc.pid), [])
+ 
+-    def test_unrecorded_launch_not_signalled(self):
++    def test_unrecorded_or_reaped_launch_not_signalled(self):
+         entry = {'role': 'metro', 'pid': None, 'pgid': None, 'state': 'launching'}
+         self.assertFalse(supervision.stop_owned(self.run, entry, grace=1))
+         self.assertEqual(entry['state'], 'unverified')
+-
+-    def test_reaped_handle_not_signalled(self):
+         proc = subprocess.Popen(['sh', '-c', 'sleep 60 & exit 0'], start_new_session=True)
+         self.procs.append(proc)
+         proc.wait()
+         self.run.live[proc.pid] = proc
+-        entry = {'role': 'metro', 'pid': proc.pid, 'pgid': proc.pid, 'state': 'running'}
+         time.sleep(0.2)
++        entry.update(pid=proc.pid, pgid=proc.pid, state='running')
+         self.assertFalse(supervision.stop_owned(self.run, entry, grace=1))
+         self.assertTrue(self.group(proc.pid))  # orphan still alive: nothing was signalled
+ 
+@@ -74,8 +75,7 @@
+         self.assertEqual(entry['state'], 'gone')
+ 
+     def test_escaped_descendants_found(self):
+-        table = {10: (10, False, 1), 11: (10, False, 10), 12: (12, False, 11), 13: (13, True, 11),
+-                 14: (14, False, 12), 20: (20, False, 1)}
++        table = {10: (10, False, 1), 11: (10, False, 10), 12: (12, False, 11), 13: (13, True, 11), 14: (14, False, 12)}
+         self.assertEqual(supervision.escaped(table, 10), [12, 14])
+ 
+     def test_escaped_descendant_fails_cleanup_unsignalled(self):
+@@ -94,7 +94,6 @@
+ 
+     def test_bootstrap_signal_kept_pending(self):
+         supervision.install((signal.SIGUSR2,))
+-        reached = False
+         try:
+             os.kill(os.getpid(), signal.SIGUSR2)  # before arming: kept, not dropped
+             with self.assertRaises(supervision.Interrupted):
+@@ -102,8 +101,6 @@
+             with self.assertRaises(supervision.Interrupted):
+                 with supervision.critical():
+                     os.kill(os.getpid(), signal.SIGUSR2)  # deferred until the critical section ends
+-                    reached = True
+-            self.assertTrue(reached)
+         finally:
+             supervision.arm(False)
+             supervision._signals['pending'] = None
+@@ -114,8 +111,134 @@
+         self.procs.append(proc)
+         with self.assertRaises(PermissionError):
+             subprocess.Popen(['sleep', '1'], process_group=proc.pid)
++
++
++class FinalizationTests(Tmp):
++    CELL = 'a/tr/light/normal'
++
++    def finalized(self, result='PASS', gen='g1'):
++        self.run.record.pop('confirmation', None)
++        self.record(driver='desktop-renderer', phase='CLEANED', result=result, finalization={'gen': gen, 'result': result},
++                    cells={self.CELL: {'status': 'PASS', 'screen': 'settings'}})
++
++    def stored(self):
++        return json.loads((self.out / 'run.json').read_text())
++
++    def test_matching_exit_is_confirmed_with_run_and_generation(self):
++        self.finalized()
++        self.assertEqual(cli._settle(self.out, 0), 0)
++        record = self.stored()
++        self.assertEqual((record['confirmation'], common.confirmed(record)), ({'runID': record['runID'], 'gen': 'g1', 'exit': 0}, True))
++
++    def test_cli_loss_exit_mismatch_and_generation_change_never_confirm(self):
++        for exit_code, interrupted in ((1, False), (0, True)):
++            self.finalized()
++            self.assertEqual(cli._settle(self.out, exit_code, cli_interrupted=interrupted), 1)
++            self.assertFalse(common.confirmed(self.stored()))
++            self.assertEqual(self.stored()['result'], 'FAIL')
++        self.finalized()
++        original = common.Run._acquire
++
++        def racing(root):  # another cleanup replaces the result between the CLI's two reads
++            data = json.loads((root / common.RECORD).read_text())
++            common.atomic_write_json(root / common.RECORD, {**data, 'finalization': {'gen': 'g2', 'result': 'PASS'}})
++            return original(root)
++        common.Run._acquire = staticmethod(racing)
++        try:
++            self.assertEqual(cli._settle(self.out, 0), 1)
++        finally:
++            common.Run._acquire = staticmethod(original)
++        self.assertFalse(common.confirmed(self.stored()))
++
++    def test_offline_cleanup_cannot_confirm_and_resume_refuses(self):
++        self.finalized()  # supervisor wrote PASS, the CLI never confirmed it
++        done = _cli('cleanup', '--run', str(self.out))
++        record = self.stored()
++        self.assertEqual((done.returncode, record['phase'], record['result']), (1, 'CLEANED', 'FAIL'))
++        self.run = common.Run.open(self.out)
++        self.assertEqual(cli._resume_cell(self.run, {}, {}, self.CELL)['changed'], ['unconfirmed'])
++
++    def test_confirmed_result_survives_offline_cleanup(self):
++        self.finalized()
++        cli._settle(self.out, 0)
++        self.assertEqual(_cli('cleanup', '--run', str(self.out)).returncode, 0)
++        self.assertEqual(self.stored()['result'], 'PASS')
++
++
++class RecoveryTests(Tmp):
++    def test_escaped_descendant_blocks_every_retry(self):
++        stray = subprocess.Popen(['sleep', '60'], start_new_session=True)
++        root = subprocess.Popen(['true'])
++        root.wait()
++        self.procs.append(stray)
++        entry = {'role': 'metro', 'pid': root.pid, 'pgid': root.pid, 'state': 'alive', 'escaped': [stray.pid]}
++        self.run.record['processes'].append(entry)
++        self.record(driver='desktop-renderer', phase='RESTORE_PENDING', result='CLEANUP_FAILED')
++        for _ in range(2):  # root group is gone, the recorded escaped child is not: still pending, never signalled
++            self.assertEqual(_cli('cleanup', '--run', str(self.out)).returncode, common.EXIT_CODES['CLEANUP_FAILED'])
++            self.assertIsNone(stray.poll())
++        stray.kill()
++        stray.wait()
++        self.assertEqual(_cli('cleanup', '--run', str(self.out)).returncode, common.EXIT_CODES['FAIL'])
++        self.assertEqual(json.loads((self.out / 'run.json').read_text())['phase'], 'CLEANED')
+ 
++    def roles(self):
++        return {e['role']: e for e in self.run.record['processes']}
+ 
++    def test_driver_and_browser_get_separate_receipts(self):
++        desktop.launch(self.run)
++        roles = self.roles()
++        self.assertEqual(set(roles), {'playwright-driver', 'browser'})
++        self.assertTrue(all(e['pid'] for e in roles.values()))
++        desktop.cleanup(self.run)
++        self.assertEqual(self.run.record['cleanup']['errors'], [])
++        self.assertEqual([self.roles()[r]['state'] for r in sorted(roles)], ['gone', 'gone'])
++        self.assertEqual({s['step'] for s in self.run.record['cleanup']['steps']}, {'stop:browser', 'stop:playwright-driver'})
++
++    def test_browser_gone_driver_alive_or_unknown_stays_pending(self):
++        desktop.launch(self.run)
++        driver, entry = self.run.live.pop('playwright'), self.roles()['playwright-driver']
++        self.run.live.pop('browser').close()  # supervisor lost after only the browser closed
++        desktop.cleanup(self.run)
++        self.assertEqual((self.roles()['browser']['state'], entry['state']), ('gone', 'unverified'))
++        pid, entry['pid'] = entry['pid'], None  # identity never established: no receipt either
++        desktop.cleanup(self.run)
++        self.assertEqual(entry['state'], 'unverified')
++        driver.stop()
++        entry['pid'] = pid
++        desktop.cleanup(self.run)
++        self.assertEqual((self.run.record['cleanup']['errors'], entry['state']), ([], 'gone'))
++
++    def test_intents_precede_start_and_launch(self):
++        seen = []
++
++        def start_fails():
++            seen.append([e['state'] for e in self.run.record['processes']])
++            raise RuntimeError('start failed')
++        with mock.patch('playwright.sync_api.sync_playwright', lambda: SimpleNamespace(start=start_fails)):
++            with self.assertRaises(RuntimeError):
++                desktop.launch(self.run)
++        self.assertEqual(seen, [['launching']])
++        desktop.cleanup(self.run)  # failed start with no child observed: nothing to prove open
++        self.assertEqual(self.run.record['cleanup']['errors'], [])
++        self.run.record['processes'].clear()
++        original, seen = importlib.import_module('playwright.sync_api').sync_playwright, []
++
++        def launch_fails(**_kwargs):
++            seen.append({e['role']: e['state'] for e in self.run.record['processes']})
++            raise RuntimeError('launch failed')
++
++        def start():  # a real driver, started after launch() took its baseline
++            real = original().start()
++            return SimpleNamespace(chromium=SimpleNamespace(launch=launch_fails), stop=real.stop)
++        with mock.patch('playwright.sync_api.sync_playwright', lambda: SimpleNamespace(start=start)):
++            with self.assertRaises(RuntimeError):
++                desktop.launch(self.run)
++        self.assertEqual(seen[0]['browser'], 'launching')  # Chromium intent exists before launch()
++        desktop.cleanup(self.run)
++        self.assertEqual(self.run.record['cleanup']['errors'], [])
++
++
+ class CliTests(Tmp):
+     def test_usage_and_blocked(self):
+         out = self.dir / 'blocked'
+@@ -123,6 +246,7 @@
+         self.assertEqual(done.returncode, common.EXIT_CODES['BLOCKED'], done.stdout + done.stderr)
+         record = json.loads((out / 'run.json').read_text())
+         self.assertEqual((record['phase'], record['result']), ('CLEANED', 'BLOCKED'))
++        self.assertTrue(common.confirmed(record))  # a normal run: the waiting CLI confirmed the exit
+         self.assertFalse(list(out.glob('*.png')))
+         bad = _cli('run', '--driver', 'desktop-renderer', '--width', '0', '--out', str(self.dir / 'w'))
+         self.assertEqual(bad.returncode, common.EXIT_CODES['USAGE'])
+@@ -150,13 +274,8 @@
+         record = json.loads((self.out / 'run.json').read_text())
+         self.assertEqual((record['result'], record['supervisorAbnormal']), ('FAIL', -6))
+         self.run = common.Run.open(self.out)
+-        self.assertEqual(cli._resume_cell(self.run, {}, {}, 'a/tr/light/normal')['changed'], ['supervisor'])
++        self.assertEqual(cli._resume_cell(self.run, {}, {}, 'a/tr/light/normal')['changed'], ['unconfirmed'])
+ 
+-    def test_normal_supervisor_exit_kept(self):
+-        self.record(phase='RESTORE_PENDING', result='CLEANUP_FAILED')
+-        self.assertEqual(cli._settle(self.out, 3), common.EXIT_CODES['CLEANUP_FAILED'])
+-        self.assertNotIn('supervisorAbnormal', json.loads((self.out / 'run.json').read_text()))
+-
+     def test_early_cli_loss_launches_nothing(self):
+         renderer = self.dir / 'renderer'
+         renderer.mkdir()
+@@ -179,7 +298,9 @@
+ 
+     def test_resume_rejects_changed_row(self):
+         old = {'status': 'PASS', 'screen': 'other-screen', 'fingerprint': {}}
+-        self.run.record.update(driver='ios-native-entry', cells={'mobile.settings/tr/light/normal': old})
++        self.run.record.update(driver='ios-native-entry', cells={'mobile.settings/tr/light/normal': old}, result='PASS',
++                               finalization={'gen': 'g', 'result': 'PASS'})
++        self.run.record['confirmation'] = {'runID': self.run.record['runID'], 'gen': 'g', 'exit': 0}
+         matrix = cli.mx.load(cli.MATRIX)
+         rows = {row['id']: row for row in matrix['rows']}
+         self.assertEqual(cli._resume_cell(self.run, matrix, rows, 'mobile.settings/tr/light/normal')['changed'], ['row'])
+@@ -214,8 +335,9 @@
+         record = state()
+         self.assertEqual((record['phase'], record['result']), ('CLEANED', 'FAIL'))
+         self.assertTrue(record['interrupted'])
+-        self.assertEqual([e['state'] for e in record['processes']], ['gone'])
+-        self.assertIsNotNone(record['processes'][0]['pid'])  # browser identity was recorded at launch
++        self.assertEqual({e['role']: e['state'] for e in record['processes']}, {'playwright-driver': 'gone', 'browser': 'gone'})
++        self.assertTrue(all(e['pid'] for e in record['processes']))  # both identities were recorded at launch
++        self.assertTrue(common.confirmed(record) is False)  # the CLI died: no exit confirmation
+ 
+ 
+ if __name__ == '__main__':
+--- fix-r2/tools/ui-capture/matrix.json
++++ fix-r3/tools/ui-capture/matrix.json
+@@ -122,7 +122,7 @@
+       "driver": "desktop-renderer", "status": "ready", "reason": null,
+       "ref": {"source": "DesktopRoute", "route": "settings", "hash": "#/settings"}, "evidence": ["docs/implementation/evidence/backlog-2.2-g2-g3/capture/"],
+       "dependencies": ["apps/desktop/src/features/desktop-background/DesktopBackground.tsx", "apps/desktop/src/features/desktop-background/AppearanceSettings.tsx"],
+-      "localeKeys": ["receiver.settingsNavigation", "appearance", "background"],
++      "localeKeys": ["receiver.settingsNavigation", "appearance", "background", "ui.language", "ui.languages"],
+       "cellOverrides": [{"size": "large", "status": "state_unavailable", "reason": "renderer has no root font-size control; browser zoom is not native large text"}] },
+     { "id": "desktop.tray", "platform": "desktop", "family": "desktop-route", "screen": "tray",
+       "driver": "desktop-renderer", "status": "ready", "reason": null,

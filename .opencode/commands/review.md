@@ -1,6 +1,6 @@
 ---
 description: Gerçek diff'in bağımsız GPT review'u
-model: openai/gpt-6.1-sol
+model: openai/gpt-6.2-sol
 ---
 
 Uygulamadan ayrı GPT oturumunda çalış; bu koşul sağlanmıyorsa bağımsız kabul verme.
@@ -11,9 +11,23 @@ kapsam kararıdır. Scoped fix kabulünü üst işin bütününün kabulü olara
 Goal'un bütün uygulamasını topluca review et; kabul satırlarına ayrı review açma.
 Hataya ek olarak etkilenen yolları, kod temizliği/sorumluluk sınırlarını, proje
 standartlarını ve gerekli test/lint/typecheck/build kanıtlarını kontrol et.
-Gerekli dış API araştırmasını research-pilot.md ile düşük maliyetli subagent'a ver;
+Gerekli dış API araştırmasını research-pilot.md ile GPT-6 Luna
+(`openai/gpt-6-luna`) subagent'ına ver;
 gerçek kod review'u ve kabul kararı ana GPT'de kalır.
-AGENTS.md → CURRENT.md'nin aktif iş bölümünü oku. İlk uygulama review'unda onaylı
+Luna'ya gerektiğinde dar salt-okunur kanıt, etkilenen çağıran veya kabul→test
+eşlemesi verilebilir (research-pilot.md). Bu bağımsız review yerine geçmez;
+önceki aşamanın geçerli çıktısını kullan, aynı araştırmayı yeniden yaptırma.
+Mevcut Opus turundan sonra düşük-riskli Haiku uygulaması execution-budget.md §4 ile
+yetkilidir; ana Sonnet diff/kanıt kontrolü bağımsız GPT kabulü yerine geçmez. Tek doğrulama
+seçiminin gerçek diff'i kapsadığını ve normal/recovery/hata yollarını kontrol et;
+geçerli testleri yeniden koşturma. Mevcut review'a yeni süreç kabul şartı ekleme.
+Yeni oturum/iş başlangıcında AGENTS.md → CURRENT.md'nin aktif iş bölümünü oku.
+Aynı GPT review sohbetinde FIX dönüşü: ilk review'u yeniden başlatma; değişmiş
+CURRENT bölümü, ilgili manifest turu ve yeni fix diff/kanıtlarını oku. Bağlamdaki
+değişmeyen AGENTS/plan/önceki review'u tekrar yükleme. Bunlar değiştiyse veya bağlamda
+yoksa ilgili kısmı getir; güncellik belirsizse hedefli diff/hash kontrolü yap.
+Komut yeniden verilmiş olsa da aynı iş/rol devamını başlangıç olarak yorumlama.
+İlk uygulama review'unda onaylı
 planı kullan. FIX review'unda önce son bulgular + tur manifesti + düzeltme diff'i;
 plandan yalnız ilgili invariant/onay/kapsam bölümleri. Etkilenen komşu güvenlik
 yollarını da incele; eski işin tümünü ve başarılı kontrolleri yeniden başlatma.
@@ -41,7 +55,7 @@ Kabul ölçütleri karşılanıp bağımsız review kabul edildiyse aynı oturum
 CURRENT/ilgili manifest kapanış kayıtlarını güncelle ve maddeyi [x] yap.
 Engelleyici bulgu varsa checkbox açık kalsın; tüm bulguları tek gerekçeli listede
 topla, engelleyici bulgularla isteğe bağlı temizlik önerilerini ayır. Onaylı davranış
-içindeki scoped düzeltmeyi mevcut Opus sohbetine devret: kök neden doğrulama →
+içindeki scoped düzeltmeyi mevcut uygulama sohbetine devret: kök neden doğrulama →
 regression → minimum fix → etkilenen yollar. Yeni plan/onay yalnız tasarım/kapsam
 kararı gerekiyorsa. Sonucu bu GPT review sohbetinde değerlendir.
 Her bulguyu invariant ailesine bağla (stale ownership, OS handoff, migration
@@ -50,19 +64,23 @@ dosya/sembol, başlangıç durumu→olay sırası→beklenen sonuç, dar regress
 korunacak yollar olsun. Yeni beklentiyi eski kabul şartı gibi ekleme.
 Manifestte invariant bazlı başarısız denemeleri koru; aynı yaklaşım iki kez
 başarısızsa otomatik yeni FIX yerine GPT tasarım değerlendirmesi gerekir.
-Mevcut F1 R12/R3 clock turu yeniden reddedilirse doğrudan yeni Opus FIX devretme:
+Mevcut F1 R12/R3 clock turu yeniden reddedilirse doğrudan yeni uygulama FIX'i devretme:
 önce aynı GPT sohbetinde kök neden/en küçük çözüm/sözleşme çelişkisini netleştir,
 CURRENT'a DECISION yaz. Sonraki uygulamalarda execution-budget.md kapıları geçerli;
 dar fix sözleşmesi tasarım belirsizliği taşıyorsa aynı şekilde önce GPT çözümü gerekir.
 CURRENT'ta INITIAL/FIX/REVIEW/DECISION durumunu ve son review/manifest yollarını
-açıkça göster. Normal FIX devrinde tam prompt yerine `/implement` yeterli.
+açıkça göster. Yeni uygulama sohbetinde `/implement` yeterli. Mevcut uygulama sohbetine
+dönüşte kısa kopyalanabilir mesaj ver: "<iş/bulgu> için review düzeltmeleri hazır.
+<review §bulgular> ve <manifest §tur> üzerinden scoped FIX'e devam et; önceki goal
+ve kapsam geçerli." Kimlik/yolları doldur; başlangıç okuma zinciri/komut gövdesini
+tekrarlama. Yeni tasarım kararı gerekiyorsa FIX yerine somut DECISION mesajı ver.
 Ertelenmiş test/kabul kapılarını koru; kod review kabulünü tam PASS sayma.
-Kayıt için Opus'a yeni oturum açtırma. Sıradaki iş ve hazır promptu güncelle;
+Kayıt için uygulayıcıya yeni oturum açtırma. Sıradaki iş ve hazır promptu güncelle;
 sonraki planı/uygulamayı başlatmadan dur. Commit/push yok.
 Review açıklamaları, kanıt tamamlama ve belge kapanışı aynı GPT review
 sohbetinde kalır; yalnız bunlar için yeni oturum isteme.
 Kapanış biçimi: Durum; Devam (AYNI SOHBET / YENİ SOHBET / DUR — kullanıcı
-kararı); Rol; tam komut/prompt. Aynı işte mevcut Opus/GPT rol sohbetlerini kullan;
+kararı); Rol; tam komut/prompt. Aynı işte mevcut uygulama/GPT rol sohbetlerini kullan;
 yeni bağımsız işte veya ilgili rol sohbeti yoksa yeni sohbet öner.
 
 !`git status --short`

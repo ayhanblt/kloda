@@ -1,0 +1,82 @@
+# 2.3/G4–G6 — dar keşif ve kanıt eşlemesi / 18.11.2026
+
+Bu ek sözleşme değildir. Tek goal/kabul kaynağı: [next-plan §2.3](next-plan.md#23g4g6--native-free-m13-ve-kapsam-eşlemesi--18112026).
+HEAD `508b3f0486a7ce04628ec0c3681d995573e5721d`; mobil ve Desktop BackupSetup dirty diff'i boş.
+Mevcut Desktop 2.2 ve süreç/F1/1.5 belge/kanıt değişiklikleri bu işe ait değildir.
+Bu keşifte ürün/test/fixture yazılmadı; test/lint/typecheck/build/runtime koşulmadı.
+
+## Doğrulanmış kaynak bulguları
+
+- `apps/mobile/src/pages/settings/ui/settings-page.tsx::SettingsPage`: tema/dil,
+  kaynaklar/program/yedekler/recovery/etkinlik/setup bağlantıları var; G4 satırları yok.
+- Frozen `docs/ui/lovable-reference/c144e98938da/source/src/views/mobile/activity-backups-settings.tsx.reference:173–200`:
+  hücresel switch, demo photoPermission pill, defaultChecked bildirim switch'i ve
+  `0.9.0 (prototype)` satırı prototiptir; gerçek native kabiliyet kanıtı değildir.
+- `apps/mobile/modules/my-module/ios/IosWebDavClient.swift:63`, `IosS3Client.swift:37`:
+  cellular kapalı; OAuth/Nextcloud login aynı kısıtı taşır. Android DAV/S3/OAuth
+  client'ları `NativeLanRoutes.transport` ile Wi-Fi/Ethernet transport kontrol eder.
+  Bu sınırlı kaynak bulgusu bütün provider/OS davranışı için yeni runtime PASS değildir.
+  Kullanıcıya “ücretsiz ağ”, tüm yollarda kesintisiz çalışma veya Ethernet yasağı vaat edilmez.
+- `apps/mobile/src/shared/api/gallery.ts`: izin bilgisi `galleryPage` yanıtındadır;
+  ayrı genel permission-status metodu yok. `useGallery::load` kaynak/sayfa/thumbnail
+  okur; Settings'e izin pill'i için bu hook bağlamak salt-okunur küçük izin sorgusu değildir.
+- `apps/mobile/src/shared/api/file-transfer.ts:208–218`: mevcut notification request
+  ve queue status API'si var. `IosBackupNotifications.swift:6–15` başlangıçta false
+  önbellek tutar, asenkron refresh/request ile günceller; taze OS izin sorgusu değildir.
+  `AndroidBackupNotifications.kt:22–38` OS/channel durumunu kullanır; iki platformun
+  mevcut bool alanından M13 için güncel, birleşik izin modeli türetilemez.
+- `apps/mobile/src/app/App.tsx:50,54,61`: mevcut `sources`, `activity`, `settings`
+  yolları hazır. `SourcePage` foto kaynağı seçimini ancak ilgili kullanıcı eyleminde
+  başlatır. ActivityPage `notificationsEnabled === false` açıklamasını gösterir;
+  bildirim istemi mevcut Sync/Continue eylemindedir, bağımsız izin yönetim ekranı değildir.
+  Bu nedenle yeni M13 bağlantısı “bildirimleri aç/kapat” veya “OS ayarlarını aç” diye sunulmaz.
+- `apps/mobile/app.json::expo.version` ve package sürümü `0.0.0`; kurulu native
+  artifact sürümünü veren mevcut shared wrapper bulunmadı. Onaylı çözüm yalnız
+  app.json yapılandırma sürümünü açık etiketle gösterir; yeni SDK/API/dependency yok.
+- `apps/desktop/src/pages/backup/BackupSetup.tsx:19,65–79,130–141`: D10 kaynak seçimi
+  ve program aynı `sources` adımındadır; `pickSources` ve `saveSchedule` mevcut yollardır.
+  `apps/desktop/src/app/App.tsx:81` aynı mounted BackupSetup'ı kullanır.
+  Bu iş yeni `/d/sources`, router veya Desktop davranışı eklemez.
+- `docs/ui/lovable-design-reference.md:58–72` ve review G6: kilit ekranı step19;
+  yeni bir eksik veya bu iş için Live Activity çalışma yetkisi değildir.
+
+## Kanıt → mevcut kaynak/diff
+
+| Sınıf | Kanıt / karşılaştırma | Kullanım sınırı |
+|---|---|---|
+| Reuse | `../evidence/backlog-2.1-g1/MANIFEST.md` §G1-R1/bağımsız kapanış: 40 test, tsc, scoped lint, iki export | Kendi final varyantının prior PASS'i; yeni M13'ü doğrulamaz. |
+| Reuse | G1 `source-final.sha256` selector+spec+üç locale; `fix-r1/source-final.sha256` üç final page/panel/spec | Etkin sekiz final kaynak LF/CRLF eşdeğer. Üç INITIAL page/panel hash'i FIX ile superseded; eski INITIAL hash uyuşmazlığı yeni ürün değişikliği değildir. |
+| Etkilenecek | Yeni M13 + üç locale + config import | Önceki G1 export/tsc yeni import/satır/metinleri kapsamaz; scoped tsc/lint/export ve yeni M13 testi bu somut delta içindir. |
+| Reuse / sınırlı | `../evidence/lovable-step12-2026-10-28/mobile-checks.json`: 123 test/14 suite ve export/lint/tsc | Settings/ilgili API hash'i yok; tarihî geniş suite güncel M13 PASS'i değildir; tam suite tekrarı gerekmez. |
+| Reuse / sınırlı | `../claude-review-2026-11-11.md:47–52` G4–G6; aynı step12 Desktop `desktop/checks.json` | G4 eksikleri/D10 birleşimi/G6 kapısının önceki kaydı. BackupSetup hash bağı yok; yeni D10 runtime/görsel PASS'i denmez. |
+| Eksik | Yeni M13 capability açıklamaları, navigation-only davranış, yapılandırma sürümü | Yeni scoped render/yan-etki testi gerekir; mevcut veri/permission fixture'ı gerekmez. |
+| Eksik | Yeni M13'ün dar görsel karşılaştırması | G1-07 ertelemesi yalnız G1 içindir; M13 için otomatik erteleme değildir. Hazır capture komutu varsayılmaz; 2.5 altyapısı üstlenilmez. |
+
+## Keşif SHA256 (ham byte; yukarıdaki G1 karşılaştırması LF/CRLF toleranslı)
+
+| Kaynak | SHA256 |
+|---|---|
+| `apps/mobile/src/pages/settings/ui/settings-page.tsx` | `79dfe6b2fbe0ff90807850621756f360e85c4d1b7325c0c27183ad2e7d3e9b9d` |
+| `apps/mobile/app.json` | `44f40880787bed5c2ace9fad3a3b996f4f50d81e13de7bc0d1e606226cc1d72d` |
+| `apps/mobile/src/app/App.tsx` | `a6731c4fc3ba6a5c1e5bb09681d75bb7ba887bf702ffce37a088afd39e3718b8` |
+| `apps/mobile/src/pages/setup/ui/source-page.tsx` | `18b9bca12566157cad9a8f5ee449a52d2d1e2b6e1ddf38e851e8219ab45fbbaf` |
+| `apps/mobile/src/pages/activity/ui/activity-page.tsx` | `ea20129388beb13610b4adc1c4d0c7e80c774e7e8f4fcde8a94ec439e0136ce0` |
+| `apps/desktop/src/pages/backup/BackupSetup.tsx` | `4376fc30a9a105ae45e473141f78090bfdc3e493f558ad43cfe5d3f0263370a1` |
+
+## Araştırma/delegasyon kaydı ve belirsizlik sınırı
+
+- Kullanıcı kararı **D-G456 / 18.11**: native-free M13 önerisi açıkça onaylandı;
+  bu ekte yeni goal üretilmez. Tek sözleşme next-plan §2.3'tür.
+- Salt-okunur kanıt taraması: `openai/gpt-6-luna`, session
+  `ses_e146d6ec1ffehDnwAD0FTq3Yk6`; çağrı öncesi katalogda active doğrulandı.
+  İzinli kaynak/kanıt alanlarıyla tek görev; yazma/build/test/hesap/alt ajan yetkisi yok.
+  Başlangıç/bitiş süresi, token/cache ve maliyet UNKNOWN; tasarruf iddiası yok.
+- Luna G4/G5 eski hash bağının eksikliğini ve G6 kapısını işaretledi; ana ajan
+  ilgili review/manifest ve gerçek sayfaları doğruladı. “Settings yalnız kaynak/yedek
+  bağlantısı içerir” özeti eksikti; gerçek mevcut tema/dil/program/recovery/setup
+  kontrolleri yukarıda korunacak yollar olarak düzeltildi. Kabul kararı devredilmedi.
+- Ana ajan G1 final hash zincirini ayrıca doğruladı; bu yeni G1 testi veya review'u değildir.
+- Dış API/OS araştırması NOT_NEEDED: seçilen çözüm yeni OS/SDK API'si kullanmaz;
+  yukarıdaki bulgular mevcut proje kodunun incelemesidir, genel platform garantisi değildir.
+- Native capture ortamı bu planlama turunda denenmedi. Dar M13 görsel kanıtı
+  zorunludur; yokluğu uygulama review-ready durumunu engeller, otomatik erteleme olmaz.

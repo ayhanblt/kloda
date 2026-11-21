@@ -1,0 +1,1 @@
+CLEANED FAIL Interrupted: SIGUSR1 {'mobile.settings/de/dark/normal': 'FAIL'} ['app:terminated:True', 'restore:appearance:True', 'restore:content_size:True', 'stop:metro:True', 'phase-server:closed:True', 'simulator:deleted:True'] [('metro', 'stopped')]

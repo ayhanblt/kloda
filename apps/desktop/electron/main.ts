@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { DesktopSyncJournal } from './runtime/journal.js';
 import { ElectronScheduleAdapter } from './runtime/scheduler.js';
 import { registerWebDavHandlers } from './runtime/webdav-ipc.js';
+import { storageTestReply } from './runtime/webdav-test-result.js';
 import { DesktopSyncRuntime } from './runtime/runtime.js';
 import { bindPairingWindow, closeNativePairing, receiverStatus, registerPairingHandlers, startNativeReceiver } from './runtime/pairing.js';
 import { desktopDisplayName, initializeDesktopProfile } from './runtime/desktop-profile.js';
@@ -83,7 +84,7 @@ function registerHandlers(): void {
     if (!isStorageForm(storage)) throw new Error('Invalid storage payload.');
     return runtime.saveStorage(storage);
   });
-  handle('kloda:test-storage', () => runtime.testStorage());
+  handle('kloda:test-storage', () => storageTestReply(() => runtime.testStorage()));
   handle('kloda:start-sync', () => runtime.startSync());
 }
 

@@ -1,0 +1,98 @@
+diff --git a/docs/implementation/CURRENT.md b/docs/implementation/CURRENT.md
+index 74d60e1..46c37d6 100644
+--- a/docs/implementation/CURRENT.md
++++ b/docs/implementation/CURRENT.md
+@@ -4,15 +4,33 @@ Tek başlangıç işaretçisi. Tarihî PASS taze kabul değildir. Kurallar: kök
+ 
+ ## Aktif iş / sıradaki adım
+ 
++**17.11 kullanıcı kararı ve sonuç:** F1 fix2 compile/RED-GREEN/dar lint doğrulaması
++**Faz3'e DEFERRED / NOT_RUN**; aşağıdaki eski Mac F1→1.5 sırası artık yürütülmez.
++1.5 için onaylı 10 dakikalık pencerede host testi **6.01 saniye / exit 0**: H15/P15
++derleme+seed/reopen PASS. [Kanıt](evidence/backlog-1.5/mac-2026-11-17/result.txt),
++ham log aynı dizinde `host-check.log`. Kod değişikliği/tekrar koşu yok.
++**1.5 REVIEW / ACCEPTED — bağımsız GPT review ile goal kapandı:**
++H15/P15 Mac PASS reuse; L15 kaynak/metin ve B15 release kapısı statik doğrulandı.
++[Review](evidence/backlog-1.5/review.md), [manifest](evidence/backlog-1.5/MANIFEST.md).
++Gerçek release/lisans paketleme/fiziksel kapılar açık. **2.2/G2–G3: GPT planı onaylandı,
++18.11 INITIAL + FIX-R1 bağımsız GPT review ACCEPTED; 2.2 geliştirme goal'u kapandı**;
++[review §FIX-R1](evidence/backlog-2.2-g2-g3/review.md#fix-r1-bağımsız-devam-reviewu--18112026),
++[manifest](evidence/backlog-2.2-g2-g3/MANIFEST.md). G23-R1 RESOLVED; G23-01–08 karşılandı.
++Reviewer probe 3/3 GREEN; uygulayıcı regression RED→GREEN/19 test ve dar kontroller reuse.
++INITIAL ret=1, başarısız FIX=0. Gerçek OS/native/release kapıları açık.
++**Tek sonraki adım:** yeni GPT plan sohbetinde **2.3/G4–G6**; hazır prompt:
++`2.2/G2–G3 kabul edildi. CURRENT'teki 2.3/G4–G6 için gerçek mobil ayar yetenek/kapsamını
++ve D10 birleşimini inceleyip tek goal/ortak kabul tablosuyla GPT planı hazırla;
++step19 kilit ekranı ve F1/Faz3–4 ertelemelerini koru. Ürün kodu değiştirme.`
++Burada sonraki iş başlatılmadı. F1 fix2 PASS/kabul değildir;
++2.1 kabulü, R3 önceki scoped lint ve FO1 Faz4 ertelemesi korunur. Token/kota UNKNOWN.
++
+ **16.11 kullanıcı yönlendirmesi:** F1 fix2 ve 1.5 kapanmadan Mac doğrulama kuyruğunda
+ bekler; Windows'taki **2.1/G1 INITIAL + G1-R1**, **bağımsız GPT review ile geliştirme kabulü aldı**.
+ G1 durumu **REVIEW / ACCEPTED**; görsel Faz3 DEFERRED / NOT_RUN. Son kayıtlar:
+ [review](evidence/backlog-2.1-g1/review.md), [manifest](evidence/backlog-2.1-g1/MANIFEST.md).
+-Sıradaki bağımsız iş: **2.2/G2–G3 GPT planı**, ayrı GPT plan sohbetinde; burada başlatılmaz.
+-Hazır prompt: `AGENTS → CURRENT; 2.2/G2–G3 için gerçek Desktop tray ve sürüm/kapanış
+-eşlemesini inceleyip tek goal, kapsam dışı, hedef semboller ve ortak kabul tablosuyla
+-GPT planı hazırla. ADR0018 foreground/Linux görünür kontrol sınırlarını ve açık
+-F1/1.5/Faz3–4 kapılarını koru. Ürün kodu değiştirme; uygulama başlatma.`
++16.11 tarihî 2.2 plan yönlendirmesi karşılandı; güncel tek sonraki adım üstteki
++**2.3/G4–G6 GPT planı**dır; 2.2 review kapandı.
+ Mac'te sıra: **F1 fix2 → 1.5 H15/P15**; [güncel kuyruk ve komutlar](windows-handoff-2026-11-16.md#güncel-mac-doğrulama-sırası--1611-kullanıcı-kararı).
+ Alttaki F1 uygulama yönlendirmesi yalnız o iş Mac'te sürdürüldüğünde geçerlidir.
+ 
+@@ -98,10 +116,12 @@ S3 review kaydı için ek Opus oturumu gerekmez. Commit/push yok.
+ - [x] **1.3/B3:** FTPS Drop-zeroize + bağımsız GPT review kabul; P3 belge notu, FTPS/JNI runtime ve fiziksel kapılar açık.
+ - [x] **1.4/B4:** vault politikası belge review kabul; bayrak eklenmedi, kalan risk kabul. R1 tarihî CURRENT aidiyeti sınırlaması korundu; runtime güvenlik PASS'i değil.
+ - [ ] **1.4b/F1 geliştirme:** R1/R2 dar tasarım kullanıcı onaylı → fix2 kaynağı tamam, doğrulama BLOCKED-ENV (NOT_RUN); iki ret sayacı korunur. R3 dar lint kabul ve S3 kabulü korunur. FO1 prior PASS reuse/yeni zincir ve diğer fiziksel/release kapıları Faz4'te; yalnız bu ertelemeler geliştirme kapanışını bekletmez.
+-- [ ] **1.5:** iOS WebDAV host testini onar; cesu8/instant-xml/instant-xml-macros lisansları; B2 release iOS fixture-CA marker kontrolünü kabul kapısına bağla.
+-  16.11 Opus INITIAL: **KISMİ / BLOCKED-ENV — review-ready değil.** H15 harness kaynağı, L15 notices, B15 §20 kapısı
+-  uygulandı; H15/P15 macOS koşusu NOT_RUN (Windows'ta xcrun/swiftc yok). Kanıt: [1.5 MANIFEST](evidence/backlog-1.5/MANIFEST.md).
+-  Sıradaki: macOS'ta kod değiştirmeden `python3 -I tools/test-ios-webdav-journal.py` (aynı Opus rolü); GREEN sonrası GPT review.
++- [x] **1.5:** iOS WebDAV host onarımı + üç lisans metni + B2 gerçek release app kabul kapısı.
++  **17.11 REVIEW / ACCEPTED:** H15/P15 macOS compile+seed/reopen PASS reuse, 6.01 sn / exit0;
++  L15/B15/V15 bağımsız GPT review kabul. [Review](evidence/backlog-1.5/review.md),
++  [MANIFEST](evidence/backlog-1.5/MANIFEST.md). Üç kaynak baseline/hash zinciri doğrulandı;
++  eksik tarihî yardımcı loglar yeni statik audit ile karşılandı, tarihî RED uydurulmadı.
++  Reviewer host testi/build tekrar etmedi. Release/fiziksel kapılar ve F1 ertelemeleri açık.
+ - [x] **2.1/G1:** gerçek journal ile Mobil Etkinlik Şu an/Geçmiş. Sözleşme: next-plan §2.1/G1 (D-G1 onaylı).
+   16.11 INITIAL + G1-R1 FIX: **bağımsız GPT geliştirme review KABUL.** G1-01–06 ve G1-07 render/a11y
+   karşılandı; son Jest 40/40, tsc, scoped ESLint ve iOS/Android export uygulama kanıtı REUSE.
+@@ -109,11 +129,22 @@ S3 review kaydı için ek Opus oturumu gerekmez. Commit/push yok.
+   [Review](evidence/backlog-2.1-g1/review.md): G1-R1 M11 header dropdown RESOLVED; 8/8 son hash,
+   INITIAL→FIX baseline zinciri ve komşu yollar taze statik doğrulandı. Reviewer yeni test/build NOT_RUN.
+   [Manifest](evidence/backlog-2.1-g1/MANIFEST.md) §Bağımsız GPT kapanışı; görsel/runtime veya üst F1/1.5 kabulü değil.
+-- [ ] **2.2/G2–G3:** gerçek Desktop tray, sürüm/kapanış eşlemesi; ADR0018 foreground ve Linux görünür kontrol sınırları.
++- [x] **2.2/G2–G3:** gerçek Desktop tray, sürüm/kapanış eşlemesi; ADR0018 foreground ve Linux görünür kontrol sınırları.
++  **18.11 INITIAL + FIX-R1 bağımsız GPT REVIEW / ACCEPTED.** next-plan §2.2 D-G23/G23-01–08 karşılandı.
++  G23-R1 RESOLVED: hata+aktif gözlemi doğru; mounted regression RED→GREEN, FIX 19/19 test,
++  scoped ESLint/renderer tsc/build/tek capture reuse; reviewer probe 3/3 GREEN.
++  INITIAL 334 test/main tsc/26 capture kendi kaynaklarında reuse; final tam suite iddiası yok.
++  Start/review HEAD `508b3f0`, 11/11 final hash/diff zinciri doğrulandı; INITIAL ret=1, başarısız FIX=0.
++  Yalnız 2.2 geliştirme kabulü; F1/native/OS/Faz3–4/release kapıları açık. Sonraki ayrı iş 2.3 GPT planı.
++  [Review](evidence/backlog-2.2-g2-g3/review.md), [MANIFEST](evidence/backlog-2.2-g2-g3/MANIFEST.md).
+ - [ ] **2.3/G4–G6:** gerçek mobil ayar yetenek/kapsamı; D10 birleşimini belgele; kilit ekranı step19 kapısında.
+ - [ ] **2.4:** eşleşme/aktarım metinleri, WebDAV endpoint/port/yol ve sır sızdırmayan teşhis; kök neden olmadan retry/fence gevşetme yok.
+ - [ ] **2.5:** mevcut betiklerle eksik ekran/dil kapsamını kalıcı batch capture'a tamamla.
+ - [ ] **3:** tek tam regresyon; önce fixture/tek temsilci; JS/native/build, güvenlik/B2, a11y/görsel/performance. Lint açık: DeviceCheck:40/45 MissingPermission, S3Automatic:46 NewApi ve worklets bağımlılık analizi (FTPS MANIFEST §R3 dış-kapsam lint bulguları); FTPS dar lint kabulü genel lint PASS'i değil. Dropbox Android JobService, iOS >150 MiB upload_session, Dropbox Photos/Nextcloud restore, Android yükseltme ve recovery göster/kopyala açık kontrolleri dahil. Hesaplar ayrı izinli; bağımsız review ve dağıtım kapıları korunur.
++  **F1 fix2 — 17.11 kullanıcı onaylı erteleme:** Kotlin compile/AndroidTest build,
++  R1/R2 start-RED→final-GREEN ve değişen kapsamın dar lint'i burada yapılacak;
++  mevcut fix2 runtime NOT_RUN, geliştirme kabulü verilmedi. Eski PASS'ler yalnız
++  kendi kaynak/varyantlarında korunur. FO1 delta ayrıca Faz4'tedir.
+   **G1-07:** Etkinlik Şu an/Geçmiş + filtreler; TR/EN/DE, light/dark, büyük yazı ve Lovable M11
+   görsel karşılaştırması 16.11 kullanıcı kararıyla burada **DEFERRED / NOT_RUN**. Kalıcı batch capture
+   script açığı 2.5'te açık; hazır olmayan runnable komut varsayılmaz.
+@@ -142,8 +173,11 @@ güncel yetki değildir. Aktif kapsam bu CURRENT ve onaylı FTPS next-plan'dır.
+ 
+ **Güncel maliyet politikası:** [uygulama politikası](execution-budget.md):
+ hazır tasarım, ilk temsilci regression/minimum fix, 15k ajan içi verimlilik kontrolü
+-(UNKNOWN tek başına durdurmaz), uygun düşük riskli işte kullanıcı seçimiyle tek
+-`/implement-pilot` Sonnet denemesi. F1 pilot değil, Opus/model effort değişmez.
++(UNKNOWN tek başına durdurmaz). **18.11 sonraki iş döngüsü:** düşük riskli net iş
++normal `/implement` altında Sonnet 5.5'e devredilebilir (§4); ayrı pilot komutu kaldırıldı.
++Tek doğrulama seçimi, dar compile→runtime ve review öncesi çağıran/hata yolu taraması
++§5'te. Plan/review destek Luna; uygulama destek Sonnet. Mevcut review/devir kapsamı
++değişmez; F1 hassas uygulaması Opus'ta, ana model/effort aynı kalır.
+ Önceki R13/R14 FIX yönlendirmesi tamamlanan S3 scoped kabulüyle supersede edildi;
+ güncel INITIAL/FIX yetkisi yalnız yukarıdaki aktif iş bölümünden okunur.
+ 

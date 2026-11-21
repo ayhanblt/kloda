@@ -1,0 +1,217 @@
+--- a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Automatic.kt
++++ b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3Automatic.kt
+@@ -6,6 +6,7 @@
+ import android.app.job.JobService
+ import android.content.ComponentName
+ import android.content.Context
++import android.os.Build
+ import android.os.Handler
+ import android.os.Looper
+ import android.os.PersistableBundle
+@@ -14,6 +15,9 @@
+ // owner (AndroidS3AutomaticCoordinator). A new occurrence never resumes unknown multipart work.
+ internal object AndroidS3Automatic {
+   const val JOB = 2712
++  // Android 7.0/7.1 (API 24/25): the S3 job requires BatteryNotLow (API 26) and the constraint is never relaxed,
++  // so automatic S3 is unsupported there. Manual S3, stored settings and restore are unaffected.
++  internal fun automaticSupported(sdk: Int = Build.VERSION.SDK_INT): Boolean = sdk >= Build.VERSION_CODES.O
+   @Volatile private var instance: AndroidS3AutomaticCoordinator? = null
+   internal fun next(app: Context, now: Long): Long =
+     if (AndroidBackupScheduler.mode(app) == "live") Math.addExact(now, JobInfo.getMinPeriodMillis()) else AndroidBackupScheduler.nextScheduled(app, now)
+@@ -33,7 +37,7 @@
+   }
+   fun reconcileAsync(app: Context, changed: Boolean = false) { Thread({ reconcile(app.applicationContext, changed) }, "kloda-s3-schedule").start() }
+   fun reconcile(app: Context, changed: Boolean = false) {
+-    if (!BuildConfig.KLODA_S3_NATIVE) return
++    if (!BuildConfig.KLODA_S3_NATIVE || !automaticSupported()) return
+     // An unavailable runtime is not a revocation: no cancel of an already-projected plan.
+     runCatching { coordinator(app) }.getOrNull()?.reconcile(changed)
+   }
+@@ -42,11 +46,15 @@
+ // Shared real OS adapter: production uses AndroidS3JobService, the harness only its test service.
+ internal class AndroidS3JobOs(private val context: Context, private val component: ComponentName) : S3AutoOs {
+   private val scheduler get() = context.getSystemService(JobScheduler::class.java)
+-  override fun schedule(wake: String, nonce: String, latency: Long, protocol: Int): Int = scheduler.schedule(
+-    JobInfo.Builder(AndroidS3Automatic.JOB, component).setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED).setRequiresBatteryNotLow(true)
+-      .setPersisted(true).setMinimumLatency(latency).setExtras(PersistableBundle().apply {
+-        putInt("protocol", protocol); putString("provider", "amazon-s3"); putString("wake", wake); putString("nonce", nonce)
+-      }).build())
++  override fun schedule(wake: String, nonce: String, latency: Long, protocol: Int): Int {
++    // Boundary guard for the API 26 setter below; the coordinator gates API 24/25 earlier, this keeps the constraint unrelaxed.
++    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) throw IllegalStateException("s3_automatic_unsupported")
++    return scheduler.schedule(
++      JobInfo.Builder(AndroidS3Automatic.JOB, component).setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED).setRequiresBatteryNotLow(true)
++        .setPersisted(true).setMinimumLatency(latency).setExtras(PersistableBundle().apply {
++          putInt("protocol", protocol); putString("provider", "amazon-s3"); putString("wake", wake); putString("nonce", nonce)
++        }).build())
++  }
+   override fun cancel() = scheduler.cancel(AndroidS3Automatic.JOB)
+   override fun pending(): Map<String, Any?>? = scheduler.getPendingJob(AndroidS3Automatic.JOB)?.let { job ->
+     if (job.service != component) mapOf("foreign" to job.service.className) else extras(job.extras)
+@@ -61,6 +69,7 @@
+ open class AndroidS3JobService : JobService() {
+   internal open fun coordinator(): AndroidS3AutomaticCoordinator = AndroidS3Automatic.coordinator(this)
+   override fun onStartJob(params: JobParameters): Boolean {
++    if (!AndroidS3Automatic.automaticSupported()) return false
+     val owner = try { coordinator() } catch (_: Exception) { return false }
+     return owner.onStart(params, this, AndroidS3JobOs.extras(params.extras)) { retry -> jobFinished(params, retry) }
+   }
+--- a/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaS3Module.kt
++++ b/apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/KlodaS3Module.kt
+@@ -57,7 +57,8 @@
+     val captured = owner(provider).capture()
+     return buildMap {
+       put("provider", provider); put("supported", true); put("configured", captured != null); put("enabled", state["enabled"] ?: false); put("canRun", state["canRun"] ?: false); put("running", state["running"] ?: false)
+-      put("automaticEnabled", state["automaticEnabled"] ?: false); put("canAutomatic", personal && captured != null && state["enabled"] == true)
++      val auto = AndroidS3Automatic.automaticSupported()
++      put("automaticEnabled", auto && state["automaticEnabled"] == true); put("canAutomatic", auto && personal && captured != null && state["enabled"] == true); put("automaticSupported", auto)
+       put("canEnable", personal && captured != null); put("canTest", state["running"] != true && captured != null && captured.profile.target.prefix.isNotEmpty())
+       state["run"]?.let { put("run", it) }
+       captured?.profile?.target?.let { t -> put("profile", mapOf("endpoint" to t.endpoint, "region" to t.region, "bucket" to t.bucket, "prefix" to t.prefix, "pathStyle" to t.pathStyle)) }
+@@ -87,7 +88,8 @@
+     AsyncFunction("runS3") { provider: String -> safe { checkUi(); requirePersonal(provider); queue(provider).start(); status(provider) } }
+     AsyncFunction("pauseS3") { provider: String -> safe { queue(provider).pause(); queue(provider).setAutomatic(false); appContext.reactContext?.let { AndroidS3Automatic.reconcileAsync(it) }; status(provider) } }
+     AsyncFunction("automaticS3") { provider: String, enabled: Boolean -> safe {
+-      checkUi(); requirePersonal(provider); cancelRestore(); queue(provider).setAutomatic(enabled)
++      checkUi(); requirePersonal(provider); if (enabled && !AndroidS3Automatic.automaticSupported()) throw S3Failure("automatic_unsupported")
++      cancelRestore(); queue(provider).setAutomatic(enabled)
+       appContext.reactContext?.let { AndroidS3Automatic.reconcileAsync(it) }; status(provider)
+     } }
+     AsyncFunction("reviewS3") { provider: String, id: String, request: String -> safe {
+--- a/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticChecks.kt
++++ b/apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticChecks.kt
+@@ -16,6 +16,9 @@
+ // Amazon isolated queue: automatic admission is only the exact-owner startAutomatic path.
+ internal object AndroidS3AutomaticChecks {
+   fun run(instrumentation: Instrumentation, root: File) {
++    // Boundary contract only (runs on the test device's API, not on API 24/25): 7.0/7.1 are unsupported, 8.0+ is not.
++    check(!AndroidS3Automatic.automaticSupported(24) && !AndroidS3Automatic.automaticSupported(25))
++    check(AndroidS3Automatic.automaticSupported(26) && AndroidS3Automatic.automaticSupported(35))
+     val base = instrumentation.targetContext; val namespace = UUID.randomUUID().toString()
+     val app = object : ContextWrapper(base) {
+       override fun getApplicationContext() = this
+--- a/apps/mobile/src/pages/connections/ui/s3-page.tsx
++++ b/apps/mobile/src/pages/connections/ui/s3-page.tsx
+@@ -39,7 +39,7 @@
+         <PairingButton disabled={m.working || m.dirty || (!m.status.running && !m.status.canRun)}
+           label={t(m.status.running ? 'destinations.s3.pause' : 'destinations.s3.run')}
+           onPress={() => { void m.action(m.status?.running ? 'pauseS3' : 'runS3'); }} />
+-        <Text className="font-sans text-sm text-secondary-text">{t('destinations.s3.automaticHint')}</Text>
++        <Text className="font-sans text-sm text-secondary-text">{t(m.status.automaticSupported === false ? 'destinations.s3.automaticUnsupported' : 'destinations.s3.automaticHint')}</Text>
+         <PairingButton variant="secondary" disabled={m.working || m.dirty || !m.status.canAutomatic}
+           label={t(m.status.automaticEnabled ? 'destinations.s3.automaticOff' : 'destinations.s3.automaticOn')}
+           onPress={() => { void m.action('automaticS3'); }} />
+--- a/apps/mobile/src/shared/api/s3.ts
++++ b/apps/mobile/src/shared/api/s3.ts
+@@ -4,7 +4,7 @@
+ export type S3Provider = 'amazon-s3' | 's3-compatible';
+ export interface S3Form { endpoint: string; region: string; bucket: string; prefix: string; pathStyle: boolean; accessKey: string; secret: string; token: string }
+ export const emptyS3Form: S3Form = { endpoint:'',region:'',bucket:'',prefix:'',pathStyle:true,accessKey:'',secret:'',token:'' };
+-export interface S3Status { provider: S3Provider; supported: boolean; configured: boolean; enabled: boolean; canRun: boolean; automaticEnabled?: boolean; canAutomatic?: boolean; canEnable?: boolean; running?: boolean; run?: S3Run; canTest?: boolean; profile?: Omit<S3Form,'accessKey' | 'secret' | 'token'> }
++export interface S3Status { provider: S3Provider; supported: boolean; configured: boolean; enabled: boolean; canRun: boolean; automaticEnabled?: boolean; canAutomatic?: boolean; automaticSupported?: boolean; canEnable?: boolean; running?: boolean; run?: S3Run; canTest?: boolean; profile?: Omit<S3Form,'accessKey' | 'secret' | 'token'> }
+ export interface S3Run { id: string; state: 'running' | 'paused' | 'finished' | 'needs_attention'; counts: { verifiedFiles: string; verifiedBytes: string }; errorCode?: string }
+ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+ function runFromNative(value: unknown): S3Run {
+@@ -30,17 +30,19 @@
+   } catch { return invalid(); }
+ }
+ export function s3StatusFromNative(value: unknown, provider: S3Provider): S3Status {
+-  const row = object(value,['provider','supported','configured','enabled','canRun','profile','canTest','canEnable','running','run','automaticEnabled','canAutomatic']);
++  const row = object(value,['provider','supported','configured','enabled','canRun','profile','canTest','canEnable','running','run','automaticEnabled','canAutomatic','automaticSupported']);
+   if (row.provider !== provider || typeof row.supported !== 'boolean' || typeof row.configured !== 'boolean' || typeof row.enabled !== 'boolean' || typeof row.canRun !== 'boolean') return invalid();
+   if (row.canTest !== undefined && (typeof row.canTest !== 'boolean' || (row.canTest && (!row.supported || !row.configured)))) return invalid();
+-  for (const key of ['canEnable','running','automaticEnabled','canAutomatic'] as const) if (row[key] !== undefined && typeof row[key] !== 'boolean') return invalid();
++  for (const key of ['canEnable','running','automaticEnabled','canAutomatic','automaticSupported'] as const) if (row[key] !== undefined && typeof row[key] !== 'boolean') return invalid();
+   const personal = provider === 'amazon-s3' && row.supported && row.configured && row.canEnable === true;
+   if ((row.enabled || row.canRun || row.running || row.canEnable) && !personal) return invalid();
+   if ((row.automaticEnabled || row.canAutomatic) && (!personal || !row.enabled)) return invalid();
++  if (row.automaticSupported === false && (row.automaticEnabled || row.canAutomatic)) return invalid();
+   if ((row.canRun && (!row.enabled || row.running)) || (row.running && !row.enabled)) return invalid();
+   const result: S3Status = { provider,supported:row.supported,configured:row.configured,enabled:row.enabled,canRun:row.canRun };
+   if (row.automaticEnabled !== undefined) result.automaticEnabled = row.automaticEnabled as boolean;
+   if (row.canAutomatic !== undefined) result.canAutomatic = row.canAutomatic as boolean;
++  if (row.automaticSupported !== undefined) result.automaticSupported = row.automaticSupported as boolean;
+   if (row.canEnable !== undefined) result.canEnable = row.canEnable as boolean;
+   if (row.running !== undefined) result.running = row.running as boolean;
+   if (row.run !== undefined) {
+--- a/apps/mobile/src/pages/connections/ui/s3-queue-page.spec.tsx
++++ b/apps/mobile/src/pages/connections/ui/s3-queue-page.spec.tsx
+@@ -3,7 +3,7 @@
+ import { S3Page } from './s3-page';
+ import { s3 } from '../../../shared/api/s3';
+ import { i18n } from '../../../shared/i18n';
+-jest.mock('../../../shared/api/s3',() => ({ emptyS3Form:{ endpoint:'',region:'',bucket:'',prefix:'',pathStyle:true,accessKey:'',secret:'',token:'' },s3:{ status:jest.fn(),action:jest.fn(),cancelTest:jest.fn() },s3ErrorCode:() => 'storage_failure' }));
++jest.mock('../../../shared/api/s3',() => ({ emptyS3Form:{ endpoint:'',region:'',bucket:'',prefix:'',pathStyle:true,accessKey:'',secret:'',token:'' },s3:{ status:jest.fn(),action:jest.fn(),automatic:jest.fn(),cancelTest:jest.fn() },s3ErrorCode:() => 'storage_failure' }));
+ const mocked = jest.mocked(s3), original = Object.getOwnPropertyDescriptor(AppState,'currentState')!;
+ const status = { provider:'amazon-s3' as const,supported:true,configured:true,enabled:false,canEnable:true,canRun:false,running:false,canTest:true,
+   profile:{ endpoint:'https://s3.eu-north-1.amazonaws.com',region:'eu-north-1',bucket:'owned-bucket',prefix:'owned',pathStyle:false } };
+@@ -48,3 +48,20 @@
+   expect(view.queryByRole('button',{ name:i18n.t('destinations.s3.pause') })).toBeNull();
+   await view.unmount();
+ });
++it('explains unsupported automatic S3 on Android 7 without disabling manual controls',async () => {
++  const old = { ...status,enabled:true,canRun:true,canAutomatic:false,automaticEnabled:false,automaticSupported:false };
++  mocked.status.mockResolvedValue(old);
++  const page = await render(<S3Page provider="amazon-s3" onBack={jest.fn()} />);
++  expect(await page.findByText(i18n.t('destinations.s3.automaticUnsupported'))).toBeTruthy();
++  expect(page.queryByText(i18n.t('destinations.s3.automaticHint'))).toBeNull();
++  expect(page.getByText(i18n.t('destinations.s3.automaticOn'))).toBeTruthy(); expect(page.queryByText(i18n.t('destinations.s3.automaticOff'))).toBeNull();
++  await fireEvent.press(page.getByText(i18n.t('destinations.s3.automaticOn'))); expect(mocked.automatic).not.toHaveBeenCalled(); expect(mocked.action).not.toHaveBeenCalled();
++  await fireEvent.press(page.getByText(i18n.t('destinations.s3.run'))); await waitFor(() => expect(mocked.action).toHaveBeenCalledWith('amazon-s3','runS3'));
++});
++it('keeps the automatic hint and an enabled control when support is reported or absent',async () => {
++  mocked.status.mockResolvedValue({ ...status,enabled:true,canRun:true,canAutomatic:true,automaticEnabled:false });
++  const page = await render(<S3Page provider="amazon-s3" onBack={jest.fn()} />);
++  expect(await page.findByText(i18n.t('destinations.s3.automaticHint'))).toBeTruthy(); expect(page.queryByText(i18n.t('destinations.s3.automaticUnsupported'))).toBeNull();
++  mocked.automatic.mockResolvedValue({ ...status,enabled:true,canRun:true,canAutomatic:true,automaticEnabled:true,automaticSupported:true });
++  await fireEvent.press(page.getByText(i18n.t('destinations.s3.automaticOn'))); await waitFor(() => expect(mocked.automatic).toHaveBeenCalledWith('amazon-s3',true));
++});
+--- a/apps/mobile/src/shared/api/s3-product.spec.ts
++++ b/apps/mobile/src/shared/api/s3-product.spec.ts
+@@ -16,6 +16,16 @@
+   expect(() => s3StatusFromNative({ ...status,enabled:false },'amazon-s3')).toThrow();
+   expect(() => s3StatusFromNative({ ...status,canEnable:false },'amazon-s3')).toThrow();
+ });
++it('keeps the automatic support flag optional for older bridges and rejects contradictory API 24/25 status',() => {
++  const base = { provider:'amazon-s3',supported:true,configured:true,enabled:true,canRun:true,canEnable:true,canAutomatic:true,automaticEnabled:true,
++    profile:{ endpoint:'https://s3.eu-north-1.amazonaws.com',region:'eu-north-1',bucket:'owned-bucket',prefix:'owned',pathStyle:false } };
++  expect(s3StatusFromNative(base,'amazon-s3').automaticSupported).toBeUndefined();
++  expect(s3StatusFromNative({ ...base,automaticSupported:true },'amazon-s3').canAutomatic).toBe(true);
++  const old = s3StatusFromNative({ ...base,canAutomatic:false,automaticEnabled:false,automaticSupported:false },'amazon-s3');
++  expect(old).toMatchObject({ supported:true,enabled:true,canRun:true,canEnable:true,canAutomatic:false,automaticEnabled:false,automaticSupported:false });
++  for (const bad of [{ canAutomatic:true },{ automaticEnabled:true }]) expect(() => s3StatusFromNative({ ...base,automaticSupported:false,canAutomatic:false,automaticEnabled:false,...bad },'amazon-s3')).toThrow();
++  expect(() => s3StatusFromNative({ ...base,automaticSupported:'no' },'amazon-s3')).toThrow();
++});
+ it('rejects provider confusion, credential echo, duplicate rows and unbounded catalogue pages',async () => {
+   const s3BackupsNative = jest.fn(); jest.mocked(requireOptionalNativeModule).mockReturnValue({ s3Backups:s3BackupsNative });
+   for (const value of [{ provider:'s3-compatible',page },{ provider:'amazon-s3',page,secret:'no' },
+--- a/apps/mobile/src/shared/i18n/locales/tr.json
++++ b/apps/mobile/src/shared/i18n/locales/tr.json
+@@ -757,6 +757,7 @@
+       "catalogHint": "Yalnız bu cihazın bu hedefe ait doğrulanmış tamamlanma kayıtları listelenir. Geri yükleme, buluttaki dosyayı yeniden doğrular ve seçtiğiniz klasöre yazar.",
+       "reviewHint": "Yanıtı belirsiz işler otomatik tamamlanmış sayılmaz veya yeniden gönderilmez. Mevcut dosya ve kayıtlar korunur.",
+       "automaticHint": "Otomatik çalışma seçili kaynakları mevcut zamanlama ayarlarıyla yedekler. Başlama zamanı işletim sistemine, ağ ve kilit durumuna bağlıdır; belirsiz işler otomatik tekrarlanmaz.",
++      "automaticUnsupported": "Otomatik S3 yedekleme Android 7.0/7.1'de desteklenmez; Android 8 veya üzeri gerekir. Elle yedekleme ve geri yükleme kullanılabilir.",
+       "automaticOn": "Otomatik yedeklemeyi etkinleştir",
+       "automaticOff": "Otomatik yedeklemeyi kapat",
+       "copied": "Yeni ayrı kopya doğrulandı: {{name}}. Eski belirsiz kayıt korunuyor."
+--- a/apps/mobile/src/shared/i18n/locales/en.json
++++ b/apps/mobile/src/shared/i18n/locales/en.json
+@@ -757,6 +757,7 @@
+       "catalogHint": "Only this device’s verified completion receipts for this destination are listed. Restore verifies the cloud file again and writes to the folder you select.",
+       "reviewHint": "Jobs with unknown responses are never automatically completed or replayed. Existing files and records are retained.",
+       "automaticHint": "Automatic work backs up selected sources using the current schedule settings. Delivery depends on the OS, network and lock state; uncertain jobs are never automatically replayed.",
++      "automaticUnsupported": "Automatic S3 backup is not supported on Android 7.0/7.1; Android 8 or later is required. Manual backup and restore remain available.",
+       "automaticOn": "Enable automatic backup",
+       "automaticOff": "Turn off automatic backup",
+       "copied": "New separate copy verified: {{name}}. The original uncertain record is retained."
+--- a/apps/mobile/src/shared/i18n/locales/de.json
++++ b/apps/mobile/src/shared/i18n/locales/de.json
+@@ -757,6 +757,7 @@
+       "catalogHint": "Angezeigt werden nur verifizierte Abschlussbelege dieses Geräts für dieses Ziel. Beim Wiederherstellen wird die Cloud-Datei erneut geprüft und in den ausgewählten Ordner geschrieben.",
+       "reviewHint": "Aufträge mit unbekannter Antwort werden weder automatisch abgeschlossen noch erneut gesendet. Vorhandene Dateien und Einträge bleiben erhalten.",
+       "automaticHint": "Automatische Läufe sichern ausgewählte Quellen mit den vorhandenen Zeitplaneinstellungen. Die Ausführung hängt von Betriebssystem, Netzwerk und Sperrstatus ab; unklare Aufträge werden nicht automatisch wiederholt.",
++      "automaticUnsupported": "Automatische S3-Sicherung wird unter Android 7.0/7.1 nicht unterstützt; Android 8 oder höher ist erforderlich. Manuelle Sicherung und Wiederherstellung bleiben verfügbar.",
+       "automaticOn": "Automatische Sicherung aktivieren",
+       "automaticOff": "Automatische Sicherung ausschalten",
+       "copied": "Neue separate Kopie verifiziert: {{name}}. Der ursprüngliche unklare Eintrag bleibt erhalten."

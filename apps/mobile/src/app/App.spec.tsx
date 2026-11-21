@@ -5,6 +5,7 @@ import { nativeRuntime, restoreNativeRuntime } from './native-runtime.fixture';
 import { App } from './App';
 import { loadWebDavSettings, testAndSaveWebDavSettings } from '../shared/api/webdav-settings';
 import { i18n } from '../shared/i18n';
+import { webDavFailure } from '../shared/api/webdav-diagnostics';
 
 jest.mock('../shared/api/webdav-settings', () => ({
   loadWebDavSettings: jest.fn().mockResolvedValue(null),
@@ -84,6 +85,48 @@ describe('App', () => {
       await waitFor(() => expect(surface.getByText(i18n.t('onboarding.storageTested'))).toBeTruthy());
       expect(surface.getByText(i18n.t('onboarding.webdavErrors.webdav_probe_incomplete'))).toBeTruthy();
       await surface.unmount();
+    } finally { await i18n.changeLanguage('tr'); }
+  });
+
+  it.each(['tr', 'en', 'de'])('G24-02/05: shows form hints and only the current failed test diagnostic in %s', async (language) => {
+    await i18n.changeLanguage(language);
+    const listeners: ((state: ReactNative.AppStateStatus) => void)[] = [];
+    jest.spyOn(ReactNative.AppState, 'addEventListener').mockImplementation((_event, listener) => { listeners.push(listener); return { remove: jest.fn() }; });
+    const summary = (stage: string, reason: string, status: number) => i18n.t('onboarding.webdavDiagnostic.summary', {
+      stage: i18n.t(`onboarding.webdavDiagnostic.stages.${stage}`), reason: i18n.t(`onboarding.webdavDiagnostic.reasons.${reason}`, { status }) });
+    const deferred = () => { let reject!: (error: Error) => void; const promise = new Promise<never>((_, fail) => { reject = fail; }); return { promise, reject }; };
+    try {
+      nativeRuntime.loadDirectorySources.mockResolvedValueOnce([{ id: 'source-1', kind: 'directory', displayName: 'Documents' }]);
+      const surface = await renderSetup();
+      await waitFor(() => expect(surface.getByText('Documents')).toBeTruthy());
+      await fireEvent.press(surface.getByText(i18n.t('ui.common.next')));
+      await fireEvent.press(surface.getByText(i18n.t('onboarding.saveSchedule')));
+      await fireEvent.press(surface.getByText(i18n.t('computer.advanced')));
+      for (const key of ['endpoint', 'targetPath', 'security']) expect(surface.getByText(i18n.t(`onboarding.webdavHints.${key}`))).toBeTruthy();
+      expect(surface.getByLabelText(i18n.t('onboarding.endpoint')).props.accessibilityHint).toBe(i18n.t('onboarding.webdavHints.endpoint'));
+      jest.mocked(testAndSaveWebDavSettings).mockRejectedValueOnce(webDavFailure('webdav_connection', { stage: 'propfind', kind: 'http', status: 404 }));
+      await fireEvent.press(surface.getByText(i18n.t('onboarding.testConnection')));
+      await waitFor(() => expect(surface.getByText(summary('propfind', 'not_found', 404))).toBeTruthy());
+      expect(surface.getByText(i18n.t('onboarding.webdavErrors.webdav_connection'))).toBeTruthy();
+      await fireEvent.changeText(surface.getByLabelText(i18n.t('onboarding.targetPath')), 'edited');
+      expect(surface.queryByText(summary('propfind', 'not_found', 404))).toBeNull();
+      const stale = deferred();
+      jest.mocked(testAndSaveWebDavSettings).mockReturnValueOnce(stale.promise);
+      await fireEvent.press(surface.getByText(i18n.t('onboarding.testConnection')));
+      await fireEvent.changeText(surface.getByLabelText(i18n.t('onboarding.targetPath')), 'form-b');
+      await act(async () => { stale.reject(webDavFailure('webdav_probe_incomplete', { stage: 'put', kind: 'http', status: 403 })); await stale.promise.catch(() => undefined); });
+      expect(surface.getByText(i18n.t('onboarding.webdavErrors.webdav_probe_incomplete'))).toBeTruthy();
+      expect(surface.queryByText(summary('put', 'access_denied', 403))).toBeNull();
+      await fireEvent.press(surface.getByText(i18n.t('onboarding.testConnection')));
+      await waitFor(() => expect(surface.getByText(i18n.t('onboarding.storageTested'))).toBeTruthy());
+      expect(surface.getByText(i18n.t('onboarding.webdavErrors.webdav_probe_incomplete'))).toBeTruthy();
+      const background = deferred();
+      jest.mocked(testAndSaveWebDavSettings).mockReturnValueOnce(background.promise);
+      await fireEvent.press(surface.getByText(i18n.t('onboarding.testConnection')));
+      await act(async () => { for (const listener of listeners) listener('background'); });
+      await act(async () => { background.reject(webDavFailure('webdav_connection', { stage: 'propfind', kind: 'transport_unknown' })); await background.promise.catch(() => undefined); });
+      expect(surface.queryByText(i18n.t('onboarding.webdavDiagnostic.reasons.transport_unknown'), { exact: false })).toBeNull();
+      expect(surface.queryByText(i18n.t('onboarding.storageTested'))).toBeNull();
     } finally { await i18n.changeLanguage('tr'); }
   });
 

@@ -1,0 +1,38 @@
+--- docs/implementation/evidence/backlog-2.2-g2-g3/fix-r1/baseline/DesktopBackground.spec.tsx.start	2026-11-18 00:43:11
++++ apps/desktop/src/features/desktop-background/DesktopBackground.spec.tsx	2026-11-18 00:43:27
+@@ -88,6 +88,35 @@
+   expect(trayMenu()).not.toHaveTextContent('2');
+ });
+ 
++it('G23-R1 keeps observed activity independent of the error-priority pill', async () => {
++  vi.useFakeTimers();
++  const fileFailure = { ...initial, receiver: { available: true, activeTransfers: 1 }, backup: { active: false, failed: true } };
++  const { background, update } = fixture(initial);
++  await act(async () => { render(<DesktopBackground settings={false} tray onOpen={vi.fn()} />); });
++  const expectTray = (pill: string, activity: string) => {
++    expect(trayPill()).toHaveTextContent(i18n.t(pill));
++    expect(trayMenu()).toHaveTextContent(i18n.t(activity));
++  };
++  const sequence: [BackgroundStatus, string, string][] = [
++    [fileFailure, 'tray.state.error', 'background.active'],
++    [{ ...fileFailure, backup: { active: false, failed: false } }, 'tray.state.active', 'background.active'],
++    [initial, 'tray.state.listening', 'background.idle'],
++    [{ ...initial, backup: { active: true, failed: false }, receiver: { available: false, activeTransfers: 0, errorCode: 'lan_unavailable' } },
++      'tray.state.error', 'background.active'],
++    [{ ...initial, receiver: { available: true, activeTransfers: 2 }, shutdownError: true }, 'tray.state.error', 'background.active'],
++  ];
++  for (const [next, pill, activity] of sequence) {
++    update(next); await tick();
++    expectTray(pill, activity);
++    if (pill === 'tray.state.error') expect(within(trayMenu()).getAllByRole('alert').length).toBeGreaterThan(0);
++  }
++  background.status.mockRejectedValueOnce(new Error('bridge failed')); await tick();
++  expect(trayPill()).toHaveTextContent(i18n.t('tray.state.unknown'));
++  expect(trayMenu()).not.toHaveTextContent(i18n.t('background.active'));
++  expect(trayMenu()).not.toHaveTextContent(i18n.t('background.idle'));
++  expect(within(trayMenu()).queryByRole('alert')).not.toBeInTheDocument();
++});
++
+ it('G23-02 keeps one poller across tray/settings and ignores replies after unmount', async () => {
+   vi.useFakeTimers();
+   const { background } = fixture(initial);

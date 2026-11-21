@@ -1,0 +1,996 @@
+{
+ "results": [
+  {
+   "lang": "tr",
+   "theme": "light",
+   "headings": [
+    "Ayarlar"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [
+    "<input type=\"checkbox\" style=\"\">"
+   ],
+   "buttons": [
+    {
+     "name": "Kloda’dan çık",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Yerel alıcı dinliyor. Bu, telefonun bilgisayara erişebildiğini doğrulamaz.",
+    "status:Otomatik başlatma etkin değil."
+   ],
+   "calls": [],
+   "name": "settings-tr-light-1440",
+   "surface": "settings",
+   "mode": "light",
+   "width": 1440,
+   "state": "normal"
+  },
+  {
+   "lang": "tr",
+   "theme": "light",
+   "headings": [
+    "Tray menüsü"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [],
+   "buttons": [
+    {
+     "name": "Kloda’yı aç",
+     "disabled": false,
+     "described": null
+    },
+    {
+     "name": "Gelen yedeklemeleri duraklat",
+     "disabled": true,
+     "described": "Bu sürümde duraklatma desteklenmiyor. Bu kontroller hiçbir aktarımı durdurmaz veya bekletmez; Kloda’dan çıkmak alımı ve yedeklemeleri durdurur."
+    },
+    {
+     "name": "Giden yedeklemeleri duraklat",
+     "disabled": true,
+     "described": "Bu sürümde duraklatma desteklenmiyor. Bu kontroller hiçbir aktarımı durdurmaz veya bekletmez; Kloda’dan çıkmak alımı ve yedeklemeleri durdurur."
+    },
+    {
+     "name": "Kloda’dan çık",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Dinliyor"
+   ],
+   "calls": [],
+   "openFocusable": true,
+   "tabAfterOpen": "Kloda’dan çık",
+   "name": "tray-tr-light-1440",
+   "surface": "tray",
+   "mode": "light",
+   "width": 1440,
+   "state": "normal"
+  },
+  {
+   "lang": "tr",
+   "theme": "light",
+   "headings": [
+    "Ayarlar"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [
+    "<input type=\"checkbox\" style=\"\">"
+   ],
+   "buttons": [
+    {
+     "name": "Kloda’dan çık",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Yerel alıcı dinliyor. Bu, telefonun bilgisayara erişebildiğini doğrulamaz.",
+    "alert:Desteklenen doğrudan Wi-Fi veya Ethernet yerel ağ rotası yok.",
+    "status:Bildirim alanı/menü kontrolü bu oturumda doğrulanmadı. Pencere gizlenmez; çıkış düğmesi kullanılabilir. Linux’ta önce Kloda simgesinin menüsünden pencereyi açın.",
+    "status:Otomatik başlatma etkin değil."
+   ],
+   "calls": [],
+   "name": "settings-tr-light-1440-error",
+   "surface": "settings",
+   "mode": "light",
+   "width": 1440,
+   "state": "error"
+  },
+  {
+   "lang": "tr",
+   "theme": "light",
+   "headings": [
+    "Tray menüsü"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [],
+   "buttons": [
+    {
+     "name": "Kloda’yı aç",
+     "disabled": false,
+     "described": null
+    },
+    {
+     "name": "Gelen yedeklemeleri duraklat",
+     "disabled": true,
+     "described": "Bu sürümde duraklatma desteklenmiyor. Bu kontroller hiçbir aktarımı durdurmaz veya bekletmez; Kloda’dan çıkmak alımı ve yedeklemeleri durdurur."
+    },
+    {
+     "name": "Giden yedeklemeleri duraklat",
+     "disabled": true,
+     "described": "Bu sürümde duraklatma desteklenmiyor. Bu kontroller hiçbir aktarımı durdurmaz veya bekletmez; Kloda’dan çıkmak alımı ve yedeklemeleri durdurur."
+    },
+    {
+     "name": "Kloda’dan çık",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Dikkat gerekiyor",
+    "alert:Desteklenen doğrudan Wi-Fi veya Ethernet yerel ağ rotası yok."
+   ],
+   "calls": [],
+   "openFocusable": true,
+   "tabAfterOpen": "Kloda’dan çık",
+   "name": "tray-tr-light-1440-error",
+   "surface": "tray",
+   "mode": "light",
+   "width": 1440,
+   "state": "error"
+  },
+  {
+   "lang": "en",
+   "theme": "light",
+   "headings": [
+    "Settings"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [
+    "<input type=\"checkbox\" style=\"\">"
+   ],
+   "buttons": [
+    {
+     "name": "Quit Kloda",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Local receiver is listening. This does not verify reachability from the phone.",
+    "status:Login start is not enabled."
+   ],
+   "calls": [],
+   "name": "settings-en-light-1440",
+   "surface": "settings",
+   "mode": "light",
+   "width": 1440,
+   "state": "normal"
+  },
+  {
+   "lang": "en",
+   "theme": "light",
+   "headings": [
+    "Tray menu"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [],
+   "buttons": [
+    {
+     "name": "Open Kloda",
+     "disabled": false,
+     "described": null
+    },
+    {
+     "name": "Pause incoming backups",
+     "disabled": true,
+     "described": "Pausing is not supported in this version. These controls do not stop or hold any transfer; quitting Kloda stops receiving and backups."
+    },
+    {
+     "name": "Pause outgoing backups",
+     "disabled": true,
+     "described": "Pausing is not supported in this version. These controls do not stop or hold any transfer; quitting Kloda stops receiving and backups."
+    },
+    {
+     "name": "Quit Kloda",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Listening"
+   ],
+   "calls": [],
+   "openFocusable": true,
+   "tabAfterOpen": "Quit Kloda",
+   "name": "tray-en-light-1440",
+   "surface": "tray",
+   "mode": "light",
+   "width": 1440,
+   "state": "normal"
+  },
+  {
+   "lang": "de",
+   "theme": "light",
+   "headings": [
+    "Einstellungen"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [
+    "<input type=\"checkbox\" style=\"\">"
+   ],
+   "buttons": [
+    {
+     "name": "Kloda beenden",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Der lokale Empfänger lauscht. Die Erreichbarkeit vom Telefon ist damit nicht bestätigt.",
+    "status:Autostart ist nicht aktiviert."
+   ],
+   "calls": [],
+   "name": "settings-de-light-1440",
+   "surface": "settings",
+   "mode": "light",
+   "width": 1440,
+   "state": "normal"
+  },
+  {
+   "lang": "de",
+   "theme": "light",
+   "headings": [
+    "Tray-Menü"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [],
+   "buttons": [
+    {
+     "name": "Kloda öffnen",
+     "disabled": false,
+     "described": null
+    },
+    {
+     "name": "Eingehende Sicherungen pausieren",
+     "disabled": true,
+     "described": "Pausieren wird in dieser Version nicht unterstützt. Diese Steuerungen stoppen oder halten keine Übertragung an; Beenden von Kloda stoppt Empfang und Sicherungen."
+    },
+    {
+     "name": "Ausgehende Sicherungen pausieren",
+     "disabled": true,
+     "described": "Pausieren wird in dieser Version nicht unterstützt. Diese Steuerungen stoppen oder halten keine Übertragung an; Beenden von Kloda stoppt Empfang und Sicherungen."
+    },
+    {
+     "name": "Kloda beenden",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Empfangsbereit"
+   ],
+   "calls": [],
+   "openFocusable": true,
+   "tabAfterOpen": "Kloda beenden",
+   "name": "tray-de-light-1440",
+   "surface": "tray",
+   "mode": "light",
+   "width": 1440,
+   "state": "normal"
+  },
+  {
+   "lang": "tr",
+   "theme": "light",
+   "headings": [
+    "Ayarlar"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [
+    "<input type=\"checkbox\" style=\"\">"
+   ],
+   "buttons": [
+    {
+     "name": "Kloda’dan çık",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Yerel alıcı dinliyor. Bu, telefonun bilgisayara erişebildiğini doğrulamaz.",
+    "status:Otomatik başlatma etkin değil."
+   ],
+   "calls": [],
+   "name": "settings-tr-light-640",
+   "surface": "settings",
+   "mode": "light",
+   "width": 640,
+   "state": "normal"
+  },
+  {
+   "lang": "tr",
+   "theme": "light",
+   "headings": [
+    "Tray menüsü"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [],
+   "buttons": [
+    {
+     "name": "Kloda’yı aç",
+     "disabled": false,
+     "described": null
+    },
+    {
+     "name": "Gelen yedeklemeleri duraklat",
+     "disabled": true,
+     "described": "Bu sürümde duraklatma desteklenmiyor. Bu kontroller hiçbir aktarımı durdurmaz veya bekletmez; Kloda’dan çıkmak alımı ve yedeklemeleri durdurur."
+    },
+    {
+     "name": "Giden yedeklemeleri duraklat",
+     "disabled": true,
+     "described": "Bu sürümde duraklatma desteklenmiyor. Bu kontroller hiçbir aktarımı durdurmaz veya bekletmez; Kloda’dan çıkmak alımı ve yedeklemeleri durdurur."
+    },
+    {
+     "name": "Kloda’dan çık",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Dinliyor"
+   ],
+   "calls": [],
+   "openFocusable": true,
+   "tabAfterOpen": "Kloda’dan çık",
+   "name": "tray-tr-light-640",
+   "surface": "tray",
+   "mode": "light",
+   "width": 640,
+   "state": "normal"
+  },
+  {
+   "lang": "en",
+   "theme": "light",
+   "headings": [
+    "Settings"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [
+    "<input type=\"checkbox\" style=\"\">"
+   ],
+   "buttons": [
+    {
+     "name": "Quit Kloda",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Local receiver is listening. This does not verify reachability from the phone.",
+    "status:Login start is not enabled."
+   ],
+   "calls": [],
+   "name": "settings-en-light-640",
+   "surface": "settings",
+   "mode": "light",
+   "width": 640,
+   "state": "normal"
+  },
+  {
+   "lang": "en",
+   "theme": "light",
+   "headings": [
+    "Tray menu"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [],
+   "buttons": [
+    {
+     "name": "Open Kloda",
+     "disabled": false,
+     "described": null
+    },
+    {
+     "name": "Pause incoming backups",
+     "disabled": true,
+     "described": "Pausing is not supported in this version. These controls do not stop or hold any transfer; quitting Kloda stops receiving and backups."
+    },
+    {
+     "name": "Pause outgoing backups",
+     "disabled": true,
+     "described": "Pausing is not supported in this version. These controls do not stop or hold any transfer; quitting Kloda stops receiving and backups."
+    },
+    {
+     "name": "Quit Kloda",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Listening"
+   ],
+   "calls": [],
+   "openFocusable": true,
+   "tabAfterOpen": "Quit Kloda",
+   "name": "tray-en-light-640",
+   "surface": "tray",
+   "mode": "light",
+   "width": 640,
+   "state": "normal"
+  },
+  {
+   "lang": "de",
+   "theme": "light",
+   "headings": [
+    "Einstellungen"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [
+    "<input type=\"checkbox\" style=\"\">"
+   ],
+   "buttons": [
+    {
+     "name": "Kloda beenden",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Der lokale Empfänger lauscht. Die Erreichbarkeit vom Telefon ist damit nicht bestätigt.",
+    "status:Autostart ist nicht aktiviert."
+   ],
+   "calls": [],
+   "name": "settings-de-light-640",
+   "surface": "settings",
+   "mode": "light",
+   "width": 640,
+   "state": "normal"
+  },
+  {
+   "lang": "de",
+   "theme": "light",
+   "headings": [
+    "Tray-Menü"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [],
+   "buttons": [
+    {
+     "name": "Kloda öffnen",
+     "disabled": false,
+     "described": null
+    },
+    {
+     "name": "Eingehende Sicherungen pausieren",
+     "disabled": true,
+     "described": "Pausieren wird in dieser Version nicht unterstützt. Diese Steuerungen stoppen oder halten keine Übertragung an; Beenden von Kloda stoppt Empfang und Sicherungen."
+    },
+    {
+     "name": "Ausgehende Sicherungen pausieren",
+     "disabled": true,
+     "described": "Pausieren wird in dieser Version nicht unterstützt. Diese Steuerungen stoppen oder halten keine Übertragung an; Beenden von Kloda stoppt Empfang und Sicherungen."
+    },
+    {
+     "name": "Kloda beenden",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Empfangsbereit"
+   ],
+   "calls": [],
+   "openFocusable": true,
+   "tabAfterOpen": "Kloda beenden",
+   "name": "tray-de-light-640",
+   "surface": "tray",
+   "mode": "light",
+   "width": 640,
+   "state": "normal"
+  },
+  {
+   "lang": "tr",
+   "theme": "dark",
+   "headings": [
+    "Ayarlar"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [
+    "<input type=\"checkbox\" style=\"\">"
+   ],
+   "buttons": [
+    {
+     "name": "Kloda’dan çık",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Yerel alıcı dinliyor. Bu, telefonun bilgisayara erişebildiğini doğrulamaz.",
+    "status:Otomatik başlatma etkin değil."
+   ],
+   "calls": [],
+   "name": "settings-tr-dark-1440",
+   "surface": "settings",
+   "mode": "dark",
+   "width": 1440,
+   "state": "normal"
+  },
+  {
+   "lang": "tr",
+   "theme": "dark",
+   "headings": [
+    "Tray menüsü"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [],
+   "buttons": [
+    {
+     "name": "Kloda’yı aç",
+     "disabled": false,
+     "described": null
+    },
+    {
+     "name": "Gelen yedeklemeleri duraklat",
+     "disabled": true,
+     "described": "Bu sürümde duraklatma desteklenmiyor. Bu kontroller hiçbir aktarımı durdurmaz veya bekletmez; Kloda’dan çıkmak alımı ve yedeklemeleri durdurur."
+    },
+    {
+     "name": "Giden yedeklemeleri duraklat",
+     "disabled": true,
+     "described": "Bu sürümde duraklatma desteklenmiyor. Bu kontroller hiçbir aktarımı durdurmaz veya bekletmez; Kloda’dan çıkmak alımı ve yedeklemeleri durdurur."
+    },
+    {
+     "name": "Kloda’dan çık",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Dinliyor"
+   ],
+   "calls": [],
+   "openFocusable": true,
+   "tabAfterOpen": "Kloda’dan çık",
+   "name": "tray-tr-dark-1440",
+   "surface": "tray",
+   "mode": "dark",
+   "width": 1440,
+   "state": "normal"
+  },
+  {
+   "lang": "en",
+   "theme": "dark",
+   "headings": [
+    "Settings"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [
+    "<input type=\"checkbox\" style=\"\">"
+   ],
+   "buttons": [
+    {
+     "name": "Quit Kloda",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Local receiver is listening. This does not verify reachability from the phone.",
+    "status:Login start is not enabled."
+   ],
+   "calls": [],
+   "name": "settings-en-dark-1440",
+   "surface": "settings",
+   "mode": "dark",
+   "width": 1440,
+   "state": "normal"
+  },
+  {
+   "lang": "en",
+   "theme": "dark",
+   "headings": [
+    "Tray menu"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [],
+   "buttons": [
+    {
+     "name": "Open Kloda",
+     "disabled": false,
+     "described": null
+    },
+    {
+     "name": "Pause incoming backups",
+     "disabled": true,
+     "described": "Pausing is not supported in this version. These controls do not stop or hold any transfer; quitting Kloda stops receiving and backups."
+    },
+    {
+     "name": "Pause outgoing backups",
+     "disabled": true,
+     "described": "Pausing is not supported in this version. These controls do not stop or hold any transfer; quitting Kloda stops receiving and backups."
+    },
+    {
+     "name": "Quit Kloda",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Listening"
+   ],
+   "calls": [],
+   "openFocusable": true,
+   "tabAfterOpen": "Quit Kloda",
+   "name": "tray-en-dark-1440",
+   "surface": "tray",
+   "mode": "dark",
+   "width": 1440,
+   "state": "normal"
+  },
+  {
+   "lang": "de",
+   "theme": "dark",
+   "headings": [
+    "Einstellungen"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [
+    "<input type=\"checkbox\" style=\"\">"
+   ],
+   "buttons": [
+    {
+     "name": "Kloda beenden",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Der lokale Empfänger lauscht. Die Erreichbarkeit vom Telefon ist damit nicht bestätigt.",
+    "status:Autostart ist nicht aktiviert."
+   ],
+   "calls": [],
+   "name": "settings-de-dark-1440",
+   "surface": "settings",
+   "mode": "dark",
+   "width": 1440,
+   "state": "normal"
+  },
+  {
+   "lang": "de",
+   "theme": "dark",
+   "headings": [
+    "Tray-Menü"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [],
+   "buttons": [
+    {
+     "name": "Kloda öffnen",
+     "disabled": false,
+     "described": null
+    },
+    {
+     "name": "Eingehende Sicherungen pausieren",
+     "disabled": true,
+     "described": "Pausieren wird in dieser Version nicht unterstützt. Diese Steuerungen stoppen oder halten keine Übertragung an; Beenden von Kloda stoppt Empfang und Sicherungen."
+    },
+    {
+     "name": "Ausgehende Sicherungen pausieren",
+     "disabled": true,
+     "described": "Pausieren wird in dieser Version nicht unterstützt. Diese Steuerungen stoppen oder halten keine Übertragung an; Beenden von Kloda stoppt Empfang und Sicherungen."
+    },
+    {
+     "name": "Kloda beenden",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Empfangsbereit"
+   ],
+   "calls": [],
+   "openFocusable": true,
+   "tabAfterOpen": "Kloda beenden",
+   "name": "tray-de-dark-1440",
+   "surface": "tray",
+   "mode": "dark",
+   "width": 1440,
+   "state": "normal"
+  },
+  {
+   "lang": "tr",
+   "theme": "dark",
+   "headings": [
+    "Ayarlar"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [
+    "<input type=\"checkbox\" style=\"\">"
+   ],
+   "buttons": [
+    {
+     "name": "Kloda’dan çık",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Yerel alıcı dinliyor. Bu, telefonun bilgisayara erişebildiğini doğrulamaz.",
+    "status:Otomatik başlatma etkin değil."
+   ],
+   "calls": [],
+   "name": "settings-tr-dark-640",
+   "surface": "settings",
+   "mode": "dark",
+   "width": 640,
+   "state": "normal"
+  },
+  {
+   "lang": "tr",
+   "theme": "dark",
+   "headings": [
+    "Tray menüsü"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [],
+   "buttons": [
+    {
+     "name": "Kloda’yı aç",
+     "disabled": false,
+     "described": null
+    },
+    {
+     "name": "Gelen yedeklemeleri duraklat",
+     "disabled": true,
+     "described": "Bu sürümde duraklatma desteklenmiyor. Bu kontroller hiçbir aktarımı durdurmaz veya bekletmez; Kloda’dan çıkmak alımı ve yedeklemeleri durdurur."
+    },
+    {
+     "name": "Giden yedeklemeleri duraklat",
+     "disabled": true,
+     "described": "Bu sürümde duraklatma desteklenmiyor. Bu kontroller hiçbir aktarımı durdurmaz veya bekletmez; Kloda’dan çıkmak alımı ve yedeklemeleri durdurur."
+    },
+    {
+     "name": "Kloda’dan çık",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Dinliyor"
+   ],
+   "calls": [],
+   "openFocusable": true,
+   "tabAfterOpen": "Kloda’dan çık",
+   "name": "tray-tr-dark-640",
+   "surface": "tray",
+   "mode": "dark",
+   "width": 640,
+   "state": "normal"
+  },
+  {
+   "lang": "en",
+   "theme": "dark",
+   "headings": [
+    "Settings"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [
+    "<input type=\"checkbox\" style=\"\">"
+   ],
+   "buttons": [
+    {
+     "name": "Quit Kloda",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Local receiver is listening. This does not verify reachability from the phone.",
+    "status:Login start is not enabled."
+   ],
+   "calls": [],
+   "name": "settings-en-dark-640",
+   "surface": "settings",
+   "mode": "dark",
+   "width": 640,
+   "state": "normal"
+  },
+  {
+   "lang": "en",
+   "theme": "dark",
+   "headings": [
+    "Tray menu"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [],
+   "buttons": [
+    {
+     "name": "Open Kloda",
+     "disabled": false,
+     "described": null
+    },
+    {
+     "name": "Pause incoming backups",
+     "disabled": true,
+     "described": "Pausing is not supported in this version. These controls do not stop or hold any transfer; quitting Kloda stops receiving and backups."
+    },
+    {
+     "name": "Pause outgoing backups",
+     "disabled": true,
+     "described": "Pausing is not supported in this version. These controls do not stop or hold any transfer; quitting Kloda stops receiving and backups."
+    },
+    {
+     "name": "Quit Kloda",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Listening"
+   ],
+   "calls": [],
+   "openFocusable": true,
+   "tabAfterOpen": "Quit Kloda",
+   "name": "tray-en-dark-640",
+   "surface": "tray",
+   "mode": "dark",
+   "width": 640,
+   "state": "normal"
+  },
+  {
+   "lang": "de",
+   "theme": "dark",
+   "headings": [
+    "Einstellungen"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [
+    "<input type=\"checkbox\" style=\"\">"
+   ],
+   "buttons": [
+    {
+     "name": "Kloda beenden",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Der lokale Empfänger lauscht. Die Erreichbarkeit vom Telefon ist damit nicht bestätigt.",
+    "status:Autostart ist nicht aktiviert."
+   ],
+   "calls": [],
+   "name": "settings-de-dark-640",
+   "surface": "settings",
+   "mode": "dark",
+   "width": 640,
+   "state": "normal"
+  },
+  {
+   "lang": "de",
+   "theme": "dark",
+   "headings": [
+    "Tray-Menü"
+   ],
+   "pageOverflow": false,
+   "clippedChildren": 0,
+   "childrenOutsideCard": 0,
+   "inlineStyles": 0,
+   "styled": [],
+   "buttons": [
+    {
+     "name": "Kloda öffnen",
+     "disabled": false,
+     "described": null
+    },
+    {
+     "name": "Eingehende Sicherungen pausieren",
+     "disabled": true,
+     "described": "Pausieren wird in dieser Version nicht unterstützt. Diese Steuerungen stoppen oder halten keine Übertragung an; Beenden von Kloda stoppt Empfang und Sicherungen."
+    },
+    {
+     "name": "Ausgehende Sicherungen pausieren",
+     "disabled": true,
+     "described": "Pausieren wird in dieser Version nicht unterstützt. Diese Steuerungen stoppen oder halten keine Übertragung an; Beenden von Kloda stoppt Empfang und Sicherungen."
+    },
+    {
+     "name": "Kloda beenden",
+     "disabled": false,
+     "described": null
+    }
+   ],
+   "status": [
+    "status:Empfangsbereit"
+   ],
+   "calls": [],
+   "openFocusable": true,
+   "tabAfterOpen": "Kloda beenden",
+   "name": "tray-de-dark-640",
+   "surface": "tray",
+   "mode": "dark",
+   "width": 640,
+   "state": "normal"
+  }
+ ],
+ "consoleErrors": []
+}

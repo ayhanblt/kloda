@@ -1,0 +1,7 @@
+23,24d22
+<   // Same real page as 'settings'; the entry scrolls it to the end and reports the measured offset.
+<   'settings-bottom': { page: 'settings', render: () => <SettingsPage navigate={inert} /> },
+30c28
+< export const scrollToEndScreens: readonly string[] = ['settings-bottom'];
+---
+> export const scrollToEndScreens: readonly string[] = [];

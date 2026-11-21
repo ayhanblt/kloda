@@ -2,6 +2,7 @@ import { fetch as nativeFetch } from 'expo/fetch';
 import * as SecureStore from 'expo-secure-store';
 import { testWebDavWriteAccess } from './webdav';
 import { backupDestinations } from './backup-destinations';
+import { webDavDiagnostic } from './webdav-diagnostics';
 import { loadWebDavSettings, testAndSaveWebDavSettings, enableSavedWebDavBackup } from './webdav-settings';
 
 jest.mock('./backup-destinations', () => ({ backupDestinations: { disable: jest.fn().mockResolvedValue({ configured: false, enabled: false, running: false }), enable: jest.fn().mockResolvedValue({ configured: true, enabled: true, running: false }) } }));
@@ -57,6 +58,26 @@ it('invalidates the old test before retesting and keeps its whole old context on
   expect(JSON.parse([...memory.values()][0]).storage).toEqual(storage);
 });
 
+it('G24-03: a PROPFIND 404 or transport rejection keeps the old profile untested, mutates nothing and exposes only safe metadata', async () => {
+  await testAndSaveWebDavSettings(storage, () => true);
+  const changed = { ...storage, targetPath: 'missing', password: 'another-secret' };
+  network.mockImplementation(async () => response(404));
+  const http = await testAndSaveWebDavSettings(changed, () => true).catch((error: unknown) => error);
+  expect(http).toEqual(new Error('webdav_connection'));
+  expect(webDavDiagnostic(http)).toEqual({ stage: 'propfind', kind: 'http', status: 404 });
+  network.mockClear();
+  network.mockRejectedValue(new Error('TLS handshake fixture.example/dav public-test-secret'));
+  const transport = await testAndSaveWebDavSettings(changed, () => true).catch((error: unknown) => error);
+  expect(transport).toEqual(new Error('webdav_connection'));
+  expect(webDavDiagnostic(transport)).toEqual({ stage: 'propfind', kind: 'transport_unknown' });
+  expect(network.mock.calls.map(([, init]) => init?.method)).toEqual(['PROPFIND']);
+  for (const diagnostic of [webDavDiagnostic(http), webDavDiagnostic(transport)]) {
+    expect(JSON.stringify(diagnostic)).not.toMatch(/secret|fixture|dav|missing|Kloda|TLS/);
+  }
+  expect(await loadWebDavSettings()).toMatchObject({ config: { targetPath: storage.targetPath }, testedAt: null, probeWarning: false });
+  expect(JSON.parse([...memory.values()][0]).storage).toEqual(storage);
+});
+
 it.each([
   { endpoint: 'http://fixture.example' }, { endpoint: 'https://user:pass@fixture.example' },
   { endpoint: 'https://fixture.example?token=x' }, { endpoint: 'https://fixture.example#x' },
@@ -72,6 +93,43 @@ it.each(['MKCOL', 'PUT', 'MOVE', 'GET', 'DELETE'])('rejects partial/incorrect %s
   expect(await loadWebDavSettings()).toMatchObject({ testedAt: null, probeWarning: true });
   const methods = network.mock.calls.map(([, init]) => init?.method);
   expect(methods[methods.length - 1]).toBe(method);
+});
+
+function failAt(method: string, nth: number, outcome: number | Error) {
+  let seen = 0;
+  network.mockImplementation(async (_url, init) => {
+    if (init?.method === method && ++seen === nth) { if (outcome instanceof Error) throw outcome; return response(outcome); }
+    return response(init?.method === 'PROPFIND' ? 207 : init?.method === 'GET' ? 200 : init?.method === 'DELETE' ? 204 : 201);
+  });
+}
+
+it.each([
+  ['MKCOL', 1, 'mkcol'], ['PUT', 1, 'put'], ['MOVE', 1, 'move'], ['GET', 1, 'get'], ['DELETE', 1, 'delete_file'], ['DELETE', 2, 'delete_directory'],
+] as const)('G24-04: %s #%i failure reports only the last observed stage/status and keeps the uncertainty warning', async (method, nth, stage) => {
+  failAt(method, nth, 409);
+  const http = await testAndSaveWebDavSettings(storage, () => true).catch((error: unknown) => error);
+  expect(http).toEqual(new Error('webdav_probe_incomplete'));
+  expect(webDavDiagnostic(http)).toEqual({ stage, kind: 'http', status: 409 });
+  expect(await loadWebDavSettings()).toMatchObject({ testedAt: null, probeWarning: true });
+  failAt(method, nth, new Error('socket reset public-test-secret https://fixture.example/dav/Kloda/'));
+  const transport = await testWebDavWriteAccess(storage).catch((error: unknown) => error);
+  expect(transport).toEqual(new Error('webdav_probe_incomplete'));
+  expect(webDavDiagnostic(transport)).toEqual({ stage, kind: 'transport_unknown' });
+  expect(JSON.stringify(webDavDiagnostic(transport))).not.toMatch(/secret|fixture|reset/);
+});
+
+it('G24-04: readback mismatch and cancellation are distinct; cancellation shows no server diagnostic', async () => {
+  network.mockImplementation(async (_url, init) => response(init?.method === 'PROPFIND' ? 207 : init?.method === 'GET' ? 200 : 201, 'other'));
+  const mismatch = await testWebDavWriteAccess(storage).catch((error: unknown) => error);
+  expect(webDavDiagnostic(mismatch)).toEqual({ stage: 'get', kind: 'readback_mismatch' });
+  const controller = new AbortController();
+  network.mockImplementation(async (_url, init) => {
+    if (init?.method === 'PUT') { controller.abort(); throw new Error('aborted'); }
+    return response(init?.method === 'PROPFIND' ? 207 : 201);
+  });
+  const cancelled = await testWebDavWriteAccess(storage, controller.signal).catch((error: unknown) => error);
+  expect(cancelled).toEqual(new Error('webdav_cancelled_probe'));
+  expect(webDavDiagnostic(cancelled)).toBeUndefined();
 });
 
 it('preserves ambiguous MOVE outcomes instead of blindly deleting or adopting', async () => {

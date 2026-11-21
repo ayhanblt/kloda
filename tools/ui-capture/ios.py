@@ -1,0 +1,361 @@
+"""iOS native-entry adapter: disposable fixture bundle, run-created Simulator, supervised Metro.
+
+Real product components and native modules run inside a fixture bundle whose only Keychain
+group is its own identifier, on a Simulator this run creates and deletes. Existing Simulators,
+apps, containers and Keychains are never adopted. This is not production signing acceptance.
+"""
+import http.client
+import http.server
+import json
+import os
+import secrets
+import socket
+import subprocess
+import threading
+import time
+import urllib.parse
+
+from common import CaptureError, png_info, sha256_file
+from ios_build import FIXTURE_KEYS, verify_fixture
+from supervision import critical, exited, stop_owned
+
+SIZES = {'normal': 'large', 'large': 'accessibility-extra-extra-extra-large'}
+METRO_READY_S, PHASE_S, SIMCTL_S, BOOT_S, INSTALL_S = 90, 60, 60, 240, 180
+LAUNCH_ARGS = ['-EXDevMenuIsOnboardingFinished', '1', '-EXDevMenuShowsAtLaunch', '0']
+
+
+def new_phase(run_id, index, cell, extra=None):
+    return {'runID': run_id, 'phase': index, 'nonce': secrets.token_hex(16), **cell, **(extra or {})}
+
+
+def match_report(expected, report):
+    """A report is current only when runID, phase index and nonce all equal the live phase."""
+    if not isinstance(report, dict) or expected is None:
+        return False
+    return all(report.get(key) == expected.get(key) for key in ('runID', 'phase', 'nonce'))
+
+
+REPORT_KEYS = frozenset(('runID', 'phase', 'nonce', 'probe', 'screen', 'language', 'themeMode', 'fontScale',
+                         'fontsLoaded', 'fontError', 'appState', 'layoutReady', 'width', 'height', 'scroll', 'scrollNote'))
+SCROLL_END_SCREENS = frozenset(('settings-bottom',))
+MAX_REPORT_BYTES = 8192
+
+
+class PhaseServer:
+    """Loopback rendezvous: serves the live phase; keeps only reports for that exact phase.
+
+    Each phase carries a probe token. `reprobe()` replaces it after a screenshot; a report that
+    echoes the new token was measured from a phase fetched after the screenshot finished, so a
+    delayed earlier report of the same phase can never stand in for it."""
+
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._phase, self.reports, self.stale = None, [], 0
+        owner = self
+
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def log_message(self, *args):
+                pass
+
+            def _reply(self, code, body=b'{}'):
+                self.send_response(code)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(body)
+
+            def do_GET(self):
+                if self.path != '/phase':
+                    return self._reply(404)
+                with owner._lock:
+                    body = json.dumps(owner._phase or {}).encode()
+                return self._reply(200, body)
+
+            def do_POST(self):
+                length = int(self.headers.get('Content-Length') or 0)
+                if self.path != '/report' or not 0 < length <= MAX_REPORT_BYTES:
+                    return self._reply(400)
+                try:
+                    report = json.loads(self.rfile.read(length))
+                except ValueError:
+                    return self._reply(400)
+                owner.offer(report)
+                return self._reply(200)
+
+        self._server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+        self.port = self._server.server_address[1]
+        threading.Thread(target=self._server.serve_forever, daemon=True).start()
+
+    def offer(self, report):
+        with self._lock:
+            valid = isinstance(report, dict) and set(report) == REPORT_KEYS and isinstance(report['probe'], str)
+            if valid and match_report(self._phase, report):
+                self.reports.append(report)
+            else:
+                self.stale += 1
+
+    def announce(self, phase):
+        with self._lock:
+            self._phase = phase and {**phase, 'probe': secrets.token_hex(16)}
+            self.reports = []
+            return self._phase and self._phase['probe']
+
+    def reprobe(self):
+        with self._lock:
+            self._phase = {**self._phase, 'probe': secrets.token_hex(16)}
+            return self._phase['probe']
+
+    def latest(self, probe=None):
+        with self._lock:
+            found = [r for r in self.reports if probe is None or r['probe'] == probe]
+            return found[-1] if found else None
+
+    def close(self):
+        self.announce(None)
+        self._server.shutdown()
+        self._server.server_close()
+
+
+def simctl(*argv, check=True, timeout=SIMCTL_S):
+    return subprocess.run(['xcrun', 'simctl', *argv], capture_output=True, text=True, check=check, timeout=timeout)
+
+
+def resolve_owned_device(simulator, listing):
+    """('none'|'absent'|'owned'|'ambiguous', udid|reason) from the run record only."""
+    if not simulator:
+        return 'none', None
+    devices = [dict(d, runtime=rt) for rt, items in listing.get('devices', {}).items() for d in items]
+    if simulator.get('udid'):
+        found = [d for d in devices if d['udid'] == simulator['udid']]
+        if not found:
+            return 'absent', None
+        if found[0]['name'] != simulator['name']:
+            return 'ambiguous', 'recorded UDID now has a different name'
+        return 'owned', found[0]['udid']
+    found = [d for d in devices if d['name'] == simulator['name'] and d['runtime'] == simulator['runtime']
+             and d.get('deviceTypeIdentifier') == simulator['deviceType']]
+    if not found:
+        return 'absent', None
+    return ('owned', found[0]['udid']) if len(found) == 1 else ('ambiguous', f'{len(found)} intent matches')
+
+
+def report_problems(cell, screen, report):
+    if not report:
+        return ['no current-phase report']
+    problems = [f'{key} {report.get(key)!r} != {want!r}' for key, want in
+                (('screen', screen), ('language', cell.locale), ('themeMode', cell.theme),
+                 ('fontsLoaded', True), ('fontError', False), ('appState', 'active'), ('layoutReady', True))
+                if report.get(key) != want]
+    scale = report.get('fontScale') or 0
+    if (cell.size == 'large' and scale <= 1.5) or (cell.size == 'normal' and abs(scale - 1.0) > 0.01):
+        problems.append(f'fontScale {scale} does not match size {cell.size}')
+    if not (report.get('width') or 0) > 0 < (report.get('height') or 0):
+        problems.append('no positive layout size')
+    problems += [f'{p} ({report.get("scrollNote")})' if p == 'no scroll measurement' else p
+                 for p in scroll_problems(screen, report.get('scroll'))]
+    return problems
+
+
+def scroll_problems(screen, scroll):
+    """Scroll-to-end screens need a measured settled end state; every other screen reports none."""
+    if screen not in SCROLL_END_SCREENS:
+        return [] if scroll is None else ['unexpected scroll measurement']
+    keys = ('offset', 'content', 'visible')
+    if not isinstance(scroll, dict) or set(scroll) != {*keys, 'atEnd'}:
+        return ['no scroll measurement']
+    if not all(isinstance(scroll[k], (int, float)) and not isinstance(scroll[k], bool) for k in keys):
+        return ['invalid scroll measurement']
+    if scroll['atEnd'] is not True or scroll['offset'] <= 0 or scroll['content'] <= scroll['visible'] \
+            or scroll['offset'] + scroll['visible'] < scroll['content'] - 1:
+        return [f"settings not scrolled to the end ({scroll['offset']}+{scroll['visible']} of {scroll['content']})"]
+    return []
+
+
+def png_problems(size, report):
+    """The PNG must be a complete image of the measured screen (same aspect, at least 1x)."""
+    if size is None:
+        return ['missing or invalid PNG']
+    width, height = (report or {}).get('width') or 0, (report or {}).get('height') or 0
+    if width <= 0 or height <= 0 or size[0] < width or abs(size[0] * height - size[1] * width) > size[0]:
+        return [f'PNG {size[0]}x{size[1]} does not match measured screen {width}x{height}']
+    return []
+
+
+def free_port():
+    with socket.socket() as sock:
+        sock.bind(('127.0.0.1', 0))
+        return sock.getsockname()[1]
+
+
+def _fetch(conn, target, outcome):
+    try:
+        conn.request('GET', target)
+        response = conn.getresponse()
+        outcome['status'] = response.status
+        while response.read(1 << 16):
+            pass
+        outcome['done'] = time.monotonic()
+    except (OSError, http.client.HTTPException) as error:
+        outcome['error'] = error
+
+
+def wait_bundle(url, metro, limit=None):
+    """The whole bundle, EOF included, must arrive before one absolute deadline. The download runs
+    in a worker whose socket is shut down at the deadline; Metro exit is seen without reaping."""
+    limit = METRO_READY_S if limit is None else limit
+    deadline, parts = time.monotonic() + limit, urllib.parse.urlsplit(url)
+    while deadline - time.monotonic() > 0:
+        if exited(metro):
+            raise CaptureError('Metro exited before the bundle was ready')
+        conn, outcome = http.client.HTTPConnection(parts.hostname, parts.port, timeout=limit), {}
+        worker = threading.Thread(target=_fetch, args=(conn, f'{parts.path}?{parts.query}', outcome), daemon=True)
+        worker.start()
+        worker.join(max(0, deadline - time.monotonic()))
+        if worker.is_alive() and conn.sock is not None:
+            try:
+                conn.sock.shutdown(socket.SHUT_RDWR)  # aborts a download still running at the deadline
+            except OSError:
+                pass
+        if not worker.is_alive() and outcome.get('status') == 200 and outcome.get('done', deadline + 1) <= deadline:
+            return
+        if worker.is_alive():
+            break
+        time.sleep(min(1, max(0, deadline - time.monotonic())))
+    raise CaptureError(f'Metro bundle not complete within {limit}s')
+
+
+def simulator_listing():
+    return json.loads(simctl('list', 'devices', '-j').stdout)
+
+
+def _target_problem(opts):
+    runtimes = json.loads(simctl('list', 'runtimes', '-j').stdout)['runtimes']
+    types = json.loads(simctl('list', 'devicetypes', '-j').stdout)['devicetypes']
+    if not any(r['identifier'] == opts['runtime'] and r.get('isAvailable') for r in runtimes):
+        return f'runtime not installed: {opts["runtime"]}'
+    if not any(t['identifier'] == opts['deviceType'] for t in types):
+        return f'device type not installed: {opts["deviceType"]}'
+    return None
+
+
+def capture(run, repo, cells, rows, opts):
+    fixture, problem = verify_fixture(repo, opts['fixture'])
+    problem = problem or _target_problem(opts)
+    if problem:
+        for cell in cells:
+            run.set_cell(cell.id, 'BLOCKED', reason=problem)
+        return
+    run.record['provenance']['fixture'] = {k: fixture[k] for k in FIXTURE_KEYS}
+    sim = run.record['simulator'] = {'name': f'Kloda-Capture25-{run.record["runID"]}', 'runtime': opts['runtime'],
+                                     'deviceType': opts['deviceType'], 'udid': None}
+    run.advance('CREATING')
+    with critical():
+        sim['udid'] = simctl('create', sim['name'], opts['deviceType'], opts['runtime']).stdout.strip()
+        run.advance('CREATED')
+    simctl('boot', sim['udid'])
+    simctl('bootstatus', sim['udid'], '-b', timeout=BOOT_S)
+    run.record['settings'] = {key: simctl('ui', sim['udid'], key).stdout.strip() for key in ('appearance', 'content_size')}
+    server = run.live['server'] = PhaseServer()
+    port = free_port()
+    url = f'http://localhost:{port}/apps/mobile/capture/entry.bundle?platform=ios&dev=true&minify=false'
+    env = {**os.environ, 'CI': '1', 'EXPO_PUBLIC_KLODA_CAPTURE_PORT': str(server.port),
+           'EXPO_PUBLIC_KLODA_CAPTURE_RUN': run.record['runID']}
+    log = run.live['metroLog'] = open(run.path('metro.log'), 'w')
+    metro = run.spawn('metro', ['npx', 'expo', 'start', '--dev-client', '--localhost', '--port', str(port)],
+                      cwd=repo / 'apps/mobile', env=env, stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT)
+    run.advance('RUNNING')
+    wait_bundle(url, metro)
+    simctl('install', sim['udid'], fixture['app'], timeout=INSTALL_S)
+    simctl('launch', sim['udid'], fixture['bundle'], '--initialUrl', url, *LAUNCH_ARGS)
+    for index, cell in enumerate(cells, 1):
+        _capture_cell(run, sim['udid'], server, index, cell, rows[cell.row]['screen'])
+    run.record['provenance']['staleReports'] = server.stale
+
+
+def _await_report(server, cell, screen, probe):
+    """Wait for a passing report that echoes exactly this probe token."""
+    deadline, report, problems = time.monotonic() + PHASE_S, None, ['no current-phase report']
+    while time.monotonic() < deadline:
+        latest = server.latest(probe)
+        if latest:
+            report, problems = latest, report_problems(cell, screen, latest)
+            if not problems:
+                break
+        time.sleep(0.25)
+    return report, problems
+
+
+def _capture_cell(run, udid, server, index, cell, screen):
+    simctl('ui', udid, 'appearance', cell.theme)
+    simctl('ui', udid, 'content_size', SIZES[cell.size])
+    probe = server.announce(new_phase(run.record['runID'], index, {'screen': screen, 'locale': cell.locale,
+                                                                   'theme': cell.theme, 'size': cell.size}))
+    base = {'screen': screen, 'driverKind': 'native-component-fixture'}
+    before, problems = _await_report(server, cell, screen, probe)
+    if problems:
+        return run.set_cell(cell.id, 'FAIL', reasons=problems, measure=before, **base)
+    name = cell.id.replace('/', '__') + '.png'
+    target = run.path(name)
+    simctl('io', udid, 'screenshot', str(target))
+    size = png_info(target)
+    # A new probe is issued only after the screenshot completed; a report echoing it was measured
+    # from a phase fetched afterwards, so the state shown held across the screenshot.
+    after, problems = _await_report(server, cell, screen, server.reprobe())
+    problems = problems + png_problems(size, after or before)
+    run.set_cell(cell.id, 'FAIL' if problems else 'PASS', reasons=problems, png=name, pngSize=size,
+                 pngSha256=sha256_file(target) if size else None, measure=after, before=before, **base)
+
+
+def _try(*argv):
+    try:
+        return simctl(*argv, check=False).returncode == 0
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
+def cleanup(run):
+    run.begin_cleanup()
+    server = run.live.pop('server', None)
+    if server:
+        server.announce(None)
+    sim = run.record.get('simulator')
+    try:
+        state, udid = resolve_owned_device(sim, simulator_listing())
+    except (OSError, subprocess.SubprocessError, ValueError) as error:
+        state, udid = 'ambiguous', f'simctl listing failed: {error}'
+    if state == 'owned':
+        bundle = run.record['provenance'].get('fixture', {}).get('bundle')
+        if bundle:
+            run.cleanup_step('app:terminated', True, None if _try('terminate', udid, bundle) else 'not running')
+        for key, value in run.record.get('settings', {}).items():
+            run.cleanup_step(f'restore:{key}', _try('ui', udid, key, value))
+    for entry in run.record['processes']:
+        stop_owned(run, entry)
+    if run.live.get('metroLog'):
+        run.live.pop('metroLog').close()
+    if server:
+        server.close()
+        run.cleanup_step('phase-server:closed', True)
+    if state == 'owned':
+        _try('shutdown', udid)
+        deleted = _try('delete', udid)
+        try:
+            gone = resolve_owned_device(sim, simulator_listing())[0] == 'absent'
+        except (OSError, subprocess.SubprocessError, ValueError):
+            gone = False
+        run.cleanup_step('simulator:deleted', deleted and gone, None if gone else 'device still listed')
+    elif state == 'ambiguous':
+        run.cleanup_step('simulator:ownership', False, udid)
+    else:
+        run.cleanup_step('simulator:none-owned-present', True)
+
+
+def resume_problems(repo, run, cell, _row, old):
+    fixture, problem = verify_fixture(repo, run.record['selection']['args']['fixture'])
+    if problem:
+        return [problem]
+    recorded = run.record['provenance'].get('fixture', {})
+    if any(fixture[key] != recorded.get(key) for key in FIXTURE_KEYS):
+        return ['fixture identity changed']
+    measure = old.get('measure') or {}
+    size = tuple(old['pngSize']) if old.get('pngSize') else None
+    return report_problems(cell, old.get('screen'), measure) + png_problems(size, measure)

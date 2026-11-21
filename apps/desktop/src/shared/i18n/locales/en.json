@@ -71,6 +71,44 @@
     "sourceRequired": "Select at least one folder.",
     "scheduleError": "Unable to save schedule.",
     "testError": "WebDAV test failed.",
+    "webdavHints": {
+      "endpoint": "Enter the full HTTPS address including the port (if any) and the server's WebDAV root. Example: https://server.example:8083/webdav/",
+      "targetPath": "A subfolder under that WebDAV root which must already exist and be accessible; Kloda does not create it. Example: Kloda → https://server.example:8083/webdav/Kloda/",
+      "security": "Only HTTPS with a certificate trusted by the operating system and Basic sign-in is supported. The test writes, reads back and deletes its own temporary data only."
+    },
+    "webdavDiagnostic": {
+      "summary": "Failed step: {{stage}}. {{reason}}",
+      "stages": {
+        "propfind": "Folder access check (PROPFIND)",
+        "mkcol": "Creating the temporary test folder (MKCOL)",
+        "put": "Writing the test file (PUT)",
+        "move": "Finalizing the test file (MOVE)",
+        "get": "Reading the test file back (GET)",
+        "delete_file": "Deleting the test file (DELETE)",
+        "delete_directory": "Deleting the temporary test folder (DELETE)"
+      },
+      "reasons": {
+        "access_denied": "The server denied access (HTTP {{status}}).",
+        "not_found": "The folder or path could not be verified as accessible (HTTP {{status}}).",
+        "method_rejected": "The server rejected this method (HTTP {{status}}).",
+        "http_other": "The server returned HTTP {{status}}.",
+        "transport_unknown": "The connection failed without a usable server response. The exact cause (network, DNS, TLS or timeout) cannot be determined from this test.",
+        "readback_mismatch": "The read-back content did not match what was written."
+      }
+    },
+    "testErrors": {
+      "connection_unavailable": "The server is unreachable or temporarily unavailable.",
+      "access_denied": "The server denied access.",
+      "storage_full": "The storage is full.",
+      "review_required": "The result is uncertain. Temporary Kloda test data may remain and needs review.",
+      "configuration_required": "The endpoint or settings are invalid; the address must use HTTPS.",
+      "settings_changed": "The settings changed during the test. Test again.",
+      "interrupted": "The test was interrupted.",
+      "retry_exhausted": "The retry limit was reached.",
+      "backup_busy": "Another backup operation is busy.",
+      "source_changed": "A source changed during the test.",
+      "unknown": "The connection test failed."
+    },
     "startError": "Backup could not start."
   },
   "pairing": {
@@ -130,7 +168,7 @@
     "approve": "Approve local trust",
     "deny": "Deny this phone",
     "repairTitle": "Pair this revoked phone again?",
-    "repairDescription": "Previous local trust for this exact phone key was revoked. Pair again establishes new device trust only; it does not clear existing file denies or grant file access.",
+    "repairDescription": "The phone has already explicitly agreed to pair again. Your approval here is still required. It creates new device trust only, does not clear existing file denies and grants no file access.",
     "pairAgain": "Pair again",
     "resume": "Resume pairing",
     "resumeDescription": "Pairing is not complete. Resume explicitly requests recovery of the retained record on a fresh authenticated LAN connection. No automatic network retry is started.",
@@ -212,7 +250,13 @@
       "unavailable": "Operating system login-start status could not be read.",
       "external_entry": "Another startup entry was found and was not overwritten.",
       "desktop_policy": "The XDG startup entry is configured; Linux desktop policy may still prevent launch."
-    }
+    },
+    "closeBehavior": "When the window is closed",
+    "closeHides": "Kloda hides the window and keeps receiving. Reopen it from the system tray or menu bar.",
+    "closeStaysVisible": "The window stays open because a tray or menu control has not been verified in this session.",
+    "closeAutomatic": "Determined automatically from the observed tray/menu control; this is not a separate preference.",
+    "version": "Version",
+    "versionUnknown": "Unknown"
   },
   "incoming": {
     "navigation": "Incoming",
@@ -364,7 +408,7 @@
     "providerUnavailable": "The actual connection for this provider is not implemented yet.",
     "providerFuture": "Connection options are shown as part of the design. This screen does not sign in to an account or start a transfer.",
     "connectionFields": "Connection fields",
-    "trayDescription": "On supported systems Kloda can be reopened from the system tray or menu bar. The actual receiver and quit controls are above. A visible window is retained if the environment has no tray support.",
+    "trayDescription": "On supported systems Kloda can be reopened from the system tray or menu bar. The actual tray menu offers the same Open and Quit controls shown below. A visible window is retained if the environment has no tray support.",
     "brand": "Kloda",
     "home": "Home",
     "receiverGroup": "Receiver",
@@ -434,9 +478,26 @@
     }
   },
   "appearance": {
+    "general": "General",
     "title": "Appearance",
     "dark": "Dark",
     "light": "Light",
-    "system": "System"
+    "system": "System",
+    "systemHint": "When System is selected, your device's light/dark setting is followed."
+  },
+  "tray": {
+    "menuLabel": "Kloda tray menu",
+    "open": "Open Kloda",
+    "pauseIncoming": "Pause incoming backups",
+    "pauseOutgoing": "Pause outgoing backups",
+    "pauseUnavailable": "Pausing is not supported in this version. These controls do not stop or hold any transfer; quitting Kloda stops receiving and backups.",
+    "state": {
+      "error": "Needs attention",
+      "unknown": "Status unknown",
+      "checking": "Checking",
+      "active": "Active",
+      "listening": "Listening",
+      "unavailable": "Unavailable"
+    }
   }
 }

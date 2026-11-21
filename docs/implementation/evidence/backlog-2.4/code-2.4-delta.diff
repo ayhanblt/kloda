@@ -1,0 +1,1040 @@
+--- a/apps/desktop/electron/main.ts
++++ b/apps/desktop/electron/main.ts
+@@ -5,6 +5,7 @@
+ import { DesktopSyncJournal } from './runtime/journal.js';
+ import { ElectronScheduleAdapter } from './runtime/scheduler.js';
+ import { registerWebDavHandlers } from './runtime/webdav-ipc.js';
++import { storageTestReply } from './runtime/webdav-test-result.js';
+ import { DesktopSyncRuntime } from './runtime/runtime.js';
+ import { bindPairingWindow, closeNativePairing, receiverStatus, registerPairingHandlers, startNativeReceiver } from './runtime/pairing.js';
+ import { desktopDisplayName, initializeDesktopProfile } from './runtime/desktop-profile.js';
+@@ -83,7 +84,7 @@
+     if (!isStorageForm(storage)) throw new Error('Invalid storage payload.');
+     return runtime.saveStorage(storage);
+   });
+-  handle('kloda:test-storage', () => runtime.testStorage());
++  handle('kloda:test-storage', () => storageTestReply(() => runtime.testStorage()));
+   handle('kloda:start-sync', () => runtime.startSync());
+ }
+ 
+--- a/apps/desktop/electron/runtime/webdav-errors.ts
++++ b/apps/desktop/electron/runtime/webdav-errors.ts
+@@ -2,13 +2,28 @@
+   | 'connection_unavailable' | 'access_denied' | 'storage_full' | 'source_changed' | 'review_required'
+   | 'configuration_required' | 'settings_changed' | 'interrupted' | 'retry_exhausted' | 'backup_busy' | 'unknown';
+ 
++export type WebDavDiagnosticStage = 'propfind' | 'mkcol' | 'put' | 'move' | 'get' | 'delete_file' | 'delete_directory';
++// Connection-test presentation only; never a retry input and never copied without the safe projection.
++export type WebDavDiagnostic =
++  | { stage: WebDavDiagnosticStage; kind: 'http'; status: number }
++  | { stage: WebDavDiagnosticStage; kind: 'transport_unknown' | 'readback_mismatch' };
++
+ export class WebDavFailure extends Error {
+-  constructor(readonly code: WebDavFailureCode, message: string = code, options?: ErrorOptions) {
++  readonly diagnostic?: WebDavDiagnostic;
++  constructor(readonly code: WebDavFailureCode, message: string = code, options?: ErrorOptions & { diagnostic?: WebDavDiagnostic }) {
+     super(message, options);
+     this.name = 'WebDavFailure';
++    if (options?.diagnostic) this.diagnostic = options.diagnostic;
+   }
+ }
+ 
++// Attaches the observed probe boundary once; code, message and cause stay unchanged.
++export function atStage(failure: WebDavFailure, stage: WebDavDiagnosticStage, status?: number): WebDavFailure {
++  if (failure.diagnostic) return failure;
++  const diagnostic: WebDavDiagnostic = status === undefined ? { stage, kind: 'transport_unknown' } : { stage, kind: 'http', status };
++  return new WebDavFailure(failure.code, failure.message, { cause: failure.cause, diagnostic });
++}
++
+ export function failureCode(error: unknown): WebDavFailureCode {
+   const visited = new Set<unknown>();
+   let current = error;
+--- a/apps/desktop/electron/runtime/webdav.ts
++++ b/apps/desktop/electron/runtime/webdav.ts
+@@ -1,7 +1,7 @@
+ import { createHash, randomUUID } from 'node:crypto';
+ 
+ import type { StorageForm } from './types.js';
+-import { httpFailure, networkFailure, WebDavFailure } from './webdav-errors.js';
++import { atStage, httpFailure, networkFailure, WebDavFailure, type WebDavDiagnosticStage } from './webdav-errors.js';
+ 
+ export class NodeWebDavClient {
+   private readonly preparedDirectories = new Set<string>();
+@@ -17,29 +17,35 @@
+     let finalized = false;
+     let operationFailure: unknown;
+ 
+-    const directory = await this.request(baseUrl, 'PROPFIND', { Depth: '0' });
+-    if (!directory.ok && directory.status !== 207) throw httpFailure(directory.status, `WebDAV directory access failed (${directory.status}).`);
++    let directory: Response;
++    try { directory = await this.request(baseUrl, 'PROPFIND', { Depth: '0' }); }
++    catch (reason) { throw reason instanceof WebDavFailure ? atStage(reason, 'propfind') : reason; }
++    if (!directory.ok && directory.status !== 207) throw atStage(httpFailure(directory.status, `WebDAV directory access failed (${directory.status}).`), 'propfind', directory.status);
+ 
+     let createProbeDirectory: Response;
+     try { createProbeDirectory = await this.request(probeDirectoryUrl, 'MKCOL'); }
+-    catch (cause) { throw new WebDavFailure('review_required', 'WebDAV probe directory creation result is uncertain.', { cause }); }
+-    if (!createProbeDirectory.ok) throw httpFailure(createProbeDirectory.status, `WebDAV probe directory creation failed (${createProbeDirectory.status}).`);
++    catch (cause) { throw atStage(new WebDavFailure('review_required', 'WebDAV probe directory creation result is uncertain.', { cause }), 'mkcol'); }
++    if (!createProbeDirectory.ok) throw atStage(httpFailure(createProbeDirectory.status, `WebDAV probe directory creation failed (${createProbeDirectory.status}).`), 'mkcol', createProbeDirectory.status);
++    // Diagnostic stage of the request in flight; it never influences classification or cleanup.
++    let stage: WebDavDiagnosticStage = 'put';
+     try {
+       const upload = await this.probeMutation(uploadUrl, 'PUT', { 'Content-Type': 'text/plain' }, probePayload);
+-      if (!upload.ok) throw httpFailure(upload.status, `WebDAV write failed (${upload.status}).`);
++      if (!upload.ok) throw atStage(httpFailure(upload.status, `WebDAV write failed (${upload.status}).`), stage, upload.status);
+       uploaded = true;
+ 
++      stage = 'move';
+       const move = await this.probeMutation(uploadUrl, 'MOVE', { Destination: finalUrl.toString(), Overwrite: 'F' });
+-      if (!move.ok) throw httpFailure(move.status, `WebDAV finalize failed (${move.status}).`);
++      if (!move.ok) throw atStage(httpFailure(move.status, `WebDAV finalize failed (${move.status}).`), stage, move.status);
+       finalized = true;
+ 
++      stage = 'get';
+       const read = await this.request(finalUrl, 'GET');
+-      if (!read.ok) throw httpFailure(read.status, 'WebDAV read-back verification failed.');
++      if (!read.ok) throw atStage(httpFailure(read.status, 'WebDAV read-back verification failed.'), stage, read.status);
+       let text: string;
+       try { text = await read.text(); } catch (cause) { throw networkFailure(cause); }
+-      if (text !== probePayload) throw new WebDavFailure('review_required', 'WebDAV read-back verification failed.');
++      if (text !== probePayload) throw new WebDavFailure('review_required', 'WebDAV read-back verification failed.', { diagnostic: { stage, kind: 'readback_mismatch' } });
+     } catch (reason) {
+-      operationFailure = reason;
++      operationFailure = reason instanceof WebDavFailure ? atStage(reason, stage) : reason;
+     }
+ 
+     const cleanupFailure = await this.cleanupProbe(finalized ? finalUrl : uploaded ? uploadUrl : undefined, probeDirectoryUrl);
+@@ -115,15 +121,17 @@
+   }
+ 
+   private async cleanupProbe(fileUrl: URL | undefined, directoryUrl: URL): Promise<Error | undefined> {
++    let stage: WebDavDiagnosticStage = 'delete_file';
+     try {
+       if (fileUrl) {
+         const cleanupFile = await this.request(fileUrl, 'DELETE');
+-        if (!cleanupFile.ok && cleanupFile.status !== 404) return new WebDavFailure('review_required', `WebDAV probe file cleanup failed (${cleanupFile.status}).`);
++        if (!cleanupFile.ok && cleanupFile.status !== 404) return atStage(new WebDavFailure('review_required', `WebDAV probe file cleanup failed (${cleanupFile.status}).`), stage, cleanupFile.status);
+       }
++      stage = 'delete_directory';
+       const cleanupDirectory = await this.request(directoryUrl, 'DELETE');
+-      if (!cleanupDirectory.ok && cleanupDirectory.status !== 404) return new WebDavFailure('review_required', `WebDAV probe directory cleanup failed (${cleanupDirectory.status}).`);
++      if (!cleanupDirectory.ok && cleanupDirectory.status !== 404) return atStage(new WebDavFailure('review_required', `WebDAV probe directory cleanup failed (${cleanupDirectory.status}).`), stage, cleanupDirectory.status);
+     } catch (reason) {
+-      return new WebDavFailure('review_required', 'WebDAV probe cleanup result is uncertain.', { cause: reason });
++      return atStage(new WebDavFailure('review_required', 'WebDAV probe cleanup result is uncertain.', { cause: reason }), stage);
+     }
+     return undefined;
+   }
+--- a/apps/desktop/src/app/App.spec.tsx
++++ b/apps/desktop/src/app/App.spec.tsx
+@@ -57,7 +57,7 @@
+       }),
+       getProgress: vi.fn().mockResolvedValue(null), pickSources: vi.fn(),
+       saveSchedule: vi.fn().mockResolvedValue(undefined), saveStorage: vi.fn().mockResolvedValue(undefined),
+-      testStorage: vi.fn().mockReturnValueOnce(pendingTest).mockResolvedValue(undefined), startSync: vi.fn(),
++      testStorage: vi.fn().mockReturnValueOnce(pendingTest).mockResolvedValue({ ok: true }), startSync: vi.fn(),
+     };
+     render(<App />);
+     await screen.findByText('Documents');
+--- a/apps/desktop/src/pages/backup/BackupSetup.tsx
++++ b/apps/desktop/src/pages/backup/BackupSetup.tsx
+@@ -4,6 +4,7 @@
+ import { WebDavActivity } from './WebDavActivity';
+ 
+ import { getDesktopBridge, type BackupDraft, type SyncProgress } from '../../shared/api/desktop';
++import { diagnosticReasonKey, parseStorageTestResult, type StorageTestDiagnostic } from '../../shared/api/webdav-test-result';
+ 
+ const emptyDraft: BackupDraft = {
+   intervalHours: 12,
+@@ -25,6 +26,7 @@
+     previousActivity.current = showActivity;
+   }, [visible, showActivity]);
+   const [error, setError] = useState<string | null>(null);
++  const [diagnostic, setDiagnostic] = useState<StorageTestDiagnostic | null>(null);
+   const [progress, setProgress] = useState<SyncProgress | null>(null);
+   const progressVersion = useRef(0);
+   const storageVersion = useRef(0);
+@@ -39,7 +41,7 @@
+       setProgress(snapshot);
+       if (nextDraft.storage) setStorage((current) => ({ ...current, ...nextDraft.storage }));
+       if (snapshot && nextDraft.storageTested && nextDraft.sources.length > 0) setStep('activity');
+-    }).catch((reason: unknown) => setError(reason instanceof Error ? reason.message : t('onboarding.loadError')));
++    }).catch(() => setError(t('onboarding.loadError')));
+   }, []);
+ 
+   useEffect(() => {
+@@ -67,7 +69,7 @@
+       const sources = await getDesktopBridge().pickSources();
+       setDraft((current) => ({ ...current, sources }));
+       setError(null);
+-    } catch (reason) { setError(reason instanceof Error ? reason.message : t('onboarding.selectError')); }
++    } catch { setError(t('onboarding.selectError')); }
+   };
+ 
+   const continueToStorage = async () => {
+@@ -76,7 +78,7 @@
+       await getDesktopBridge().saveSchedule(draft.intervalHours, draft.localTime);
+       setStep('storage');
+       setError(null);
+-    } catch (reason) { setError(reason instanceof Error ? reason.message : t('onboarding.scheduleError')); }
++    } catch { setError(t('onboarding.scheduleError')); }
+   };
+ 
+   const editStorage = (field: keyof typeof storage, value: string) => {
+@@ -84,20 +86,24 @@
+     setStorage((current) => ({ ...current, [field]: value }));
+     setDraft((current) => ({ ...current, storageTested: false }));
+     setError(null);
++    setDiagnostic(null);
+   };
+ 
+   const testStorage = async () => {
+     const version = ++storageVersion.current;
+     setDraft((current) => ({ ...current, storageTested: false }));
+     setError(null);
++    setDiagnostic(null);
+     try {
+       await getDesktopBridge().saveStorage(storage);
+       if (version !== storageVersion.current) return;
+-      await getDesktopBridge().testStorage();
++      const result = parseStorageTestResult(await getDesktopBridge().testStorage());
+       if (version !== storageVersion.current) return;
+-      setDraft((current) => ({ ...current, storageTested: true }));
+-    } catch (reason) {
+-      if (version === storageVersion.current) setError(reason instanceof Error ? reason.message : t('onboarding.testError'));
++      if (result.ok) return setDraft((current) => ({ ...current, storageTested: true }));
++      setError(t(`onboarding.testErrors.${result.code}`));
++      setDiagnostic(result.diagnostic ?? null);
++    } catch {
++      if (version === storageVersion.current) setError(t('onboarding.testError'));
+     }
+   };
+ 
+@@ -110,10 +116,10 @@
+       if (version !== progressVersion.current) return;
+       progressVersion.current += 1;
+       setProgress(next);
+-    } catch (reason) {
++    } catch {
+       if (version !== progressVersion.current) return;
+       const failedVersion = ++progressVersion.current;
+-      setError(reason instanceof Error ? reason.message : t('onboarding.startError'));
++      setError(t('onboarding.startError'));
+       void getDesktopBridge().getProgress().then((snapshot) => {
+         if (failedVersion === progressVersion.current) setProgress(snapshot);
+       }, () => {
+@@ -144,14 +150,16 @@
+         <>
+           <h1 className="mt-4 text-3xl font-bold">{t('onboarding.storageTitle')}</h1>
+           <p className="mt-2 text-secondary-text">{t('onboarding.storageDescription')}</p>
+-          <div className="mt-6 grid gap-3">{(['endpoint', 'targetPath', 'username', 'password'] as const).map((field) => <label className="grid gap-1 capitalize" key={field}>{t(`onboarding.${field}`)}<input aria-label={t(`onboarding.${field}`)} className="rounded-lg border border-border-subtle bg-surface-1 p-3" onChange={(event) => editStorage(field, event.target.value)} type={field === 'password' ? 'password' : 'text'} value={storage[field]} /></label>)}</div>
++          <div className="mt-6 grid gap-3">{(['endpoint', 'targetPath', 'username', 'password'] as const).map((field) => <label className="grid gap-1 capitalize" key={field}>{t(`onboarding.${field}`)}<input aria-describedby={field === 'endpoint' || field === 'targetPath' ? `desktop-webdav-hint-${field}` : undefined} aria-label={t(`onboarding.${field}`)} className="rounded-lg border border-border-subtle bg-surface-1 p-3" onChange={(event) => editStorage(field, event.target.value)} type={field === 'password' ? 'password' : 'text'} value={storage[field]} />{(field === 'endpoint' || field === 'targetPath') && <span className="text-sm normal-case text-secondary-text" id={`desktop-webdav-hint-${field}`}>{t(`onboarding.webdavHints.${field}`)}</span>}</label>)}</div>
++          <p className="mt-3 text-sm text-secondary-text">{t('onboarding.webdavHints.security')}</p>
+           <button className="mt-6 rounded-xl border border-border-subtle bg-surface-1 px-4 py-3 font-semibold" onClick={() => void testStorage()} type="button">{t('onboarding.testConnection')}</button>
+           {draft.storageTested && <p className="mt-3 text-emerald-700" role="status">{t('onboarding.verified')}</p>}
+           <button className="mt-3 rounded-xl bg-button-brand px-4 py-3 font-semibold text-on-brand disabled:opacity-40" disabled={!draft.storageTested} onClick={() => void startSync()} type="button">{t('onboarding.startBackup')}</button>
+-          <button className="mt-3 text-secondary-text underline" onClick={() => setStep('sources')} type="button">{t('onboarding.back')}</button>
++          <button className="mt-3 text-secondary-text underline" onClick={() => { setDiagnostic(null); setStep('sources'); }} type="button">{t('onboarding.back')}</button>
+         </>
+       )}
+       {error && <p className="mt-4 text-danger-text" role="alert">{error}</p>}
++      {error && diagnostic && <p className="mt-2 text-sm text-danger-text">{t('onboarding.webdavDiagnostic.summary', { reason: t(`onboarding.webdavDiagnostic.reasons.${diagnosticReasonKey(diagnostic)}`, { status: diagnostic.kind === 'http' ? diagnostic.status : undefined }), stage: t(`onboarding.webdavDiagnostic.stages.${diagnostic.stage}`) })}</p>}
+     </main>
+   );
+ }
+--- a/apps/desktop/src/pages/pairing/PairingPage.spec.tsx
++++ b/apps/desktop/src/pages/pairing/PairingPage.spec.tsx
+@@ -116,7 +116,19 @@
+     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+     expect(screen.getByText(i18n.t('pairing.phaseDescriptions.invalid'))).toBeInTheDocument();
+     expect(screen.queryByText(i18n.t('pairing.phases.complete'))).not.toBeInTheDocument();
++    expect(bridge.approve).not.toHaveBeenCalled();
++  });
++
++  it.each(['tr', 'en', 'de'])('G24-01: repair copy keeps phone consent, Desktop approval and file grants separate in %s', async (language) => {
++    await i18n.changeLanguage(language);
++    const { bridge } = nativeStatus({ ...reserved, repairRequired: true });
++    render(<PairingPage />);
++    const dialog = await screen.findByRole('dialog', { name: i18n.t('pairing.repairTitle') });
++    expect(within(dialog).getByText(i18n.t('pairing.repairDescription'))).toBeInTheDocument();
++    expect(within(dialog).getByRole('button', { name: i18n.t('pairing.pairAgain') })).toBeEnabled();
++    expect(dialog.textContent).not.toMatch(/pairing\./);
+     expect(bridge.approve).not.toHaveBeenCalled();
++    await i18n.changeLanguage('tr');
+   });
+ 
+   it('replaces stale candidate consent and does not turn a rejected old generation into trust', async () => {
+--- a/apps/desktop/src/shared/api/desktop.ts
++++ b/apps/desktop/src/shared/api/desktop.ts
+@@ -138,7 +138,7 @@
+       saveSchedule(intervalHours: 12 | 24, localTime: string): Promise<void>;
+       saveStorage(storage: { endpoint: string; password: string; targetPath: string; username: string }): Promise<void>;
+       startSync(): Promise<SyncProgress>;
+-      testStorage(): Promise<void>;
++      testStorage(): Promise<unknown>;
+     };
+   }
+ }
+--- a/apps/mobile/src/app/App.spec.tsx
++++ b/apps/mobile/src/app/App.spec.tsx
+@@ -5,6 +5,7 @@
+ import { App } from './App';
+ import { loadWebDavSettings, testAndSaveWebDavSettings } from '../shared/api/webdav-settings';
+ import { i18n } from '../shared/i18n';
++import { webDavFailure } from '../shared/api/webdav-diagnostics';
+ 
+ jest.mock('../shared/api/webdav-settings', () => ({
+   loadWebDavSettings: jest.fn().mockResolvedValue(null),
+@@ -87,6 +88,48 @@
+     } finally { await i18n.changeLanguage('tr'); }
+   });
+ 
++  it.each(['tr', 'en', 'de'])('G24-02/05: shows form hints and only the current failed test diagnostic in %s', async (language) => {
++    await i18n.changeLanguage(language);
++    const listeners: ((state: ReactNative.AppStateStatus) => void)[] = [];
++    jest.spyOn(ReactNative.AppState, 'addEventListener').mockImplementation((_event, listener) => { listeners.push(listener); return { remove: jest.fn() }; });
++    const summary = (stage: string, reason: string, status: number) => i18n.t('onboarding.webdavDiagnostic.summary', {
++      stage: i18n.t(`onboarding.webdavDiagnostic.stages.${stage}`), reason: i18n.t(`onboarding.webdavDiagnostic.reasons.${reason}`, { status }) });
++    const deferred = () => { let reject!: (error: Error) => void; const promise = new Promise<never>((_, fail) => { reject = fail; }); return { promise, reject }; };
++    try {
++      nativeRuntime.loadDirectorySources.mockResolvedValueOnce([{ id: 'source-1', kind: 'directory', displayName: 'Documents' }]);
++      const surface = await renderSetup();
++      await waitFor(() => expect(surface.getByText('Documents')).toBeTruthy());
++      await fireEvent.press(surface.getByText(i18n.t('ui.common.next')));
++      await fireEvent.press(surface.getByText(i18n.t('onboarding.saveSchedule')));
++      await fireEvent.press(surface.getByText(i18n.t('computer.advanced')));
++      for (const key of ['endpoint', 'targetPath', 'security']) expect(surface.getByText(i18n.t(`onboarding.webdavHints.${key}`))).toBeTruthy();
++      expect(surface.getByLabelText(i18n.t('onboarding.endpoint')).props.accessibilityHint).toBe(i18n.t('onboarding.webdavHints.endpoint'));
++      jest.mocked(testAndSaveWebDavSettings).mockRejectedValueOnce(webDavFailure('webdav_connection', { stage: 'propfind', kind: 'http', status: 404 }));
++      await fireEvent.press(surface.getByText(i18n.t('onboarding.testConnection')));
++      await waitFor(() => expect(surface.getByText(summary('propfind', 'not_found', 404))).toBeTruthy());
++      expect(surface.getByText(i18n.t('onboarding.webdavErrors.webdav_connection'))).toBeTruthy();
++      await fireEvent.changeText(surface.getByLabelText(i18n.t('onboarding.targetPath')), 'edited');
++      expect(surface.queryByText(summary('propfind', 'not_found', 404))).toBeNull();
++      const stale = deferred();
++      jest.mocked(testAndSaveWebDavSettings).mockReturnValueOnce(stale.promise);
++      await fireEvent.press(surface.getByText(i18n.t('onboarding.testConnection')));
++      await fireEvent.changeText(surface.getByLabelText(i18n.t('onboarding.targetPath')), 'form-b');
++      await act(async () => { stale.reject(webDavFailure('webdav_probe_incomplete', { stage: 'put', kind: 'http', status: 403 })); await stale.promise.catch(() => undefined); });
++      expect(surface.getByText(i18n.t('onboarding.webdavErrors.webdav_probe_incomplete'))).toBeTruthy();
++      expect(surface.queryByText(summary('put', 'access_denied', 403))).toBeNull();
++      await fireEvent.press(surface.getByText(i18n.t('onboarding.testConnection')));
++      await waitFor(() => expect(surface.getByText(i18n.t('onboarding.storageTested'))).toBeTruthy());
++      expect(surface.getByText(i18n.t('onboarding.webdavErrors.webdav_probe_incomplete'))).toBeTruthy();
++      const background = deferred();
++      jest.mocked(testAndSaveWebDavSettings).mockReturnValueOnce(background.promise);
++      await fireEvent.press(surface.getByText(i18n.t('onboarding.testConnection')));
++      await act(async () => { for (const listener of listeners) listener('background'); });
++      await act(async () => { background.reject(webDavFailure('webdav_connection', { stage: 'propfind', kind: 'transport_unknown' })); await background.promise.catch(() => undefined); });
++      expect(surface.queryByText(i18n.t('onboarding.webdavDiagnostic.reasons.transport_unknown'), { exact: false })).toBeNull();
++      expect(surface.queryByText(i18n.t('onboarding.storageTested'))).toBeNull();
++    } finally { await i18n.changeLanguage('tr'); }
++  });
++
+   it('lets the user save a 24-hour preference without claiming scheduling is active', async () => {
+     const { getByText } = await renderSetup();
+     await fireEvent.press(getByText(i18n.t('ui.common.next')));
+--- a/apps/mobile/src/features/backup-setup/model/use-backup-setup.ts
++++ b/apps/mobile/src/features/backup-setup/model/use-backup-setup.ts
+@@ -5,6 +5,7 @@
+ import type { NativeDirectorySource, NativePhotoAlbum, NativePhotoSource, NativeSchedule, NativeSourceAccess, NativeStorageConfig } from '../../../../modules/my-module/src/KlodaSyncRuntimeModule';
+ import { loadWebDavSettings, testAndSaveWebDavSettings } from '../../../shared/api/webdav-settings';
+ import type { MobileStorageForm } from '../../../shared/api/webdav';
++import { webDavDiagnostic, type WebDavDiagnostic } from '../../../shared/api/webdav-diagnostics';
+ 
+ interface NativeScheduleRuntime {
+   loadDirectorySources(): Promise<NativeDirectorySource[]>;
+@@ -38,6 +39,8 @@
+   const [savedStorage, setSavedStorage] = useState<Omit<MobileStorageForm, 'password'> | null>(null);
+   const [storageTested, setStorageTested] = useState(false);
+   const [storageWarning, setStorageWarning] = useState(false);
++  // RAM-only detail of the current failed test; never reconstructed on reopen.
++  const [storageDiagnostic, setStorageDiagnostic] = useState<WebDavDiagnostic | null>(null);
+   const storageVersion = useRef(0);
+   const testingStorage = useRef(false);
+   const [storageTesting, setStorageTesting] = useState(false);
+@@ -66,7 +69,7 @@
+ 
+   useEffect(() => {
+     const listener = AppState.addEventListener('change', (state) => {
+-      if (state !== 'active') { storageVersion.current += 1; storageAbort.current?.abort(); setStorageTested(false); }
++      if (state !== 'active') { storageVersion.current += 1; storageAbort.current?.abort(); setStorageTested(false); setStorageDiagnostic(null); }
+     });
+     return () => { storageVersion.current += 1; storageAbort.current?.abort(); listener.remove(); };
+   }, []);
+@@ -133,6 +136,7 @@
+     storageAbort.current?.abort();
+     setStorage((current) => ({ ...current, [field]: value }));
+     setStorageTested(false);
++    setStorageDiagnostic(null);
+     setMessage(null);
+   };
+ 
+@@ -143,6 +147,7 @@
+     const version = ++storageVersion.current;
+     const controller = new AbortController(); storageAbort.current = controller;
+     setStorageTested(false);
++    setStorageDiagnostic(null);
+     setMessage(null);
+     try {
+       const saved = await testAndSaveWebDavSettings(storage, () => version === storageVersion.current, controller.signal);
+@@ -154,14 +159,15 @@
+       if (uncertain) setStorageWarning(true);
+       if (version === storageVersion.current) {
+         setStorageTested(false);
++        setStorageDiagnostic(webDavDiagnostic(error) ?? null);
+         setMessage(uncertain ? null : t(`onboarding.webdavErrors.${error instanceof Error ? error.message : 'webdav_connection'}`, { defaultValue: t('onboarding.testError') }));
+       }
+     } finally { testingStorage.current = false; setStorageTesting(false); if (storageAbort.current === controller) storageAbort.current = null; }
+   };
+ 
+-  const leaveStorage = () => { storageVersion.current += 1; storageAbort.current?.abort(); setStorageTested(false); };
++  const leaveStorage = () => { storageVersion.current += 1; storageAbort.current?.abort(); setStorageTested(false); setStorageDiagnostic(null); };
+   return { backupMode, setBackupMode, intervalHours, setIntervalHours, localTime, setLocalTime,
+-    sources, message, photoAlbums, sourceAccess, storage, storageTested, storageWarning, storageTesting, savedStorage,
++    sources, message, photoAlbums, sourceAccess, storage, storageTested, storageWarning, storageDiagnostic, storageTesting, savedStorage,
+     sourceAction, selectDirectory, selectPhotoLibrary, removeSource, loadPhotoAlbums, selectPhotoAlbum,
+     saveSchedule, editStorage, testStorage, leaveStorage,
+     supportsLive: !!runtime?.saveLiveSchedule, supportsPhotos: !!runtime?.selectPhotoLibrary,
+--- a/apps/mobile/src/features/pairing/ui/pairing-modal.tsx
++++ b/apps/mobile/src/features/pairing/ui/pairing-modal.tsx
+@@ -29,6 +29,9 @@
+   const generation = status?.candidateGeneration;
+   const canDecide = repair && !!operationId && !!generation && !!status?.peerFingerprint && !action && !uncertain;
+   const phase = status?.phase ?? 'connecting';
++  // An in-flight repair decision must not keep reading as the instruction to decide.
++  const deciding = repair && (action === 'approve' || action === 'deny');
++  const copy = action === 'remove' ? 'pairing.unpair' : deciding ? 'pairing.repairWorking' : null;
+ 
+   return (
+     <ModalSurface entering={FadeIn.duration(180)} className="absolute inset-0 z-20 justify-center p-6" accessibilityViewIsModal importantForAccessibility="yes">
+@@ -36,8 +39,8 @@
+       <View className="max-h-[95%] overflow-hidden rounded-2xl bg-background">
+         <ScrollView contentContainerClassName="gap-4 p-6">
+           <ShieldAlert color={colors['attention-base']} size={32} />
+-          <Text accessibilityRole="header" className="text-[22px] font-inter-semibold leading-7 text-primary-text">{t(action === 'remove' ? 'pairing.unpair.title' : repair ? 'pairing.repairTitle' : uncertain ? 'pairing.unknownTitle' : `pairing.phases.${phase}.title`)}</Text>
+-          <Text className="font-sans text-sm leading-5 text-secondary-text">{t(action === 'remove' ? 'pairing.unpair.description' : repair ? 'pairing.repairDescription' : uncertain ? 'pairing.unknownDescription' : `pairing.phases.${phase}.description`)}</Text>
++          <Text accessibilityRole="header" className="text-[22px] font-inter-semibold leading-7 text-primary-text">{t(copy ? `${copy}.title` : repair ? 'pairing.repairTitle' : uncertain ? 'pairing.unknownTitle' : `pairing.phases.${phase}.title`)}</Text>
++          <Text className="font-sans text-sm leading-5 text-secondary-text">{t(copy ? `${copy}.description` : repair ? 'pairing.repairDescription' : uncertain ? 'pairing.unknownDescription' : `pairing.phases.${phase}.description`)}</Text>
+           {status?.peerFingerprint && (
+             <View className="gap-2 rounded-xl border border-border-subtle p-3">
+               <Text className="text-xs font-inter-medium text-secondary-text">{t('pairing.peerFingerprint')}</Text>
+--- a/apps/mobile/src/pages/activity/ui/activity-automatic.spec.tsx
++++ b/apps/mobile/src/pages/activity/ui/activity-automatic.spec.tsx
+@@ -36,6 +36,24 @@
+ });
+ 
+ 
++it('G24-07: os_interrupted and WebDAV auth refusal keep their own states and claim no exact cause in all three languages', async () => {
++  try {
++    for (const language of ['tr', 'en', 'de']) {
++      await i18n.changeLanguage(language);
++      jest.mocked(fileTransfer.status).mockResolvedValue({ running: false, jobs: [], totalJobs: '0', hasMore: false,
++        run: { id: 'run-1', recordId: 'AAAAAAAAAAAAAAAAAAAAAA', attempts: 1, state: 'failed', errorCode: 'webdav_auth' },
++        automaticRun: { attempts: 3, accessAttempts: 1, state: 'waiting', updated: 0, errorCode: 'os_interrupted' } });
++      const surface = await render(<ActivityPage onBack={() => undefined} />);
++      await waitFor(() => expect(surface.getByText(i18n.t('transfer.errors.os_interrupted'))).toBeTruthy());
++      expect(surface.getByText(i18n.t('transfer.osStates.waiting'))).toBeTruthy();
++      expect(surface.queryByText(i18n.t('transfer.retryWaiting'))).toBeNull();
++      expect(surface.getByText(i18n.t('transfer.errors.webdav_auth'))).toBeTruthy();
++      expect(surface.queryByText(/transfer\./)).toBeNull();
++      await surface.unmount();
++    }
++  } finally { await i18n.changeLanguage('tr'); }
++});
++
+ it.each([{ fontScale: 1, height: 852 }, { fontScale: 2.643, height: 852 }, { fontScale: 1, height: 393 }])('keeps headers and actions reachable with $fontScale font and $height height', async ({ fontScale, height }) => {
+   const original = Native.Dimensions.get('window');
+   await act(async () => { Native.Dimensions.set({ window: { width: 393, height, scale: 3, fontScale } }); });
+--- a/apps/mobile/src/pages/pairing/ui/pairing-page.spec.tsx
++++ b/apps/mobile/src/pages/pairing/ui/pairing-page.spec.tsx
+@@ -38,3 +38,24 @@
+   expect(surface.queryByText(i18n.t('computer.continue'))).toBeNull();
+   await surface.unmount();
+ });
++
++it.each(['tr', 'en', 'de'])('G24-01: repair approval in flight reads as working, not as a new instruction, in %s', async (language) => {
++  await i18n.changeLanguage(language);
++  try {
++    mockSnapshot = { status: { phase: 'connecting', repairRequired: true, operationId: 'operation-1', candidateGeneration: 'generation-1',
++      peerFingerprint: 'fixture-pc' }, error: null, uncertain: false, action: null, scanLocked: true };
++    const idle = await render(<PairingPage onBack={jest.fn()} onContinue={jest.fn()} />);
++    expect(idle.getByText(i18n.t('pairing.repairDescription'))).toBeTruthy();
++    expect(idle.getByText(i18n.t('pairing.repairConsequences'))).toBeTruthy();
++    await idle.unmount();
++    mockSnapshot = { ...mockSnapshot, action: 'approve' };
++    const working = await render(<PairingPage onBack={jest.fn()} onContinue={jest.fn()} />);
++    expect(working.getByText(i18n.t('pairing.repairWorking.title'))).toBeTruthy();
++    expect(working.getByText(i18n.t('pairing.repairWorking.description'))).toBeTruthy();
++    expect(working.queryByText(i18n.t('pairing.repairDescription'))).toBeNull();
++    expect(working.getByText(i18n.t('pairing.noFileGrant'))).toBeTruthy();
++    expect(working.queryByText(i18n.t('computer.continue'))).toBeNull();
++    expect(working.queryByText(/pairing\.\w/)).toBeNull();
++    await working.unmount();
++  } finally { await i18n.changeLanguage('tr'); }
++});
+--- a/apps/mobile/src/pages/setup/ui/webdav-page.tsx
++++ b/apps/mobile/src/pages/setup/ui/webdav-page.tsx
+@@ -3,22 +3,38 @@
+ import { TextInput, View } from 'react-native';
+ import { Text } from '../../../shared/ui/text';
+ import type { BackupSetupModel } from '../../../features/backup-setup/model/use-backup-setup';
++import type { WebDavDiagnostic } from '../../../shared/api/webdav-diagnostics';
+ import { PairingButton } from '../../../features/pairing/ui/pairing-button';
+ import { MobilePanel, MobileSurface } from '../../../widgets/mobile-surface/ui';
+ 
++const hinted = { endpoint: 'onboarding.webdavHints.endpoint', targetPath: 'onboarding.webdavHints.targetPath' } as const;
++
++function reasonKey(diagnostic: WebDavDiagnostic): string {
++  if (diagnostic.kind !== 'http') return `onboarding.webdavDiagnostic.reasons.${diagnostic.kind}`;
++  const status = diagnostic.status;
++  return `onboarding.webdavDiagnostic.reasons.${status === 401 || status === 403 ? 'access_denied' : status === 404 ? 'not_found' : status === 405 ? 'method_rejected' : 'http_other'}`;
++}
++
+ export function WebDavPage({ model: m, onBack }: { model: BackupSetupModel; onBack: () => void }) {
+   const { t } = useTranslation();
++  const diagnostic = m.storageDiagnostic;
+   return <MobileSurface title={t('onboarding.storageTitle')} description={t('onboarding.webdavScope')} onBack={onBack}>
+     <MobilePanel>
+       {(['endpoint','targetPath','username','password'] as const).map((field) => <View className="gap-2" key={field}>
+         <Text className="text-sm font-inter-semibold text-primary-text">{t(`onboarding.${field}`)}</Text>
+-        <TextInput accessibilityLabel={t(`onboarding.${field}`)} autoCapitalize="none" secureTextEntry={field === 'password'} className="font-sans min-h-[48px] rounded-xl border border-border-subtle bg-surface-1 p-3 text-base text-primary-text" value={m.storage[field]} onChangeText={(value) => m.editStorage(field,value)} />
++        <TextInput accessibilityLabel={t(`onboarding.${field}`)} accessibilityHint={field in hinted ? t(hinted[field as keyof typeof hinted]) : undefined} autoCapitalize="none" secureTextEntry={field === 'password'} className="font-sans min-h-[48px] rounded-xl border border-border-subtle bg-surface-1 p-3 text-base text-primary-text" value={m.storage[field]} onChangeText={(value) => m.editStorage(field,value)} />
++        {field in hinted && <Text className="font-sans text-xs leading-5 text-secondary-text">{t(hinted[field as keyof typeof hinted])}</Text>}
+       </View>)}
++      <Text className="font-sans text-xs leading-5 text-secondary-text">{t('onboarding.webdavHints.security')}</Text>
+       <PairingButton disabled={m.storageTesting} label={t(m.storageTesting ? 'onboarding.testingConnection' : 'onboarding.testConnection')} onPress={() => { void m.testStorage(); }} />
+     </MobilePanel>
+     <WebDavBackupPanel tested={m.storageTested} testing={m.storageTesting} />
+     {m.storageTested && <Text accessibilityRole="alert" className="font-sans text-sm text-secondary-text">{t('onboarding.storageTested')}</Text>}
+     {m.storageWarning && <Text accessibilityRole="alert" className="font-sans text-sm text-danger-text">{t('onboarding.webdavErrors.webdav_probe_incomplete')}</Text>}
+     {m.message && <Text accessibilityRole="alert" className="font-sans text-sm text-danger-text">{m.message}</Text>}
++    {diagnostic && <Text accessibilityRole="alert" className="font-sans text-sm text-danger-text">{t('onboarding.webdavDiagnostic.summary', {
++      stage: t(`onboarding.webdavDiagnostic.stages.${diagnostic.stage}`),
++      reason: t(reasonKey(diagnostic), diagnostic.kind === 'http' ? { status: diagnostic.status } : undefined),
++    })}</Text>}
+   </MobileSurface>;
+ }
+--- a/apps/mobile/src/shared/api/webdav-settings.spec.ts
++++ b/apps/mobile/src/shared/api/webdav-settings.spec.ts
+@@ -2,6 +2,7 @@
+ import * as SecureStore from 'expo-secure-store';
+ import { testWebDavWriteAccess } from './webdav';
+ import { backupDestinations } from './backup-destinations';
++import { webDavDiagnostic } from './webdav-diagnostics';
+ import { loadWebDavSettings, testAndSaveWebDavSettings, enableSavedWebDavBackup } from './webdav-settings';
+ 
+ jest.mock('./backup-destinations', () => ({ backupDestinations: { disable: jest.fn().mockResolvedValue({ configured: false, enabled: false, running: false }), enable: jest.fn().mockResolvedValue({ configured: true, enabled: true, running: false }) } }));
+@@ -57,6 +58,26 @@
+   expect(JSON.parse([...memory.values()][0]).storage).toEqual(storage);
+ });
+ 
++it('G24-03: a PROPFIND 404 or transport rejection keeps the old profile untested, mutates nothing and exposes only safe metadata', async () => {
++  await testAndSaveWebDavSettings(storage, () => true);
++  const changed = { ...storage, targetPath: 'missing', password: 'another-secret' };
++  network.mockImplementation(async () => response(404));
++  const http = await testAndSaveWebDavSettings(changed, () => true).catch((error: unknown) => error);
++  expect(http).toEqual(new Error('webdav_connection'));
++  expect(webDavDiagnostic(http)).toEqual({ stage: 'propfind', kind: 'http', status: 404 });
++  network.mockClear();
++  network.mockRejectedValue(new Error('TLS handshake fixture.example/dav public-test-secret'));
++  const transport = await testAndSaveWebDavSettings(changed, () => true).catch((error: unknown) => error);
++  expect(transport).toEqual(new Error('webdav_connection'));
++  expect(webDavDiagnostic(transport)).toEqual({ stage: 'propfind', kind: 'transport_unknown' });
++  expect(network.mock.calls.map(([, init]) => init?.method)).toEqual(['PROPFIND']);
++  for (const diagnostic of [webDavDiagnostic(http), webDavDiagnostic(transport)]) {
++    expect(JSON.stringify(diagnostic)).not.toMatch(/secret|fixture|dav|missing|Kloda|TLS/);
++  }
++  expect(await loadWebDavSettings()).toMatchObject({ config: { targetPath: storage.targetPath }, testedAt: null, probeWarning: false });
++  expect(JSON.parse([...memory.values()][0]).storage).toEqual(storage);
++});
++
+ it.each([
+   { endpoint: 'http://fixture.example' }, { endpoint: 'https://user:pass@fixture.example' },
+   { endpoint: 'https://fixture.example?token=x' }, { endpoint: 'https://fixture.example#x' },
+@@ -74,6 +95,43 @@
+   expect(methods[methods.length - 1]).toBe(method);
+ });
+ 
++function failAt(method: string, nth: number, outcome: number | Error) {
++  let seen = 0;
++  network.mockImplementation(async (_url, init) => {
++    if (init?.method === method && ++seen === nth) { if (outcome instanceof Error) throw outcome; return response(outcome); }
++    return response(init?.method === 'PROPFIND' ? 207 : init?.method === 'GET' ? 200 : init?.method === 'DELETE' ? 204 : 201);
++  });
++}
++
++it.each([
++  ['MKCOL', 1, 'mkcol'], ['PUT', 1, 'put'], ['MOVE', 1, 'move'], ['GET', 1, 'get'], ['DELETE', 1, 'delete_file'], ['DELETE', 2, 'delete_directory'],
++] as const)('G24-04: %s #%i failure reports only the last observed stage/status and keeps the uncertainty warning', async (method, nth, stage) => {
++  failAt(method, nth, 409);
++  const http = await testAndSaveWebDavSettings(storage, () => true).catch((error: unknown) => error);
++  expect(http).toEqual(new Error('webdav_probe_incomplete'));
++  expect(webDavDiagnostic(http)).toEqual({ stage, kind: 'http', status: 409 });
++  expect(await loadWebDavSettings()).toMatchObject({ testedAt: null, probeWarning: true });
++  failAt(method, nth, new Error('socket reset public-test-secret https://fixture.example/dav/Kloda/'));
++  const transport = await testWebDavWriteAccess(storage).catch((error: unknown) => error);
++  expect(transport).toEqual(new Error('webdav_probe_incomplete'));
++  expect(webDavDiagnostic(transport)).toEqual({ stage, kind: 'transport_unknown' });
++  expect(JSON.stringify(webDavDiagnostic(transport))).not.toMatch(/secret|fixture|reset/);
++});
++
++it('G24-04: readback mismatch and cancellation are distinct; cancellation shows no server diagnostic', async () => {
++  network.mockImplementation(async (_url, init) => response(init?.method === 'PROPFIND' ? 207 : init?.method === 'GET' ? 200 : 201, 'other'));
++  const mismatch = await testWebDavWriteAccess(storage).catch((error: unknown) => error);
++  expect(webDavDiagnostic(mismatch)).toEqual({ stage: 'get', kind: 'readback_mismatch' });
++  const controller = new AbortController();
++  network.mockImplementation(async (_url, init) => {
++    if (init?.method === 'PUT') { controller.abort(); throw new Error('aborted'); }
++    return response(init?.method === 'PROPFIND' ? 207 : 201);
++  });
++  const cancelled = await testWebDavWriteAccess(storage, controller.signal).catch((error: unknown) => error);
++  expect(cancelled).toEqual(new Error('webdav_cancelled_probe'));
++  expect(webDavDiagnostic(cancelled)).toBeUndefined();
++});
++
+ it('preserves ambiguous MOVE outcomes instead of blindly deleting or adopting', async () => {
+   network.mockImplementation(async (_url, init) => {
+     if (init?.method === 'MOVE') throw new Error('lost reply');
+--- a/apps/mobile/src/shared/api/webdav.ts
++++ b/apps/mobile/src/shared/api/webdav.ts
+@@ -1,5 +1,6 @@
+ import { fetch as nativeFetch } from 'expo/fetch';
+ import { uuid } from 'expo-modules-core';
++import { webDavFailure, type WebDavDiagnostic, type WebDavDiagnosticStage } from './webdav-diagnostics';
+ 
+ export interface MobileStorageForm {
+   endpoint: string;
+@@ -24,41 +25,54 @@
+ export async function testWebDavWriteAccess(storage: MobileStorageForm, signal?: AbortSignal, beforeMutation?: () => Promise<void>): Promise<void> {
+   const target = validateWebDavForm(storage);
+   const headers = { Authorization: `Basic ${btoa(unescape(encodeURIComponent(`${storage.username}:${storage.password}`)))}` };
+-  const request = async (url: URL, method: string, statuses: number[], extra: RequestInit = {}) => {
++  // Last observed failing boundary; only fixed stage/kind and the Response status are recorded.
++  let observed: WebDavDiagnostic | undefined;
++  const fail = (message: string) => signal?.aborted
++    ? webDavFailure(message === 'webdav_connection' ? 'webdav_cancelled' : 'webdav_cancelled_probe')
++    : webDavFailure(message, observed);
++  const request = async (url: URL, method: string, stage: WebDavDiagnosticStage, statuses: number[], extra: RequestInit = {}) => {
+     if (signal?.aborted) throw new Error('webdav_cancelled');
+-    const response = await nativeFetch(url.toString(), { ...extra, method, headers: { ...headers, ...extra.headers },
+-      credentials: 'omit', redirect: 'error', signal });
+-    if (!statuses.includes(response.status)) { await response.body?.cancel(); throw new Error('webdav_response'); }
+-    if (method !== 'GET') await response.body?.cancel();
+-    return response;
++    observed = undefined;
++    try {
++      const response = await nativeFetch(url.toString(), { ...extra, method, headers: { ...headers, ...extra.headers },
++        credentials: 'omit', redirect: 'error', signal });
++      if (!statuses.includes(response.status)) {
++        observed = { stage, kind: 'http', status: response.status };
++        await response.body?.cancel(); throw new Error('webdav_response');
++      }
++      if (method !== 'GET') await response.body?.cancel();
++      return response;
++    } catch (error) { observed ??= { stage, kind: 'transport_unknown' }; throw error; }
+   };
+-  try { await request(target, 'PROPFIND', [207], { headers: { Depth: '0' } }); }
+-  catch { throw new Error(signal?.aborted ? 'webdav_cancelled' : 'webdav_connection'); }
++  try { await request(target, 'PROPFIND', 'propfind', [207], { headers: { Depth: '0' } }); }
++  catch { throw fail('webdav_connection'); }
+   const directory = new URL(`.kloda-connection-test-${uuid.v4()}/`, target);
+   const upload = new URL('upload', directory), final = new URL('final', directory);
+   const marker = 'kloda-connection-test';
+   await beforeMutation?.();
+   try {
+     // Only a newly created collection permits subsequent probe writes.
+-    await request(directory, 'MKCOL', [201]);
+-    await request(upload, 'PUT', [201], { body: marker, headers: { 'If-None-Match': '*', 'Content-Type': 'text/plain; charset=utf-8' } });
+-    await request(upload, 'MOVE', [201], { headers: { Destination: final.toString(), Overwrite: 'F' } });
+-    const response = await request(final, 'GET', [200]);
++    await request(directory, 'MKCOL', 'mkcol', [201]);
++    await request(upload, 'PUT', 'put', [201], { body: marker, headers: { 'If-None-Match': '*', 'Content-Type': 'text/plain; charset=utf-8' } });
++    await request(upload, 'MOVE', 'move', [201], { headers: { Destination: final.toString(), Overwrite: 'F' } });
++    const response = await request(final, 'GET', 'get', [200]);
++    const mismatch = () => { observed = { stage: 'get', kind: 'readback_mismatch' }; return new Error('webdav_response'); };
+     const reader = response.body?.getReader();
+-    if (!reader) throw new Error('webdav_response');
++    if (!reader) throw mismatch();
+     let offset = 0;
+     try {
+       for (;;) {
++        observed = { stage: 'get', kind: 'transport_unknown' };
+         const { done, value } = await reader.read();
+         if (done) break;
+-        for (const byte of value) if (offset >= marker.length || byte !== marker.charCodeAt(offset++)) throw new Error('webdav_response');
++        for (const byte of value) if (offset >= marker.length || byte !== marker.charCodeAt(offset++)) throw mismatch();
+       }
+-      if (offset !== marker.length) throw new Error('webdav_response');
++      if (offset !== marker.length) throw mismatch();
+     } finally { await reader.cancel(); reader.releaseLock(); }
+-    await request(final, 'DELETE', [200, 204]);
+-    await request(directory, 'DELETE', [200, 204]);
++    await request(final, 'DELETE', 'delete_file', [200, 204]);
++    await request(directory, 'DELETE', 'delete_directory', [200, 204]);
+   } catch {
+     // A lost write/MOVE reply is not permission to adopt or recursively clean unknown content.
+-    throw new Error(signal?.aborted ? 'webdav_cancelled_probe' : 'webdav_probe_incomplete');
++    throw fail('webdav_probe_incomplete');
+   }
+ }
+--- /dev/null
++++ b/apps/desktop/electron/runtime/webdav-test-result.ts
+@@ -0,0 +1,29 @@
++import { failureCode, WebDavFailure } from './webdav-errors.js';
++import type { WebDavDiagnostic, WebDavDiagnosticStage, WebDavFailureCode } from './webdav-errors.js';
++
++export type StorageTestReply = { ok: true } | { ok: false; code: WebDavFailureCode; diagnostic?: WebDavDiagnostic };
++
++const stages: readonly WebDavDiagnosticStage[] = ['propfind', 'mkcol', 'put', 'move', 'get', 'delete_file', 'delete_directory'];
++
++// Rebuilds the diagnostic from allowlisted fields only; anything else is dropped before IPC.
++function safeDiagnostic(value: unknown): WebDavDiagnostic | undefined {
++  if (!value || typeof value !== 'object') return undefined;
++  const { stage, kind, status } = value as { stage?: unknown; kind?: unknown; status?: unknown };
++  if (!stages.includes(stage as WebDavDiagnosticStage)) return undefined;
++  const safeStage = stage as WebDavDiagnosticStage;
++  if (kind === 'transport_unknown' || kind === 'readback_mismatch') return { stage: safeStage, kind };
++  if (kind === 'http' && Number.isInteger(status) && (status as number) >= 100 && (status as number) <= 599) {
++    return { stage: safeStage, kind, status: status as number };
++  }
++  return undefined;
++}
++
++export async function storageTestReply(test: () => Promise<void>): Promise<StorageTestReply> {
++  try {
++    await test();
++    return { ok: true };
++  } catch (error) {
++    const diagnostic = safeDiagnostic(error instanceof WebDavFailure ? error.diagnostic : undefined);
++    return diagnostic ? { ok: false, code: failureCode(error), diagnostic } : { ok: false, code: failureCode(error) };
++  }
++}
+--- /dev/null
++++ b/apps/desktop/electron/runtime/webdav-test-result.spec.ts
+@@ -0,0 +1,64 @@
++// @vitest-environment node
++import { afterEach, describe, expect, it, vi } from 'vitest';
++
++import { WebDavFailure } from './webdav-errors.js';
++import { storageTestReply } from './webdav-test-result.js';
++import { NodeWebDavClient } from './webdav.js';
++
++const secret = 'public-secret-sentinel';
++const storage = { endpoint: 'https://fixture.invalid:8083/dav/', username: 'sentinel-user', password: secret, targetPath: 'sentinel-path' };
++const probe = () => storageTestReply(() => new NodeWebDavClient(storage).verifyWriteAccess());
++const leak = /sentinel|fixture\.invalid|dav|Basic|8083/;
++afterEach(() => vi.unstubAllGlobals());
++
++function serve(fail: (method: string, nth: number) => Response | Error | undefined, body = 'kloda-webdav-probe') {
++  const seen = new Map<string, number>();
++  vi.stubGlobal('fetch', vi.fn(async (_input: unknown, init: RequestInit) => {
++    const method = init.method!; const nth = (seen.get(method) ?? 0) + 1; seen.set(method, nth);
++    const outcome = fail(method, nth);
++    if (outcome instanceof Error) throw outcome;
++    return outcome ?? new Response(method === 'GET' ? body : null, { status: method === 'PROPFIND' ? 207 : method === 'DELETE' ? 204 : 201 });
++  }));
++}
++
++describe('connection test reply projection', () => {
++  it('G24-04/06: PROPFIND 404 becomes a plain envelope with only code/stage/status and no secret', async () => {
++    serve((method) => method === 'PROPFIND' ? new Response(`denied ${secret}`, { status: 404 }) : undefined);
++    const reply = await probe();
++    expect(reply).toEqual({ ok: false, code: 'unknown', diagnostic: { stage: 'propfind', kind: 'http', status: 404 } });
++    expect(JSON.stringify(reply)).not.toMatch(leak);
++  });
++
++  it.each([
++    ['MKCOL', 1, 'mkcol', 'unknown'], ['PUT', 1, 'put', 'unknown'], ['MOVE', 1, 'move', 'unknown'], ['GET', 1, 'get', 'unknown'],
++    ['DELETE', 1, 'delete_file', 'review_required'], ['DELETE', 2, 'delete_directory', 'review_required'],
++  ] as const)('G24-04: HTTP failure at %s #%i reports %s with the unchanged failure code', async (target, count, stage, code) => {
++    serve((method, nth) => method === target && nth === count ? new Response(null, { status: 400 }) : undefined);
++    expect(await probe()).toEqual({ ok: false, code, diagnostic: { stage, kind: 'http', status: 400 } });
++  });
++
++  it.each([
++    ['PROPFIND', 'propfind', 'connection_unavailable'], ['MKCOL', 'mkcol', 'review_required'], ['PUT', 'put', 'review_required'],
++    ['MOVE', 'move', 'review_required'], ['GET', 'get', 'connection_unavailable'], ['DELETE', 'delete_file', 'review_required'],
++  ] as const)('G24-04/06: transport failure at %s is transport_unknown without its raw message', async (target, stage, code) => {
++    serve((method) => method === target ? new TypeError(`fetch failed ${secret} https://fixture.invalid:8083/dav/`) : undefined);
++    const reply = await probe();
++    expect(reply).toEqual({ ok: false, code, diagnostic: { stage, kind: 'transport_unknown' } });
++    expect(JSON.stringify(reply)).not.toMatch(leak);
++  });
++
++  it('G24-04: readback mismatch is distinct and keeps review_required', async () => {
++    serve(() => undefined, 'other');
++    expect(await probe()).toEqual({ ok: false, code: 'review_required', diagnostic: { stage: 'get', kind: 'readback_mismatch' } });
++  });
++
++  it('G24-06: success is only ok=true; foreign errors and forged diagnostics are reduced to the allowlist', async () => {
++    expect(await storageTestReply(async () => undefined)).toEqual({ ok: true });
++    expect(await storageTestReply(async () => { throw new Error(secret); })).toEqual({ ok: false, code: 'unknown' });
++    const forged = new WebDavFailure('access_denied', secret, { diagnostic: { stage: 'put', kind: 'http', status: 401 } });
++    Object.assign(forged.diagnostic!, { host: secret });
++    expect(await storageTestReply(async () => { throw forged; })).toEqual({ ok: false, code: 'access_denied', diagnostic: { stage: 'put', kind: 'http', status: 401 } });
++    const malformed = new WebDavFailure('unknown', secret, { diagnostic: { stage: secret, kind: 'http', status: 404 } as never });
++    expect(await storageTestReply(async () => { throw malformed; })).toEqual({ ok: false, code: 'unknown' });
++  });
++});
+--- /dev/null
++++ b/apps/desktop/src/shared/api/webdav-test-result.ts
+@@ -0,0 +1,43 @@
++// Renderer-side allowlist for the kloda:test-storage reply; IPC data is treated as untrusted.
++export const storageTestCodes = [
++  'connection_unavailable', 'access_denied', 'storage_full', 'source_changed', 'review_required',
++  'configuration_required', 'settings_changed', 'interrupted', 'retry_exhausted', 'backup_busy', 'unknown',
++] as const;
++export type StorageTestCode = (typeof storageTestCodes)[number];
++
++const stages = ['propfind', 'mkcol', 'put', 'move', 'get', 'delete_file', 'delete_directory'] as const;
++export type StorageTestStage = (typeof stages)[number];
++export type StorageTestDiagnostic =
++  | { stage: StorageTestStage; kind: 'http'; status: number }
++  | { stage: StorageTestStage; kind: 'transport_unknown' | 'readback_mismatch' };
++export type StorageTestResult = { ok: true } | { ok: false; code: StorageTestCode; diagnostic?: StorageTestDiagnostic };
++
++function parseDiagnostic(value: unknown): StorageTestDiagnostic | undefined {
++  if (!value || typeof value !== 'object') return undefined;
++  const { stage, kind, status } = value as Record<string, unknown>;
++  if (!stages.includes(stage as StorageTestStage)) return undefined;
++  const safeStage = stage as StorageTestStage;
++  if (kind === 'transport_unknown' || kind === 'readback_mismatch') return { stage: safeStage, kind };
++  if (kind === 'http' && Number.isInteger(status) && (status as number) >= 100 && (status as number) <= 599) {
++    return { stage: safeStage, kind, status: status as number };
++  }
++  return undefined;
++}
++
++// Only an explicit ok=true is success; void, malformed or unknown replies are a generic failure.
++export function parseStorageTestResult(value: unknown): StorageTestResult {
++  if (!value || typeof value !== 'object') return { ok: false, code: 'unknown' };
++  const reply = value as Record<string, unknown>;
++  if (reply.ok === true) return { ok: true };
++  const code = storageTestCodes.includes(reply.code as StorageTestCode) ? reply.code as StorageTestCode : 'unknown';
++  const diagnostic = parseDiagnostic(reply.diagnostic);
++  return diagnostic ? { ok: false, code, diagnostic } : { ok: false, code };
++}
++
++export function diagnosticReasonKey(diagnostic: StorageTestDiagnostic): string {
++  if (diagnostic.kind !== 'http') return diagnostic.kind;
++  if (diagnostic.status === 401 || diagnostic.status === 403) return 'access_denied';
++  if (diagnostic.status === 404) return 'not_found';
++  if (diagnostic.status === 405) return 'method_rejected';
++  return 'http_other';
++}
+--- /dev/null
++++ b/apps/desktop/src/shared/api/webdav-test-result.spec.tsx
+@@ -0,0 +1,39 @@
++import { describe, expect, it } from 'vitest';
++
++import { diagnosticReasonKey, parseStorageTestResult } from './webdav-test-result';
++
++const secret = 'public-secret-sentinel';
++
++describe('storage test reply parser', () => {
++  it('G24-06: only an explicit ok=true is success; void and malformed replies are generic failures', () => {
++    expect(parseStorageTestResult({ ok: true, extra: secret })).toEqual({ ok: true });
++    for (const reply of [undefined, null, 'ok', true, {}, { ok: 'true' }, { ok: 1 }]) {
++      expect(parseStorageTestResult(reply)).toEqual({ ok: false, code: 'unknown' });
++    }
++  });
++
++  it('G24-04/06: keeps allowlisted code and diagnostic fields and drops everything else', () => {
++    const reply = parseStorageTestResult({ ok: false, code: 'access_denied', message: secret,
++      diagnostic: { stage: 'put', kind: 'http', status: 401, host: secret } });
++    expect(reply).toEqual({ ok: false, code: 'access_denied', diagnostic: { stage: 'put', kind: 'http', status: 401 } });
++    expect(parseStorageTestResult({ ok: false, code: 'review_required', diagnostic: { stage: 'get', kind: 'readback_mismatch', status: 200 } }))
++      .toEqual({ ok: false, code: 'review_required', diagnostic: { stage: 'get', kind: 'readback_mismatch' } });
++    expect(JSON.stringify(reply)).not.toContain(secret);
++  });
++
++  it.each([
++    { code: secret }, { code: 'unknown', diagnostic: { stage: secret, kind: 'http', status: 404 } },
++    { code: 'unknown', diagnostic: { stage: 'put', kind: 'http', status: 404.5 } },
++    { code: 'unknown', diagnostic: { stage: 'put', kind: 'http', status: 600 } },
++    { code: 'unknown', diagnostic: { stage: 'put', kind: 'http' } },
++    { code: 'unknown', diagnostic: { stage: 'put', kind: secret } },
++  ])('G24-06: rejects forged code/diagnostic %#', (reply) => {
++    expect(parseStorageTestResult({ ok: false, ...reply })).toEqual({ ok: false, code: 'unknown' });
++  });
++
++  it('maps HTTP statuses to stable reason keys', () => {
++    const key = (status: number) => diagnosticReasonKey({ stage: 'propfind', kind: 'http', status });
++    expect([401, 403, 404, 405, 500].map(key)).toEqual(['access_denied', 'access_denied', 'not_found', 'method_rejected', 'http_other']);
++    expect(diagnosticReasonKey({ stage: 'get', kind: 'transport_unknown' })).toBe('transport_unknown');
++  });
++});
+--- /dev/null
++++ b/apps/desktop/src/pages/backup/BackupSetup.spec.tsx
+@@ -0,0 +1,107 @@
++import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
++import { afterEach, expect, it, vi } from 'vitest';
++
++import { BackupSetup } from './BackupSetup';
++import { i18n } from '../../shared/i18n';
++
++const secret = 'public-secret-sentinel';
++const draft = { intervalHours: 12, localTime: '12:00', sources: [{ displayName: 'Documents', id: 'source-1' }], storage: null, storageTested: false };
++function bridge(overrides: Partial<NonNullable<Window['kloda']>> = {}) {
++  const kloda = { getDraft: vi.fn().mockResolvedValue(draft), getProgress: vi.fn().mockResolvedValue(null), pickSources: vi.fn(),
++    saveSchedule: vi.fn().mockResolvedValue(undefined), saveStorage: vi.fn().mockResolvedValue(undefined), startSync: vi.fn(),
++    testStorage: vi.fn(), ...overrides };
++  window.kloda = kloda;
++  return kloda;
++}
++async function openStorage() {
++  render(<BackupSetup visible />);
++  await screen.findByText('Documents');
++  fireEvent.click(screen.getByRole('button', { name: i18n.t('onboarding.continue') }));
++  return screen.findByRole('textbox', { name: i18n.t('onboarding.endpoint') });
++}
++const test = () => fireEvent.click(screen.getByRole('button', { name: i18n.t('onboarding.testConnection') }));
++const summary = (stage: string, reason: string, status?: number) => i18n.t('onboarding.webdavDiagnostic.summary', {
++  stage: i18n.t(`onboarding.webdavDiagnostic.stages.${stage}`), reason: i18n.t(`onboarding.webdavDiagnostic.reasons.${reason}`, { status }) });
++afterEach(async () => { cleanup(); window.kloda = undefined; await i18n.changeLanguage('tr'); });
++
++it.each(['tr', 'en', 'de'])('G24-02/04/06: shows hints and a safe PROPFIND 404 diagnostic in %s', async (language) => {
++  await i18n.changeLanguage(language);
++  bridge({ testStorage: vi.fn().mockResolvedValue({ ok: false, code: 'unknown', message: secret,
++    diagnostic: { stage: 'propfind', kind: 'http', status: 404, host: secret } }) });
++  const endpoint = await openStorage();
++  expect(endpoint).toHaveAccessibleDescription(i18n.t('onboarding.webdavHints.endpoint'));
++  expect(screen.getByRole('textbox', { name: i18n.t('onboarding.targetPath') })).toHaveAccessibleDescription(i18n.t('onboarding.webdavHints.targetPath'));
++  expect(screen.getByText(i18n.t('onboarding.webdavHints.security'))).toBeInTheDocument();
++  fireEvent.change(endpoint, { target: { value: 'https://fixture.example:8083/webdav/' } });
++  test();
++  expect(await screen.findByRole('alert')).toHaveTextContent(i18n.t('onboarding.testErrors.unknown'));
++  expect(screen.getByText(summary('propfind', 'not_found', 404))).toBeInTheDocument();
++  expect(window.kloda?.saveStorage).toHaveBeenCalledWith(expect.objectContaining({ endpoint: 'https://fixture.example:8083/webdav/', targetPath: 'Kloda' }));
++  expect(screen.getByRole('button', { name: i18n.t('onboarding.startBackup') })).toBeDisabled();
++  expect(document.body.textContent).not.toContain(secret);
++  expect(document.body.textContent).not.toMatch(/onboarding\./);
++});
++
++it('G24-05: a stale failure does not reach the edited form and edits clear a shown diagnostic', async () => {
++  let finish!: (value: unknown) => void;
++  const failure = { ok: false, code: 'access_denied', diagnostic: { stage: 'put', kind: 'http', status: 401 } };
++  bridge({ testStorage: vi.fn().mockReturnValueOnce(new Promise((resolve) => { finish = resolve; })).mockResolvedValue(failure) });
++  const endpoint = await openStorage();
++  test();
++  await waitFor(() => expect(window.kloda?.testStorage).toHaveBeenCalledOnce());
++  fireEvent.change(endpoint, { target: { value: 'https://other.example/webdav/' } });
++  await act(async () => { finish(failure); });
++  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
++  expect(screen.queryByText(summary('put', 'access_denied', 401))).not.toBeInTheDocument();
++  test();
++  expect(await screen.findByText(summary('put', 'access_denied', 401))).toBeInTheDocument();
++  fireEvent.change(endpoint, { target: { value: 'https://third.example/webdav/' } });
++  expect(screen.queryByText(summary('put', 'access_denied', 401))).not.toBeInTheDocument();
++  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
++});
++
++it('G24-06: a void or malformed reply is not success', async () => {
++  bridge({ testStorage: vi.fn().mockResolvedValueOnce(undefined).mockResolvedValueOnce({ ok: 'true', code: secret }).mockResolvedValue({ ok: true }) });
++  await openStorage();
++  for (let attempt = 0; attempt < 2; attempt += 1) {
++    test();
++    await waitFor(() => expect(window.kloda?.testStorage).toHaveBeenCalledTimes(attempt + 1));
++    expect(await screen.findByRole('alert')).toHaveTextContent(i18n.t('onboarding.testErrors.unknown'));
++    expect(screen.queryByText(i18n.t('onboarding.verified'))).not.toBeInTheDocument();
++  }
++  test();
++  expect(await screen.findByText(i18n.t('onboarding.verified'))).toBeInTheDocument();
++  expect(screen.getByRole('button', { name: i18n.t('onboarding.startBackup') })).toBeEnabled();
++  expect(document.body.textContent).not.toContain(secret);
++});
++
++it('G24-06: load, select, schedule, save and start failures show localized fallbacks, never raw messages', async () => {
++  const leak = () => Promise.reject(new Error(secret));
++  bridge({ getDraft: vi.fn(leak) });
++  render(<BackupSetup visible />);
++  expect(await screen.findByRole('alert')).toHaveTextContent(i18n.t('onboarding.loadError'));
++  cleanup();
++  bridge({ pickSources: vi.fn(leak), saveSchedule: vi.fn(leak), saveStorage: vi.fn(leak), startSync: vi.fn(leak) });
++  render(<BackupSetup visible />);
++  await screen.findByText('Documents');
++  fireEvent.click(screen.getByRole('button', { name: i18n.t('onboarding.chooseFolders') }));
++  expect(await screen.findByRole('alert')).toHaveTextContent(i18n.t('onboarding.selectError'));
++  fireEvent.click(screen.getByRole('button', { name: i18n.t('onboarding.continue') }));
++  await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent(i18n.t('onboarding.scheduleError')));
++  expect(document.body.textContent).not.toContain(secret);
++  cleanup();
++  bridge({ saveStorage: vi.fn(leak), testStorage: vi.fn().mockResolvedValue({ ok: true }), startSync: vi.fn(leak) });
++  await openStorage();
++  test();
++  expect(await screen.findByRole('alert')).toHaveTextContent(i18n.t('onboarding.testError'));
++  expect(window.kloda?.testStorage).not.toHaveBeenCalled();
++  expect(document.body.textContent).not.toContain(secret);
++});
++
++it('G24-06: a start failure stays on the existing generic activity alert without the raw message', async () => {
++  bridge({ getDraft: vi.fn().mockResolvedValue({ ...draft, storageTested: true }), startSync: vi.fn(() => Promise.reject(new Error(secret))) });
++  await openStorage();
++  fireEvent.click(screen.getByRole('button', { name: i18n.t('onboarding.startBackup') }));
++  expect(await screen.findByText(i18n.t('activity.errors.unknown'))).toHaveAttribute('role', 'alert');
++  expect(document.body.textContent).not.toContain(secret);
++});
+--- /dev/null
++++ b/apps/mobile/src/shared/api/webdav-diagnostics.ts
+@@ -0,0 +1,32 @@
++export const webDavDiagnosticStages = ['propfind', 'mkcol', 'put', 'move', 'get', 'delete_file', 'delete_directory'] as const;
++export type WebDavDiagnosticStage = typeof webDavDiagnosticStages[number];
++export type WebDavDiagnostic =
++  | { stage: WebDavDiagnosticStage; kind: 'http'; status: number }
++  | { stage: WebDavDiagnosticStage; kind: 'transport_unknown' | 'readback_mismatch' };
++
++// RAM-only presentation metadata for the current test result; never persisted, logged or serialized with the Error.
++const observed = new WeakMap<object, WebDavDiagnostic>();
++
++export function webDavFailure(message: string, diagnostic?: WebDavDiagnostic): Error {
++  const error = new Error(message);
++  const safe = diagnostic && safeWebDavDiagnostic(diagnostic);
++  if (safe) observed.set(error, safe);
++  return error;
++}
++
++export function webDavDiagnostic(error: unknown): WebDavDiagnostic | undefined {
++  return error && typeof error === 'object' ? observed.get(error) : undefined;
++}
++
++// Allowlist projection: only a fixed stage/kind and an observed HTTP status integer survive.
++export function safeWebDavDiagnostic(value: unknown): WebDavDiagnostic | undefined {
++  if (!value || typeof value !== 'object') return undefined;
++  const { stage, kind, status } = value as Record<string, unknown>;
++  if (!webDavDiagnosticStages.includes(stage as WebDavDiagnosticStage)) return undefined;
++  const safeStage = stage as WebDavDiagnosticStage;
++  if (kind === 'http') {
++    return typeof status === 'number' && Number.isInteger(status) && status >= 100 && status <= 599
++      ? { stage: safeStage, kind, status } : undefined;
++  }
++  return kind === 'transport_unknown' || kind === 'readback_mismatch' ? { stage: safeStage, kind } : undefined;
++}
+--- /dev/null
++++ b/apps/mobile/src/shared/api/webdav-diagnostics.spec.ts
+@@ -0,0 +1,24 @@
++import { safeWebDavDiagnostic, webDavDiagnostic, webDavFailure } from './webdav-diagnostics';
++
++it('G24-06: projection copies only allowlisted stage/kind/status and rejects malformed payloads', () => {
++  const secret = 'Authorization: Basic c2VjcmV0 https://user@fixture.example/dav?token=x';
++  expect(safeWebDavDiagnostic({ stage: 'put', kind: 'http', status: 404, message: secret, host: secret }))
++    .toEqual({ stage: 'put', kind: 'http', status: 404 });
++  expect(safeWebDavDiagnostic({ stage: 'get', kind: 'readback_mismatch', status: 200, cause: secret }))
++    .toEqual({ stage: 'get', kind: 'readback_mismatch' });
++  for (const malformed of [null, 'propfind', { stage: secret, kind: 'http', status: 404 }, { stage: 'put', kind: secret },
++    { stage: 'put', kind: 'http' }, { stage: 'put', kind: 'http', status: 99 }, { stage: 'put', kind: 'http', status: 600 },
++    { stage: 'put', kind: 'http', status: 404.5 }, { stage: 'put', kind: 'http', status: '404' }]) {
++    expect(safeWebDavDiagnostic(malformed)).toBeUndefined();
++  }
++});
++
++it('G24-06: metadata stays off the Error object and is absent for foreign errors', () => {
++  const error = webDavFailure('webdav_connection', { stage: 'propfind', kind: 'http', status: 401 });
++  expect(Object.keys(error)).toEqual([]);
++  expect(JSON.stringify(error)).toBe('{}');
++  expect(error.message).toBe('webdav_connection');
++  expect(webDavDiagnostic(error)).toEqual({ stage: 'propfind', kind: 'http', status: 401 });
++  expect(webDavDiagnostic(Object.assign(new Error('webdav_connection'), { stage: 'propfind', kind: 'http', status: 401 }))).toBeUndefined();
++  expect(webDavDiagnostic('webdav_connection')).toBeUndefined();
++});

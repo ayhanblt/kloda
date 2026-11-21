@@ -29,6 +29,9 @@ export function PairingModal({ snapshot, onCancel, onResume, onRefresh, onLeave,
   const generation = status?.candidateGeneration;
   const canDecide = repair && !!operationId && !!generation && !!status?.peerFingerprint && !action && !uncertain;
   const phase = status?.phase ?? 'connecting';
+  // An in-flight repair decision must not keep reading as the instruction to decide.
+  const deciding = repair && (action === 'approve' || action === 'deny');
+  const copy = action === 'remove' ? 'pairing.unpair' : deciding ? 'pairing.repairWorking' : null;
 
   return (
     <ModalSurface entering={FadeIn.duration(180)} className="absolute inset-0 z-20 justify-center p-6" accessibilityViewIsModal importantForAccessibility="yes">
@@ -36,8 +39,8 @@ export function PairingModal({ snapshot, onCancel, onResume, onRefresh, onLeave,
       <View className="max-h-[95%] overflow-hidden rounded-2xl bg-background">
         <ScrollView contentContainerClassName="gap-4 p-6">
           <ShieldAlert color={colors['attention-base']} size={32} />
-          <Text accessibilityRole="header" className="text-[22px] font-inter-semibold leading-7 text-primary-text">{t(action === 'remove' ? 'pairing.unpair.title' : repair ? 'pairing.repairTitle' : uncertain ? 'pairing.unknownTitle' : `pairing.phases.${phase}.title`)}</Text>
-          <Text className="font-sans text-sm leading-5 text-secondary-text">{t(action === 'remove' ? 'pairing.unpair.description' : repair ? 'pairing.repairDescription' : uncertain ? 'pairing.unknownDescription' : `pairing.phases.${phase}.description`)}</Text>
+          <Text accessibilityRole="header" className="text-[22px] font-inter-semibold leading-7 text-primary-text">{t(copy ? `${copy}.title` : repair ? 'pairing.repairTitle' : uncertain ? 'pairing.unknownTitle' : `pairing.phases.${phase}.title`)}</Text>
+          <Text className="font-sans text-sm leading-5 text-secondary-text">{t(copy ? `${copy}.description` : repair ? 'pairing.repairDescription' : uncertain ? 'pairing.unknownDescription' : `pairing.phases.${phase}.description`)}</Text>
           {status?.peerFingerprint && (
             <View className="gap-2 rounded-xl border border-border-subtle p-3">
               <Text className="text-xs font-inter-medium text-secondary-text">{t('pairing.peerFingerprint')}</Text>

@@ -59,6 +59,8 @@ export interface BackgroundStatus {
   canHide: boolean;
   environmentLimited: boolean;
   shutdownError: boolean;
+  /** Main-process `app.getVersion()`; read-only metadata, not a release-maturity claim. Missing → unknown. */
+  appVersion?: string;
 }
 
 export interface DesktopSource {
@@ -136,7 +138,7 @@ declare global {
       saveSchedule(intervalHours: 12 | 24, localTime: string): Promise<void>;
       saveStorage(storage: { endpoint: string; password: string; targetPath: string; username: string }): Promise<void>;
       startSync(): Promise<SyncProgress>;
-      testStorage(): Promise<void>;
+      testStorage(): Promise<unknown>;
     };
   }
 }
