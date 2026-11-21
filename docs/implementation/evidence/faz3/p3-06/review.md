@@ -332,3 +332,149 @@ FIX'leri başarısız=2; birbirine eklenmez/sıfırlanmaz. vsftpd kararlılık
 Önceki gerçek host/Android PASS reuse; yeni tarif gerçek uçtan uca
 çalıştırılmadı. CURRENT/MANIFEST kapanışı yok; FTPS-1…4, üst P3-06,
 iOS ve Faz3 açık. Kaynak değişikliği/commit/push yok.
+
+## Tek deadline tasarımı — bağımsız uygulama incelemesi, 21.11.2026
+
+**FIX — FTPS-4 tek kalan boşluk: süreç başlatma öncesi son tarih.**
+Reviewer GPT-6.2 Sol (`openai/gpt-6.2-sol`),
+`ses_e02b92a99ffeq0YRpAWUiBcSB2`. HEAD
+`f6f1c318246d50e218d92bc5f260292351f30f1f`; tarif
+[`build-recipe.sh`](ftps-android/build-recipe.sh) SHA-256
+`376b813d399566f9267a8ed03613f0bad8395f0de72e0edefd1670ca5cce0c64`.
+Gerçek tarif diff'i başlıklar dışında `/private/tmp/p3-06-recipe-fix3/fix6.diff`
+ile eşleşti. `sh -n` ve gömülü Python AST ayrıştırması geçti.
+
+`/private/tmp/p3-06-recipe-fix3/{harness6.py,results6-RED.txt,results6-GREEN.txt,results4-new.txt,results5-new.txt}`
+incelendi. Sahte tam cleanup zinciri RED 15 → GREEN 0 ihlal: tek
+`t0`, sabit `A/G/D`, bağımsız grup kapatma, geç Docker inspect/remove
+sonrası `CLEANUP_INCOMPLETE` için kimlik, sıfır bekleme, readiness/boot
+parent aktarımı destekleniyor. Gerçek diff tam Docker ID, yabancı
+sahiplik, belirsiz create ve cleanup INT/TERM korumalarını taşıyor;
+inert kayıtlar da bunları destekliyor. `run()` tek okumadan cap/parent
+clamp yapıyor ve Popen dönüşünde kalan süreyi tekrar ölçüyor. Kanıt
+gerçek dış araç, ağ veya uçtan uca FTPS davranışını sınamıyor.
+
+**Somut engel:** §3 her `Popen` öncesinde güncel kalan süreyi ve
+sıfır bütçede *yeni dış komut olmamasını* şart koşuyor.
+[`build-recipe.sh:102–114`](ftps-android/build-recipe.sh#L102-L114)
+son kontrolü `open(out, "wb")` **öncesinde** yapıyor; dosya açma
+çağrısı son tarihi tüketip döndüğünde yeni süreç yine başlatılıyor.
+Bağımsız inert prob gerçek dosyadan `run()` AST gövdesini, sahte `open`,
+`Popen` ve sanal saatle yürüttü: `END=10 ms`, log açma `12 ms`,
+`Popen` **12 ms'de çağrıldı**, ardından KILL ve timeout. Bu Popen'ın
+kaçınılmaz başlatma gecikmesi değil, gecikme **sonrası yeni iş**;
+log yönlendirmeli Docker start/build/instrumentation için etkili.
+Doğrudan emülatör başlatma da
+[`:620–629`](ftps-android/build-recipe.sh#L620-L629) ledger/log hazırlığı
+sonrasında `END` kontrolünden geçmiyor. Adayın inert başarı kayıtları
+bu iki başlatma sınırını ayırt etmiyor. Dar kapatma: mevcut mutlak
+tarihi log/ledger hazırlığından sonra ve Popen'dan hemen önce güncel
+saatle tekrar kontrol et; süre bittiyse süreç başlatılmadığını inert
+olarak doğrula. Yeni gerçek servis veya build koşusu gerekmez.
+
+Her iki eski sayaç **2** korunur; bu DESIGN-READY tek-deadline
+uygulamasının ilk scoped bulgusu, eski sayaçlar sıfırlanmaz.
+Önceki gerçek host/Android aktarımı ve fiş reuse. Yeni tarif gerçek
+ortamda uçtan uca çalıştırılmadı. CURRENT/MANIFEST'e kabul işlenmedi;
+FTPS-1…4, iOS, üst P3-06 ve Faz3 açık. Kod/commit/push yok.
+
+## Spawn öncesi deadline FIX — bağımsız dönüş, 21.11.2026
+
+**FIX — deadline yolu düzeldi; maskeyi geri yüklerken gelen sinyal
+log handle temizliğini atlayabiliyor.** GPT-6.2 Sol
+(`openai/gpt-6.2-sol`), `ses_e02b92a99ffeq0YRpAWUiBcSB2`;
+HEAD `f6f1c318246d50e218d92bc5f260292351f30f1f`. Tek aday
+[`build-recipe.sh`](ftps-android/build-recipe.sh) SHA-256
+`eff94fb0f90c7148b21b4590e3be853998a9e57543ce0f69d579ab0fc313f8fd`.
+Gerçek tarif diff'i ilk iki başlık dışında
+`/private/tmp/p3-06-recipe-fix3/fix7.diff` ile eşleşti; `sh -n` ve
+gömülü Python AST ayrıştırması geçti.
+
+`/private/tmp/p3-06-recipe-fix3/{harness7.py,results7-RED.txt,results7-GREEN.txt,results6-fix7.txt,results5-fix7.txt}`
+çaprazlandı. Gerçek `run` ve `start_emulator` artık hazırlıktan
+sonra aynı `d`/`END` ile kontrol ediyor: 10 ve 12 ms hazırlıkta
+`Popen=0`, 9 ms'de tek başlatma; GREEN `FAILS=0`. Normal timeout,
+başarı ve sahte `Popen` OSError yollarında handle/maske doğrulandı.
+A/G/D ve readiness/boot inert sonuçlarında ihlal yok; grup/helper
+kanıtı reuse. Harness maske metodunu taklit ediyor; bekleyen sinyal
+teslimini ve gerçek fork/exec'i sınamıyor.
+
+**Tek engel — maskeyi kaldırma geçişinde log handle temizliği.**
+[`build-recipe.sh:474–489`](ftps-android/build-recipe.sh#L474-L489):
+parent INT/TERM'i Popen→PID kaydına kadar blokluyor, çocuk fork ile
+maskeyi devralıp `preexec_fn` ile yalnız kendi INT/TERM maskesini
+açıyor; exec maskeyi korur. Parent `SIG_SETMASK` ile eski maskeyi
+geri alır; eski maske INT/TERM'i bloklamıyorsa bekleyen sinyal o
+çağrıdan dönüşte Python handler'ını çalıştırabilir. `main` armed
+iken handler `Interrupted` fırlatır; o anda `logf.close()` henüz
+çalışmamıştır. Bu, açıkça vaat edilen her çıkışta handle kapatma
+koşulunu bozar; exception traceback'i frame/handle'ı üst cleanup
+boyunca tutabilir. Bağımsız inert prob gerçek `start_emulator` AST
+gövdesini, süresi dolmuş hazırlık ve `SIG_SETMASK` dönüşünde
+`Interrupted` veren sahte maskeyle çalıştırdı: `block, restore`;
+`Popen` yok ve **`close_called=False`**. Maske geri yükleme ve
+handle kapatma birbirinin istisnasından bağımsız garanti edilmeli;
+bekleyen sinyal üst finally'ye ulaşmalı. Gerçek sinyal/cihaz
+koşusu gerekmez. Süre ve fork/exec tasarımını değiştirmeyi gerektirmez.
+
+İki tarihî yaklaşım sayacı **2/2** korunur. Bu, yeni tek-deadline
+tasarımında spawn boşluğunun yeniden üretimi değil, FIX dönüşünde
+maskenin istisna yolunda bulunan ayrı temizlik bulgusudur (ilk bulgu).
+Önceki gerçek host/Android aktarım/fiş PASS reuse; yeni tarif gerçek
+ortamda uçtan uca çalıştırılmadı. CURRENT/MANIFEST kabulü ve kod
+değişikliği/commit/push yok; FTPS-1…4, iOS, üst P3-06 ve Faz3 açık.
+
+## Handle ve sinyal maskesi FIX — bağımsız kapanış, 21.11.2026
+
+**ACCEPTED — yalnız P3-06-FTPS-1…4.** Plan §3'teki tek hedef:
+güncel adayın Android arm64 JNI yoluyla tek sentetik dosya aktarımı,
+doğrulanmış alıcı ve kalıcı fiş; bunu yeniden üretmek için tek, izole,
+aidiyetli ve süre sınırlı tarif. Üst P3-06 veya Faz3 kabulü değil.
+
+- Bağımsız reviewer GPT-6.2 Sol (`openai/gpt-6.2-sol`),
+  `ses_e02b92a99ffeq0YRpAWUiBcSB2`. HEAD
+  `f6f1c318246d50e218d92bc5f260292351f30f1f`. Son aday
+  [`build-recipe.sh`](ftps-android/build-recipe.sh) SHA-256
+  `a3d96560b2a543168cb0f3d055814e69cfad2ea842977582cebe56593020924c`.
+  `/private/tmp/recipe-before-fix8.sh` önceki kayıtlı `eff94fb0f90c…`
+  SHA ile eşleşti; gerçek tarif diff'i başlıklar dışında
+  `/private/tmp/p3-06-recipe-fix3/fix8.diff` ile aynı. Tek davranış
+  değişikliği `start_emulator` içindeki nested `finally` (`:485–491`).
+  Bağımsız `sh -n` ve gömülü Python AST ayrıştırması geçti.
+- `close()` artık parent INT/TERM maskesi geri yüklenmeden önce
+  deneniyor. `close` hata verirse iç `finally` yine `SIG_SETMASK`
+  çağırıyor; restore'da bekleyen sinyal `Interrupted` olarak
+  yükselse bile handle kapatma girişimi geride kalmış oluyor.
+  Başlatma niyet kaydı, mutlak `END`, çocukta fork sonrası maskeyi
+  açma ve ayrı süreç grubu değişmedi. Başarılı spawn'da `EMU` ve
+  bellek içi PID maskeyi açmadan önce atanıyor; orada sinyal gelirse
+  dış `finally` sahipli süreci görüp temizler. Süre dolmuş yolda
+  `Popen` yok. Gerçek fork/exec ve OS sinyal teslimi çalıştırılmadı.
+- `/private/tmp/p3-06-recipe-fix3/{harness8.py,results8-RED.txt,results8-GREEN.txt,results7-fix8.txt,results6-fix8.txt}`
+  gerçek fonksiyon ve diff'e karşı çaprazlandı; inert koşular tekrar
+  edilmedi. Önceki sıra pending sinyalde üç assertion'ı kaçırıyor,
+  yeni sıra `FAILS=0`: süresi dolmuş ve başarılı spawn yollarında
+  pending TERM'den önce kapatma; close hatasında restore; ikisi
+  çakıştığında iki işlemin de denenmesi; normal yol. Sahte `close`
+  hatasında `closed=False` doğru; kanıt kapatma **girişimi** ve
+  restore'u gösterir, başarısız close'un başarılı olduğunu değil.
+  Önceki spawn sınırı regresyonu `FAILS=0`, A/G/D ve readiness/boot
+  sahte zinciri `violations=0`.
+
+**Kabul eşlemesi:** FTPS-1 [ProFTPD host kanıtı](ftps-host-representative/proftpd/RESULT.md)
+reuse; bağımsız host normal explicit TLS kontrol/veri, alıcı hash ve
+sağlıklı kapanış. FTPS-2 [Android APK/JNI kanıtı](ftps-android/RESULT.md)
+reuse; güncel arm64 test asset, CA, export, hash ve üretim marker
+yasağı. FTPS-3 [instrumentation](ftps-android/run-ftps-files-positive-2.log)
+ve [alıcı kaydı](ftps-android/receiver-readback.txt) reuse; tek 1 MiB,
+SHA/boyut ve yeniden açılan kalıcı fiş. Android resumption gözlendi,
+reuse zorunlu ayarla test edilmedi. FTPS-4 önceki gerçek temizlik
+reuse, tek yeni tarif statik ve inert zincir/negatif kanıtlarla
+kabul. **Yeni tarif gerçek ortamda uçtan uca çalıştırılmadı**;
+bu review'da yeni Docker/ADB/AVD/build/FTPS/paket/ağ koşusu yok.
+
+İki tarihî yaklaşımın başarısız sayaçları **2/2** korunur; vsftpd
+kararlılık 2, RUSTC 1 ve auth 1 ayrı. Seçici canlı ürüne taşınmadı.
+iOS, gerçek LAN/fiziksel, release ve hata/karışık scope kolları,
+üst P3-06 ve Faz3 açık. CURRENT/MANIFEST scoped güncellemesi ve
+sonraki commit/push ana koordinatörde; bu review kod/commit/push yapmadı.

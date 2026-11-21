@@ -90,12 +90,12 @@ iki normal explicit TLS aktarımı ve sağlıklı kapanış doğrulandı. Sessio
 zorunluluğu yalnız loopback fixture'da kapalı; ürün TLS güveni değişmedi.
 [FTPS-2…4 Android kanıtı](evidence/faz3/p3-06/ftps-android/RESULT.md) incelendi:
 ayrı test kopyasında güncel arm64 APK/JNI ile tek sentetik aktarım ve temizlik
-kanıtı var. Seçici yalnız test kopyasında; canlı ürün değişmedi. Son
-[bağımsız review DECISION](evidence/faz3/p3-06/review.md): FTPS-4'te üst son
-tarih tüm temizlik akışına taşınmıyor. İlk yaklaşım başarısız=2; yeni
-yürütücü mutlak süre FIX başarısız=2; sayaçlar ayrı. Üçüncü aynı yaklaşım,
-gerçek koşu, commit/push yok. Önceki host/Android runtime kanıtı geçerli;
-dar FTPS kabulü, iOS ve Faz3 açık. Tek sonraki adım: GPT tasarım kararı.
+kanıtı var. Seçici yalnız test kopyasında; canlı ürün değişmedi.
+[Bağımsız kabul](evidence/faz3/p3-06/review.md): **P3-06-FTPS-1…4 dar kabul**,
+tarif SHA `a3d96560b2a5…`. Önceki host/Android runtime kanıtı reuse; yeni
+tarif statik/inert doğrulandı, gerçek ortamda uçtan uca koşulmadı. İki tarihî
+sayaç ayrı ayrı 2. iOS, üst P3-06 ve Faz3 açık. Sonraki Faz3 dilimi için
+manifestteki zorunlu açıkları mevcut kanıta göre sırala.
 D12 yeniden açılmaz; sonraki iş kısa disk devriyle, sayaçlar korunarak yürür.
 Kaynak incelemesi görsel PASS sayılmaz; referans çözülmeden build/capture veya
 M13-alt tekrarı yok.

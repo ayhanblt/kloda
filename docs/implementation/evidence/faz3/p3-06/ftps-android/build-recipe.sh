@@ -75,10 +75,6 @@ class Interrupted(BaseException):
         self.sig = sig
 
 
-def remaining():
-    return END - time.monotonic()
-
-
 class Res:
     def __init__(self, rc, out, err):
         self.rc, self.out, self.err = rc, out, err
@@ -91,21 +87,31 @@ def killpg(p):
         pass
 
 
-def nap(sec, until=None):
-    """Mutlak son tarihi (varsayılan parent END) aşmayan uyku."""
-    until = END if until is None else until
-    time.sleep(max(0.0, min(sec, until - time.monotonic())))
+def nap(sec, until):
+    """Mutlak `until` tarihini aşmayan uyku: kalan süre uykudan HEMEN önce okunur; kalan sıfırsa uyku yok."""
+    rest = until - time.monotonic()
+    if rest > 0:
+        time.sleep(min(sec, rest))
 
 
-def run(cmd, timeout, check=True, out=None, env=None, cwd=None, inp=None, cleanup=False):
-    """Tek alt süreç; kendi süreç grubunda. Çağrı son tarihi Popen ÖNCESİ mutlak olarak belirlenir; Popen sonrası ve her
-    bloklayan beklemeden önce kalan süre yeniden hesaplanır (taban/min yok). Süre tükenmişse yalnız beklemesiz sinyal/poll.
-    İşletim sisteminin süreç yaratma gecikmesi geri alınmaz; dönüşte yeni bloklayan bekleme verilmez."""
-    budget = timeout if cleanup else min(timeout, remaining())
-    if budget <= 0:
-        raise Timeout("no time budget before %s" % cmd[0])
-    deadline = time.monotonic() + budget      # mutlak son tarih: Popen'den ÖNCE
+def run(cmd, cap=None, check=True, out=None, env=None, cwd=None, inp=None, cleanup=False, until=None):
+    """Tek alt süreç; kendi süreç grubunda. Çağrı son tarihi TEK monotonik örnekten türer:
+    d = min(parent END [cleanup=False ise], until [mutlak, çağıran aşama], now + cap). Göreli süre tekrar tarihe çevrilmez.
+    Popen sonrası ve her bloklayan beklemeden önce kalan süre yeniden okunur; taban yok. Süre tükenmişse YENİ komut/bekleme
+    yok: yalnız beklemesiz sinyal/poll. İşletim sistemi süreç yaratma gecikmesi geri alınmaz."""
+    now = time.monotonic()
+    d = float("inf") if cap is None else now + cap
+    if until is not None:
+        d = min(d, until)
+    if not cleanup:
+        d = min(d, END)
+    if d - now <= 0:
+        raise Timeout("no time budget before %s (no command started)" % cmd[0])
     fh = open(out, "wb") if out else None
+    if d - time.monotonic() <= 0:              # hazırlık (open) deadline'ı tüketti: aynı d, yeni pencere yok; Popen olmaz
+        if fh:
+            fh.close()
+        raise Timeout("deadline reached while preparing %s (no command started)" % cmd[0])
     try:
         p = subprocess.Popen(cmd, stdin=subprocess.PIPE if inp is not None else subprocess.DEVNULL,
                              stdout=fh if fh else subprocess.PIPE, stderr=subprocess.STDOUT if fh else subprocess.PIPE,
@@ -115,12 +121,9 @@ def run(cmd, timeout, check=True, out=None, env=None, cwd=None, inp=None, cleanu
             fh.close()
         raise Fail("cannot exec %s: %s" % (cmd[0], e))
 
-    def left():
-        return deadline - time.monotonic()
-
-    def reap():  # sinyal beklemesiz; kalan süre varsa yalnız o kadar bekle, yoksa poll
+    def reap():  # sinyal beklemesiz; kalan süre (yeniden okunur) varsa yalnız o kadar bekle, yoksa poll
         killpg(p)
-        rest = left()
+        rest = d - time.monotonic()
         try:
             if rest > 0:
                 p.wait(timeout=rest)
@@ -136,7 +139,7 @@ def run(cmd, timeout, check=True, out=None, env=None, cwd=None, inp=None, cleanu
                 pass
 
     try:
-        first = left()                         # Popen sonrası yeniden hesap
+        first = d - time.monotonic()           # Popen sonrası yeniden okuma
         if first <= 0:
             reap()                             # bütçe spawn'da bitti: bekleme yok
             raise Timeout("%s: budget consumed by process creation (no wait performed)" % cmd[0])
@@ -144,7 +147,7 @@ def run(cmd, timeout, check=True, out=None, env=None, cwd=None, inp=None, cleanu
             o, e = p.communicate(input=inp.encode() if inp is not None else None, timeout=first * 0.8)
         except subprocess.TimeoutExpired:
             reap()
-            raise Timeout("%s timed out (budget %.3fs)" % (cmd[0], budget))
+            raise Timeout("%s timed out (deadline reached)" % cmd[0])
     except BaseException:
         if p.poll() is None:
             reap()
@@ -216,13 +219,13 @@ def docker_exit_ok(rec):
         raise Fail("container %s exit code %s" % (rec["name"], r.out.strip()))
 
 
-def docker_resolve(ref, name, role, want_id, t):
+def docker_resolve(ref, name, role, want_id, until):
     """-> (state, full_id). state: absent | own | foreign | unknown. 'own' yalnız TAM kimlik (64 hex), ad, koşu etiketi ve rol
     birlikte doğrulanırsa (ve create ID döndüyse aynı ID ise)."""
     try:
         r = run(["docker", "inspect", "--type", "container", "--format",
                  '{{.Id}}|{{.Name}}|{{index .Config.Labels "%s"}}|{{index .Config.Labels "%s"}}' % (LABEL_KEY, ROLE_KEY), ref],
-                t, check=False, cleanup=True)
+                cap=15, until=until, check=False, cleanup=True)
     except Fail:
         return "unknown", ""
     if r.rc != 0:
@@ -240,18 +243,16 @@ def docker_resolve(ref, name, role, want_id, t):
 
 # ---------------------------------------------------------------- tek temizlik (başarı/hata/INT/TERM)
 SIGSEEN = []            # temizlik sırasında gelen INT/TERM (kaydedilir; temizlik kesilmez; PASS verilmez)
-EMU_SLICE = min(17.0, CLEAN / 3.0)   # emülatör grubu TERM/KILL/reap için AYRILMIŞ bütçe; dış servisler tüketemez
-ADB_SLICE = min(15.0, CLEAN / 4.0)   # ADB teardown toplam payı; kalan (>= 5/12) Docker adımlarına kalır
 
 
-def kill_emulator_group():
-    """Koşulsuz ve SONLU. Mutlak son tarih girişte (t_end = giriş + EMU_SLICE); TERM/KILL/reap öncesi kalan süre yeniden
-    hesaplanır, min taban yok. Süre tükendiyse bekleme yok: TERM ve KILL sinyali anında, poll."""
+def kill_emulator_group(until):
+    """Koşulsuz ve SONLU; `until` = mutlak G. TERM/KILL sinyali bekleme gerektirmez (G geçmişse de anında gider); bekleme
+    payı her seferinde TEK okumadan `until`'ı aşmayacak şekilde türetilir, kısa uykular `min(aralık, kalan)`. Ölü doğrulanamazsa
+    False (çağıran PGID ile CLEANUP_INCOMPLETE yazar)."""
     global EMU_DEAD
     if EMU is None or EMU_DEAD:
         return True
     pgid = EMU.pid
-    t_end = time.monotonic() + EMU_SLICE
 
     def alive():
         EMU.poll()
@@ -263,9 +264,9 @@ def kill_emulator_group():
         except PermissionError:
             return True
 
-    def wait_dead(until):  # kısa uykular da `until`'ı aşmaz
+    def wait_dead(stop):  # `stop` mutlak; her uyku öncesi kalan yeniden okunur
         while alive():
-            rest = until - time.monotonic()
+            rest = stop - time.monotonic()
             if rest <= 0:
                 break
             time.sleep(min(0.05, rest))
@@ -277,15 +278,16 @@ def kill_emulator_group():
                 os.killpg(pgid, sig)
             except (ProcessLookupError, PermissionError):
                 pass
-            rest = max(0.0, t_end - time.monotonic())            # bloklamadan önce yeniden hesap
-            if wait_dead(time.monotonic() + rest * frac):         # kalan sürenin payı kadar; tükendiyse sıfır bekleme
+            now = time.monotonic()                               # tek örnek: pay bundan türer ve `until`'ı aşmaz
+            rest = until - now
+            if wait_dead(now + rest * frac if rest > 0 else now):
                 break
-        rest = t_end - time.monotonic()
+        rest = until - time.monotonic()                          # reap öncesi yeniden okuma
         try:
             if rest > 0:
-                EMU.wait(timeout=rest)                            # reap: kalan süre kadar
+                EMU.wait(timeout=rest)
             else:
-                EMU.poll()                                        # beklemesiz
+                EMU.poll()                                       # beklemesiz
         except Exception:
             pass
     dead = not alive()
@@ -295,14 +297,15 @@ def kill_emulator_group():
 
 
 def cleanup():
-    """Bağımsız adımlar; her biri kendi try/except'inde. Tek mutlak temizlik son tarihi CEND; emülatör grubu için son
-    EMU_SLICE ayrılmıştır (ADB/dockerd o dilime giremez), grup adımı koşulsuz çalışır. Kalan kimlikleri döndürür."""
+    """Tek t0 (girişte bir kez). D = t0+CLEAN; grup rezervi E = min(17, CLEAN/3); ADB en geç A = t0+min(ADB_SLICE,(CLEAN-E)/2);
+    grup G = A+E; Docker D. Hepsi başta hesaplanır; hiçbir adım yeni bütçe açamaz. Anahtar temizliği bağımsız ve ilk;
+    grup adımı ADB'den hemen sonra, sonucu ne olursa olsun denenir. Kalan kimlikleri döndürür."""
     left = []
-    cend = time.monotonic() + CLEAN
-    ext_end = cend - EMU_SLICE          # dış servis (ADB/Docker) adımlarının mutlak sınırı, emülatör kapatma bundan ÖNCE koşar
-
-    def room(until, cap_s):
-        return min(cap_s, until - time.monotonic())
+    t0 = time.monotonic()
+    D = t0 + CLEAN
+    E = min(17.0, CLEAN / 3.0)
+    A = t0 + min(min(15.0, CLEAN / 4.0), (CLEAN - E) / 2.0)
+    G = A + E
 
     def step(label, fn):
         try:
@@ -310,7 +313,7 @@ def cleanup():
         except BaseException as e:  # noqa: BLE001 — bir adım takılsa/patlasa diğerleri denenir
             left.append("%s:%s" % (label, type(e).__name__))
 
-    # 1) yerel özel anahtarlar (yerel, takılmaz)
+    # 1) yerel özel anahtarlar (yerel, takılmaz; bağımsız)
     def keys():
         for rel in ("pki/ca.key", "pki/server.key", "pki/server.csr", "pki/ca.srl", "conf/server.key"):
             pth = os.path.join(W, rel)
@@ -322,18 +325,14 @@ def cleanup():
                 left.append("file:" + pth)
     step("keys", keys)
 
-    # 2a) ADB teardown: yalnız aidiyeti doğrulanmış (bu scriptin canlı süreci + AVD adı) emülatöre; toplam payı sınırlı
+    # 2a) ADB teardown: yalnız aidiyeti doğrulanmış (bu scriptin canlı süreci + AVD adı) emülatöre; her çağrı ve polling `A`
     def adb_teardown():
         if EMU is None or EMU.poll() is not None or not LEDGER["adb"]:
             return
-        stop = min(ext_end, time.monotonic() + ADB_SLICE)   # ADB toplam üst sınırı; emülatör diliminden önce biter
-        t = room(stop, CALL)
-        if t <= 0:
-            return
         try:
-            v = run(["adb", "-s", SERIAL, "emu", "avd", "name"], t, check=False, cleanup=True)
+            v = run(["adb", "-s", SERIAL, "emu", "avd", "name"], cap=CALL, until=A, check=False, cleanup=True)
         except Fail:
-            return  # ADB cevap vermiyor: dokunma; aidiyetli grup 2b'de kapanır (kurulum/reverse -read-only emülatörle yok olur)
+            return  # ADB cevap vermiyor/bütçe yok: dokunma; aidiyetli grup 2b'de kapanır (-read-only emülatörle yok olur)
         if not (v.rc == 0 and v.out.strip().split("\n")[0].strip() == AVD):
             return  # doğrulanamadı: ADB'ye dokunma
         for it in reversed(list(LEDGER["adb"])):
@@ -342,39 +341,37 @@ def cleanup():
             else:
                 cmds = [["adb", "-s", SERIAL, "reverse", "--remove", "tcp:%d" % it["port"]]]
             for c in cmds:
-                t = room(stop, 10)
-                if t <= 0:
-                    return
                 try:
-                    run(c, t, check=False, cleanup=True)
+                    run(c, cap=10, until=A, check=False, cleanup=True)
                 except Fail:
                     pass
-        t = room(stop, 10)
-        if t > 0:
-            try:  # zarif durdurma da yalnız doğrulanmış emülatöre
-                run(["adb", "-s", SERIAL, "emu", "kill"], t, check=False, cleanup=True)
-            except Fail:
-                pass
-            end = min(stop, time.monotonic() + 5)
-            while EMU.poll() is None and time.monotonic() < end:
-                time.sleep(0.05)
+        try:  # zarif durdurma da yalnız doğrulanmış emülatöre
+            run(["adb", "-s", SERIAL, "emu", "kill"], cap=10, until=A, check=False, cleanup=True)
+        except Fail:
+            return
+        now = time.monotonic()
+        stop = min(A, now + 5)                                   # tek örnek; polling `A`'yı aşmaz
+        while EMU.poll() is None:
+            rest = stop - time.monotonic()                       # her uyku öncesi yeniden okuma; kalan sıfırsa uyku yok
+            if rest <= 0:
+                break
+            time.sleep(min(0.05, rest))
     step("adb-teardown", adb_teardown)
 
-    # 2b) emülatör süreç grubu: ADB görünmese/asılsa da, ayrılmış dilimde, koşulsuz
+    # 2b) emülatör süreç grubu: ADB sonucu ne olursa olsun; sınır G; doğrulanamazsa PGID ile kalan
     def emulator_group():
-        if EMU is not None and not kill_emulator_group():
+        if EMU is not None and not kill_emulator_group(G):
             left.append("emulator-pgid:%d" % EMU.pid)
     step("emulator-group", emulator_group)
 
-    # 3) Docker: yalnız inspect ile doğrulanmış TAM ID'ye `rm -f`; ID dönmediyse ad+etiket yalnız KEŞİF içindir, hedef ID'dir
+    # 3) Docker: inspect → remove → recheck zincirinin HER adımı D taşır; yalnız inspect ile doğrulanan TAM ID'ye `rm -f`
     for rec in reversed(list(LEDGER["docker"])):
         def one(rec=rec):
             nm, rl, known = rec["name"], rec["role"], rec["id"]
-            t = room(cend, 15)
-            if t <= 0:
-                left.append("docker:%s:budget-exhausted" % nm)
+            if D - time.monotonic() <= 0:
+                left.append("docker:%s:budget-exhausted(%s)" % (nm, known or "id-unknown"))
                 return
-            st, cid = docker_resolve(known or nm, nm, rl, known, t)
+            st, cid = docker_resolve(known or nm, nm, rl, known, D)
             if st == "absent":
                 if known:
                     return  # create ID döndürmüştü; kaynak yok
@@ -387,13 +384,17 @@ def cleanup():
             if st == "foreign":
                 left.append("docker:%s:foreign:%s(not removed)" % (nm, cid))
                 return
-            t = room(cend, 20)
-            if t <= 0:
+            if D - time.monotonic() <= 0:                        # inspect dönüşü D'yi geçti: remove başlatılmaz
                 left.append("docker:%s:%s:budget-exhausted(verified-not-removed)" % (nm, cid))
                 return
-            run(["docker", "rm", "-f", cid], t, check=False, cleanup=True)
-            t = room(cend, 15)
-            st2, _ = docker_resolve(cid, nm, rl, cid, t) if t > 0 else ("unknown", "")
+            try:
+                run(["docker", "rm", "-f", cid], cap=20, until=D, check=False, cleanup=True)
+            except Fail:
+                pass
+            if D - time.monotonic() <= 0:                        # remove dönüşü D'yi geçti: recheck başlatılmaz
+                left.append("docker:%s:%s:rm-unverified(deadline)" % (nm, cid))
+                return
+            st2, _ = docker_resolve(cid, nm, rl, cid, D)
             if st2 != "absent":
                 left.append("docker:%s:%s:%s" % (nm, cid, "rm-unverified" if st2 == "unknown" else "still-present"))
         step("docker:" + rec["name"], one)
@@ -463,6 +464,66 @@ ls /usr/lib/proftpd | grep -x mod_tls.so
 
 
 # ---------------------------------------------------------------- ana akış
+def start_emulator(logpath):
+    """Doğrudan emülatör başlatma (ayrı süreç grubu). Niyet önce kayda girer; log handle'ı ve sinyal maskesi hazırlığından SONRA,
+    Popen hemen öncesinde parent END aynen yeniden kontrol edilir (yeni pencere yok; süreç yaratma gecikmesi için garanti yok).
+    Her çıkış yolunda eski sinyal maskesi geri yüklenir ve handle kapanır; handler'lara dokunulmaz."""
+    global EMU
+    LEDGER["emulator"] = {"avd": AVD, "serial": SERIAL, "pid": None}
+    save_ledger()
+    unblock = lambda: signal.pthread_sigmask(signal.SIG_UNBLOCK, {signal.SIGINT, signal.SIGTERM})  # noqa: E731  (yalnız çocuk)
+    logf, old = None, None
+    try:
+        logf = open(logpath, "wb")
+        old = signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGINT, signal.SIGTERM})  # Popen→atama arası sinyal penceresi yok
+        if END - time.monotonic() <= 0:        # hazırlık parent deadline'ını tüketti: Popen olmaz
+            raise Timeout("parent deadline reached before emulator spawn (no process started)")
+        EMU = subprocess.Popen([EMULATOR, "-avd", AVD, "-read-only", "-port", str(EMU_PORT), "-no-window", "-no-audio",
+                                "-no-boot-anim", "-no-snapshot-save"], stdin=subprocess.DEVNULL, stdout=logf,
+                               stderr=subprocess.STDOUT, start_new_session=True, preexec_fn=unblock)
+        LEDGER["emulator"]["pid"] = EMU.pid
+    finally:
+        try:
+            if logf is not None:
+                logf.close()        # önce handle (sinyaller hâlâ bloklu); close hata verse de maske aşağıda restore edilir
+        finally:
+            if old is not None:     # bekleyen INT/TERM yalnız burada teslim olur: close zaten denenmiş/tamamlanmış
+                signal.pthread_sigmask(signal.SIG_SETMASK, old)   # eski maske (UNBLOCK ile varsayma yok)
+    save_ledger()
+
+
+def wait_ready(ca, logpath, ready_end):
+    """Host readiness: sorgu ve uyku doğrudan MUTLAK ready_end alır; tüketilmişse yeni sorgu/uyku yok."""
+    while True:
+        try:
+            r = run(["openssl", "s_client", "-connect", "localhost:27449", "-starttls", "ftp", "-CAfile", ca,
+                     "-verify_hostname", "localhost", "-verify_return_error"], cap=10, until=ready_end, check=False, inp="QUIT\n")
+            open(logpath, "w").write(r.out + r.err)
+            if r.rc == 0 and re.search(r"Verification: OK|Verify return code: 0", r.out + r.err):
+                return
+        except Timeout:
+            pass  # sorgu kendi tarihini tüketti; aşağıdaki kontrol yeni sorgu/uykuyu keser
+        if ready_end - time.monotonic() <= 0:
+            raise Fail("service not reachable with verified TLS on 27449")
+        nap(1, ready_end)
+
+
+def wait_boot(boot_end):
+    """AVD boot: her sorgu ve polling uykusu doğrudan MUTLAK boot_end alır; tüketilmişse yeni sorgu/uyku yok."""
+    while True:
+        if EMU.poll() is not None:
+            raise Fail("emulator exited early rc=%s" % EMU.returncode)
+        if boot_end - time.monotonic() <= 0:
+            raise Timeout("AVD boot deadline exceeded (window %.0fs, parent deadline %.0fs)" % (BOOT, TOTAL))
+        try:
+            r = run(["adb", "-s", SERIAL, "shell", "getprop", "sys.boot_completed"], cap=QUERY, until=boot_end, check=False)
+            if r.rc == 0 and r.out.strip() == "1":
+                return
+        except Timeout:
+            pass  # askıda sorgu kendi tarihinde öldürüldü; boot_end içinde yeniden dene
+        nap(2.0, boot_end)
+
+
 def pipeline(R):
     global EMU
     L = lambda n: os.path.join(W, "logs", n)  # noqa: E731
@@ -519,16 +580,7 @@ def pipeline(R):
     srv = docker_create("srv", flags + ["-v", "%s/conf:/run/kloda:ro" % W], IMG, ["/run/kloda/entry.sh"])
     run(["docker", "start", srv["id"]], CALL)
     # host kontrolü: gerçek CA + hostname doğrulamalı explicit AUTH TLS (byte+SHA probu reuse: ftps-host-representative/probe.py)
-    ready_end = min(time.monotonic() + 30, END)
-    while True:
-        r = run(["openssl", "s_client", "-connect", "localhost:27449", "-starttls", "ftp", "-CAfile", pki("ca.pem"),
-                 "-verify_hostname", "localhost", "-verify_return_error"], 10, check=False, inp="QUIT\n")
-        open(L("host-tls.log"), "w").write(r.out + r.err)
-        if r.rc == 0 and re.search(r"Verification: OK|Verify return code: 0", r.out + r.err):
-            break
-        if time.monotonic() >= ready_end:
-            raise Fail("service not reachable with verified TLS on 27449")
-        nap(1, ready_end)
+    wait_ready(pki("ca.pem"), L("host-tls.log"), min(time.monotonic() + 30, END))
 
     # 4) klon + mevcut seçici + aynı CA ile test .so
     clone = os.path.join(W, "clone")
@@ -598,34 +650,8 @@ def pipeline(R):
     print("APK_SHA256=" + sha256(apk))
 
     # 6) kayıtlı sahipli read-only AVD: tek monotonik boot son tarihi; emülatör ayrı süreç grubunda
-    LEDGER["emulator"] = {"avd": AVD, "serial": SERIAL, "pid": None}
-    save_ledger()
-    logf = open(L("emulator.log"), "wb")
-    unblock = lambda: signal.pthread_sigmask(signal.SIG_UNBLOCK, {signal.SIGINT, signal.SIGTERM})  # noqa: E731
-    signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGINT, signal.SIGTERM})  # Popen→atama arası sinyal penceresi yok
-    try:
-        EMU = subprocess.Popen([EMULATOR, "-avd", AVD, "-read-only", "-port", str(EMU_PORT), "-no-window", "-no-audio",
-                                "-no-boot-anim", "-no-snapshot-save"], stdin=subprocess.DEVNULL, stdout=logf,
-                               stderr=subprocess.STDOUT, start_new_session=True, preexec_fn=unblock)
-        LEDGER["emulator"]["pid"] = EMU.pid
-    finally:
-        signal.pthread_sigmask(signal.SIG_UNBLOCK, {signal.SIGINT, signal.SIGTERM})
-        logf.close()
-    save_ledger()
-    boot_end = min(time.monotonic() + BOOT, END)
-    while True:
-        if EMU.poll() is not None:
-            raise Fail("emulator exited early rc=%s" % EMU.returncode)
-        left = boot_end - time.monotonic()
-        if left <= 0:
-            raise Timeout("AVD boot deadline exceeded (%.0fs window, parent deadline %.0fs)" % (BOOT, TOTAL))
-        try:
-            r = run(["adb", "-s", SERIAL, "shell", "getprop", "sys.boot_completed"], min(QUERY, left), check=False)
-            if r.rc == 0 and r.out.strip() == "1":
-                break
-        except Timeout:
-            pass  # askıda sorgu 5 sn'de öldürüldü; son tarih içinde yeniden dene
-        nap(2.0, boot_end)
+    start_emulator(L("emulator.log"))
+    wait_boot(min(time.monotonic() + BOOT, END))
     if run(["adb", "-s", SERIAL, "shell", "getprop", "ro.product.cpu.abi"], QUERY + 10).out.strip() != "arm64-v8a":
         raise Fail("AVD is not arm64-v8a")
     LEDGER["adb"].append({"kind": "install"})  # niyet işlemden ÖNCE

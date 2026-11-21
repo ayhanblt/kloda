@@ -2,6 +2,27 @@
 
 ## Ekip devam kaydı — 20.11
 
+- 21.11 **P3-06-FTPS-1…4 dar kabul** — [bağımsız GPT review](p3-06/review.md),
+  `ses_e02b92a99ffeq0YRpAWUiBcSB2`, tarif SHA `a3d96560b2a5…`.
+  Host/Android gerçek aktarım ve fiş kanıtı reuse; yeni tarifte statik/inert
+  zaman aşımı, aidiyet ve sinyal temizliği kanıtı. Yeni tarif gerçek ortamda
+  uçtan uca koşulmadı. İki tarihî sayaç ayrı ayrı 2; üst P3-06/iOS/Faz3 açık.
+
+- FTPS-4 bağımsız review FIX: hazırlık sırasında son tarih geçerse komut
+  veya emülatör yine başlatılabiliyor. Tek devam: iki başlatma noktasında
+  hazırlık sonrası mevcut mutlak tarihi kontrol et; inert RED→GREEN ve aynı
+  reviewer. İki eski sayaç=2; runtime reuse, kabul/commit/push yok.
+
+- 21.11 FTPS-4 tek mutlak süre tasarımı **DESIGN-READY** — GPT reviewer
+  `ses_e02b92a99ffeq0YRpAWUiBcSB2`; §3'te A/G/D ve readiness/boot çağrı
+  sınırları ile inert kabul yöntemi doğrulandı. Bu tasarım onayıdır, FTPS
+  kabulü değil. Her iki sayaç=2; eski runtime PASS geçerli. Uygulama
+  başlatılmadı; sonraki adım yetkiyle aynı Sonnet'e dar devir.
+
+- 21.11 FTPS-4 tek mutlak süre tasarımı `next-plan.md` §3'te; aynı GPT
+  reviewer'a uygulama öncesi bağımsız inceleme. Tarif/gerçek koşu yok.
+  Önceki runtime ve iki ayrı sayaç korunur.
+
 - 21.11 FTPS-4 **DECISION**: [bağımsız review](p3-06/review.md) son inert
   probda 10 ms ADB temizlik payına 50 ms uyku, emülatör için üst son
   tarihten bağımsız süre ve alt çağrıda çift saat okuması buldu. İlk

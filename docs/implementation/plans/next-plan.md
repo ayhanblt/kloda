@@ -1344,6 +1344,48 @@ bloklayan bekleme verilmez. Dar inert kabul: 10 ms bütçe, süreç açılışı
 bütçenin kısmen/tamamen tüketilmesi, kısa emülatör temizliği; her beklemeye
 verilen süre ve toplam sanal zaman ölçülür. Diğer kabul kanıtları reuse.
 
+**FTPS-4 tasarım incelemesi — tek deadline, alt aşamalar yalnız daraltır.**
+Önceki iki yaklaşımın sayaçları ayrı ayrı 2. Uygulama hedefi yalnız mevcut
+`build-recipe.sh`; sahiplik, TLS, aktarım ve sinyal kuralları değişmez.
+
+- `cleanup()` girişinde monotonik `t0` bir kez alınır. Üst son tarih
+  `D=t0+CLEAN`; grup rezervi `E=min(17,CLEAN/3)`. ADB en geç
+  `A=t0+min(ADB_SLICE,(CLEAN-E)/2)` anında biter; emülatör grubu
+  `G=A+E` sınırını, Docker `D` sınırını kullanır. Hepsi başta hesaplanır.
+  Grup adımı ADB'den hemen sonra, sonucu ne olursa olsun denenir; hiçbir
+  adım yeni bütçe açamaz. Yerel anahtar temizliği bağımsız denenir.
+- `run`, `docker_resolve`, grup kapatma ve uyku yardımcısına süre yerine
+  **mutlak tarih** aktarılır. Çağrı limiti gerekiyorsa tek bir `now` ile
+  `min(parent, now+cap)` hesaplanır; kalan süre tarihe geri çevrilmez.
+  Her `Popen`, `communicate`, `wait` ve uyku öncesi kalan süre yeniden
+  okunur; uyku `min(aralık, kalan)`. Kalan sıfırsa yeni dış komut veya
+  bekleme yok. ADB teardown ve kapanış polling'i `A`; grup TERM/KILL/reap
+  `G`; Docker inspect → remove → recheck zincirinin her adımı `D` taşır.
+  Aynı yürütücüyü kullanan host readiness ve AVD boot sorguları ile
+  polling uykuları doğrudan `ready_end` ve `boot_end` alır; göreli süreye
+  çevirip yeni pencere açmaz.
+- Süre dolarsa yalnız aidiyetli grup için beklemesiz sinyal/poll;
+  doğrulanamayan kaynak `CLEANUP_INCOMPLETE` ve nonzero. Tam Docker ID
+  ve belirsiz create korumaları devam eder. OS başlatma/dosya sistemi/
+  zamanlama gecikmesi için gerçek zaman garantisi yok; dönüşte gecikme
+  bütçeye eklenmez ve yeni bekleme başlatılmaz.
+- **Kabul:** gerçek `cleanup()` zincirini sahte saat ve araçlarla sınamak.
+  10 ms ADB payı, yavaş `Popen` ve çift-okuma arasına sokulan zaman
+  kaymasında her bekleme argümanı o andaki aşama/üst tarihe karşı ölçülür.
+  ADB kill dönüşü `A`'yı geçerse polling beklemez ama grup adımı atlanmaz.
+  Grup girişinde `G` geçmişse aidiyetli gruba yalnız beklemesiz sinyal/poll
+  gider, doğrulanamazsa PGID ile `CLEANUP_INCOMPLETE`/nonzero.
+  Docker inspect dönüşü `D`'yi geçerse remove başlatılmaz; remove dönüşü
+  `D`'yi geçerse recheck başlatılmaz. Her iki durumda kaynak kimliği ile
+  `CLEANUP_INCOMPLETE`/nonzero. ID'siz create + `NotFound`, yabancı
+  sahiplik ve cleanup INT/TERM önceki fail-closed davranışı korur.
+  Host readiness ve AVD boot için ayrı dar inert çağrı-yolu kontrolü:
+  geciken sorgu kendi parent tarihini tüketirse yeni sorgu/uyku yok.
+  Önceki host/Android runtime kanıtı reuse; gerçek koşu yok.
+
+**Kapı:** Aynı bağımsız GPT reviewer tasarımı ve tüm zinciri kapsayan
+kanıt yöntemini inceler. Görüş gelmeden uygulama Sonnet'e devredilmez.
+
 **En küçük çözüm ve sınır:** `AndroidFtpsFixture.kt` yükleyicisi ve `kloda-ftps16`
 asset sözleşmesi yeniden kullanılacak; eski binary/CA canlı ağaçta silinmez veya
 değiştirilmez. Güncel test asset'leri yalnız ayrılmış test kopyasında üretilir.
