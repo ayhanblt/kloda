@@ -1,0 +1,9 @@
+{
+ "absentStatus": -25300,
+ "account": "profile",
+ "deleteStatus": 0,
+ "mode": "cleanup",
+ "phase": "finished",
+ "service": "com.kloda.fixture.ftps16c.files.rjbnxibhh.ftps.native.v1",
+ "status": "PASS"
+}

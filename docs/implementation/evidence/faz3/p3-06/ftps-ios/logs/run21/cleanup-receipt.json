@@ -1,0 +1,18 @@
+{
+ "host_independent_password_absent": true,
+ "receipt": {
+  "absentStatus": -25300,
+  "account": "profile",
+  "bundle": "com.kloda.fixture.ftps16c.files.rwn5tq2xe",
+  "challenge": "cc38ec8961f36a7328b8e56e0ac6ffcc",
+  "deleteStatus": -25300,
+  "mode": "cleanup",
+  "nonce": "d778741c-934c-4a85-81df-9e247aa04618",
+  "passwordAbsent": true,
+  "phase": "finished",
+  "service": "com.kloda.fixture.ftps16c.files.rwn5tq2xe.ftps.native.v1",
+  "status": "PASS",
+  "udid": "61A45399-D0F9-43C0-B356-E1EF6712E960"
+ },
+ "valid": true
+}

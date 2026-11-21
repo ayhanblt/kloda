@@ -1,0 +1,9 @@
+2026-11-21T19:25:46Z
+ROOT=/private/tmp/kloda-p3-06-ftps-ios.jBnXibhh RUN=jbnxibhh
+/private/tmp/kloda-p3-06-ftps-ios.jBnXibhh/pki/server.pem: OK
+CA_FILE_SHA256=eda054fb67314b060f827c584795f5d9c8f27fa9048bef23973e6786f92d5ebc
+TEST_A_SHA256=8faa8ceb453643261d12332fdcb92d1bfd7f740d67464a4513b8704a400451d2
+APP_EXEC_SHA256=3ea89fe727ddb88f993df33f10d2c6a53f6ea0c0e37ae4b10e20f1c30edf834a BUNDLE=com.kloda.fixture.ftps16c.files.rjbnxibhh NONCE=8707ddb8-4507-4c97-be62-a6158e4c86cf
+IOS_FTPS_1_COMPILE_LINK_PASS root=/private/tmp/kloda-p3-06-ftps-ios.jBnXibhh (Simulator/servis/kurulum yok; özel anahtarlar /private/tmp/kloda-p3-06-ftps-ios.jBnXibhh/pki içinde 0600; run fazı veya hata siler)
+EXIT=0
+2026-11-21T19:27:37Z

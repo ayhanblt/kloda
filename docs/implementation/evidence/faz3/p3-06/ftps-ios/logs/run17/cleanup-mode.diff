@@ -1,0 +1,63 @@
+--- /Users/ayhanblt/Desktop/projects/kloda/packages/ftps-native/apple/tests/IosFtpsLoopbackFilesApp.swift	2026-11-03 13:59:55
++++ /private/tmp/kloda-p3-06-ftps-ios.Rlk4Hz8Q/clone/packages/ftps-native/apple/tests/IosFtpsLoopbackFilesApp.swift	2026-11-21 23:05:44
+@@ -1,6 +1,7 @@
+ import UIKit
+ import UniformTypeIdentifiers
+ import CryptoKit
++import Security
+ 
+ // Owned Simulator fixture: actual picker bookmarks/native pipeline; no Photos or fabricated receipts.
+ @main final class FtpsLoopbackFilesApp: UIResponder, UIApplicationDelegate, UIDocumentPickerDelegate {
+@@ -8,7 +9,8 @@
+   var selectingSource = true
+   let restore = IosFtpsFilesRestore()
+   var root: URL { FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0] }
+-  var mode: String { CommandLine.arguments.last ?? "invalid" }
++  var mode: String { let a = CommandLine.arguments; return a.count >= 3 && a[a.count - 2] == "cleanup" ? "cleanup" : (a.last ?? "invalid") }
++  var challenge: String { CommandLine.arguments.last ?? "" }
+   var nonce: String { Bundle.main.object(forInfoDictionaryKey: "FixtureNonce") as! String }
+   static let payload = Data((0..<4097).map { UInt8($0 % 251) })
+   func application(_ app: UIApplication, didFinishLaunchingWithOptions options: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+@@ -17,7 +19,8 @@
+     do {
+       try require(ProcessInfo.processInfo.environment["SIMULATOR_UDID"] == "61A45399-D0F9-43C0-B356-E1EF6712E960")
+       try require(Bundle.main.bundleIdentifier?.hasPrefix("com.kloda.fixture.ftps16c.files.") == true)
+-      try require(mode == "seed" || mode == "reopen")
++      try require(mode == "seed" || mode == "reopen" || mode == "cleanup")
++      if mode == "cleanup" { DispatchQueue.global().async { self.cleanup() }; return true }
+       if mode == "seed" {
+         for name in ["Source", "Restore"] { try FileManager.default.createDirectory(at: root.appendingPathComponent(name), withIntermediateDirectories: false) }
+         try Self.payload.write(to: root.appendingPathComponent("Source/owned.bin"), options: .withoutOverwriting)
+@@ -26,6 +29,32 @@
+     } catch { report(error: error) }
+     return true
+   }
++  // Fixture-only cleanup: HOST container'a yazmaz/silmez. Kendi sandbox'ında sentetik parola dosyasını siler, exact Keychain kimliğini siler/yokluğunu
++  // doğrular (değer OKUNMAZ) ve challenge'a özel atomik makbuz yazar. Challenge: tek kullanımlık 32 küçük hex (dosya adı güvenli).
++  func cleanup() {
++    let hex = Array("0123456789abcdef")
++    guard challenge.count == 32, challenge.allSatisfy({ hex.contains($0) }) else { return }   // güvensiz ad: makbuz yazılmaz
++    var d: [String: Any] = ["mode": "cleanup", "phase": "finished", "challenge": challenge, "account": "profile",
++      "udid": ProcessInfo.processInfo.environment["SIMULATOR_UDID"] ?? "", "bundle": Bundle.main.bundleIdentifier ?? "", "nonce": nonce]
++    var ok = false
++    if let bundle = Bundle.main.bundleIdentifier, !bundle.isEmpty {
++      let secret = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("fixture-password")
++      try? FileManager.default.removeItem(at: secret)
++      d["passwordAbsent"] = !FileManager.default.fileExists(atPath: secret.path)
++      let identity: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
++        kSecAttrService as String: bundle + ".ftps.native.v1", kSecAttrAccount as String: "profile", kSecAttrSynchronizable as String: false]
++      let deleted = SecItemDelete(identity as CFDictionary)
++      var probe = identity; probe[kSecReturnAttributes as String] = true; probe[kSecMatchLimit as String] = kSecMatchLimitOne
++      var item: CFTypeRef?
++      let absent = SecItemCopyMatching(probe as CFDictionary, &item)
++      d["service"] = bundle + ".ftps.native.v1"; d["deleteStatus"] = Int(deleted); d["absentStatus"] = Int(absent)
++      ok = (deleted == errSecSuccess || deleted == errSecItemNotFound) && absent == errSecItemNotFound && (d["passwordAbsent"] as? Bool) == true
++    }
++    d["status"] = ok ? "PASS" : "FAIL"
++    if let data = try? JSONSerialization.data(withJSONObject: d, options: .sortedKeys) {
++      try? data.write(to: root.appendingPathComponent("cleanup-" + challenge + ".json"), options: .atomic)
++    }
++  }
+   func require(_ condition: @autoclosure () throws -> Bool, line: UInt = #line) throws {
+     guard try condition() else { throw IosFtpsFailure(code: "fixture_assertion_\(line)") }
+   }

@@ -1,0 +1,6 @@
+.ftps.native.v1
+absentStatus
+cleanup-
+deleteStatus
+fixture-password
+passwordAbsent

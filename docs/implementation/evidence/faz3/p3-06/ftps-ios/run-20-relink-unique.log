@@ -1,0 +1,8 @@
+2026-11-21T20:20:34Z
+IDENTITY_REISSUED bundle com.kloda.fixture.ftps16c.files.rrlk4hz8q -> com.kloda.fixture.ftps16c.files.rwn5tq2xe (new nonce)
+IDENTITY_OK root=/private/tmp/kloda-p3-06-ftps-ios.Wn5Tq2Xe bundle=com.kloda.fixture.ftps16c.files.rwn5tq2xe nonce=d778741c-934c-4a85-81df-9e247aa04618 exec_sha256=99f9cd11206262ee6c8f4bea82ddeb34f64bfd3769f32bbf654dfcfa88452b77 run=wn5tq2xe
+BUNDLE=com.kloda.fixture.ftps16c.files.rwn5tq2xe NONCE=d778741c-934c-4a85-81df-9e247aa04618
+APP_EXEC_SHA256=99f9cd11206262ee6c8f4bea82ddeb34f64bfd3769f32bbf654dfcfa88452b77 TEST_A_SHA256=8faa8ceb453643261d12332fdcb92d1bfd7f740d67464a4513b8704a400451d2
+IOS_FTPS_RELINK_PASS root=/private/tmp/kloda-p3-06-ftps-ios.Wn5Tq2Xe (Simulator/servis/kurulum yok; anahtarlar korundu)
+EXIT=0
+2026-11-21T20:21:26Z

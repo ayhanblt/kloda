@@ -1,0 +1,7 @@
+2026-11-21T13:38:53Z
+start HEAD b9be515607e54967d452574ae1f9f20501f39100
+FAILED: Fail: open rc=1 Unable to find application named 'Simulator'
+CLEANUP_INCOMPLETE remaining=["keychain:service=com.kloda.fixture.ftps16c.files.rnoenk1w3.ftps.native.v1,account=profile:absence-unverified"] root=/private/tmp/kloda-p3-06-ftps-ios.noenK1w3
+CLEANUP_ELAPSED=10.1s (budget 240s)
+EXIT=4
+2026-11-21T13:39:34Z

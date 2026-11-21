@@ -1,0 +1,7 @@
+6650a8e56012f697b599a305930442d07b5ab6e7c621b4db4efb57a6347b19ea  apps/mobile/modules/my-module/ios/NativeFtps/KlodaFtpsNative.xcframework/Info.plist
+588cfc16427f82c57978e6499ba89e6d171565a5294801a62383c89e6c5dc3d2  apps/mobile/modules/my-module/ios/NativeFtps/KlodaFtpsNative.xcframework/ios-arm64-simulator/Headers/kloda_ftps.h
+e05f11328e02d79b17f0e885b67704f9e3053d56d05963254a95a8ec82ad1fad  apps/mobile/modules/my-module/ios/NativeFtps/KlodaFtpsNative.xcframework/ios-arm64-simulator/libkloda_ftps_native.a
+588cfc16427f82c57978e6499ba89e6d171565a5294801a62383c89e6c5dc3d2  apps/mobile/modules/my-module/ios/NativeFtps/KlodaFtpsNative.xcframework/ios-arm64/Headers/kloda_ftps.h
+174b657106758417fb5d4270c837dc9f72e94c17eec965226e7ac10c5cb01eb7  apps/mobile/modules/my-module/ios/NativeFtps/KlodaFtpsNative.xcframework/ios-arm64/libkloda_ftps_native.a
+588cfc16427f82c57978e6499ba89e6d171565a5294801a62383c89e6c5dc3d2  apps/mobile/modules/my-module/ios/NativeFtps/kloda_ftps.h
+fa513ce4cef3ff797ed131ae301d07a640b3774428d0dc87790b850e389e02a4  apps/mobile/modules/my-module/ios/NativePairing/KlodaPairingNative.xcframework/ios-arm64-simulator/libkloda_pairing_native.a

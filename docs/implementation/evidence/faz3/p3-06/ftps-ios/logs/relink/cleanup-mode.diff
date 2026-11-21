@@ -1,0 +1,42 @@
+--- /Users/ayhanblt/Desktop/projects/kloda/packages/ftps-native/apple/tests/IosFtpsLoopbackFilesApp.swift	2026-11-03 13:59:55
++++ /private/tmp/kloda-p3-06-ftps-ios.noenK1w3/clone/packages/ftps-native/apple/tests/IosFtpsLoopbackFilesApp.swift	2026-11-21 14:17:22
+@@ -1,6 +1,7 @@
+ import UIKit
+ import UniformTypeIdentifiers
+ import CryptoKit
++import Security
+ 
+ // Owned Simulator fixture: actual picker bookmarks/native pipeline; no Photos or fabricated receipts.
+ @main final class FtpsLoopbackFilesApp: UIResponder, UIApplicationDelegate, UIDocumentPickerDelegate {
+@@ -17,7 +18,8 @@
+     do {
+       try require(ProcessInfo.processInfo.environment["SIMULATOR_UDID"] == "61A45399-D0F9-43C0-B356-E1EF6712E960")
+       try require(Bundle.main.bundleIdentifier?.hasPrefix("com.kloda.fixture.ftps16c.files.") == true)
+-      try require(mode == "seed" || mode == "reopen")
++      try require(mode == "seed" || mode == "reopen" || mode == "cleanup")
++      if mode == "cleanup" { DispatchQueue.global().async { self.cleanup() }; return true }
+       if mode == "seed" {
+         for name in ["Source", "Restore"] { try FileManager.default.createDirectory(at: root.appendingPathComponent(name), withIntermediateDirectories: false) }
+         try Self.payload.write(to: root.appendingPathComponent("Source/owned.bin"), options: .withoutOverwriting)
+@@ -26,6 +28,21 @@
+     } catch { report(error: error) }
+     return true
+   }
++  // Fixture-only Keychain cleanup (IosFtpsVault ile aynı tam kimlik); değer OKUNMAZ, sonuç yalnız OSStatus.
++  func cleanup() {
++    do {
++      guard let bundle = Bundle.main.bundleIdentifier, !bundle.isEmpty else { throw IosFtpsFailure(code: "fixture_cleanup_bundle") }
++      let identity: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
++        kSecAttrService as String: bundle + ".ftps.native.v1", kSecAttrAccount as String: "profile", kSecAttrSynchronizable as String: false]
++      let deleted = SecItemDelete(identity as CFDictionary)
++      try require(deleted == errSecSuccess || deleted == errSecItemNotFound)
++      var probe = identity; probe[kSecReturnAttributes as String] = true; probe[kSecMatchLimit as String] = kSecMatchLimitOne
++      var item: CFTypeRef?
++      let absent = SecItemCopyMatching(probe as CFDictionary, &item)
++      try require(absent == errSecItemNotFound)
++      report(details: ["deleteStatus": Int(deleted), "absentStatus": Int(absent), "service": bundle + ".ftps.native.v1", "account": "profile"])
++    } catch { report(error: error) }
++  }
+   func require(_ condition: @autoclosure () throws -> Bool, line: UInt = #line) throws {
+     guard try condition() else { throw IosFtpsFailure(code: "fixture_assertion_\(line)") }
+   }

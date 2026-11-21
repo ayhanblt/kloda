@@ -1,0 +1,19 @@
+{
+ "docker": [
+  {
+   "name": "kloda-p3-06-ftps-ios-srv-jbnxibhh",
+   "role": "srv",
+   "id": "af46c08f4d9e0bbdfbd9014c32b764b52470b949db8768625094595d2b79a515"
+  }
+ ],
+ "sim": {
+  "udid": "61A45399-D0F9-43C0-B356-E1EF6712E960",
+  "initial_state": "Shutdown",
+  "booted_by_us": true,
+  "installed": true,
+  "seed_launched": true,
+  "password_placed": true,
+  "bundle": "com.kloda.fixture.ftps16c.files.rjbnxibhh"
+ },
+ "keys": []
+}

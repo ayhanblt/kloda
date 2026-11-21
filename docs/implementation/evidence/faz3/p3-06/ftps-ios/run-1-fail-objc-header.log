@@ -1,0 +1,14 @@
+2026-11-21T11:07:42Z
+ROOT=/private/tmp/kloda-p3-06-ftps-ios.E6Ef9Ynq RUN=e6ef9ynq
+/private/tmp/kloda-p3-06-ftps-ios.E6Ef9Ynq/pki/server.pem: OK
+CA_FILE_SHA256=eca7556603ffdd754238ac29f35bf4ff9c4976aadff8ce8eb5a2d2f478dade9e
+TEST_A_SHA256=c74109bcaaf84cd90fa41818be625938a29a794cc5a233289b79a8aa2da926aa
+/private/tmp/kloda-p3-06-ftps-ios.E6Ef9Ynq/clone/apps/mobile/modules/my-module/ios/IosBackgroundLease.swift:26:40: error: cannot find 'kloda_ios_background_begin' in scope
+   |                                        `- error: cannot find 'kloda_ios_background_begin' in scope
+/private/tmp/kloda-p3-06-ftps-ios.E6Ef9Ynq/clone/apps/mobile/modules/my-module/ios/IosBackgroundLease.swift:44:44: error: cannot find 'kloda_ios_background_transfer' in scope
+   |                                            `- error: cannot find 'kloda_ios_background_transfer' in scope
+/private/tmp/kloda-p3-06-ftps-ios.E6Ef9Ynq/clone/apps/mobile/modules/my-module/ios/IosBackgroundLease.swift:61:64: error: cannot find 'kloda_ios_background_end' in scope
+   |                                                                `- error: cannot find 'kloda_ios_background_end' in scope
+ABORT: swiftc compile/link failed rc=1 (see /private/tmp/kloda-p3-06-ftps-ios.E6Ef9Ynq/logs/swiftc-link.log)
+EXIT=1
+2026-11-21T11:08:56Z

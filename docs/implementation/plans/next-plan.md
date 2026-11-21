@@ -1278,6 +1278,84 @@ tek sentetik dosyanın doğrulanmış aktarımını tekrar üretilebilir kılmak
 Bu ilk dilim iOS, gerçek LAN/cihaz, release, hata enjeksiyonu veya tam P3-06
 kabulü değildir. Ürün kaynakları, TLS doğrulaması ve üretim paketleri değişmez.
 
+**P3-06 iOS Simulator — ayrı normal Files temsilcisi.** Aynı sahipli
+`Kloda-Ftps16c-Disposable` (`61A45399-D0F9-43C0-B356-E1EF6712E960`) ve gerçek
+Files picker yolu [önceki izole kapsamda](../ftps-native-checkpoint-2026-11-03.md)
+kullanılmıştı. Tarihî runtime PASS güncel adaya taşınmaz; P3-02 üretim link
+kanıtı ve P3-06 ağsız Swift sözleşme kanıtı değişmediyse tekrar edilmez.
+
+- **IOS-FTPS-1:** Ayrılmış geçici kopyada güncel `aarch64-apple-ios-sim`
+  `owned-fixture` `.a`, test CA ve mevcut `IosFtpsLoopbackFilesApp.swift` /
+  `OwnedLoopbackRoute.c`, benzersiz fixture bundle/nonce. Simulator dilimi,
+  test marker/CA, bağlanan test kaynağı hash'leri ve üretim xcframework'ün
+  değişmediği kanıtlanır. Tek evidence tarifi; Android tarifini değiştirme.
+- **IOS-FTPS-2:** Aynı sabit ProFTPD/loopback ve yeni geçici PKI; `localhost`
+  hostname ve test CA doğrulaması korunur. Yalnız sahipli simulator ve
+  sentetik 4097 B Files girdisi. Gerçek Source ve Restore picker'larıyla
+  `seed`, ayrı süreçte `reopen`; yayın/readback, boyut/SHA, restore ve
+  mevcut inode/yeniden açma doğrulamaları. Mevcut güvenli UI yolu varsa
+  kullan; yoksa yalnız picker adımlarında kullanıcıdan fiziksel etkileşim
+  iste. Picker bypassı, yeni UI bağımlılığı veya başka Simulator yok.
+- **IOS-FTPS-3:** Yalnız bu koşunun test Keychain girdisi, bundle/fixture
+  dosyaları, servis ve özel anahtarları temizlenir. Önkoşul geçmezse runtime
+  başlatılmaz; kullanıcı dosyası, sistem güveni, Photos, Android ve Faz4
+  bu dilim dışında. Başarı sonrası ayrı GPT review; tam P3-06 kabulü değil.
+  **Keychain sınırı:** Kurulu fixture ile aynı bundle/nonce içinde çalışan,
+  yalnız ayrılmış kopyada üretilen `cleanup` modu. `IosFtpsVault` ile aynı
+  tam generic-password kimliğini (`<fixture-bundle>.ftps.native.v1`,
+  `profile`, synchronizable=false) hedefler. Değer okumadan siler, aynı
+  kimliğin yokluğunu doğrular; sonuç gelmezse temizlik PASS değildir.
+  Seed/reopen ve picker kodu korunur; canlı Swift/vault değişmez. Uninstall
+  silme kanıtı değildir; genel Keychain sıfırlama veya doğrudan DB yok.
+
+  **IOS-FTPS-3 DECISION — host'tan container dosyası silme yok.** İki
+  başarısız aidiyet FIX'i korunur. Yalnız mevcut evidence tarifi ve onun
+  ayrılmış kopyada ürettiği fixture cleanup modu hedeflenir. Host cleanup,
+  `get_app_container` ile gelen dizinde eski sonuç veya parola dosyası
+  silmez. Exact kurulu aday doğrulandıktan sonra fixture kendi sandbox'ında
+  kalan sentetik parola dosyasını temizler ve yokluğunu, exact Keychain
+  silme/yoklukla birlikte doğrular. Yeni parola taşıma yöntemi yok.
+  Her cleanup launch için sırsız tek kullanımlık challenge; fixture kendi
+  sandbox'ında o challenge'a özgü sonucu atomik yazar. Host salt okunur
+  sonucu exact bundle/nonce/UDID/challenge, mode/phase ve beklenen
+  Keychain/dosya yokluk alanlarıyla bağlar; eski veya yanlış dizindeki sonuç
+  yetki/başarı kanıtı değildir. Aidiyet veya sonuç belirsizse
+  `CLEANUP_INCOMPLETE`; uninstall yalnız kendi mevcut aday doğrulamasıyla.
+  İlgisiz container, sistem güveni, seed/reopen/picker ve üretim değişmez.
+  Önce bağımsız tasarım incelemesi; sonra gerekirse inert yanlış dizin,
+  eski/yanlış challenge ve temiz kendi sandbox senaryoları. Run-14 reuse;
+  yeni gerçek Simulator koşusu yok.
+
+  **Ön inceleme netleştirmesi — staging, makbuz ve kaldırma sırası.**
+  - Parola taşıma yöntemi aynı: `Caches/fixture-password`. Yazmadan önce
+    exact UDID/bundle kaydındaki kurulu executable hash ve plist nonce'u
+    compile-root ile eşleştir. Aynı yapılandırılmış Simulator kaydındaki
+    bundle'a özgü data-container alanı, `get_app_container … data`
+    ile dönen kanonik dizinle birebir eşleşmeli. Alan mevcut ortamda
+    yoksa/tanımlanamıyorsa veya yol başka uygulamaya aitse dur; UDID/yol
+    öneki aidiyet kanıtı değildir. Dosya işlemlerinden önce bağı yeniden
+    doğrula; symlink/hedef değiştirme durumunda yazma yok. `mkdir`, parola
+    yazma ve `seed` launch ancak bu kontrollerle; staging niyeti ilk yazma
+    işleminden önce kaydedilir ve seed hiç başlamasa da cleanup gerekir.
+  - Her cleanup launch için yeni, dosya adı güvenli 32 küçük hex challenge;
+    fixture kendi sandbox'ında challenge'a özel atomik sonuç yazar. Host
+    sadece aidiyeti yukarıdaki gibi bağımsız doğrulanmış dizinden, beklenen
+    tek dosyayı okur; exact bundle/compile nonce/UDID/challenge, mode/phase,
+    Keychain service/account, delete `0|-25300`, absent `-25300` ve parola
+    dosyası yokluğu birlikte zorunlu. JSON tek başına aidiyet kanıtı değil.
+  - Makbuz eksik, geçersiz veya lookup belirsizse nonzero
+    `CLEANUP_INCOMPLETE`; staging niyeti olan bundle kaldırılmaz, aynı
+    adayla hedefli yeniden doğrulamaya saklanır. Diğer aidiyetli kaynaklar
+    temizlenir; retained bundle/UDID ve varsa doğrulanmış container kimliği
+    kaydedilir. Geçerli makbuzdan sonra exact aday tekrar doğrulanır ve
+    kaldırılır; doğrulanmış uninstall yokluğu ayrı ölçüttür. Staging
+    öncesi hatada yalnız bu koşuya ait olduğu kesin bundle kaldırılabilir.
+  - Inert kabul: aynı UDID yanlış dizin/eksik alan → mkdir/yazma/seed yok;
+    staging sonrası seed öncesi kesinti → fixture cleanup gerekir; eski,
+    yanlış veya eksik makbuz/lookup hatası → nonzero ve uninstall yok;
+    exact taze makbuz → aidiyetli uninstall ve ayrı yokluk doğrulaması.
+    Run-14 reuse; gerçek Simulator koşusu yok.
+
 | Kabul | Durum → sonuç |
 | --- | --- |
 | P3-06-FTPS-1 | Sahipli boş geçici kök → tek standart test sunucusu, yalnız loopback, sentetik dosya ve geçici kimlik bilgileri. Normal TLS kontrol/veri yolu önce host'ta doğrulanır; sunucu sürümü/tarifi ve public CA hash'i kaydedilir. |

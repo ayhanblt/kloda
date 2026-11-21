@@ -1,0 +1,16 @@
+{
+ "bytes": 4097,
+ "catalogCount": 1,
+ "hash": "oWVg1mi4Q_s76ZrOQdvRhHHzQr0yVaHSEgSzXkP3RDY",
+ "job": "41dcb219-2a32-46fb-9101-fd17d34ed56b",
+ "mode": "seed",
+ "phase": "finished",
+ "photosOperations": 0,
+ "relativePath": "8707ddb8-4507-4c97-be62-a6158e4c86cf/files/oWVg1mi4Q_s76ZrOQdvRhHHzQr0yVaHSEgSzXkP3RDY/owned.bin",
+ "remoteRoot": "/",
+ "restorePicker": true,
+ "restoreRepeatSameInode": true,
+ "sourcePicker": true,
+ "status": "PASS",
+ "unchangedReuse": true
+}

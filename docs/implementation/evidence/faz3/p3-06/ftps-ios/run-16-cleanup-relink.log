@@ -1,0 +1,6 @@
+2026-11-21T19:55:21Z
+BUNDLE=com.kloda.fixture.ftps16c.files.rjbnxibhh NONCE=8707ddb8-4507-4c97-be62-a6158e4c86cf
+APP_EXEC_SHA256=e04dfe57c34f349728ca0269e3083db81e08d0cd5f18ee4c493cd5860fe05fd9 TEST_A_SHA256=8faa8ceb453643261d12332fdcb92d1bfd7f740d67464a4513b8704a400451d2
+IOS_FTPS_RELINK_PASS root=/private/tmp/kloda-p3-06-ftps-ios.Chk9Wq3x (Simulator/servis/kurulum yok; anahtarlar korundu)
+EXIT=0
+2026-11-21T19:56:09Z

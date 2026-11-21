@@ -1,0 +1,16 @@
+{
+ "docker": [],
+ "sim": {
+  "udid": "61A45399-D0F9-43C0-B356-E1EF6712E960",
+  "initial_state": "Shutdown",
+  "booted_by_us": true,
+  "app_absent_verified": false,
+  "install_attempted": false,
+  "staging_intent": false,
+  "pinned": null,
+  "seed_launched": false,
+  "password_placed": false,
+  "bundle": "com.kloda.fixture.ftps16c.files.rrlk4hz8q"
+ },
+ "keys": []
+}

@@ -93,9 +93,17 @@ ayrı test kopyasında güncel arm64 APK/JNI ile tek sentetik aktarım ve temizl
 kanıtı var. Seçici yalnız test kopyasında; canlı ürün değişmedi.
 [Bağımsız kabul](evidence/faz3/p3-06/review.md): **P3-06-FTPS-1…4 dar kabul**,
 tarif SHA `a3d96560b2a5…`. Önceki host/Android runtime kanıtı reuse; yeni
-tarif statik/inert doğrulandı, gerçek ortamda uçtan uca koşulmadı. İki tarihî
-sayaç ayrı ayrı 2. iOS, üst P3-06 ve Faz3 açık. Sonraki Faz3 dilimi için
-manifestteki zorunlu açıkları mevcut kanıta göre sırala.
+tarif statik/inert doğrulandı, gerçek ortamda uçtan uca koşulmadı. İki
+tarihî Android tarif sayacı ayrı ayrı 2.
+[Bağımsız iOS kabulü](evidence/faz3/p3-06/ftps-ios/review.md): **IOS-FTPS-1…3 dar kabul**.
+[Run-14](evidence/faz3/p3-06/ftps-ios/RESULT.md) eski varyantta iki picker,
+4097 B aktarım/restore, ayrı süreç reopen ve gerçek Keychain silme `0`.
+Run-18 gerçek Xcode 27.2 dizin eşlemesi; run-20/21 yeni varyantta FD-pinli
+sentetik staging, challenge makbuzu, parola yokluğu, Keychain `-25300/-25300`
+(yalnız yokluk), aynı açılışta uninstall yokluğu ve Shutdown. Yeni varyantta
+tam Files akışı ve gerçek Keychain silme tekrarlanmadı. Aidiyet sayacı 2;
+üst P3-06, Faz3, gerçek LAN, Photos ve release açık. Sonraki Faz3 dilimi
+öncesi dar iOS kabul commit/push.
 D12 yeniden açılmaz; sonraki iş kısa disk devriyle, sayaçlar korunarak yürür.
 Kaynak incelemesi görsel PASS sayılmaz; referans çözülmeden build/capture veya
 M13-alt tekrarı yok.

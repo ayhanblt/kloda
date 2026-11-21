@@ -1,0 +1,4 @@
+_SecItemAdd
+_SecItemCopyMatching
+_SecItemDelete
+_SecItemUpdate

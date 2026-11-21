@@ -1,0 +1,9 @@
+2026-11-21T11:10:51Z
+ROOT=/private/tmp/kloda-p3-06-ftps-ios.noenK1w3 RUN=noenk1w3
+/private/tmp/kloda-p3-06-ftps-ios.noenK1w3/pki/server.pem: OK
+CA_FILE_SHA256=3c865f501b7879c582d78b26718b41f57af38dc11d7afaea400ae920a8c6febf
+TEST_A_SHA256=da7abcc9786a64b527fa0d7018b6a2e735b6d6f78fc33c0848c0b50e9988e43d
+APP_EXEC_SHA256=7e1dd3a4974611e5d1781136ac9c3d556bb3e8c768d465ca3e6e69120a207c5b BUNDLE=com.kloda.fixture.ftps16c.files.rnoenk1w3 NONCE=99a97271-f8ad-43f2-ad73-f9c417915176
+IOS_FTPS_1_COMPILE_LINK_PASS root=/private/tmp/kloda-p3-06-ftps-ios.noenK1w3 (Simulator/servis/kurulum yok; özel anahtarlar /private/tmp/kloda-p3-06-ftps-ios.noenK1w3/pki içinde 0600, IOS-FTPS-3'te silinir)
+EXIT=0
+2026-11-21T11:12:52Z

@@ -2,6 +2,81 @@
 
 ## Ekip devam kaydı — 20.11
 
+- **IOS-FTPS-1…3 dar kabul** — [bağımsız GPT review](p3-06/ftps-ios/review.md),
+  tarif `4566102d5a0bc27d…`. Run-14 eski varyant: tam Files akışı ve
+  Keychain silme `0`; run-18: Xcode 27.2 dizin eşlemesi; run-20/21 yeni
+  varyant: FD-pinli staging, challenge makbuzu, parola ve Keychain yokluğu,
+  aynı boot oturumunda uninstall yokluğu ve Shutdown. Run-19 fail-closed;
+  yeni seed/gerçek Keychain silme tekrarı yok. Aidiyet sayacı=2; üst
+  P3-06/Faz3/gerçek LAN/Photos/release açık.
+
+- IOS-FTPS run-19 önkoşulda durdu: run-18 bundle kaydı reboot sonrası
+  görünür, exact Bundle/Data dizinleri yok. Kurulum/staging/launch yok,
+  Simulator Shutdown; eski kayda dokunulmadı. Tek sonraki adım aynı
+  Sonnet ile yeni bundle/nonce için offline relink (.a ve CA reuse),
+  sonra yalnız gerçek cleanup probu. Aidiyet sayacı=2; run-14/18 reuse.
+
+- IOS-FTPS-3 bağımsız **REVIEW-READY**, yalnız gerçek sandbox cleanup
+  doğrulamasına hazır. Tarif `db8f16f041933b8b…`; staging FD aidiyeti
+  inert doğrulandı. Tek devam aynı Sonnet ile challenge makbuzu, sentetik
+  parola yokluğu, exact Keychain durumu ve uninstall/Shutdown. Seed/picker/
+  FTPS tekrarı yok; run-14/18 reuse ve aidiyet sayacı=2. Kabul açık.
+
+- IOS-FTPS-3 [run-18](p3-06/ftps-ios/run-18-install-probe.log) schema probu
+  PASS: Xcode 27.2'de benzersiz kurulu bundle, iki sorguda aynı mevcut
+  kanonik data dizini/dev/inode; exact uninstall yokluğu ve Shutdown.
+  Staging/launch yok; eski stale kayda dokunulmadı. Run-17 offline ve
+  staging pin inert kanıtıyla aynı bağımsız reviewer; yeni sandbox makbuz
+  runtime açık. Run-14 ve aidiyet sayacı=2 korunur.
+
+- IOS-FTPS-3 bağımsız FIX: run-16 yalnız offline link kanıtı; yeni
+  relink kökünün bundle kimliği uyumsuz ve makbuz staging dizinine
+  sabitlenmemiş. Tek adım aynı Sonnet ile kimlik çiftini ve staging
+  dizini pin'ini düzeltip inert doğrulamak, sonra aynı reviewer.
+  Gerçek DataContainer/makbuz runtime kapısı açık; aidiyet sayacı=2.
+
+- IOS-FTPS-3 yeni sandbox tarifi **REVIEW-READY (inert + offline link)**:
+  [run-16](p3-06/ftps-ios/run-16-cleanup-relink.log), tarif `f9539f95eb1267e7…`.
+  Run-15 yama sözdizimi hatası düzeltildi; run-16 mevcut test `.a` ile
+  çevrimdışı geçti. Tek adım aynı bağımsız reviewer. Gerçek bundle→data
+  şeması açık; yeni staging/runtime yok. Run-14 ve aidiyet sayacı=2 korunur.
+
+- IOS-FTPS-3 yeni sandbox tasarımı **DESIGN-READY**: aynı Sonnet ile
+  tarif ve inert doğrulama. Bağımsız bundle→data alanı gerçek ortamda
+  doğrulanmadı; gerçek staging/seed yok. Aidiyet sayacı=2; run-14 reuse.
+
+- IOS-FTPS-3 **DECISION**: data container aidiyeti invariantı başarısız=2.
+  Üçüncü aynı FIX yok. §3'te fixture-içi dosya temizliği tasarımı bağımsız
+  ön incelemeye gidiyor. Run-14 runtime reuse; kabul ve commit/push yok.
+
+- IOS-FTPS-3 bağımsız FIX dönüşü: kurulu bundle aidiyeti cleanup modu ve
+  container dosya işlemlerinden önce de doğrulanmalı. Invariant başarısız=1.
+  Aynı Sonnet ile yalnız tarifte inert düzeltme, sonra aynı reviewer.
+  Run-14 gerçek PASS reuse; yeni gerçek koşu yok.
+
+- IOS-FTPS-1…3 [bağımsız review FIX](p3-06/ftps-ios/review.md): run-14
+  gerçek aktarım/restore/reopen ve temizlik doğrulandı. Tek açık iOS
+  tarifinde exact bundle/nonce/UDID sahipliği ve fail-closed yokluk/Keychain
+  doğrulaması. Aynı Sonnet ile yalnız tarif ve inert test; gerçek koşu yok.
+
+- IOS-FTPS-1…3 **REVIEW-READY** — [run-14 kanıtı](p3-06/ftps-ios/RESULT.md),
+  HEAD `b9be5156`, tarif SHA `2518a8c3…`. İki gerçek picker, sentetik
+  4097 B/SHA aktarım ve restore, aynı iş ayrı süreçte reopen; hedefli
+  Keychain silme `0`, yokluk `-25300`, kaynaklar kapalı. Run-12 kullanıcı
+  yokluğunda timeout ve temizlik; test/FIX sayacı değişmedi. Sonraki:
+  bağımsız scoped GPT review; üst P3-06/Faz3 açık.
+
+- IOS-FTPS Sonnet `ses_e04dba005ffeLlgijB58tGGxLQ` kota kesintisi,
+  21.11 16:30 Türkiye reset bildirimi. `ftps-ios/run-4-relink.log` exit 0,
+  genişletilmiş tarif `sh -n` temiz; işin son devir raporu yok. Aynı
+  oturum önce kısmi tarif ve kaynak aidiyetini doğrular. Runtime/kabul yok;
+  kota nedeniyle test/FIX sayacı artmaz.
+
+- P3-06 sıradaki dilim: iOS Simulator normal FTPS aktarımı ön denetimi,
+  aynı Sonnet `ses_e04dba005ffeLlgijB58tGGxLQ`. Android dar kabulü
+  `b9be5156` ile push edildi, reuse. Önce güncel native aday ile mevcut
+  test girişi ve loopback fixture eşlemesi; build/cihaz/paket/kurulum yok.
+
 - 21.11 **P3-06-FTPS-1…4 dar kabul** — [bağımsız GPT review](p3-06/review.md),
   `ses_e02b92a99ffeq0YRpAWUiBcSB2`, tarif SHA `a3d96560b2a5…`.
   Host/Android gerçek aktarım ve fiş kanıtı reuse; yeni tarifte statik/inert
