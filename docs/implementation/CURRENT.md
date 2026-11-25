@@ -21,17 +21,23 @@ Historical Faz3 manifests, evidence, and OpenCode files are archived under `.loc
   - Enabled `'onedrive'` and `'yandex'` in `enableableProviders` and `CloudTarget` queues (including Photos + Files restore & ADR0029 catalog).
 - [x] **Faz V1-4 — PC Desktop Human-Readable File Layout (`.media` → Real Filenames)**
   - Added `backup_paths` schema migration (`user_version=5`), staged incoming transfers under `<peer>/.kloda/staging/`, stored durable objects/keeps under `<peer>/.kloda/objects/`, and atomically hardlinked readable files into `<peer>/Files/` and `<peer>/Photos/` with collision-free `name (2).ext` suffixes (keeping photo manifests hidden and preserving legacy `v4` flat backups).
-- [ ] **Faz V1-5 — `1.0.0` Release Signing, R8/ProGuard, Build Flags & Desktop Installers** *(Kod & Konfigürasyon Hazır — Release İmzalama Kimlik Bilgileri Bekleniyor)*
+- [ ] **Faz V1-5 — `1.0.0` Release Signing, R8/ProGuard, Build Flags & Desktop Installers** *(macOS & Android Tamam — Windows 11 + iOS TestFlight Kaldı)*
   - Monorepo, Android (`app` + `my-module`), iOS (`KlodaSecurePhotosSync` + `KlodaLiveActivity`) ve Desktop sürümleri `1.0.0` yapıldı.
   - Android (`gradle.properties`) ve iOS (`KlodaSyncRuntime.podspec`) varsayılan V1 native protokolleri (`SMB`, `SFTP`, `FTPS`) açıldı, `S3` kapalı tutuldu (`excludes += '**/libkloda_s3_native.so'`).
   - R8/ProGuard (`consumer-rules.pro`) için `KlodaPairingJni`, `KlodaPairingPlatform`, `SmbNative*`, `SftpNative*`, `FtpsNative*` (`connect(String,int)` dahil) ve `S3NativeEngine` `-keep` kuralları eklendi; `minifyEnabled` + `shrinkResources` Release profilinde aktif edildi.
   - Desktop (`kloda_pairing.node`), Android (4 ABI) ve iOS (Release `KlodaPairingNative.xcframework`) yeniden derlendi; `THIRD_PARTY_NOTICES.md`, `tools/build-desktop-release.mjs` ve B2 fixture-CA (`nm`/`llvm-nm`) doğrulama kapısı (`tools/verify-v1-release.mjs`) eklendi.
-  - **Kullanıcıdan beklenen Release imzalama adımları:** Android Release keystore (`KLODA_ANDROID_*`) + Entra OneDrive Release SHA-1 (`klodaOneDriveSignatureHash`), Apple Developer Team (iOS + LiveActivity + Yandex Team ID; macOS Developer ID + Notarization) ve Windows 11 Desktop paketleme.
-- [ ] **Faz V1-6 — 18-Item Physical Device Acceptance (iPhone, Android 13+, Mac, Windows 11)**
+  - **Tamamlanan Release Paketleri:**
+    - macOS Desktop `1.0.0` (`com.kloda.desktop`): `Developer ID Application` ile imzalandı, notarized (`Accepted`), stapled (`Kloda-1.0.0-macos-arm64.zip`) ve canlı QR/LAN dinleme doğrulandı.
+    - Android `1.0.0`: Release upload keystore (`CN=Ayhan Bulut`) ve Entra OneDrive Release SHA-1 (`JH84/BzkL6m5I53u/GkEQuOcztU=`) ile imzalı `app-release.apk` (`161M`) ve `app-release.aab` (`121M`) üretildi ve doğrulandı.
+    - iOS Simulator `1.0.0` (`Release`, `arm64`): `iPhone 17 Pro` simülatöründe derlendi ve açılış doğrulandı.
+  - **Kalan Release Adımları:** Windows 11 Desktop `1.0.0` paketleme (`Kloda.exe`) ve Xcode iOS TestFlight Archive yüklemesi (`Apple Distribution` sertifikası hazır).
+- [ ] **Faz V1-6 — 18-Item Physical Device Acceptance (Android, Mac, Windows 11 + iOS Simulator / TestFlight Internal Testing)**
+  - iOS işlevsel kabul testleri önce bu Mac üzerinde **Xcode iOS Simulator** ile doğrulanır.
+  - Simulator'da doğrulanamayan 4 gerçek iPhone donanım maddesi (**Secure Enclave donanım anahtarı**, **kilitli ekran `AfterFirstUnlock` + `BGProcessingTask`**, **kamera QR tarama**, **Live Activity & FaceID Kurtarma Kodu**) yerel Android/Mac/Windows testlerinden sonra uzak test kullanıcısıyla **TestFlight Internal Testing** üzerinden çalıştırılır.
 
 ## Next Immediate Step
 
-**Faz V1-5 imzalama & Faz V1-6:** Kullanıcı tarafından Release keystore, OneDrive Release SHA-1 ve Apple Developer / macOS Notarization bilgileri sağlanınca imzalı `1.0.0` paketlerini oluşturup **Faz V1-6** 18 maddelik fiziksel cihaz kabul testine geç.
+**Kullanıcı fiziksel testleri + Windows 11 paketleme:** Mac (`Kloda.app`), Android (`app-release.apk`), iOS Simulator ve Windows 11 (`Kloda.exe`) kabul testleri tamamlandıktan sonra iOS TestFlight Archive yüklemesi ve gerekirse tasarım/UI iyileştirmeleri.
 
 ## Post-V1 Queued Roadmap (V2)
 

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { closeSync, cpSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, readSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -71,15 +71,51 @@ if (process.platform === 'darwin') {
   rmSync(join(resources, 'default_app.asar'), { force: true });
   stageAppDirectory(join(resources, 'app'), resources);
 
+  function setPlistString(plistPath, key, value) {
+    try {
+      execFileSync('/usr/libexec/PlistBuddy', ['-c', `Set :${key} ${value}`, plistPath], { stdio: 'pipe' });
+    } catch {
+      execFileSync('/usr/libexec/PlistBuddy', ['-c', `Add :${key} string ${value}`, plistPath], { stdio: 'inherit' });
+    }
+  }
+
+  // Electron determines `app.isPackaged` by checking that the executable is not named "Electron".
+  renameSync(join(app, 'Contents/MacOS/Electron'), join(app, 'Contents/MacOS/Kloda'));
+  for (const [suffix, bundleId] of [
+    ['', 'com.kloda.desktop.helper'],
+    [' (GPU)', 'com.kloda.desktop.helper.gpu'],
+    [' (Plugin)', 'com.kloda.desktop.helper.plugin'],
+    [' (Renderer)', 'com.kloda.desktop.helper.renderer'],
+  ]) {
+    const helperOld = join(app, `Contents/Frameworks/Electron Helper${suffix}.app`);
+    const helperNew = join(app, `Contents/Frameworks/Kloda Helper${suffix}.app`);
+    if (existsSync(helperOld)) {
+      renameSync(helperOld, helperNew);
+      renameSync(
+        join(helperNew, `Contents/MacOS/Electron Helper${suffix}`),
+        join(helperNew, `Contents/MacOS/Kloda Helper${suffix}`),
+      );
+      const helperPlist = join(helperNew, 'Contents/Info.plist');
+      for (const [key, value] of [
+        ['CFBundleExecutable', `Kloda Helper${suffix}`],
+        ['CFBundleName', `Kloda Helper${suffix}`],
+        ['CFBundleIdentifier', bundleId],
+      ]) {
+        setPlistString(helperPlist, key, value);
+      }
+    }
+  }
+
   const infoPlist = join(app, 'Contents/Info.plist');
   for (const [key, value] of [
     ['CFBundleIdentifier', 'com.kloda.desktop'],
+    ['CFBundleExecutable', 'Kloda'],
     ['CFBundleName', 'Kloda'],
     ['CFBundleDisplayName', 'Kloda: Secure Photos & Sync'],
     ['CFBundleShortVersionString', '1.0.0'],
     ['CFBundleVersion', '1'],
   ]) {
-    execFileSync('/usr/libexec/PlistBuddy', ['-c', `Set :${key} ${value}`, infoPlist], { stdio: 'inherit' });
+    setPlistString(infoPlist, key, value);
   }
 
   const signIdentity = process.env.KLODA_MAC_SIGN_IDENTITY?.trim();
@@ -88,7 +124,7 @@ if (process.platform === 'darwin') {
     const helperRights = join(output, 'helper.entitlements');
     writeFileSync(
       helperRights,
-      '<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0"><dict><key>com.apple.security.cs.allow-jit</key><true/></dict></plist>\n',
+      '<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0"><dict><key>com.apple.security.cs.allow-jit</key><true/><key>com.apple.security.cs.allow-unsigned-executable-memory</key><true/></dict></plist>\n',
     );
     const mainRights = join(output, 'production.entitlements');
     if (team) {
@@ -102,19 +138,28 @@ if (process.platform === 'darwin') {
     } else {
       writeFileSync(
         mainRights,
-        '<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0"><dict><key>com.apple.security.cs.allow-jit</key><true/><key>com.apple.security.network.client</key><true/><key>com.apple.security.network.server</key><true/><key>com.apple.security.files.user-selected.read-write</key><true/></dict></plist>\n',
+        '<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0"><dict><key>com.apple.security.cs.allow-jit</key><true/><key>com.apple.security.cs.allow-unsigned-executable-memory</key><true/></dict></plist>\n',
       );
     }
     const profilePath = process.env.KLODA_MAC_PROFILE ? resolve(process.env.KLODA_MAC_PROFILE) : null;
     if (profilePath) {
       cpSync(profilePath, join(app, 'Contents/embedded.provisionprofile'));
     }
+    function isMachO(path) {
+      const fd = openSync(path, 'r');
+      try {
+        const header = Buffer.alloc(4);
+        return readSync(fd, header, 0, 4, 0) === 4 && ['cffaedfe', 'feedfacf', 'cafebabe', 'bebafeca'].includes(header.toString('hex'));
+      } finally {
+        closeSync(fd);
+      }
+    }
     function signingObjects(directory) {
       return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
         const path = join(directory, entry.name);
         if (entry.isSymbolicLink()) return [];
         if (entry.isDirectory()) return [...signingObjects(path), ...(/\.(app|framework)$/.test(entry.name) ? [path] : [])];
-        return /\.(dylib|node)$/.test(entry.name) || entry.isFile() && /\.(app|framework)\/Contents\/MacOS\//.test(path) ? [path] : [];
+        return /\.(dylib|node)$/.test(entry.name) || (entry.isFile() && isMachO(path)) ? [path] : [];
       });
     }
     for (const target of signingObjects(join(app, 'Contents'))) {
@@ -142,6 +187,9 @@ if (process.platform === 'darwin') {
   rmSync(output, { recursive: true, force: true });
   mkdirSync(output, { recursive: true });
   cpSync(electronSource, output, { recursive: true });
+  if (existsSync(join(output, 'electron.exe'))) {
+    renameSync(join(output, 'electron.exe'), join(output, 'Kloda.exe'));
+  }
   const resources = join(output, 'resources');
   rmSync(join(resources, 'default_app.asar'), { force: true });
   stageAppDirectory(join(resources, 'app'), resources);
