@@ -42,6 +42,11 @@ final class IosSyncJournal {
       }
       try execute("PRAGMA synchronous=FULL")
       try execute("PRAGMA foreign_keys=ON")
+      #if os(iOS)
+      for path in [databasePath, databasePath + "-wal", databasePath + "-shm"] where FileManager.default.fileExists(atPath: path) {
+        try FileManager.default.setAttributes([.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication], ofItemAtPath: path)
+      }
+      #endif
       try execute("""
         CREATE TABLE IF NOT EXISTS queued_source_file (
           source_id TEXT NOT NULL,

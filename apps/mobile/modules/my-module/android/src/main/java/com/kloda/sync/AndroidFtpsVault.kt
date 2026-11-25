@@ -1,6 +1,6 @@
 package com.kloda.sync
 
-import android.app.KeyguardManager
+import android.os.UserManager
 import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
@@ -19,7 +19,7 @@ internal class AndroidFtpsVault(private val context: Context) {
   private val alias = context.packageName + ".ftps.profile.v1"
   private val aad = alias.toByteArray(Charsets.UTF_8)
   private fun unlocked() {
-    if (context.getSystemService(KeyguardManager::class.java).isDeviceLocked) throw FtpsFailure("credential_locked")
+    if (context.getSystemService(UserManager::class.java)?.isUserUnlocked == false) throw FtpsFailure("credential_locked")
   }
   private fun key(create: Boolean): SecretKey {
     val store = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }

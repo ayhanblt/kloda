@@ -49,11 +49,15 @@ final class IosWebDavJournal {
     guard fstat(descriptor, &info) == 0, info.st_uid == geteuid(), info.st_mode & S_IFMT == S_IFDIR,
       info.st_mode & 0o077 == 0 else { throw IosWebDavFailure.code("storage_failure") }
     var values = URLResourceValues(); values.isExcludedFromBackup = true; try root.setResourceValues(values)
+    let databaseURL = root.appendingPathComponent("journal.sqlite")
     #if os(iOS)
-    try FileManager.default.setAttributes([.protectionKey: FileProtectionType.complete], ofItemAtPath: root.path)
+    try FileManager.default.setAttributes([.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication], ofItemAtPath: root.path)
+    for path in [databaseURL.path, databaseURL.path + "-wal", databaseURL.path + "-shm"] where FileManager.default.fileExists(atPath: path) {
+      try FileManager.default.setAttributes([.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication], ofItemAtPath: path)
+    }
     #endif
     // New device-local DAV state; no migration/reset of the existing PC journal or authority.
-    return try IosWebDavJournal(database: IosSyncJournal(databaseURL: root.appendingPathComponent("journal.sqlite")))
+    return try IosWebDavJournal(database: IosSyncJournal(databaseURL: databaseURL))
   }
   init(database: IosSyncJournal) throws {
     self.database = database

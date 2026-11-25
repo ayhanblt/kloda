@@ -41,17 +41,6 @@ public final class IosAutomaticSubscriber: ExpoAppDelegateSubscriber {
     })
     observers.append(NotificationCenter.default.addObserver(forName: UIApplication.protectedDataWillBecomeUnavailableNotification,
       object: nil, queue: .main) { _ in
-        IosAutomaticCoordinator.shared.protectedDataUnavailable(); IosWebDavQueue.shared.setProtected(false)
-        try? IosWebDavQueue.shared.pause(code: "credential_locked")
-#if KLODA_SMB_NATIVE
-        IosSmbQueue.shared.setProtected(false); try? IosSmbQueue.shared.pause(code: "credential_locked")
-#endif
-#if KLODA_SFTP_NATIVE
-        IosSftpQueue.shared.setProtected(false); try? IosSftpQueue.shared.pause(code: "credential_locked")
-#endif
-#if KLODA_FTPS_NATIVE
-        IosFtpsQueue.shared.setProtected(false); try? IosFtpsQueue.shared.pause(code: "credential_locked")
-#endif
 #if KLODA_S3_NATIVE
         IosS3Runtime.shared.setProtected(false)
 #endif

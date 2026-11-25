@@ -36,9 +36,16 @@ final class IosSmbQueue {
       if let database { return database }
       let base = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
       var directory = base.appendingPathComponent("kloda-smb", isDirectory: true)
-      try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700, .protectionKey: FileProtectionType.complete])
+      try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700, .protectionKey: FileProtectionType.completeUntilFirstUserAuthentication])
       var options = URLResourceValues(); options.isExcludedFromBackup = true; try directory.setResourceValues(options)
-      let value = try IosSmbJournal(databaseURL: directory.appendingPathComponent("journal.sqlite"))
+      let databaseURL = directory.appendingPathComponent("journal.sqlite")
+      #if os(iOS)
+      try FileManager.default.setAttributes([.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication], ofItemAtPath: directory.path)
+      for path in [databaseURL.path, databaseURL.path + "-wal", databaseURL.path + "-shm"] where FileManager.default.fileExists(atPath: path) {
+        try FileManager.default.setAttributes([.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication], ofItemAtPath: path)
+      }
+      #endif
+      let value = try IosSmbJournal(databaseURL: databaseURL)
       try value.createRuns(); try value.createPlan(); _ = try IosSmbCopyRequests(journal: value); try value.recoverInterrupted()
       // User decision31.10: SMB opt-in stays beside its native profile/job generation fence.
       try value.database.execute("CREATE TABLE IF NOT EXISTS smb_enabled(id INTEGER PRIMARY KEY CHECK(id=1),profile TEXT NOT NULL,enabled INTEGER NOT NULL CHECK(enabled IN(0,1)))")
@@ -131,7 +138,6 @@ final class IosSmbQueue {
     let execution = try IosWebDavContext.synchronized { () -> Execution in
       guard active == nil, foregroundWork == nil else { throw IosSmbFailure(code: "backup_busy") }
       guard foreground || lease != nil else { throw IosSmbFailure(code: "candidate_stale") }
-      guard protectedData else { throw IosSmbFailure(code: "credential_locked") }
       if automatic, try (IosAutomaticPause.requested || IosSyncJournal().automaticPaused()) { throw IosSmbFailure(code: "user_pause") }
       try lease?.check()
       let journal = try journal(), sources = try IosSmbSources.capture(journal: journal)
@@ -148,7 +154,6 @@ final class IosSmbQueue {
   private func check(_ value: Execution) throws {
     try IosWebDavContext.synchronized {
       guard active?.token == value.token, value.run.phase == "running", foreground || value.lease != nil else { throw IosSmbFailure(code: "cancelled") }
-      guard protectedData else { throw IosSmbFailure(code: "credential_locked") }
       try value.checkCancellation(); try value.lease?.check()
       if value.run.automatic, try (IosAutomaticPause.requested || IosSyncJournal().automaticPaused()) { throw IosSmbFailure(code: "user_pause") }
       let journal = try journal()

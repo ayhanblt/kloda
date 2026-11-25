@@ -65,11 +65,18 @@ enum IosOAuthVault {
   }
   static func read(slot: String) throws -> IosOAuthProfile? {
     var request = try query(slot)
-    request[kSecReturnData as String] = true; request[kSecMatchLimit as String] = kSecMatchLimitOne
+    request[kSecReturnData as String] = true
+    request[kSecReturnAttributes as String] = true
+    request[kSecMatchLimit as String] = kSecMatchLimitOne
     var item: CFTypeRef?
     let status = SecItemCopyMatching(request as CFDictionary, &item)
     if status == errSecItemNotFound { return nil }
-    guard status == errSecSuccess, let data = item as? Data, data.count <= 65536 else { throw failure(status) }
+    guard status == errSecSuccess, let row = item as? [String: Any],
+      let data = row[kSecValueData as String] as? Data, data.count <= 65536 else { throw failure(status) }
+    if (row[kSecAttrAccessible as String] as? String) != (kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly as String) {
+      _ = SecItemUpdate(try query(slot) as CFDictionary,
+        [kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly] as CFDictionary)
+    }
     guard let profile = try? JSONDecoder().decode(IosOAuthProfile.self, from: data), (try? profile.targetId()) == slot else {
       throw IosWebDavFailure.code("webdav_storage")
     }
@@ -82,7 +89,7 @@ enum IosOAuthVault {
     guard data.count <= 65536 else { throw IosWebDavFailure.code("webdav_storage") }
     var attributes = try query(slot)
     attributes[kSecValueData as String] = data
-    attributes[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+    attributes[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
     let status = SecItemAdd(attributes as CFDictionary, nil)
     if status == errSecDuplicateItem { throw IosWebDavFailure.code("destination_exists") }
     guard status == errSecSuccess else { throw failure(status) }
@@ -94,7 +101,8 @@ enum IosOAuthVault {
     profile.accountLabel = label
     let data = try JSONEncoder().encode(profile)
     guard data.count <= 65536 else { throw IosWebDavFailure.code("webdav_storage") }
-    let status = SecItemUpdate(try query(slot) as CFDictionary, [kSecValueData as String: data] as CFDictionary)
+    let status = SecItemUpdate(try query(slot) as CFDictionary, [kSecValueData as String: data,
+      kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly] as CFDictionary)
     guard status == errSecSuccess else { throw failure(status) }
     guard try read(slot: slot)?.accountLabel == label else { throw IosWebDavFailure.code("webdav_storage") }
   }

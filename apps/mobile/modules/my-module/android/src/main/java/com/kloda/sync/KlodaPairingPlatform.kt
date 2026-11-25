@@ -1,7 +1,7 @@
 package com.kloda.sync
 
 import android.content.Context
-import android.app.KeyguardManager
+import android.os.UserManager
 import android.content.pm.PackageManager
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
@@ -41,9 +41,9 @@ internal class KlodaPairingPlatform(context: Context) {
     }
 
     private fun requireUnlocked() {
-        val manager = applicationContext.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
+        val manager = applicationContext.getSystemService(UserManager::class.java)
             ?: throw IllegalStateException("identity_unavailable")
-        check(!manager.isDeviceLocked) { "identity_unavailable" }
+        check(manager.isUserUnlocked) { "identity_unavailable" }
     }
 
     @Synchronized fun nativeCreateIdentity(tag: String): String = open(tag, true)
@@ -105,7 +105,8 @@ internal class KlodaPairingPlatform(context: Context) {
             .setUserAuthenticationRequired(false)
         if (Build.VERSION.SDK_INT >= 28) {
             builder.setIsStrongBoxBacked(strongBox)
-            builder.setUnlockedDeviceRequired(true)
+            // AfterFirstUnlock background backup support; CE storage + UserManager.isUserUnlocked protects BFU.
+            builder.setUnlockedDeviceRequired(false)
         }
         KeyPairGenerator.getInstance("EC", "AndroidKeyStore").apply { initialize(builder.build()) }.generateKeyPair()
     }

@@ -37,7 +37,7 @@ unsafe extern "C" {
     static kSecAttrIsPermanent: Ref;
     static kSecAttrSynchronizable: Ref;
     static kSecAttrAccessControl: Ref;
-    static kSecAttrAccessibleWhenUnlockedThisDeviceOnly: Ref;
+    static kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly: Ref;
     static kSecPrivateKeyAttrs: Ref;
     static kSecUseDataProtectionKeychain: Ref;
     static kSecUseAuthenticationUI: Ref;
@@ -135,7 +135,7 @@ unsafe fn generate(tag: &Owned) -> Result<Owned> {
     let access = unsafe {
         SecAccessControlCreateWithFlags(
             ptr::null(),
-            kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+            kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
             1 << 30,
             &mut error,
         )

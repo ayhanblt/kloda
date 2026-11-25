@@ -53,7 +53,7 @@ import Security
       var item: CFTypeRef?
       try check(SecItemCopyMatching(request as CFDictionary, &item) == errSecSuccess)
       let attributes = item as? [String: Any]
-      try check(attributes?[kSecAttrAccessible as String] as? String == kSecAttrAccessibleWhenUnlockedThisDeviceOnly as String)
+      try check(attributes?[kSecAttrAccessible as String] as? String == kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly as String)
       try check((attributes?[kSecAttrSynchronizable as String] as? Bool) != true)
       let id = UUID().uuidString.lowercased()
       let job = IosSmbUpload(id: id, installation: "fixture", target: profile.target, context: captured.context,

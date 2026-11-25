@@ -37,7 +37,7 @@ final class IosFilesSnapshot {
       values.isExcludedFromBackup = true
       try url.setResourceValues(values)
       #if os(iOS)
-      try FileManager.default.setAttributes([.protectionKey: FileProtectionType.complete], ofItemAtPath: root.path)
+      try FileManager.default.setAttributes([.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication], ofItemAtPath: root.path)
       #endif
     } catch {
       Darwin.close(fd)

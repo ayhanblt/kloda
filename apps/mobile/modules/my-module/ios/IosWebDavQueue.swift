@@ -111,7 +111,6 @@ final class IosWebDavQueue {
     let execution: Execution = try IosWebDavContext.synchronized {
       guard active == nil else { throw IosWebDavFailure.code("backup_busy") }
       guard foreground || lease != nil else { throw IosWebDavFailure.code("candidate_stale") }
-      guard protectedData else { throw IosWebDavFailure.code("credential_locked") }
       if automatic, try (IosAutomaticPause.requested || IosSyncJournal().automaticPaused()) { throw IosWebDavFailure.code("user_pause") }
       try lease?.check()
       let journal = try IosWebDavJournal.open()
@@ -140,7 +139,6 @@ final class IosWebDavQueue {
   private func check(_ execution: Execution) throws {
     try IosWebDavContext.synchronized {
       guard active?.token == execution.token, execution.run.phase == "running", foreground || execution.lease != nil else { throw IosWebDavFailure.code("cancelled") }
-      guard protectedData else { throw IosWebDavFailure.code("credential_locked") }
       try execution.lease?.check()
       try IosWebDavContext.check(execution.destination, binding: execution.binding, journal: execution.journal)
     }

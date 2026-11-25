@@ -12,9 +12,9 @@ Historical Faz3 manifests, evidence, and OpenCode files are archived under `.loc
 - [x] **Faz V1-1 — V1 Provider Visibility & Router/NAS WebDAV (`targetPath` optional + `MKCOL`)**
   - Hidden non-V1 providers (`google-drive`, `amazon-s3`, `s3-compatible`, `box`, `mega`, `cloudme`, `google-cloud-storage`, `kolab-now`) in mobile Connections UI (`cloud-destinations.ts`).
   - Allowed empty/root `targetPath` in Mobile, Desktop, Android, and iOS WebDAV layers and added root-verified `MKCOL` subfolder creation when `targetPath` returns `404`, with `TR`/`EN`/`DE` hint parity.
-- [ ] **Faz V1-2 — `AfterFirstUnlock` Background Lock Policy (Android & iOS)**
-  - Remove app-level `KeyguardManager.isDeviceLocked` block from Android target vaults (retaining CE BFU protection; keeping biometric/keyguard gate on `AndroidRecoveryVault`).
-  - Migrate iOS target vaults to `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` (upgrading existing entries seamlessly on read; keeping FaceID/passcode on Recovery Code) and align automatic coordinators.
+- [x] **Faz V1-2 — `AfterFirstUnlock` Background Lock Policy (Android & iOS)**
+  - Replaced app-level `KeyguardManager.isDeviceLocked` checks with `UserManager.isUserUnlocked` in Android target vaults & `KlodaPairingPlatform` (`setUnlockedDeviceRequired(false)`), keeping biometric/keyguard gate on `AndroidRecoveryVault`.
+  - Migrated iOS target vaults to `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` (upgrading existing entries seamlessly on read), switched Apple pairing identity (`identity_macos.rs`) + snapshot/journal protection to `completeUntilFirstUserAuthentication`, and removed locked-screen background aborts (keeping FaceID/passcode on `IosRecoveryVault`).
 - [ ] **Faz V1-3 — OneDrive & Yandex Disk Upload/Download Adapters**
   - Implement `AndroidOneDriveTransport` + `IosOneDriveTransport` (Graph `createUploadSession`, `conflictBehavior=fail`, atomic vault persistence of rotated `refresh_token`).
   - Implement `AndroidYandexTransport` + `IosYandexTransport` (`resources/upload` + `move` with `overwrite=false`, SHA-256 verification).
@@ -30,7 +30,7 @@ Historical Faz3 manifests, evidence, and OpenCode files are archived under `.loc
 
 ## Next Immediate Step
 
-Start **Faz V1-2**: migrate Android and iOS target credential vaults and automatic coordinators to the `AfterFirstUnlock` background backup policy while preserving biometric/device-lock protection on Recovery Code display.
+Start **Faz V1-3**: implement OneDrive and Yandex Disk upload/download/restore adapters for Android & iOS and enable them in the V1 UI.
 
 ## Post-V1 Queued Roadmap (V2)
 

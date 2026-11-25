@@ -244,7 +244,7 @@ final class IosAutomaticCoordinator {
       } else { candidate = try IosAutomaticPolicy.start(prior: old, binding: plan.binding, recordId: plan.recordId, occurrence: plan.occurrence,
         now: clock.now, uptime: clock.uptime, boot: clock.boot) }
       guard var run = candidate else { task?.setTaskCompleted(success: false); return }
-      guard run.phase == "running", protected, lease?.expired != true else {
+      guard run.phase == "running", lease?.expired != true else {
         if run.phase == "running" { run.accessAttempts = old?.id == run.id ? old!.accessAttempts : 0 }
         let stopped = run.phase == "running" ? try IosAutomaticPolicy.osStopped(run, now: clock.now, uptime: clock.uptime, boot: clock.boot) : run
         try journal.saveAutomaticRun(stopped)

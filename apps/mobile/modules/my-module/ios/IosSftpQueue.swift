@@ -36,9 +36,16 @@ final class IosSftpQueue {
       if let database { return database }
       let base = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
       var directory = base.appendingPathComponent("kloda-sftp", isDirectory: true)
-      try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700, .protectionKey: FileProtectionType.complete])
+      try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700, .protectionKey: FileProtectionType.completeUntilFirstUserAuthentication])
       var options = URLResourceValues(); options.isExcludedFromBackup = true; try directory.setResourceValues(options)
-      let value = try IosSftpJournal(databaseURL: directory.appendingPathComponent("journal.sqlite"))
+      let databaseURL = directory.appendingPathComponent("journal.sqlite")
+      #if os(iOS)
+      try FileManager.default.setAttributes([.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication], ofItemAtPath: directory.path)
+      for path in [databaseURL.path, databaseURL.path + "-wal", databaseURL.path + "-shm"] where FileManager.default.fileExists(atPath: path) {
+        try FileManager.default.setAttributes([.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication], ofItemAtPath: path)
+      }
+      #endif
+      let value = try IosSftpJournal(databaseURL: databaseURL)
       try value.createRuns(); try value.createPlan(); _ = try IosSftpCopyRequests(journal: value); try value.recoverInterrupted()
       // SFTP opt-in stays in its own pin/profile generation transaction; common destination schema is unchanged.
       try value.database.execute("CREATE TABLE IF NOT EXISTS sftp_enabled(id INTEGER PRIMARY KEY CHECK(id=1),profile TEXT NOT NULL,enabled INTEGER NOT NULL CHECK(enabled IN(0,1)))")
@@ -131,7 +138,6 @@ final class IosSftpQueue {
     let execution = try IosWebDavContext.synchronized { () -> Execution in
       guard active == nil, foregroundWork == nil else { throw IosSftpFailure(code: "backup_busy") }
       guard foreground || lease != nil else { throw IosSftpFailure(code: "candidate_stale") }
-      guard protectedData else { throw IosSftpFailure(code: "credential_locked") }
       if automatic, try (IosAutomaticPause.requested || IosSyncJournal().automaticPaused()) { throw IosSftpFailure(code: "user_pause") }
       try lease?.check()
       let journal = try journal(), sources = try IosSftpSources.capture(journal: journal)
@@ -148,7 +154,6 @@ final class IosSftpQueue {
   private func check(_ value: Execution) throws {
     try IosWebDavContext.synchronized {
       guard active?.token == value.token, value.run.phase == "running", foreground || value.lease != nil else { throw IosSftpFailure(code: "cancelled") }
-      guard protectedData else { throw IosSftpFailure(code: "credential_locked") }
       try value.checkCancellation(); try value.lease?.check()
       if value.run.automatic, try (IosAutomaticPause.requested || IosSyncJournal().automaticPaused()) { throw IosSftpFailure(code: "user_pause") }
       let journal = try journal()

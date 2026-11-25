@@ -11,11 +11,18 @@ enum IosSmbVault {
   }
   static func read() throws -> IosSmbProfile? {
     var request = try query()
-    request[kSecReturnData as String] = true; request[kSecMatchLimit as String] = kSecMatchLimitOne
+    request[kSecReturnData as String] = true
+    request[kSecReturnAttributes as String] = true
+    request[kSecMatchLimit as String] = kSecMatchLimitOne
     var item: CFTypeRef?
     let status = SecItemCopyMatching(request as CFDictionary, &item)
     if status == errSecItemNotFound { return nil }
-    guard status == errSecSuccess, let data = item as? Data, data.count <= 65536 else { throw failure(status) }
+    guard status == errSecSuccess, let row = item as? [String: Any],
+      let data = row[kSecValueData as String] as? Data, data.count <= 65536 else { throw failure(status) }
+    if (row[kSecAttrAccessible as String] as? String) != (kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly as String) {
+      _ = SecItemUpdate(try query() as CFDictionary,
+        [kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly] as CFDictionary)
+    }
     do { return try IosSmbProfile.decode(data) }
     catch { throw IosSmbFailure(code: "storage_failure") }
   }
@@ -25,7 +32,7 @@ enum IosSmbVault {
     let data = try JSONEncoder().encode(profile)
     guard data.count <= 65536 else { throw IosSmbFailure(code: "storage_failure") }
     var attributes: [String: Any] = [kSecValueData as String: data,
-      kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly]
+      kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly]
     let identity = try query()
     var status = SecItemUpdate(identity as CFDictionary, attributes as CFDictionary)
     if status == errSecItemNotFound {

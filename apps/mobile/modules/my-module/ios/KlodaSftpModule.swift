@@ -145,14 +145,8 @@ public final class KlodaSftpModule: Module {
   }
   private func observe() {
     guard !destroyed, observers.isEmpty else { return }
-    for name in [UIApplication.protectedDataDidBecomeAvailableNotification, UIApplication.protectedDataWillBecomeUnavailableNotification] {
-      observers.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] note in
-        if note.name == UIApplication.protectedDataWillBecomeUnavailableNotification {
-          IosSftpQueue.shared.setProtected(false)
-          try? IosSftpQueue.shared.pause(code: "credential_locked")
-        } else { self?.refresh() }
-      })
-    }
+    observers.append(NotificationCenter.default.addObserver(forName: UIApplication.protectedDataDidBecomeAvailableNotification,
+      object: nil, queue: .main) { [weak self] _ in self?.refresh() })
     refresh()
   }
 }
