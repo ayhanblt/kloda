@@ -41,6 +41,7 @@ internal data class OAuthProvider(val name: String, val clientId: String, val au
 internal data class OAuthRequest(val provider: OAuthProvider, val url: Uri, val state: String, val verifier: String)
 // `refreshToken` is the stored credential: a refresh token, or for Yandex the long-lived access token with its expiry.
 internal data class OAuthGrant(val accessToken: String, val refreshToken: String, val accountId: String, val expiresAt: Long? = null)
+internal data class OAuthRefresh(val accessToken: String, val refreshToken: String? = null)
 
 // Authorization code + PKCE public client (ADR0028): no client secret, app-folder scope, offline refresh token.
 // Same Wi-Fi/Ethernet, no-redirect, no-cookie policy as the Nextcloud login.
@@ -103,25 +104,34 @@ internal class AndroidOAuthLogin(context: Context, val provider: OAuthProvider) 
     return id to email
   }
 
-  // ADR0028 account display label, Dropbox only for now: best effort, a failure never fails sign-in.
+  // ADR0028 account display label: best effort, a failure never fails sign-in.
   fun label(access: String): String? {
-    if (provider != OAuthProvider.DROPBOX) return null
-    val (status, body) = runCatching { exchange(Request.Builder().url("${provider.api}/2/users/get_current_account")
-      .header("Authorization", "Bearer $access").post("null".toByteArray().toRequestBody("application/json".toMediaType())).build()) }
-      .getOrNull() ?: return null
-    return if (status == 200) AndroidOAuthProfile.label(body) else null
+    val reply = when (provider) {
+      OAuthProvider.DROPBOX -> runCatching { exchange(Request.Builder().url("${provider.api}/2/users/get_current_account")
+        .header("Authorization", "Bearer $access").post("null".toByteArray().toRequestBody("application/json".toMediaType())).build()) }
+      OAuthProvider.ONEDRIVE -> runCatching { exchange(Request.Builder().url("${provider.api}/v1.0/me?\$select=mail,userPrincipalName,displayName")
+        .header("Authorization", "Bearer $access").build()) }
+      OAuthProvider.YANDEX -> runCatching { exchange(Request.Builder().url("https://login.yandex.ru/info?format=json")
+        .header("Authorization", "OAuth $access").build()) }
+      else -> return null
+    }.getOrNull() ?: return null
+    return if (reply.first == 200) AndroidOAuthProfile.label(reply.second, provider.name) else null
   }
 
-  // A fresh access token; for Yandex the stored token itself while it has not expired.
-  fun refresh(refreshToken: String, expiresAt: Long? = null): String {
+  // A fresh access token (with optional rotated refresh token); for Yandex the stored token itself while it has not expired.
+  fun refreshFull(refreshToken: String, expiresAt: Long? = null): OAuthRefresh {
     if (provider == OAuthProvider.YANDEX) {
       if (expiresAt == null || expiresAt <= System.currentTimeMillis() / 1000) throw FilesFailure("oauth_expired")
-      return refreshToken
+      return OAuthRefresh(refreshToken, null)
     }
     val form = FormBody.Builder().add("grant_type", "refresh_token").add("refresh_token", refreshToken).add("client_id", provider.clientId)
     provider.scope?.let { form.add("scope", it) }
-    return token(form.build()).optString("access_token").takeIf(::token) ?: throw FilesFailure("oauth_login")
+    val json = token(form.build())
+    val access = json.optString("access_token").takeIf(::token) ?: throw FilesFailure("oauth_login")
+    val rotated = json.optString("refresh_token").takeIf(::token)
+    return OAuthRefresh(access, rotated)
   }
+  fun refresh(refreshToken: String, expiresAt: Long? = null): String = refreshFull(refreshToken, expiresAt).accessToken
   // Best effort on removal or a failed save. Only Dropbox lets a public client revoke; Microsoft has no such call and
   // Yandex requires the app secret (ADR0028 §6).
   val canRevoke get() = provider == OAuthProvider.DROPBOX

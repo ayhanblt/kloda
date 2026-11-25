@@ -50,10 +50,18 @@ internal data class AndroidOAuthProfile(val revision: String, val provider: Stri
     val PROVIDERS = setOf("dropbox", "onedrive", "yandex", "google-drive")
     fun validLabel(value: String) = value.isNotEmpty() && value.toByteArray().size <= 512 && value.none(Char::isISOControl)
     // Email, else display name, from the provider's own account reply; anything unusable leaves the label empty.
-    fun label(body: String?): String? {
+    fun label(body: String?, provider: String = "dropbox"): String? {
       val json = body?.let { runCatching { JSONObject(it) }.getOrNull() } ?: return null
-      val value = json.optString("email").takeIf { it.contains('@') }
-        ?: json.optJSONObject("name")?.optString("display_name")
+      val value = when (provider) {
+        "onedrive" -> json.optString("mail").takeIf { it.contains('@') }
+          ?: json.optString("userPrincipalName").takeIf { it.contains('@') }
+          ?: json.optString("displayName").takeIf { it.isNotEmpty() }
+        "yandex" -> json.optString("default_email").takeIf { it.contains('@') }
+          ?: json.optString("display_name").takeIf { it.isNotEmpty() }
+          ?: json.optString("login").takeIf { it.isNotEmpty() }
+        else -> json.optString("email").takeIf { it.contains('@') }
+          ?: json.optJSONObject("name")?.optString("display_name")
+      }
       return value?.takeIf(::validLabel)
     }
   }
@@ -115,6 +123,19 @@ internal class AndroidOAuthVault(private val context: Context, private val slot:
     if (profile.accountLabel != null) return@synchronized
     write(profile.copy(accountLabel = label))
     if (read()?.accountLabel != label) throw FilesFailure("webdav_storage")
+  }
+  // Atomically persists a rotated OneDrive refresh token without altering identity or revision.
+  fun rotate(expectedRevision: String, newRefreshToken: String) = synchronized(AndroidSyncJournal.sourceLock) {
+    unlocked()
+    val profile = read()
+    if (profile == null || profile.revision != expectedRevision || profile.provider != "onedrive") {
+      throw FilesFailure("settings_changed")
+    }
+    if (profile.refreshToken == newRefreshToken) return@synchronized
+    val updated = profile.copy(refreshToken = newRefreshToken)
+    updated.validate()
+    write(updated)
+    if (read()?.refreshToken != newRefreshToken) throw FilesFailure("webdav_storage")
   }
   private fun write(profile: AndroidOAuthProfile) {
     try {

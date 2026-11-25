@@ -53,6 +53,11 @@ struct IosOAuthGrant: Equatable {
   var expiresAt: Int64? = nil
 }
 
+struct IosOAuthRefresh: Equatable {
+  let accessToken: String
+  let refreshToken: String?
+}
+
 private final class OAuthReply: @unchecked Sendable { var value: (Data?, URLResponse?, Error?) = (nil, nil, nil) }
 
 // Authorization code + PKCE public client (ADR0028): no client secret, app-folder scope, offline refresh token.
@@ -138,29 +143,44 @@ final class IosOAuthLogin: NSObject, URLSessionTaskDelegate, @unchecked Sendable
     return value
   }
 
-  // ADR0028 account display label, Dropbox only for now: best effort, a failure never fails sign-in.
+  // ADR0028 account display label: best effort, a failure never fails sign-in.
   func label(_ access: String) -> String? {
-    guard provider == .dropbox else { return nil }
-    var request = URLRequest(url: URL(string: provider.api + "/2/users/get_current_account")!)
-    request.httpMethod = "POST"
-    request.setValue("Bearer " + access, forHTTPHeaderField: "Authorization")
-    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.httpBody = Data("null".utf8)
+    var request: URLRequest
+    switch provider {
+    case .dropbox:
+      request = URLRequest(url: URL(string: provider.api + "/2/users/get_current_account")!)
+      request.httpMethod = "POST"
+      request.setValue("Bearer " + access, forHTTPHeaderField: "Authorization")
+      request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+      request.httpBody = Data("null".utf8)
+    case .onedrive:
+      request = URLRequest(url: URL(string: provider.api + "/v1.0/me?$select=mail,userPrincipalName,displayName")!)
+      request.setValue("Bearer " + access, forHTTPHeaderField: "Authorization")
+    case .yandex:
+      request = URLRequest(url: URL(string: "https://login.yandex.ru/info?format=json")!)
+      request.setValue("OAuth " + access, forHTTPHeaderField: "Authorization")
+    default:
+      return nil
+    }
     guard let (status, body) = try? exchange(request), status == 200 else { return nil }
-    return IosOAuthProfile.label(body)
+    return IosOAuthProfile.label(body, provider: provider.name)
   }
 
-  // A fresh access token; for Yandex the stored token itself while it has not expired.
-  func refresh(_ refreshToken: String, expiresAt: Int64? = nil) throws -> String {
+  // A fresh access token (with optional rotated refresh token); for Yandex the stored token itself while it has not expired.
+  func refreshFull(_ refreshToken: String, expiresAt: Int64? = nil) throws -> IosOAuthRefresh {
     if provider == .yandex {
       guard let expiresAt, expiresAt > Int64(Date().timeIntervalSince1970) else { throw IosWebDavFailure.code("oauth_expired") }
-      return refreshToken
+      return IosOAuthRefresh(accessToken: refreshToken, refreshToken: nil)
     }
     var fields = ["grant_type": "refresh_token", "refresh_token": refreshToken, "client_id": provider.clientId]
     if let scope = provider.scope { fields["scope"] = scope }
     let json = try token(fields)
     guard let access = json["access_token"] as? String, Self.token(access) else { throw IosWebDavFailure.code("oauth_login") }
-    return access
+    let rotated = (json["refresh_token"] as? String).flatMap { Self.token($0) ? $0 : nil }
+    return IosOAuthRefresh(accessToken: access, refreshToken: rotated)
+  }
+  func refresh(_ refreshToken: String, expiresAt: Int64? = nil) throws -> String {
+    try refreshFull(refreshToken, expiresAt: expiresAt).accessToken
   }
   // Best effort on removal or a failed save. Dropbox and Google let a public client revoke; Microsoft has no such call and
   // Yandex requires the app secret (ADR0028 §6). Google revokes the refresh token directly.

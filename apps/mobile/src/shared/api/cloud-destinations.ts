@@ -34,9 +34,9 @@ export const blockedProviders: readonly CloudProvider[] = ['cloudme'];
 export const hiddenProviders = ['google-drive', 'amazon-s3', 's3-compatible', 'box', 'mega', 'cloudme', 'google-cloud-storage', 'kolab-now'] as const;
 const targetPattern = /^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/;
 const keys = ['targetId', 'provider', 'endpoint', 'targetPath', 'username', 'enabled'];
-// The providers the queue uploads to: DAV, and Dropbox since 18B/5 (user decision 2026-11-03). The original WebDAV
+// The providers the queue uploads to: DAV, Dropbox (18B/5), OneDrive & Yandex (V1-3). The original WebDAV
 // entry is enabled from its own screen.
-export const enableableProviders: readonly CloudProvider[] = ['nextcloud', 'kolab-now', 'dropbox'];
+export const enableableProviders: readonly CloudProvider[] = ['nextcloud', 'kolab-now', 'dropbox', 'onedrive', 'yandex'];
 function invalid(): never { throw new Error('outcome_unknown'); }
 function native(): NativeCloud {
   const value = requireOptionalNativeModule<NativeCloud>('KlodaCloud');

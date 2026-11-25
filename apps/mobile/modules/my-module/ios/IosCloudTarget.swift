@@ -18,7 +18,7 @@ struct IosRemoteChild: Equatable { let name: String; let folder: Bool }
 enum IosCloudTarget: Equatable {
   case dav(IosWebDavProfile)
   case oauth(IosOAuthProfile)
-  static let oauthKinds: Set<String> = ["dropbox"]
+  static let oauthKinds: Set<String> = ["dropbox", "onedrive", "yandex"]
 
   var kind: String {
     switch self {
@@ -38,12 +38,25 @@ enum IosCloudTarget: Equatable {
     case .oauth(let profile): return try profile.targetId()
     }
   }
+  func sameBinding(_ other: IosCloudTarget?) -> Bool {
+    switch (self, other) {
+    case (.dav(let a), .dav(let b)): return a == b
+    case (.oauth(let a), .oauth(let b)):
+      return a.revision == b.revision && a.provider == b.provider && a.accountId == b.accountId &&
+        a.targetPath == b.targetPath && a.expiresAt == b.expiresAt
+    default: return false
+    }
+  }
   func transport(snapshots: IosFilesSnapshot, check: @escaping () throws -> Void) throws -> IosBackupTransport {
     switch self {
     case .dav(let profile): return IosWebDavTransport(profile: profile, snapshots: snapshots, check: check)
     case .oauth(let profile):
-      guard profile.provider == "dropbox" else { throw IosWebDavFailure.code("destination_unsupported") }
-      return IosDropboxTransport(profile: profile, snapshots: snapshots, check: check)
+      switch profile.provider {
+      case "dropbox": return IosDropboxTransport(profile: profile, snapshots: snapshots, check: check)
+      case "onedrive": return IosOneDriveTransport(profile: profile, snapshots: snapshots, check: check)
+      case "yandex": return IosYandexTransport(profile: profile, snapshots: snapshots, check: check)
+      default: throw IosWebDavFailure.code("destination_unsupported")
+      }
     }
   }
 }

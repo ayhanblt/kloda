@@ -110,7 +110,11 @@ internal class AndroidWebDavQueue(private val context: Context, private val mayR
         val files = AndroidWebDavFilesRunner(context, publisher); files.run(execution.captured.sources.sources)
         val photos = AndroidWebDavPhotosRunner(context, publisher); photos.run(execution.captured.sources.sources)
         error = photos.errorCode ?: files.errorCode
-        if (error == null) (transport as? AndroidDropboxTransport)?.fillLabel()
+        if (error == null) when (transport) {
+          is AndroidDropboxTransport -> transport.fillLabel()
+          is AndroidOneDriveTransport -> transport.fillLabel()
+          is AndroidYandexTransport -> transport.fillLabel()
+        }
         // ADR0029 29/2: catalogue what completed, also when other items wait for review; a catalog failure only
         // reports when the backup itself had none.
         if (error == null || error == "review_required") AndroidRecoveryVault(context).catalogKeys()?.let { keys ->

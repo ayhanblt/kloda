@@ -100,7 +100,7 @@ public final class KlodaCloudModule: Module {
         try Self.added(targetId)
         guard let destination = try IosWebDavDestinations.added(targetId) else { throw IosWebDavFailure.code("not_found") }
         let check = {
-          guard try IosWebDavDestinations.added(targetId) == destination else { throw IosWebDavFailure.code("settings_changed") }
+          guard destination.sameBinding(try IosWebDavDestinations.added(targetId)) else { throw IosWebDavFailure.code("settings_changed") }
         }
         let journal = try IosWebDavJournal.open()
         let summary = try IosRecoveryImport(journal: journal, target: targetId, keys: keys,

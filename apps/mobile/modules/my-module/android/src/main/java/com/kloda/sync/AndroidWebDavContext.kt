@@ -7,7 +7,7 @@ import java.security.MessageDigest
 internal data class AndroidWebDavContext(val destination: AndroidCloudTarget, val sources: FilesRunContext, val binding: String) {
   val kind: String get() = destination.kind
   fun check(context: Context, journal: AndroidWebDavJournal) = synchronized(AndroidSyncJournal.sourceLock) {
-    if (stored(context, kind, destination.targetId()) != destination || FilesRunContext.webdav(context).binding != sources.binding ||
+    if (!destination.sameBinding(stored(context, kind, destination.targetId())) || FilesRunContext.webdav(context).binding != sources.binding ||
       !journal.enabled(kind, destination.targetId(), destination.revision)) throw FilesFailure("settings_changed")
   }
   fun complete(context: Context, journal: AndroidWebDavJournal, value: WebDavUpload) = synchronized(AndroidSyncJournal.sourceLock) {

@@ -164,7 +164,11 @@ final class IosWebDavQueue {
       let photos = IosWebDavPhotosRunner(publisher: publisher)
       try photos.run()
       var outcome = photos.errorCode ?? files.errorCode
-      if outcome == nil { (transport as? IosDropboxTransport)?.fillLabel() }
+      if outcome == nil {
+        (transport as? IosDropboxTransport)?.fillLabel()
+        (transport as? IosOneDriveTransport)?.fillLabel()
+        (transport as? IosYandexTransport)?.fillLabel()
+      }
       // ADR0029 29/2: catalogue what completed, also when other items wait for review; a catalog failure only
       // reports when the backup itself had none.
       if outcome == nil || outcome == "review_required", let keys = try IosRecoveryVault.catalogKeys() {

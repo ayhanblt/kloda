@@ -26,7 +26,7 @@ const navigate = jest.fn();
 function List() { return <CloudDestinationList cloud={useCloudDestinations()} navigate={navigate} openBackups={openBackups} saved={null} />; }
 
 it('switches a DAV destination, keeps OAuth unsupported and removes only after confirmation', async () => {
-  const dav = row(1, 'nextcloud'), oauth = row(2, 'onedrive');
+  const dav = row(1, 'nextcloud'), oauth = row(2, 'google-drive');
   const original = row(0, 'webdav');
   api.list.mockResolvedValue([original, dav, oauth]);
   api.setEnabled.mockResolvedValue([original, { ...dav, enabled: true }, oauth]);
@@ -81,20 +81,21 @@ it('runs an enabled DAV destination now and pauses it while running', async () =
   await view.unmount();
 });
 
-it('lets an enabled Dropbox destination run like a DAV one (18B/5)', async () => {
-  api.list.mockResolvedValue([row(7, 'dropbox', true), { ...row(8, 'dropbox'), accountLabel: 'eight@example.com' }]);
+it('lets an enabled Dropbox, OneDrive, or Yandex destination run like a DAV one (18B/5 & V1-3)', async () => {
+  api.list.mockResolvedValue([row(7, 'dropbox', true), { ...row(8, 'onedrive'), accountLabel: 'eight@example.com' }, { ...row(9, 'yandex', true), accountLabel: 'nine@yandex.ru' }]);
   const view = await render(<List />);
   await waitFor(() => expect(view.getByLabelText(i18n.t('ui.conn.account', { account: 'eight@example.com' }))).toBeTruthy());
+  expect(view.getByLabelText(i18n.t('ui.conn.account', { account: 'nine@yandex.ru' }))).toBeTruthy();
   expect(view.queryByText('user8')).toBeNull();
   expect(view.getByText(i18n.t('ui.conn.accountPending'))).toBeTruthy();
   expect(view.queryByText(i18n.t('transfer.errors.destination_unsupported'))).toBeNull();
   expect(view.getAllByRole('button', { name: i18n.t('destinations.enableSaved') })).toHaveLength(1);
-  expect(view.getAllByRole('button', { name: i18n.t('statusUi.backupNow') })).toHaveLength(1);
+  expect(view.getAllByRole('button', { name: i18n.t('statusUi.backupNow') })).toHaveLength(2);
   await view.unmount();
 });
 
 it('offers no manual run for a disabled or unsupported OAuth destination', async () => {
-  api.list.mockResolvedValue([row(5, 'nextcloud'), row(6, 'onedrive')]);
+  api.list.mockResolvedValue([row(5, 'nextcloud'), row(6, 'google-drive')]);
   const view = await render(<List />);
   await waitFor(() => expect(view.getAllByRole('button', { name: i18n.t('recovery.importEntry') })).toBeTruthy());
   expect(view.queryByRole('button', { name: i18n.t('statusUi.backupNow') })).toBeNull();
@@ -147,7 +148,7 @@ it('asks destinations enabled before the recovery code for one, and hides the no
 });
 
 it('opens the old-phone import under a supported card only', async () => {
-  api.list.mockResolvedValue([row(5, 'dropbox'), row(6, 'onedrive')]);
+  api.list.mockResolvedValue([row(5, 'dropbox'), row(6, 'google-drive')]);
   const view = await render(<List />);
   await waitFor(() => expect(view.getAllByRole('button', { name: i18n.t('recovery.importEntry') })).toBeTruthy());
   const entries = view.getAllByRole('button', { name: i18n.t('recovery.importEntry') });

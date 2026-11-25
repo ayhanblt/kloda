@@ -17,8 +17,10 @@ it('accepts display metadata only and rejects a password or unknown field', () =
   const missing: Record<string, unknown> = { ...row }; delete missing.enabled;
   expect(() => cloudDestinationFromNative(missing)).toThrow('outcome_unknown');
   expect(() => cloudDestinationFromNative({ ...row, enabled: 'yes' })).toThrow('outcome_unknown');
-  expect(() => cloudDestinationFromNative({ ...row, provider: 'onedrive', enabled: true })).toThrow('outcome_unknown');
+  expect(() => cloudDestinationFromNative({ ...row, provider: 'google-drive', enabled: true })).toThrow('outcome_unknown');
   expect(cloudDestinationFromNative({ ...row, provider: 'dropbox', enabled: true })).toEqual({ ...row, provider: 'dropbox', enabled: true });
+  expect(cloudDestinationFromNative({ ...row, provider: 'onedrive', enabled: true })).toEqual({ ...row, provider: 'onedrive', enabled: true });
+  expect(cloudDestinationFromNative({ ...row, provider: 'yandex', enabled: true })).toEqual({ ...row, provider: 'yandex', enabled: true });
 });
 
 it('accepts a display label for an OAuth destination only', () => {
@@ -121,6 +123,10 @@ it('runs and pauses one destination by targetId and accepts only a known run sta
   await expect(cloudDestinations.pause(target)).resolves.toEqual([{ ...row, run: { state: 'paused', errorCode: 'target_pause' } }]);
   native.destinations.mockResolvedValueOnce({ destinations: [{ ...row, run: { ...run, state: 'exploded' } }] });
   await expect(cloudDestinations.list()).rejects.toThrow('outcome_unknown');
-  native.destinations.mockResolvedValueOnce({ destinations: [{ ...row, provider: 'onedrive', endpoint: 'https://graph.microsoft.com', run }] });
+  native.destinations.mockResolvedValueOnce({ destinations: [{ ...row, provider: 'google-drive', endpoint: 'https://www.googleapis.com', run }] });
   await expect(cloudDestinations.list()).rejects.toThrow('outcome_unknown');
+  native.destinations.mockResolvedValueOnce({ destinations: [{ ...row, provider: 'onedrive', endpoint: 'https://graph.microsoft.com', run }] });
+  await expect(cloudDestinations.list()).resolves.toEqual([{ ...row, provider: 'onedrive', endpoint: 'https://graph.microsoft.com', run: { state: 'running' } }]);
+  native.destinations.mockResolvedValueOnce({ destinations: [{ ...row, provider: 'yandex', endpoint: 'https://cloud-api.yandex.net', run }] });
+  await expect(cloudDestinations.list()).resolves.toEqual([{ ...row, provider: 'yandex', endpoint: 'https://cloud-api.yandex.net', run: { state: 'running' } }]);
 });

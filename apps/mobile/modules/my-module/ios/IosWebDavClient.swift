@@ -7,6 +7,7 @@ struct IosWebDavReply {
   let sha256: String
   // Bounded (64 KiB) body of an error reply, or of a reply the caller asked to collect (JSON APIs).
   var body = Data()
+  var location: String? = nil
 }
 
 // A request owns one serial delegate queue and never buffers a whole download in memory.
@@ -21,6 +22,7 @@ final class IosWebDavClient: NSObject, URLSessionDataDelegate, @unchecked Sendab
   private var mutationAcknowledged = false
   private var failure: Error?
   private var status = 0
+  private var location: String? = nil
   private var received: Int64 = 0
   private var maximum: Int64 = 65536
   private var digest = SHA256()
@@ -68,7 +70,7 @@ final class IosWebDavClient: NSObject, URLSessionDataDelegate, @unchecked Sendab
     request.httpShouldHandleCookies = false
     condition.lock()
     guard task == nil else { condition.unlock(); session.invalidateAndCancel(); throw IosWebDavFailure.code("backup_busy") }
-    finished = false; mutationAcknowledged = false; failure = nil; status = 0; received = 0; maximum = size; digest = SHA256(); sink = receive
+    finished = false; mutationAcknowledged = false; failure = nil; status = 0; location = nil; received = 0; maximum = size; digest = SHA256(); sink = receive
     self.mutation = mutation; self.readsBody = readsBody; self.collect = collect; self.multistatus = multistatus; body = Data()
     active = session
     let operation = upload.map { session.uploadTask(with: request, fromFile: $0) }
@@ -90,7 +92,7 @@ final class IosWebDavClient: NSObject, URLSessionDataDelegate, @unchecked Sendab
       }
     }
     let error = failure
-    let reply = IosWebDavReply(status: status, size: received, sha256: Self.encode(Data(digest.finalize())), body: body)
+    let reply = IosWebDavReply(status: status, size: received, sha256: Self.encode(Data(digest.finalize())), body: body, location: location)
     condition.unlock()
     if let error { throw error }
     // The caller persists a received mutation ACK before testing a newly changed context.
@@ -111,7 +113,10 @@ final class IosWebDavClient: NSObject, URLSessionDataDelegate, @unchecked Sendab
   }
   func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse,
     completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
-    condition.lock(); status = (response as? HTTPURLResponse)?.statusCode ?? 0
+    condition.lock()
+    let http = response as? HTTPURLResponse
+    status = http?.statusCode ?? 0
+    if [301, 302, 303, 307, 308].contains(status) { location = http?.value(forHTTPHeaderField: "Location") }
     // A received mutation status is its ACK. Diagnostic-body cancellation or loss cannot erase it.
     if mutation, status != 0 { mutationAcknowledged = true }
     if !readsBody, mutationAcknowledged {

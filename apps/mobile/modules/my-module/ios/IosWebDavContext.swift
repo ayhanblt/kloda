@@ -79,7 +79,7 @@ enum IosWebDavContext {
   static func check(_ destination: IosCloudTarget, binding: String, journal: IosWebDavJournal) throws {
     try synchronized {
       let target = try destination.targetId()
-      guard try stored(kind: destination.kind, target: target) == destination,
+      guard destination.sameBinding(try stored(kind: destination.kind, target: target)),
         try journal.enabled(kind: destination.kind, id: target, revision: destination.revision),
         try capture(destination, journal: journal) == binding else { throw IosWebDavFailure.code("settings_changed") }
     }

@@ -15,10 +15,10 @@ Historical Faz3 manifests, evidence, and OpenCode files are archived under `.loc
 - [x] **Faz V1-2 — `AfterFirstUnlock` Background Lock Policy (Android & iOS)**
   - Replaced app-level `KeyguardManager.isDeviceLocked` checks with `UserManager.isUserUnlocked` in Android target vaults & `KlodaPairingPlatform` (`setUnlockedDeviceRequired(false)`), keeping biometric/keyguard gate on `AndroidRecoveryVault`.
   - Migrated iOS target vaults to `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` (upgrading existing entries seamlessly on read), switched Apple pairing identity (`identity_macos.rs`) + snapshot/journal protection to `completeUntilFirstUserAuthentication`, and removed locked-screen background aborts (keeping FaceID/passcode on `IosRecoveryVault`).
-- [ ] **Faz V1-3 — OneDrive & Yandex Disk Upload/Download Adapters**
-  - Implement `AndroidOneDriveTransport` + `IosOneDriveTransport` (Graph `createUploadSession`, `conflictBehavior=fail`, atomic vault persistence of rotated `refresh_token`).
-  - Implement `AndroidYandexTransport` + `IosYandexTransport` (`resources/upload` + `move` with `overwrite=false`, SHA-256 verification).
-  - Enable `'onedrive'` and `'yandex'` in `enableableProviders` and `CloudTarget` queues (including Photos + Files restore & ADR0029 catalog).
+- [x] **Faz V1-3 — OneDrive & Yandex Disk Upload/Download Adapters**
+  - Implemented `AndroidOneDriveTransport` + `IosOneDriveTransport` (Graph `createUploadSession` with 320 KiB chunk multiples, `conflictBehavior=fail`, SHA-256 verification, atomic vault persistence of rotated `refresh_token`).
+  - Implemented `AndroidYandexTransport` + `IosYandexTransport` (`resources/upload` + `move` with `overwrite=false`, 202 async polling, SHA-256 verification).
+  - Enabled `'onedrive'` and `'yandex'` in `enableableProviders` and `CloudTarget` queues (including Photos + Files restore & ADR0029 catalog).
 - [ ] **Faz V1-4 — PC Desktop Human-Readable File Layout (`.media` → Real Filenames)**
   - Stage incoming transfers in `.kloda/staging/`, retain hardlink protection in `.kloda/objects/`, and atomically publish `<Device>/Photos/<name.ext>` and `<Device>/Files/<relative_path>` with no-overwrite numbered suffixes (`name (2).ext`).
 - [ ] **Faz V1-5 — `1.0.0` Release Signing, R8/ProGuard, Build Flags & Desktop Installers**
@@ -30,7 +30,7 @@ Historical Faz3 manifests, evidence, and OpenCode files are archived under `.loc
 
 ## Next Immediate Step
 
-Start **Faz V1-3**: implement OneDrive and Yandex Disk upload/download/restore adapters for Android & iOS and enable them in the V1 UI.
+Start **Faz V1-4**: switch PC Desktop file receiver (`packages/pairing-native/src/file_receiver.rs` & retention) from opaque `.media` IDs to human-readable `<Device>/Photos/` and `<Device>/Files/` layout with no-overwrite suffixes.
 
 ## Post-V1 Queued Roadmap (V2)
 

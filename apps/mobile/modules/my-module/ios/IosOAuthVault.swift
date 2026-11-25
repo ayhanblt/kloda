@@ -20,9 +20,22 @@ struct IosOAuthProfile: Codable, Equatable {
       left.targetPath == right.targetPath && left.refreshToken == right.refreshToken && left.expiresAt == right.expiresAt
   }
   // Email, else display name, from the provider's own account reply; anything unusable leaves the label empty.
-  static func label(_ body: Data?) -> String? {
+  static func label(_ body: Data?, provider: String = "dropbox") -> String? {
     guard let body, let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any] else { return nil }
-    let value = (json["email"] as? String).flatMap { $0.contains("@") ? $0 : nil } ?? (json["name"] as? [String: Any])?["display_name"] as? String
+    let value: String?
+    switch provider {
+    case "onedrive":
+      value = (json["mail"] as? String).flatMap { $0.contains("@") ? $0 : nil }
+        ?? (json["userPrincipalName"] as? String).flatMap { $0.contains("@") ? $0 : nil }
+        ?? (json["displayName"] as? String)
+    case "yandex":
+      value = (json["default_email"] as? String).flatMap { $0.contains("@") ? $0 : nil }
+        ?? (json["display_name"] as? String)
+        ?? (json["login"] as? String)
+    default:
+      value = (json["email"] as? String).flatMap { $0.contains("@") ? $0 : nil }
+        ?? (json["name"] as? [String: Any])?["display_name"] as? String
+    }
     guard let value, valid(label: value) else { return nil }
     return value
   }
@@ -105,6 +118,22 @@ enum IosOAuthVault {
       kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly] as CFDictionary)
     guard status == errSecSuccess else { throw failure(status) }
     guard try read(slot: slot)?.accountLabel == label else { throw IosWebDavFailure.code("webdav_storage") }
+  }
+  // Atomically persists a rotated OneDrive refresh token without altering identity or revision.
+  static func rotate(expectedRevision: String, refreshToken: String, slot: String) throws {
+    guard let profile = try read(slot: slot), profile.revision == expectedRevision, profile.provider == "onedrive" else {
+      throw IosWebDavFailure.code("settings_changed")
+    }
+    if profile.refreshToken == refreshToken { return }
+    let updated = IosOAuthProfile(revision: profile.revision, provider: profile.provider, accountId: profile.accountId,
+      targetPath: profile.targetPath, refreshToken: refreshToken, expiresAt: profile.expiresAt, accountLabel: profile.accountLabel)
+    try updated.validate()
+    let data = try JSONEncoder().encode(updated)
+    guard data.count <= 65536 else { throw IosWebDavFailure.code("webdav_storage") }
+    let status = SecItemUpdate(try query(slot) as CFDictionary, [kSecValueData as String: data,
+      kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly] as CFDictionary)
+    guard status == errSecSuccess else { throw failure(status) }
+    guard try read(slot: slot)?.refreshToken == refreshToken else { throw IosWebDavFailure.code("webdav_storage") }
   }
   static func delete(slot: String) throws {
     let status = SecItemDelete(try query(slot) as CFDictionary)

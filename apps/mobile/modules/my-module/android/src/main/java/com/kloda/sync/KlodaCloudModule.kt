@@ -126,7 +126,7 @@ class KlodaCloudModule : Module() {
         val keys = try { AndroidRecoveryCatalog.keys(secret) } finally { secret.fill(0) }
         added(targetId)
         val destination = AndroidWebDavDestinations.added(context(), targetId) ?: throw FilesFailure("not_found")
-        val check = { if (AndroidWebDavDestinations.added(context(), targetId) != destination) throw FilesFailure("settings_changed") }
+        val check = { if (!destination.sameBinding(AndroidWebDavDestinations.added(context(), targetId))) throw FilesFailure("settings_changed") }
         AndroidSyncJournal.webdav(context()).use { helper ->
           val journal = AndroidWebDavJournal(helper.writableDatabase)
           val transport = destination.transport(context(), AndroidFilesSnapshots(context(), webdav = true, checkPaused = check), check)

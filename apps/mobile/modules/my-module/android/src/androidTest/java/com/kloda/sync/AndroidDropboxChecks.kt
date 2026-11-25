@@ -33,12 +33,16 @@ internal object AndroidDropboxChecks {
 
     val dropbox = AndroidOAuthProfile(UUID.randomUUID().toString(), "dropbox", "dbid:owned", "Kloda", "fixture-token")
     val onedrive = AndroidOAuthProfile(UUID.randomUUID().toString(), "onedrive", "owned", "Kloda", "fixture-token")
+    val yandex = AndroidOAuthProfile(UUID.randomUUID().toString(), "yandex", "113000", "Kloda", "fixture-token", expiresAt = 4102444800L)
+    val drive = AndroidOAuthProfile(UUID.randomUUID().toString(), "google-drive", "owned", "Kloda", "", accountName = "owned@example.com")
     val target = dropbox.targetId()
     try {
-      listOf(dropbox, onedrive).forEach { AndroidOAuthVault(context, it.targetId()).add(it) }
+      listOf(dropbox, onedrive, yandex, drive).forEach { AndroidOAuthVault(context, it.targetId()).add(it) }
       check(AndroidWebDavDestinations.added(context, target) == AndroidCloudTarget.OAuth(dropbox))
-      check(AndroidWebDavDestinations.added(context, onedrive.targetId()) == null)
-      rejects("destination_unsupported") { AndroidWebDavDestinations.setEnabled(context, onedrive.targetId(), true) }
+      check(AndroidWebDavDestinations.added(context, onedrive.targetId()) == AndroidCloudTarget.OAuth(onedrive))
+      check(AndroidWebDavDestinations.added(context, yandex.targetId()) == AndroidCloudTarget.OAuth(yandex))
+      check(AndroidWebDavDestinations.added(context, drive.targetId()) == null)
+      rejects("destination_unsupported") { AndroidWebDavDestinations.setEnabled(context, drive.targetId(), true) }
       rejects("not_found") { AndroidWebDavDestinations.setEnabled(context, "A".repeat(42) + "E", true) }
       // Saving custody is not enabling (ADR0023).
       check(!AndroidWebDavDestinations.enabled(context, target))
@@ -47,15 +51,27 @@ internal object AndroidDropboxChecks {
       AndroidSyncJournal.webdav(context).use { owner ->
         val journal = AndroidWebDavJournal(owner.writableDatabase)
         check(journal.destination(target)?.kind == "dropbox" && journal.destination(target)?.revision == dropbox.revision)
-        check(journal.destinations().none { it.target == onedrive.targetId() })
+        check(journal.destinations().none { it.target == drive.targetId() })
       }
       check(AndroidWebDavContext.stored(context, "dropbox", target) == AndroidCloudTarget.OAuth(dropbox))
-      check(AndroidWebDavContext.stored(context, "onedrive", onedrive.targetId()) == null)
+      check(AndroidWebDavContext.stored(context, "onedrive", onedrive.targetId()) == AndroidCloudTarget.OAuth(onedrive))
+      check(AndroidWebDavContext.stored(context, "yandex", yandex.targetId()) == AndroidCloudTarget.OAuth(yandex))
+      check(AndroidWebDavContext.stored(context, "google-drive", drive.targetId()) == null)
       check(AndroidWebDavContext.stored(context, "nextcloud", target) == null) { "kind must match the slot" }
       val snapshots = AndroidFilesSnapshots(context, true) {}
       check(AndroidCloudTarget.OAuth(dropbox).transport(context, snapshots) {} is AndroidDropboxTransport)
-      rejects("destination_unsupported") { AndroidCloudTarget.OAuth(onedrive).transport(context, snapshots) {} }
-      announce("PASS dropbox saved-not-enabled explicit-enable journal-row stored-target transport onedrive-unsupported")
+      check(AndroidCloudTarget.OAuth(onedrive).transport(context, snapshots) {} is AndroidOneDriveTransport)
+      check(AndroidCloudTarget.OAuth(yandex).transport(context, snapshots) {} is AndroidYandexTransport)
+      rejects("destination_unsupported") { AndroidCloudTarget.OAuth(drive).transport(context, snapshots) {} }
+      check(AndroidOneDriveTransport.encodePath(listOf("Kloda", "Foto ğ+1.txt")) == "Kloda/Foto%20%C4%9F%2B1.txt")
+      rejects("conflict") { AndroidOneDriveTransport.require(WebDavReply(409, 0, "", "{\"error\":{\"code\":\"nameAlreadyExists\"}}".toByteArray()), setOf(200)) }
+      rejects("disk_full") { AndroidOneDriveTransport.require(WebDavReply(507, 0, "", "{\"error\":{\"code\":\"quotaLimitReached\"}}".toByteArray()), setOf(200)) }
+      rejects("oauth_expired") { AndroidOneDriveTransport.require(WebDavReply(401, 0, ""), setOf(200)) }
+      check(AndroidYandexTransport.appPath(listOf("Kloda", "Foto.txt")) == "app:/Kloda/Foto.txt")
+      rejects("conflict") { AndroidYandexTransport.require(WebDavReply(409, 0, "", "{\"error\":\"DiskResourceAlreadyExistsError\"}".toByteArray()), setOf(200)) }
+      rejects("disk_full") { AndroidYandexTransport.require(WebDavReply(507, 0, "", "{\"error\":\"DiskLimitExceededError\"}".toByteArray()), setOf(200)) }
+      rejects("oauth_expired") { AndroidYandexTransport.require(WebDavReply(401, 0, ""), setOf(200)) }
+      announce("PASS dropbox/onedrive/yandex wiring, transports, and google-drive unsupported")
       AndroidWebDavDestinations.forget(context, target)
       check(!AndroidWebDavDestinations.enabled(context, target))
       AndroidSyncJournal.webdav(context).use { owner ->
@@ -64,7 +80,7 @@ internal object AndroidDropboxChecks {
       }
       announce("PASS dropbox forget disables and drops plan")
     } finally {
-      listOf(dropbox, onedrive).forEach { runCatching { AndroidOAuthVault(context, it.targetId()).delete() } }
+      listOf(dropbox, onedrive, yandex, drive).forEach { runCatching { AndroidOAuthVault(context, it.targetId()).delete() } }
     }
   }
 

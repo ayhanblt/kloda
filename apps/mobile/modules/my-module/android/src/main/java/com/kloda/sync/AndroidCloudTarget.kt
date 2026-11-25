@@ -24,10 +24,20 @@ internal sealed class AndroidCloudTarget {
   val kind: String get() = when (this) { is Dav -> profile.provider ?: "webdav"; is OAuth -> profile.provider }
   val revision: String get() = when (this) { is Dav -> profile.revision; is OAuth -> profile.revision }
   fun targetId(): String = when (this) { is Dav -> profile.targetId(); is OAuth -> profile.targetId() }
+  fun sameBinding(other: AndroidCloudTarget?): Boolean = when (this) {
+    is Dav -> this == other
+    is OAuth -> other is OAuth && profile.revision == other.profile.revision && profile.provider == other.profile.provider &&
+      profile.accountId == other.profile.accountId && profile.targetPath == other.profile.targetPath &&
+      profile.expiresAt == other.profile.expiresAt && profile.accountName == other.profile.accountName
+  }
   fun transport(context: Context, snapshots: AndroidFilesSnapshots, check: () -> Unit): AndroidBackupTransport = when (this) {
     is Dav -> AndroidWebDavTransport(context, profile, snapshots, check)
-    is OAuth -> if (profile.provider == "dropbox") AndroidDropboxTransport(context, profile, snapshots, check)
-      else throw FilesFailure("destination_unsupported")
+    is OAuth -> when (profile.provider) {
+      "dropbox" -> AndroidDropboxTransport(context, profile, snapshots, check)
+      "onedrive" -> AndroidOneDriveTransport(context, profile, snapshots, check)
+      "yandex" -> AndroidYandexTransport(context, profile, snapshots, check)
+      else -> throw FilesFailure("destination_unsupported")
+    }
   }
-  companion object { val OAUTH_KINDS = setOf("dropbox") }
+  companion object { val OAUTH_KINDS = setOf("dropbox", "onedrive", "yandex") }
 }
