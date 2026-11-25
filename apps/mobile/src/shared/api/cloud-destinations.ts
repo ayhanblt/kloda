@@ -30,8 +30,8 @@ export const destinationAccount = (item: CloudDestination): string | undefined =
   oauthProviders.includes(item.provider as OAuthProvider) ? item.accountLabel : item.username;
 // ADR0027 §6: CloudMe answers only with Digest (probed 2026-11-01); no auth downgrade, so it has no add path.
 export const blockedProviders: readonly CloudProvider[] = ['cloudme'];
-// User decision 2026-11-03: Kolab Now is out of V1 and not offered; its native add path stays, unreachable.
-export const hiddenProviders = ['kolab-now'] as const;
+// User decisions (2026-11-03 & 2026-11-25): hide unimplemented/post-V1 providers in V1 Connections UI.
+export const hiddenProviders = ['google-drive', 'amazon-s3', 's3-compatible', 'box', 'mega', 'cloudme', 'google-cloud-storage', 'kolab-now'] as const;
 const targetPattern = /^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/;
 const keys = ['targetId', 'provider', 'endpoint', 'targetPath', 'username', 'enabled'];
 // The providers the queue uploads to: DAV, and Dropbox since 18B/5 (user decision 2026-11-03). The original WebDAV

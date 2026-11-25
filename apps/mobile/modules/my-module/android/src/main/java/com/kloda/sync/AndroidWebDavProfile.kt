@@ -16,8 +16,9 @@ internal data class AndroidWebDavProfile(val revision: String, val endpoint: Str
     if (runCatching { UUID.fromString(revision) }.isFailure || username.isBlank() || username.contains(':') || password.isEmpty() ||
       listOf(endpoint, targetPath, username, password).any { it.contains('\u0000') || it.toByteArray().size > 8192 }) throw FilesFailure("webdav_fields")
     val base = endpoint.toHttpUrlOrNull() ?: throw FilesFailure("webdav_fields")
+    val segments = parts(targetPath)
     if (base.scheme != "https" || base.host.isEmpty() || base.username.isNotEmpty() || base.password.isNotEmpty() ||
-      base.query != null || base.fragment != null || parts(targetPath).isEmpty()) throw FilesFailure("webdav_fields")
+      base.query != null || base.fragment != null || (provider != null && segments.isEmpty())) throw FilesFailure("webdav_fields")
   }
   fun url(relative: String = ""): HttpUrl {
     validate()
@@ -26,8 +27,11 @@ internal data class AndroidWebDavProfile(val revision: String, val endpoint: Str
     return result.build()
   }
   private fun parts(value: String): List<String> {
+    if (value.any { it == '\\' || it.isISOControl() }) throw FilesFailure("backup_path_rejected")
+    val trimmed = value.trim()
+    if (trimmed.isEmpty() || trimmed == "/") return emptyList()
     val parts = value.split('/').filter { it.isNotEmpty() }
-    if (value.any { it == '\\' || it.isISOControl() } || parts.any { it == "." || it == ".." || it.toByteArray().size > 255 })
+    if (parts.any { it.isBlank() || it == "." || it == ".." || it.toByteArray().size > 255 })
       throw FilesFailure("backup_path_rejected")
     return parts
   }

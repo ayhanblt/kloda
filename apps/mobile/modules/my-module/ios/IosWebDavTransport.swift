@@ -51,6 +51,7 @@ final class IosWebDavTransport: IosBackupTransport {
   private func prepareParents(_ path: String) throws {
     // MKCOL is create-only. A 405 never authorizes replacing an existing resource.
     let parts = profile.targetPath.split(separator: "/").map(String.init) + path.split(separator: "/").dropLast().map(String.init)
+    guard !parts.isEmpty else { return }
     for index in 1...parts.count {
       try check()
       let prefix = parts.prefix(index).joined(separator: "/")

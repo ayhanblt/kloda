@@ -85,7 +85,7 @@ it('validates Kolab Now credentials and folder before native custody; CloudMe st
   await expect(cloudDestinations.addKolabNow('me', 'secret', 'Kloda')).rejects.toThrow('outcome_unknown');
   expect(native.addKolabNow).toHaveBeenCalledTimes(2);
   expect(blockedProviders).toEqual(['cloudme']);
-  expect(hiddenProviders).toEqual(['kolab-now']);
+  expect(hiddenProviders).toEqual(['google-drive', 'amazon-s3', 's3-compatible', 'box', 'mega', 'cloudme', 'google-cloud-storage', 'kolab-now']);
 });
 
 it('signs in to an OAuth provider with a normalized folder and accepts the account ID as display name only', async () => {

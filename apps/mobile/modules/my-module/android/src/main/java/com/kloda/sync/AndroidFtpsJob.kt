@@ -35,6 +35,10 @@ class AndroidFtpsJob : JobService() {
     /** WATCH same-URI replacement outcome (§4.8); null = not attempted. Decided by `complete`, never in finally. */
     @Volatile var watch: AndroidFtpsScheduler.Rewatch? = null
   }
+  companion object {
+    /** Test-only ordering point (null in production): stage ("watch" before changed, "rewatch" after its return before complete, "finished" before a claimed run's finished) + own token; called on the worker thread outside arbiter/sourceLock. */
+    @Volatile internal var workerGate: ((String, String?) -> Unit)? = null
+  }
   /** Lane → at most one slot of this service: a live worker E or a worker-closed E retaining its stop answer. */
   private val executions = java.util.concurrent.ConcurrentHashMap<Int, Execution>()
   /** Worker side-effect authority: own slot AND RUNNING (volatile snapshot; read lock-free, also under sourceLock). */
@@ -54,8 +58,10 @@ class AndroidFtpsJob : JobService() {
       val token = params.extras.getString("token")
       try {
         if (params.jobId == AndroidFtpsScheduler.WATCH) {
+          workerGate?.invoke("watch", token)
           AndroidFtpsScheduler.changed(applicationContext, token) { live(execution) }
           execution.watch = AndroidFtpsScheduler.rewatch(applicationContext, token, execution) { live(execution) }
+          workerGate?.invoke("rewatch", token)
         } else execute(execution)
       } catch (failure: Exception) {
         execution.locked = params.jobId == AndroidFtpsScheduler.JOB && execution.plan == null && AndroidFtpsQueue.code(failure) == "credential_locked"
@@ -161,6 +167,7 @@ class AndroidFtpsJob : JobService() {
       } finally { AndroidFtpsRuntime.endAutomatic(execution, interrupt = true) }
       val result = execution.result ?: return
       val claimed = execution.plan ?: return
+      workerGate?.invoke("finished", execution.parameters.extras.getString("token"))
       AndroidFtpsScheduler.finished(context, claimed, result, execution.parameters.extras.getString("token")) { live(execution) }
     }
   }

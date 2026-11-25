@@ -73,7 +73,7 @@
     "testError": "WebDAV-Test fehlgeschlagen.",
     "webdavHints": {
       "endpoint": "Gib die vollständige HTTPS-Adresse einschließlich Port (falls vorhanden) und WebDAV-Stammpfad des Servers ein. Beispiel: https://server.example:8083/webdav/",
-      "targetPath": "Ein Unterordner unter diesem WebDAV-Stamm, der bereits existieren und zugänglich sein muss; Kloda legt ihn nicht an. Beispiel: Kloda → https://server.example:8083/webdav/Kloda/",
+      "targetPath": "Optionaler Unterordner unter diesem WebDAV-Stamm. Leer lassen, um direkt den Stamm zu nutzen (z. B. Router-/Modem-Freigaben); fehlt ein Unterordner, legt Kloda ihn an. Beispiel: Kloda → https://server.example:8083/webdav/Kloda/",
       "security": "Unterstützt werden nur HTTPS mit einem vom Betriebssystem als vertrauenswürdig eingestuften Zertifikat und Basic-Anmeldung. Der Test schreibt, liest zurück und löscht ausschließlich seine eigenen temporären Daten."
     },
     "webdavDiagnostic": {

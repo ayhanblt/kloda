@@ -251,7 +251,12 @@ export class DesktopSyncRuntime implements DesktopBridge {
   }
 
   private validateStorage(storage: StorageForm): void {
-    if (!storage.username || !storage.password || !storage.targetPath) throw new Error('Storage fields are required.');
+    if (!storage.username || !storage.password) throw new Error('Storage fields are required.');
+    const trimmed = storage.targetPath.trim();
+    const segments = trimmed === '' || trimmed === '/' ? [] : storage.targetPath.split('/').filter(Boolean);
+    if (storage.targetPath.includes('\\') || segments.some(segment => !segment.trim() || segment === '.' || segment === '..')) {
+      throw new Error('Invalid target path.');
+    }
     const endpoint = new URL(storage.endpoint);
     if (endpoint.username || endpoint.password || endpoint.protocol !== 'https:') throw new Error('Use an HTTPS endpoint without embedded credentials.');
   }

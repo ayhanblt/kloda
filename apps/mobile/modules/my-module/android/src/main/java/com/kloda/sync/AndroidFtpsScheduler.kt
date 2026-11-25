@@ -158,7 +158,8 @@ internal object AndroidFtpsScheduler {
       run {
         val queue = AndroidFtpsRuntime.queue(context)
         val plan = synchronized(AndroidSyncJournal.sourceLock) source@{
-          val header = queue.destination() ?: run { cancel(context); return@source null }
+          // FP2: a fresh-capture storage failure with an open UNKNOWN (ordinary live reconcile) is neither absence nor revoke: original error, no cancel.
+          val header = try { queue.destination() } catch (f: Exception) { if (self == null && watchUnknown != null && AndroidBackupScheduler.mode(context) == "live" && AndroidFtpsQueue.code(f) == "storage_failure") { runCatching { report(context, "storage_failure") }; return@run }; throw f } ?: run { cancel(context); return@source null }
           val sources = FilesRunContext.webdav(context)
           if (sources.sources.isEmpty()) { cancel(context); return@source null }
           val binding = header.revision
@@ -321,11 +322,15 @@ internal object AndroidFtpsScheduler {
    * (installed or kept); false = rejected/unknown/blocked, error already recorded, no success report and no cleanup.
    */
   private fun watch(context: Context, scheduler: JobScheduler): Boolean {
-    val uris = triggers(context)
+    // Trigger derivation fails before any WATCH decision: original error, no install, no cancel (no independent revoke authority).
+    val uris = try { triggers(context) } catch (failure: Exception) { runCatching { report(context, AndroidFtpsQueue.code(failure)) }; return false }
     val attempt = watchUnknown
     val read = runCatching { os.pending(scheduler, WATCH) }
     // No open attempt: an existing WATCH is kept (helper meaning); an unreadable one is a fail-closed read error.
-    if (attempt == null) return read.getOrThrow() != null || settled(install(context, scheduler, null, null, uris))
+    if (attempt == null) {
+      // An unreadable WATCH is neither absence nor revoke authority: original error, no install, no cancel.
+      read.exceptionOrNull()?.let { if (it !is Exception) throw it; runCatching { report(context, AndroidFtpsQueue.code(it)) }; return false }
+      return read.getOrNull() != null || settled(install(context, scheduler, null, null, uris)) }
     val pending = read.getOrElse { return blocked(context) }
     return when {
       proves(pending, attempt.next) -> { watchUnknown = null; true }

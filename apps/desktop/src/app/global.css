@@ -45,6 +45,13 @@ button:disabled { cursor: default; }
 .desktop-navigation button[aria-current="page"] { background: var(--brand-subtle); color: var(--brand-text); box-shadow: 0 1px 3px var(--shadow-color); }
 .desktop-navigation button:hover:not([aria-current="page"]) { background: var(--surface-2); }
 .desktop-navigation button:disabled { opacity: .5; }
+/* Wide shell identity (frozen c144 desktop-shell): separate sidebar surface, light-fill active row. Narrow layout unchanged. */
+@media (min-width: 1024px) {
+  .desktop-sidebar { background: var(--surface-1); }
+  .desktop-navigation button[aria-current="page"] { background: var(--text-primary); color: var(--bg); box-shadow: var(--card-highlight); }
+  .appearance-settings .segmented { border-radius: 10px; }
+  .appearance-settings .segmented-option { min-height: 44px; }
+}
 .desktop-main { display: flex; min-width: 0; flex: 1; flex-direction: column; background: var(--bg); }
 .desktop-toolbar { display: flex; position: sticky; top: 0; z-index: 20; min-height: 64px; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 32px; border-bottom: 1px solid var(--border-subtle); background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(14px); }
 .desktop-toolbar-controls { display: flex; align-items: center; gap: 12px; }
@@ -150,6 +157,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .segmented { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border: 1px solid var(--border-subtle); border-radius: 12px; background: var(--surface-2); width: 100%; }
 .segmented-option { display: inline-flex; flex: 1 1 0; justify-content: center; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border: 1px solid transparent; border-radius: 8px; font-weight: 600; cursor: pointer; }
 .segmented-option:has(input:checked) { border-color: var(--brand-text); color: var(--brand-text); background: var(--brand-subtle); }
+:root.light .appearance-settings .segmented-option:has(input:checked) { color: color-mix(in srgb, var(--brand-text) 95%, var(--text-primary)); }
 .segmented-option:focus-within { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .segmented-option input { accent-color: var(--brand-text); }
 .settings-version { margin-bottom: 24px; }

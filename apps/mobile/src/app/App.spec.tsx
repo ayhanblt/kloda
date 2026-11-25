@@ -239,10 +239,12 @@ describe('App', () => {
     expect(testAndSaveWebDavSettings).not.toHaveBeenCalled();
     await fireEvent.press(surface.getByRole('tab', { name: i18n.t('statusUi.targets') }));
     await fireEvent.press(surface.getByText(i18n.t('ui.conn.add')));
-    for (const id of ['webdav','smb','ftp','sftp','s3-compatible','amazon-s3','box','cloudme','dropbox','google-drive','google-cloud-storage','mega','onedrive','nextcloud','yandex-disk']) {
+    for (const id of ['webdav', 'smb', 'ftp', 'sftp', 'nextcloud', 'dropbox', 'onedrive', 'yandex-disk']) {
       expect(surface.getByRole('button', { name: i18n.t(`ui.providers.${id}`) })).toBeTruthy();
     }
-    expect(surface.queryByRole('button', { name: i18n.t('ui.providers.kolab-now') })).toBeNull();
+    for (const id of ['google-drive', 'amazon-s3', 's3-compatible', 'box', 'mega', 'cloudme', 'google-cloud-storage', 'kolab-now']) {
+      expect(surface.queryByRole('button', { name: i18n.t(`ui.providers.${id}`) })).toBeNull();
+    }
     await fireEvent.press(surface.getByText(i18n.t('ui.providers.sftp')));
     expect(surface.getByText(i18n.t('ui.integrationUnavailable'))).toBeTruthy();
     expect(surface.getByLabelText(i18n.t('ui.providerFields.fingerprint')).props.editable).toBe(false);
@@ -287,15 +289,13 @@ describe('App', () => {
     await surface.unmount();
   });
 
-  it('opens native S3 screens with distinct provider identities and no automatic activation', async () => {
+  it('hides post-V1 S3 providers from the V1 add-connection list', async () => {
     const surface = await render(<App />);
     await fireEvent.press(surface.getByText(i18n.t('ui.common.skip')));
     await fireEvent.press(surface.getByRole('tab', { name: i18n.t('statusUi.targets') }));
     await fireEvent.press(surface.getByText(i18n.t('ui.conn.add')));
-    await fireEvent.press(surface.getByRole('button', { name: i18n.t('ui.providers.amazon-s3') }));
-    await waitFor(() => expect(surface.getByLabelText(i18n.t('destinations.s3.fields.accessKey')).props.secureTextEntry).toBe(true));
-    expect(surface.queryByLabelText(i18n.t('destinations.s3.fields.endpoint'))).toBeNull();
-    expect(surface.getByRole('button', { name:i18n.t('destinations.s3.save') }).props.accessibilityState.disabled).toBe(true);
+    expect(surface.queryByRole('button', { name: i18n.t('ui.providers.amazon-s3') })).toBeNull();
+    expect(surface.queryByRole('button', { name: i18n.t('ui.providers.s3-compatible') })).toBeNull();
     await surface.unmount();
   });
 

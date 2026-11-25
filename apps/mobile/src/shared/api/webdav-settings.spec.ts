@@ -1,6 +1,6 @@
 import { fetch as nativeFetch } from 'expo/fetch';
 import * as SecureStore from 'expo-secure-store';
-import { testWebDavWriteAccess } from './webdav';
+import { testWebDavWriteAccess, validateWebDavForm } from './webdav';
 import { backupDestinations } from './backup-destinations';
 import { webDavDiagnostic } from './webdav-diagnostics';
 import { loadWebDavSettings, testAndSaveWebDavSettings, enableSavedWebDavBackup } from './webdav-settings';
@@ -81,10 +81,58 @@ it('G24-03: a PROPFIND 404 or transport rejection keeps the old profile untested
 it.each([
   { endpoint: 'http://fixture.example' }, { endpoint: 'https://user:pass@fixture.example' },
   { endpoint: 'https://fixture.example?token=x' }, { endpoint: 'https://fixture.example#x' },
-  { targetPath: '' }, { targetPath: ' / ' }, { targetPath: '/' }, { targetPath: '../archive' }, { username: '' }, { username: 'a:b' }, { password: '' },
+  { targetPath: '../archive' }, { targetPath: './archive' }, { targetPath: 'a/ /b' }, { targetPath: 'a\\b' }, { targetPath: 'a\u0007b' },
+  { username: '' }, { username: 'a:b' }, { password: '' },
 ])('rejects missing/unsafe fields before credentials or network %#', async (change) => {
   await expect(testAndSaveWebDavSettings({ ...storage, ...change }, () => true)).rejects.toThrow('webdav_fields');
   expect(network).not.toHaveBeenCalled(); expect(set).not.toHaveBeenCalled();
+});
+
+it('accepts empty or root targetPath and resolves to the WebDAV root', async () => {
+  expect(validateWebDavForm({ ...storage, targetPath: '' }).toString()).toBe('https://fixture.example/dav/');
+  expect(validateWebDavForm({ ...storage, targetPath: '/' }).toString()).toBe('https://fixture.example/dav/');
+  expect(validateWebDavForm({ ...storage, endpoint: 'https://router.local:8083/webdav', targetPath: '' }).toString())
+    .toBe('https://router.local:8083/webdav/');
+  await testWebDavWriteAccess({ ...storage, targetPath: '' });
+  expect(network.mock.calls.map(([, init]) => init?.method)).toEqual(['PROPFIND', 'MKCOL', 'PUT', 'MOVE', 'GET', 'DELETE', 'DELETE']);
+  expect(String(network.mock.calls[0][0])).toBe('https://fixture.example/dav/');
+  expect(String(network.mock.calls[1][0])).toMatch(/^https:\/\/fixture\.example\/dav\/\.kloda-connection-test-/);
+});
+
+it('creates missing subfolders via MKCOL after verifying the WebDAV root and fails cleanly if root is inaccessible', async () => {
+  const beforeMutation = jest.fn(async () => undefined);
+  network.mockImplementation(async (url, init) => {
+    const target = String(url);
+    if (init?.method === 'PROPFIND' && target === 'https://fixture.example/dav/Kloda/Sub/') return response(404);
+    if (init?.method === 'PROPFIND' && target === 'https://fixture.example/dav/Kloda/') return response(404);
+    if (init?.method === 'PROPFIND' && target === 'https://fixture.example/dav/') return response(207);
+    return response(init?.method === 'GET' ? 200 : init?.method === 'DELETE' ? 204 : 201);
+  });
+  await testWebDavWriteAccess({ ...storage, targetPath: 'Kloda/Sub' }, undefined, beforeMutation);
+  expect(beforeMutation).toHaveBeenCalledTimes(1);
+  expect(network.mock.calls.map(([u, init]) => `${init?.method}:${new URL(String(u)).pathname.replace(/\.kloda-connection-test-[^/]+/, '.kloda-probe')}`))
+    .toEqual([
+      'PROPFIND:/dav/Kloda/Sub/',
+      'PROPFIND:/dav/',
+      'PROPFIND:/dav/Kloda/',
+      'MKCOL:/dav/Kloda/',
+      'MKCOL:/dav/Kloda/Sub/',
+      'MKCOL:/dav/Kloda/Sub/.kloda-probe/',
+      'PUT:/dav/Kloda/Sub/.kloda-probe/upload',
+      'MOVE:/dav/Kloda/Sub/.kloda-probe/upload',
+      'GET:/dav/Kloda/Sub/.kloda-probe/final',
+      'DELETE:/dav/Kloda/Sub/.kloda-probe/final',
+      'DELETE:/dav/Kloda/Sub/.kloda-probe/',
+    ]);
+  for (const rootStatus of [404, 401] as const) {
+    network.mockClear(); beforeMutation.mockClear();
+    network.mockImplementation(async () => response(rootStatus));
+    const err = await testWebDavWriteAccess(storage, undefined, beforeMutation).catch((e: unknown) => e);
+    expect(err).toEqual(new Error('webdav_connection'));
+    expect(webDavDiagnostic(err)).toEqual({ stage: 'propfind', kind: 'http', status: rootStatus });
+    expect(beforeMutation).not.toHaveBeenCalled();
+    expect(network.mock.calls.some(([, init]) => init?.method === 'MKCOL')).toBe(false);
+  }
 });
 
 it.each(['MKCOL', 'PUT', 'MOVE', 'GET', 'DELETE'])('rejects partial/incorrect %s results without deleting unknown paths', async (method) => {

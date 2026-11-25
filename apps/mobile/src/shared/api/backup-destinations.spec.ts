@@ -19,6 +19,9 @@ it('keeps credentials out of native status and rejects false completion or wrong
     { configured: false, running: false, enabled: true },
   ]) expect(() => webDavBackupFromNative(value)).toThrow('outcome_unknown');
 });
+it('accepts root WebDAV status with empty targetPath', () => {
+  expect(webDavBackupFromNative({ ...idle, config: { ...idle.config, targetPath: '' } }).config?.targetPath).toBe('');
+});
 it('publishes credentials only through explicit enable and validates PC opt-in separately', async () => {
   mockNative.webDavStatus.mockResolvedValue(idle);
   await backupDestinations.status(); expect(mockNative.configureWebDav).not.toHaveBeenCalled();

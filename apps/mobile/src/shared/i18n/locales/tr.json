@@ -201,7 +201,7 @@
     "testError": "WebDAV bağlantısı doğrulanamadı.",
     "webdavHints": {
       "endpoint": "Portu (varsa) ve sunucunun WebDAV kök yolunu içeren tam HTTPS adresini girin. Örnek: https://server.example:8083/webdav/",
-      "targetPath": "Bu WebDAV kökü altında önceden var olan ve erişilebilen bir alt klasör; Kloda onu oluşturmaz. Örnek: Kloda → https://server.example:8083/webdav/Kloda/",
+      "targetPath": "İsteğe bağlı alt klasör. Modem veya router paylaşımları gibi doğrudan WebDAV kökünü kullanmak için boş bırakın; klasör yoksa Kloda oluşturur. Örnek: Kloda → https://server.example:8083/webdav/Kloda/",
       "security": "Yalnızca işletim sisteminin güvendiği sertifikaya sahip HTTPS ve Basic oturum açma desteklenir. Test yalnızca kendi geçici verisini yazar, geri okur ve siler."
     },
     "webdavDiagnostic": {

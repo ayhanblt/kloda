@@ -85,4 +85,31 @@ describe('NodeWebDavClient pending upload boundary', () => {
     await expect(client.finalizeUpload('source/photo.jpg', 'source/photo.jpg.kloda-upload-transaction')).rejects.toMatchObject({ code: 'connection_unavailable' });
     expect(files.get(temp)).toBe('pending bytes');
   });
+
+  it('supports empty root targetPath and creates missing subfolders via MKCOL on verifyWriteAccess', async () => {
+    const calls: string[] = [];
+    vi.stubGlobal('fetch', vi.fn(async (input: URL | RequestInfo, init?: RequestInit) => {
+      const url = new URL(input instanceof URL ? input.toString() : input instanceof Request ? input.url : input);
+      const method = init?.method ?? 'GET';
+      calls.push(`${method}:${url.pathname}`);
+      if (method === 'PROPFIND' && url.pathname === '/dav/Kloda/') return new Response(null, { status: 404 });
+      if (method === 'PROPFIND') return new Response(null, { status: 207 });
+      if (method === 'GET') return new Response('kloda-webdav-probe', { status: 200 });
+      if (method === 'DELETE') return new Response(null, { status: 204 });
+      return new Response(null, { status: 201 });
+    }));
+    const rootClient = new NodeWebDavClient({ endpoint: 'https://dav.example.test/dav', password: 'secret', targetPath: '', username: 'user' });
+    await rootClient.verifyWriteAccess();
+    expect(calls[0]).toBe('PROPFIND:/dav/');
+    expect(calls[1]).toMatch(/^MKCOL:\/dav\/\.kloda-probe-/);
+    calls.length = 0;
+    const subClient = new NodeWebDavClient({ endpoint: 'https://dav.example.test/dav/', password: 'secret', targetPath: 'Kloda', username: 'user' });
+    await subClient.verifyWriteAccess();
+    expect(calls.slice(0, 4).map(c => c.replace(/\.kloda-probe-[^/]+/, '.kloda-probe'))).toEqual([
+      'PROPFIND:/dav/Kloda/',
+      'PROPFIND:/dav/',
+      'MKCOL:/dav/Kloda/',
+      'MKCOL:/dav/Kloda/.kloda-probe/',
+    ]);
+  });
 });

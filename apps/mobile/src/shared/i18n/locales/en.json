@@ -201,7 +201,7 @@
     "testError": "WebDAV connection could not be verified.",
     "webdavHints": {
       "endpoint": "Enter the full HTTPS address including the port (if any) and the server's WebDAV root. Example: https://server.example:8083/webdav/",
-      "targetPath": "A subfolder under that WebDAV root which must already exist and be accessible; Kloda does not create it. Example: Kloda → https://server.example:8083/webdav/Kloda/",
+      "targetPath": "Optional subfolder under that WebDAV root. Leave empty to use the root directly (such as router/modem shares); if a subfolder is missing, Kloda creates it. Example: Kloda → https://server.example:8083/webdav/Kloda/",
       "security": "Only HTTPS with a certificate trusted by the operating system and Basic sign-in is supported. The test writes, reads back and deletes its own temporary data only."
     },
     "webdavDiagnostic": {

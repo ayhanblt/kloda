@@ -8,7 +8,7 @@ export class NodeWebDavClient {
   constructor(private readonly storage: StorageForm) {}
 
   async verifyWriteAccess(): Promise<void> {
-    const baseUrl = this.getBaseUrl();
+    const { rootUrl, baseUrl, segments } = this.resolveTarget();
     const probeDirectoryUrl = new URL(`.kloda-probe-${randomUUID()}/`, baseUrl);
     const uploadUrl = new URL('upload', probeDirectoryUrl);
     const finalUrl = new URL('final', probeDirectoryUrl);
@@ -20,7 +20,12 @@ export class NodeWebDavClient {
     let directory: Response;
     try { directory = await this.request(baseUrl, 'PROPFIND', { Depth: '0' }); }
     catch (reason) { throw reason instanceof WebDavFailure ? atStage(reason, 'propfind') : reason; }
-    if (!directory.ok && directory.status !== 207) throw atStage(httpFailure(directory.status, `WebDAV directory access failed (${directory.status}).`), 'propfind', directory.status);
+    await this.cancelBody(directory);
+    if (directory.status === 404 && segments.length > 0) {
+      await this.ensureTargetDirectory(rootUrl, segments);
+    } else if (!directory.ok && directory.status !== 207) {
+      throw atStage(httpFailure(directory.status, `WebDAV directory access failed (${directory.status}).`), 'propfind', directory.status);
+    }
 
     let createProbeDirectory: Response;
     try { createProbeDirectory = await this.request(probeDirectoryUrl, 'MKCOL'); }
@@ -136,13 +141,51 @@ export class NodeWebDavClient {
     return undefined;
   }
 
-  private getBaseUrl(): URL {
+  private async ensureTargetDirectory(rootUrl: URL, segments: string[]): Promise<void> {
+    let root: Response;
+    try { root = await this.request(rootUrl, 'PROPFIND', { Depth: '0' }); }
+    catch (reason) { throw reason instanceof WebDavFailure ? atStage(reason, 'propfind') : reason; }
+    await this.cancelBody(root);
+    if (!root.ok && root.status !== 207) throw atStage(httpFailure(root.status, `WebDAV directory access failed (${root.status}).`), 'propfind', root.status);
+    let current = rootUrl;
+    for (let index = 0; index < segments.length; index += 1) {
+      current = new URL(`${encodeURIComponent(segments[index])}/`, current);
+      let exists = false;
+      if (index < segments.length - 1) {
+        let sub: Response;
+        try { sub = await this.request(current, 'PROPFIND', { Depth: '0' }); }
+        catch (reason) { throw reason instanceof WebDavFailure ? atStage(reason, 'propfind') : reason; }
+        await this.cancelBody(sub);
+        if (sub.ok || sub.status === 207) exists = true;
+        else if (sub.status !== 404) throw atStage(httpFailure(sub.status, `WebDAV directory access failed (${sub.status}).`), 'propfind', sub.status);
+      }
+      if (!exists) {
+        let created: Response;
+        try { created = await this.request(current, 'MKCOL'); }
+        catch (reason) { throw reason instanceof WebDavFailure ? atStage(reason, 'mkcol') : reason; }
+        await this.cancelBody(created);
+        if (!created.ok && created.status !== 201) throw atStage(httpFailure(created.status, `WebDAV directory creation failed (${created.status}).`), 'mkcol', created.status);
+      }
+    }
+  }
+
+  private resolveTarget(): { rootUrl: URL; baseUrl: URL; segments: string[] } {
     let endpoint: URL;
     try { endpoint = new URL(this.storage.endpoint); }
     catch (cause) { throw new WebDavFailure('configuration_required', 'Invalid WebDAV endpoint.', { cause }); }
     if (endpoint.protocol !== 'https:') throw new WebDavFailure('configuration_required', 'WebDAV endpoint must use HTTPS.');
-    endpoint.pathname = `${endpoint.pathname.replace(/\/$/, '')}/${this.storage.targetPath.replace(/^\/+|\/+$/g, '')}/`;
-    return endpoint;
+    const rootUrl = new URL(endpoint.pathname.endsWith('/') ? endpoint.pathname : `${endpoint.pathname}/`, endpoint);
+    const trimmed = this.storage.targetPath.trim();
+    const segments = trimmed === '' || trimmed === '/' ? [] : this.storage.targetPath.split('/').filter(Boolean);
+    if (this.storage.targetPath.includes('\\') || segments.some(segment => !segment.trim() || segment === '.' || segment === '..')) {
+      throw new WebDavFailure('configuration_required', 'Invalid WebDAV target path.');
+    }
+    const baseUrl = segments.length === 0 ? rootUrl : new URL(`${segments.map(encodeURIComponent).join('/')}/`, rootUrl);
+    return { rootUrl, baseUrl, segments };
+  }
+
+  private getBaseUrl(): URL {
+    return this.resolveTarget().baseUrl;
   }
 
   private async cancelBody(response: Response): Promise<void> {

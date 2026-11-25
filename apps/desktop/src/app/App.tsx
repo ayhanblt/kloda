@@ -72,7 +72,7 @@ export function App() {
         {route === 'tray' && <header className="pairing-page-header receiver-heading">
           <h1>{t('ui.tray')}</h1><p>{t('ui.trayDescription')}</p>
         </header>}
-        <div hidden={route === 'welcome'}>
+        <div className={route === 'settings' ? 'max-w-3xl' : undefined} hidden={route === 'welcome'}>
           <DesktopBackground onOpen={() => navigate('receiver')} settings={route === 'settings'} tray={route === 'tray'}
             general={route === 'settings' ? <AppearanceSettings preference={appearance.preference} onChange={appearance.choose} /> : undefined} />
         </div>
