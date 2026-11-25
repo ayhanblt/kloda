@@ -147,7 +147,7 @@ fn oversized_manifest_record_is_rejected_before_any_content_or_directory_read() 
     let mut items = load(&store).unwrap();
     let item = items.get_mut(&id).unwrap();
     item.entry.operation.size = 65537;
-    fs::remove_file(peer.join(format!("{id}.media"))).unwrap();
+    fs::remove_file(final_path(&peer, &id)).unwrap();
     assert!(matches!(
         files::content(&store, item),
         Err(Error::InvalidRequest)

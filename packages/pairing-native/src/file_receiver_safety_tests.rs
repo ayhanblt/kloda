@@ -61,7 +61,7 @@ fn substituted_symlink_never_reads_or_writes_an_outside_file() {
         Request::Create(upload(15, b"owned")),
     ))
     .id;
-    let path = peer_folder(&folder).join(temp_name(&id));
+    let path = temp_path(&folder, &id);
     fs::rename(&path, path.with_extension("preserved")).unwrap();
     let outside = directory.path().join("outside");
     fs::write(&outside, b"outside-private").unwrap();
@@ -107,8 +107,5 @@ fn completed_result_is_not_authority_after_current_file_grant_is_revoked() {
         ));
     }
     assert!(store.record(&[1; 16]).unwrap().unwrap().state == RecordState::Complete);
-    assert_eq!(
-        fs::read(peer_folder(&folder).join(final_name(&id))).unwrap(),
-        b"retained-completed"
-    );
+    assert_eq!(fs::read(final_path(&folder, &id)).unwrap(), b"retained-completed");
 }

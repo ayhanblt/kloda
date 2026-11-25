@@ -85,15 +85,9 @@ fn offline_device_removal_fences_work_preserves_backups_and_requires_fresh_pair_
             Err(Error::Denied)
         ));
     }
-    assert_eq!(
-        fs::read(peer_folder(&folder).join(final_name(&complete))).unwrap(),
-        b"kept"
-    );
-    assert_eq!(
-        fs::read(peer_folder(&folder).join(temp_name(&partial))).unwrap(),
-        b"abc"
-    );
-    assert!(!peer_folder(&folder).join(final_name(&validating)).exists());
+    assert_eq!(fs::read(final_path(&folder, &complete)).unwrap(), b"kept");
+    assert_eq!(fs::read(temp_path(&folder, &partial)).unwrap(), b"abc");
+    assert!(!final_path(&folder, &validating).exists());
     let removed = snapshot(&store);
     assert_eq!(removed["devices"]["items"][0]["trust"], "revoked");
     assert_eq!(
@@ -167,10 +161,7 @@ fn offline_device_removal_fences_work_preserves_backups_and_requires_fresh_pair_
             Request::Create(upload(4, b"new"))
         )
         .is_ok());
-    assert_eq!(
-        fs::read(peer_folder(&folder).join(final_name(&complete))).unwrap(),
-        b"kept"
-    );
+    assert_eq!(fs::read(final_path(&folder, &complete)).unwrap(), b"kept");
     println!("KLODA_REMOVAL_SNAPSHOT:{}", removed);
 }
 

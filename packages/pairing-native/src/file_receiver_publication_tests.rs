@@ -26,14 +26,12 @@ fn mismatched_hash_never_publishes_and_existing_same_hash_final_is_not_adopted()
         ),
         Err(Error::HashMismatch)
     ));
-    assert!(!peer_folder(&folder).join(final_name(&id)).exists());
-    assert_eq!(
-        fs::read(peer_folder(&folder).join(temp_name(&id))).unwrap(),
-        b"wrong"
-    );
+    assert!(!final_path(&folder, &id).exists());
+    assert_eq!(fs::read(temp_path(&folder, &id)).unwrap(), b"wrong");
     let id = receive(&mut receiver, &mut store, 7, b"original");
-    let final_path = peer_folder(&folder).join(final_name(&id));
-    fs::write(&final_path, b"original").unwrap();
+    let published = final_path(&folder, &id);
+    fs::create_dir_all(published.parent().unwrap()).unwrap();
+    fs::write(&published, b"original").unwrap();
     assert!(matches!(
         run(
             &mut receiver,
@@ -46,7 +44,7 @@ fn mismatched_hash_never_publishes_and_existing_same_hash_final_is_not_adopted()
         run(&mut receiver, &mut store, Request::Status { id }),
         Err(Error::Conflict)
     ));
-    assert_eq!(fs::read(final_path).unwrap(), b"original");
+    assert_eq!(fs::read(published).unwrap(), b"original");
 }
 #[test]
 fn publication_response_loss_recovers_only_the_durable_owned_file_and_restores_original_bytes() {
@@ -67,10 +65,7 @@ fn publication_response_loss_recovers_only_the_durable_owned_file_and_restores_o
         ),
         Err(Error::OutcomeUnknown)
     ));
-    assert_eq!(
-        fs::read(peer_folder(&folder).join(final_name(&id))).unwrap(),
-        b"preserved-original"
-    );
+    assert_eq!(fs::read(final_path(&folder, &id)).unwrap(), b"preserved-original");
     drop(store);
     let mut store = directory.store(key("pc"));
     store.conn.execute_batch("DROP TRIGGER fault").unwrap();

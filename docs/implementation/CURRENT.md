@@ -19,8 +19,8 @@ Historical Faz3 manifests, evidence, and OpenCode files are archived under `.loc
   - Implemented `AndroidOneDriveTransport` + `IosOneDriveTransport` (Graph `createUploadSession` with 320 KiB chunk multiples, `conflictBehavior=fail`, SHA-256 verification, atomic vault persistence of rotated `refresh_token`).
   - Implemented `AndroidYandexTransport` + `IosYandexTransport` (`resources/upload` + `move` with `overwrite=false`, 202 async polling, SHA-256 verification).
   - Enabled `'onedrive'` and `'yandex'` in `enableableProviders` and `CloudTarget` queues (including Photos + Files restore & ADR0029 catalog).
-- [ ] **Faz V1-4 — PC Desktop Human-Readable File Layout (`.media` → Real Filenames)**
-  - Stage incoming transfers in `.kloda/staging/`, retain hardlink protection in `.kloda/objects/`, and atomically publish `<Device>/Photos/<name.ext>` and `<Device>/Files/<relative_path>` with no-overwrite numbered suffixes (`name (2).ext`).
+- [x] **Faz V1-4 — PC Desktop Human-Readable File Layout (`.media` → Real Filenames)**
+  - Added `backup_paths` schema migration (`user_version=5`), staged incoming transfers under `<peer>/.kloda/staging/`, stored durable objects/keeps under `<peer>/.kloda/objects/`, and atomically hardlinked readable files into `<peer>/Files/` and `<peer>/Photos/` with collision-free `name (2).ext` suffixes (keeping photo manifests hidden and preserving legacy `v4` flat backups).
 - [ ] **Faz V1-5 — `1.0.0` Release Signing, R8/ProGuard, Build Flags & Desktop Installers**
   - Bump versions to `1.0.0`; enable `SMB`/`SFTP`/`FTPS` build flags by default (`S3` off for V1).
   - Add missing JNI `-keep` rules (`KlodaPairingJni`, `AndroidFtpsPublication`, callbacks) to `consumer-rules.pro`; configure Android Release signing & OneDrive Release SHA-1.
@@ -30,7 +30,7 @@ Historical Faz3 manifests, evidence, and OpenCode files are archived under `.loc
 
 ## Next Immediate Step
 
-Start **Faz V1-4**: switch PC Desktop file receiver (`packages/pairing-native/src/file_receiver.rs` & retention) from opaque `.media` IDs to human-readable `<Device>/Photos/` and `<Device>/Files/` layout with no-overwrite suffixes.
+Start **Faz V1-5**: bump version numbers to `1.0.0`, enable native `SMB`/`SFTP`/`FTPS` release flags, update ProGuard JNI `-keep` rules, rebuild Desktop & mobile native libraries, and coordinate Release signing credentials.
 
 ## Post-V1 Queued Roadmap (V2)
 

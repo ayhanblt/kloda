@@ -68,6 +68,15 @@ fn receive(store: &mut Store, receiver: &mut Receiver, request: Upload, bytes: &
 fn view(store: &Store, trash: bool) -> serde_json::Value {
     serde_json::from_str(&list(store, None, trash).unwrap()).unwrap()
 }
+fn final_path(peer: &std::path::Path, id: &str) -> PathBuf {
+    peer.join(".kloda").join("objects").join(format!("{id}.media"))
+}
+fn part_path(peer: &std::path::Path, id: &str) -> PathBuf {
+    peer.join(".kloda").join("staging").join(format!(".kloda-{id}.part"))
+}
+fn keep_path(peer: &std::path::Path, id: &str) -> PathBuf {
+    peer.join(".kloda").join("objects").join(format!(".kloda-{id}.keep"))
+}
 
 #[test]
 fn trash_restore_conflict_expiry_and_source_tombstone_are_exact_and_idempotent() {
@@ -81,8 +90,9 @@ fn trash_restore_conflict_expiry_and_source_tombstone_are_exact_and_idempotent()
     assert!(deadline >= 1000 + RETENTION_MS);
     actions::change(&mut store, &id, false, 2000).unwrap();
     assert_eq!(deleted(&store, &id).unwrap().unwrap().expires, deadline);
-    assert!(!peer.join(format!("{id}.media")).exists());
-    assert!(!peer.join(format!(".kloda-{id}.part")).exists());
+    assert!(!final_path(&peer, &id).exists());
+    assert!(!part_path(&peer, &id).exists());
+    assert!(!peer.join("Files").join("one.txt").exists());
     assert_eq!(view(&store, true)["items"][0]["state"], "trash");
     assert!(matches!(
         run(
@@ -103,7 +113,7 @@ fn trash_restore_conflict_expiry_and_source_tombstone_are_exact_and_idempotent()
         ),
         Err(Error::OwnerDeleted)
     ));
-    let target = peer.join(format!("{id}.media"));
+    let target = final_path(&peer, &id);
     fs::write(&target, b"user file").unwrap();
     assert!(actions::change(&mut store, &id, true, 2000).is_err());
     assert_eq!(fs::read(&target).unwrap(), b"user file");
@@ -111,6 +121,7 @@ fn trash_restore_conflict_expiry_and_source_tombstone_are_exact_and_idempotent()
     actions::change(&mut store, &id, true, 2000).unwrap();
     actions::change(&mut store, &id, true, 2000).unwrap();
     assert_eq!(fs::read(&target).unwrap(), b"safe");
+    assert_eq!(fs::read(peer.join("Files").join("one.txt")).unwrap(), b"safe");
     assert!(run(
         &mut receiver,
         &mut store,
@@ -120,11 +131,12 @@ fn trash_restore_conflict_expiry_and_source_tombstone_are_exact_and_idempotent()
     actions::change(&mut store, &id, false, 3000).unwrap();
     let expires = deleted(&store, &id).unwrap().unwrap().expires;
     actions::maintain(&mut store, expires - 1).unwrap();
-    assert!(peer.join(format!(".kloda-{id}.keep")).exists());
+    assert!(keep_path(&peer, &id).exists());
     actions::maintain(&mut store, expires).unwrap();
     actions::maintain(&mut store, expires + 1).unwrap();
     assert_eq!(deleted(&store, &id).unwrap().unwrap().phase, 6);
-    assert!(!peer.join(format!(".kloda-{id}.keep")).exists());
+    assert!(!keep_path(&peer, &id).exists());
+    assert!(!peer.join("Files").join("one.txt").exists());
     assert_eq!(fs::read(&unrelated).unwrap(), b"do not touch");
     let mut unchanged = original.clone();
     unchanged.request_id = crate::qr_base64::encode(&[2; 16]);
@@ -189,10 +201,8 @@ fn bulk_removed_device_and_active_finalize_do_not_grant_authority_or_touch_unrel
         .unwrap()
         .iter()
         .all(|v| v["success"] == true));
-    assert_eq!(
-        fs::read(peer.join(format!("{first}.media"))).unwrap(),
-        b"one"
-    );
+    assert_eq!(fs::read(final_path(&peer, &first)).unwrap(), b"one");
+    assert_eq!(fs::read(peer.join("Files").join("one.txt")).unwrap(), b"one");
     assert!(matches!(
         run(&mut receiver, &mut store, Request::Status { id: first }),
         Err(Error::Denied)
@@ -266,9 +276,9 @@ fn unknown_identity_and_damaged_metadata_never_delete_or_claim_success() {
         upload(1, 3, "v1", "one.txt", b"safe"),
         b"safe",
     );
-    fs::write(peer.join(format!("{id}.media")), b"edit").unwrap();
+    fs::write(final_path(&peer, &id), b"edit").unwrap();
     assert!(actions::change(&mut store, &id, false, 1000).is_err());
-    assert_eq!(fs::read(peer.join(format!("{id}.media"))).unwrap(), b"edit");
+    assert_eq!(fs::read(final_path(&peer, &id)).unwrap(), b"edit");
     assert!(deleted(&store, &id).unwrap().is_none());
     let ids = serde_json::to_string(&vec![id]).unwrap();
     let result: serde_json::Value = serde_json::from_str(

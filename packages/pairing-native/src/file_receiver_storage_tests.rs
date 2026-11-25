@@ -22,7 +22,7 @@ fn read_only_local_journal_reports_acl_unavailable_without_losing_target_tail() 
         ),
         Err(Error::AclUnavailable)
     ));
-    let path = peer_folder(&folder).join(temp_name(&id));
+    let path = temp_path(&folder, &id);
     assert_eq!(fs::read(&path).unwrap(), b"journal-tail");
     assert_eq!(
         operation(run(

@@ -17,18 +17,23 @@ fn disposable_large_file_protection_restore_and_cleanup_latency() {
     let start = Instant::now();
     actions::change(&mut store, &id, false, 1000).unwrap();
     let trash_ms = start.elapsed().as_millis();
-    assert!(!peer.join(format!("{id}.media")).exists());
+    assert!(!final_path(&peer, &id).exists());
+    assert!(!peer.join("Files").join("disposable-large.bin").exists());
     let start = Instant::now();
     actions::change(&mut store, &id, true, 2000).unwrap();
     let restore_ms = start.elapsed().as_millis();
-    assert_eq!(fs::read(peer.join(format!("{id}.media"))).unwrap(), bytes);
+    assert_eq!(fs::read(final_path(&peer, &id)).unwrap(), bytes);
+    assert_eq!(
+        fs::read(peer.join("Files").join("disposable-large.bin")).unwrap(),
+        bytes
+    );
     actions::change(&mut store, &id, false, 3000).unwrap();
     let deadline = deleted(&store, &id).unwrap().unwrap().expires;
     let start = Instant::now();
     actions::maintain(&mut store, deadline + 1).unwrap();
     let purge_ms = start.elapsed().as_millis();
     assert_eq!(fs::read(manual).unwrap(), b"preserve");
-    assert!(!peer.join(format!(".kloda-{id}.keep")).exists());
+    assert!(!keep_path(&peer, &id).exists());
     assert_eq!(deleted(&store, &id).unwrap().unwrap().phase, 6);
     println!(
         "KLODA_LATENCY_FIXTURE bytes={} trash_ms={} restore_ms={} purge_ms={}",

@@ -23,10 +23,7 @@ fn journal_busy_returns_acl_busy_preserves_tail_and_allows_exact_retry() {
         ),
         Err(Error::AclBusy)
     ));
-    assert_eq!(
-        fs::read(peer_folder(&folder).join(temp_name(&id))).unwrap(),
-        b"busy-bytes"
-    );
+    assert_eq!(fs::read(temp_path(&folder, &id)).unwrap(), b"busy-bytes");
     lock.execute_batch("ROLLBACK").unwrap();
     assert_eq!(
         operation(run(

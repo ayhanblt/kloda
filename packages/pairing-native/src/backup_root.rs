@@ -33,6 +33,64 @@ impl Directories {
         sync_dir(&self.peer)?;
         sync_dir(&self.root)
     }
+    pub(crate) fn staging(&self, create: bool) -> Result<Dir> {
+        let kloda = open_subdir(&self.peer, ".kloda", create)?;
+        if create {
+            sync_dir(&self.peer)?;
+        }
+        let dir = open_subdir(&kloda, "staging", create)?;
+        if create {
+            sync_dir(&kloda)?;
+        }
+        Ok(dir)
+    }
+    pub(crate) fn objects(&self, create: bool) -> Result<Dir> {
+        let kloda = open_subdir(&self.peer, ".kloda", create)?;
+        if create {
+            sync_dir(&self.peer)?;
+        }
+        let dir = open_subdir(&kloda, "objects", create)?;
+        if create {
+            sync_dir(&kloda)?;
+        }
+        Ok(dir)
+    }
+    pub(crate) fn visible_dir(&self, folder: &str, create: bool) -> Result<Dir> {
+        if !matches!(folder, "Files" | "Photos") {
+            return Err(PairingError::BackupPathRejected);
+        }
+        let dir = open_subdir(&self.peer, folder, create)?;
+        if create {
+            sync_dir(&self.peer)?;
+        }
+        Ok(dir)
+    }
+}
+
+pub(crate) fn open_subdir(parent: &Dir, name: &str, create: bool) -> Result<Dir> {
+    if !matches!(name, ".kloda" | "staging" | "objects" | "Files" | "Photos") {
+        return Err(PairingError::BackupPathRejected);
+    }
+    if create {
+        match parent.create_dir(name) {
+            Ok(()) => (),
+            Err(error) if error.kind() == io::ErrorKind::AlreadyExists => (),
+            Err(error) => return Err(target_error(error)),
+        }
+    }
+    let metadata = parent.symlink_metadata(name).map_err(target_error)?;
+    if !metadata.is_dir() || metadata.is_symlink() {
+        return Err(PairingError::BackupPathRejected);
+    }
+    #[cfg(windows)]
+    {
+        use cap_std::fs::MetadataExt;
+        use windows_sys::Win32::Storage::FileSystem::FILE_ATTRIBUTE_REPARSE_POINT;
+        if metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0 {
+            return Err(PairingError::BackupPathRejected);
+        }
+    }
+    parent.open_dir(name).map_err(target_error)
 }
 
 pub(crate) fn acquire(
@@ -153,6 +211,29 @@ pub(crate) fn open_file(directory: &Dir, name: &str, create: bool, writable: boo
         .read(true)
         .write(writable || create)
         .create_new(create);
+    #[cfg(unix)]
+    {
+        use cap_std::fs::OpenOptionsExt;
+        options.custom_flags(libc::O_NOFOLLOW | libc::O_NONBLOCK);
+    }
+    #[cfg(windows)]
+    {
+        use cap_std::fs::OpenOptionsExt;
+        use windows_sys::Win32::Storage::FileSystem::FILE_FLAG_OPEN_REPARSE_POINT;
+        options.custom_flags(FILE_FLAG_OPEN_REPARSE_POINT);
+    }
+    let file = directory.open_with(name, &options).map_err(target_error)?;
+    regular(&file.metadata().map_err(target_error)?)?;
+    Ok(file)
+}
+
+pub(crate) fn open_visible_file(directory: &Dir, name: &str, writable: bool) -> Result<File> {
+    if matches!(name, "." | "..") || !crate::file_schema::safe_name(name) {
+        return Err(PairingError::BackupPathRejected);
+    }
+    regular(&directory.symlink_metadata(name).map_err(target_error)?)?;
+    let mut options = OpenOptions::new();
+    options.read(true).write(writable).create_new(false);
     #[cfg(unix)]
     {
         use cap_std::fs::OpenOptionsExt;

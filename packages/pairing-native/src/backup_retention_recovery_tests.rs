@@ -13,7 +13,7 @@ fn partial_copy_delete_restore_and_purge_intents_retry_without_adopting_foreign_
     let copy = saved(&store, &id).unwrap().unwrap();
     assert_ne!(copy.copy, copy.live);
     // A durably bound partial copy can be rewritten; a foreign file is never adopted.
-    fs::write(peer.join(format!(".kloda-{id}.keep")), b"s").unwrap();
+    fs::write(keep_path(&peer, &id), b"s").unwrap();
     store
         .conn
         .execute("UPDATE backup_protections SET ready=0 WHERE id=?1", [&id])
@@ -22,39 +22,34 @@ fn partial_copy_delete_restore_and_purge_intents_retry_without_adopting_foreign_
     drop(store);
     let mut store = directory.store(key("pc"));
     files::protect(&mut store, &id).unwrap();
-    assert_eq!(
-        fs::read(peer.join(format!(".kloda-{id}.keep"))).unwrap(),
-        b"safe"
-    );
+    assert_eq!(fs::read(keep_path(&peer, &id)).unwrap(), b"safe");
     store.conn.execute("INSERT INTO backup_deletions(id,deleted_at,expires_at,phase,dependencies) VALUES(?1,1000,?2,1,'[]')",params![id,1000+RETENTION_MS]).unwrap();
-    fs::remove_file(peer.join(format!("{id}.media"))).unwrap();
-    assert!(peer.join(format!(".kloda-{id}.part")).exists());
+    fs::remove_file(final_path(&peer, &id)).unwrap();
+    assert!(part_path(&peer, &id).exists());
     drop(store);
     let mut store = directory.store(key("pc"));
     actions::maintain(&mut store, 2000).unwrap();
     assert_eq!(deleted(&store, &id).unwrap().unwrap().phase, 2);
-    assert!(!peer.join(format!(".kloda-{id}.part")).exists());
+    assert!(!part_path(&peer, &id).exists());
     store
         .conn
         .execute("UPDATE backup_deletions SET phase=3 WHERE id=?1", [&id])
         .unwrap();
     files::restore(&mut store, &id).unwrap();
-    fs::remove_file(peer.join(format!(".kloda-{id}.part"))).unwrap();
+    fs::remove_file(part_path(&peer, &id)).unwrap();
     drop(store);
     let mut store = directory.store(key("pc"));
     actions::maintain(&mut store, 2000).unwrap();
     assert_eq!(deleted(&store, &id).unwrap().unwrap().phase, 4);
-    assert_eq!(fs::read(peer.join(format!("{id}.media"))).unwrap(), b"safe");
-    assert_eq!(
-        fs::read(peer.join(format!(".kloda-{id}.part"))).unwrap(),
-        b"safe"
-    );
+    assert_eq!(fs::read(final_path(&peer, &id)).unwrap(), b"safe");
+    assert_eq!(fs::read(part_path(&peer, &id)).unwrap(), b"safe");
+    assert_eq!(fs::read(peer.join("Files").join("one.txt")).unwrap(), b"safe");
     actions::change(&mut store, &id, false, 3000).unwrap();
     store
         .conn
         .execute("UPDATE backup_deletions SET phase=5 WHERE id=?1", [&id])
         .unwrap();
-    fs::remove_file(peer.join(format!(".kloda-{id}.keep"))).unwrap();
+    fs::remove_file(keep_path(&peer, &id)).unwrap();
     drop(store);
     let mut store = directory.store(key("pc"));
     actions::maintain(&mut store, 3000 + RETENTION_MS).unwrap();
@@ -74,7 +69,7 @@ fn substituted_target_even_with_same_bytes_and_regrant_root_change_stop_before_d
         upload(1, 3, "v1", "one.txt", b"safe"),
         b"safe",
     );
-    let target = peer.join(format!("{id}.media"));
+    let target = final_path(&peer, &id);
     let unknown = peer.join("manual-copy");
     fs::write(&unknown, b"safe").unwrap();
     fs::rename(&unknown, &target).unwrap();
@@ -97,10 +92,7 @@ fn substituted_target_even_with_same_bytes_and_regrant_root_change_stop_before_d
         actions::change(&mut store, &second, false, 1000),
         Err(Error::BackupScopeChanged)
     ));
-    assert_eq!(
-        fs::read(peer.join(format!("{second}.media"))).unwrap(),
-        b"two"
-    );
+    assert_eq!(fs::read(final_path(&peer, &second)).unwrap(), b"two");
 }
 
 #[test]
@@ -165,7 +157,7 @@ fn delayed_delete_completion_receives_full_recovery_window_before_any_cleanup() 
     assert_eq!(recovered.phase, 2);
     assert!(recovered.at >= resumed && recovered.expires >= resumed + RETENTION_MS);
     actions::maintain(&mut store, recovered.expires - 1).unwrap();
-    assert!(peer.join(format!(".kloda-{id}.keep")).exists());
+    assert!(keep_path(&peer, &id).exists());
     actions::maintain(&mut store, recovered.expires).unwrap();
     assert_eq!(deleted(&store, &id).unwrap().unwrap().phase, 6);
 }

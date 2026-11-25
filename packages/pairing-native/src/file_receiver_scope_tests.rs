@@ -30,17 +30,14 @@ fn resumed_hash_work_rechecks_scope_revision_and_cancel_does_not_remove_media() 
         ),
         Err(Error::BackupScopeChanged)
     ));
-    assert_eq!(
-        fs::read(peer_folder(&folder).join(temp_name(&id))).unwrap(),
-        bytes
-    );
-    assert!(!peer_folder(&folder).join(final_name(&id)).exists());
+    assert_eq!(fs::read(temp_path(&folder, &id)).unwrap(), bytes);
+    assert!(!final_path(&folder, &id).exists());
 }
 #[test]
 fn changed_native_file_identity_and_replaced_root_are_not_adopted() {
     let (directory, mut store, mut receiver, folder) = setup();
     let id = receive(&mut receiver, &mut store, 13, b"original");
-    let path = peer_folder(&folder).join(temp_name(&id));
+    let path = temp_path(&folder, &id);
     let old = path.with_extension("preserved");
     fs::rename(&path, &old).unwrap();
     fs::write(&path, b"original").unwrap();
@@ -65,6 +62,8 @@ fn changed_native_file_identity_and_replaced_root_are_not_adopted() {
                 .path()
                 .join("old-media")
                 .join(crate::qr_base64::encode(&key("phone").fingerprint()))
+                .join(".kloda")
+                .join("staging")
                 .join(old.file_name().unwrap())
         )
         .unwrap(),

@@ -206,11 +206,8 @@ fn same_peer_regrant_and_repair_read_only_committed_history_under_current_scope(
         matches!(repaired(&mut receiver, &mut store, Request::List { after: None }), Ok(Response::List(photos)) if photos.is_empty())
     );
     assert_eq!(
-        fs::read(peer_folder(&folder).join(final_name(&completed))).unwrap(),
+        fs::read(final_path(&folder, &completed)).unwrap(),
         b"prior-pairing-original"
     );
-    assert_eq!(
-        fs::read(peer_folder(&folder).join(temp_name(&pending))).unwrap(),
-        bytes
-    );
+    assert_eq!(fs::read(temp_path(&folder, &pending)).unwrap(), bytes);
 }

@@ -85,10 +85,7 @@ fn same_peer_same_root_regrant_restores_completed_reads_but_not_pending_work() {
             Err(Error::BackupScopeChanged)
         ));
     }
-    assert_eq!(
-        fs::read(peer_folder(&folder).join(temp_name(&pending))).unwrap(),
-        bytes
-    );
+    assert_eq!(fs::read(temp_path(&folder, &pending)).unwrap(), bytes);
     drop(store);
     let mut store = directory.store(key("pc"));
     let mut receiver = Receiver::new();
@@ -144,7 +141,7 @@ fn reselecting_a_different_root_never_authorizes_reads_of_prior_completed_files(
         matches!(run(&mut receiver, &mut store, Request::List { after: None }), Ok(Response::List(photos)) if photos.is_empty())
     );
     assert_eq!(
-        fs::read(peer_folder(&folder).join(final_name(&completed))).unwrap(),
+        fs::read(final_path(&folder, &completed)).unwrap(),
         b"old-root-original"
     );
 }

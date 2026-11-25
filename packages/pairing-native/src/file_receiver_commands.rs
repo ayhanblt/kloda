@@ -36,6 +36,7 @@ impl Receiver {
                 finalize::publish(store, sid, peer, directories, &mut old)?;
             }
             checked_file(
+                &store.conn,
                 directories,
                 &old,
                 old.operation.state == OperationState::Completed,
@@ -44,6 +45,7 @@ impl Receiver {
             return Ok(Response::Operation(old.operation));
         }
         crate::backup_retention::admit_create(store, peer, scope, &upload)?;
+        let staging = directories.staging(true)?;
         let random = SystemRandom::new();
         let (id, file) = loop {
             let mut id = [0; 16];
@@ -61,16 +63,17 @@ impl Receiver {
                 continue;
             }
             let name = temp_name(&id);
-            match directories.peer.symlink_metadata(&name) {
+            match staging.symlink_metadata(&name) {
                 Ok(_) => continue,
                 Err(error) if error.kind() == std::io::ErrorKind::NotFound => (),
                 Err(error) => return Err(io_error(error)),
             }
-            let file = backup_root::open_file(&directories.peer, &name, true, true)?;
+            let file = backup_root::open_file(&staging, &name, true, true)?;
             break (id, file);
         };
         let identity = backup_root::file_identity(&file)?;
         file.sync_all().map_err(io_error)?;
+        backup_root::sync_dir(&staging)?;
         directories.sync()?;
         let entry = rows::insert(store, sid, &id, upload, scope, &identity)?;
         Ok(Response::Operation(entry.operation))
@@ -99,7 +102,7 @@ impl Receiver {
         {
             return Err(Error::Conflict);
         }
-        let mut file = checked_file(directories, entry, false, true)?;
+        let mut file = checked_file(&store.conn, directories, entry, false, true)?;
         let length = file.metadata().map_err(io_error)?.len();
         if length < entry.operation.offset || length > entry.operation.size {
             return Err(Error::OutcomeUnknown);

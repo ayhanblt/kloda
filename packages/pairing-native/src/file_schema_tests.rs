@@ -4,10 +4,24 @@ use crate::store::Store;
 
 fn old_schema(directory: &Directory, version: i64) {
     let store = directory.store(key("pc"));
-    store
-        .conn
-        .execute_batch("DROP TABLE backup_rebackup_requests; DROP TABLE backup_deletions; DROP TABLE backup_protections; DROP TABLE file_operations; PRAGMA user_version=2;")
-        .unwrap();
+    if version < 5 {
+        store
+            .conn
+            .execute_batch("DROP TABLE backup_paths; PRAGMA user_version=4;")
+            .unwrap();
+    }
+    if version < 4 {
+        store
+            .conn
+            .execute_batch("DROP TABLE backup_rebackup_requests; DROP TABLE backup_deletions; DROP TABLE backup_protections; PRAGMA user_version=3;")
+            .unwrap();
+    }
+    if version < 3 {
+        store
+            .conn
+            .execute_batch("DROP TABLE file_operations; PRAGMA user_version=2;")
+            .unwrap();
+    }
     if version == 1 {
         store
             .conn
@@ -26,7 +40,7 @@ fn version(directory: &Directory) -> i64 {
 
 #[test]
 fn valid_older_installations_upgrade_but_wrong_installation_never_changes_version() {
-    for old in [1, 2] {
+    for old in [1, 2, 3, 4] {
         let directory = Directory::new();
         old_schema(&directory, old);
         assert!(matches!(
@@ -36,7 +50,7 @@ fn valid_older_installations_upgrade_but_wrong_installation_never_changes_versio
         assert_eq!(version(&directory), old);
         let store = directory.store(key("pc"));
         validate(&store.conn).unwrap();
-        assert_eq!(version(&directory), 4);
+        assert_eq!(version(&directory), 5);
     }
 }
 

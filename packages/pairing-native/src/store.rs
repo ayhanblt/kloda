@@ -88,7 +88,7 @@ impl Store {
             .pragma_query_value(None, "user_version", |r| r.get(0))
             .map_err(storage)?;
         // Reopening an activated generation is not permission to migrate/create.
-        if selected_generation && version != 4 {
+        if selected_generation && version != 5 {
             return Err(PairingError::ContinuityLost);
         }
         if version == 0 && !existed {
@@ -103,7 +103,7 @@ impl Store {
             )
             .map_err(storage)?;
             tx.commit().map_err(|_| PairingError::OutcomeUnknown)?;
-        } else if !matches!(version, 1..=4) {
+        } else if !matches!(version, 1..=5) {
             return Err(PairingError::StorageFailure);
         }
         let mut integrity = conn.prepare("PRAGMA integrity_check").map_err(storage)?;
@@ -121,7 +121,7 @@ impl Store {
         drop(integrity);
         check_installation(&conn, &local, &epoch)?;
         visit(&conn, &local, &epoch, |_| Ok(()))?;
-        if !matches!(version, 2..=4) {
+        if !matches!(version, 2..=5) {
             let tx = conn
                 .transaction_with_behavior(TransactionBehavior::Immediate)
                 .map_err(storage)?;
@@ -131,6 +131,7 @@ impl Store {
         }
         crate::file_schema::migrate(&mut conn, version)?;
         crate::backup_retention_schema::migrate(&mut conn, version)?;
+        crate::backup_layout_schema::migrate(&mut conn, version)?;
         #[cfg(target_os = "windows")]
         conn.healthy()?;
         Ok(Self {

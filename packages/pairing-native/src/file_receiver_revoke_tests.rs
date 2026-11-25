@@ -25,11 +25,8 @@ fn bounded_finalize_yields_and_pin_matched_revoke_wins_before_publication() {
         ),
         Err(Error::Denied)
     ));
-    assert!(!peer_folder(&folder).join(final_name(&id)).exists());
-    assert_eq!(
-        fs::read(peer_folder(&folder).join(temp_name(&id))).unwrap(),
-        bytes
-    );
+    assert!(!final_path(&folder, &id).exists());
+    assert_eq!(fs::read(temp_path(&folder, &id)).unwrap(), bytes);
     drop(store);
     let mut store = directory.store(key("pc"));
     assert!(matches!(
@@ -128,14 +125,8 @@ fn desktop_acl_revoke_during_partial_transfer_preserves_trust_history_and_finals
         store.record(&[1; 16]).unwrap().unwrap().state,
         RecordState::Complete
     );
-    assert_eq!(
-        fs::read(peer_folder(&folder).join(temp_name(&partial))).unwrap(),
-        b"abc"
-    );
-    assert_eq!(
-        fs::read(peer_folder(&folder).join(final_name(&completed))).unwrap(),
-        b"done"
-    );
+    assert_eq!(fs::read(temp_path(&folder, &partial)).unwrap(), b"abc");
+    assert_eq!(fs::read(final_path(&folder, &completed)).unwrap(), b"done");
     let after_revoke = management_snapshot(&store);
     drop(receiver);
     drop(store);

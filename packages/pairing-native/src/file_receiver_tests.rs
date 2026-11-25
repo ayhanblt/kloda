@@ -39,6 +39,18 @@ fn upload(request: u8, bytes: &[u8]) -> Upload {
 fn peer_folder(folder: &str) -> PathBuf {
     PathBuf::from(folder).join(crate::qr_base64::encode(&key("phone").fingerprint()))
 }
+fn temp_path(folder: &str, id: &str) -> PathBuf {
+    peer_folder(folder)
+        .join(".kloda")
+        .join("staging")
+        .join(temp_name(id))
+}
+fn final_path(folder: &str, id: &str) -> PathBuf {
+    peer_folder(folder)
+        .join(".kloda")
+        .join("objects")
+        .join(final_name(id))
+}
 fn receive(receiver: &mut Receiver, store: &mut Store, request: u8, bytes: &[u8]) -> String {
     let created = operation(run(
         receiver,
@@ -60,6 +72,8 @@ fn receive(receiver: &mut Receiver, store: &mut Store, request: u8, bytes: &[u8]
     created.id
 }
 
+#[path = "file_receiver_layout_tests.rs"]
+mod layout;
 #[path = "file_receiver_listing_tests.rs"]
 mod listing;
 #[path = "file_receiver_publication_tests.rs"]

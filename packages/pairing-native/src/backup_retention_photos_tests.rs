@@ -48,23 +48,22 @@ fn photos_selected_version_and_unexpired_trash_preserve_shared_resource_until_la
     assert_eq!(view(&store, true)["items"].as_array().unwrap().len(), 1);
     let first_expiry = deleted(&store, &first).unwrap().unwrap().expires;
     actions::maintain(&mut store, first_expiry).unwrap();
-    assert_eq!(
-        fs::read(peer.join(format!("{resource}.media"))).unwrap(),
-        b"image"
-    );
+    assert_eq!(fs::read(final_path(&peer, &resource)).unwrap(), b"image");
+    assert_eq!(fs::read(peer.join("Photos").join("photo.jpg")).unwrap(), b"image");
+    assert!(!peer.join("Files").join("photo.jpg").exists());
+    assert!(!peer.join("Photos").join("kloda-photo-v1-source-asset-1.json").exists());
     actions::change(&mut store, &second, false, 2000 + RETENTION_MS).unwrap();
     actions::maintain(&mut store, 2000 + 2 * RETENTION_MS - 1).unwrap();
-    assert_eq!(
-        fs::read(peer.join(format!("{resource}.media"))).unwrap(),
-        b"image"
-    );
+    assert_eq!(fs::read(final_path(&peer, &resource)).unwrap(), b"image");
+    assert_eq!(fs::read(peer.join("Photos").join("photo.jpg")).unwrap(), b"image");
     actions::change(&mut store, &second, true, 2000 + 2 * RETENTION_MS - 1).unwrap();
     actions::change(&mut store, &second, false, 3000 + 2 * RETENTION_MS).unwrap();
     let final_expiry = deleted(&store, &second).unwrap().unwrap().expires;
     actions::maintain(&mut store, final_expiry).unwrap();
-    assert!(!peer.join(format!("{resource}.media")).exists());
-    assert!(!peer.join(format!(".kloda-{resource}.part")).exists());
-    assert!(!peer.join(format!(".kloda-{resource}.keep")).exists());
+    assert!(!final_path(&peer, &resource).exists());
+    assert!(!part_path(&peer, &resource).exists());
+    assert!(!keep_path(&peer, &resource).exists());
+    assert!(!peer.join("Photos").join("photo.jpg").exists());
     assert!(matches!(
         protocol::disposition(&store, &resource),
         Err(Error::OwnerDeleted)
@@ -108,6 +107,6 @@ fn invalid_photos_graph_prevents_even_bulk_partial_deletion() {
         .unwrap();
     store.conn.execute_batch(&trigger).unwrap();
     assert!(actions::change(&mut store, &id, false, 1000).is_err());
-    assert_eq!(fs::read(peer.join(format!("{id}.media"))).unwrap(), b"safe");
+    assert_eq!(fs::read(final_path(&peer, &id)).unwrap(), b"safe");
     assert!(deleted(&store, &id).unwrap().is_none());
 }

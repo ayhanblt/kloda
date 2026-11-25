@@ -185,15 +185,17 @@ pub(crate) fn validate_publication(
     sid: &[u8; 16],
     entry: &Entry,
     dirs: &Directories,
-) -> Result<()> {
+) -> Result<Option<Vec<String>>> {
     if !entry.operation.name.starts_with(PREFIX) {
-        return Ok(());
+        return Ok(None);
     }
     if entry.operation.size > 65536 {
         return Err(Error::InvalidRequest);
     }
+    let modern = crate::backup_layout::lookup(&store.conn, &entry.operation.id)?.is_some();
+    let staging = crate::backup_layout::staging_dir(dirs, modern, false)?;
     let name = format!(".kloda-{}.part", entry.operation.id);
-    let file = backup_root::open_file(&dirs.peer, &name, false, false)?;
+    let file = backup_root::open_file(&staging, &name, false, false)?;
     if backup_root::file_identity(&file)? != entry.identity {
         return Err(Error::Conflict);
     }
@@ -222,6 +224,7 @@ pub(crate) fn validate_publication(
     }
     let record = store.record(sid)?.ok_or(Error::Denied)?;
     let items = load(store)?;
+    let mut resources = Vec::with_capacity(manifest.resources.len());
     for resource in manifest.resources {
         let target = items.get(&resource.operation_id).ok_or(Error::Conflict)?;
         if !active(target)
@@ -235,8 +238,9 @@ pub(crate) fn validate_publication(
             return Err(Error::Conflict);
         }
         files::verify_reference(store, target)?;
+        resources.push(resource.operation_id);
     }
-    Ok(())
+    Ok(Some(resources))
 }
 
 #[cfg(test)]

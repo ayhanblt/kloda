@@ -49,9 +49,11 @@ fn checked(dir: &Dir, name: &str, identity: &[u8; 24], entry: &Entry) -> Result<
 }
 pub(super) fn verify_reference(store: &Store, item: &Item) -> Result<()> {
     let dirs = directories(store, item)?;
+    let modern = crate::backup_layout::lookup(&store.conn, &item.entry.operation.id)?.is_some();
+    let objects = crate::backup_layout::objects_dir(&dirs, modern, false)?;
     if active(item) {
         checked_identity(
-            &dirs.peer,
+            &objects,
             &final_name(&item.entry.operation.id),
             &item.saved.as_ref().map_or(item.entry.identity, |s| s.live),
             &item.entry,
@@ -63,7 +65,7 @@ pub(super) fn verify_reference(store: &Store, item: &Item) -> Result<()> {
             .filter(|s| s.ready)
             .ok_or(Error::OutcomeUnknown)?;
         checked_identity(
-            &dirs.peer,
+            &objects,
             &keep(&item.entry.operation.id),
             &saved.copy,
             &item.entry,
@@ -73,9 +75,11 @@ pub(super) fn verify_reference(store: &Store, item: &Item) -> Result<()> {
 }
 pub(super) fn verify_visible(store: &Store, item: &Item) -> Result<()> {
     let dirs = directories(store, item)?;
+    let modern = crate::backup_layout::lookup(&store.conn, &item.entry.operation.id)?.is_some();
+    let objects = crate::backup_layout::objects_dir(&dirs, modern, false)?;
     if active(item) {
         checked(
-            &dirs.peer,
+            &objects,
             &final_name(&item.entry.operation.id),
             &item.saved.as_ref().map_or(item.entry.identity, |s| s.live),
             &item.entry,
@@ -87,7 +91,7 @@ pub(super) fn verify_visible(store: &Store, item: &Item) -> Result<()> {
             .filter(|s| s.ready)
             .ok_or(Error::OutcomeUnknown)?;
         checked(
-            &dirs.peer,
+            &objects,
             &keep(&item.entry.operation.id),
             &saved.copy,
             &item.entry,
@@ -100,6 +104,8 @@ pub(super) fn content(store: &Store, item: &Item) -> Result<Vec<u8>> {
         return Err(Error::InvalidRequest);
     }
     let dirs = directories(store, item)?;
+    let modern = crate::backup_layout::lookup(&store.conn, &item.entry.operation.id)?.is_some();
+    let objects = crate::backup_layout::objects_dir(&dirs, modern, false)?;
     let (name, identity) = if active(item) {
         (
             final_name(&item.entry.operation.id),
@@ -115,7 +121,7 @@ pub(super) fn content(store: &Store, item: &Item) -> Result<Vec<u8>> {
                 .copy,
         )
     };
-    let file = checked_identity(&dirs.peer, &name, &identity, &item.entry)?;
+    let file = checked_identity(&objects, &name, &identity, &item.entry)?;
     let mut bytes = Vec::with_capacity(item.entry.operation.size as usize);
     file.take(65537).read_to_end(&mut bytes).map_err(io)?;
     if bytes.len() as u64 != item.entry.operation.size {
@@ -132,22 +138,25 @@ pub(super) fn protect(store: &mut Store, id: &str) -> Result<()> {
     let items = load(store)?;
     let item = items.get(id).ok_or(Error::NotFound)?;
     let dirs = directories(store, item)?;
+    let modern = crate::backup_layout::lookup(&store.conn, id)?.is_some();
+    let objects = crate::backup_layout::objects_dir(&dirs, modern, false)?;
     let current = item.saved.as_ref().map_or(item.entry.identity, |s| s.live);
-    let mut original = checked(&dirs.peer, &final_name(id), &current, &item.entry)?;
+    let mut original = checked(&objects, &final_name(id), &current, &item.entry)?;
     let mut copy = if let Some(saved) = &item.saved {
         if saved.ready {
-            checked(&dirs.peer, &keep(id), &saved.copy, &item.entry)?;
+            checked(&objects, &keep(id), &saved.copy, &item.entry)?;
             return Ok(());
         }
-        let file = backup_root::open_file(&dirs.peer, &keep(id), false, true)?;
+        let file = backup_root::open_file(&objects, &keep(id), false, true)?;
         if backup_root::file_identity(&file)? != saved.copy {
             return Err(Error::Conflict);
         }
         file
     } else {
-        let file = backup_root::open_file(&dirs.peer, &keep(id), true, true)?;
+        let file = backup_root::open_file(&objects, &keep(id), true, true)?;
         let identity = backup_root::file_identity(&file)?;
         file.sync_all().map_err(io)?;
+        backup_root::sync_dir(&objects)?;
         dirs.sync()?;
         let folder = folder(store, item)?;
         rows::write(store, |tx, _, _| {
@@ -160,12 +169,13 @@ pub(super) fn protect(store: &mut Store, id: &str) -> Result<()> {
     copy.set_len(0).map_err(io)?;
     std::io::copy(&mut original, &mut copy).map_err(io)?;
     copy.sync_all().map_err(io)?;
+    backup_root::sync_dir(&objects)?;
     dirs.sync()?;
     let identity = backup_root::file_identity(&copy)?;
     if identity == current {
         return Err(Error::Conflict);
     }
-    checked(&dirs.peer, &keep(id), &identity, &item.entry)?;
+    checked(&objects, &keep(id), &identity, &item.entry)?;
     rows::write(store, |tx, _, _| {
         tx.execute("UPDATE backup_protections SET ready=1 WHERE id=?1", [id])
             .map_err(rows::storage)?;
@@ -184,37 +194,52 @@ fn remove_matching(dir: &Dir, name: &str, identity: &[u8; 24], entry: &Entry) ->
 }
 pub(super) fn remove_live(store: &Store, item: &Item) -> Result<()> {
     let dirs = directories(store, item)?;
+    let path_record = crate::backup_layout::lookup(&store.conn, &item.entry.operation.id)?;
+    let modern = path_record.is_some();
+    let objects = crate::backup_layout::objects_dir(&dirs, modern, false)?;
+    let staging = crate::backup_layout::staging_dir(&dirs, modern, false)?;
     let saved = item
         .saved
         .as_ref()
         .filter(|s| s.ready)
         .ok_or(Error::OutcomeUnknown)?;
     checked(
-        &dirs.peer,
+        &objects,
         &keep(&item.entry.operation.id),
         &saved.copy,
         &item.entry,
     )?;
     remove_matching(
-        &dirs.peer,
+        &objects,
         &final_name(&item.entry.operation.id),
         &saved.live,
         &item.entry,
     )?;
     remove_matching(
-        &dirs.peer,
+        &staging,
         &part(&item.entry.operation.id),
         &saved.live,
         &item.entry,
     )?;
     if let Some(identity) = saved.restore {
         remove_matching(
-            &dirs.peer,
+            &objects,
             &restored(&item.entry.operation.id),
             &identity,
             &item.entry,
         )?;
     }
+    if let Some(rec) = &path_record {
+        crate::backup_layout::remove_visible_if_owned(
+            &dirs,
+            rec,
+            &saved.live,
+            item.entry.operation.size,
+            &item.entry.operation.sha256,
+        )?;
+    }
+    backup_root::sync_dir(&objects)?;
+    backup_root::sync_dir(&staging)?;
     dirs.sync()?;
     Ok(())
 }
@@ -226,12 +251,15 @@ pub(super) fn can_restore(store: &Store, item: &Item) -> Result<()> {
         .ok_or(Error::OutcomeUnknown)?;
     let dirs = directories(store, item)?;
     let id = &item.entry.operation.id;
-    checked(&dirs.peer, &keep(id), &saved.copy, &item.entry)?;
-    for name in [final_name(id), part(id)] {
-        match dirs.peer.symlink_metadata(&name) {
+    let modern = crate::backup_layout::lookup(&store.conn, id)?.is_some();
+    let objects = crate::backup_layout::objects_dir(&dirs, modern, false)?;
+    let staging = crate::backup_layout::staging_dir(&dirs, modern, false)?;
+    checked(&objects, &keep(id), &saved.copy, &item.entry)?;
+    for (dir, name) in [(&objects, final_name(id)), (&staging, part(id))] {
+        match dir.symlink_metadata(&name) {
             Ok(_) => {
                 checked(
-                    &dirs.peer,
+                    dir,
                     &name,
                     &saved.restore.ok_or(Error::Conflict)?,
                     &item.entry,
@@ -241,8 +269,8 @@ pub(super) fn can_restore(store: &Store, item: &Item) -> Result<()> {
             Err(e) => return Err(io(e)),
         }
     }
-    if dirs.peer.symlink_metadata(restored(id)).is_ok() {
-        let file = backup_root::open_file(&dirs.peer, &restored(id), false, false)?;
+    if objects.symlink_metadata(restored(id)).is_ok() {
+        let file = backup_root::open_file(&objects, &restored(id), false, false)?;
         if Some(backup_root::file_identity(&file)?) != saved.restore {
             return Err(Error::Conflict);
         }
@@ -253,20 +281,35 @@ pub(super) fn purge(store: &mut Store, id: &str, live: bool) -> Result<()> {
     let items = load(store)?;
     let item = items.get(id).ok_or(Error::NotFound)?;
     let dirs = directories(store, item)?;
+    let path_record = crate::backup_layout::lookup(&store.conn, id)?;
+    let modern = path_record.is_some();
+    let objects = crate::backup_layout::objects_dir(&dirs, modern, false)?;
+    let staging = crate::backup_layout::staging_dir(&dirs, modern, false)?;
     let saved = item
         .saved
         .as_ref()
         .filter(|s| s.ready)
         .ok_or(Error::OutcomeUnknown)?;
     if live {
-        remove_matching(&dirs.peer, &final_name(id), &saved.live, &item.entry)?;
-        remove_matching(&dirs.peer, &part(id), &saved.live, &item.entry)?;
+        remove_matching(&objects, &final_name(id), &saved.live, &item.entry)?;
+        remove_matching(&staging, &part(id), &saved.live, &item.entry)?;
+        if let Some(rec) = &path_record {
+            crate::backup_layout::remove_visible_if_owned(
+                &dirs,
+                rec,
+                &saved.live,
+                item.entry.operation.size,
+                &item.entry.operation.sha256,
+            )?;
+        }
     }
     // Each unlink is exact, hash-checked and retryable; no directory scanning or recursive removal.
-    remove_matching(&dirs.peer, &keep(id), &saved.copy, &item.entry)?;
+    remove_matching(&objects, &keep(id), &saved.copy, &item.entry)?;
     if let Some(identity) = saved.restore {
-        remove_matching(&dirs.peer, &restored(id), &identity, &item.entry)?;
+        remove_matching(&objects, &restored(id), &identity, &item.entry)?;
     }
+    backup_root::sync_dir(&objects)?;
+    backup_root::sync_dir(&staging)?;
     dirs.sync()?;
     Ok(())
 }

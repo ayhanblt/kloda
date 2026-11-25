@@ -120,7 +120,7 @@ fn failed_offset_commit_keeps_crash_tail_and_only_identical_retry_adopts_it() {
         ),
         Err(Error::OutcomeUnknown)
     ));
-    let path = peer_folder(&folder).join(temp_name(&id));
+    let path = temp_path(&folder, &id);
     assert_eq!(fs::read(&path).unwrap(), b"abc");
     drop(store);
     let mut store = directory.store(key("pc"));

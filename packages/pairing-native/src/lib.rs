@@ -1,6 +1,9 @@
 #![deny(unsafe_op_in_unsafe_fn)]
 
 #[cfg(not(target_os = "android"))]
+mod backup_layout;
+mod backup_layout_schema;
+#[cfg(not(target_os = "android"))]
 mod backup_retention;
 mod backup_retention_schema;
 #[cfg(not(target_os = "android"))]

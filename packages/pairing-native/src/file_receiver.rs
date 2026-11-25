@@ -61,6 +61,7 @@ impl Receiver {
                     finalize::publish(store, sid, peer, &directories, &mut entry)?;
                 }
                 checked_file(
+                    &store.conn,
                     &directories,
                     &entry,
                     entry.operation.state == OperationState::Completed,
@@ -83,7 +84,7 @@ impl Receiver {
                 if offset > entry.operation.size {
                     return Err(Error::InvalidRequest);
                 }
-                let mut file = checked_file(&directories, &entry, true, false)?;
+                let mut file = checked_file(&store.conn, &directories, &entry, true, false)?;
                 let length = (entry.operation.size - offset).min(CHUNK_LIMIT as u64) as usize;
                 let mut bytes = vec![0; length];
                 file.seek(SeekFrom::Start(offset)).map_err(io_error)?;
@@ -147,18 +148,26 @@ pub(super) fn final_name(id: &str) -> String {
     format!("{id}.media")
 }
 
-fn checked_file(
+pub(super) fn checked_file(
+    conn: &rusqlite::Connection,
     directories: &Directories,
     entry: &Entry,
     final_file: bool,
     writable: bool,
 ) -> Result<File> {
-    let name = if final_file {
-        final_name(&entry.operation.id)
+    let modern = crate::backup_layout::lookup(conn, &entry.operation.id)?.is_some();
+    let (dir, name) = if final_file {
+        (
+            crate::backup_layout::objects_dir(directories, modern, false)?,
+            final_name(&entry.operation.id),
+        )
     } else {
-        temp_name(&entry.operation.id)
+        (
+            crate::backup_layout::staging_dir(directories, modern, false)?,
+            temp_name(&entry.operation.id),
+        )
     };
-    let file = backup_root::open_file(&directories.peer, &name, false, writable)?;
+    let file = backup_root::open_file(&dir, &name, false, writable)?;
     if backup_root::file_identity(&file)? != entry.identity {
         return Err(Error::Conflict);
     }

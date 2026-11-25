@@ -160,7 +160,7 @@ pub(crate) fn list(
                 &entry.operation.id,
                 entry.identity,
             )?;
-            super::checked_file(directories, &entry, true, false)?;
+            super::checked_file(conn, directories, &entry, true, false)?;
             Ok(entry.operation)
         })();
         if matches!(result, Err(Error::OwnerDeleted)) {
@@ -214,6 +214,11 @@ pub(crate) fn insert(
             params![id, sid.as_slice(), upload.request_id, upload.source_id, upload.source_revision,
                 upload.name, hash.as_slice(), size, scope.revision, scope.binding.root.as_slice(),
                 scope.binding.peer.as_slice(), identity.as_slice()]).map_err(storage)?;
+        tx.execute(
+            "INSERT INTO backup_paths(id,folder,filename) VALUES(?1,'','')",
+            [id],
+        )
+        .map_err(storage)?;
         if let Some(previous) = &upload.rebackup_of {
             tx.execute(
                 "INSERT INTO backup_rebackup_requests(id,previous_id) VALUES(?1,?2)",
