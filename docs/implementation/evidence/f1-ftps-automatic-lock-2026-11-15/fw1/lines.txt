@@ -1,6 +1,0 @@
-AndroidFtpsScheduler.kt 180
-AndroidFtpsJob.kt 128
-AndroidFtpsQueue.kt 223
-AndroidFtpsAutomaticChecks.kt 276
-AndroidFtpsLifecycleChecks.kt 55
-AndroidFilesQueueRecoveryInstrumentation.kt 295

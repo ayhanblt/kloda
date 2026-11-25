@@ -1,8 +1,0 @@
-2026-11-21T13:50:30Z
-start HEAD b9be515607e54967d452574ae1f9f20501f39100
-HUMAN_ACTION 1/2: Simulator'da açılan klasör seçicide 'Source' klasörü açık; 'Open/Seç' dokun.
-FAILED: Timeout: no finished seed result before deadline (picker/UI step not completed)
-CLEANUP_ELAPSED=6.4s (budget 240s)
-CLEANUP_DONE root=/private/tmp/kloda-p3-06-ftps-ios.FfYSpH3W (keys removed; Keychain absence verified if seed was launched; app uninstalled if installed; imaj kloda-p3-06-ftps-pro:2dc9d74b korunur)
-EXIT=3
-2026-11-21T14:06:32Z

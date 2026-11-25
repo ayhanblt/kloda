@@ -1,1 +1,0 @@
-KLODA_MAC_VALIDATION_FAIL owner_open:native_unsupported

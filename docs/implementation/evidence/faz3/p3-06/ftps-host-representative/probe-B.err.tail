@@ -1,3 +1,0 @@
-    return self._sslobj.write(data)
-           ~~~~~~~~~~~~~~~~~~^^^^^^
-BrokenPipeError: [Errno 32] Broken pipe

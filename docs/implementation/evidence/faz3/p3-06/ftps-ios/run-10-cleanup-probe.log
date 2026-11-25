@@ -1,7 +1,0 @@
-2026-11-21T13:46:48Z
-PROBE_ONLY: cleanup modu tanısı (seed/picker yok)
-CLEANUP_ELAPSED=6.1s (budget 240s)
-CLEANUP_DONE root=/private/tmp/kloda-p3-06-ftps-ios.noenK1w3 (keys removed; Keychain absence verified if seed was launched; app uninstalled if installed; imaj kloda-p3-06-ftps-pro:2dc9d74b korunur)
-IOS_FTPS_CLEANUP_PROBE_DONE root=/private/tmp/kloda-p3-06-ftps-ios.noenK1w3 (kabul PASS'i değil)
-EXIT=0
-2026-11-21T13:47:38Z

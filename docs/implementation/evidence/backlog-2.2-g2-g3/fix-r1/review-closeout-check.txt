@@ -1,6 +1,0 @@
-reviewer did not change product: True
-2.2 checked: True
-2.3 unchecked: True
-manifest accepted: True
-staged empty: True
-CURRENT whitespace clean: True

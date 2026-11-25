@@ -1,9 +1,0 @@
-ce1ac3002124052b41a36a82272ed635dccedd4b62871b92b32bbc3f1aedd852  ./app/App.tsx
-b0ff233e641472e21c0bfe2818128f1d903e5d812c1d2219c7d21e20b1311392  ./app/global.css
-011259743443d1699021eaae12454f8e81fd58c20c415c90d94dd4602f37f30f  ./app/App.spec.tsx
-0676f1f3de54d35adf70d63dd9d94c0cea231670782a09a3b63fae09aaa18816  ./features/desktop-background/DesktopBackground.spec.tsx
-dfb2f13a52e014f87cb74e7971c3aac89ac3398a87aa6d5739fbdf7e897c5625  ./features/desktop-background/DesktopBackground.tsx
-eae1465d403958c76efa4972983069478a5df8b241661891421587fd99286734  ./features/desktop-background/AppearanceSettings.tsx
-abfecf4878cf5e245a3c47ba85937bdd01cd510726dbd6797a2aa406d50be74f  ./shared/i18n/locales/tr.json
-ed6278ee5c244004bb9083977e4ec8526f34c79fbe812377319cc89aa0ce3d55  ./shared/i18n/locales/de.json
-2538fbcef8c4c0bc31fecb686dbaf0c36ca1759dc20d4ddf206468f473bf83e1  ./shared/i18n/locales/en.json

@@ -1,6 +1,0 @@
-7d945c3dbce12b15bdd965e657fb459cb8f4fce6da7e0f9aee81c6de516253b0  apps/mobile/src/pages/settings/ui/settings-page.tsx
-ab5b8f6211d43167b61961b01c327cc2c5d9df50efd3d73e97a073c8c7ee8023  apps/mobile/src/shared/config/app-version.ts
-28326486f6678497a3fd83e1621199de3df5a2cb5717dbc464b0dd0cebd8b2a0  apps/mobile/src/pages/settings/ui/settings-page.spec.tsx
-9ee286da789cff3221c5a0436ff5862dd21cebcaf5e5ee505cdb77da7a31c939  apps/mobile/src/shared/i18n/locales/tr.json
-43dcd5c91de59a7973757c3559c5fa14b2d9c8d41b514fa3f3aa02712ccd76c9  apps/mobile/src/shared/i18n/locales/en.json
-1f043d8d15bfec03ae8fad4a8d9e214a7810c3b79c8761750bcc9c29a2cc1c51  apps/mobile/src/shared/i18n/locales/de.json

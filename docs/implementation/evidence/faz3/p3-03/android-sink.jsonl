@@ -1,1 +1,0 @@
-{"platform":"android","results":[{"protocol":"smb","nativeModulePresent":true,"calls":2,"valid":2,"unique":2,"error":null},{"protocol":"sftp","nativeModulePresent":true,"calls":2,"valid":2,"unique":2,"error":null},{"protocol":"ftps","nativeModulePresent":true,"calls":2,"valid":2,"unique":2,"error":null}],"totalValues":6,"totalUnique":6}

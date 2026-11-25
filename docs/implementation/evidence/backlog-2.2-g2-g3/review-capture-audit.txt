@@ -1,7 +1,0 @@
-capture rows=26; flagged=[]; consoleErrors=[]
-Open focusable=True; tabAfterOpen=['Kloda beenden', 'Kloda’dan çık', 'Quit Kloda']
-tr: tray keys=['menuLabel', 'open', 'pauseIncoming', 'pauseOutgoing', 'pauseUnavailable', 'state'], state keys=['active', 'checking', 'error', 'listening', 'unavailable', 'unknown']
-en: tray keys=['menuLabel', 'open', 'pauseIncoming', 'pauseOutgoing', 'pauseUnavailable', 'state'], state keys=['active', 'checking', 'error', 'listening', 'unavailable', 'unknown']
-de: tray keys=['menuLabel', 'open', 'pauseIncoming', 'pauseOutgoing', 'pauseUnavailable', 'state'], state keys=['active', 'checking', 'error', 'listening', 'unavailable', 'unknown']
-built index-B_aSAu2p.js: exists=True
-built index-C70Toj8N.css: exists=True

@@ -1,4 +1,0 @@
-75c75
-<     if (e.epoch != epoch || active() != null || (if (e.wake == null) !legacyOk else p?.wake != e.wake)) { e.state = "done"; return@synchronized false }
----
->     if (e.epoch != epoch || active() != null || e.wake != null && p?.wake != e.wake) { e.state = "done"; return@synchronized false }

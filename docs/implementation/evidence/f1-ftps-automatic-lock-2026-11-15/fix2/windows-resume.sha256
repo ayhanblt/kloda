@@ -1,6 +1,0 @@
-6e7c904362185a89e79ccfa38b78e908f39af82676f7c505838ab77b5aff68c1  apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsJob.kt
-4f65800a1bb8a7a72e0120c72c5d1e21816557a4df9636714909ce517edd8844  apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsScheduler.kt
-06b0b00bc195a3faa3468d78d60bd684d6c53e29fe198005528600098a572b15  apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidFtpsQueue.kt
-8abc4122c2504387077c845289f9a2606877630b256a32f6d1cd4ca5dfde1bd2  apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsAutomaticChecks.kt
-a00ebbb1ca9aa12e9570cc634b3085aa5a3ea346cb25cb78b3d42f234d919c84  apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsLifecycleChecks.kt
-c33e6cbb1723e1a347f2930ea0fa6cbd1699fa199b966c8eed9f8ac5c899cf8f  apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidFtpsPolicyChecks.kt

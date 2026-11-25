@@ -1,4 +1,0 @@
-
-> @kloda/mobile@0.0.0 lint
-> eslint "src/**/*.{ts,tsx}" App.tsx
-

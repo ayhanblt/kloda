@@ -1,8 +1,0 @@
-{
-  "extends": "../tsconfig.json",
-  "compilerOptions": {
-    "noEmit": true,
-    "types": ["node"]
-  },
-  "include": ["../nativewind-env.d.ts", "../src/assets.d.ts", "./**/*.ts", "./**/*.tsx"]
-}

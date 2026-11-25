@@ -1,1 +1,0 @@
-red1 run: NOT_RUN/BLOCKED — emulator-5590 cold boot headless (-no-window), deviceLocked=1 strongAuthRequired=0x1 (credential set); instrumentation produced no output in 600s, force-stopped. Not a test result.

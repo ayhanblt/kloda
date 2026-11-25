@@ -1,4 +1,0 @@
-# Inspected generated build outputs (not runtime/distributed binary evidence); mtime local
-9b0b15c7afb9b3b3f61dbda6443b39bd1e805f1d73895d45d3f8d63c452f53d6  apps/mobile/modules/my-module/android/build/generated/source/buildConfig/debug/com/kloda/sync/BuildConfig.java  mtime=Nov 11 20:38:41 2026
-272ac79619f7e7e40ce19f3e8c183b5c2723f37af61f75b8ac8e4f4fa5fbb613  apps/mobile/android/app/build/intermediates/merged_manifests/debug/processDebugManifest/AndroidManifest.xml  mtime=Nov  4 15:13:14 2026
-272ac79619f7e7e40ce19f3e8c183b5c2723f37af61f75b8ac8e4f4fa5fbb613  apps/mobile/android/app/build/intermediates/merged_manifest/debug/processDebugMainManifest/AndroidManifest.xml  mtime=Nov  4 15:13:14 2026

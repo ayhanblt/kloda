@@ -1,1 +1,0 @@
-{"control_tls": "TLSv1.2", "cipher": "ECDHE-RSA-AES256-GCM-SHA384", "payload_bytes": 1048576, "payload_sha256": "631b84027d6b9e52b539c4e8373622d23032dfadc64d60af87339c9037e4f769", "server_size": 1048576, "readback_bytes": 1048576, "readback_sha256": "631b84027d6b9e52b539c4e8373622d23032dfadc64d60af87339c9037e4f769", "match": true}

@@ -1,6 +1,0 @@
-product unchanged after review: True
-review exists: True
-manifest FIX: True
-CURRENT 2.2 remains unchecked: True
-staged empty: True
-tracked status documentation whitespace: True

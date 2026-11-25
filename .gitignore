@@ -25,8 +25,10 @@ node_modules/
 !.vscode/settings.json
 
 
-# Local-only evidence archives and recovery artifacts
+# Local-only evidence archives and retired OpenCode harness
 /.local-evidence/
+/docs/implementation/evidence/
+/.opencode/
 
 # Serena generated/runtime data
 .serena/cache/
@@ -82,14 +84,6 @@ apps/mobile/.expo/dev/logs/export.log
 !**/snapshot/**
 !**/snapshots/**
 !/docs/ui/lovable-reference/**
-
-# Existing manifest/document-referenced evidence remains searchable/tracked.
-!/docs/implementation/evidence/lovable-step12-2026-10-28/mobile-build-final.log
-!/docs/implementation/evidence/lovable-step12-2026-10-28/mobile-lint-final.log
-!/docs/implementation/evidence/lovable-step12-2026-10-28/mobile-native/android-boot.log
-!/docs/implementation/evidence/lovable-step12-2026-10-28/mobile-native/metro.log
-!/docs/implementation/evidence/lovable-step12-2026-10-28/mobile-suite-final.log
-!/docs/implementation/evidence/lovable-step12-2026-10-28/mobile-typecheck-final.log
 
 apps/mobile/modules/my-module/ios/NativeStorage/
 

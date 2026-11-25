@@ -1,5 +1,0 @@
-13ccdedf68239b08097e7e07bd3e30ca1a1ad13d6a544c4f8ddd4ae7550b7761  apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticCoordinator.kt
-a05e88d2baad8b4bdeac56a38d85f0a0d3651e45e542b07abbd180812e7a17bd  apps/mobile/modules/my-module/android/src/main/java/com/kloda/sync/AndroidS3AutomaticPlan.kt
-5cedc4a7575a76236a373def5cf265862c5c78d063bd31d1482f185165ab8924  apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidAutomaticLockChecks.kt
-9d037a63cb81e94e17997139801d31231de7a749d70aa5e0c92d32b8ca4c52de  apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticPlanChecks.kt
-5c2e4c6851bada84fc27b5ee64ae9e5029db23fc822691564a32f9ea613b722b  apps/mobile/modules/my-module/android/src/androidTest/java/com/kloda/sync/AndroidS3AutomaticOsChecks.kt

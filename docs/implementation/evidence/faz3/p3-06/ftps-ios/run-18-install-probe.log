@@ -1,8 +1,0 @@
-2026-11-21T20:09:18Z
-start HEAD b9be515607e54967d452574ae1f9f20501f39100
-INSTALL_PROBE_OK own_check=own canonical+dev/ino match; app NOT launched
-CLEANUP_ELAPSED=4.2s (budget 240s)
-CLEANUP_DONE root=/private/tmp/kloda-p3-06-ftps-ios.Rlk4Hz8Q (keys removed; Keychain absence verified if seed was launched; app uninstalled if installed; imaj kloda-p3-06-ftps-pro:2dc9d74b korunur)
-IOS_FTPS_INSTALL_PROBE_DONE root=/private/tmp/kloda-p3-06-ftps-ios.Rlk4Hz8Q (kabul PASS'i değil)
-EXIT=0
-2026-11-21T20:10:07Z

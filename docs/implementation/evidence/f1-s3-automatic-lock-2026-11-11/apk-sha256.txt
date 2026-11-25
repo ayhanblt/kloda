@@ -1,1 +1,0 @@
-331930ee36e7df1c1c0f412ee7bab3d5870c87d8f0d7738e1eb823ed7ce4930e  apps/mobile/modules/my-module/android/build/outputs/apk/androidTest/debug/my-module-debug-androidTest.apk

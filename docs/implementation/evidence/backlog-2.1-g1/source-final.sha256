@@ -1,8 +1,0 @@
-698d45185c4ba82d05770bc18c902af12e1d97f59bbaa7cf15a2bf0b692e266e  .\apps\mobile\src\features\file-transfer\model\activity-journal.ts
-57278fbd932bb62c3909a703d6021654e5d987796a1863dad002b2c43d8e17df  .\apps\mobile\src\features\file-transfer\model\activity-journal.spec.ts
-2ff6c5443569725e202ede23cf964910619df6df185d42ceb3ccf267ae1d16df  .\apps\mobile\src\pages\activity\ui\activity-journal-panel.tsx
-4f5144abc8ca742e7f3cb124274926704f2fb61de2fcab8be732f109bc652eb1  .\apps\mobile\src\pages\activity\ui\activity-journal-panel.spec.tsx
-581956cf91abae6d4df2f72596c4fdc69a3ca7f94b2f1f6983a3bdf66a808315  .\apps\mobile\src\pages\activity\ui\activity-page.tsx
-c6ab80a7a6040ed7076e0d8bd2fb064ad91b6ec0289bf76c9bf5a7ae49ff3cbe  .\apps\mobile\src\shared\i18n\locales\tr.json
-3baa46e844516ef486c7e08867ec9b006ca67754058174197b4c17183c6ba72f  .\apps\mobile\src\shared\i18n\locales\en.json
-07c86ee22c452e1a13ef1fa88ffe5f4caaab4be35c628fb174be0a5f21b093a2  .\apps\mobile\src\shared\i18n\locales\de.json

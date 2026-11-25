@@ -1,8 +1,0 @@
- M .opencode/commands/implement.md
- M .opencode/commands/plan.md
- M .opencode/commands/review.md
- M AGENTS.md
- M docs/implementation/CURRENT.md
- M docs/implementation/plans/f1-r13-r14-clock-reconcile-fix.md
-?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/r13-r14/baseline/head.txt
-?? docs/implementation/evidence/f1-s3-automatic-lock-2026-11-11/fix-r12/clock-reconcile/r13-r14/baseline/status.txt

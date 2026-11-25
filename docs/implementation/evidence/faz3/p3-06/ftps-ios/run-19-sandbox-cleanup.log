@@ -1,7 +1,0 @@
-2026-11-21T20:18:10Z
-start HEAD b9be515607e54967d452574ae1f9f20501f39100
-FAILED: Fail: fixture bundle com.kloda.fixture.ftps16c.files.rrlk4hz8q is present on 61A45399-D0F9-43C0-B356-E1EF6712E960; refusing to install (no install/uninstall attempted)
-CLEANUP_ELAPSED=3.5s (budget 240s)
-CLEANUP_DONE root=/private/tmp/kloda-p3-06-ftps-ios.Rlk4Hz8Q (keys removed; Keychain absence verified if seed was launched; app uninstalled if installed; imaj kloda-p3-06-ftps-pro:2dc9d74b korunur)
-EXIT=1
-2026-11-21T20:18:23Z

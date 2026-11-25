@@ -1,7 +1,0 @@
-2026-11-21T19:55:06Z
-  File "<stdin>", line 43
-    func require(_ condition:''')
-                             ^
-SyntaxError: unterminated triple-quoted string literal (detected at line 44)
-EXIT=1
-2026-11-21T19:55:07Z

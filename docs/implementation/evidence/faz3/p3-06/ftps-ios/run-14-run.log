@@ -1,9 +1,0 @@
-2026-11-21T19:27:42Z
-start HEAD b9be515607e54967d452574ae1f9f20501f39100
-HUMAN_ACTION 1/2: DeviceHub'da 'Kloda-Ftps16c-Disposable' (61A45399-D0F9-43C0-B356-E1EF6712E960) cihazının ekranı; klasör seçicide 'Source' klasörü açık, 'Open/Seç' dokun. SON TARİH 19:43:36Z UTC (22:43:36 yerel)
-HUMAN_ACTION 2/2: aynı cihazda ikinci klasör seçici ('Restore' açık), 'Open/Seç' dokun. SON TARİH 19:43:36Z UTC (22:43:36 yerel)
-CLEANUP_ELAPSED=6.5s (budget 240s)
-CLEANUP_DONE root=/private/tmp/kloda-p3-06-ftps-ios.jBnXibhh (keys removed; Keychain absence verified if seed was launched; app uninstalled if installed; imaj kloda-p3-06-ftps-pro:2dc9d74b korunur)
-IOS_FTPS_RUN_PASS root=/private/tmp/kloda-p3-06-ftps-ios.jBnXibhh
-EXIT=0
-2026-11-21T19:29:33Z

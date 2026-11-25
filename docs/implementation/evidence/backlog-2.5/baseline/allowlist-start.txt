@@ -1,3 +1,0 @@
-ABSENT tools/capture-ui.py
-ABSENT tools/ui-capture
-ABSENT apps/mobile/capture
