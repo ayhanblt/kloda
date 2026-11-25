@@ -60,16 +60,16 @@ test('G456-03 notifications has no switch and only navigates to activity once', 
 test('G456-04 shows the configured version and a translated unknown for invalid config', async () => {
   const first = await show();
   expect(screen.getByText('Configuration version')).toBeTruthy();
-  expect(screen.getByText('0.0.0')).toBeTruthy();
+  expect(screen.getByText('1.0.0')).toBeTruthy();
   expect(screen.queryByText(/prototype|installed|build|release/i)).toBeNull();
   await first.view.unmount();
   for (const raw of ['', '  ', undefined, null, 7, {}]) expect(parseConfiguredVersion(raw)).toBeNull();
   expect(parseConfiguredVersion('1.2.3')).toBe('1.2.3');
-  expect(actualVersion()).toBe('0.0.0');
+  expect(actualVersion()).toBe('1.0.0');
   jest.mocked(configuredAppVersion).mockReturnValue(null);
   await show();
   expect(screen.getByText('Unknown')).toBeTruthy();
-  expect(screen.queryByText('0.0.0')).toBeNull();
+  expect(screen.queryByText('1.0.0')).toBeNull();
 });
 
 test('G456-05 keeps theme/language selection and every existing navigation target', async () => {
@@ -97,5 +97,5 @@ test.each(['tr', 'en', 'de'])('G456-07 renders all groups in %s with no missing 
   expect(cellular.props.accessible).toBe(true);
   expect(cellular.props.accessibilityState).toMatchObject({ checked: false, disabled: true });
   expect(screen.getByText(t('ui.settings.cellularDesc'))).toBeTruthy();
-  expect(screen.getByText('0.0.0')).toBeTruthy();
+  expect(screen.getByText('1.0.0')).toBeTruthy();
 });

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.kloda.sync'
-version = '0.1.0'
+version = '1.0.0'
 
 dependencies {
   implementation('com.facebook.react:react-android')
@@ -19,10 +19,13 @@ android {
   ndkVersion "27.1.12297006"
   buildFeatures { buildConfig true }
   defaultConfig {
+    def oneDriveSignatureHash = (providers.gradleProperty("klodaOneDriveSignatureHash").orNull ?: "Xo8WBi6jzSxKDVR4drqm84yr9iU=").trim()
     buildConfigField "boolean", "KLODA_SMB_NATIVE", (providers.gradleProperty("klodaSmbNative").orNull == "true").toString()
     buildConfigField "boolean", "KLODA_SFTP_NATIVE", (providers.gradleProperty("klodaSftpNative").orNull == "true").toString()
     buildConfigField "boolean", "KLODA_FTPS_NATIVE", (providers.gradleProperty("klodaFtpsNative").orNull == "true").toString()
     buildConfigField "boolean", "KLODA_S3_NATIVE", (providers.gradleProperty("klodaS3Native").orNull == "true").toString()
+    buildConfigField "String", "KLODA_ONEDRIVE_SIGNATURE_HASH", "\"${oneDriveSignatureHash}\""
+    manifestPlaceholders["klodaOneDriveSignatureHash"] = oneDriveSignatureHash
     minSdkVersion 24
     consumerProguardFiles "consumer-rules.pro"
     testInstrumentationRunner "com.kloda.sync.AndroidFilesQueueRecoveryInstrumentation"
@@ -30,7 +33,7 @@ android {
       abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64', 'x86'
     }
     versionCode 1
-    versionName "0.1.0"
+    versionName "1.0.0"
   }
   lintOptions {
     abortOnError true

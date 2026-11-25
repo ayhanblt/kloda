@@ -2,7 +2,7 @@
   "expo": {
     "name": "Kloda: Secure Photos & Sync",
     "slug": "kloda",
-    "version": "0.0.0",
+    "version": "1.0.0",
     "orientation": "default",
     "userInterfaceStyle": "automatic",
     "plugins": [

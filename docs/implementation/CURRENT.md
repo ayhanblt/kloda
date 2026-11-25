@@ -21,16 +21,17 @@ Historical Faz3 manifests, evidence, and OpenCode files are archived under `.loc
   - Enabled `'onedrive'` and `'yandex'` in `enableableProviders` and `CloudTarget` queues (including Photos + Files restore & ADR0029 catalog).
 - [x] **Faz V1-4 — PC Desktop Human-Readable File Layout (`.media` → Real Filenames)**
   - Added `backup_paths` schema migration (`user_version=5`), staged incoming transfers under `<peer>/.kloda/staging/`, stored durable objects/keeps under `<peer>/.kloda/objects/`, and atomically hardlinked readable files into `<peer>/Files/` and `<peer>/Photos/` with collision-free `name (2).ext` suffixes (keeping photo manifests hidden and preserving legacy `v4` flat backups).
-- [ ] **Faz V1-5 — `1.0.0` Release Signing, R8/ProGuard, Build Flags & Desktop Installers**
-  - Bump versions to `1.0.0`; enable `SMB`/`SFTP`/`FTPS` build flags by default (`S3` off for V1).
-  - Add missing JNI `-keep` rules (`KlodaPairingJni`, `AndroidFtpsPublication`, callbacks) to `consumer-rules.pro`; configure Android Release signing & OneDrive Release SHA-1.
-  - Configure Apple Developer Team signing (iOS App + Live Activity + Yandex Team ID; macOS `com.kloda.desktop` Developer ID + Notarization) and Windows 11 Desktop installer.
-  - Verify B2 fixture-CA exclusion (`nm`) and `THIRD_PARTY_NOTICES` inclusion.
+- [ ] **Faz V1-5 — `1.0.0` Release Signing, R8/ProGuard, Build Flags & Desktop Installers** *(Kod & Konfigürasyon Hazır — Release İmzalama Kimlik Bilgileri Bekleniyor)*
+  - Monorepo, Android (`app` + `my-module`), iOS (`KlodaSecurePhotosSync` + `KlodaLiveActivity`) ve Desktop sürümleri `1.0.0` yapıldı.
+  - Android (`gradle.properties`) ve iOS (`KlodaSyncRuntime.podspec`) varsayılan V1 native protokolleri (`SMB`, `SFTP`, `FTPS`) açıldı, `S3` kapalı tutuldu (`excludes += '**/libkloda_s3_native.so'`).
+  - R8/ProGuard (`consumer-rules.pro`) için `KlodaPairingJni`, `KlodaPairingPlatform`, `SmbNative*`, `SftpNative*`, `FtpsNative*` (`connect(String,int)` dahil) ve `S3NativeEngine` `-keep` kuralları eklendi; `minifyEnabled` + `shrinkResources` Release profilinde aktif edildi.
+  - Desktop (`kloda_pairing.node`), Android (4 ABI) ve iOS (Release `KlodaPairingNative.xcframework`) yeniden derlendi; `THIRD_PARTY_NOTICES.md`, `tools/build-desktop-release.mjs` ve B2 fixture-CA (`nm`/`llvm-nm`) doğrulama kapısı (`tools/verify-v1-release.mjs`) eklendi.
+  - **Kullanıcıdan beklenen Release imzalama adımları:** Android Release keystore (`KLODA_ANDROID_*`) + Entra OneDrive Release SHA-1 (`klodaOneDriveSignatureHash`), Apple Developer Team (iOS + LiveActivity + Yandex Team ID; macOS Developer ID + Notarization) ve Windows 11 Desktop paketleme.
 - [ ] **Faz V1-6 — 18-Item Physical Device Acceptance (iPhone, Android 13+, Mac, Windows 11)**
 
 ## Next Immediate Step
 
-Start **Faz V1-5**: bump version numbers to `1.0.0`, enable native `SMB`/`SFTP`/`FTPS` release flags, update ProGuard JNI `-keep` rules, rebuild Desktop & mobile native libraries, and coordinate Release signing credentials.
+**Faz V1-5 imzalama & Faz V1-6:** Kullanıcı tarafından Release keystore, OneDrive Release SHA-1 ve Apple Developer / macOS Notarization bilgileri sağlanınca imzalı `1.0.0` paketlerini oluşturup **Faz V1-6** 18 maddelik fiziksel cihaz kabul testine geç.
 
 ## Post-V1 Queued Roadmap (V2)
 

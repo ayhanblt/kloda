@@ -1,7 +1,7 @@
 {
   "name": "@kloda/desktop",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "main": "dist/main/main.js",
   "productName": "Kloda: Secure Photos & Sync",
@@ -12,13 +12,14 @@
   "scripts": {
     "dev": "npm run build:main && concurrently -k \"vite --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5173 node ../../tools/run-desktop-dev.mjs\"",
     "build": "npm run typecheck && npm run build:main && vite build",
+    "package:release": "node ../../tools/build-desktop-release.mjs",
     "build:main": "npm run build --workspace @kloda/sync-core && tsc -p tsconfig.main.json && node ../../tools/build-electron-sqlite.mjs && node ../../tools/build-native-desktop.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint \"src/**/*.{ts,tsx}\" \"electron/**/*.{ts,cts}\" vite.config.ts",
     "test": "vitest run --config vitest.config.ts"
   },
   "dependencies": {
-    "@kloda/sync-core": "0.0.0",
+    "@kloda/sync-core": "1.0.0",
     "@tailwindcss/vite": "^4.3.3",
     "better-sqlite3": "^12.8.0",
     "i18next": "^26.4.2",

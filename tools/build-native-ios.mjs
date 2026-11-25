@@ -24,6 +24,8 @@ function run(command, args, env = {}, capture = false) {
   if (result.error || result.status !== 0) throw new Error(`${command} failed (${result.error?.code ?? result.status}); no iOS package accepted.`);
   return result.stdout?.trim() ?? '';
 }
+const debugProfile = process.argv.includes('--debug');
+const profile = debugProfile ? 'debug' : 'release';
 const compiler = requireFile(run('rustup', ['which', '--toolchain', rustToolchain, 'rustc'], {}, true), true);
 const simulator = process.arch === 'arm64' ? 'aarch64-apple-ios-sim' : 'x86_64-apple-ios';
 assert(['arm64', 'x64'].includes(process.arch), 'Unsupported build host architecture');
@@ -33,10 +35,11 @@ const symbols = ['open', 'request', 'suspend', 'set_foreground', 'transfer', 're
 for (const [target, sdk] of [['aarch64-apple-ios', 'iphoneos'], [simulator, 'iphonesimulator']]) {
   const sdkRoot = run('xcrun', ['--sdk', sdk, '--show-sdk-path'], {}, true);
   run('rustup', ['run', rustToolchain, 'cargo', 'rustc', '--locked', '--offline', '--no-default-features',
+    ...(debugProfile ? [] : ['--release']),
     '--manifest-path', join(crate, 'Cargo.toml'), '--target-dir', targetDirectory, '--features', 'ios-ffi',
     '--target', target, '--lib', '--crate-type', 'staticlib'],
   { RUSTC: compiler, SDKROOT: sdkRoot, IPHONEOS_DEPLOYMENT_TARGET: '16.4' });
-  const library = requireFile(join(targetDirectory, target, 'debug', 'libkloda_pairing_native.a'));
+  const library = requireFile(join(targetDirectory, target, profile, 'libkloda_pairing_native.a'));
   const exports = run('xcrun', ['nm', '--no-llvm-bc', '-gU', library], {}, true);
   for (const symbol of symbols) assert(new RegExp(`\\b_kloda_ios_${symbol}\\b`).test(exports), `Missing ABI export ${symbol}`);
   libraries.push({ target, sdk, library });
@@ -71,7 +74,7 @@ if (existsSync(published)) {
 }
 try { renameSync(staged, published); }
 catch (error) { if (moved) renameSync(previous, published); throw error; }
-writeFileSync(join(output, 'build.json'), JSON.stringify({ profile: 'debug', minimumIos: '16.4',
+writeFileSync(join(output, 'build.json'), JSON.stringify({ profile, minimumIos: '16.4',
   targetSlices: libraries.map(({target,sdk}) => ({target,sdk})), exports: symbols.map(s => `kloda_ios_${s}`),
   framework, published, scope: 'Native packaging; simulator/device/runtime acceptance is separate' }, null, 2) + '\n');
 console.log(`iOS_ABI_PACKAGE_VERIFIED_NOT_RUNTIME_ACCEPTANCE ${framework}`);

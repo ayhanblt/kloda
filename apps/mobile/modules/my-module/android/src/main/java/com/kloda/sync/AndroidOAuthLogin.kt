@@ -24,10 +24,10 @@ internal data class OAuthProvider(val name: String, val clientId: String, val au
     val DROPBOX = OAuthProvider("dropbox", "5435jnh71fcmfck", "https://www.dropbox.com/oauth2/authorize",
       "https://api.dropboxapi.com/oauth2/token", "db-5435jnh71fcmfck://oauth", null, mapOf("token_access_type" to "offline"),
       "https://api.dropboxapi.com")
-    // `common` accepts personal and work accounts. The redirect carries the debug signing hash; a release key needs its own registration.
+    // `common` accepts personal and work accounts. Release builds pass `klodaOneDriveSignatureHash` to match their Entra registration.
     val ONEDRIVE = OAuthProvider("onedrive", "dcd6301f-639d-4289-80d0-620f376fab71",
       "https://login.microsoftonline.com/common/oauth2/v2.0/authorize", "https://login.microsoftonline.com/common/oauth2/v2.0/token",
-      "msauth://com.kloda.app/Xo8WBi6jzSxKDVR4drqm84yr9iU%3D", "offline_access User.Read Files.ReadWrite.AppFolder",
+      "msauth://com.kloda.app/${Uri.encode(BuildConfig.KLODA_ONEDRIVE_SIGNATURE_HASH)}", "offline_access User.Read Files.ReadWrite.AppFolder",
       mapOf("response_mode" to "query"), "https://graph.microsoft.com")
     // Scopes come from the Yandex app registration (Disk app folder only). The redirect uses Yandex's own `yx<client ID>` scheme.
     val YANDEX = OAuthProvider("yandex", "c50f110fd8ab48debcabb20f8b1474f0", "https://oauth.yandex.com/authorize",

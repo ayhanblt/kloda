@@ -24,15 +24,15 @@ Pod::Spec.new do |s|
 
   frameworks = ['NativePairing/KlodaPairingNative.xcframework']
   conditions = []
-  if ENV['KLODA_SMB_NATIVE'] == '1'
+  if ENV['KLODA_SMB_NATIVE'] != '0'
     frameworks << 'NativeStorage/KlodaStorageNative.xcframework'
     conditions << 'KLODA_SMB_NATIVE'
   end
-  if ENV['KLODA_SFTP_NATIVE'] == '1'
+  if ENV['KLODA_SFTP_NATIVE'] != '0'
     frameworks << 'NativeSftp/KlodaSftpNative.xcframework'
     conditions << 'KLODA_SFTP_NATIVE'
   end
-  if ENV['KLODA_FTPS_NATIVE'] == '1'
+  if ENV['KLODA_FTPS_NATIVE'] != '0'
     frameworks << 'NativeFtps/KlodaFtpsNative.xcframework'
     conditions << 'KLODA_FTPS_NATIVE'
   end

@@ -38,7 +38,7 @@
         <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
-        <data android:scheme="msauth" android:host="com.kloda.app" android:path="/Xo8WBi6jzSxKDVR4drqm84yr9iU=" />
+        <data android:scheme="msauth" android:host="com.kloda.app" android:path="/${klodaOneDriveSignatureHash}" />
       </intent-filter>
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
