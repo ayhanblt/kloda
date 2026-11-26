@@ -33,6 +33,7 @@ let loginLaunch = false;
 function createWindow(): BrowserWindow {
   const window = new BrowserWindow({
     title: desktopDisplayName,
+    icon: fileURLToPath(new URL('../renderer/app-icon.png', import.meta.url)),
     show: !(loginLaunch && background.canHide()),
     webPreferences: {
       contextIsolation: true,

@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Cloud, HardDrive, KeyRound } from 'lucide-react-native';
 import { Text } from '../../../shared/ui/text';
@@ -7,7 +7,7 @@ import type { NavigateMobile } from '../../../shared/model/mobile-navigation';
 import type { MobileStorageForm } from '../../../shared/api/webdav';
 import { destinationAccount, enableableProviders, providerLabel, type CloudDestination } from '../../../shared/api/cloud-destinations';
 import type { useCloudDestinations } from '../../../features/cloud-destination/model/use-cloud-destinations';
-import { MobilePanel } from '../../../widgets/mobile-surface/ui';
+import { IconTile, RichCard } from '../../../shared/ui/rich';
 import { PairingButton } from '../../../features/pairing/ui/pairing-button';
 import { useThemeColors } from '../../../shared/theme/theme-provider';
 import { RecoveryCodePanel } from '../../../features/recovery-code/ui/recovery-code-panel';
@@ -34,24 +34,33 @@ function DestinationCard({ destination, busy, onToggle, onRemove, onRun, onPause
     { text: t('ui.conn.cancel'), style: 'cancel' },
     { text: t('ui.conn.remove'), style: 'destructive', onPress: onRemove },
   ], { cancelable: true });
-  return <MobilePanel>
-    <Cloud size={24} color={colors['text-secondary']} />
-    <Text className="text-base font-inter-semibold text-primary-text">{t(providerLabel(destination.provider))}</Text>
-    <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-secondary-text">
-      {t(enableable ? (destination.enabled ? 'destinations.enabled' : 'destinations.disabled') : errorLabel('destination_unsupported'))}
-    </Text>
+  return <RichCard className="gap-3 p-4">
+    <View className="flex-row items-center gap-3">
+      <IconTile tone={destination.enabled ? 'brand' : 'neutral'}>
+        <Cloud size={20} color={destination.enabled ? colors['brand-text'] : colors['text-secondary']} />
+      </IconTile>
+      <View className="min-w-0 flex-1 gap-0.5">
+        <Text className="text-base font-inter-semibold text-primary-text">{t(providerLabel(destination.provider))}</Text>
+        <View className="flex-row items-center gap-1.5">
+          <View className={`h-[7px] w-[7px] rounded-full ${enableable && destination.enabled ? 'bg-brand' : 'bg-tertiary-text'}`} />
+          <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-secondary-text">
+            {t(enableable ? (destination.enabled ? 'destinations.enabled' : 'destinations.disabled') : errorLabel('destination_unsupported'))}
+          </Text>
+        </View>
+      </View>
+    </View>
     {account ? <Text selectable accessibilityLabel={t('ui.conn.account', { account })} className="font-sans text-sm text-primary-text">{account}</Text>
       : <Text className="font-sans text-sm text-secondary-text">{t('ui.conn.accountPending')}</Text>}
     <Text selectable className="font-sans text-sm text-secondary-text">{destination.targetPath}</Text>
     {onRecovery && <RecoveryProtectedLine onPress={onRecovery} />}
     {run && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-secondary-text">{t(`destinations.states.${run.state}`)}</Text>}
     {run?.errorCode && <Text className="font-sans text-sm text-danger-text">{t(errorLabel(run.errorCode), { defaultValue: t(errorLabel('outcome_unknown')) })}</Text>}
-    {enableable && destination.enabled && <PairingButton disabled={busy} label={t(running ? 'statusUi.pause' : 'statusUi.backupNow')} onPress={running ? onPause : onRun} />}
+    {enableable && destination.enabled && <PairingButton variant={running ? 'secondary' : 'primary'} disabled={busy} label={t(running ? 'statusUi.pause' : 'statusUi.backupNow')} onPress={running ? onPause : onRun} />}
     {enableable && destination.enabled && <PairingButton variant="secondary" disabled={busy} label={t('ui.conn.viewBackups')} onPress={onBackups} />}
     {enableable && <PairingButton variant="secondary" disabled={busy} label={t(destination.enabled ? 'destinations.disable' : 'destinations.enableSaved')} onPress={onToggle} />}
     {enableable && <PairingButton variant="secondary" disabled={busy} icon={<KeyRound size={18} />} label={t('recovery.importEntry')} onPress={onImport} />}
     <PairingButton variant="destructive" disabled={busy} label={t('ui.conn.remove')} onPress={confirm} />
-  </MobilePanel>;
+  </RichCard>;
 }
 
 // Saved destinations in one list: the original WebDAV entry keeps its own screen; added DAV/OAuth destinations
@@ -71,12 +80,19 @@ export function CloudDestinationList({ cloud, navigate, openBackups, saved }: { 
   const legacy = status !== null && status !== 'confirmed' && !cloud.recoveryFor && (cloud.destinations ?? []).some((item) => item.enabled);
   return <>
     {legacy && <RecoveryLegacyPanel onConfirmed={() => setRefresh((value) => value + 1)} />}
-    {saved && <MobilePanel><HardDrive size={24} color={colors['text-secondary']} /><Text className="text-base font-inter-semibold text-primary-text">{t('ui.providers.webdav')}</Text>
-      <Text className="font-sans text-sm text-secondary-text">{t('ui.savedTarget')}</Text><Text selectable className="font-sans text-sm text-primary-text">{saved.endpoint}</Text>
+    {saved && <RichCard className="gap-3 p-4">
+      <View className="flex-row items-center gap-3">
+        <IconTile tone="brand"><HardDrive size={20} color={colors['brand-text']} /></IconTile>
+        <View className="min-w-0 flex-1 gap-0.5">
+          <Text className="text-base font-inter-semibold text-primary-text">{t('ui.providers.webdav')}</Text>
+          <Text className="font-sans text-sm text-secondary-text">{t('ui.savedTarget')}</Text>
+        </View>
+      </View>
+      <Text selectable className="font-sans text-sm text-primary-text">{saved.endpoint}</Text>
       <Text selectable className="font-sans text-sm text-secondary-text">{saved.targetPath}</Text>
       {recovery && <RecoveryProtectedLine onPress={recovery} />}
       <PairingButton variant="secondary" label={t('ui.common.manage')} onPress={() => navigate('storage')} />
-    </MobilePanel>}
+    </RichCard>}
     {addedDestinations(cloud.destinations).map((item) => <Fragment key={item.targetId}>
       <DestinationCard destination={item} busy={busy}
         onToggle={() => { void cloud.setEnabled(item.targetId, !item.enabled); }} onRemove={() => { void cloud.remove(item.targetId); }}

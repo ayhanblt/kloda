@@ -36,6 +36,10 @@ export function DesktopShell({ location, blocked, onNavigate, children }: {
           </button>)}
         </section>)}
       </nav>
+      <div className="desktop-sidebar-status">
+        <span className="desktop-status-pill">{t('receiver.navigation')}</span>
+        <p>{t('ui.localComputer')}</p>
+      </div>
     </aside>}
     <div className="desktop-main">
       <header className="desktop-toolbar">

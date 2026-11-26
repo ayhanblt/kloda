@@ -37,7 +37,7 @@ function lockColors(mode) {
   const t = tokens(mode);
   return { lockCard: t.tile, lockText: t['tile-foreground'], lockMuted: mix(t['tile-foreground'], t.tile, 0.72),
     lockTrack: mix(t['tile-foreground'], t.tile, 0.22), lockAccent: t['brand-base'], brand: t['brand-base'], tile: t.tile,
-    tileRing: t['tile-ring'], buttonBrand: mode === 'light' ? t['brand-text'] : t['brand-base'], onBrand: t['on-brand'] };
+    tileRing: t['tile-ring'], buttonBrand: t['brand-base'], onBrand: t['on-brand'] };
 }
 function theme() {
   const light = lockColors('light'), dark = lockColors('dark');

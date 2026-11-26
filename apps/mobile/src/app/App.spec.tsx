@@ -6,7 +6,12 @@ import { App } from './App';
 import { loadWebDavSettings, testAndSaveWebDavSettings } from '../shared/api/webdav-settings';
 import { i18n } from '../shared/i18n';
 import { webDavFailure } from '../shared/api/webdav-diagnostics';
+import { loadIntroSeen, saveIntroSeen } from '../shared/model/intro-storage';
 
+jest.mock('../shared/model/intro-storage', () => ({
+  loadIntroSeen: jest.fn().mockResolvedValue(true),
+  saveIntroSeen: jest.fn().mockResolvedValue(undefined),
+}));
 jest.mock('../shared/api/webdav-settings', () => ({
   loadWebDavSettings: jest.fn().mockResolvedValue(null),
   testAndSaveWebDavSettings: jest.fn().mockImplementation(async (value: { endpoint: string; targetPath: string; username: string }) => ({ config: { endpoint: value.endpoint, targetPath: value.targetPath, username: value.username }, testedAt: '2026-10-28T00:00:00.000Z' })),
@@ -297,6 +302,22 @@ describe('App', () => {
     expect(surface.queryByRole('button', { name: i18n.t('ui.providers.amazon-s3') })).toBeNull();
     expect(surface.queryByRole('button', { name: i18n.t('ui.providers.s3-compatible') })).toBeNull();
     await surface.unmount();
+  });
+
+  it('shows IntroPage on first launch, persists acknowledgement on start, and skips it on subsequent launches', async () => {
+    jest.mocked(loadIntroSeen).mockResolvedValueOnce(false);
+    const first = await render(<App />);
+    await waitFor(() => expect(first.getByRole('header', { name: i18n.t('ui.setup.introTitle') })).toBeTruthy());
+    await fireEvent.press(first.getByRole('button', { name: i18n.t('ui.setup.introStart') }));
+    expect(saveIntroSeen).toHaveBeenCalledTimes(1);
+    expect(first.getByText(i18n.t('ui.setup.start'))).toBeTruthy();
+    await first.unmount();
+
+    jest.mocked(loadIntroSeen).mockResolvedValueOnce(true);
+    const second = await render(<App />);
+    await waitFor(() => expect(second.getByText(i18n.t('ui.setup.start'))).toBeTruthy());
+    expect(second.queryByRole('header', { name: i18n.t('ui.setup.introTitle') })).toBeNull();
+    await second.unmount();
   });
 
 });

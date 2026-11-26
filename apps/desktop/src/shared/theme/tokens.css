@@ -7,28 +7,28 @@
 :root {
   color-scheme: light;
   /* Neutrals (Phase 1) */
-  --bg: #F7F8F9;
+  --bg: #F7F5F2;
   --surface-1: #FFFFFF;
-  --surface-2: #F0F2F4;
-  --border-subtle: #E2E5E9;
-  --border-strong: #CDD2D8;
-  --text-primary: #121417;
-  --text-secondary: #545B63;
-  --text-tertiary: #62686F;
-  --action: #121417;
+  --surface-2: #EFEBE6;
+  --border-subtle: #E5DFD8;
+  --border-strong: #CFC7BE;
+  --text-primary: #1A1612;
+  --text-secondary: #5C544C;
+  --text-tertiary: #6B635A;
+  --action: #1A1612;
   --on-action: #FFFFFF;
   /* Accents */
-  --brand-base: #1F9C8C;
-  --brand-text: #0F7266;
+  --brand-base: #9A6640;
+  --brand-text: #7E5230;
   --on-brand: #FFFFFF;
   --attention-base: #B7791F;
   --attention-text: #8F5E0F;
   --danger-base: #D2453A;
   --danger-text: #B8372D;
   /* Logo tile keeps its dark identity in both themes. */
-  --tile: #1B1C1E;
-  --tile-ring: #ECEEF0;
-  --tile-foreground: #ECEEF0;
+  --tile: #1C1A18;
+  --tile-ring: #F1ECE6;
+  --tile-foreground: #F1ECE6;
   --shadow-color: rgba(16, 20, 24, 0.08);
   --highlight-color: rgba(255, 255, 255, 0);
   --button-highlight: rgba(255, 255, 255, 0.18);
@@ -46,29 +46,31 @@
 
 :root.dark {
   color-scheme: dark;
-  --bg: #111213;
-  --surface-1: #191A1C;
-  --surface-2: #222326;
-  --border-subtle: #2C2D30;
-  --border-strong: #3B3D41;
-  --text-primary: #ECEEF0;
-  --text-secondary: #A6A8AC;
-  --text-tertiary: #888A8E;
-  --action: #ECEEF0;
-  --on-action: #111213;
-  --brand-base: #3DBFAE;
+  --bg: #121110;
+  --surface-1: #1B1A18;
+  --surface-2: #252321;
+  --border-subtle: #2E2B28;
+  --border-strong: #3E3A36;
+  --text-primary: #F2EDE7;
+  --text-secondary: #ADA59C;
+  --text-tertiary: #8E867D;
+  --action: #F2EDE7;
+  --on-action: #121110;
+  --brand-base: #E8C3A1;
   --brand-text: var(--brand-base);
-  --on-brand: #06231F;
+  --on-brand: #2A1A0E;
   --attention-base: #E0A93B;
   --attention-text: var(--attention-base);
   --danger-base: #F06A5F;
   --danger-text: var(--danger-base);
-  --tile: #222326;
+  --tile: #252321;
+  --tile-ring: #F1ECE6;
+  --tile-foreground: #F1ECE6;
   --shadow-color: rgba(0, 0, 0, 0.35);
   --highlight-color: rgba(255, 255, 255, 0.05);
-  --illus-body: #222326;
-  --illus-screen: #2E3034;
-  --illus-line: #55585E;
+  --illus-body: #252321;
+  --illus-screen: #302D2A;
+  --illus-line: #5A554F;
   --illus-photo-1: #8A6E52;
   --illus-photo-2: #4F6676;
   --illus-photo-3: #56694F;
@@ -87,7 +89,7 @@
   --brand-halo-1: color-mix(in srgb, var(--brand-base) 24%, transparent);
   --brand-halo-2: color-mix(in srgb, var(--brand-base) 10%, transparent);
   --focus-ring: color-mix(in srgb, var(--brand-base) 60%, transparent);
-  --button-brand: var(--brand-text);
+  --button-brand: var(--brand-base);
   --button-brand-bottom: color-mix(in srgb, var(--button-brand) 94%, var(--text-primary));
   --button-on-brand: var(--on-brand);
   --shadow-sheet: 0 8px 24px var(--shadow-color);
@@ -98,4 +100,4 @@
 :root.light { --focus-ring: var(--brand-base); }
 :root { --overlay: rgba(0, 0, 0, .6); }
 
-:root { --qr-ink: #121417; --qr-paper: #FFFFFF; }
+:root { --qr-ink: #1A1612; --qr-paper: #FFFFFF; }

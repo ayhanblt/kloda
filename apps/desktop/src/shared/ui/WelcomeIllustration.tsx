@@ -5,10 +5,10 @@ export function WelcomeIllustration({ className }: { className?: string }) {
       {/* orbit rings */}
       <circle cx="180" cy="150" r="128" stroke="var(--illus-line)" strokeWidth="1.5" strokeDasharray="2 10" />
       <circle cx="180" cy="150" r="96" stroke="var(--illus-line)" strokeWidth="1" />
-      <circle cx="180" cy="150" r="70" fill="var(--brand-base)" opacity="0.15" />
+      <circle cx="180" cy="150" r="70" fill="var(--brand-base)" opacity="0.15" className="welcome-halo" />
 
       {/* data path */}
-      <path d="M78 170 C 120 100, 240 100, 282 170" stroke="var(--brand-base)" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M78 170 C 120 100, 240 100, 282 170" stroke="var(--brand-base)" strokeWidth="2.5" strokeLinecap="round" className="welcome-dash" />
 
       {/* phone */}
       <g >
@@ -41,16 +41,16 @@ export function WelcomeIllustration({ className }: { className?: string }) {
       </g>
 
       {/* floating tiles */}
-      <g >
+      <g className="welcome-float">
         <rect x="128" y="36" width="34" height="34" rx="8" fill="var(--illus-body)" stroke="var(--illus-line)" strokeWidth="1.5" />
         <circle cx="138" cy="47" r="4" fill="var(--illus-photo-2)" />
         <path d="M132 64 L142 54 L150 61 L156 56 L160 64 Z" fill="var(--brand-base)" opacity="0.8" />
       </g>
-      <g >
+      <g className="welcome-float-slow">
         <rect x="214" y="30" width="28" height="28" rx="7" fill="var(--illus-body)" stroke="var(--illus-line)" strokeWidth="1.5" />
         <path d="M221 44 l5 5 l9 -10" stroke="var(--brand-base)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
       </g>
-      <g >
+      <g className="welcome-float">
         <rect x="160" y="236" width="40" height="22" rx="11" fill="var(--illus-body)" stroke="var(--illus-line)" strokeWidth="1.5" />
         <circle cx="172" cy="247" r="3.5" fill="var(--brand-base)" />
         <rect x="179" y="245" width="14" height="4" rx="2" fill="var(--illus-line)" />

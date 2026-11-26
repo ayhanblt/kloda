@@ -47,7 +47,7 @@
   justify-content: center;
   gap: 8px;
   min-height: 44px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-strong);
   border-radius: 12px;
   background: var(--surface-2);
   padding: 10px 16px;
@@ -59,9 +59,9 @@
   transition: background-color 120ms ease, border-color 120ms ease;
 }
 .pairing-button:hover:not(:disabled) { border-color: var(--border-strong); background: var(--surface-2); }
-.pairing-button-primary { background: var(--button-brand); border-color: var(--button-brand); color: var(--surface-1); }
-.pairing-button-primary:hover:not(:disabled) { background: var(--button-brand-bottom); }
-.pairing-button-danger { color: var(--danger-text); background: var(--bg); }
+.pairing-button-primary { background: var(--button-brand); border-color: var(--button-brand); color: var(--on-brand); }
+.pairing-button-primary:hover:not(:disabled) { filter: brightness(1.04); }
+.pairing-button-danger { color: var(--danger-text); background: var(--surface-2); border-color: transparent; }
 .pairing-button:disabled { cursor: not-allowed; opacity: .45; }
 .pairing-button:focus-visible, .desktop-navigation button:focus-visible {
   outline: 3px solid var(--focus-ring);

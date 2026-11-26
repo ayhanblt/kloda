@@ -52,6 +52,7 @@ internal object AndroidBackupNotifications {
       val open = context.packageManager.getLaunchIntentForPackage(context.packageName) ?: return
       val builder = if (Build.VERSION.SDK_INT >= 26) Notification.Builder(context, CHANNEL) else Notification.Builder(context)
       manager.notify(id, builder.setSmallIcon(android.R.drawable.stat_sys_upload)
+        .setColor(0xFF9A6640.toInt())
         .setContentTitle(context.getString(R.string.kloda_backup_title)).setContentText(context.getString(message))
         .setOnlyAlertOnce(true).setOngoing(ongoing).setContentIntent(PendingIntent.getActivity(context, 0, open,
           PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)).build())

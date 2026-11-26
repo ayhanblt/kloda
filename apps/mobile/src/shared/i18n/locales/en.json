@@ -397,6 +397,9 @@
       ]
     },
     "setup": {
+      "introTitle": "Your memories, only in your hands.",
+      "introBody": "Privately back up your photos to your own computer, NAS or the cloud you choose. No middleman account.",
+      "introStart": "Get started",
       "m1Title": "Your photos, on your computer.",
       "m1Body": "Kloda backs up your files and photos to your own computer or the storage you choose. No central account required.",
       "m1Points": [
@@ -407,7 +410,14 @@
       "start": "Start setup"
     },
     "sources": {
-      "title": "What should be backed up?"
+      "title": "What should be backed up?",
+      "subtitle": "Photo library, albums, or file folders.",
+      "photos": "Photos",
+      "files": "Files",
+      "permissionTitle": "Photo access required",
+      "permissionBody": "Kloda does not read your photos until you allow it. Permission is requested via the system prompt.",
+      "privacyNote": "You stay in control of sources and destinations. Only selected folders and albums are backed up.",
+      "selectedCount": "{{count}} sources selected"
     },
     "schedule": {
       "weekdays": [
@@ -435,6 +445,7 @@
       "title": "Connections",
       "subtitle": "Where your backups go.",
       "add": "Add connection",
+      "addDestinationBody": "WebDAV, SMB, SFTP and more",
       "computers": "Computers",
       "protocols": "File protocols",
       "clouds": "Cloud services",
@@ -809,7 +820,35 @@
       "tr": "Türkçe",
       "en": "English",
       "de": "Deutsch"
-    }
+    },
+    "chipSetup": "Setup needed",
+    "setupWaitingPill": "Your photos are waiting for backup",
+    "setupList": "Setup",
+    "step1Done": "Sources selected",
+    "step1Todo": "Choose your photos",
+    "step1Sub": "Camera roll and albums",
+    "step2": "Pair computer",
+    "step2Sub": "Scan the QR code on your computer",
+    "step3": "Approve folder access",
+    "step3Sub": "On the computer, after pairing",
+    "otherTargets": "Other destinations",
+    "addOther": "Add NAS or cloud",
+    "addOtherSub": "WebDAV, SMB, SFTP and more",
+    "recommended": "Recommended",
+    "privacyTitle": "Your photos stay with you",
+    "privacyBody": "They go straight to your own devices; no Kloda server in between.",
+    "lockLine": "No account needed. Your photos stay on your own devices.",
+    "ctaSourcesSub": "Camera roll and albums",
+    "ctaPairSub": "About a minute with QR",
+    "rules": "Backup rules",
+    "edit": "Edit",
+    "seeAll": "See all",
+    "protoPc": "Local network",
+    "protoNas": "WebDAV",
+    "protoCloud": "Cloud",
+    "heroNoPermTitle": "Photo access needed",
+    "heroNoPermBody": "Kloda needs gallery permission to back up.",
+    "heroAllow": "Allow access"
   },
   "recovery": {
     "title": "Your recovery code",

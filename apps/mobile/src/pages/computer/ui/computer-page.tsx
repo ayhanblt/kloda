@@ -1,10 +1,11 @@
 import { usePcDestination } from '../../../features/backup-setup/model/use-pc-destination';
-import { ArrowLeft, FolderSync, Monitor, ScanQrCode } from 'lucide-react-native';
+import { FolderSync, Monitor, ScanQrCode } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppState, BackHandler, Platform, ScrollView, View } from 'react-native';
 import { Text } from '../../../shared/ui/text';
 import { NativeSafeArea } from '../../../shared/ui/native-safe-area';
+import { BackLink, IconTile, RichCard } from '../../../shared/ui/rich';
 import { PairingButton } from '../../../features/pairing/ui/pairing-button';
 import { pairing, pairingErrorCode, type PairingErrorCode, type PairingStatus } from '../../../shared/api/pairing';
 import { useThemeColors } from '../../../shared/theme/theme-provider';
@@ -54,13 +55,15 @@ export function ComputerPage({ onBack, onPair, onActivity, onAdvanced, embedded 
   const destination = usePcDestination(paired ? status.recordId : undefined);
   return (
     <Surface className="flex-1 bg-background">
-      <ScrollView contentContainerClassName="gap-4 px-4 pt-5 pb-8">
-        <PairingButton label={t('onboarding.back')} variant="secondary" icon={<ArrowLeft color={colors['text-primary']} size={20} />} onPress={onBack} />
+      <ScrollView contentContainerClassName={`gap-4 px-4 pt-3 ${embedded ? 'pb-28' : 'pb-8'}`}>
+        <BackLink label={t('onboarding.back')} onPress={onBack} />
         {!embedded && <Text className="shrink text-lg font-inter-semibold text-primary-text">{t('pairing.brand')}</Text>}
         <Text accessibilityRole="header" className="text-[28px] font-inter-semibold leading-9 text-primary-text">{t('computer.title')}</Text>
         <Text className="font-sans text-sm leading-5 text-secondary-text">{t('computer.description')}</Text>
-        <View className="gap-3 rounded-2xl border border-border-subtle bg-surface-1 p-5">
-          <Monitor color={colors['text-primary']} size={28} />
+        <RichCard className="gap-3 p-5">
+          <IconTile tone={paired ? 'brand' : 'neutral'}>
+            <Monitor color={paired ? colors['brand-text'] : colors['text-primary']} size={22} />
+          </IconTile>
           <Text accessibilityRole="header" className="text-lg font-inter-semibold text-primary-text">{t(paired ? 'computer.paired' : 'computer.pairTitle')}</Text>
           <Text className="font-sans text-sm leading-5 text-secondary-text">{t('computer.pairDescription')}</Text>
           {paired && <>
@@ -75,20 +78,20 @@ export function ComputerPage({ onBack, onPair, onActivity, onAdvanced, embedded 
           {status?.repairRequired && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-danger-text">{t('pairing.repairDescription')}</Text>}
           {status?.peerFingerprint && <Text selectable className="font-sans text-xs leading-5 text-secondary-text">{t('transfer.peer', { fingerprint: status.peerFingerprint })}</Text>}
           {error && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-danger-text">{t(`pairing.errors.${error}`)}</Text>}
-          <PairingButton label={t(paired ? 'computer.managePairing' : 'pairing.open')} disabled={!active}
-            icon={<ScanQrCode color={colors['surface-1']} size={20} />} onPress={onPair} />
+          <PairingButton variant="primary" label={t(paired ? 'computer.managePairing' : 'pairing.open')} disabled={!active}
+            icon={<ScanQrCode size={20} />} onPress={onPair} />
           <PairingButton label={t('pairing.refresh')} variant="secondary" disabled={!active} onPress={() => refresh.current()} />
-        </View>
-        <View className="gap-3 rounded-2xl border border-border-subtle bg-surface-1 p-5">
+        </RichCard>
+        <RichCard className="gap-3 p-5">
           <Text accessibilityRole="header" className="text-lg font-inter-semibold text-primary-text">{t('computer.grantTitle')}</Text>
           <Text className="font-sans text-sm leading-5 text-secondary-text">{t('computer.grantDescription')}</Text>
           <Text className="font-sans text-sm leading-5 text-secondary-text">{t('pairing.noFileGrant')}</Text>
-        </View>
-        <View className="gap-3 rounded-2xl border border-border-subtle bg-surface-1 p-5">
+        </RichCard>
+        <RichCard className="gap-3 p-5">
           <Text accessibilityRole="header" className="text-lg font-inter-semibold text-primary-text">{t('computer.transferTitle')}</Text>
           <Text className="font-sans text-sm leading-5 text-secondary-text">{t('computer.availability')}</Text>
           <PairingButton label={t('transfer.title')} variant="secondary" icon={<FolderSync color={colors['text-primary']} size={20} />} onPress={onActivity} />
-        </View>
+        </RichCard>
         <Text className="font-sans text-sm leading-5 text-secondary-text">{t(Platform.OS === 'android' ? 'computer.androidBackground' : Platform.OS === 'ios' ? 'computer.iosBackground' : 'computer.foregroundOnly')}</Text>
         <PairingButton label={t('computer.advanced')} variant="secondary" onPress={onAdvanced} />
       </ScrollView>

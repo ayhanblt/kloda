@@ -397,6 +397,9 @@
       ]
     },
     "setup": {
+      "introTitle": "Anıların, yalnızca senin elinde.",
+      "introBody": "Fotoğraflarını kendi bilgisayarına, NAS’ına ya da seçtiğin buluta özel olarak yedekle. Aracı hesap yok.",
+      "introStart": "Başla",
       "m1Title": "Fotoğrafların, senin bilgisayarında.",
       "m1Body": "Kloda dosya ve fotoğraflarını kendi bilgisayarına ya da seçtiğin depolamaya yedekler. Merkezi hesap gerekmez.",
       "m1Points": [
@@ -407,7 +410,14 @@
       "start": "Kuruluma başla"
     },
     "sources": {
-      "title": "Ne yedeklensin?"
+      "title": "Ne yedeklensin?",
+      "subtitle": "Fotoğraf kitaplığı, albümler veya dosya klasörleri.",
+      "photos": "Fotoğraflar",
+      "files": "Dosyalar",
+      "permissionTitle": "Fotoğraf izni gerekiyor",
+      "permissionBody": "Kloda, sen izin verene kadar fotoğraflarını okumaz. İzin sistem penceresiyle istenir.",
+      "privacyNote": "Kaynak ve hedef kontrolü sende. Yalnız seçtiğin klasör ve albümler yedeklenir.",
+      "selectedCount": "{{count}} kaynak seçildi"
     },
     "schedule": {
       "weekdays": [
@@ -435,6 +445,7 @@
       "title": "Bağlantılar",
       "subtitle": "Yedeklerin gideceği yerler.",
       "add": "Bağlantı ekle",
+      "addDestinationBody": "WebDAV, SMB, SFTP ve daha fazlası",
       "computers": "Bilgisayarlar",
       "protocols": "Dosya protokolleri",
       "clouds": "Bulut hizmetleri",
@@ -809,7 +820,35 @@
       "tr": "Türkçe",
       "en": "English",
       "de": "Deutsch"
-    }
+    },
+    "chipSetup": "Kurulum bekliyor",
+    "setupWaitingPill": "Fotoğrafların yedeklenmeyi bekliyor",
+    "setupList": "Kurulum",
+    "step1Done": "Fotoğraflar seçildi",
+    "step1Todo": "Fotoğraflarını seç",
+    "step1Sub": "Kamera rulosu ve albümler",
+    "step2": "Bilgisayarı eşleştir",
+    "step2Sub": "Bilgisayardaki QR kodu tara",
+    "step3": "Klasör iznini onayla",
+    "step3Sub": "Eşleşmeden sonra bilgisayarda",
+    "otherTargets": "Diğer hedefler",
+    "addOther": "NAS veya bulut ekle",
+    "addOtherSub": "WebDAV, SMB, SFTP ve daha fazlası",
+    "recommended": "Önerilen",
+    "privacyTitle": "Fotoğrafların sende kalır",
+    "privacyBody": "Doğrudan kendi cihazlarına gider; arada Kloda sunucusu yok.",
+    "lockLine": "Hesap gerekmez. Fotoğrafların kendi cihazlarında kalır.",
+    "ctaSourcesSub": "Kamera rulosu ve albümler",
+    "ctaPairSub": "QR ile 1 dakikada",
+    "rules": "Yedekleme kuralları",
+    "edit": "Düzenle",
+    "seeAll": "Tümünü gör",
+    "protoPc": "Yerel ağ",
+    "protoNas": "WebDAV",
+    "protoCloud": "Bulut",
+    "heroNoPermTitle": "Fotoğraflarına erişim gerekli",
+    "heroNoPermBody": "Kloda yedeklemek için galeri iznine ihtiyaç duyar.",
+    "heroAllow": "İzin ver"
   },
   "recovery": {
     "title": "Kurtarma kodun",

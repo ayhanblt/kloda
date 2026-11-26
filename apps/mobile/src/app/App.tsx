@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { BackHandler } from 'react-native';
+import { BackHandler, View } from 'react-native';
 import type { DestinationProviderId } from '@kloda/sync-core';
 import { providerLabel, type CloudProvider } from '../shared/api/cloud-destinations';
 import '../shared/i18n';
 import type { MobilePage } from '../shared/model/mobile-navigation';
+import { loadIntroSeen, saveIntroSeen } from '../shared/model/intro-storage';
 import { useBackupSetup } from '../features/backup-setup/model/use-backup-setup';
 import { MobileShell } from '../widgets/mobile-shell/ui';
+import { IntroPage } from '../pages/intro/ui/intro-page';
 import { WelcomePage } from '../pages/welcome/ui/welcome-page';
 import { PhotosPage } from '../pages/photos/ui/photos-page';
 import { HomePage } from '../pages/home/ui/home-page';
@@ -25,18 +27,31 @@ import { ComputerPage } from '../pages/computer/ui/computer-page';
 import { PairingPage } from '../pages/pairing/ui/pairing-page';
 import { ActivityPage } from '../pages/activity/ui/activity-page';
 
-export function App() {
+export function App({ initialIntroSeen }: { initialIntroSeen?: boolean } = {}) {
   const model = useBackupSetup();
-  const [page, setPage] = useState<MobilePage>('welcome');
+  const [introReady, setIntroReady] = useState(initialIntroSeen !== undefined);
+  const [page, setPage] = useState<MobilePage>(initialIntroSeen === false ? 'intro' : 'welcome');
   const [provider, setProvider] = useState<DestinationProviderId>('webdav');
   const [backupTarget, setBackupTarget] = useState<{ id: string; provider: CloudProvider } | undefined>();
   const navigate = (next: MobilePage) => { if (page === 'storage') model.leaveStorage(); setBackupTarget(undefined); setPage(next); };
   const openBackups = (id: string, target: CloudProvider) => { navigate('backups'); setBackupTarget({ id, provider: target }); };
   useEffect(() => {
-    if (page === 'pairing' || page === 'welcome' || page === 'home' || page === 'photos') return;
+    if (initialIntroSeen !== undefined) return;
+    let active = true;
+    void loadIntroSeen().then((seen) => {
+      if (!active) return;
+      if (!seen) setPage('intro');
+      setIntroReady(true);
+    });
+    return () => { active = false; };
+  }, [initialIntroSeen]);
+  useEffect(() => {
+    if (page === 'intro' || page === 'pairing' || page === 'welcome' || page === 'home' || page === 'photos') return;
     const listener = BackHandler.addEventListener('hardwareBackPress', () => { navigate('home'); return true; });
     return () => listener.remove();
   }, [page]);
+  if (!introReady) return <View className="flex-1 bg-background" />;
+  if (page === 'intro') return <IntroPage onStart={() => { void saveIntroSeen(); setPage('welcome'); }} />;
   if (page === 'welcome') return <WelcomePage onStart={() => navigate('sources')} onSkip={() => navigate('home')} />;
   // Pairing owns its protected foreground/camera/pending back actions; no global tab can bypass them.
   if (page === 'pairing') return <PairingPage onBack={() => navigate('computer')} onContinue={() => navigate('activity')} />;

@@ -69,6 +69,8 @@ if (process.platform === 'darwin') {
 
   const resources = join(app, 'Contents/Resources');
   rmSync(join(resources, 'default_app.asar'), { force: true });
+  rmSync(join(resources, 'electron.icns'), { force: true });
+  cpSync(join(desktop, 'build/icon.icns'), join(resources, 'Kloda.icns'));
   stageAppDirectory(join(resources, 'app'), resources);
 
   function setPlistString(plistPath, key, value) {
@@ -110,6 +112,7 @@ if (process.platform === 'darwin') {
   for (const [key, value] of [
     ['CFBundleIdentifier', 'com.kloda.desktop'],
     ['CFBundleExecutable', 'Kloda'],
+    ['CFBundleIconFile', 'Kloda.icns'],
     ['CFBundleName', 'Kloda'],
     ['CFBundleDisplayName', 'Kloda: Secure Photos & Sync'],
     ['CFBundleShortVersionString', '1.0.0'],

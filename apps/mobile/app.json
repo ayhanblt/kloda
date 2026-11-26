@@ -3,6 +3,7 @@
     "name": "Kloda: Secure Photos & Sync",
     "slug": "kloda",
     "version": "1.0.0",
+    "icon": "./assets/icon.png",
     "orientation": "default",
     "userInterfaceStyle": "automatic",
     "plugins": [
@@ -42,6 +43,11 @@
     },
     "android": {
       "package": "com.kloda.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "monochromeImage": "./assets/adaptive-icon-monochrome.png",
+        "backgroundColor": "#1C1A18"
+      },
       "permissions": [
         "READ_MEDIA_IMAGES",
         "READ_MEDIA_VIDEO",

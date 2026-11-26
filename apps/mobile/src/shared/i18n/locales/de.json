@@ -397,6 +397,9 @@
       ]
     },
     "setup": {
+      "introTitle": "Deine Erinnerungen, nur in deiner Hand.",
+      "introBody": "Sichere deine Fotos privat auf deinem eigenen Computer, NAS oder in der Cloud deiner Wahl. Kein Zwischenkonto.",
+      "introStart": "Los geht’s",
       "m1Title": "Deine Fotos, auf deinem Computer.",
       "m1Body": "Kloda sichert Dateien und Fotos auf deinem eigenen Computer oder dem Speicher deiner Wahl. Kein zentrales Konto nötig.",
       "m1Points": [
@@ -407,7 +410,14 @@
       "start": "Einrichtung starten"
     },
     "sources": {
-      "title": "Was soll gesichert werden?"
+      "title": "Was soll gesichert werden?",
+      "subtitle": "Fotomediathek, Alben oder Dateiordner.",
+      "photos": "Fotos",
+      "files": "Dateien",
+      "permissionTitle": "Fotozugriff erforderlich",
+      "permissionBody": "Kloda liest deine Fotos erst, wenn du zustimmst. Die Freigabe erfolgt über den Systemdialog.",
+      "privacyNote": "Du behältst die Kontrolle über Quellen und Ziele. Nur ausgewählte Ordner und Alben werden gesichert.",
+      "selectedCount": "{{count}} Quellen ausgewählt"
     },
     "schedule": {
       "weekdays": [
@@ -435,6 +445,7 @@
       "title": "Verbindungen",
       "subtitle": "Wohin deine Sicherungen gehen.",
       "add": "Verbindung hinzufügen",
+      "addDestinationBody": "WebDAV, SMB, SFTP und mehr",
       "computers": "Computer",
       "protocols": "Dateiprotokolle",
       "clouds": "Cloud-Dienste",
@@ -809,7 +820,35 @@
       "tr": "Türkçe",
       "en": "English",
       "de": "Deutsch"
-    }
+    },
+    "chipSetup": "Einrichtung nötig",
+    "setupWaitingPill": "Deine Fotos warten auf die Sicherung",
+    "setupList": "Einrichtung",
+    "step1Done": "Quellen ausgewählt",
+    "step1Todo": "Fotos auswählen",
+    "step1Sub": "Aufnahmen und Alben",
+    "step2": "Computer koppeln",
+    "step2Sub": "QR-Code am Computer scannen",
+    "step3": "Ordnerzugriff bestätigen",
+    "step3Sub": "Nach dem Koppeln am Computer",
+    "otherTargets": "Weitere Ziele",
+    "addOther": "NAS oder Cloud hinzufügen",
+    "addOtherSub": "WebDAV, SMB, SFTP und mehr",
+    "recommended": "Empfohlen",
+    "privacyTitle": "Deine Fotos bleiben bei dir",
+    "privacyBody": "Sie gehen direkt auf deine eigenen Geräte; kein Kloda-Server dazwischen.",
+    "lockLine": "Kein Konto nötig. Deine Fotos bleiben auf deinen Geräten.",
+    "ctaSourcesSub": "Aufnahmen und Alben",
+    "ctaPairSub": "Etwa eine Minute per QR",
+    "rules": "Sicherungsregeln",
+    "edit": "Bearbeiten",
+    "seeAll": "Alle anzeigen",
+    "protoPc": "Lokales Netz",
+    "protoNas": "WebDAV",
+    "protoCloud": "Cloud",
+    "heroNoPermTitle": "Fotozugriff nötig",
+    "heroNoPermBody": "Kloda braucht die Galerie-Berechtigung für die Sicherung.",
+    "heroAllow": "Zugriff erlauben"
   },
   "recovery": {
     "title": "Dein Wiederherstellungscode",

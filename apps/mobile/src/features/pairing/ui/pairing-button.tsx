@@ -8,15 +8,29 @@ interface Props {
   onPress: () => void;
   disabled?: boolean;
   variant?: 'primary' | 'secondary' | 'tertiary' | 'destructive';
+  size?: 'default' | 'lg' | 'sm';
+  pill?: boolean;
   icon?: ReactNode;
 }
 
-export function PairingButton({ label, onPress, disabled, variant, icon }: Props) {
+export function PairingButton({ label, onPress, disabled, variant, size = 'default', pill = false, icon }: Props) {
   const c = useThemeColors();
   const appearance = variant ?? 'secondary';
   const primary = appearance === 'primary';
   const foreground = primary ? c['on-brand'] : appearance === 'destructive' ? c['danger-text'] : appearance === 'tertiary' ? c['brand-text'] : c['text-primary'];
-  const styles = { primary: 'border border-button-brand bg-button-brand', secondary: 'border border-border-strong bg-surface-2', tertiary: 'bg-transparent', destructive: 'bg-surface-2' };
+  const styles = {
+    primary: 'border border-button-brand bg-button-brand',
+    secondary: 'border border-border-strong bg-surface-2',
+    tertiary: 'bg-transparent',
+    destructive: 'bg-surface-2',
+  };
+  const sizes = {
+    default: 'min-h-[48px] px-5 py-3',
+    lg: 'min-h-[52px] px-6 py-3.5',
+    sm: 'min-h-[38px] px-3.5 py-2',
+  };
+  const radius = pill ? 'rounded-full' : size === 'lg' ? 'rounded-[14px]' : size === 'sm' ? 'rounded-[10px]' : 'rounded-[12px]';
+  const textSize = size === 'lg' ? 'text-base' : 'text-sm';
   return (
     <Pressable
       accessibilityRole="button"
@@ -24,10 +38,10 @@ export function PairingButton({ label, onPress, disabled, variant, icon }: Props
       accessibilityState={{ disabled: !!disabled }}
       disabled={disabled}
       onPress={onPress}
-      className={`min-h-[48px] min-w-0 shrink flex-row items-center justify-center gap-2 rounded-xl px-4 py-3 active:opacity-70 ${styles[appearance]} ${disabled ? 'opacity-50' : ''}`}
+      className={`min-w-0 shrink flex-row items-center justify-center gap-2 active:opacity-80 ${sizes[size]} ${radius} ${styles[appearance]} ${disabled ? 'opacity-50' : ''}`}
     >
       {isValidElement<{ color?: string }>(icon) ? cloneElement(icon, { color: foreground }) : icon}
-      <Text className={`min-w-0 shrink text-center text-sm font-inter-semibold ${primary ? 'text-on-brand' : appearance === 'destructive' ? 'text-danger-text' : appearance === 'tertiary' ? 'text-brand-text' : 'text-primary-text'}`}>{label}</Text>
+      <Text className={`min-w-0 shrink text-center ${textSize} font-inter-semibold ${primary ? 'text-on-brand' : appearance === 'destructive' ? 'text-danger-text' : appearance === 'tertiary' ? 'text-brand-text' : 'text-primary-text'}`}>{label}</Text>
     </Pressable>
   );
 }

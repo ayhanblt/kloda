@@ -1,4 +1,4 @@
-import { ArrowLeft, Info, ScanQrCode, ShieldCheck } from 'lucide-react-native';
+import { Info, ScanQrCode, ShieldCheck } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, BackHandler, ScrollView, View } from 'react-native';
@@ -11,6 +11,7 @@ import { PairingButton } from '../../../features/pairing/ui/pairing-button';
 import { PairingModal } from '../../../features/pairing/ui/pairing-modal';
 import { PairingQuickPanel } from '../../../features/pairing/ui/pairing-quick-panel';
 import { QrScanner } from '../../../features/pairing/ui/qr-scanner';
+import { BackLink, RichCard } from '../../../shared/ui/rich';
 import { useThemeColors } from '../../../shared/theme/theme-provider';
 
 export function PairingPage({ onBack, onContinue }: { onBack: () => void; onContinue?: () => void }) {
@@ -67,8 +68,8 @@ export function PairingPage({ onBack, onContinue }: { onBack: () => void; onCont
   return (
     <NativeSafeArea className="flex-1 bg-background">
       <View className="flex-1" importantForAccessibility={protectedDecision || help ? 'no-hide-descendants' : 'auto'}>
-        <View className="flex-row items-center gap-4 border-b border-border-subtle px-4 py-4">
-          <PairingButton label={t('pairing.back')} variant="secondary" disabled={protectedDecision || cameraVisible || help} icon={<ArrowLeft color={colors['text-primary']} size={20} />} onPress={onBack} />
+        <View className="flex-row items-center justify-between gap-4 border-b border-border-subtle px-4 py-2">
+          <BackLink label={t('pairing.back')} disabled={protectedDecision || cameraVisible || help} onPress={onBack} />
           <Text className="shrink text-sm font-inter-semibold text-primary-text">{t('pairing.brand')}</Text>
         </View>
         <ScrollView contentContainerClassName="gap-6 px-4 pt-5 pb-8">
@@ -77,7 +78,7 @@ export function PairingPage({ onBack, onContinue }: { onBack: () => void; onCont
           {cameraVisible ? (
             <QrScanner foreground={foreground} onScan={(qr) => { void scan(qr); }} onStop={stop} />
           ) : (
-            <View className="gap-4 rounded-2xl border border-border-subtle bg-surface-1 p-5">
+            <RichCard className="gap-4 p-5">
               {status?.phase === 'complete' && <ShieldCheck color={colors['brand-base']} size={32} />}
               {!status && !error && <ActivityIndicator color={colors['text-primary']} accessibilityLabel={t('pairing.loading')} />}
               {status && <Text className="text-lg font-inter-semibold leading-6 text-primary-text">{t(`pairing.phases.${status.phase}.title`)}</Text>}
@@ -92,9 +93,9 @@ export function PairingPage({ onBack, onContinue }: { onBack: () => void; onCont
               {error && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-danger-text">{t(`pairing.errors.${error}`)}</Text>}
               {status?.unpairResult && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-secondary-text">{t(`pairing.unpair.${status.unpairResult.state}`)}</Text>}
               {status?.phase === 'complete' && status.recordId && <PairingButton label={t('pairing.unpair.button')} variant="destructive" disabled={protectedDecision || cameraVisible} onPress={confirmRemoval} />}
-              {canScan && <PairingButton variant="primary" label={t('pairing.startScan')} icon={<ScanQrCode color={colors['surface-1']} size={20} />} onPress={beginScan} />}
+              {canScan && <PairingButton variant="primary" label={t('pairing.startScan')} icon={<ScanQrCode size={20} />} onPress={beginScan} />}
               {!protectedDecision && <PairingButton label={t('pairing.refresh')} variant="secondary" onPress={() => { void refresh(); }} />}
-            </View>
+            </RichCard>
           )}
           <Text className="font-sans text-sm leading-5 text-secondary-text">{t('pairing.noFileGrant')}</Text>
           {onContinue && foreground && !protectedDecision && !cameraVisible && !error && !uncertain
