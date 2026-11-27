@@ -172,6 +172,8 @@ def main() -> None:
 
     tray_icon = render_tray_template(44)
     tray_icon.save(desktop_public / "tray-logo.png", format="PNG")
+    win_tray_icon = render_rounded_tile(72, tile_ratio=0.92, radius_ratio=0.225, shadow=False)
+    win_tray_icon.save(desktop_public / "tray-logo-win.png", format="PNG")
 
     print("BRAND_ICONS_GENERATED")
 

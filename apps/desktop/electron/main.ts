@@ -39,6 +39,7 @@ function createWindow(): BrowserWindow {
     height,
     minWidth: 420,
     minHeight: 600,
+    autoHideMenuBar: process.platform !== 'darwin',
     icon: fileURLToPath(new URL('../renderer/app-icon.png', import.meta.url)),
     show: shouldShow,
     webPreferences: {
@@ -48,6 +49,7 @@ function createWindow(): BrowserWindow {
       sandbox: true,
     },
   });
+  if (process.platform === 'win32') window.setMenuBarVisibility(false);
   if (shouldShow) window.maximize();
   bindPairingWindow(window);
   background.attach(window);
@@ -116,7 +118,7 @@ void app.whenReady().then(async () => {
   background = new DesktopBackground({
     window: () => mainWindow, showWindow, runtime, journal, autostart,
     receiverStatus, closeReceiver: closeNativePairing, stopSchedule: () => scheduler.cancel(),
-    iconPath: fileURLToPath(new URL('../renderer/tray-logo.png', import.meta.url)),
+    iconPath: fileURLToPath(new URL(process.platform === 'darwin' ? '../renderer/tray-logo.png' : '../renderer/tray-logo-win.png', import.meta.url)),
   });
   background.start();
   runtime.resumeRetries();
