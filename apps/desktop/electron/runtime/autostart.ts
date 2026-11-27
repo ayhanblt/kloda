@@ -20,6 +20,7 @@ export class DesktopAutostart {
   private readonly platform: NodeJS.Platform;
   private readonly executable: string;
   private readonly environment: NodeJS.ProcessEnv;
+  private readonly registrationId: string;
   private readonly file: string;
 
   constructor(private readonly options: AutostartOptions) {
@@ -30,6 +31,7 @@ export class DesktopAutostart {
     const directory = configured && isAbsolute(configured) ? configured : join(homedir(), '.config');
     const registrationId = options.registrationId ?? 'com.kloda.desktop';
     if (!/^com\.kloda\.desktop(?:\.dev)?$/u.test(registrationId)) throw new Error('Invalid autostart registration ID');
+    this.registrationId = registrationId;
     this.file = join(directory, 'autostart', `${registrationId}.autostart.desktop`);
   }
 
@@ -45,13 +47,23 @@ export class DesktopAutostart {
           ? { reason: 'os_blocked' } : {}) };
       }
       const expectedPath = this.normalizeWindowsPath(this.executable);
-      const itemMatch = settings.launchItems.some((item) => item.enabled
-        && this.normalizeWindowsPath(item.path) === expectedPath
-        && item.args.length === 1
-        && this.normalizeWindowsArg(item.args[0] ?? '') === backgroundLaunchArgument);
-      const enabled = settings.launchItems.length > 0
-        ? itemMatch
-        : Boolean(settings.openAtLogin && settings.executableWillLaunchAtLogin);
+      const itemMatch = settings.launchItems.some((item) => {
+        if (!item.enabled || this.normalizeWindowsPath(item.path) !== expectedPath) return false;
+        if (item.args.length === 1) {
+          return this.normalizeWindowsArg(item.args[0] ?? '') === backgroundLaunchArgument;
+        }
+        // On Windows, Electron populates `launchItems[].args` from Chromium's CommandLine::GetArgs(),
+        // which strips `--` switches like `--kloda-background`. `openAtLogin` still checks the exact
+        // `(path, args)` registry value, while `executableWillLaunchAtLogin` + `item.enabled` verify
+        // StartupApproved did not disable this registration.
+        return item.args.length === 0
+          && settings.openAtLogin
+          && settings.executableWillLaunchAtLogin === true
+          && (!item.name || item.name.toLowerCase() === this.registrationId.toLowerCase());
+      });
+      const enabled = settings.openAtLogin
+        && settings.executableWillLaunchAtLogin !== false
+        && (settings.launchItems.length > 0 ? itemMatch : settings.executableWillLaunchAtLogin === true);
       return { supported: true, enabled, ...(!enabled && settings.openAtLogin
         ? { reason: 'os_blocked' } : {}) };
     } catch {

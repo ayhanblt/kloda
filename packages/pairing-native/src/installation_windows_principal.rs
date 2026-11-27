@@ -37,6 +37,53 @@ pub(super) struct Principals {
     pub(super) user: Sid,
     pub(super) system: Sid,
     pub(super) administrators: Sid,
+    pub(super) machine_domain: Option<[u32; 3]>,
+}
+fn local_machine_domain() -> Option<[u32; 3]> {
+    use windows_sys::Win32::System::SystemInformation::{
+        ComputerNameNetBIOS, GetComputerNameExW,
+    };
+    let mut name = [0u16; 64];
+    let mut name_len = name.len() as u32;
+    if unsafe { GetComputerNameExW(ComputerNameNetBIOS, name.as_mut_ptr(), &mut name_len) } == 0
+        || name_len == 0
+    {
+        return None;
+    }
+    let mut sid = [0u32; SECURITY_MAX_SID_SIZE as usize / 4];
+    let mut sid_size = SECURITY_MAX_SID_SIZE;
+    let mut domain = [0u16; 64];
+    let mut domain_len = domain.len() as u32;
+    let mut sid_use = 0;
+    if unsafe {
+        LookupAccountNameW(
+            ptr::null(),
+            name.as_ptr(),
+            sid.as_mut_ptr().cast(),
+            &mut sid_size,
+            domain.as_mut_ptr(),
+            &mut domain_len,
+            &mut sid_use,
+        )
+    } == 0
+        || sid_use != SidTypeDomain
+    {
+        return None;
+    }
+    let pointer = sid.as_mut_ptr().cast::<c_void>();
+    if unsafe { IsValidSid(pointer) } == 0 {
+        return None;
+    }
+    let authority = unsafe { (*GetSidIdentifierAuthority(pointer)).Value };
+    let count = unsafe { *GetSidSubAuthorityCount(pointer) };
+    if authority != [0, 0, 0, 0, 0, 5] || count != 4 || unsafe { *GetSidSubAuthority(pointer, 0) } != 21 {
+        return None;
+    }
+    Some([
+        unsafe { *GetSidSubAuthority(pointer, 1) },
+        unsafe { *GetSidSubAuthority(pointer, 2) },
+        unsafe { *GetSidSubAuthority(pointer, 3) },
+    ])
 }
 static PRINCIPALS: LazyLock<Result<Principals>> = LazyLock::new(|| {
     let mut token = null_mut();
@@ -79,6 +126,7 @@ static PRINCIPALS: LazyLock<Result<Principals>> = LazyLock::new(|| {
         user: sid,
         system: Sid::well_known(WinLocalSystemSid)?,
         administrators: Sid::well_known(WinBuiltinAdministratorsSid)?,
+        machine_domain: local_machine_domain(),
     })
 });
 pub(super) fn principals() -> Result<&'static Principals> {

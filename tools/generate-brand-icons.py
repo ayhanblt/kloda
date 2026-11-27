@@ -69,6 +69,7 @@ def render_rounded_tile(
     tile_ratio: float = 1.0,
     radius_ratio: float = 0.225,
     shadow: bool = False,
+    symbol_ratio: float = 0.86,
 ) -> Image.Image:
     s = size * SS
     canvas = Image.new("RGBA", (s, s), (0, 0, 0, 0))
@@ -87,7 +88,7 @@ def render_rounded_tile(
     tile_layer = Image.new("RGBA", (s, s), (0, 0, 0, 0))
     td = ImageDraw.Draw(tile_layer)
     td.rounded_rectangle((offset, offset, offset + tile_size, offset + tile_size), radius=rx, fill=TILE)
-    draw_kloda_symbol(td, s / 2.0, s / 2.0, tile_size * 0.86, RING, DOT)
+    draw_kloda_symbol(td, s / 2.0, s / 2.0, tile_size * symbol_ratio, RING, DOT)
 
     canvas = Image.alpha_composite(canvas, tile_layer)
     return canvas.resize((size, size), Image.Resampling.LANCZOS)
@@ -162,7 +163,7 @@ def main() -> None:
     )
 
     # 4. Windows & Electron Runtime Icons
-    win_master = render_rounded_tile(512, tile_ratio=0.92, radius_ratio=0.225, shadow=False)
+    win_master = render_rounded_tile(512, tile_ratio=1.0, radius_ratio=0.225, shadow=False, symbol_ratio=1.0)
     win_master.save(
         desktop_build / "icon.ico",
         format="ICO",
@@ -172,7 +173,7 @@ def main() -> None:
 
     tray_icon = render_tray_template(44)
     tray_icon.save(desktop_public / "tray-logo.png", format="PNG")
-    win_tray_icon = render_rounded_tile(72, tile_ratio=0.92, radius_ratio=0.225, shadow=False)
+    win_tray_icon = render_rounded_tile(72, tile_ratio=1.0, radius_ratio=0.225, shadow=False, symbol_ratio=1.0)
     win_tray_icon.save(desktop_public / "tray-logo-win.png", format="PNG")
 
     print("BRAND_ICONS_GENERATED")

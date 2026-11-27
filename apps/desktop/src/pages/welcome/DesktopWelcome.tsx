@@ -50,7 +50,7 @@ export function DesktopWelcome({
   return (
     <main className="desktop-welcome">
       <section className="welcome-introduction">
-        <Brand large showDot={false} />
+        <Brand large />
         <h1 className="!mt-4 !text-[36px] !leading-tight">{t('ui.welcomeTitle')}</h1>
         <p>{t('ui.welcomeDescription')}</p>
         <WelcomeIllustration className="welcome-illustration" />

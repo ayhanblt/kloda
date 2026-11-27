@@ -17,6 +17,9 @@ use windows_sys::{
     },
 };
 
+// Windows 11 PCP KSP sets NCRYPT_TPM12_PROVIDER (0x0001_0000) alongside NCRYPT_PCP_SIGNATURE_KEY.
+const NCRYPT_TPM12_PROVIDER_FLAG: u32 = 0x0001_0000;
+
 // NCrypt handles are process-owned opaque integers, not COM/thread-affine pointers.
 // The key and its provider remain owned together; field order frees key first.
 // All post-publication key access is serialized; Arc drain precedes destruction.
@@ -92,7 +95,13 @@ pub(super) fn open(tag: &str, create: bool) -> Result<Identity> {
         }
         // Release any partial failed-open handle before requesting a new one.
         drop(key);
-        key = generate(&provider, &name)?;
+        let created = generate(&provider, &name)?;
+        // Reopen the persisted key so PCP KSP populates Length and confirms round-trip persistence.
+        drop(created);
+        key = Owned(0);
+        status(unsafe {
+            NCryptOpenKey(provider.0, &mut key.0, name.as_ptr(), 0, NCRYPT_SILENT_FLAG)
+        })?;
     } else {
         status(opened)?;
     }
@@ -156,16 +165,31 @@ fn generate(provider: &Owned, name: &[u16]) -> Result<Owned> {
 
 fn validate(key: &Owned) -> Result<()> {
     let mut algorithm = [0u8; 22];
-    get_exact(key, NCRYPT_ALGORITHM_PROPERTY, &mut algorithm)?;
-    let expected = "ECDSA_P256".encode_utf16().chain(Some(0));
-    if !algorithm
-        .chunks_exact(2)
-        .map(|b| u16::from_le_bytes([b[0], b[1]]))
-        .eq(expected)
-        || dword(key, NCRYPT_LENGTH_PROPERTY)? != 256
+    let algorithm_len = get_bounded(key, NCRYPT_ALGORITHM_PROPERTY, &mut algorithm)?;
+    let utf16_eq = |bytes: &[u8], expected: &str| {
+        bytes
+            .chunks_exact(2)
+            .map(|b| u16::from_le_bytes([b[0], b[1]]))
+            .eq(expected.encode_utf16().chain(Some(0)))
+    };
+    let is_ecdsa_p256 = algorithm_len == 22 && utf16_eq(&algorithm[..22], "ECDSA_P256");
+    let is_ecdsa_generic = algorithm_len == 12 && utf16_eq(&algorithm[..12], "ECDSA");
+    if is_ecdsa_generic {
+        let mut curve = [0u8; 18];
+        get_exact(key, NCRYPT_ECC_CURVE_NAME_PROPERTY, &mut curve)?;
+        if !utf16_eq(&curve, "nistP256") {
+            return Err(PairingError::NativeUnsupported);
+        }
+    } else if !is_ecdsa_p256 {
+        return Err(PairingError::NativeUnsupported);
+    }
+    let usage_policy = dword(key, NCRYPT_PCP_KEY_USAGE_POLICY_PROPERTY)?;
+    let valid_usage_policy = usage_policy == NCRYPT_PCP_SIGNATURE_KEY
+        || usage_policy == (NCRYPT_PCP_SIGNATURE_KEY | NCRYPT_TPM12_PROVIDER_FLAG);
+    if dword(key, NCRYPT_LENGTH_PROPERTY)? != 256
         || dword(key, NCRYPT_KEY_TYPE_PROPERTY)? != 0
         || dword(key, NCRYPT_KEY_USAGE_PROPERTY)? != NCRYPT_ALLOW_SIGNING_FLAG
-        || dword(key, NCRYPT_PCP_KEY_USAGE_POLICY_PROPERTY)? != NCRYPT_PCP_SIGNATURE_KEY
+        || !valid_usage_policy
         || dword(key, NCRYPT_EXPORT_POLICY_PROPERTY)? != 0
     {
         return Err(PairingError::NativeUnsupported);
@@ -184,6 +208,25 @@ fn validate(key: &Owned) -> Result<()> {
     }
     // ECDSA_P256 fixes the curve; the public blob must also have its P256 magic.
     Ok(())
+}
+
+fn get_bounded(object: &Owned, property: PCWSTR, out: &mut [u8]) -> Result<usize> {
+    let mut written = 0;
+    status(unsafe {
+        NCryptGetProperty(
+            object.0,
+            property,
+            out.as_mut_ptr(),
+            out.len() as u32,
+            &mut written,
+            NCRYPT_SILENT_FLAG,
+        )
+    })?;
+    let written = written as usize;
+    if written == 0 || written > out.len() || written % 2 != 0 {
+        return Err(PairingError::IdentityUnavailable);
+    }
+    Ok(written)
 }
 
 fn get_exact(object: &Owned, property: PCWSTR, out: &mut [u8]) -> Result<()> {

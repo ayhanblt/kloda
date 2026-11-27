@@ -3,7 +3,7 @@ use crate::error::{PairingError, Result};
 use crate::startup_diagnostics::{self as diagnostic, Operation};
 use std::{ffi::c_void, ptr::null_mut};
 use windows_sys::Win32::{
-    Foundation::{GetLastError, LocalFree, GENERIC_ALL, GENERIC_WRITE, HANDLE},
+    Foundation::{ERROR_NONE_MAPPED, GetLastError, LocalFree, GENERIC_ALL, GENERIC_WRITE, HANDLE},
     Security::{
         Authorization::{GetSecurityInfo, SE_FILE_OBJECT},
         *,
@@ -198,6 +198,47 @@ pub(super) fn user_directory(handle: HANDLE) -> Result<()> {
     }
     result
 }
+fn is_orphaned_local_account_sid(sid: PSID, machine_domain: Option<[u32; 3]>) -> bool {
+    let Some(domain) = machine_domain else {
+        return false;
+    };
+    // `ace()` already bounded and validated `sid` via `IsValidSid`.
+    let authority = unsafe { (*GetSidIdentifierAuthority(sid)).Value };
+    let count = unsafe { *GetSidSubAuthorityCount(sid) };
+    if authority != [0, 0, 0, 0, 0, 5]
+        || count != 5
+        || unsafe { *GetSidSubAuthority(sid, 0) } != 21
+    {
+        return false;
+    }
+    let sid_domain = [
+        unsafe { *GetSidSubAuthority(sid, 1) },
+        unsafe { *GetSidSubAuthority(sid, 2) },
+        unsafe { *GetSidSubAuthority(sid, 3) },
+    ];
+    let rid = unsafe { *GetSidSubAuthority(sid, 4) };
+    if sid_domain != domain || rid < 1000 {
+        return false;
+    }
+    let mut name = [0u16; 256];
+    let mut name_len = name.len() as u32;
+    let mut ref_domain = [0u16; 256];
+    let mut ref_domain_len = ref_domain.len() as u32;
+    let mut sid_use = 0;
+    let ok = unsafe {
+        LookupAccountSidW(
+            std::ptr::null(),
+            sid,
+            name.as_mut_ptr(),
+            &mut name_len,
+            ref_domain.as_mut_ptr(),
+            &mut ref_domain_len,
+            &mut sid_use,
+        )
+    };
+    ok == 0 && unsafe { GetLastError() } == ERROR_NONE_MAPPED
+}
+
 fn user_directory_inner(handle: HANDLE) -> Result<()> {
     let principals = rule!(Principals, principals())?;
     let security = security(handle)?;
@@ -220,6 +261,8 @@ fn user_directory_inner(handle: HANDLE) -> Result<()> {
             && !same(sid, &principals.user)
             && !same(sid, &principals.system)
             && !same(sid, &principals.administrators)
+            && !(ace.Header.AceFlags as u32 & INHERITED_ACE != 0
+                && is_orphaned_local_account_sid(sid, principals.machine_domain))
         {
             #[cfg(test)]
             {
@@ -271,4 +314,65 @@ fn writer_principal(sid: PSID) {
         std::io::stderr(),
         "KLODA_FIXTURE_PRINCIPAL role_check_complete=true named_match={matched} account_sid_shape={account_shape}"
     );
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn build_nt_account_sid(domain: [u32; 3], rid: u32) -> [u8; 28] {
+        let mut sid = [0u8; 28];
+        sid[0] = 1; // SID_REVISION
+        sid[1] = 5; // SubAuthorityCount
+        sid[7] = 5; // SECURITY_NT_AUTHORITY
+        sid[8..12].copy_from_slice(&21u32.to_le_bytes());
+        sid[12..16].copy_from_slice(&domain[0].to_le_bytes());
+        sid[16..20].copy_from_slice(&domain[1].to_le_bytes());
+        sid[20..24].copy_from_slice(&domain[2].to_le_bytes());
+        sid[24..28].copy_from_slice(&rid.to_le_bytes());
+        sid
+    }
+
+    #[test]
+    fn orphaned_local_account_check_rejects_live_builtin_and_foreign_sids() {
+        let principals = principals().unwrap();
+        let domain = principals
+            .machine_domain
+            .expect("local machine domain SID must resolve on Windows");
+
+        // Built-in Administrator RID (500) is always rejected even if disabled.
+        let mut builtin_admin = build_nt_account_sid(domain, 500);
+        assert!(!is_orphaned_local_account_sid(
+            builtin_admin.as_mut_ptr().cast(),
+            Some(domain)
+        ));
+
+        // Reserved RIDs (< 1000) are always rejected.
+        let mut low_rid = build_nt_account_sid(domain, 999);
+        assert!(!is_orphaned_local_account_sid(
+            low_rid.as_mut_ptr().cast(),
+            Some(domain)
+        ));
+
+        // Foreign / AD domain SID is rejected even when unmapped.
+        let foreign_domain = [domain[0].wrapping_add(1), domain[1], domain[2]];
+        let mut foreign = build_nt_account_sid(foreign_domain, 999_999_999);
+        assert!(!is_orphaned_local_account_sid(
+            foreign.as_mut_ptr().cast(),
+            Some(domain)
+        ));
+
+        // Missing machine domain fails closed.
+        let mut orphaned = build_nt_account_sid(domain, 999_999_999);
+        assert!(!is_orphaned_local_account_sid(
+            orphaned.as_mut_ptr().cast(),
+            None
+        ));
+
+        // Unmapped local SAM RID >= 1000 is recognized as orphaned.
+        assert!(is_orphaned_local_account_sid(
+            orphaned.as_mut_ptr().cast(),
+            Some(domain)
+        ));
+    }
 }

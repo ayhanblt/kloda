@@ -74,6 +74,48 @@ describe('DesktopAutostart', () => {
       launchItems: [],
     } as never);
     expect(winQuoted.service.status()).toEqual({ enabled: false, supported: true, reason: 'os_blocked' });
+
+    // Real Electron 44 Windows 11 shape: `--kloda-background` is parsed as a switch so `args` is `[]`,
+    // while `openAtLogin` confirms exact `(path, args)` match and `executableWillLaunchAtLogin` + `enabled` confirm OS approval.
+    winQuoted.app.getLoginItemSettings.mockReturnValue({
+      openAtLogin: true,
+      executableWillLaunchAtLogin: true,
+      launchItems: [
+        { name: 'com.kloda.desktop', path: 'C:\\Program Files\\Kloda\\Kloda.exe', args: [], scope: 'user', enabled: true },
+      ],
+    } as never);
+    expect(winQuoted.service.status()).toEqual({ enabled: true, supported: true });
+
+    // Disabled via Task Manager / StartupApproved: `openAtLogin` remains true, approval flags become false.
+    winQuoted.app.getLoginItemSettings.mockReturnValue({
+      openAtLogin: true,
+      executableWillLaunchAtLogin: false,
+      launchItems: [
+        { name: 'com.kloda.desktop', path: 'C:\\Program Files\\Kloda\\Kloda.exe', args: [], scope: 'user', enabled: false },
+      ],
+    } as never);
+    expect(winQuoted.service.status()).toEqual({ enabled: false, supported: true, reason: 'os_blocked' });
+
+    // Same executable registered without `--kloda-background`: Electron reports `openAtLogin: false`.
+    winQuoted.app.getLoginItemSettings.mockReturnValue({
+      openAtLogin: false,
+      executableWillLaunchAtLogin: true,
+      launchItems: [
+        { name: 'com.kloda.desktop', path: 'C:\\Program Files\\Kloda\\Kloda.exe', args: [], scope: 'user', enabled: true },
+      ],
+    } as never);
+    expect(winQuoted.service.status()).toEqual({ enabled: false, supported: true });
+
+    // Unrelated Run value name cannot mask a disabled Kloda registration.
+    winQuoted.app.getLoginItemSettings.mockReturnValue({
+      openAtLogin: true,
+      executableWillLaunchAtLogin: true,
+      launchItems: [
+        { name: 'com.kloda.desktop', path: 'C:\\Program Files\\Kloda\\Kloda.exe', args: [], scope: 'user', enabled: false },
+        { name: 'ExternalEntry', path: 'C:\\Program Files\\Kloda\\Kloda.exe', args: [], scope: 'user', enabled: true },
+      ],
+    } as never);
+    expect(winQuoted.service.status()).toEqual({ enabled: false, supported: true, reason: 'os_blocked' });
   });
 
   it('reports macOS requires-approval instead of claiming enabled', () => {
