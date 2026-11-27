@@ -1,27 +1,91 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FolderLock } from 'lucide-react';
 
 import { WelcomeIllustration } from '../../shared/ui/WelcomeIllustration';
 import { Brand } from '../../shared/ui/Brand';
+import { Notice } from '../../shared/ui/Kit';
 
-export function DesktopWelcome({ onStart, onSkip, onAccess }: { onStart(): void; onSkip(): void; onAccess(): void }) {
+export function DesktopWelcome({
+  autostartEnabled = false,
+  autostartSupported = false,
+  onStart,
+  onSkip,
+  onAccess,
+}: {
+  autostartEnabled?: boolean;
+  autostartSupported?: boolean;
+  onStart(): void;
+  onSkip(): void;
+  onAccess(): void;
+}) {
   const { t } = useTranslation();
-  return <main className="desktop-welcome">
-    <section className="welcome-introduction">
-      <Brand large />
-      <h1>{t('ui.welcomeTitle')}</h1>
-      <p>{t('ui.welcomeDescription')}</p>
-      <WelcomeIllustration className="welcome-illustration" />
-    </section>
-    <section className="pairing-card welcome-actions" aria-label={t('ui.setup')}>
-      <FolderLock size={28} aria-hidden="true" />
-      <h2>{t('receiver.accessTitle')}</h2>
-      <p>{t('receiver.accessDescription')}</p>
-      <button className="pairing-button" onClick={onAccess} type="button">{t('receiver.accessAction')}</button>
-      <p className="pairing-permission-note">{t('receiver.trustBoundary')}</p>
-      <button className="pairing-button pairing-button-primary" onClick={onStart} type="button">{t('ui.startSetup')}</button>
-      <button className="pairing-button pairing-button-quiet" onClick={onSkip} type="button">{t('ui.skipSetup')}</button>
-      <p className="pairing-caption">{t('ui.skipDescription')}</p>
-    </section>
-  </main>;
+  const [busy, setBusy] = useState(false);
+  const [localAutostart, setLocalAutostart] = useState<boolean | null>(null);
+  const checked = localAutostart ?? autostartEnabled;
+  const bg = window.kloda?.background;
+
+  const toggleAutostart = async (next: boolean) => {
+    if (!bg || busy) return;
+    setBusy(true);
+    try {
+      const updated = await bg.setAutostart(next);
+      setLocalAutostart(updated.autostart.enabled);
+    } catch {
+      // Keep observed state unmodified when OS toggle fails.
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <main className="desktop-welcome">
+      <section className="welcome-introduction">
+        <Brand large showDot={false} />
+        <h1 className="!mt-4 !text-[36px] !leading-tight">{t('ui.welcomeTitle')}</h1>
+        <p>{t('ui.welcomeDescription')}</p>
+        <WelcomeIllustration className="welcome-illustration" />
+      </section>
+      <section className="pairing-card welcome-actions !p-6" aria-label={t('ui.setup')}>
+        <p className="text-sm font-semibold text-primary-text">{t('receiver.accessTitle')}</p>
+        <button className="pairing-button w-full" onClick={onAccess} type="button">
+          <FolderLock aria-hidden="true" size={18} />
+          {t('receiver.accessAction')}
+        </button>
+        <p className="text-xs leading-relaxed text-secondary-text">{t('receiver.accessDescription')}</p>
+
+        <label className="relative flex min-h-12 cursor-pointer items-center justify-between gap-3 border-y border-border-subtle py-3">
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-medium text-primary-text">{t('background.loginLabel')}</span>
+            <span className="block text-xs text-secondary-text">
+              {t(checked ? 'background.loginEnabled' : 'background.loginDisabled')}
+            </span>
+          </span>
+          <span className="relative inline-flex shrink-0 items-center">
+            <input
+              aria-label={t('background.loginLabel')}
+              checked={checked}
+              className="kloda-switch-input"
+              disabled={busy || !bg || !autostartSupported}
+              onChange={(event) => void toggleAutostart(event.target.checked)}
+              type="checkbox"
+            />
+            <span aria-hidden="true" className="kloda-switch-track">
+              <span className="kloda-switch-thumb" />
+            </span>
+          </span>
+        </label>
+
+        <Notice>{t('receiver.trustBoundary')}</Notice>
+
+        <button className="pairing-button pairing-button-primary !min-h-[52px] w-full" onClick={onStart} type="button">
+          {t('ui.startSetup')}
+        </button>
+        <button className="pairing-button pairing-button-quiet w-full" onClick={onSkip} type="button">
+          {t('ui.skipSetup')}
+        </button>
+        <p className="text-center text-xs leading-relaxed text-secondary-text">{t('ui.skipDescription')}</p>
+      </section>
+    </main>
+  );
 }

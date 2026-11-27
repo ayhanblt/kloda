@@ -38,6 +38,7 @@ export class DesktopBackground {
     try {
       const image = nativeImage.createFromPath(this.options.iconPath).resize({ height: 18 });
       if (image.isEmpty()) throw new Error('Tray image unavailable');
+      if (this.platform === 'darwin' && typeof image.setTemplateImage === 'function') image.setTemplateImage(true);
       this.tray = new Tray(image);
       this.tray.on('click', () => { this.linuxControlVerified = true; this.options.showWindow(); });
       this.tray.on('right-click', () => { this.linuxControlVerified = true; });
@@ -110,13 +111,25 @@ export class DesktopBackground {
     const error = Boolean(this.receiver.errorCode || this.backup.failed || this.shutdownError);
     if (this.badge !== error) {
       const image = nativeImage.createFromPath(this.options.iconPath).resize({ width: 18, height: 18 });
+      if (this.platform === 'darwin' && typeof image.setTemplateImage === 'function') image.setTemplateImage(!error);
       if (error) {
         const bitmap = image.toBitmap();
-        // BGRA pixels: a high-contrast exclamation mark, not a synthetic error state.
-        for (let y = 1; y < 17; y += 1) for (let x = 11; x < 18; x += 1) {
-          const white = x >= 13 && x <= 15 && ((y >= 3 && y <= 10) || (y >= 13 && y <= 14));
-          const offset = (y * 18 + x) * 4;
-          bitmap.set(white ? [255, 255, 255, 255] : [35, 35, 210, 255], offset);
+        if (this.platform === 'darwin') {
+          for (let offset = 0; offset < bitmap.length; offset += 4) {
+            if (bitmap[offset + 3]! > 0) {
+              bitmap[offset] = 255;
+              bitmap[offset + 1] = 255;
+              bitmap[offset + 2] = 255;
+            }
+          }
+        }
+        // BGRA pixels: crisp circular status dot at bottom-right instead of obstructing half the icon.
+        for (let y = 11; y < 18; y += 1) for (let x = 11; x < 18; x += 1) {
+          const dist2 = (x - 14.5) ** 2 + (y - 14.5) ** 2;
+          if (dist2 <= 2.75 ** 2) {
+            const offset = (y * 18 + x) * 4;
+            bitmap.set([58, 69, 210, 255], offset);
+          }
         }
         this.tray.setImage(nativeImage.createFromBitmap(bitmap, { width: 18, height: 18 }));
       } else this.tray.setImage(image);

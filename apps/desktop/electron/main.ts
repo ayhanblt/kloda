@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, powerMonitor } from 'electron';
+import { app, BrowserWindow, ipcMain, powerMonitor, screen } from 'electron';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -31,10 +31,16 @@ let background: DesktopBackground;
 let loginLaunch = false;
 
 function createWindow(): BrowserWindow {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  const shouldShow = !(loginLaunch && background.canHide());
   const window = new BrowserWindow({
     title: desktopDisplayName,
+    width,
+    height,
+    minWidth: 420,
+    minHeight: 600,
     icon: fileURLToPath(new URL('../renderer/app-icon.png', import.meta.url)),
-    show: !(loginLaunch && background.canHide()),
+    show: shouldShow,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -42,6 +48,7 @@ function createWindow(): BrowserWindow {
       sandbox: true,
     },
   });
+  if (shouldShow) window.maximize();
   bindPairingWindow(window);
   background.attach(window);
   window.on('closed', () => { if (mainWindow === window) mainWindow = null; });

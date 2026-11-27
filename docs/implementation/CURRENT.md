@@ -43,4 +43,4 @@ Historical Faz3 manifests, evidence, and OpenCode files are archived under `.loc
 
 1. **Faz V2-1:** Common Native Backup Engine (`kloda-native-sync`) — collapse ~300 duplicated Kotlin/Swift protocol files into one shared Scheduler/Job/Journal/Restore engine + thin `TransportAdapter`s.
 2. **Faz V2-2:** Unified Rust Cargo Workspace & single mobile native library (`libkloda_core`) + `tools/` script consolidation.
-3. **Faz V2-3:** Google Drive (with OAuth brand verification), Amazon S3 / S3-Compatible, WebDAV folder browser, Linux Desktop, and remote WebRTC/P2P sync.
+3. **Faz V2-3:** Google Drive (with OAuth brand verification), Amazon S3 / S3-Compatible, WebDAV folder browser, Linux Desktop, LAN device discovery (`mDNS`/`Bonjour` + 6-digit PAKE verification code as an optional companion to QR pairing), and remote WebRTC/P2P sync.

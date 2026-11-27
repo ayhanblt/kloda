@@ -1,10 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ArrowLeft, HardDrive, RefreshCw, Zap } from 'lucide-react';
 
 import { getDesktopBridge, type SyncProgress, type WebDavIssue } from '../../shared/api/desktop';
+import { Notice, StatusPill, type StatusTone } from '../../shared/ui/Kit';
 
-const errorCodes = ['connection_unavailable', 'access_denied', 'storage_full', 'source_changed', 'configuration_required',
-  'interrupted', 'settings_changed', 'retry_exhausted', 'review_required', 'backup_busy'] as const;
+const errorCodes = [
+  'connection_unavailable',
+  'access_denied',
+  'storage_full',
+  'source_changed',
+  'configuration_required',
+  'interrupted',
+  'settings_changed',
+  'retry_exhausted',
+  'review_required',
+  'backup_busy',
+] as const;
 const safeError = (code?: string) => errorCodes.find((known) => known === code) ?? 'unknown';
 
 function targetLabel(targetId?: string): string | null {
@@ -13,13 +25,28 @@ function targetLabel(targetId?: string): string | null {
     if (!Array.isArray(parts) || parts.length !== 3 || !parts.every((part) => typeof part === 'string')) return null;
     const url = new URL(parts[0] as string);
     if (!['https:', 'http:'].includes(url.protocol)) return null;
-    url.username = ''; url.password = ''; url.search = ''; url.hash = '';
+    url.username = '';
+    url.password = '';
+    url.search = '';
+    url.hash = '';
     return `${url.toString()} · ${parts[1] as string}`;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
-export function WebDavActivity({ error, onBack, onSync, progress, visible }: {
-  error: string | null; onBack: () => void; onSync: () => Promise<void>; progress: SyncProgress | null; visible: boolean;
+export function WebDavActivity({
+  error,
+  onBack,
+  onSync,
+  progress,
+  visible,
+}: {
+  error: string | null;
+  onBack: () => void;
+  onSync: () => Promise<void>;
+  progress: SyncProgress | null;
+  visible: boolean;
 }) {
   const { t, i18n } = useTranslation();
   const [issues, setIssues] = useState<readonly WebDavIssue[]>([]);
@@ -28,6 +55,7 @@ export function WebDavActivity({ error, onBack, onSync, progress, visible }: {
   const [actionError, setActionError] = useState(false);
   const generation = useRef(0);
   const reading = useRef(false);
+
   const refresh = useCallback(async () => {
     if (reading.current) return;
     reading.current = true;
@@ -36,23 +64,38 @@ export function WebDavActivity({ error, onBack, onSync, progress, visible }: {
       const api = getDesktopBridge().webdav;
       if (!api) throw new Error('unavailable');
       const next = await api.issues();
-      if (version === generation.current) { setIssues(next); setVerified(true); }
+      if (version === generation.current) {
+        setIssues(next);
+        setVerified(true);
+      }
     } catch {
       if (version === generation.current) setVerified(false);
-    } finally { reading.current = false; }
+    } finally {
+      reading.current = false;
+    }
   }, []);
 
   useEffect(() => {
-    if (!visible) { setVerified(false); return; }
+    if (!visible) {
+      setVerified(false);
+      return;
+    }
     void refresh();
     const timer = window.setInterval(() => void refresh(), 1500);
-    return () => { generation.current += 1; setVerified(false); setBusy(false); window.clearInterval(timer); };
+    return () => {
+      generation.current += 1;
+      setVerified(false);
+      setBusy(false);
+      window.clearInterval(timer);
+    };
   }, [refresh, visible]);
 
   const review = async (id: string, action: 'recheck' | 'keep_both' | 'skip') => {
     if (!verified || busy || !visible) return;
     const version = ++generation.current;
-    setBusy(true); setVerified(false); setActionError(false);
+    setBusy(true);
+    setVerified(false);
+    setActionError(false);
     try {
       const api = getDesktopBridge().webdav;
       if (!api) throw new Error('unavailable');
@@ -61,48 +104,153 @@ export function WebDavActivity({ error, onBack, onSync, progress, visible }: {
     } catch {
       if (version === generation.current) setActionError(true);
     } finally {
-      if (version === generation.current) { setBusy(false); void refresh(); }
+      if (version === generation.current) {
+        setBusy(false);
+        void refresh();
+      }
     }
   };
 
   const needsReview = (progress?.reviewCount ?? 0) > 0 || issues.length > 0;
   const status = progress?.status === 'completed' && needsReview ? 'needs_review' : progress?.status;
   const target = targetLabel(progress?.targetId);
-  return <main className="min-h-screen bg-background p-6 text-primary-text">
-    <h1 className="text-3xl font-bold">{t('onboarding.activityTitle')}</h1>
-    {progress ? <section aria-label={t('activity.snapshot')} className="mt-4 rounded-2xl border border-border-subtle bg-surface-1 p-5">
-      <p className="text-secondary-text" role="status">{t('activity.snapshot')}: {t(`activity.${status}`)}</p>
-      <p className="mt-2 text-secondary-text">{t('onboarding.filesSynced', { completed: progress.completedFiles, total: progress.totalFiles })}</p>
-      {progress.targetId && <p className="mt-2 break-all">{t('activity.target')}: {target ?? t('activity.contextUnknown')}</p>}
-      {progress.sourceIds && <p className="mt-2 break-all">{t('activity.sources')}: {progress.sourceIds.join(', ')}</p>}
-      {progress.startedAt !== undefined && <p className="mt-2">{t('activity.startedAt')}: {new Date(progress.startedAt).toLocaleString(i18n.language)}</p>}
-      {progress.errorCode && <p className="mt-2 text-stone-700">{t(`activity.errors.${safeError(progress.errorCode)}`)}</p>}
-      {progress.attempts !== undefined && <p className="mt-2">{t('activity.attempts', { count: progress.attempts, total: 5 })}</p>}
-      {progress.retryAt !== undefined && <p className="mt-2">{t('activity.retryAt')}: {new Date(progress.retryAt).toLocaleString(i18n.language)}</p>}
-    </section> : <p className="mt-2 text-secondary-text">{t('activity.unknown')}</p>}
-    {error && <p className="mt-4 text-danger-text" role="alert">{t('activity.errors.unknown')}</p>}
-    <section aria-labelledby="webdav-review-title" className="mt-6 rounded-2xl border border-border-subtle bg-surface-1 p-5">
-      <h2 className="text-xl font-semibold" id="webdav-review-title">{t('activity.reviewTitle')}</h2>
-      <p className="mt-2 text-sm text-stone-700">{t('activity.reviewHint')}</p>
-      {!verified && <p className="mt-3 text-danger-text" role="alert">{t('activity.issuesUnavailable')}</p>}
-      {actionError && <p className="mt-3 text-danger-text" role="alert">{t('activity.actionFailed')}</p>}
-      {verified && issues.length === 0 && <p className="mt-3 text-secondary-text">{t('activity.noIssues')}</p>}
-      <ul aria-label={t('activity.reviewTitle')} className="mt-3 grid gap-3">{issues.map((issue) => <li className="rounded-xl border border-border-subtle p-4" key={issue.id}>
-        <h3 className="break-all font-semibold">{issue.relativePath}</h3>
-        <p className="mt-1 break-all text-sm">{t('activity.target')}: {targetLabel(issue.targetId) ?? t('activity.contextUnknown')}</p>
-        <p className="mt-1 break-all text-sm">{t('activity.sources')}: {issue.sourceId}</p>
-        <p className="mt-2">{t(`activity.errors.${safeError(issue.errorCode)}`)}</p>
-        {issue.skipped && <p className="mt-2">{t('activity.skipped')}</p>}
-        {issue.publishedPath && <p className="mt-2 break-all">{t('activity.publishedPath')}: {issue.publishedPath}</p>}
-        <div className="mt-3 flex flex-wrap gap-3">{(['recheck', 'keep_both', 'skip'] as const).map((action) => <button
-          className="rounded-xl border border-border-subtle bg-surface-1 px-4 py-3 font-semibold disabled:opacity-40"
-          disabled={!visible || !verified || busy || (action === 'keep_both' && !issue.canKeepBoth)}
-          key={action} onClick={() => void review(issue.id, action)} type="button">{t(`activity.actions.${action}`)}</button>)}</div>
-      </li>)}</ul>
-      <button className="mt-4 rounded-xl border border-border-subtle px-4 py-3 font-semibold disabled:opacity-40" disabled={!visible || busy}
-        onClick={() => void refresh()} type="button">{t('activity.refreshIssues')}</button>
-    </section>
-    <button className="mt-6 rounded-xl bg-button-brand px-4 py-3 font-semibold text-on-brand disabled:opacity-40" disabled={!visible || busy} onClick={() => void onSync()} type="button">{t('onboarding.syncNow')}</button>
-    <button className="ml-4 text-stone-700" onClick={onBack} type="button">{t('onboarding.back')}</button>
-  </main>;
+  const statusTone: StatusTone =
+    status === 'completed' ? 'synced' : status === 'running' ? 'syncing' : status === 'needs_review' || status === 'waiting_retry' ? 'review' : 'pending';
+
+  return (
+    <main className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-xl font-semibold text-primary-text">{t('onboarding.activityTitle')}</h2>
+        <div className="flex flex-wrap gap-2">
+          <button className="pairing-button pairing-button-primary !min-h-10 !px-4 !text-sm" disabled={!visible || busy} onClick={() => void onSync()} type="button">
+            <Zap aria-hidden="true" size={16} />
+            {t('onboarding.syncNow')}
+          </button>
+          <button className="pairing-button pairing-button-quiet !min-h-10 !px-3.5 !text-sm" onClick={onBack} type="button">
+            <ArrowLeft aria-hidden="true" size={16} />
+            {t('onboarding.back')}
+          </button>
+        </div>
+      </div>
+
+      {progress ? (
+        <section aria-label={t('activity.snapshot')} className="pairing-card space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="inline-flex items-center gap-2 text-xs font-medium text-secondary-text">
+              <HardDrive aria-hidden="true" size={16} />
+              <span>{t('activity.target')}</span>
+            </div>
+            <StatusPill role="status" tone={statusTone}>
+              {t('activity.snapshot')}: {t(`activity.${status}`)}
+            </StatusPill>
+          </div>
+
+          <p className="text-base font-semibold tabular-nums text-primary-text">
+            {t('onboarding.filesSynced', { completed: progress.completedFiles, total: progress.totalFiles })}
+          </p>
+
+          <div className="grid gap-1 text-sm text-secondary-text">
+            {progress.targetId && (
+              <p className="break-all">
+                {t('activity.target')}: <span className="font-mono text-xs text-primary-text">{target ?? t('activity.contextUnknown')}</span>
+              </p>
+            )}
+            {progress.sourceIds && (
+              <p className="break-all">
+                {t('activity.sources')}: {progress.sourceIds.join(', ')}
+              </p>
+            )}
+            {progress.startedAt !== undefined && (
+              <p>
+                {t('activity.startedAt')}: {new Date(progress.startedAt).toLocaleString(i18n.language)}
+              </p>
+            )}
+            {progress.errorCode && <p className="text-attention-text">{t(`activity.errors.${safeError(progress.errorCode)}`)}</p>}
+            {progress.attempts !== undefined && (
+              <p className="tabular-nums">{t('activity.attempts', { count: progress.attempts, total: 5 })}</p>
+            )}
+            {progress.retryAt !== undefined && (
+              <p>
+                {t('activity.retryAt')}: {new Date(progress.retryAt).toLocaleString(i18n.language)}
+              </p>
+            )}
+          </div>
+        </section>
+      ) : (
+        <Notice>{t('activity.unknown')}</Notice>
+      )}
+
+      {error && (
+        <Notice role="alert" tone="danger">
+          {t('activity.errors.unknown')}
+        </Notice>
+      )}
+
+      <section aria-labelledby="webdav-review-title" className="pairing-card space-y-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-base font-semibold text-primary-text" id="webdav-review-title">
+              {t('activity.reviewTitle')}
+            </h2>
+            <p className="mt-1 text-xs text-secondary-text">{t('activity.reviewHint')}</p>
+          </div>
+          <button
+            className="pairing-button !min-h-9 !px-3 !text-xs"
+            disabled={!visible || busy}
+            onClick={() => void refresh()}
+            type="button"
+          >
+            <RefreshCw aria-hidden="true" size={14} />
+            {t('activity.refreshIssues')}
+          </button>
+        </div>
+
+        {!verified && (
+          <Notice role="alert" tone="danger">
+            {t('activity.issuesUnavailable')}
+          </Notice>
+        )}
+        {actionError && (
+          <Notice role="alert" tone="danger">
+            {t('activity.actionFailed')}
+          </Notice>
+        )}
+        {verified && issues.length === 0 && <p className="text-sm text-secondary-text">{t('activity.noIssues')}</p>}
+
+        <ul aria-label={t('activity.reviewTitle')} className="grid gap-3">
+          {issues.map((issue) => (
+            <li className="rounded-xl border border-border-subtle bg-surface-2/40 p-4 space-y-2.5" key={issue.id}>
+              <h3 className="break-all text-sm font-semibold text-primary-text">{issue.relativePath}</h3>
+              <p className="break-all text-xs text-secondary-text">
+                {t('activity.target')}: {targetLabel(issue.targetId) ?? t('activity.contextUnknown')}
+              </p>
+              <p className="break-all text-xs text-secondary-text">
+                {t('activity.sources')}: {issue.sourceId}
+              </p>
+              <Notice tone="warn">{t(`activity.errors.${safeError(issue.errorCode)}`)}</Notice>
+              {issue.skipped && <p className="text-xs text-secondary-text">{t('activity.skipped')}</p>}
+              {issue.publishedPath && (
+                <p className="break-all text-xs text-secondary-text">
+                  {t('activity.publishedPath')}: {issue.publishedPath}
+                </p>
+              )}
+              <div className="flex flex-wrap gap-2 pt-1">
+                {(['recheck', 'keep_both', 'skip'] as const).map((action) => (
+                  <button
+                    className={`pairing-button !min-h-9 !px-3 !text-xs ${action === 'skip' ? 'pairing-button-quiet' : ''}`}
+                    disabled={!visible || !verified || busy || (action === 'keep_both' && !issue.canKeepBoth)}
+                    key={action}
+                    onClick={() => void review(issue.id, action)}
+                    type="button"
+                  >
+                    {t(`activity.actions.${action}`)}
+                  </button>
+                ))}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </main>
+  );
 }

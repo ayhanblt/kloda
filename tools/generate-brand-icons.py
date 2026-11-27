@@ -9,6 +9,7 @@ TILE = (28, 26, 24, 255)          # #1C1A18 (--tile)
 RING = (241, 236, 230, 255)       # #F1ECE6 (--tile-ring)
 DOT = (232, 195, 161, 255)        # #E8C3A1 (--brand-base on dark tile)
 WHITE = (255, 255, 255, 255)
+BLACK = (0, 0, 0, 255)
 
 SS = 4  # 4x supersampling factor for razor-sharp curves and round caps
 
@@ -31,6 +32,28 @@ def draw_kloda_symbol(draw: ImageDraw.ImageDraw, cx: float, cy: float, box: floa
 
     dot_r = 7.0 * u
     draw.ellipse((cx - dot_r, cy - dot_r, cx + dot_r, cy + dot_r), fill=dot_color)
+
+
+def render_tray_template(size: int) -> Image.Image:
+    """Render monochrome 24x24 TrayIcon geometry (thicker stroke, transparent background) for macOS template menu bar."""
+    s = size * SS
+    img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    u = s / 24.0
+    cx = cy = s / 2.0
+    radius = 7.0 * u
+    cap_radius = (3.0 * u) / 2.0
+    sweep_rad = (33.0 / (2.0 * math.pi * 7.0)) * 2.0 * math.pi
+    start_rad = -math.pi / 2.0
+    steps = 720
+    for i in range(steps + 1):
+        theta = start_rad + (sweep_rad * i) / steps
+        x = cx + radius * math.cos(theta)
+        y = cy + radius * math.sin(theta)
+        draw.ellipse((x - cap_radius, y - cap_radius, x + cap_radius, y + cap_radius), fill=BLACK)
+    dot_r = 2.5 * u
+    draw.ellipse((cx - dot_r, cy - dot_r, cx + dot_r, cy + dot_r), fill=BLACK)
+    return img.resize((size, size), Image.Resampling.LANCZOS)
 
 
 def render_opaque_square(size: int) -> Image.Image:
@@ -147,7 +170,7 @@ def main() -> None:
     )
     win_master.save(desktop_public / "app-icon.png", format="PNG")
 
-    tray_icon = render_rounded_tile(72, tile_ratio=0.92, radius_ratio=0.225, shadow=False)
+    tray_icon = render_tray_template(44)
     tray_icon.save(desktop_public / "tray-logo.png", format="PNG")
 
     print("BRAND_ICONS_GENERATED")

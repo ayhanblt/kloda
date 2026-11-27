@@ -29,14 +29,33 @@ button { cursor: pointer; }
 button:disabled { cursor: default; }
 .desktop-shell { display: flex; min-height: 100dvh; background: var(--bg); }
 .desktop-sidebar { display: flex; position: sticky; top: 0; width: 256px; height: 100dvh; flex-shrink: 0; flex-direction: column; gap: 20px; padding: 16px; border-right: 1px solid var(--border-subtle); }
+.desktop-sidebar-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.desktop-hamburger, .desktop-sidebar-close { display: none; width: 40px; height: 40px; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--surface-1); color: var(--text-primary); }
+.desktop-mobile-brand, .desktop-drawer-backdrop { display: none; }
 .desktop-brand-button { min-height: 48px; padding-inline: 8px; text-align: start; border-radius: 12px; }
-.kloda-brand { display: inline-flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 600; letter-spacing: -.025em; }
-.kloda-mark { display: inline-flex; width: 36px; height: 36px; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 22%; background: var(--tile); box-shadow: 0 2px 4px var(--shadow-color); }
-.kloda-mark svg { width: 86%; height: 86%; }
+.kloda-brand { display: inline-flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 600; letter-spacing: -.025em; }
+.kloda-app-icon { display: inline-grid; place-items: center; flex-shrink: 0; border-radius: 22%; background: var(--tile); box-shadow: 0 2px 6px var(--shadow-color), var(--card-highlight); }
+.kloda-app-icon svg { width: 86%; height: 86%; }
 .kloda-ring { stroke: var(--tile-ring); }
 .kloda-dot { fill: var(--brand-base); }
-.kloda-brand-large { gap: 16px; font-size: 28px; }
-.kloda-brand-large .kloda-mark { width: 96px; height: 96px; }
+.kloda-brand-large { gap: 0; }
+@keyframes logo-ring-draw { from { stroke-dashoffset: 163; } to { stroke-dashoffset: 0; } }
+.logo-ring-draw { stroke-dashoffset: 0; animation: logo-ring-draw 700ms ease-out both; }
+@keyframes status-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .45; transform: scale(.85); } }
+.status-pulse { animation: status-pulse 1.8s ease-in-out infinite; }
+.kloda-switch-track { position: relative; display: inline-flex; width: 42px; height: 24px; shrink: 0; flex-shrink: 0; align-items: center; border-radius: 9999px; border: 1px solid var(--border-strong); background: var(--surface-2); transition: background-color 140ms ease, border-color 140ms ease; }
+.kloda-switch-thumb { width: 18px; height: 18px; border-radius: 9999px; background: var(--text-secondary); transform: translateX(2px); transition: transform 140ms ease, background-color 140ms ease; }
+.kloda-switch-input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+.kloda-switch-input:checked + .kloda-switch-track { background: var(--button-brand); border-color: var(--button-brand); }
+.kloda-switch-input:checked + .kloda-switch-track .kloda-switch-thumb { background: var(--on-brand); transform: translateX(20px); }
+.kloda-switch-input:focus-visible + .kloda-switch-track { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+.kloda-switch-input:disabled { cursor: not-allowed; }
+.kloda-switch-input:disabled + .kloda-switch-track { opacity: .45; }
+.kloda-progress { width: 100%; height: 6px; overflow: hidden; border-radius: 9999px; appearance: none; background: var(--surface-2); }
+.kloda-progress::-webkit-progress-bar { background: var(--surface-2); border-radius: 9999px; }
+.kloda-progress::-webkit-progress-value { background: var(--brand-base); border-radius: 9999px; transition: width 160ms ease; }
+.kloda-row { display: flex; min-height: 52px; width: 100%; align-items: center; gap: 12px; border-radius: 12px; padding: 8px 12px; text-align: start; transition: background-color 120ms ease; }
+.kloda-row:hover { background: var(--surface-2); }
 .desktop-navigation { display: flex; flex: 1; flex-direction: column; align-items: stretch; gap: 24px; overflow-y: auto; padding: 0; border: 0; background: transparent; }
 .desktop-navigation section { display: grid; gap: 2px; }
 .desktop-navigation h2 { margin: 0 0 4px; padding: 0 12px; color: var(--text-secondary); font-size: 13px; font-weight: 500; letter-spacing: 0; }
@@ -137,20 +156,21 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 @media (max-width: 1080px) { .connection-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 1023px) {
   .desktop-shell { flex-direction: column; }
-  .desktop-sidebar { position: static; width: 100%; height: auto; padding: 12px 16px; gap: 12px; border-right: 0; border-bottom: 1px solid var(--border-subtle); }
-  .desktop-navigation { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-  .desktop-navigation section { display: contents; }
-  .desktop-navigation h2 { display: none; }
-  .desktop-navigation button { padding: 8px; gap: 8px; font-size: 12px; }
+  .desktop-hamburger, .desktop-mobile-brand, .desktop-sidebar-close { display: inline-flex; }
+  .desktop-drawer-backdrop { display: block; position: fixed; inset: 0; z-index: 45; border: 0; background: var(--overlay); backdrop-filter: blur(2px); }
+  .desktop-sidebar {
+    position: fixed; inset: 0 auto 0 0; z-index: 50; width: min(288px, 86vw); height: 100dvh;
+    background: var(--surface-1); border-right: 1px solid var(--border-subtle); padding: 16px; gap: 20px;
+    transform: translateX(-100%); visibility: hidden; transition: transform 180ms ease, visibility 180ms ease;
+  }
+  .desktop-sidebar.desktop-sidebar-open { transform: translateX(0); visibility: visible; box-shadow: 0 12px 32px var(--shadow-color); }
   .desktop-content { padding: 24px 16px; }
-  .desktop-toolbar { position: static; padding: 12px 16px; }
+  .desktop-toolbar { position: sticky; top: 0; padding: 12px 16px; }
   .desktop-welcome { grid-template-columns: minmax(0, 1fr); max-width: 560px; gap: 24px; }
   .welcome-introduction h1 { font-size: 32px; }
 }
 @media (max-width: 600px) {
   .receiver-steps, .receiver-destinations, .connection-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
-  .desktop-navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .desktop-toolbar { align-items: start; }
   .desktop-toolbar-controls { flex-wrap: wrap; justify-content: end; }
   .welcome-introduction h1 { font-size: 30px; }
 }
