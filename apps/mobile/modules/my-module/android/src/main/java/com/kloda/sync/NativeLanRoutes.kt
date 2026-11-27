@@ -27,13 +27,63 @@ internal class NativeLanRoutes(context: Context) : AutoCloseable {
   private var registered = false
   private var closed = false
 
+  private data class AddressSig(val bytes: List<Byte>, val prefix: Int, val unusable: Boolean)
+  private data class RouteSig(val dst: List<Byte>, val prefix: Int, val gw: List<Byte>?, val iface: String?, val type: Int)
+  private data class LinkSignature(val iface: String?, val hasProxy: Boolean, val addresses: List<AddressSig>, val routes: List<RouteSig>)
+
   private data class State(
     var generation: Long,
     var capabilities: NetworkCapabilities? = null,
+    var capSig: String? = null,
     var links: LinkProperties? = null,
+    var linkSig: LinkSignature? = null,
     var addresses: List<LinkAddress> = emptyList(),
     var blocked: Boolean = false,
   )
+
+  private fun compareBytes(a: List<Byte>, b: List<Byte>): Int {
+    val n = minOf(a.size, b.size)
+    for (i in 0 until n) {
+      val cmp = (a[i].toInt() and 255).compareTo(b[i].toInt() and 255)
+      if (cmp != 0) return cmp
+    }
+    return a.size.compareTo(b.size)
+  }
+
+  private fun unusableAddressFlags(flags: Int): Boolean =
+    (flags and OsConstants.IFA_F_DADFAILED) != 0 ||
+      ((flags and OsConstants.IFA_F_TENTATIVE) != 0 && (flags and OsConstants.IFA_F_OPTIMISTIC) == 0)
+
+  private fun capabilitySignature(value: NetworkCapabilities?): String? = value?.let { transport(it) }
+
+  private fun linkSignature(value: LinkProperties?): LinkSignature? {
+    if (value == null) return null
+    val addrSigs = value.linkAddresses
+      .map { AddressSig(it.address.address.toList(), it.prefixLength, unusableAddressFlags(it.flags)) }
+      .sortedWith { a, b ->
+        compareBytes(a.bytes, b.bytes)
+          .takeIf { it != 0 } ?: a.prefix.compareTo(b.prefix)
+          .takeIf { it != 0 } ?: a.unusable.compareTo(b.unusable)
+      }
+    val routeSigs = value.routes
+      .map {
+        RouteSig(
+          it.destination.address.address.toList(),
+          it.destination.prefixLength,
+          it.gateway?.address?.toList(),
+          it.`interface`,
+          if (Build.VERSION.SDK_INT >= 33) it.type else 0,
+        )
+      }
+      .sortedWith { a, b ->
+        compareBytes(a.dst, b.dst)
+          .takeIf { it != 0 } ?: a.prefix.compareTo(b.prefix)
+          .takeIf { it != 0 } ?: (a.iface ?: "").compareTo(b.iface ?: "")
+          .takeIf { it != 0 } ?: a.type.compareTo(b.type)
+          .takeIf { it != 0 } ?: compareBytes(a.gw ?: emptyList(), b.gw ?: emptyList())
+      }
+    return LinkSignature(value.interfaceName, value.httpProxy != null, addrSigs, routeSigs)
+  }
 
   private fun generation(): Long {
     check(sequence < Long.MAX_VALUE) { "lan_unavailable" }
@@ -54,20 +104,26 @@ internal class NativeLanRoutes(context: Context) : AutoCloseable {
 
     override fun onCapabilitiesChanged(network: Network, value: NetworkCapabilities) = synchronized(lock) {
       val state = states[network] ?: return@synchronized
-      if (state.capabilities != value) {
-        state.capabilities = NetworkCapabilities(value)
+      val nextSig = capabilitySignature(value)
+      state.capabilities = NetworkCapabilities(value)
+      if (state.capSig != nextSig) {
+        state.capSig = nextSig
         state.generation = generation()
       }
     }
 
     override fun onLinkPropertiesChanged(network: Network, value: LinkProperties) = synchronized(lock) {
       val state = states[network] ?: return@synchronized
-      if (state.links != value) {
-        // Retain the OS callback snapshot; Kloda never mutates it.
-        state.links = value
-        state.addresses = value.linkAddresses.sortedWith(compareBy<LinkAddress>(
-          { if (it.address is Inet4Address) 0 else 1 }, { it.address.hostAddress ?: "" },
-        ))
+      val nextSig = linkSignature(value)
+      // Retain the OS callback snapshot; Kloda never mutates it.
+      state.links = value
+      state.addresses = value.linkAddresses.sortedWith(compareBy<LinkAddress>(
+        { if (it.address is Inet4Address) 0 else 1 },
+        { if ((it.flags and OsConstants.IFA_F_DEPRECATED) != 0) 1 else 0 },
+        { it.address.hostAddress ?: "" },
+      ))
+      if (state.linkSig != nextSig) {
+        state.linkSig = nextSig
         state.generation = generation()
       }
     }
@@ -110,9 +166,11 @@ internal class NativeLanRoutes(context: Context) : AutoCloseable {
       check(!closed && registered) { "lan_unavailable" }
       for ((network, state) in states) {
         val capabilities = state.capabilities ?: continue
+        val capSig = state.capSig ?: continue
         val links = state.links ?: continue
-        if (state.blocked || manager.getNetworkCapabilities(network) != capabilities
-          || manager.getLinkProperties(network) != links) continue
+        val linkSig = state.linkSig ?: continue
+        if (state.blocked || capabilitySignature(manager.getNetworkCapabilities(network)) != capSig
+          || linkSignature(manager.getLinkProperties(network)) != linkSig) continue
         val transport = transport(capabilities) ?: continue
         val name = links.interfaceName ?: continue
         if (name.isEmpty() || name.length >= 16 || name.any { it.code !in 33..126 }) continue
@@ -126,8 +184,10 @@ internal class NativeLanRoutes(context: Context) : AutoCloseable {
           val local = link.address
           val prefix = link.prefixLength
           if (!supported(local) || !host(local, local, prefix)) continue
-          if (link.flags and (OsConstants.IFA_F_TENTATIVE or OsConstants.IFA_F_DADFAILED
-              or OsConstants.IFA_F_DEPRECATED) != 0) continue
+          // Reject DAD-failed and non-optimistic tentative addresses; do not hard-reject
+          // IFA_F_DEPRECATED (AOSP LinkAddress.getFlags() sets it dynamically from stale DHCP
+          // deprecationTime while the kernel IPv4 address is live) or RFC 4429 optimistic IPv6.
+          if (unusableAddressFlags(link.flags)) continue
           if (actualAddresses.none { it.address == local && it.networkPrefixLength.toInt() == prefix }) continue
           if (target != null && (!supported(target) || local == target || !host(local, target, prefix))) continue
           val destination = target ?: witness(local, prefix) ?: continue
@@ -152,9 +212,9 @@ internal class NativeLanRoutes(context: Context) : AutoCloseable {
             || direct.`interface` != name || direct.destination.prefixLength == 0) continue
           val handle = network.networkHandle
           if (handle == 0L || state.generation <= 0) continue
-          // Requery only outside callbacks; disagreement with callback data means unknown/change.
-          if (manager.getNetworkCapabilities(network) != capabilities
-            || manager.getLinkProperties(network) != links) continue
+          // Requery only outside callbacks; disagreement with security-relevant callback evidence means unknown/change.
+          if (capabilitySignature(manager.getNetworkCapabilities(network)) != capSig
+            || linkSignature(manager.getLinkProperties(network)) != linkSig) continue
           return@synchronized JSONObject().put("network", handle)
             .put("generation", state.generation).put("index", iface.index).put("api", Build.VERSION.SDK_INT)
             .put("interface", name).put("local", local.hostAddress)

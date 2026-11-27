@@ -76,7 +76,7 @@ export function MobileShell({ page, navigate, section, children }: { page: Mobil
       <View className="flex-1">{children}</View>
       <View
         pointerEvents="box-none"
-        style={[styles.floatingOverlay, { paddingBottom: Math.max(insets?.bottom ?? 0, 12) }]}
+        style={[styles.floatingOverlay, { paddingBottom: Math.max((insets?.bottom ?? 0) + 6, 12) }]}
       >
         <View
           key={`tabs-${fontScale}`}

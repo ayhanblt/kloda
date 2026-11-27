@@ -27,10 +27,6 @@ export function PairingPage({ onBack, onContinue }: { onBack: () => void; onCont
   const canScan = !!status && !status.repairRequired && !protectedDecision && ['idle', 'invalid', 'revoked'].includes(status.phase);
 
   useEffect(() => {
-    if (error) toast.error(t(`pairing.errors.${error}`));
-  }, [error, t]);
-
-  useEffect(() => {
     if (status?.phase !== 'complete') return;
     const record = status.recordId ?? status.operationId ?? 'observed-complete';
     if (completed.current !== record) {

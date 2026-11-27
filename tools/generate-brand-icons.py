@@ -60,7 +60,7 @@ def render_opaque_square(size: int) -> Image.Image:
     s = size * SS
     img = Image.new("RGBA", (s, s), TILE)
     draw = ImageDraw.Draw(img)
-    draw_kloda_symbol(draw, s / 2.0, s / 2.0, s * 0.86, RING, DOT)
+    draw_kloda_symbol(draw, s / 2.0, s / 2.0, s * 1.15, RING, DOT)
     return img.resize((size, size), Image.Resampling.LANCZOS).convert("RGB")
 
 
@@ -99,7 +99,7 @@ def render_circle_tile(size: int) -> Image.Image:
     canvas = Image.new("RGBA", (s, s), (0, 0, 0, 0))
     draw = ImageDraw.Draw(canvas)
     draw.ellipse((0, 0, s, s), fill=TILE)
-    draw_kloda_symbol(draw, s / 2.0, s / 2.0, s * 0.86, RING, DOT)
+    draw_kloda_symbol(draw, s / 2.0, s / 2.0, s * 1.15, RING, DOT)
     return canvas.resize((size, size), Image.Resampling.LANCZOS)
 
 
@@ -134,10 +134,10 @@ def main() -> None:
     ios_icon.save(ios_appicon, format="PNG")
 
     # 2. Android Adaptive Master Foregrounds + Mipmap WebP assets
-    adaptive_fg = render_transparent_symbol(1024, 0.62, RING, DOT)
+    adaptive_fg = render_transparent_symbol(1024, 0.92, RING, DOT)
     adaptive_fg.save(mobile_assets / "adaptive-icon.png", format="PNG")
 
-    adaptive_mono = render_transparent_symbol(1024, 0.62, WHITE, WHITE)
+    adaptive_mono = render_transparent_symbol(1024, 0.92, WHITE, WHITE)
     adaptive_mono.save(mobile_assets / "adaptive-icon-monochrome.png", format="PNG")
 
     mipmap_specs = [
@@ -149,10 +149,10 @@ def main() -> None:
     ]
     for folder, legacy_px, adaptive_px in mipmap_specs:
         d = android_res / folder
-        save_webp(render_rounded_tile(legacy_px, tile_ratio=0.92, radius_ratio=0.225, shadow=False), d / "ic_launcher.webp")
+        save_webp(render_rounded_tile(legacy_px, tile_ratio=1.0, radius_ratio=0.225, shadow=False, symbol_ratio=1.15), d / "ic_launcher.webp")
         save_webp(render_circle_tile(legacy_px), d / "ic_launcher_round.webp")
-        save_webp(render_transparent_symbol(adaptive_px, 0.62, RING, DOT), d / "ic_launcher_foreground.webp")
-        save_webp(render_transparent_symbol(adaptive_px, 0.62, WHITE, WHITE), d / "ic_launcher_monochrome.webp")
+        save_webp(render_transparent_symbol(adaptive_px, 0.92, RING, DOT), d / "ic_launcher_foreground.webp")
+        save_webp(render_transparent_symbol(adaptive_px, 0.92, WHITE, WHITE), d / "ic_launcher_monochrome.webp")
 
     # 3. macOS Desktop App Icon (.icns via Pillow)
     macos_master = render_rounded_tile(1024, tile_ratio=824.0 / 1024.0, radius_ratio=0.225, shadow=True)
