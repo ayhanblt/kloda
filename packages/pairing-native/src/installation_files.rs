@@ -17,7 +17,7 @@ mod windows;
 #[cfg(target_os = "windows")]
 pub(super) use windows::{exists, prepare, replace, write_new, OwnerLock};
 #[cfg(target_os = "windows")]
-pub(super) use windows::{selected as select_generation, Selected};
+pub(super) use windows::{bootstrap_if_fresh, selected as select_generation, Selected};
 #[cfg(not(target_os = "windows"))]
 pub(crate) type OwnerLock = File;
 

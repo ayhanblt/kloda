@@ -1,7 +1,7 @@
 import type { App } from 'electron';
 import { constants, closeSync, fstatSync, ftruncateSync, mkdirSync, openSync, readFileSync, writeSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { isAbsolute, join } from 'node:path';
+import { isAbsolute, join, posix, win32 } from 'node:path';
 
 export const backgroundLaunchArgument = '--kloda-background';
 export interface AutoStartStatus { enabled: boolean; supported: boolean; reason?: 'unpackaged' | 'unsupported' | 'os_blocked' | 'unavailable' | 'external_entry' | 'desktop_policy' }
@@ -44,8 +44,14 @@ export class DesktopAutostart {
         return { supported: true, enabled, ...(!enabled && (settings.openAtLogin || settings.status === 'requires-approval' || settings.status === 'not-found')
           ? { reason: 'os_blocked' } : {}) };
       }
-      const enabled = settings.openAtLogin && settings.launchItems.some((item) => item.enabled
-        && item.path === this.executable && item.args.length === 1 && item.args[0] === backgroundLaunchArgument);
+      const expectedPath = this.normalizeWindowsPath(this.executable);
+      const itemMatch = settings.launchItems.some((item) => item.enabled
+        && this.normalizeWindowsPath(item.path) === expectedPath
+        && item.args.length === 1
+        && this.normalizeWindowsArg(item.args[0] ?? '') === backgroundLaunchArgument);
+      const enabled = settings.launchItems.length > 0
+        ? itemMatch
+        : Boolean(settings.openAtLogin && settings.executableWillLaunchAtLogin);
       return { supported: true, enabled, ...(!enabled && settings.openAtLogin
         ? { reason: 'os_blocked' } : {}) };
     } catch {
@@ -87,7 +93,10 @@ export class DesktopAutostart {
   private unsupported(): AutoStartStatus['reason'] {
     if (!this.options.app.isPackaged) return 'unpackaged';
     if (!['win32', 'darwin', 'linux'].includes(this.platform)) return 'unsupported';
-    if (!isAbsolute(this.executable) || /[\r\n\t=]/u.test(this.executable)) return 'unsupported';
+    const absolutePath = this.platform === 'win32'
+      ? win32.isAbsolute(this.executable)
+      : posix.isAbsolute(this.executable);
+    if (!absolutePath || /[\r\n\t=]/u.test(this.executable)) return 'unsupported';
     if (this.platform === 'linux' && !this.environment.XDG_CURRENT_DESKTOP) return 'unsupported';
     if (this.platform === 'linux' && (this.environment.APPIMAGE || this.executable.includes('/.mount_'))) return 'unsupported';
     return undefined;
@@ -95,6 +104,14 @@ export class DesktopAutostart {
 
   private loginOptions() {
     return this.platform === 'win32' ? { path: this.executable, args: [backgroundLaunchArgument] } : {};
+  }
+
+  private normalizeWindowsPath(value: string): string {
+    return value.trim().replace(/^"+|"+$/gu, '').replaceAll('/', '\\').toLowerCase();
+  }
+
+  private normalizeWindowsArg(value: string): string {
+    return value.trim().replace(/^"+|"+$/gu, '');
   }
 
   private linuxEntry(enabled: boolean): string {

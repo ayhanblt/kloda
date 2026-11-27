@@ -95,6 +95,7 @@ export function App() {
           {route === 'welcome' && (
             <DesktopWelcome
               autostartEnabled={bgState.status?.autostart.enabled}
+              autostartReason={bgState.status?.autostart.reason}
               autostartSupported={bgState.status?.autostart.supported}
               onAccess={() => navigate('devices')}
               onSkip={() => navigate('receiver')}

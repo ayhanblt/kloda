@@ -50,6 +50,30 @@ describe('DesktopAutostart', () => {
       { path: '/opt/Kloda/kloda', args: ['different'], enabled: true },
     ] } as never);
     expect(service.status()).toEqual({ enabled: false, supported: true, reason: 'os_blocked' });
+
+    const winQuoted = fixture('win32', true, 'C:\\Program Files\\Kloda\\Kloda.exe');
+    winQuoted.app.getLoginItemSettings.mockReturnValue({
+      openAtLogin: true,
+      executableWillLaunchAtLogin: true,
+      launchItems: [
+        { path: '"c:/program files/kloda/kloda.exe"', args: [`"${backgroundLaunchArgument}"`], enabled: true },
+      ],
+    } as never);
+    expect(winQuoted.service.status()).toEqual({ enabled: true, supported: true });
+
+    winQuoted.app.getLoginItemSettings.mockReturnValue({
+      openAtLogin: true,
+      executableWillLaunchAtLogin: true,
+      launchItems: [],
+    } as never);
+    expect(winQuoted.service.status()).toEqual({ enabled: true, supported: true });
+
+    winQuoted.app.getLoginItemSettings.mockReturnValue({
+      openAtLogin: true,
+      executableWillLaunchAtLogin: false,
+      launchItems: [],
+    } as never);
+    expect(winQuoted.service.status()).toEqual({ enabled: false, supported: true, reason: 'os_blocked' });
   });
 
   it('reports macOS requires-approval instead of claiming enabled', () => {

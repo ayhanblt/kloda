@@ -26,6 +26,9 @@ mod publication;
 mod legacy_fence;
 #[path = "installation_windows_generation.rs"]
 mod generation;
+#[path = "installation_windows_bootstrap.rs"]
+mod bootstrap;
+pub(crate) use bootstrap::bootstrap_if_fresh;
 pub(crate) use generation::{selected, Selected};
 
 struct OwnerPins {

@@ -44,7 +44,10 @@ pub(super) fn open(context: &NativeContext) -> Result<Installation> {
     if context.role != OwnerRole::Pc {
         return Err(PairingError::NativeUnsupported);
     }
-    let selected = diagnostic::at(Stage::Storage, || files::select_generation(&context.directory))?;
+    let selected = diagnostic::at(Stage::Storage, || {
+        files::bootstrap_if_fresh(&context.directory)?;
+        files::select_generation(&context.directory)
+    })?;
     let identity = diagnostic::at(Stage::Identity, || {
         identity::open(&selected.directory, selected.epoch, false)
     })?;

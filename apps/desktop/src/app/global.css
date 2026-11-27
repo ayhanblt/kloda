@@ -27,6 +27,7 @@ body { margin: 0; background: var(--bg); color: var(--text-primary); font-family
 button, input, select { font: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: default; }
+h1[tabindex="-1"]:focus:not(:focus-visible) { outline: none; }
 .desktop-shell { display: flex; min-height: 100dvh; background: var(--bg); }
 .desktop-sidebar { display: flex; position: sticky; top: 0; width: 256px; height: 100dvh; flex-shrink: 0; flex-direction: column; gap: 20px; padding: 16px; border-right: 1px solid var(--border-subtle); }
 .desktop-sidebar-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }

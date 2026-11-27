@@ -22,7 +22,7 @@ pub(super) struct Pins {
 pub(super) fn generation_name(name: &str) -> bool {
     name.strip_prefix("generation-").is_some_and(|id| id.len() == 32 && id.bytes().all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b)))
 }
-fn generation_leaf(id: &[u8; 16]) -> String {
+pub(super) fn generation_leaf(id: &[u8; 16]) -> String {
     let mut name = String::from("generation-");
     for byte in id { use std::fmt::Write; write!(name, "{byte:02x}").expect("String formatting"); }
     name

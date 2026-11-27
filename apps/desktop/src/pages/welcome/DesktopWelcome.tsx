@@ -2,18 +2,21 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FolderLock } from 'lucide-react';
 
+import type { BackgroundStatus } from '../../shared/api/desktop';
 import { WelcomeIllustration } from '../../shared/ui/WelcomeIllustration';
 import { Brand } from '../../shared/ui/Brand';
 import { Notice } from '../../shared/ui/Kit';
 
 export function DesktopWelcome({
   autostartEnabled = false,
+  autostartReason,
   autostartSupported = false,
   onStart,
   onSkip,
   onAccess,
 }: {
   autostartEnabled?: boolean;
+  autostartReason?: BackgroundStatus['autostart']['reason'];
   autostartSupported?: boolean;
   onStart(): void;
   onSkip(): void;
@@ -22,17 +25,23 @@ export function DesktopWelcome({
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [localAutostart, setLocalAutostart] = useState<boolean | null>(null);
+  const [localReason, setLocalReason] = useState<BackgroundStatus['autostart']['reason'] | null>(null);
+  const [toggleNotApplied, setToggleNotApplied] = useState(false);
   const checked = localAutostart ?? autostartEnabled;
+  const effectiveReason = localReason ?? autostartReason;
   const bg = window.kloda?.background;
 
   const toggleAutostart = async (next: boolean) => {
     if (!bg || busy) return;
     setBusy(true);
+    setToggleNotApplied(false);
     try {
       const updated = await bg.setAutostart(next);
       setLocalAutostart(updated.autostart.enabled);
+      setLocalReason(updated.autostart.reason ?? null);
+      setToggleNotApplied(next && !updated.autostart.enabled && !updated.autostart.reason);
     } catch {
-      // Keep observed state unmodified when OS toggle fails.
+      setToggleNotApplied(true);
     } finally {
       setBusy(false);
     }
@@ -75,6 +84,9 @@ export function DesktopWelcome({
             </span>
           </span>
         </label>
+
+        {toggleNotApplied && <Notice tone="warn">{t('background.loginNotApplied')}</Notice>}
+        {effectiveReason && <Notice tone="warn">{t(`background.loginReasons.${effectiveReason}`)}</Notice>}
 
         <Notice>{t('receiver.trustBoundary')}</Notice>
 

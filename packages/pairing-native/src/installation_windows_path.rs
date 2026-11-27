@@ -125,7 +125,7 @@ pub(super) fn compiled_legacy() -> Result<&'static Path> {
     Ok(if cfg!(feature = "desktop-production") { &folders.production } else { &folders.development })
 }
 
-fn create_directory(path: &Path) -> Result<()> {
+pub(super) fn create_directory(path: &Path) -> Result<()> {
     let name = wide(path)?;
     principal::with_attributes(true, |attributes| {
         if unsafe { CreateDirectoryW(name.as_ptr(), attributes) } == 0 {
@@ -141,6 +141,47 @@ fn create_directory(path: &Path) -> Result<()> {
         }
         Ok(())
     })
+}
+
+pub(super) fn directories_profile() -> Result<Vec<File>> {
+    let folders = FOLDERS.as_ref().map_err(|error| *error)?;
+    let profile = compiled_legacy()?.parent().ok_or(PairingError::StorageFailure)?;
+    local_syntax(profile)?;
+    let mut handles = Vec::with_capacity(profile.components().count());
+    let ancestors: Vec<_> = profile.ancestors().collect();
+    for ancestor in ancestors.into_iter().rev() {
+        if ancestor.as_os_str().is_empty() {
+            continue;
+        }
+        let mut file = handles::open(
+            ancestor,
+            FILE_READ_DATA | FILE_READ_ATTRIBUTES | READ_CONTROL,
+            FILE_SHARE_READ,
+            OPEN_EXISTING,
+            true,
+            false,
+        )?;
+        if file.is_none() && ancestor == profile {
+            create_directory(ancestor)?;
+            file = handles::open(
+                ancestor,
+                FILE_READ_DATA | FILE_READ_ATTRIBUTES | READ_CONTROL,
+                FILE_SHARE_READ,
+                OPEN_EXISTING,
+                true,
+                false,
+            )?;
+        }
+        let file = file.ok_or(PairingError::StorageFailure)?;
+        if handles.is_empty() {
+            handles::local_ntfs(&file, ancestor)?;
+        }
+        if ancestor == folders.local || ancestor == profile {
+            security::user_directory(file.as_raw_handle())?;
+        }
+        handles.push(file);
+    }
+    Ok(handles)
 }
 
 pub(super) fn directories(directory: &Path, create: bool) -> Result<Vec<File>> {
