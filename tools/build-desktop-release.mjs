@@ -49,6 +49,16 @@ function stageAppDirectory(appSource, resourcesRoot) {
   for (const folder of ['main', 'native', 'renderer']) {
     cpSync(join(desktop, 'dist', folder), join(appSource, 'dist', folder), { recursive: true });
   }
+  execFileSync(
+    process.execPath,
+    [
+      join(root, 'tools/build-native-desktop.mjs'),
+      '--production',
+      '--out',
+      join(appSource, 'dist/native/kloda_pairing.node'),
+    ],
+    { stdio: 'inherit' },
+  );
   for (const [name, files] of Object.entries(runtimeFiles)) {
     const destination = join(appSource, 'node_modules', name);
     mkdirSync(destination, { recursive: true });
