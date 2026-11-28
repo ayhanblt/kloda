@@ -44,6 +44,7 @@ pub(crate) struct Session {
     generation: u64,
     pc: bool,
     peer: Option<Spki>,
+    peer_name: Option<String>,
     decoder: FrameDecoder,
     deadline: u64,
     partial_since: Option<u64>,
@@ -92,6 +93,7 @@ impl Session {
             generation,
             pc,
             peer: None,
+            peer_name: None,
             decoder: FrameDecoder::new(),
             deadline: now
                 .checked_add(10_000)
@@ -105,6 +107,9 @@ impl Session {
     }
     pub(crate) fn generation(&self) -> u64 {
         self.generation
+    }
+    pub(crate) fn peer_name(&self) -> Option<&str> {
+        self.peer_name.as_deref()
     }
     pub(crate) fn peer_ip(&self) -> Result<IpAddr> {
         self.socket
@@ -193,6 +198,12 @@ impl Session {
             self.peer = self
                 .verifier
                 .verified_key
+                .lock()
+                .map_err(|_| PairingError::TlsRejected)?
+                .clone();
+            self.peer_name = self
+                .verifier
+                .verified_name
                 .lock()
                 .map_err(|_| PairingError::TlsRejected)?
                 .clone();

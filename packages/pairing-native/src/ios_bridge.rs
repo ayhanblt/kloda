@@ -119,6 +119,17 @@ pub unsafe extern "C" fn kloda_ios_transfer(
 }
 
 /// # Safety
+/// Input is a native UTF-8 device label readable for `length` bytes during this call.
+#[no_mangle]
+pub unsafe extern "C" fn kloda_ios_set_device_name(name: *const u8, length: usize) -> *mut c_char {
+    response(|| {
+        let raw = unsafe { text(name, length, 256)? };
+        crate::device_name::set_local_name(raw);
+        Ok(serde_json::json!({}))
+    })
+}
+
+/// # Safety
 /// Reply must be null or the exact, not-yet-freed pointer returned by this ABI.
 #[no_mangle]
 pub unsafe extern "C" fn kloda_ios_reply_free(reply: *mut c_char) {

@@ -70,12 +70,12 @@ pub(super) fn step(
         return Err(Error::Conflict);
     }
     let length = (entry.operation.size - work.offset).min(CHUNK_LIMIT as u64) as usize;
-    let mut bytes = [0; CHUNK_LIMIT];
-    if let Err(error) = work.file.read_exact(&mut bytes[..length]) {
+    let mut bytes = vec![0; length];
+    if let Err(error) = work.file.read_exact(&mut bytes) {
         hashes.0.remove(&entry.id);
         return Err(io_error(error));
     }
-    work.digest.update(&bytes[..length]);
+    work.digest.update(&bytes);
     work.offset += length as u64;
     if work.offset != entry.operation.size {
         return Ok(true);
@@ -86,7 +86,6 @@ pub(super) fn step(
     if work.digest.finish().as_ref() != hash {
         return Err(Error::HashMismatch);
     }
-    work.file.sync_all().map_err(io_error)?;
     let (scope, current) = admit(store, sid, peer)?;
     scope_matches(entry, &scope)?;
     checked_file(&store.conn, &current, entry, false, false)?;
@@ -135,7 +134,6 @@ pub(super) fn publish(
     let final_file = checked_file(&store.conn, &directories, entry, true, true)?;
     final_file.sync_all().map_err(io_error)?;
     crate::backup_root::sync_dir(&objects)?;
-    directories.sync()?;
 
     let mut visible_update: Option<(&'static str, String)> = None;
     let mut promotions: Vec<(String, String, String, [u8; 24])> = Vec::new();

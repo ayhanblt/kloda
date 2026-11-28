@@ -9,6 +9,7 @@ pub(crate) struct Scope {
     pub(crate) binding: Binding,
     pub(crate) revision: i64,
     pub(crate) approved: bool,
+    pub(crate) peer_folder: Option<String>,
 }
 
 impl Store {
@@ -19,7 +20,8 @@ impl Store {
             return Err(PairingError::CandidateStale);
         }
         let mut statement = self.conn.prepare(
-            "SELECT folder,root,peer_root,revision,state,permissions FROM backup_scopes WHERE sid=?1",
+            "SELECT s.folder,s.root,s.peer_root,s.revision,s.state,s.permissions,sf.peer_folder
+             FROM backup_scopes s LEFT JOIN scope_folders sf ON sf.sid=s.sid WHERE s.sid=?1",
         ).map_err(acl_storage)?;
         let mut rows = statement.query([sid.as_slice()]).map_err(acl_storage)?;
         let Some(row) = rows.next().map_err(acl_storage)? else {
@@ -33,6 +35,7 @@ impl Store {
         let revision: i64 = row.get(3).map_err(acl_storage)?;
         let state: i64 = row.get(4).map_err(acl_storage)?;
         let permissions: i64 = row.get(5).map_err(acl_storage)?;
+        let peer_folder: Option<String> = row.get(6).map_err(acl_storage)?;
         if revision <= 0
             || !matches!(state, 1 | 2)
             || permissions != 31
@@ -45,6 +48,7 @@ impl Store {
             binding: Binding { root, peer },
             revision,
             approved: state == 1,
+            peer_folder,
         }))
     }
 
@@ -69,7 +73,25 @@ impl Store {
         if self.backup_scope(sid)?.map(|scope| scope.revision) != expected_revision {
             return Err(PairingError::CandidateStale);
         }
-        let binding = backup_root::prepare(folder, &record.expected)?;
+        let peer_name = self.peer_name(sid).ok().flatten();
+        let reusable_peer_root: Option<[u8; 24]> = self
+            .conn
+            .query_row(
+                "SELECT s.peer_root FROM backup_scopes s JOIN records r ON r.sid=s.sid
+                 WHERE r.expected=?1 AND s.folder=?2 ORDER BY s.revision DESC LIMIT 1",
+                params![record.expected.as_slice(), folder],
+                |row| row.get::<_, Vec<u8>>(0),
+            )
+            .optional()
+            .ok()
+            .flatten()
+            .and_then(|bytes| bytes.try_into().ok());
+        let (binding, chosen_folder) = backup_root::prepare_named(
+            folder,
+            &record.expected,
+            peer_name.as_deref(),
+            reusable_peer_root,
+        )?;
         let _authorization = authorize()?;
         self.acl_write(|tx, local, epoch| {
             approved_peer(load(tx, sid, local, epoch)?)?;
@@ -97,6 +119,20 @@ impl Store {
                 ],
             )
             .map_err(acl_storage)?;
+            if let Some(peer_folder) = chosen_folder.as_deref() {
+                tx.execute(
+                    "INSERT INTO scope_folders(sid,peer_folder) VALUES(?1,?2)
+                    ON CONFLICT(sid) DO UPDATE SET peer_folder=excluded.peer_folder",
+                    params![sid.as_slice(), peer_folder],
+                )
+                .map_err(acl_storage)?;
+            } else {
+                tx.execute(
+                    "DELETE FROM scope_folders WHERE sid=?1",
+                    [sid.as_slice()],
+                )
+                .map_err(acl_storage)?;
+            }
             Ok(())
         })
     }

@@ -41,6 +41,9 @@ export function PairingModal({ snapshot, onCancel, onResume, onRefresh, onLeave,
           <ShieldAlert color={colors['attention-base']} size={32} />
           <Text accessibilityRole="header" className="text-[22px] font-inter-semibold leading-7 text-primary-text">{t(copy ? `${copy}.title` : repair ? 'pairing.repairTitle' : uncertain ? 'pairing.unknownTitle' : `pairing.phases.${phase}.title`)}</Text>
           <Text className="font-sans text-sm leading-5 text-secondary-text">{t(copy ? `${copy}.description` : repair ? 'pairing.repairDescription' : uncertain ? 'pairing.unknownDescription' : `pairing.phases.${phase}.description`)}</Text>
+          {status?.peerName && (
+            <Text className="text-base font-inter-semibold text-primary-text">{status.peerName}</Text>
+          )}
           {status?.peerFingerprint && (
             <View className="gap-2 rounded-xl border border-border-subtle p-3">
               <Text className="text-xs font-inter-medium text-secondary-text">{t('pairing.peerFingerprint')}</Text>

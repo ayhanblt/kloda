@@ -179,7 +179,7 @@ internal class AndroidPhotosSources(private val context: Context) {
       PhotoSourceMetadata(device, identity("asset", "$version|$volume|$reference|$birth"),
         name, mime, albums, favorite)
     }
-    checkedMedia(source, reference)
+    checkPermission()
     return result
   }
 

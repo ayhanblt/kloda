@@ -42,8 +42,10 @@ export class DesktopSyncRuntime implements DesktopBridge {
   }
   getBackgroundState(): { active: boolean; failed: boolean } {
     const progress = this.journal.getLatestProgress();
+    const draft = this.journal.getDraft();
+    const unconfiguredSkip = !draft.storage && draft.sources.length === 0 && progress?.status === 'failed' && progress.errorCode === 'configuration_required';
     const interrupted = progress?.status === 'running' && progress.id !== this.activeProgressId;
-    return { active: Boolean(this.activeSync) && progress?.status !== 'waiting_retry', failed: this.lastFailure || interrupted || progress?.status === 'failed' || (progress?.status === 'needs_review' && this.journal.getReviewUploads(true).length > 0) };
+    return { active: Boolean(this.activeSync) && progress?.status !== 'waiting_retry', failed: this.lastFailure || interrupted || (!unconfiguredSkip && progress?.status === 'failed') || (progress?.status === 'needs_review' && this.journal.getReviewUploads(true).length > 0) };
   }
   prepareToQuit(): void {
     this.stopping = true;
@@ -157,6 +159,8 @@ export class DesktopSyncRuntime implements DesktopBridge {
   }
 
   startSync(context = this.journal.getWorkRevision()): Promise<SyncProgress> {
+    const draft = this.journal.getDraft();
+    if (!draft.storage && draft.sources.length === 0) return Promise.reject(new WebDavFailure('configuration_required'));
     if (this.reviewing) return Promise.reject(new WebDavFailure('backup_busy'));
     if (this.stopping) return Promise.reject(new WebDavFailure('interrupted', 'Kloda is shutting down; backup remains incomplete.'));
     if (context !== this.journal.getWorkRevision()) return Promise.reject(new WebDavFailure('settings_changed'));

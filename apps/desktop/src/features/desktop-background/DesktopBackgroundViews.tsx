@@ -120,9 +120,9 @@ export function DesktopReceiverSummary({
           )
         )}
 
-        <div className="space-y-2">
-          <Notice>{t('background.sleepHint')}</Notice>
-          <p className="text-xs text-tertiary-text">{t('receiver.listenerBoundary')}</p>
+        <div className="space-y-1 text-xs leading-relaxed text-tertiary-text">
+          <p>{t('background.sleepHint')}</p>
+          <p>{t('receiver.listenerBoundary')}</p>
         </div>
       </section>
 

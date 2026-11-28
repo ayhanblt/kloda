@@ -1,5 +1,6 @@
 import { FolderSync, Pause } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { ActivityFilterMenu, ActivityJournalPanel, ActivitySegments } from './activity-journal-panel';
 import { activityNowJobs, type ActivityFilter, type ActivityTab } from '../../../features/file-transfer/model/activity-journal';
 import { SmbItemsPanel } from './smb-items-panel';
@@ -17,13 +18,15 @@ import { PairingButton } from '../../../features/pairing/ui/pairing-button';
 import { ByteProgress } from '../../../shared/ui/byte-progress';
 import { BackLink, IconTile, RichCard } from '../../../shared/ui/rich';
 import { OwnBackups } from '../../../widgets/own-backups/own-backups';
+import { formatBytes } from '../../../shared/lib/format-bytes';
 import { useThemeColors } from '../../../shared/theme/theme-provider';
 
 // `target`: the Backups view opened from one destination card shows only that destination's backups (18B/5r), titled
 // with `targetLabel` (the provider's translation key) and returning to the Destinations tab.
 export function ActivityPage({ onBack, view = 'activity', embedded = false, target, targetLabel }: { onBack: () => void; view?: 'activity' | 'backups'; embedded?: boolean; target?: string; targetLabel?: string }) {
   const colors = useThemeColors();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const insets = useContext(SafeAreaInsetsContext);
   const transfer = useFileTransfer();
   const webdav = useWebDavBackup();
   const { queue, error, working, peer, run, pause, resumeAutomatic, restoring, cancelRestore } = transfer;
@@ -46,19 +49,36 @@ export function ActivityPage({ onBack, view = 'activity', embedded = false, targ
       </View>
   );
   const controls = (view === 'activity' && !past) || restoring ? (
-    <View className={scrollChrome ? 'gap-3 pt-5' : `gap-3 border-t border-border-subtle bg-background px-4 pt-4 ${embedded ? 'pb-24' : 'pb-5'}`}>
-        {restoring && <PairingButton label={t('transfer.backups.cancel')} variant="secondary" onPress={() => { void cancelRestore(); }} />}
-        {view === 'activity' && !past && <>{queue?.automaticPaused === true
-          ? <PairingButton label={t('transfer.continueAutomatic')} variant="secondary" disabled={working} onPress={() => { void resumeAutomatic(); }} />
-          : <PairingButton label={t('transfer.pause')} variant="secondary" disabled={working || !(queue?.running || queue?.automaticPaused === false)} icon={<Pause color={colors['text-primary']} size={18} />} onPress={() => { void pause(); }} />}
-        {queue?.automaticPaused !== undefined && <Text className="font-sans text-sm leading-5 text-secondary-text">{t('transfer.pauseExplanation')}</Text>}
-        <PairingButton variant="primary" label={t('transfer.syncNow')} disabled={working} icon={<FolderSync size={18} />} onPress={() => { void run(); }} /></>}
+    <View
+      className={scrollChrome ? 'gap-2.5 pt-3' : 'gap-2.5 border-t border-border-subtle bg-background px-4 pt-2.5'}
+      style={scrollChrome ? undefined : { paddingBottom: embedded ? Math.max((insets?.bottom ?? 0) + 84, 96) : Math.max((insets?.bottom ?? 0) + 12, 16) }}
+    >
+        {restoring && <PairingButton label={t('transfer.backups.cancel')} size="sm" variant="secondary" onPress={() => { void cancelRestore(); }} />}
+        {view === 'activity' && !past && <View className="flex-row gap-2.5">
+          <View className="flex-1">
+            {queue?.automaticPaused === true
+              ? <PairingButton size="sm" label={t('transfer.continueAutomatic')} variant="secondary" disabled={working} onPress={() => { void resumeAutomatic(); }} />
+              : <PairingButton size="sm" label={t('transfer.pause')} variant="secondary" disabled={working || !(queue?.running || queue?.automaticPaused === false)} icon={<Pause color={colors['text-primary']} size={16} />} onPress={() => { void pause(); }} />}
+          </View>
+          <View className="flex-1">
+            <PairingButton size="sm" variant="primary" label={t('transfer.syncNow')} disabled={working} icon={<FolderSync size={16} />} onPress={() => { void run(); }} />
+          </View>
+        </View>}
       </View>
   ) : null;
+  const shownErrorCodes = new Set<string>();
+  const showErrorCode = (code: string | undefined | null) => {
+    if (!code || shownErrorCodes.has(code)) return false;
+    shownErrorCodes.add(code);
+    return true;
+  };
   return (
     <Surface className="flex-1 bg-background">
       {!scrollChrome && header}
-      <ScrollView contentContainerClassName={`gap-4 px-4 pt-3 ${embedded && (!controls || scrollChrome) ? 'pb-28' : 'pb-8'}`}>
+      <ScrollView
+        contentContainerClassName="gap-4 px-4 pt-3"
+        contentContainerStyle={{ paddingBottom: embedded && (!controls || scrollChrome) ? Math.max((insets?.bottom ?? 0) + 104, 128) : 32 }}
+      >
         {scrollChrome && header}
         <Text accessibilityRole="header" className="text-[28px] font-inter-semibold leading-9 text-primary-text">{targetName ? t('destinations.restore.targetTitle', { name: targetName }) : t(view === 'backups' ? 'transfer.backups.title' : 'transfer.title')}</Text>
         {view === 'activity' && <ActivitySegments tab={tab} onChange={setTab} />}
@@ -74,9 +94,9 @@ export function ActivityPage({ onBack, view = 'activity', embedded = false, targ
           </>}
           {(transfer.webdavActionError || webdav.error || webdav.status?.run?.errorCode || webdav.status?.automaticError) && <Text accessibilityRole="alert" className="font-sans text-sm text-danger-text">{t(`transfer.errors.${transfer.webdavActionError ?? webdav.error ?? webdav.status?.run?.errorCode ?? webdav.status?.automaticError}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
         </RichCard>}
-        {view === 'activity' && <><WebDavReviewPanel /><SmbItemsPanel issues /><SftpItemsPanel issues /><FtpsItemsPanel issues /></>}
+        {view === 'activity' && <><WebDavReviewPanel configured={Boolean(webdav.status?.configured)} /><SmbItemsPanel issues /><SftpItemsPanel issues /><FtpsItemsPanel issues /></>}
         {view === 'activity' && <Text accessibilityRole="header" className="text-lg font-inter-semibold text-primary-text">{t('destinations.pc')}</Text>}
-        {!targetName && <Text className="font-sans text-sm leading-5 text-secondary-text">{t(view === 'backups' ? 'transfer.backups.description' : 'transfer.description')}</Text>}
+        {!targetName && <Text className="font-sans text-xs leading-4 text-tertiary-text">{t(view === 'backups' ? 'transfer.backups.description' : 'transfer.description')}</Text>}
         {view === 'activity' && <>
         <RichCard className="gap-3 p-5">
           <IconTile tone="brand"><FolderSync color={colors['brand-text']} size={22} /></IconTile>
@@ -86,7 +106,7 @@ export function ActivityPage({ onBack, view = 'activity', embedded = false, targ
             <Text className="font-sans text-sm leading-5 text-secondary-text">{t('transfer.runAttempt', { attempt: queue.run.attempts })}</Text>
             <Text className="font-sans text-sm leading-5 text-secondary-text">{t(`transfer.runStates.${queue.run.state}`)}</Text>
             {queue.run.retryAt && <Text className="font-sans text-sm leading-5 text-secondary-text">{t('transfer.retryAt', { time: new Date(Number(queue.run.retryAt)).toLocaleString() })}</Text>}
-            {queue.run.errorCode && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-danger-text">
+            {showErrorCode(queue.run.errorCode) && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-danger-text">
               {t(`transfer.errors.${queue.run.errorCode}`, { defaultValue: t('transfer.errors.outcome_unknown') })}
             </Text>}
           </View>}
@@ -98,15 +118,16 @@ export function ActivityPage({ onBack, view = 'activity', embedded = false, targ
               : queue.automaticRun.accessAttempts !== undefined && queue.automaticRun.state === 'waiting' && queue.automaticRun.errorCode !== 'os_interrupted'
                 ? 'transfer.retryWaiting' : `transfer.osStates.${queue.automaticRun.state}`)}</Text>
             {queue.automaticRun.retryAt && <Text className="font-sans text-sm leading-5 text-secondary-text">{t('transfer.retryAt', { time: new Date(Number(queue.automaticRun.retryAt)).toLocaleString() })}</Text>}
-            {queue.automaticRun.errorCode && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-danger-text">{t(`transfer.errors.${queue.automaticRun.errorCode}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
+            {showErrorCode(queue.automaticRun.errorCode) && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-danger-text">{t(`transfer.errors.${queue.automaticRun.errorCode}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
           </View>}
           {queue?.notificationsEnabled === false && <Text accessibilityLiveRegion="polite" className="font-sans text-sm leading-5 text-secondary-text">{t('transfer.notificationsDisabled')}</Text>}
           {queue?.automaticPaused === true && <Text accessibilityLiveRegion="polite" className="font-sans text-sm leading-5 text-secondary-text">{t('transfer.automaticPaused')}</Text>}
-          {queue?.automaticError && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-danger-text">{t(`transfer.errors.${queue.automaticError}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
+          {showErrorCode(queue?.automaticError) && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-danger-text">{t(`transfer.errors.${queue?.automaticError}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
           {queue && <Text className="font-sans text-sm leading-5 text-secondary-text">{t('transfer.count', { count: queue.totalJobs })}</Text>}
           {!queue && !error && <Text className="font-sans text-sm leading-5 text-secondary-text">{t('pairing.loading')}</Text>}
-          {error && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-danger-text">{t(`transfer.errors.${error}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
+          {showErrorCode(error) && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-danger-text">{t(`transfer.errors.${error}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
         </RichCard>
+        {view === 'activity' && queue?.automaticPaused !== undefined && <Text className="px-1 font-sans text-xs leading-4 text-tertiary-text">{t('transfer.pauseExplanation')}</Text>}
         {queue && activityNowJobs(queue).map((job) => {
           const percent = job.totalBytes !== undefined && BigInt(job.totalBytes) > 0n
             ? Number(BigInt(job.acknowledgedBytes) * 100n / BigInt(job.totalBytes)) : 0;
@@ -114,7 +135,12 @@ export function ActivityPage({ onBack, view = 'activity', embedded = false, targ
             <RichCard key={job.id} className="gap-3 p-5">
               <Text className="text-lg font-inter-semibold text-primary-text">{job.name}</Text>
               <Text className="font-sans text-sm leading-5 text-secondary-text">{t(`transfer.states.${job.state}`)}</Text>
-              <Text className="font-sans text-sm leading-5 text-secondary-text">{t('transfer.bytes', { acknowledged: job.acknowledgedBytes, total: job.totalBytes ?? t('transfer.unknownBytes') })}</Text>
+              <Text className="font-sans text-sm leading-5 text-secondary-text">
+                {t('transfer.bytes', {
+                  acknowledged: formatBytes(job.acknowledgedBytes, i18n.language),
+                  total: job.totalBytes !== undefined ? formatBytes(job.totalBytes, i18n.language) : t('transfer.unknownBytes'),
+                })}
+              </Text>
               {job.totalBytes !== undefined && BigInt(job.totalBytes) > 0n && (
                 <ByteProgress label={job.name} percent={percent} />
               )}
@@ -127,7 +153,7 @@ export function ActivityPage({ onBack, view = 'activity', embedded = false, targ
             </RichCard>
           );
         })}
-        {queue?.hasMore && <Text className="font-sans text-sm leading-5 text-secondary-text">{t('transfer.more', { count: queue.totalJobs })}</Text>}
+        {queue?.hasMore && <Text className="font-sans text-xs leading-4 text-tertiary-text">{t('transfer.more', { count: queue.totalJobs })}</Text>}
         </>}
         {view === 'backups' && error && <Text accessibilityRole="alert" className="font-sans text-sm leading-5 text-danger-text">{t(`transfer.errors.${error}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
         {view === 'backups' && (target ? <WebDavBackupsPanel target={target} name={targetName} /> : <><WebDavBackupsPanel /><SmbItemsPanel /><SftpItemsPanel /><FtpsItemsPanel /></>)}

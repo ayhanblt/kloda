@@ -19,7 +19,7 @@ import { CloudDestinationList, addedDestinations } from './cloud-destination-lis
 
 const hiddenIds: ReadonlySet<string> = new Set(hiddenProviders);
 
-export function ConnectionsPage({ adding, navigate, openProvider, openBackups, saved }: { adding: boolean; navigate: NavigateMobile; openProvider: (id: DestinationProviderId) => void; openBackups: (targetId: string, provider: CloudProvider) => void; saved: Omit<MobileStorageForm,'password'> | null }) {
+export function ConnectionsPage({ adding, navigate, onBack, openProvider, openBackups, saved }: { adding: boolean; navigate: NavigateMobile; onBack?: () => void; openProvider: (id: DestinationProviderId) => void; openBackups: (targetId: string, provider: CloudProvider) => void; saved: Omit<MobileStorageForm,'password'> | null }) {
   const colors = useThemeColors();
   const { t } = useTranslation();
   const smb = useSmbBackup().status;
@@ -27,7 +27,7 @@ export function ConnectionsPage({ adding, navigate, openProvider, openBackups, s
   const cloud = useCloudDestinations();
   const ftps = useFtpsBackup().status;
   const amazon = useS3Backup('amazon-s3').status, compatible = useS3Backup('s3-compatible').status;
-  return <MobileSurface title={t(adding ? 'ui.conn.add' : 'ui.conn.title')} description={t('ui.conn.subtitle')} onBack={() => navigate(adding ? 'connections' : 'home')}>
+  return <MobileSurface title={t(adding ? 'ui.conn.add' : 'ui.conn.title')} description={t('ui.conn.subtitle')} onBack={onBack ?? (() => navigate(adding ? 'connections' : 'home'))}>
     <RichCard className="gap-3 p-4">
       <View className="flex-row items-center gap-3">
         <IconTile><Monitor size={20} color={colors['text-primary']} /></IconTile>

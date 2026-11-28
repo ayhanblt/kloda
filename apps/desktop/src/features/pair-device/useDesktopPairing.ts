@@ -20,7 +20,7 @@ export interface DesktopPairingController {
   deny(operationId: string, generation: string): Promise<void>;
   cancel(operationId: string): Promise<void>;
   resume(recordId: string): Promise<void>;
-  approveBackup(recordId: string): Promise<void>;
+  approveBackup(recordId: string, language?: 'tr' | 'en' | 'de', theme?: 'dark' | 'light'): Promise<void>;
   revokeBackup(recordId: string): Promise<void>;
   refresh(): Promise<void>;
 }
@@ -147,9 +147,14 @@ export function useDesktopPairing(): DesktopPairingController {
     }
   }
 
-  function manageBackup(action: 'approve-backup' | 'revoke-backup', recordId: string) {
+  function manageBackup(
+    action: 'approve-backup' | 'revoke-backup',
+    recordId: string,
+    language?: 'tr' | 'en' | 'de',
+    theme?: 'dark' | 'light',
+  ) {
     return execute(action, (bridge) => action === 'approve-backup'
-      ? bridge.approveBackup(recordId) : bridge.revokeBackup(recordId),
+      ? bridge.approveBackup(recordId, language, theme) : bridge.revokeBackup(recordId),
     (current) => !current.uncertain && Boolean(recordId) && current.status?.phase === 'complete' &&
       current.status.recordId === recordId &&
       (action !== 'revoke-backup' || current.status.backupScope?.state === 'approved' ||
@@ -163,7 +168,8 @@ export function useDesktopPairing(): DesktopPairingController {
     deny: (operationId: string, generation: string) => execute('deny', (bridge) => bridge.deny(operationId, generation)),
     cancel: (operationId: string) => execute('cancel', (bridge) => bridge.cancel(operationId)),
     resume: (recordId: string) => execute('resume', (bridge) => bridge.resume(recordId)),
-    approveBackup: (recordId: string) => manageBackup('approve-backup', recordId),
+    approveBackup: (recordId: string, language?: 'tr' | 'en' | 'de', theme?: 'dark' | 'light') =>
+      manageBackup('approve-backup', recordId, language, theme),
     revokeBackup: (recordId: string) => manageBackup('revoke-backup', recordId),
     refresh: () => execute('refresh', (bridge) => bridge.status()),
   };

@@ -85,6 +85,7 @@ impl Loopback {
                 let verifier = Arc::new(Verifier {
                     expected_pc: Some(expected),
                     verified_key: Mutex::new(None),
+                    verified_name: Mutex::new(None),
                 });
                 let mut provider = rustls::crypto::ring::default_provider();
                 provider.cipher_suites =

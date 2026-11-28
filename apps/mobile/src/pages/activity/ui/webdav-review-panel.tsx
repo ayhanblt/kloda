@@ -4,10 +4,11 @@ import { useWebDavReview } from '../../../features/file-transfer/model/use-webda
 import { PairingButton } from '../../../features/pairing/ui/pairing-button';
 import { Text } from '../../../shared/ui/text';
 
-export function WebDavReviewPanel() {
+export function WebDavReviewPanel({ configured = true }: { configured?: boolean }) {
   const { t } = useTranslation();
   const model = useWebDavReview();
   if (!model.page && (!model.error || model.error === 'native_unsupported')) return null;
+  if (!configured && (model.page?.items.length ?? 0) === 0 && (!model.error || model.error === 'native_unsupported')) return null;
   return <View className="gap-3 rounded-2xl border border-border-subtle bg-surface-1 p-5">
     <Text accessibilityRole="header" className="text-lg font-inter-semibold text-primary-text">{t('destinations.review.title')}</Text>
     <Text className="font-sans text-sm text-secondary-text">{t('destinations.review.hint')}</Text>

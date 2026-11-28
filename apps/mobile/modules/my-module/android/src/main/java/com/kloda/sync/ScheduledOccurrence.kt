@@ -6,7 +6,7 @@ internal data class ScheduledOccurrence(
   val retryAt: Long? = null, val retryElapsed: Long? = null, val retryBoot: Int? = null,
   val runId: String? = null, val error: String? = null
 ) {
-  companion object { const val RETRY_MS = 300_000L }
+  companion object { const val RETRY_MS = 30_000L }
 
   // Wall time is a display/dispatch hint; same-boot monotonic time controls retry eligibility.
   fun due(elapsed: Long, boot: Int?): Boolean = phase == "waiting" &&

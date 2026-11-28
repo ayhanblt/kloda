@@ -9,7 +9,22 @@ use x509_parser::{
 mod creation;
 #[path = "certificate_der.rs"]
 mod der;
-pub(crate) use creation::{create, CertificateSigner};
+#[cfg_attr(not(test), allow(unused_imports))]
+pub(crate) use creation::{create, create_named, CertificateSigner};
+
+pub(crate) fn peer_device_name(bytes: &[u8]) -> Option<String> {
+    let (remaining, cert) = X509Certificate::from_der(bytes).ok()?;
+    if !remaining.is_empty() {
+        return None;
+    }
+    let extracted = cert
+        .subject()
+        .iter_organizational_unit()
+        .next()
+        .and_then(|attr| attr.as_str().ok())
+        .and_then(crate::device_name::sanitize_display);
+    extracted
+}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) enum Role {

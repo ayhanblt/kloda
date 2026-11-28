@@ -1,18 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { QrCode } from 'lucide-react';
+import { ChevronDown, ChevronUp, QrCode } from 'lucide-react';
 
-import type { PairedDevice, PairedDevicesPage } from '../../shared/api/desktop';
+import type { PairedDevicesPage } from '../../shared/api/desktop';
 import { pairingErrorCode, type PairingErrorCode } from '../../shared/api/pairing';
-import { DeviceGlyph, Notice, PageHeader, StatusPill, type StatusTone } from '../../shared/ui/Kit';
+import { Notice, PageHeader } from '../../shared/ui/Kit';
+import { DeviceRow } from './DeviceRow';
 
 export function DeviceManagement({ onPair }: { onPair?: () => void }) {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage?.split('-')[0];
   const confirmationLanguage = language === 'tr' || language === 'de' ? language : 'en';
+  const confirmationTheme = typeof document !== 'undefined' && document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
   const [page, setPage] = useState<PairedDevicesPage | null>(null);
   const [cursor, setCursor] = useState<string>();
   const [previous, setPrevious] = useState<(string | undefined)[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState<PairingErrorCode | null>(null);
   const [actionError, setActionError] = useState<PairingErrorCode | null>(null);
@@ -55,7 +58,7 @@ export function DeviceManagement({ onPair }: { onPair?: () => void }) {
             if (action === 'remove') {
               if (!bridge.removeDevice) throw { code: 'native_unsupported' };
               await bridge.removeDevice(recordId, confirmationLanguage);
-            } else await (action === 'grant' ? bridge.approveBackup(recordId) : bridge.revokeBackup(recordId));
+            } else await (action === 'grant' ? bridge.approveBackup(recordId, confirmationLanguage, confirmationTheme) : bridge.revokeBackup(recordId));
           } catch (reason) {
             if (alive) setActionError(pairingErrorCode(reason));
           } finally {
@@ -72,7 +75,7 @@ export function DeviceManagement({ onPair }: { onPair?: () => void }) {
       controls.current = null;
       window.clearInterval(timer);
     };
-  }, [bridge, cursor, confirmationLanguage]);
+  }, [bridge, cursor, confirmationLanguage, confirmationTheme]);
 
   const changePage = (after: string | undefined) => {
     setPage(null);
@@ -81,6 +84,9 @@ export function DeviceManagement({ onPair }: { onPair?: () => void }) {
     setBusy(true);
     setCursor(after);
   };
+
+  const activeItems = page?.items.filter((item) => item.trust !== 'revoked') ?? [];
+  const revokedItems = page?.items.filter((item) => item.trust === 'revoked') ?? [];
 
   return (
     <main className="space-y-4">
@@ -101,7 +107,6 @@ export function DeviceManagement({ onPair }: { onPair?: () => void }) {
         <div className="space-y-1">
           <p>{t('devices.revokeMeaning')}</p>
           <p>{t('devices.removeMeaning')}</p>
-          <p className="text-xs text-tertiary-text">{t('devices.order')}</p>
         </div>
       </Notice>
 
@@ -128,7 +133,7 @@ export function DeviceManagement({ onPair }: { onPair?: () => void }) {
 
       {page && (
         <>
-          {!error && page.items.length === 0 && (
+          {!error && activeItems.length === 0 && (
             <div className="pairing-card py-10 text-center" role="status">
               <p className="font-semibold text-primary-text">{t('devices.empty')}</p>
               {onPair && (
@@ -139,18 +144,48 @@ export function DeviceManagement({ onPair }: { onPair?: () => void }) {
               )}
             </div>
           )}
-          <ul aria-label={t('devices.listLabel')} className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-            {page.items.map((item) => (
-              <DeviceRow
-                canRemove={Boolean(bridge?.removeDevice)}
-                disabled={busy || Boolean(error)}
-                item={item}
-                key={item.recordId}
-                onChange={(action) => controls.current?.change(item.recordId, action)}
-                stale={Boolean(error)}
-              />
-            ))}
-          </ul>
+          {activeItems.length > 0 && (
+            <ul aria-label={t('devices.listLabel')} className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+              {activeItems.map((item) => (
+                <DeviceRow
+                  canRemove={Boolean(bridge?.removeDevice)}
+                  disabled={busy || Boolean(error)}
+                  item={item}
+                  key={item.recordId}
+                  onChange={(action) => controls.current?.change(item.recordId, action)}
+                  stale={Boolean(error)}
+                />
+              ))}
+            </ul>
+          )}
+
+          {revokedItems.length > 0 && (
+            <section className="space-y-3 pt-2">
+              <button
+                aria-expanded={showHistory}
+                className="pairing-button !min-h-10 !px-3.5 !text-sm"
+                onClick={() => setShowHistory((prev) => !prev)}
+                type="button"
+              >
+                {showHistory ? <ChevronUp aria-hidden="true" size={16} /> : <ChevronDown aria-hidden="true" size={16} />}
+                {t(showHistory ? 'devices.hideHistory' : 'devices.showHistory', { count: revokedItems.length })}
+              </button>
+              {showHistory && (
+                <ul className="grid grid-cols-1 gap-3 opacity-80 lg:grid-cols-2">
+                  {revokedItems.map((item) => (
+                    <DeviceRow
+                      canRemove={false}
+                      disabled={busy || Boolean(error)}
+                      item={item}
+                      key={item.recordId}
+                      onChange={() => undefined}
+                      stale={Boolean(error)}
+                    />
+                  ))}
+                </ul>
+              )}
+            </section>
+          )}
         </>
       )}
 
@@ -183,99 +218,5 @@ export function DeviceManagement({ onPair }: { onPair?: () => void }) {
         </button>
       </div>
     </main>
-  );
-}
-
-function DeviceRow({
-  item,
-  stale,
-  disabled,
-  canRemove,
-  onChange,
-}: {
-  item: PairedDevice;
-  stale: boolean;
-  disabled: boolean;
-  canRemove: boolean;
-  onChange(action: 'grant' | 'revoke' | 'remove'): void;
-}) {
-  const { t } = useTranslation();
-  const scope = item.backupScope;
-  const scopeState = stale ? 'unavailable' : (scope?.state ?? 'unavailable');
-
-  const trustTone: StatusTone = stale
-    ? 'pending'
-    : item.trust === 'complete'
-      ? 'synced'
-      : item.trust === 'revoked'
-        ? 'danger'
-        : 'review';
-
-  const permTone: StatusTone =
-    scopeState === 'approved' ? 'synced' : scopeState === 'revoked' ? 'danger' : scopeState === 'unavailable' ? 'pending' : 'review';
-
-  return (
-    <li className="pairing-card flex flex-col justify-between gap-4">
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <DeviceGlyph kind="phone" />
-            <div className="min-w-0">
-              <h2 className="break-all text-sm font-semibold text-primary-text">
-                <code dir="ltr">{item.peerFingerprint}</code>
-              </h2>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            <StatusPill tone={trustTone}>
-              {`${t('devices.trustLabel')} ${t(stale ? 'devices.trust.unknown' : `devices.trust.${item.trust}`)}`}
-            </StatusPill>
-            <StatusPill tone={permTone}>
-              {`${t('devices.permissionLabel')} ${t(`devices.permission.${scopeState}`)}`}
-            </StatusPill>
-          </div>
-        </div>
-
-        <p className="break-all rounded-xl bg-surface-2/60 px-3 py-2 text-xs text-secondary-text">
-          <span className="font-medium">{t('devices.folderLabel')} </span>
-          <bdi className="font-mono text-primary-text">
-            {stale ? t('devices.unknownFolder') : (scope?.folder ?? t(scopeState === 'unavailable' ? 'devices.unknownFolder' : 'devices.noFolder'))}
-          </bdi>
-        </p>
-
-        {!stale && scope?.errorCode && (
-          <Notice role="alert" tone="danger">
-            {t(`pairing.errors.${scope.errorCode}`)}
-          </Notice>
-        )}
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        <button
-          className={`pairing-button !min-h-9 !px-3 !text-xs ${scopeState !== 'approved' ? 'pairing-button-primary' : ''}`}
-          disabled={disabled || item.trust !== 'complete'}
-          onClick={() => onChange('grant')}
-          type="button"
-        >
-          {t('devices.grant')}
-        </button>
-        <button
-          className="pairing-button !min-h-9 !px-3 !text-xs"
-          disabled={disabled || item.trust !== 'complete' || !(scopeState === 'approved' || (scopeState === 'unavailable' && Boolean(scope?.revision)))}
-          onClick={() => onChange('revoke')}
-          type="button"
-        >
-          {t('devices.revoke')}
-        </button>
-        <button
-          className="pairing-button pairing-button-danger !min-h-9 !px-3 !text-xs"
-          disabled={disabled || !canRemove || item.trust === 'revoked'}
-          onClick={() => onChange('remove')}
-          type="button"
-        >
-          {t('devices.remove')}
-        </button>
-      </div>
-    </li>
   );
 }

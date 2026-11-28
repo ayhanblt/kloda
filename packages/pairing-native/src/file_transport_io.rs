@@ -5,7 +5,7 @@ use std::io::{self, Read, Write};
 use std::net::{IpAddr, Shutdown, TcpStream};
 use std::pin::Pin;
 use std::sync::{
-    atomic::{AtomicBool, Ordering},
+    atomic::{AtomicBool, AtomicU64, Ordering},
     Arc, Mutex,
 };
 use std::task::{Context, Poll};
@@ -30,8 +30,9 @@ struct LiveState {
     live: AtomicBool,
     socket: TcpStream,
     last_progress: Mutex<Instant>,
+    progress_seq: AtomicU64,
 }
-const INACTIVITY: Duration = Duration::from_secs(10);
+const INACTIVITY: Duration = Duration::from_secs(60);
 impl Evidence {
     pub(crate) fn check_live(&self) -> Result<()> {
         let expired = self
@@ -64,6 +65,10 @@ impl Evidence {
     pub(crate) fn same_channel(&self, other: &Self) -> bool {
         Arc::ptr_eq(&self.state, &other.state)
     }
+    #[cfg_attr(target_os = "android", allow(dead_code))]
+    pub(crate) fn progress_seq(&self) -> u64 {
+        self.state.progress_seq.load(Ordering::Relaxed)
+    }
     fn note_progress(&self) -> io::Result<()> {
         let mut progress = self
             .state
@@ -76,6 +81,7 @@ impl Evidence {
             return Err(io::ErrorKind::TimedOut.into());
         }
         *progress = Instant::now();
+        self.state.progress_seq.fetch_add(1, Ordering::Relaxed);
         Ok(())
     }
 }
@@ -91,6 +97,7 @@ impl TlsIo {
         socket
             .set_nonblocking(true)
             .map_err(|_| PairingError::ConnectionClosed)?;
+        let _ = socket.set_nodelay(true);
         let ip = socket
             .peer_addr()
             .map_err(|_| PairingError::ConnectionClosed)?
@@ -111,6 +118,7 @@ impl TlsIo {
                     live: AtomicBool::new(true),
                     socket: probe,
                     last_progress: Mutex::new(Instant::now()),
+                    progress_seq: AtomicU64::new(0),
                 }),
             },
         })
@@ -273,6 +281,7 @@ mod tests {
                 live: AtomicBool::new(true),
                 socket,
                 last_progress: Mutex::new(Instant::now()),
+                progress_seq: AtomicU64::new(0),
             }),
         };
         assert!(evidence.same_channel(&evidence.clone()));

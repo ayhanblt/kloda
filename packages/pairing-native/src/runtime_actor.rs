@@ -37,6 +37,8 @@ impl Actor {
             error: None,
             fatal: None,
             file_transport,
+            #[cfg(not(target_os = "android"))]
+            last_file_activity: 0,
             file_sender: None,
             #[cfg(not(target_os = "android"))]
             file_receiver: crate::file_receiver::Receiver::new(),
@@ -92,6 +94,12 @@ impl Actor {
     }
 
     pub(super) fn wait_duration(&self) -> Duration {
+        #[cfg(not(target_os = "android"))]
+        if self.file_transport.live_count() != 0
+            && self.last_now.saturating_sub(self.last_file_activity) < 500
+        {
+            return Duration::from_millis(1);
+        }
         let active = self.file_transport.live_count() != 0
             || !self.peers.is_empty()
             || self
@@ -148,7 +156,7 @@ impl Actor {
             return;
         }
         #[cfg(not(target_os = "android"))]
-        self.file_step();
+        self.file_step(now);
         if let Err(error) = self.accept(now) {
             self.fail_all(error);
             return;

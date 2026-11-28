@@ -16,7 +16,7 @@ const messages = {
     detail: 'Das Telefon muss nicht online sein. Seine laufende Übertragung wird gestoppt. Fertige Sicherungen bleiben erhalten; auf dem Telefon werden keine Einträge oder Dateien gelöscht. Erneutes Verbinden erfordert eine neue QR-Kopplung und eine separate Dateizugriffsgenehmigung.' },
 };
 async function read(native: RemovalOwner, record: string) {
-  const row = JSON.parse(await native.pairedDevice(record)) as { recordId?: unknown; peerFingerprint?: unknown; trust?: unknown; backupScope?: { state?: unknown } };
+  const row = JSON.parse(await native.pairedDevice(record)) as { recordId?: unknown; peerFingerprint?: unknown; peerName?: unknown; trust?: unknown; backupScope?: { state?: unknown } };
   if (row.recordId !== record || typeof row.peerFingerprint !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(row.peerFingerprint) ||
     !['complete', 'consumed_pending_ack', 'revoked'].includes(String(row.trust))) throw new Error('candidate_stale');
   return row;
@@ -26,8 +26,10 @@ export async function confirmDeviceRemoval(native: RemovalOwner, parent: Browser
   const observed = await read(native, record);
   check();
   const text = messages[language];
+  const label = typeof observed.peerName === 'string' && observed.peerName.trim().length > 0
+    ? `${observed.peerName.trim()}\n${observed.peerFingerprint}` : observed.peerFingerprint;
   const result = await dialog.showMessageBox(parent, { type: 'warning', title: text.title, message: text.message,
-    detail: `${observed.peerFingerprint}\n\n${text.detail}`, buttons: [text.cancel, text.confirm], defaultId: 0, cancelId: 0, noLink: true });
+    detail: `${label}\n\n${text.detail}`, buttons: [text.cancel, text.confirm], defaultId: 0, cancelId: 0, noLink: true });
   check();
   if (result.response !== 1) throw new Error('cancelled');
   const current = await read(native, record);

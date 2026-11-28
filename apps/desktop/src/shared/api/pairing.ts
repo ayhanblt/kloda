@@ -7,6 +7,7 @@ export interface PairingStatus {
   operationId?: string;
   candidateGeneration?: string;
   peerFingerprint?: string;
+  peerName?: string;
   qr?: string;
   remainingMs?: number;
   recordId?: string;
@@ -15,10 +16,20 @@ export interface PairingStatus {
   backupScope?: {
     state: 'not_approved' | 'approved' | 'revoked' | 'unavailable';
     folder?: string;
+    peerFolder?: string;
     revision?: string;
     errorCode?: PairingErrorCode;
   };
   hardwareClass?: 'secure_enclave' | 'strongbox' | 'hardware_tee' | 'secure_hardware' | 'windows_tpm';
+}
+
+export function formatBackupFolder(folder?: string, peerFolder?: string): string | undefined {
+  if (!folder) return undefined;
+  if (!peerFolder) return folder;
+  const sep = folder.includes('\\') && !folder.includes('/') ? '\\' : '/';
+  const rootOnly = folder === '/' || /^[A-Za-z]:[\\/]$/.test(folder);
+  const trimmed = rootOnly ? folder : folder.replace(/[\\/]+$/, '');
+  return trimmed.endsWith(sep) ? `${trimmed}${peerFolder}` : `${trimmed}${sep}${peerFolder}`;
 }
 
 export interface DesktopPairingBridge {
@@ -28,7 +39,7 @@ export interface DesktopPairingBridge {
   deny(operationId: string, candidateGeneration: string): Promise<PairingStatus>;
   cancel(operationId: string): Promise<PairingStatus>;
   resume(recordId: string): Promise<PairingStatus>;
-  approveBackup(recordId: string): Promise<PairingStatus>;
+  approveBackup(recordId: string, language?: 'tr' | 'en' | 'de', theme?: 'dark' | 'light'): Promise<PairingStatus>;
   revokeBackup(recordId: string): Promise<PairingStatus>;
   close(): Promise<void>;
 }

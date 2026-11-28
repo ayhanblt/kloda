@@ -32,18 +32,39 @@ final class IosAutomaticCoordinator {
     reconcile()
   }
   func observed(status: [String: Any]) {
-    guard status["phase"] as? String == "complete", status["repairRequired"] as? Bool == false,
-      let record = status["recordId"] as? String else { return }
-    worker.async {
-      do {
-        let journal = try IosSyncJournal()
-        if try journal.automaticRecord() != record {
-          try self.invalidate(journal, clearRecord: false)
-          try journal.setAutomaticRecord(record)
-          try self.plan(journal, allowForeground: self.foreground)
-        }
-      } catch { self.report(Self.code(error)) }
+    let phase = status["phase"] as? String
+    let unpairState = (status["unpairResult"] as? [String: Any])?["state"] as? String
+    if phase == "complete", status["repairRequired"] as? Bool == false, let record = status["recordId"] as? String {
+      worker.async {
+        do {
+          let enabledChanged = (try? IosWebDavJournal.open().enablePcIfUnset(record: record)) ?? false
+          let journal = try IosSyncJournal()
+          if try journal.automaticRecord() != record || enabledChanged {
+            try self.invalidate(journal, clearRecord: false)
+            try journal.setAutomaticRecord(record)
+            try self.plan(journal, allowForeground: self.foreground)
+          }
+        } catch { self.report(Self.code(error)) }
+      }
+      return
     }
+    if phase == "revoked" || unpairState == "pc_confirmed" || unpairState == "local_only" {
+      let record = status["recordId"] as? String
+      worker.async {
+        do {
+          if let record { _ = try? IosWebDavJournal.open().disablePcIfPresent(record: record) }
+          self.files.clearPeerState()
+          try self.invalidate(IosSyncJournal(), clearRecord: true)
+        } catch { self.report(Self.code(error)) }
+      }
+    }
+  }
+  func currentPairedRecordId() -> String? {
+    try? IosSyncJournal().automaticRecord()
+  }
+  func currentPairedPcEnabled() -> Bool {
+    guard let record = currentPairedRecordId() else { return false }
+    return (try? IosWebDavJournal.open().enabled(kind: "pc", id: record, revision: "v1")) ?? false
   }
   func reconcile() { worker.async { self.reconcileOnWorker() } }
   func pause() throws {

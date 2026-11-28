@@ -120,7 +120,7 @@ class KlodaBackupModule : Module() {
       finally { synchronized(restoreLock) { if (restore === session) restore = null }; session.pause() }
     }
     AsyncFunction("cancelWebDavRestore") { request: String -> guarded { cancelRestore(UUID.fromString(request)) } }
-    AsyncFunction("pcSelected") { guarded { mapOf("enabled" to AndroidBackupDestinations.hasEnabledPc(context())) } }
+    AsyncFunction("pcSelected") { guarded { mapOf("enabled" to AndroidBackupDestinations.currentPairedPcEnabled(context())) } }
     AsyncFunction("pcEnabled") { record: String -> guarded {
       mapOf("enabled" to AndroidBackupDestinations.pcEnabled(context(), record))
     } }

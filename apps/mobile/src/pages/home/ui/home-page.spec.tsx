@@ -21,13 +21,18 @@ test('safe/syncing render without demo claims, and secondary actions keep their 
   const props = { targets: [{ id: 'owned', label: 'Owned PC', kind: 'pc' as const, state: 'safe' as const, page: 'computer' as const }], sourceCount: 1, paused: false, working: false, navigate, run, pause, resume: jest.fn() };
   const view = await render(<ThemeProvider><AppearanceSwitch /><StatusView {...props} state="safe" /></ThemeProvider>);
   expect(screen.getByRole('header', { name: 'Last run completed' })).toBeTruthy();
+  expect(screen.getByTestId('hero-reason-folder')).toBeTruthy();
+  expect(screen.getByText('No photos in selected folders')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Add folder' })); expect(navigate).toHaveBeenCalledWith('sources');
   expect(screen.queryByText(/100%|MacBook|14:06|MB\/s/)).toBeNull();
-  expect((JSON.stringify(screen.toJSON()).match(/"payload":\d+/g) ?? [])).toContain(`"payload":${Number(processColor(themeColors('dark')['brand-base'])) >>> 0}`);
+  expect((JSON.stringify(screen.toJSON()).match(/"payload":\d+/g) ?? [])).toContain(`"payload":${Number(processColor(themeColors('dark')['brand-halo-1'])) >>> 0}`);
   await fireEvent.press(screen.getByRole('button', { name: 'fixture light' }));
-  await waitFor(() => expect((JSON.stringify(screen.toJSON()).match(/"payload":\d+/g) ?? [])).toContain(`"payload":${Number(processColor(themeColors('light')['brand-base'])) >>> 0}`));
+  await waitFor(() => expect((JSON.stringify(screen.toJSON()).match(/"payload":\d+/g) ?? [])).toContain(`"payload":${Number(processColor(themeColors('light')['brand-halo-1'])) >>> 0}`));
   await fireEvent.press(screen.getByRole('button', { name: 'Back up now' })); expect(run).toHaveBeenCalledTimes(1);
   await fireEvent.press(screen.getByRole('button', { name: 'Activity history' })); expect(navigate).toHaveBeenCalledWith('activity');
   await view.rerender(<ThemeProvider><StatusView {...props} state="syncing" progress={{ kind: 'bytes', completed: '5', total: '10', percent: 50 }} /></ThemeProvider>);
+  expect(screen.queryByTestId('hero-reason-folder')).toBeNull();
+  expect((JSON.stringify(screen.toJSON()).match(/"payload":\d+/g) ?? [])).toContain(`"payload":${Number(processColor(themeColors('light')['brand-base'])) >>> 0}`);
   expect(screen.getByRole('progressbar').props.accessibilityValue.now).toBe(50);
   await fireEvent.press(screen.getByRole('button', { name: 'Pause' })); expect(pause).toHaveBeenCalledTimes(1);
 });
@@ -37,5 +42,24 @@ test('Reduce Motion keeps the syncing illustration static', async () => {
   await render(<ThemeProvider><StatusView state="syncing" targets={[{ id: 'owned', label: 'Fixture PC', kind: 'pc', state: 'syncing', page: 'computer' }]}
     sourceCount={1} paused={false} working={false} navigate={jest.fn()} run={jest.fn()} pause={jest.fn()} resume={jest.fn()} /></ThemeProvider>);
   expect(screen.getByRole('header', { name: 'Backing up' })).toBeTruthy();
+  expect(JSON.stringify(screen.toJSON())).not.toContain('animate-pulse');
+});
+
+test('formats byte progress in MB/GB and renders a quiet skeleton while hero photos load', async () => {
+  await render(<ThemeProvider><StatusView
+    state="syncing"
+    heroLoading
+    progress={{ kind: 'bytes', completed: '157286400', total: '2147483648', percent: 7 }}
+    targets={[{ id: 'owned', label: 'Owned PC', kind: 'pc', state: 'syncing', page: 'computer' }]}
+    sourceCount={1}
+    paused={false}
+    working={false}
+    navigate={jest.fn()}
+    run={jest.fn()}
+    pause={jest.fn()}
+    resume={jest.fn()}
+  /></ThemeProvider>);
+  expect(screen.getByTestId('hero-mosaic-skeleton')).toBeTruthy();
+  expect(screen.getByText('150 MB / 2 GB backed up')).toBeTruthy();
   expect(JSON.stringify(screen.toJSON())).not.toContain('animate-pulse');
 });

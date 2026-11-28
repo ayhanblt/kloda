@@ -40,6 +40,7 @@ int32_t kloda_ios_lan_with_socket(const uint8_t *address, size_t length, uint16_
 int32_t kloda_ios_lan_current(const void *borrowed_lease);
 /* Same peer/interface witness; returned FD transfers ownership. */
 int32_t kloda_ios_lan_connect(const void *borrowed_lease, uint16_t port);
+char *kloda_ios_set_device_name(const uint8_t *name, size_t length);
 void kloda_ios_reply_free(char *reply);
 #ifdef __cplusplus
 }

@@ -163,10 +163,12 @@ fn directories(store: &Store, item: &Item) -> Result<Directories> {
         }
         scope.folder
     };
+    let peer_folder = store.scope_folder(&item.sid).ok().flatten();
     Ok(backup_root::acquire(
         &folder,
         &item.fingerprint,
         item.entry.binding,
+        peer_folder.as_deref(),
     )?)
 }
 fn folder(store: &Store, item: &Item) -> Result<String> {

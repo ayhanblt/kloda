@@ -34,16 +34,30 @@ final class IosFilesQueue {
   private var activeRun: IosFilesRun?
 
 
+  func clearPeerState() {
+    lock.lock()
+    if !running {
+      lastError = nil
+      activeRun = nil
+    }
+    lock.unlock()
+  }
+
   func pause() {
     lock.lock(); generation &+= 1; lock.unlock()
   }
 
-  func status() throws -> [String: Any] {
+  func status(recordId: String? = nil, filterByRecord: Bool = false) throws -> [String: Any] {
     lock.lock()
     defer { lock.unlock() }
+    if filterByRecord && recordId == nil {
+      var value: [String: Any] = ["running": running, "jobs": [[String: Any]](), "totalJobs": "0", "hasMore": false]
+      if running, let error = lastError { value["errorCode"] = error }
+      return value
+    }
     let journal = try IosSyncJournal()
     if !recovered && !running { try journal.recoverFilesJobs(); try journal.recoverFilesRuns(); recovered = true }
-    let all = try journal.filesJobs()
+    let all = try filterByRecord ? journal.filesJobs(recordId: recordId!) : journal.filesJobs()
     let jobs: [[String: Any]] = all.prefix(100).map { job in
       var value: [String: Any] = ["id": job.id, "sourceId": job.sourceId, "name": job.name,
         "recordId": job.recordId, "state": job.state, "acknowledgedBytes": String(job.acknowledged), "totalBytes": String(job.size)]
@@ -51,7 +65,7 @@ final class IosFilesQueue {
       return value
     }
     var value: [String: Any] = ["running": running, "jobs": jobs, "totalJobs": String(all.count), "hasMore": all.count > 100]
-    if let run = try journal.latestFilesRun() {
+    if let run = try (filterByRecord ? journal.latestFilesRun(recordId: recordId!) : journal.latestFilesRun()) {
       var visible: [String: Any] = ["id": run.id, "recordId": run.recordId, "state": run.state, "attempts": run.attempts]
       if let error = run.errorCode { visible["errorCode"] = error }
       value["run"] = visible

@@ -12,12 +12,82 @@ pub(crate) struct Binding {
     pub(crate) peer: [u8; 24],
 }
 
+#[cfg(test)]
 pub(crate) fn prepare(folder: &str, fingerprint: &[u8; 32]) -> Result<Binding> {
-    Ok(open(folder, fingerprint, true)?.0)
+    Ok(open(folder, fingerprint, true, None)?.0)
 }
 
-pub(crate) fn verify(folder: &str, fingerprint: &[u8; 32], binding: Binding) -> Result<()> {
-    if open(folder, fingerprint, false)?.0 != binding {
+pub(crate) fn prepare_named(
+    folder: &str,
+    fingerprint: &[u8; 32],
+    preferred_name: Option<&str>,
+    reusable_peer_root: Option<[u8; 24]>,
+) -> Result<(Binding, Option<String>)> {
+    if folder.len() > 4096 || folder.contains('\0') || !Path::new(folder).is_absolute() {
+        return Err(PairingError::BackupPathRejected);
+    }
+    let Some(base) = preferred_name.and_then(crate::device_name::sanitize_folder) else {
+        return Ok((open(folder, fingerprint, true, None)?.0, None));
+    };
+    let root = Dir::open_ambient_dir(folder, ambient_authority()).map_err(target_error)?;
+    let root_id = identity(&root)?;
+    for index in 1..=99usize {
+        let candidate = if index == 1 {
+            base.clone()
+        } else {
+            format!("{base} ({index})")
+        };
+        match root.symlink_metadata(&candidate) {
+            Ok(metadata) => {
+                if !is_safe_dir(&metadata) {
+                    continue;
+                }
+                if let Ok(peer) = root.open_dir(&candidate) {
+                    if let (Some(expected), Ok(actual)) = (reusable_peer_root, identity(&peer)) {
+                        if actual == expected {
+                            return Ok((
+                                Binding {
+                                    root: root_id,
+                                    peer: actual,
+                                },
+                                Some(candidate),
+                            ));
+                        }
+                    }
+                }
+            }
+            Err(error) if error.kind() == io::ErrorKind::NotFound => {
+                match root.create_dir(&candidate) {
+                    Ok(()) => (),
+                    Err(err) if err.kind() == io::ErrorKind::AlreadyExists => continue,
+                    Err(err) => return Err(target_error(err)),
+                }
+                let metadata = root.symlink_metadata(&candidate).map_err(target_error)?;
+                if !is_safe_dir(&metadata) {
+                    return Err(PairingError::BackupPathRejected);
+                }
+                let peer = root.open_dir(&candidate).map_err(target_error)?;
+                return Ok((
+                    Binding {
+                        root: root_id,
+                        peer: identity(&peer)?,
+                    },
+                    Some(candidate),
+                ));
+            }
+            Err(error) => return Err(target_error(error)),
+        }
+    }
+    Ok((open(folder, fingerprint, true, None)?.0, None))
+}
+
+pub(crate) fn verify(
+    folder: &str,
+    fingerprint: &[u8; 32],
+    binding: Binding,
+    peer_folder: Option<&str>,
+) -> Result<()> {
+    if open(folder, fingerprint, false, peer_folder)?.0 != binding {
         return Err(PairingError::BackupScopeChanged);
     }
     Ok(())
@@ -97,21 +167,54 @@ pub(crate) fn acquire(
     folder: &str,
     fingerprint: &[u8; 32],
     expected: Binding,
+    peer_folder: Option<&str>,
 ) -> Result<Directories> {
-    let (binding, directories) = open(folder, fingerprint, false)?;
+    let (binding, directories) = open(folder, fingerprint, false, peer_folder)?;
     if binding != expected {
         return Err(PairingError::BackupScopeChanged);
     }
     Ok(directories)
 }
 
-fn open(folder: &str, fingerprint: &[u8; 32], create: bool) -> Result<(Binding, Directories)> {
+fn is_safe_dir(metadata: &cap_std::fs::Metadata) -> bool {
+    if !metadata.is_dir() || metadata.is_symlink() {
+        return false;
+    }
+    #[cfg(windows)]
+    {
+        use cap_std::fs::MetadataExt;
+        use windows_sys::Win32::Storage::FileSystem::FILE_ATTRIBUTE_REPARSE_POINT;
+        if metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0 {
+            return false;
+        }
+    }
+    true
+}
+
+fn open(
+    folder: &str,
+    fingerprint: &[u8; 32],
+    create: bool,
+    peer_folder: Option<&str>,
+) -> Result<(Binding, Directories)> {
     if folder.len() > 4096 || folder.contains('\0') || !Path::new(folder).is_absolute() {
         return Err(PairingError::BackupPathRejected);
     }
     // Ambient authority is only for the PC-selected root, never a remote path.
     let root = Dir::open_ambient_dir(folder, ambient_authority()).map_err(target_error)?;
-    let name = crate::qr_base64::encode(fingerprint);
+    let name = match peer_folder {
+        Some(pf) => {
+            if pf.is_empty()
+                || pf.len() > 255
+                || matches!(pf, "." | "..")
+                || pf.contains(['/', '\\', '\0'])
+            {
+                return Err(PairingError::BackupPathRejected);
+            }
+            pf.to_owned()
+        }
+        None => crate::qr_base64::encode(fingerprint),
+    };
     if create {
         match root.create_dir(&name) {
             Ok(()) => (),
@@ -120,16 +223,8 @@ fn open(folder: &str, fingerprint: &[u8; 32], create: bool) -> Result<(Binding, 
         }
     }
     let metadata = root.symlink_metadata(&name).map_err(target_error)?;
-    if !metadata.is_dir() || metadata.is_symlink() {
+    if !is_safe_dir(&metadata) {
         return Err(PairingError::BackupPathRejected);
-    }
-    #[cfg(windows)]
-    {
-        use cap_std::fs::MetadataExt;
-        use windows_sys::Win32::Storage::FileSystem::FILE_ATTRIBUTE_REPARSE_POINT;
-        if metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0 {
-            return Err(PairingError::BackupPathRejected);
-        }
     }
     // Local filesystem writers are explicitly trusted; cap-std contains hostile peer paths.
     let peer = root.open_dir(&name).map_err(target_error)?;

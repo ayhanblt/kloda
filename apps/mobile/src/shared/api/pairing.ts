@@ -7,6 +7,13 @@ export type { PairingErrorCode } from './pairing-errors';
 
 const phases = ['idle', 'open', 'connecting', 'reserved', 'consumed_pending_ack', 'complete', 'pending', 'invalid', 'revoked'] as const;
 export type PairingPhase = typeof phases[number];
+const scopeStates = ['approved', 'not_approved', 'revoked', 'unavailable', 'unreachable', 'unpaired'] as const;
+export type PcScopeState = typeof scopeStates[number];
+export interface PcScopeStatus {
+  state: PcScopeState;
+  peerName?: string;
+  errorCode?: PairingErrorCode;
+}
 const hardwareClasses: Record<NonNullable<PairingStatus['hardwareClass']>, true> = {
   secure_enclave: true, strongbox: true, hardware_tee: true, secure_hardware: true, windows_tpm: true,
 };
@@ -15,6 +22,7 @@ export interface PairingStatus {
   operationId?: string;
   candidateGeneration?: string;
   peerFingerprint?: string;
+  peerName?: string;
   qr?: string;
   remainingMs?: number;
   recordId?: string;
@@ -26,6 +34,7 @@ export interface PairingStatus {
 
 export interface PairingApi {
   status(): Promise<PairingStatus>;
+  pcScopeStatus?(): Promise<PcScopeStatus>;
   scan(qr: string): Promise<PairingStatus>;
   approve(operationId: string, candidateGeneration: string): Promise<PairingStatus>;
   deny(operationId: string, candidateGeneration: string): Promise<PairingStatus>;
@@ -37,6 +46,7 @@ export interface PairingApi {
 
 interface NativePairingModule {
   status(): Promise<unknown>;
+  pcScopeStatus?(): Promise<unknown>;
   scan(qr: string): Promise<unknown>;
   approve(operationId: string, candidateGeneration: string): Promise<unknown>;
   deny(operationId: string, candidateGeneration: string): Promise<unknown>;
@@ -83,6 +93,7 @@ function statusFromNative(value: unknown): PairingStatus {
     operationId: optionalText('operationId' in value ? value.operationId : undefined),
     candidateGeneration: optionalText('candidateGeneration' in value ? value.candidateGeneration : undefined),
     peerFingerprint: optionalText('peerFingerprint' in value ? value.peerFingerprint : undefined),
+    peerName: optionalText('peerName' in value ? value.peerName : undefined),
     recordId: optionalText('recordId' in value ? value.recordId : undefined),
     remainingMs: typeof remainingMs === 'number' ? remainingMs : undefined,
     repairRequired: typeof repairRequired === 'boolean' ? repairRequired : undefined,
@@ -104,6 +115,21 @@ async function invoke(action: (native: NativePairingModule) => Promise<unknown>)
 // Only the native runtime parses QR, authenticates TLS/proof, and writes trust.
 export const pairing: PairingApi = {
   status: () => invoke((native) => native.status()),
+  pcScopeStatus: async (): Promise<PcScopeStatus> => {
+    try {
+      const native = requireOptionalNativeModule<NativePairingModule>('KlodaPairing');
+      if (!native || typeof native.pcScopeStatus !== 'function') return { state: 'unreachable' };
+      const raw = await native.pcScopeStatus();
+      if (typeof raw !== 'object' || raw === null || !('state' in raw)) return { state: 'unreachable' };
+      const state = scopeStates.find((known) => known === raw.state) ?? 'unreachable';
+      const peerName = 'peerName' in raw && typeof raw.peerName === 'string' && raw.peerName.trim().length > 0
+        ? raw.peerName.trim() : undefined;
+      const errorCode = 'errorCode' in raw && raw.errorCode != null ? pairingErrorCode({ code: raw.errorCode }) : undefined;
+      return { state, peerName, errorCode };
+    } catch {
+      return { state: 'unreachable' };
+    }
+  },
   scan: (qr) => invoke((native) => native.scan(qr)),
   approve: (operationId, generation) => invoke((native) => native.approve(operationId, generation)),
   deny: (operationId, generation) => invoke((native) => native.deny(operationId, generation)),

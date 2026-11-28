@@ -9,6 +9,8 @@ pub(crate) struct BackupScopeStatus {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) folder: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) peer_folder: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) revision: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) error_code: Option<&'static str>,
@@ -32,6 +34,8 @@ pub(crate) struct PairingStatus {
     pub(crate) candidate_generation: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) peer_fingerprint: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) peer_name: Option<String>,
     #[serde(
         skip_serializing_if = "Option::is_none",
         serialize_with = "serialize_qr"
@@ -58,6 +62,7 @@ impl Default for PairingStatus {
             operation_id: None,
             candidate_generation: None,
             peer_fingerprint: None,
+            peer_name: None,
             qr: None,
             remaining_ms: None,
             record_id: None,

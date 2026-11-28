@@ -120,11 +120,12 @@ fn seed_database(directory: &Path, spki: &crate::key::Spki, epoch: [u8; 16]) -> 
     crate::file_schema::migrate(&mut conn, 0)?;
     crate::backup_retention_schema::migrate(&mut conn, 0)?;
     crate::backup_layout_schema::migrate(&mut conn, 0)?;
+    crate::device_metadata_schema::migrate(&mut conn, 0)?;
 
     let version: i64 = conn
         .pragma_query_value(None, "user_version", |r| r.get(0))
         .map_err(|_| PairingError::StorageFailure)?;
-    if version != 5 {
+    if version != 6 {
         return Err(PairingError::ContinuityLost);
     }
     conn.close().map_err(|_| PairingError::StorageFailure)?;
@@ -207,12 +208,13 @@ pub(crate) fn bootstrap_if_fresh(legacy: &Path) -> Result<()> {
         let after = now
             .checked_add(365 * 86_400)
             .ok_or(PairingError::TlsRejected)?;
-        let der = certificate::create(
+        let der = certificate::create_named(
             certificate::Role::Pc,
             identity.spki(),
             now,
             after,
             identity.certificate_signer(),
+            crate::device_name::local_name().as_deref(),
         )?;
         drop(write_protected_file(&gen_dir.join("certificate.der"), &der)?);
         Ok(())

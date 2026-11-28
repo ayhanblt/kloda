@@ -4,6 +4,7 @@ import type { PairingErrorCode } from './pairing';
 export interface PairedDevice {
   recordId: string;
   peerFingerprint: string;
+  peerName?: string;
   trust: 'complete' | 'consumed_pending_ack' | 'revoked';
   backupScope: PairingStatus['backupScope'];
 }
@@ -127,7 +128,7 @@ declare global {
       };
       devices?: {
         list(after?: string): Promise<PairedDevicesPage>;
-        approveBackup(recordId: string): Promise<unknown>;
+        approveBackup(recordId: string, language?: 'tr' | 'en' | 'de', theme?: 'dark' | 'light'): Promise<unknown>;
         revokeBackup(recordId: string): Promise<unknown>;
         removeDevice?(recordId: string, language: 'tr' | 'en' | 'de'): Promise<unknown>;
       };

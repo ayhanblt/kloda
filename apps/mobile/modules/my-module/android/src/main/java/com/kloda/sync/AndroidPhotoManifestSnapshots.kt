@@ -31,9 +31,9 @@ internal class AndroidPhotoManifestSnapshots(context: Context) {
       try {
         val descriptor = Os.open(temporary.path, OsConstants.O_CREAT or OsConstants.O_EXCL or OsConstants.O_WRONLY or OsConstants.O_NOFOLLOW, 384)
         FileOutputStream(descriptor).use { output ->
-          output.write(publication.bytes); Os.fchmod(output.fd, 256); output.fd.sync()
+          output.write(publication.bytes); Os.fchmod(output.fd, 256)
         }
-        Os.rename(temporary.path, file.path); sync(directory)
+        Os.rename(temporary.path, file.path)
       } finally { temporary.delete() }
     }
     val descriptor = Os.open(file.path, OsConstants.O_RDONLY or OsConstants.O_NOFOLLOW, 0)
@@ -53,7 +53,7 @@ internal class AndroidPhotoManifestSnapshots(context: Context) {
   }
   fun discard(publication: PhotoPublication) {
     val file = path(publication.job.id)
-    if (file.exists()) { if (!file.delete()) throw FilesFailure("storage_failure"); sync(directory) }
+    if (file.exists() && !file.delete()) throw FilesFailure("storage_failure")
   }
   fun recover() {
     if (!directory.exists()) return

@@ -63,3 +63,11 @@ it('uses a distinct explicit authorization action for an old context', async () 
   await fireEvent.press(surface.getByText(i18n.t('destinations.review.authorizeRecheck')));
   await waitFor(() => expect(webDavReview.act).toHaveBeenCalledWith(id, 'authorize_recheck', expect.any(String)));
 });
+
+it('hides the review panel when WebDAV is not configured and there are no items', async () => {
+  jest.spyOn(AppState, 'addEventListener').mockReturnValue({ remove: jest.fn() });
+  jest.mocked(webDavReview.items).mockResolvedValue({ items: [], hasMore: false });
+  const surface = await render(<WebDavReviewPanel configured={false} />);
+  await waitFor(() => expect(webDavReview.items).toHaveBeenCalled());
+  expect(surface.queryByText(i18n.t('destinations.review.title'))).toBeNull();
+});

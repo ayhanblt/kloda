@@ -76,7 +76,7 @@ internal object AndroidOwnBackups {
     }
     val bytes = number(value, "bytes")
     if (number(value, "offset") != offset || number(value, "size") != size || offset > size ||
-      bytes != minOf(65536L, size - offset)) throw FilesFailure("outcome_unknown")
+      bytes != minOf(1_048_576L, size - offset)) throw FilesFailure("outcome_unknown")
     return bytes
   }
 }

@@ -20,7 +20,7 @@ pub(crate) struct Channel {
     sender: hyper::client::conn::http1::SendRequest<Body>,
     connection: Pin<Box<Connection>>,
     pub(crate) record: Record,
-    operation: Option<crate::file_protocol::Operation>,
+    operations: Vec<crate::file_protocol::Operation>,
 }
 impl Channel {
     pub(crate) async fn connect(
@@ -41,6 +41,7 @@ impl Channel {
         socket
             .set_nonblocking(true)
             .map_err(|_| PairingError::ConnectionClosed)?;
+        let _ = socket.set_nodelay(true);
         let socket =
             tokio::net::TcpStream::from_std(socket).map_err(|_| PairingError::ConnectionClosed)?;
         let (config, verifier) = crate::tls_config::client_config(key, record.expected)?;
@@ -68,8 +69,18 @@ impl Channel {
             sender,
             connection: Box::pin(connection),
             record: record.clone(),
-            operation: None,
+            operations: Vec::new(),
         })
+    }
+    fn operation(&self, id: &str) -> Option<&crate::file_protocol::Operation> {
+        self.operations.iter().find(|op| op.id == id)
+    }
+    fn remember(&mut self, operation: crate::file_protocol::Operation) {
+        self.operations.retain(|op| op.id != operation.id);
+        self.operations.push(operation);
+        if self.operations.len() > 16 {
+            self.operations.remove(0);
+        }
     }
     pub(crate) fn matches(&self, record: &Record) -> bool {
         self.record.sid == record.sid
@@ -127,11 +138,16 @@ impl Channel {
         task: Task,
         check_route: impl Fn() -> Result<()>,
     ) -> Result<Reply> {
+        let target_id = match &task.command {
+            Command::Status { id }
+            | Command::Chunk { id, .. }
+            | Command::Finalize { id }
+            | Command::Restore { id, .. } => Some(id.as_str()),
+            Command::Create { .. } | Command::List { .. } | Command::Scope => None,
+        };
         if let Command::Chunk { id, offset, length } = &task.command {
             let old = self
-                .operation
-                .as_ref()
-                .filter(|old| old.id == *id)
+                .operation(id)
                 .ok_or(PairingError::CandidateStale)?;
             let end = offset
                 .checked_add(*length as u64)
@@ -158,9 +174,10 @@ impl Channel {
         let (request, limit) = request(&self.record, &task)?;
         let response = self.exchange(request, limit, &check_route).await?;
         check_route()?;
-        let reply = crate::file_sender_ack::decode(response, &task, self.operation.as_ref())?;
+        let previous = target_id.and_then(|id| self.operation(id));
+        let reply = crate::file_sender_ack::decode(response, &task, previous)?;
         if let Some(operation) = &reply.operation {
-            self.operation = Some(operation.clone());
+            self.remember(operation.clone());
         }
         Ok(reply)
     }
@@ -202,6 +219,7 @@ fn request(record: &Record, task: &Task) -> Result<(Request<Body>, usize)> {
             Vec::new(),
             Some(*offset),
         ),
+        Command::Scope => ("GET", "/v1/scope".to_owned(), Vec::new(), None),
     };
     let mut request = Request::builder()
         .method(method)

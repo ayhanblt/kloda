@@ -1,6 +1,7 @@
 use super::*;
-use crate::file_sender_command::{Reply, Task};
-use crate::store_rows::{RecordRole, RecordState};
+use crate::file_protocol::OperationState;
+use crate::file_sender_command::{Command, Reply, Task};
+use crate::store_rows::{Record, RecordRole, RecordState};
 
 impl Actor {
     pub(super) fn transfer(
@@ -15,6 +16,59 @@ impl Actor {
             self.file_sender = None;
         }
         result
+    }
+    fn connect_file_channel(
+        &self,
+        record: &Record,
+        hint: &crate::qr::LanHint,
+        check_foreground: &impl Fn() -> Result<()>,
+    ) -> Result<(crate::route::Route, crate::file_sender::Channel)> {
+        #[cfg(target_os = "android")]
+        let route = crate::route::for_peer(hint, &self.context.platform)?;
+        #[cfg(not(target_os = "android"))]
+        let route = crate::route::for_peer(hint)?;
+        route.check(hint.ip)?;
+        check_foreground()?;
+        let socket = route.connect(hint, Duration::from_millis(250))?;
+        let channel = self.file_transport.runtime().block_on(async {
+            tokio::time::timeout(
+                Duration::from_secs(10),
+                crate::file_sender::Channel::connect(
+                    socket,
+                    self.installation.certified_key.clone(),
+                    record,
+                    || {
+                        check_foreground()?;
+                        route.check(hint.ip)
+                    },
+                ),
+            )
+            .await
+            .map_err(|_| PairingError::ConnectionClosed)?
+        })?;
+        Ok((route, channel))
+    }
+    fn transfer_once(
+        &mut self,
+        channel: &mut crate::file_sender::Channel,
+        route: &crate::route::Route,
+        hint: &crate::qr::LanHint,
+        task: Task,
+        check_foreground: &impl Fn() -> Result<()>,
+    ) -> Result<Reply> {
+        route.check(hint.ip)?;
+        self.guard()?;
+        self.file_transport.runtime().block_on(async {
+            tokio::time::timeout(
+                Duration::from_secs(30),
+                channel.transfer(task, || {
+                    check_foreground()?;
+                    route.check(hint.ip)
+                }),
+            )
+            .await
+            .map_err(|_| PairingError::OutcomeUnknown)?
+        })
     }
     fn transfer_checked(
         &mut self,
@@ -51,48 +105,76 @@ impl Actor {
         {
             self.file_sender = None;
         }
-        let (route, mut channel) = match self.file_sender.take() {
+        let reused = self.file_sender.is_some();
+        let (mut route, mut channel) = match self.file_sender.take() {
             Some(sender) => sender,
-            None => {
-                #[cfg(target_os = "android")]
-                let route = crate::route::for_peer(hint, &self.context.platform)?;
-                #[cfg(not(target_os = "android"))]
-                let route = crate::route::for_peer(hint)?;
-                route.check(hint.ip)?;
-                check_foreground()?;
-                let socket = route.connect(hint, Duration::from_millis(250))?;
-                let channel = self.file_transport.runtime().block_on(async {
-                    tokio::time::timeout(
-                        Duration::from_secs(10),
-                        crate::file_sender::Channel::connect(
-                            socket,
-                            self.installation.certified_key.clone(),
-                            &record,
-                            || {
-                                check_foreground()?;
-                                route.check(hint.ip)
-                            },
-                        ),
-                    )
-                    .await
-                    .map_err(|_| PairingError::ConnectionClosed)?
-                })?;
-                (route, channel)
-            }
+            None => self.connect_file_channel(&record, hint, &check_foreground)?,
         };
-        route.check(hint.ip)?;
-        self.guard()?;
-        let reply = self.file_transport.runtime().block_on(async {
-            tokio::time::timeout(
-                Duration::from_secs(30),
-                channel.transfer(task, || {
-                    check_foreground()?;
-                    route.check(hint.ip)
-                }),
-            )
-            .await
-            .map_err(|_| PairingError::OutcomeUnknown)?
-        })?;
+        let retry_task = if reused {
+            Some(Task {
+                command: task.command.clone(),
+                file: match task.file.as_ref() {
+                    Some(file) => Some(
+                        file.try_clone()
+                            .map_err(|_| PairingError::BackupUnavailable)?,
+                    ),
+                    None => None,
+                },
+            })
+        } else {
+            None
+        };
+        let reply = match self.transfer_once(&mut channel, &route, hint, task, &check_foreground) {
+            Ok(reply) => reply,
+            Err(PairingError::ConnectionClosed | PairingError::OutcomeUnknown)
+                if retry_task.is_some() =>
+            {
+                drop(channel);
+                check_foreground()?;
+                self.guard()?;
+                let (fresh_route, fresh_channel) =
+                    self.connect_file_channel(&record, hint, &check_foreground)?;
+                route = fresh_route;
+                channel = fresh_channel;
+                let retry_task = retry_task.unwrap();
+                if let Command::Chunk { id, offset, length } = &retry_task.command {
+                    let status_reply = self.transfer_once(
+                        &mut channel,
+                        &route,
+                        hint,
+                        Task {
+                            command: Command::Status { id: id.clone() },
+                            file: None,
+                        },
+                        &check_foreground,
+                    )?;
+                    let already_committed = status_reply.operation.as_ref().is_some_and(|op| {
+                        op.state == OperationState::Completed
+                            || op.offset >= *offset + *length as u64
+                    });
+                    if already_committed {
+                        status_reply
+                    } else {
+                        self.transfer_once(
+                            &mut channel,
+                            &route,
+                            hint,
+                            retry_task,
+                            &check_foreground,
+                        )?
+                    }
+                } else {
+                    self.transfer_once(
+                        &mut channel,
+                        &route,
+                        hint,
+                        retry_task,
+                        &check_foreground,
+                    )?
+                }
+            }
+            Err(error) => return Err(error),
+        };
         self.guard()?;
         let current = self
             .installation

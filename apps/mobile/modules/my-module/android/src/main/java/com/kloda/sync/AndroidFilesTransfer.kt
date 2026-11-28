@@ -59,7 +59,7 @@ internal class AndroidFilesTransfer(private val send: (String, Int) -> String) {
   fun status(job: FilesJob): FilesAck = request(JSONObject().put("kind", "status").put("id", job.operationId), job)
 
   fun chunk(job: FilesJob, descriptor: Int): FilesAck {
-    val length = minOf(65536L, job.size - job.offset)
+    val length = minOf(1_048_576L, job.size - job.offset)
     val ack = request(JSONObject().put("kind", "chunk").put("id", job.operationId)
       .put("offset", job.offset).put("length", length), job, descriptor)
     if (ack.offset != job.offset + length) throw FilesFailure("outcome_unknown")

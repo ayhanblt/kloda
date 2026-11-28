@@ -68,4 +68,15 @@ describe('phone native pairing availability', () => {
     optionalModule.mockReturnValue({ status: async () => ({ phase: 'complete', repairRequired: 'yes' }) });
     await expect(pairing.status()).rejects.toEqual(new PairingError('outcome_unknown'));
   });
+
+  it('passes through peerName and handles pcScopeStatus safely without throwing', async () => {
+    optionalModule.mockReturnValue({
+      status: async () => ({ phase: 'complete', peerName: 'Ayhan Mac mini' }),
+      pcScopeStatus: async () => ({ state: 'not_approved', peerName: 'Ayhan Mac mini' }),
+    });
+    expect(await pairing.status()).toMatchObject({ phase: 'complete', peerName: 'Ayhan Mac mini' });
+    expect(await pairing.pcScopeStatus?.()).toEqual({ state: 'not_approved', peerName: 'Ayhan Mac mini', errorCode: undefined });
+    optionalModule.mockReturnValue({ pcScopeStatus: async () => { throw new Error('offline'); } });
+    expect(await pairing.pcScopeStatus?.()).toEqual({ state: 'unreachable' });
+  });
 });

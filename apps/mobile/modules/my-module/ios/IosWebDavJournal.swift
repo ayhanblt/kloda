@@ -165,6 +165,23 @@ final class IosWebDavJournal {
       return step == SQLITE_ROW
     }
   }
+  func destinationExists(kind: String, id: String) throws -> Bool {
+    try database.statement("SELECT 1 FROM backup_destination WHERE kind=? AND id=? LIMIT 1", values: [kind, id]) { row in
+      let step = sqlite3_step(row)
+      guard step == SQLITE_ROW || step == SQLITE_DONE else { throw IosWebDavFailure.code("storage_failure") }
+      return step == SQLITE_ROW
+    }
+  }
+  func enablePcIfUnset(record: String) throws -> Bool {
+    if try destinationExists(kind: "pc", id: record) { return false }
+    try setEnabled(kind: "pc", id: record, enabled: true, revision: "v1")
+    return true
+  }
+  func disablePcIfPresent(record: String) throws -> Bool {
+    guard try enabled(kind: "pc", id: record, revision: "v1") else { return false }
+    try setEnabled(kind: "pc", id: record, enabled: false, revision: "v1")
+    return true
+  }
   func enabled(kind: String, id: String, revision: String? = nil) throws -> Bool {
     try database.statement("SELECT enabled,revision FROM backup_destination WHERE kind=? AND id=?", values: [kind, id]) { row in
       let step = sqlite3_step(row)

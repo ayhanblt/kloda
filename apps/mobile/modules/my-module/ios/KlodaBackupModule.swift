@@ -110,7 +110,7 @@ public final class KlodaBackupModule: Module {
       if self.restoreRequest == ticket { self.restoreRequest = nil; self.restore.cancel(ticket); self.photosRestore.cancel(ticket) }
     }.runOnQueue(.main)
     AsyncFunction("pcSelected") { (promise: Promise) in
-      self.reply(promise) { ["enabled": try IosWebDavJournal.open().hasEnabledPc()] }
+      self.reply(promise) { ["enabled": IosAutomaticCoordinator.shared.currentPairedPcEnabled()] }
     }
     AsyncFunction("pcEnabled") { (record: String, promise: Promise) in
       self.reply(promise) { try IosFilesTransfer.fixed(record, bytes: 16); return ["enabled": try IosWebDavJournal.open().enabled(kind: "pc", id: record, revision: "v1")] }

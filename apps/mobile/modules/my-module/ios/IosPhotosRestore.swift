@@ -142,7 +142,7 @@ final class IosPhotosRestore {
         let bytes = try IosFilesTransfer.number(response, "bytes")
         guard try IosFilesTransfer.number(response, "offset") == intent.offset,
           try IosFilesTransfer.number(response, "size") == intent.size,
-          bytes == min(65_536, intent.size - intent.offset) else { throw IosPairingFailure.invalidReply }
+          bytes == min(1_048_576, intent.size - intent.offset) else { throw IosPairingFailure.invalidReply }
         try file.synchronize()
         guard fcntl(file.fileDescriptor, F_FULLFSYNC) == 0 else { throw IosFilesSource.ioFailure() }
         intent.offset += bytes; try journal.saveRestoreIntent(intent)

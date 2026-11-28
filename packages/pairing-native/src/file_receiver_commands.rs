@@ -72,9 +72,6 @@ impl Receiver {
             break (id, file);
         };
         let identity = backup_root::file_identity(&file)?;
-        file.sync_all().map_err(io_error)?;
-        backup_root::sync_dir(&staging)?;
-        directories.sync()?;
         let entry = rows::insert(store, sid, &id, upload, scope, &identity)?;
         Ok(Response::Operation(entry.operation))
     }
@@ -109,18 +106,18 @@ impl Receiver {
         }
         let overlap = length.saturating_sub(offset).min(bytes.len() as u64) as usize;
         file.seek(SeekFrom::Start(offset)).map_err(io_error)?;
-        let mut existing = [0; CHUNK_LIMIT];
-        file.read_exact(&mut existing[..overlap])
-            .map_err(io_error)?;
-        if existing[..overlap] != bytes[..overlap] {
-            return Err(Error::Conflict);
+        if overlap > 0 {
+            let mut existing = vec![0; overlap];
+            file.read_exact(&mut existing).map_err(io_error)?;
+            if existing.as_slice() != &bytes[..overlap] {
+                return Err(Error::Conflict);
+            }
         }
         if offset < entry.operation.offset {
             return Ok(());
         }
         // A crash tail is adopted only by explicit same-byte retry; nothing is truncated.
         file.write_all(&bytes[overlap..]).map_err(io_error)?;
-        file.sync_all().map_err(io_error)?;
         rows::advance(store, sid, entry, end, OperationState::Receiving)
     }
     pub(super) fn revoke(

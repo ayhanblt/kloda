@@ -24,6 +24,14 @@ async function renderSetup() {
   return surface;
 }
 
+async function openWebDavFromSetup(surface: Awaited<ReturnType<typeof render>>) {
+  await fireEvent.press(surface.getByText(i18n.t('ui.common.next')));
+  await fireEvent.press(surface.getByText(i18n.t('onboarding.saveSchedule')));
+  await fireEvent.press(surface.getByRole('tab', { name: i18n.t('statusUi.targets') }));
+  await fireEvent.press(surface.getByText(i18n.t('ui.conn.add')));
+  await fireEvent.press(surface.getByRole('button', { name: i18n.t('ui.providers.webdav') }));
+}
+
 describe('App', () => {
   afterAll(restoreNativeRuntime);
   beforeEach(() => { jest.clearAllMocks(); });
@@ -34,11 +42,10 @@ describe('App', () => {
     let finishProbe!: () => void;
     const oldProbe = new Promise<Awaited<ReturnType<typeof testAndSaveWebDavSettings>>>((resolve) => { finishProbe = () => resolve({ config: { endpoint: 'https://fixture.example', targetPath: 'Kloda', username: 'fixture' }, testedAt: null }); });
     jest.mocked(testAndSaveWebDavSettings).mockReturnValueOnce(oldProbe);
-    const { getByText, getByLabelText, queryAllByText } = await renderSetup();
+    const surface = await renderSetup();
+    const { getByText, getByLabelText, queryAllByText } = surface;
     await waitFor(() => expect(getByText('Documents')).toBeTruthy());
-    await fireEvent.press(getByText(i18n.t('ui.common.next')));
-    await fireEvent.press(getByText(i18n.t('onboarding.saveSchedule')));
-    await fireEvent.press(getByText(i18n.t('computer.advanced')));
+    await openWebDavFromSetup(surface);
     await waitFor(() => expect(getByLabelText(i18n.t('onboarding.endpoint'))).toBeTruthy());
     await fireEvent.changeText(getByLabelText(i18n.t('onboarding.endpoint')), 'https://fixture.example');
     await fireEvent.press(getByText(i18n.t('onboarding.testConnection')));
@@ -58,9 +65,7 @@ describe('App', () => {
     jest.mocked(loadWebDavSettings).mockResolvedValueOnce({ config: { endpoint: 'https://fixture.example', targetPath: 'saved', username: 'fixture' }, testedAt: '2026-10-28T00:00:00.000Z', probeWarning: true });
     const surface = await renderSetup();
     await waitFor(() => expect(surface.getByText('Documents')).toBeTruthy());
-    await fireEvent.press(surface.getByText(i18n.t('ui.common.next')));
-    await fireEvent.press(surface.getByText(i18n.t('onboarding.saveSchedule')));
-    await fireEvent.press(surface.getByText(i18n.t('computer.advanced')));
+    await openWebDavFromSetup(surface);
     await waitFor(() => expect(surface.getByLabelText(i18n.t('onboarding.targetPath')).props.value).toBe('saved'));
     expect(surface.getByLabelText(i18n.t('onboarding.password')).props.value).toBe('');
     expect(surface.getByText(i18n.t('onboarding.storageTested'))).toBeTruthy();
@@ -78,9 +83,7 @@ describe('App', () => {
       jest.mocked(testAndSaveWebDavSettings).mockReturnValueOnce(probe);
       const surface = await renderSetup();
       await waitFor(() => expect(surface.getByText('Documents')).toBeTruthy());
-      await fireEvent.press(surface.getByText(i18n.t('ui.common.next')));
-    await fireEvent.press(surface.getByText(i18n.t('onboarding.saveSchedule')));
-      await fireEvent.press(surface.getByText(i18n.t('computer.advanced')));
+      await openWebDavFromSetup(surface);
       await fireEvent.press(surface.getByText(i18n.t('onboarding.testConnection')));
       await fireEvent.changeText(surface.getByLabelText(i18n.t('onboarding.targetPath')), 'new-draft');
       await act(async () => { cancel(); await probe.catch(() => undefined); });
@@ -104,9 +107,7 @@ describe('App', () => {
       nativeRuntime.loadDirectorySources.mockResolvedValueOnce([{ id: 'source-1', kind: 'directory', displayName: 'Documents' }]);
       const surface = await renderSetup();
       await waitFor(() => expect(surface.getByText('Documents')).toBeTruthy());
-      await fireEvent.press(surface.getByText(i18n.t('ui.common.next')));
-      await fireEvent.press(surface.getByText(i18n.t('onboarding.saveSchedule')));
-      await fireEvent.press(surface.getByText(i18n.t('computer.advanced')));
+      await openWebDavFromSetup(surface);
       for (const key of ['endpoint', 'targetPath', 'security']) expect(surface.getByText(i18n.t(`onboarding.webdavHints.${key}`))).toBeTruthy();
       expect(surface.getByLabelText(i18n.t('onboarding.endpoint')).props.accessibilityHint).toBe(i18n.t('onboarding.webdavHints.endpoint'));
       jest.mocked(testAndSaveWebDavSettings).mockRejectedValueOnce(webDavFailure('webdav_connection', { stage: 'propfind', kind: 'http', status: 404 }));
@@ -182,7 +183,8 @@ describe('App', () => {
     await fireEvent.press(surface.getByText(i18n.t('ui.common.next')));
     await fireEvent.press(surface.getByText(i18n.t('onboarding.saveSchedule')));
     await waitFor(() => expect(surface.getByText(i18n.t('computer.title'))).toBeTruthy());
-    expect(surface.getByText(i18n.t('computer.grantDescription'))).toBeTruthy();
+    expect(surface.getByText(i18n.t('computer.pairDescription'))).toBeTruthy();
+    expect(surface.queryByText(i18n.t('computer.advanced'))).toBeNull();
     expect(surface.queryByLabelText(i18n.t('onboarding.password'))).toBeNull();
     expect(nativeRuntime.saveStorageConfig).not.toHaveBeenCalled();
     await surface.unmount();
@@ -319,5 +321,4 @@ describe('App', () => {
     expect(second.queryByRole('header', { name: i18n.t('ui.setup.introTitle') })).toBeNull();
     await second.unmount();
   });
-
 });

@@ -9,12 +9,12 @@
       "paused": "Automatische Ausführung pausiert"
     },
     "title": "Backup-Aktivität",
-    "description": "Ausgewählte Dateien und Fotos werden über natives verschlüsseltes LAN direkt an den gekoppelten PC gesendet. Der PC muss den Backup-Ordner separat freigeben.",
+    "description": "Ausgewählte Dateien und Fotos werden über das lokale WLAN direkt an deinen Computer gesendet.",
     "running": "Dateien werden gesendet",
     "waiting": "Wartet auf Synchronisierung",
-    "peer": "Gekoppelter PC: {{fingerprint}}",
+    "peer": "Computer: {{fingerprint}}",
     "count": "{{count}} dauerhaft gespeicherte Aufträge",
-    "bytes": "{{acknowledged}} / {{total}} vom PC bestätigte Bytes",
+    "bytes": "{{acknowledged}} / {{total}} vom PC bestätigt",
     "more": "Bis zu 100 Aufträge werden angezeigt; {{count}} bleiben im dauerhaften Journal.",
     "journal": {
       "segments": "Aktivitätsansicht",
@@ -236,126 +236,134 @@
     "brand": "Kloda: Secure Photos & Sync",
     "open": "Mit deinem Computer koppeln",
     "back": "Zurück zur Einrichtung",
-    "title": "Telefon koppeln",
-    "description": "Scanne die Kloda-Einladung auf deinem Computer. Beide Geräte müssen im selben lokalen Netzwerk sein.",
-    "startScan": "Computer-QR scannen",
-    "scanTitle": "Einladung scannen",
-    "scanDescription": "Richte die Rückkamera auf den Kloda-QR-Code des Computers. Eine manuelle Geheimniseingabe ist nicht möglich.",
+    "title": "Mit Computer koppeln",
+    "description": "Verbinde beide Geräte mit demselben WLAN und scanne den QR-Code auf dem Computer.",
+    "startScan": "QR-Code scannen",
+    "scanTitle": "QR-Code scannen",
+    "scanDescription": "Richte die Kamera auf den Kloda-QR-Code am Computer.",
     "stopScan": "Scannen beenden",
-    "loading": "Nativen Kopplungsstatus lesen",
+    "loading": "Status wird geprüft",
     "loadingCamera": "Kameraberechtigung prüfen",
-    "cameraPermission": "Der Kamerazugriff dient nur zum Scannen dieser Kopplungseinladung.",
-    "cameraDenied": "Die Kameraberechtigung wurde verweigert. Erlaube den Zugriff zum Scannen; ohne QR-Scan ist keine Kopplung möglich.",
+    "cameraPermission": "Die Kamera wird nur zum Scannen des QR-Codes verwendet.",
+    "cameraDenied": "Für den QR-Scan ist eine Kameraberechtigung erforderlich.",
     "allowCamera": "Kamera erlauben",
     "openSettings": "Kameraeinstellungen öffnen",
-    "cameraError": "Die Kameraberechtigung konnte nicht geprüft oder angefordert werden.",
-    "cameraUnavailable": "Die Rückkamera konnte nicht geöffnet werden. Sie ist möglicherweise nicht verfügbar oder wird von einer anderen App verwendet.",
+    "cameraError": "Kameraberechtigung konnte nicht geprüft werden.",
+    "cameraUnavailable": "Rückkamera konnte nicht geöffnet werden. Möglicherweise nutzt eine andere App die Kamera.",
     "cameraPaused": "Die Kamera pausiert, während Kloda im Hintergrund ist.",
     "retryCamera": "Kamera erneut versuchen",
-    "peerFingerprint": "Identitätsfingerabdruck des Computers",
-    "noFileGrant": "Die Kopplung schafft nur Gerätevertrauen. Sie gewährt keinen Zugriff auf Dateien, Ordner oder Fotos.",
-    "resume": "Gespeicherte Kopplung fortsetzen",
-    "refresh": "Nativen Status lesen",
-    "cancel": "Auf diesem Telefon abbrechen",
-    "cancelConsequences": "Der Abbruch betrifft nur den Versuch oder die lokale Bindung dieses Telefons. Der Computer kann einen bestätigten Datensatz behalten; dies ist kein verteilter Rollback.",
-    "working": "Native Kopplung läuft",
-    "unknownTitle": "Kopplungsergebnis unbekannt",
-    "unknownDescription": "Ein unterbrochener Vorgang beweist weder Erfolg noch Rollback. Lies den nativen Status oder setze einen gespeicherten Versuch ausdrücklich fort beziehungsweise brich ihn ab.",
-    "leave": "Kopplungsansicht verlassen",
-    "leaveConsequences": "Beim Verlassen werden diese Ansicht und ihre Verbindung geschlossen. Es schließt die Kopplung nicht ab und löscht keine ausstehenden oder angehefteten Datensätze.",
+    "peerFingerprint": "Computer-Fingerabdruck",
+    "noFileGrant": "Die Kopplung verbindet nur die beiden Geräte. Der Dateizugriff erfolgt über den am Computer gewählten Sicherungsordner.",
+    "resume": "Kopplung fortsetzen",
+    "refresh": "Status aktualisieren",
+    "cancel": "Abbrechen",
+    "cancelConsequences": "Bricht den aktuellen Kopplungsversuch ab.",
+    "working": "Kopplung läuft",
+    "unknownTitle": "Verbindungsstatus unklar",
+    "unknownDescription": "Status aktualisieren oder Versuch abbrechen und erneut starten.",
+    "leave": "Ansicht verlassen",
+    "leaveConsequences": "Schließt diese Ansicht; bestehende Kopplungen bleiben erhalten.",
     "repairTitle": "Erneut mit diesem Computer koppeln?",
-    "repairDescription": "Das frühere lokale Vertrauen dieses Computers wurde widerrufen. Prüfe den authentifizierten Computerfingerabdruck vor einer ausdrücklichen erneuten Kopplung.",
-    "repairConsequences": "Zuerst stimmst du auf diesem Telefon ausdrücklich zu, danach muss der Computer zustimmen. Diese Zustimmung schließt die Kopplung nicht ab und gewährt keinen Dateizugriff. Der alte widerrufene Datensatz und alle Dateizugriffsverbote bleiben unverändert.",
+    "repairDescription": "Du verbindest dich wieder mit einem Computer, der zuvor entfernt wurde.",
+    "repairConsequences": "Nach der Bestätigung hier musst du die Kopplung auch am Computer annehmen.",
     "repairWorking": {
-      "title": "Deine Entscheidung wird gesendet",
-      "description": "Deine Entscheidung wird gesendet. Das ist keine abgeschlossene Kopplung. Wenn du zugestimmt hast, muss der Computer noch zustimmen; der Dateizugriff bleibt getrennt."
+      "title": "Bestätigung wird gesendet",
+      "description": "Deine Bestätigung wird gesendet. Zum Abschließen noch am Computer annehmen."
     },
-    "pairAgain": "Erneut mit diesem Computer koppeln",
-    "denyRepair": "Nicht erneut koppeln",
-    "helpTitle": "So funktioniert lokale Kopplung",
-    "helpComputer": "Öffne die Telefon-Kopplungseinladung in Kloda auf deinem Computer. Bestätige nach dem Scannen dort den exakten Telefonkandidaten.",
-    "helpLan": "Beide Geräte müssen im selben lokalen Netzwerk bleiben. Die Kopplung verwendet kein entferntes Relay und akzeptiert kein manuell eingegebenes Geheimnis.",
-    "helpRecovery": "Ein gespeicherter ausstehender Datensatz ist keine abgeschlossene Kopplung. Fortsetzen versucht dieselbe native Identitätsbindung erneut; ein Abbruch löscht den Computerdatensatz nicht.",
-    "closeHelp": "Kopplungsanleitung schließen",
+    "pairAgain": "Erneut koppeln",
+    "denyRepair": "Abbrechen",
+    "helpTitle": "So funktioniert die Kopplung",
+    "helpComputer": "Öffne Kloda auf deinem Computer und scanne den QR-Code auf dem Bildschirm Telefon koppeln.",
+    "helpLan": "Beide Geräte müssen im selben lokalen Netzwerk sein.",
+    "helpRecovery": "Ein laufender Versuch kann fortgesetzt oder abgebrochen werden.",
+    "closeHelp": "Schließen",
     "unpair": {
       "button": "Kopplung entfernen",
-      "title": "Kopplung mit diesem Computer entfernen?",
-      "description": "Wenn erreichbar, muss der PC den dauerhaften Widerruf zuerst bestätigen. Das Entfernen nur auf dem Telefon widerruft die PC-Berechtigungen nicht. Gesicherte Fotos werden nicht gelöscht.",
+      "title": "Diese Computer-Kopplung entfernen?",
+      "confirmBody": "Die Verbindung zu diesem Computer wird getrennt. Vorhandene Sicherungen auf dem Computer bleiben erhalten.",
+      "description": "Die Verbindung zu diesem Computer wird getrennt. Vorhandene Sicherungen auf dem Computer bleiben erhalten.",
       "online": "Auf PC und Telefon entfernen",
       "offline": "Nur auf diesem Telefon entfernen",
       "cancel": "Kopplung behalten",
-      "pc_confirmed": "Der PC hat Gerätevertrauen und Dateiberechtigungen dauerhaft widerrufen. Die Kopplung wurde auf diesem Telefon entfernt; gesicherte Fotos bleiben erhalten.",
-      "local_only": "Die Kopplung wurde nur auf diesem Telefon entfernt. Der Widerruf auf dem PC ist nicht bestätigt; alte Berechtigungen können bestehen bleiben. Zum erneuten Verbinden ist eine neue QR-Kopplung nötig.",
-      "pc_unconfirmed": "Der PC hat den dauerhaften Widerruf nicht bestätigt. Die Kopplung bleibt auf diesem Telefon bestehen. Erneut versuchen oder ausdrücklich nur auf diesem Telefon entfernen."
+      "pc_confirmed": "Verbindung zum Computer getrennt. Vorhandene Sicherungen bleiben erhalten.",
+      "local_only": "Auf diesem Telefon entfernt. Zum erneuten Verbinden einen neuen QR-Code am Computer scannen.",
+      "pc_unconfirmed": "Computer konnte nicht erreicht werden."
     },
     "phases": {
       "idle": {
-        "title": "Bereit zum Scannen",
-        "description": "Erstelle eine neue Einladung am Computer und scanne ihren QR-Code."
+        "title": "Bereit zum Verbinden",
+        "description": "Scanne den QR-Code auf deinem Computer zum Koppeln."
       },
       "open": {
-        "title": "Einladung offen",
-        "description": "Die Einladung ist aktiv, aber es wurde noch kein Gerätevertrauen hergestellt."
+        "title": "Einladung bereit",
+        "description": "Scanne den QR-Code auf deinem Computer."
       },
       "connecting": {
-        "title": "Sichere Verbindung wird aufgebaut",
-        "description": "Das native Kloda prüft den Computer und die lokale Verbindung. Ein dauerhafter ausstehender Datensatz oder Vertrauenspin ist noch nicht bestätigt."
+        "title": "Verbindung wird hergestellt",
+        "description": "Verbindung über das lokale WLAN wird aufgebaut."
       },
       "reserved": {
-        "title": "Warten auf Computerzustimmung",
-        "description": "Der Computer hat einen Kandidaten reserviert. Nur eine ausdrückliche Entscheidung am Computer kann die normale Kopplung genehmigen."
+        "title": "Wartet auf Bestätigung am Computer",
+        "description": "Bestätige die Kopplung auf dem Computerbildschirm."
       },
       "pending": {
-        "title": "Kopplung ausstehend",
-        "description": "Dieses Telefon hat eine ausstehende Bindung gespeichert. Die Bestätigung des Computers ist noch nicht bestätigt. Prüfe den Kandidaten am Computer."
+        "title": "Wartet auf Bestätigung am Computer",
+        "description": "Bestätige die Kopplung auf dem Computerbildschirm."
       },
       "consumed_pending_ack": {
-        "title": "Pin gespeichert; Abschluss ausstehend",
-        "description": "Die Computeridentität ist auf diesem Telefon dauerhaft angeheftet. Der Abschlussaustausch ist nicht bestätigt; Fortsetzen kann dasselbe Paar wiederherstellen."
+        "title": "Kopplung wird abgeschlossen",
+        "description": "Tippe auf Kopplung fortsetzen, um abzuschließen."
       },
       "complete": {
         "title": "Kopplung abgeschlossen",
-        "description": "Dieses Telefon hat den Vertrauenspin des Computers gespeichert und den Abschlussaustausch empfangen. Dateizugriff erfordert weiterhin eine separate Autorisierung."
+        "description": "Dieses Telefon ist mit deinem Computer gekoppelt."
       },
       "invalid": {
-        "title": "Versuch beendet",
-        "description": "Diese Einladung ist nicht mehr aktiv. Ein Computerdatensatz kann bestehen bleiben; gehe nicht von einem Rollback aus."
+        "title": "Einladung abgelaufen",
+        "description": "Erstelle einen neuen QR-Code am Computer und scanne erneut."
       },
       "revoked": {
-        "title": "Auf diesem Telefon deaktiviert",
-        "description": "Der lokale Versuch oder die Bindung ist deaktiviert. Computervertrauen und Dateizugriffsverbote bleiben davon getrennt."
+        "title": "Kopplung entfernt",
+        "description": "Scanne zum erneuten Verbinden einen QR-Code am Computer."
       }
     },
     "errors": {
-      "invalid_qr": "Dies ist kein gültiger Kloda-Kopplungs-QR.",
-      "unsupported_version": "Dieser QR verwendet eine nicht unterstützte Kopplungsversion.",
-      "lan_unavailable": "Eine erlaubte Route im lokalen Netzwerk ist nicht verfügbar.",
-      "native_unsupported": "Sichere native Kopplung ist in dieser App-Version nicht verfügbar. Verwende einen unterstützten nativen Kloda-Build; keine Kopplung wurde simuliert.",
-      "identity_unavailable": "Klodas hardwaregeschützte Geräteidentität ist nicht verfügbar.",
-      "continuity_lost": "Die gespeicherte lokale Identität oder Installationskontinuität kann nicht bestätigt werden. Automatische Vertrauenswiederherstellung ist blockiert.",
-      "tls_rejected": "Die authentifizierte TLS-Identität des Computers wurde abgelehnt.",
-      "proof_rejected": "Der Kopplungsnachweis wurde vom nativen Kloda abgelehnt.",
-      "invitation_expired": "Die Einladung ist abgelaufen. Erstelle einen neuen QR am Computer.",
-      "candidate_stale": "Dieser exakte Kandidat ist nicht mehr aktuell. Lies vor einer weiteren Entscheidung den nativen Status.",
-      "already_paired": "Dieser Computer hat bereits eine aktive lokale Kopplung.",
-      "storage_failure": "Der erforderliche dauerhafte Kopplungsdatensatz konnte nicht geschrieben oder gelesen werden. Der Abschluss ist nicht bestätigt.",
-      "connection_closed": "Die Verbindung wurde geschlossen. Gespeicherte ausstehende oder angeheftete Datensätze erfordern weiterhin nativen Status und ausdrückliche Wiederherstellung.",
-      "outcome_unknown": "Das Kopplungsergebnis kann nicht bestimmt werden. Gehe weder von Abschluss noch Rollback aus.",
-      "cancelled": "Der lokale Vorgang wurde abgebrochen. Dies verspricht keine Löschung des Computerdatensatzes.",
-      "revoked": "Die lokale Kopplung wurde widerrufen und kann nicht fortgesetzt werden."
+      "invalid_qr": "Dies ist kein gültiger Kloda-QR-Code.",
+      "unsupported_version": "Dieser QR-Code verwendet eine nicht unterstützte Version.",
+      "lan_unavailable": "Beide Geräte scheinen nicht im selben lokalen Netzwerk zu sein.",
+      "native_unsupported": "Sichere lokale Kopplung ist in diesem Build nicht verfügbar.",
+      "identity_unavailable": "Hardware-Geräteidentität ist nicht verfügbar.",
+      "continuity_lost": "Gespeicherte Geräteidentität konnte nicht bestätigt werden.",
+      "tls_rejected": "Sicherheitsidentität des Computers konnte nicht geprüft werden.",
+      "proof_rejected": "Kopplungsbestätigung wurde abgelehnt.",
+      "invitation_expired": "Der QR-Code ist abgelaufen. Öffne am Computer einen neuen.",
+      "candidate_stale": "Status geändert. Aktualisieren und erneut versuchen.",
+      "already_paired": "Dieser Computer ist bereits gekoppelt.",
+      "storage_failure": "Kopplungsdatensatz konnte nicht gelesen oder gespeichert werden.",
+      "connection_closed": "Verbindung getrennt. Prüfe, ob Kloda am Computer geöffnet ist, und versuche es erneut.",
+      "outcome_unknown": "Kopplungsstatus unklar. Aktualisieren und erneut versuchen.",
+      "cancelled": "Vorgang abgebrochen.",
+      "revoked": "Diese Kopplung wurde entfernt. Zum erneuten Verbinden QR scannen."
     }
   },
   "computer": {
-    "title": "Auf dem Computer sichern",
-    "description": "Ausgewählte Dateien und Fotos über das lokale Netzwerk auf dem eigenen Computer sichern.",
-    "paired": "1. Gerätevertrauen gespeichert",
-    "pairTitle": "1. Computer per QR koppeln",
-    "pairDescription": "Kloda auf dem Computer öffnen und den Kopplungs-QR mit diesem Telefon scannen.",
+    "title": "Computer",
+    "description": "Sichere deine Fotos und Dateien über lokales WLAN auf deinem Computer.",
+    "unnamedPc": "Dein Computer",
+    "paired": "Gekoppelt · Lokales Netzwerk",
+    "pairTitle": "Mit Computer koppeln",
+    "pairDescription": "Öffne Kloda auf deinem Computer und scanne den QR-Code.",
     "managePairing": "Kopplung verwalten",
-    "grantTitle": "2. Sicherungsordner am Computer freigeben",
-    "grantDescription": "Unter Geräte und Berechtigungen am Computer dieses Telefon auswählen. Einen separaten Sicherungsordner wählen und den Dateizugriff ausdrücklich erlauben. Das Telefon kann diese Berechtigung nicht erteilen.",
-    "transferTitle": "3. Übertragung starten und Ergebnisse prüfen",
-    "availability": "Eine Kopplung bestätigt weder die aktuelle Erreichbarkeit des Computers noch einen bereiten Empfänger. Der Computer muss wach sein und Kloda muss laufen. Die Sicherungsaktivität zeigt aktuelle Zugriffs- und Übertragungsergebnisse.",
+    "grantTitle": "Sicherungsordner wählen",
+    "grantDescription": "Wähle und bestätige einen Sicherungsordner in Kloda auf deinem Computer.",
+    "scopePendingTitle": "Letzter Schritt: Ordnerfreigabe ausstehend",
+    "scopePendingBody": "Öffne Kloda auf {{name}} und wähle deinen Sicherungsordner.",
+    "scopeApproved": "Ordner bestätigt · Bereit zur Sicherung",
+    "scopeRevoked": "Der Computer hat diese Kopplung entfernt. Scanne zum erneuten Verbinden einen neuen QR-Code.",
+    "securityDetails": "Sicherheitsdetails",
+    "hideSecurityDetails": "Sicherheitsdetails ausblenden",
+    "transferTitle": "Sicherungen und Status",
+    "availability": "Halte deinen Computer wach und im selben WLAN.",
     "iosBackground": "iOS kann autorisierte Sicherungen bei einer Ausführungsmöglichkeit starten. Gesperrte geschützte Daten können Aufgaben verzögern. Neue Kopplungen, Bestätigungen und Wiederherstellung erfordern die App im Vordergrund.",
     "iosSchedulePreference": "iOS bestimmt, wann automatische Aufgaben laufen; genaue Zeiten oder Dauerbetrieb sind nicht garantiert. Pause stoppt automatische Sicherungen bis zur Auswahl von Fortsetzen.",
     "androidBackground": "Autorisierte Sicherungen laufen beim Verlassen dieses Bildschirms weiter, solange Android es erlaubt. Neue Kopplungen, Bestätigungen und Wiederherstellung erfordern die App im Vordergrund. Stoppt das System den Vorgang, die App zum Fortsetzen öffnen.",
@@ -785,7 +793,7 @@
     "backupNow": "Jetzt sichern",
     "progressLabel": "Bestätigter Sicherungsfortschritt",
     "progress": {
-      "bytes": "{{completed}} / {{total}} Bytes bestätigt",
+      "bytes": "{{completed}} / {{total}} gesichert",
       "operations": "{{completed}} / {{total}} Vorgänge abgeschlossen"
     },
     "targets": "Ziele",
@@ -798,18 +806,22 @@
       "syncing": "Sicherung läuft",
       "safe": "Letzter Lauf abgeschlossen",
       "waiting": "Wartet",
+      "folderPending": "Wartet auf Ordnerfreigabe",
       "attention": "Prüfung erforderlich",
       "error": "Sicherung angehalten",
       "disabled": "Deaktiviert"
     },
     "lines": {
-      "setup": "Quellen auswählen und ein Sicherungsziel ausdrücklich aktivieren.",
-      "syncing": "Der Fortschritt zeigt die vom Gerät erhaltenen Bestätigungen.",
-      "safe": "Angezeigt wird der letzte vom Gerät bestätigte Lauf.",
-      "waiting": "Zeitplan, Berechtigungen und Verbindung unter Aktivität prüfen.",
-      "attention": "Ausstehende Vorgänge unter Aktivität prüfen.",
-      "error": "Ursache und sichere Wiederholungsoptionen unter Aktivität prüfen."
+      "setup": "Quellen auswählen und ein Sicherungsziel hinzufügen.",
+      "syncing": "Sicherung läuft.",
+      "safe": "Die letzte Sicherung der ausgewählten Quellen ist bestätigt.",
+      "waiting": "Die Sicherung läuft bei der nächsten Gelegenheit weiter.",
+      "folderPending": "Letzter Schritt: Wähle auf {{name}} einen Sicherungsordner.",
+      "attention": "Prüfe unter Aktivität ausstehende Vorgänge.",
+      "error": "Öffne Aktivität für weitere Details."
     },
+    "folderApprovalTitle": "Letzter Schritt: Ordner am PC wählen",
+    "folderApprovalBody": "Wähle und bestätige einen Sicherungsordner in Kloda auf {{name}}.",
     "photos": "Fotos",
     "settings": "Einstellungen",
     "appearance": "Darstellung",
@@ -848,7 +860,10 @@
     "protoCloud": "Cloud",
     "heroNoPermTitle": "Fotozugriff nötig",
     "heroNoPermBody": "Kloda braucht die Galerie-Berechtigung für die Sicherung.",
-    "heroAllow": "Zugriff erlauben"
+    "heroAllow": "Zugriff erlauben",
+    "heroNoPhotosTitle": "Keine Fotos in den gewählten Ordnern",
+    "heroNoPhotosBody": "Dokumente werden weiterhin gesichert; hier werden nur Fotos angezeigt.",
+    "heroAddFolder": "Ordner hinzufügen"
   },
   "recovery": {
     "title": "Dein Wiederherstellungscode",

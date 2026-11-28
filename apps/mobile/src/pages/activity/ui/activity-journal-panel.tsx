@@ -6,6 +6,7 @@ import { IconTile, RichCard } from '../../../shared/ui/rich';
 import { Text } from '../../../shared/ui/text';
 import { useThemeColors } from '../../../shared/theme/theme-provider';
 import type { FileJob, FileQueue } from '../../../shared/api/file-transfer';
+import { formatBytes } from '../../../shared/lib/format-bytes';
 import { activityPastJobs, type ActivityFilter, type ActivityTab } from '../../../features/file-transfer/model/activity-journal';
 
 const tabs: readonly ActivityTab[] = ['now', 'past'];
@@ -45,7 +46,7 @@ export function ActivityFilterMenu({ filter, onFilter }: { filter: ActivityFilte
 }
 
 function JournalRow({ job, divider = false }: { job: FileJob; divider?: boolean }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const colors = useThemeColors();
   const Icon = job.state === 'completed' ? Check : job.state === 'owner_deleted' ? Ban : job.state === 'paused' ? PauseCircle : CircleAlert;
   const tone = job.state === 'completed' ? colors['brand-text'] : job.state === 'owner_deleted' ? colors['text-secondary'] : colors['attention-base'];
@@ -56,7 +57,12 @@ function JournalRow({ job, divider = false }: { job: FileJob; divider?: boolean 
     <View className="min-w-0 flex-1 gap-1">
       <Text className="text-base font-inter-semibold text-primary-text">{job.name}</Text>
       <Text className="font-sans text-sm leading-5 text-secondary-text">{t(`transfer.states.${job.state}`)}</Text>
-      <Text className="font-sans text-sm leading-5 text-secondary-text">{t('transfer.bytes', { acknowledged: job.acknowledgedBytes, total: job.totalBytes ?? t('transfer.unknownBytes') })}</Text>
+      <Text className="font-sans text-sm leading-5 text-secondary-text">
+        {t('transfer.bytes', {
+          acknowledged: formatBytes(job.acknowledgedBytes, i18n.language),
+          total: job.totalBytes !== undefined ? formatBytes(job.totalBytes, i18n.language) : t('transfer.unknownBytes'),
+        })}
+      </Text>
       {job.errorCode && <Text className="font-sans text-sm leading-5 text-danger-text">{t(`transfer.errors.${job.errorCode}`, { defaultValue: t('transfer.errors.outcome_unknown') })}</Text>}
     </View>
   </View>;

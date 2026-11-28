@@ -12,6 +12,29 @@ final class KlodaPairingSession {
   private var generation: UInt64 = 0
   private var destroyed = false
   private var poisoned = false
+  private var deviceName = "iPhone"
+
+  func setDeviceName(_ name: String) {
+    let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+    let normalized = trimmed.isEmpty ? "iPhone" : trimmed
+    var clipped = normalized
+    while clipped.utf8.count > 256, !clipped.isEmpty { clipped.removeLast() }
+    let finalName = clipped.isEmpty ? "iPhone" : clipped
+    lock.lock()
+    deviceName = finalName
+    lock.unlock()
+    pushDeviceName(finalName)
+  }
+
+  private func pushDeviceName(_ name: String) {
+    #if !targetEnvironment(simulator)
+    let data = Data(name.utf8)
+    guard !data.isEmpty, data.count <= 256 else { return }
+    _ = try? data.withUnsafeBytes { bytes in
+      try IosPairingNativeCall.consume(kloda_ios_set_device_name(bytes.bindMemory(to: UInt8.self).baseAddress, bytes.count))
+    }
+    #endif
+  }
 
   var isForegroundActive: Bool { lock.lock(); defer { lock.unlock() }; return active && !destroyed && !poisoned }
 
@@ -51,6 +74,66 @@ final class KlodaPairingSession {
         _ = try self.check(owner: owner, ticket: ticket, foreground: foreground)
         completion(.success(status))
       } catch { completion(.failure(self.failure(error))) }
+    }
+  }
+
+  func probeScope(completion: @escaping ([String: Any]) -> Void) {
+    lock.lock()
+    let ticket = generation
+    let permitted = !destroyed && !poisoned && active
+    lock.unlock()
+    guard permitted else { completion(["state": "unreachable"]); return }
+    worker.async {
+      var fallbackName: String?
+      do {
+        let owner = try self.ownerOnWorker(ticket: ticket)
+        let epoch = try self.check(owner: owner, ticket: ticket, foreground: true)
+        let status = try IosPairingReply.status(self.nativeRequest(owner: owner, command: ["kind": "status"]))
+        fallbackName = (status["peerName"] as? String).flatMap { $0.isEmpty ? nil : $0 }
+        guard status["phase"] as? String == "complete",
+          status["repairRequired"] as? Bool == false,
+          let record = status["recordId"] as? String else {
+          completion(["state": "unpaired"])
+          return
+        }
+        var data = try JSONSerialization.data(withJSONObject: ["kind": "scope"])
+        defer { data.resetBytes(in: 0..<data.count) }
+        let recordBytes = Data(record.utf8)
+        let value = try recordBytes.withUnsafeBytes { recordBuffer in
+          try data.withUnsafeBytes { commandBuffer in
+            try IosPairingNativeCall.consume(kloda_ios_transfer(owner,
+              recordBuffer.bindMemory(to: UInt8.self).baseAddress, recordBuffer.count,
+              commandBuffer.bindMemory(to: UInt8.self).baseAddress, commandBuffer.count, -1, epoch))
+          }
+        }
+        guard let object = value as? [String: Any] else {
+          var reply: [String: Any] = ["state": "unreachable"]
+          if let fallbackName { reply["peerName"] = fallbackName }
+          completion(reply)
+          return
+        }
+        let peerName = (object["peerName"] as? String).flatMap { $0.isEmpty ? nil : $0 } ?? fallbackName
+        let scopeState = (object["scopeState"] as? String).flatMap { $0.isEmpty ? nil : $0 }
+        let errorCode = (object["errorCode"] as? String).flatMap { $0.isEmpty ? nil : $0 }
+        let state: String
+        if let scopeState { state = scopeState }
+        else if errorCode == "revoked" { state = "revoked" }
+        else if errorCode == "backup_permission_denied" { state = "not_approved" }
+        else { state = "unreachable" }
+        var reply: [String: Any] = ["state": state]
+        if let peerName { reply["peerName"] = peerName }
+        if state == "unreachable", let errorCode { reply["errorCode"] = errorCode }
+        completion(reply)
+      } catch {
+        let code = self.failure(error).code
+        let state: String
+        if code == "revoked" { state = "revoked" }
+        else if code == "backup_permission_denied" { state = "not_approved" }
+        else { state = "unreachable" }
+        var reply: [String: Any] = ["state": state]
+        if let fallbackName { reply["peerName"] = fallbackName }
+        completion(reply)
+      }
     }
   }
 
@@ -142,7 +225,9 @@ final class KlodaPairingSession {
     guard !destroyed, !poisoned else { lock.unlock(); throw IosPairingFailure.native("candidate_stale") }
     if let owner { lock.unlock(); return owner }
     guard background || (active && generation == ticket) else { lock.unlock(); throw IosPairingFailure.native("candidate_stale") }
+    let currentName = deviceName
     lock.unlock()
+    pushDeviceName(currentName)
     #if targetEnvironment(simulator)
     // The simulator cannot establish Secure Enclave custody; do not even create authority directories.
     throw IosPairingFailure.native("native_unsupported")

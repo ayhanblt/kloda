@@ -45,9 +45,11 @@ internal object AndroidBackupScheduler {
       id?.let { AndroidScheduleJournal(db).find(it) }
     }
     val observed = current?.let { row -> mapOf("automaticRun" to buildMap<String, Any> {
-      put("attempts", row.osAttempts); put("updated", row.updated)
-      val state = if ((paused(context) && row.phase in setOf("running", "waiting")) ||
-        (row.phase == "running" && !AndroidPairingRuntime.hasScheduledLease())) "paused" else row.phase
+      val legacyBrokenFinished = row.phase == "finished" && (row.updated != 1 || row.error != null)
+      val normalizedPhase = if (legacyBrokenFinished) "exhausted" else row.phase
+      put("attempts", row.osAttempts); put("updated", if (legacyBrokenFinished) 0 else row.updated)
+      val state = if ((paused(context) && normalizedPhase in setOf("running", "waiting")) ||
+        (normalizedPhase == "running" && !AndroidPairingRuntime.hasScheduledLease())) "paused" else normalizedPhase
       put("state", state)
       if (state == "waiting") retryTime(context, row)?.let { put("retryAt", it.toString()) }
       row.error?.let { put("errorCode", it) }
@@ -88,7 +90,7 @@ internal object AndroidBackupScheduler {
     try {
       val scheduler = context.getSystemService(JobScheduler::class.java)
       val binding = FilesRunContext.capture(context)
-      if (paused(context) || binding.sources.isEmpty() || !AndroidBackupDestinations.hasEnabledPc(context)) {
+      if (paused(context) || binding.sources.isEmpty() || !AndroidBackupDestinations.currentPairedPcEnabled(context)) {
         scheduler.cancel(JOB); scheduler.cancel(WATCH)
         return@synchronized
       }

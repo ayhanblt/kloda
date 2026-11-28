@@ -69,6 +69,21 @@ it('does not classify a never-configured idle setup as a backup failure', () => 
   expect(runtime.getBackgroundState()).toEqual({ active: false, failed: false });
 });
 
+it('does not treat unconfigured configuration_required history or unconfigured startSync as a WebDAV failure', async () => {
+  journal.saveProgress({
+    id: 'stale-unconfigured',
+    status: 'failed',
+    bytesTransferred: 0,
+    bytesTotal: 0,
+    completedFiles: 0,
+    totalFiles: 0,
+    errorCode: 'configuration_required',
+  });
+  expect(runtime.getBackgroundState()).toEqual({ active: false, failed: false });
+  await expect(runtime.startSync()).rejects.toMatchObject({ code: 'configuration_required' });
+  expect(runtime.getBackgroundState()).toEqual({ active: false, failed: false });
+});
+
 it('does not start a new upload after quitting during receipt revalidation', async () => {
   const source = join(root, 'source');
   mkdirSync(source);

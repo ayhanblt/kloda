@@ -34,6 +34,11 @@ pub fn open_pairing(directory: String) -> AsyncTask<OpenTask> {
     })
 }
 
+#[napi]
+pub fn set_device_name(name: String) {
+    crate::device_name::set_local_name(&name);
+}
+
 pub struct RequestTask {
     owner: Arc<PairingOwner>,
     action: Option<Action>,

@@ -1,5 +1,5 @@
 use crate::backup_root::{self, Directories};
-use crate::file_protocol::{Error, OperationState, Request, Response, Result, CHUNK_LIMIT};
+use crate::file_protocol::{Error, OperationState, Request, Response, Result, ScopeProbe, CHUNK_LIMIT};
 use crate::key::Spki;
 use crate::store::Store;
 use crate::store_acl::Scope;
@@ -38,6 +38,9 @@ impl Receiver {
     ) -> Result<Response> {
         if matches!(request, Request::RevokePair) {
             return self.revoke(store, sid, peer);
+        }
+        if matches!(request, Request::Scope) {
+            return probe_scope(store, sid, peer);
         }
         let (scope, directories) = admit(store, sid, peer)?;
         match request {
@@ -95,9 +98,47 @@ impl Receiver {
                     size: entry.operation.size,
                 })
             }
-            Request::RevokePair => unreachable!(),
+            Request::RevokePair | Request::Scope => unreachable!(),
         }
     }
+}
+
+fn probe_scope(store: &Store, sid: &[u8; 16], peer: &Spki) -> Result<Response> {
+    let record = store.record(sid)?.ok_or(Error::Denied)?;
+    if record.role != RecordRole::Pc
+        || record.expected != peer.fingerprint()
+        || record.peer.as_ref() != Some(peer)
+    {
+        return Err(Error::Denied);
+    }
+    let peer_name = crate::device_name::local_name();
+    if record.state == RecordState::Revoked {
+        return Ok(Response::Scope(ScopeProbe {
+            scope_state: "revoked".to_owned(),
+            peer_name,
+        }));
+    }
+    if record.state != RecordState::Complete {
+        return Err(Error::Denied);
+    }
+    let scope_state = match store.backup_scope(sid) {
+        Ok(None) => "not_approved",
+        Ok(Some(scope)) if !scope.approved => "revoked",
+        Ok(Some(scope)) => match backup_root::verify(
+            &scope.folder,
+            &record.expected,
+            scope.binding,
+            scope.peer_folder.as_deref(),
+        ) {
+            Ok(()) => "approved",
+            Err(_) => "unavailable",
+        },
+        Err(_) => "unavailable",
+    };
+    Ok(Response::Scope(ScopeProbe {
+        scope_state: scope_state.to_owned(),
+        peer_name,
+    }))
 }
 
 pub(super) fn admit(store: &Store, sid: &[u8; 16], peer: &Spki) -> Result<(Scope, Directories)> {
@@ -113,7 +154,12 @@ pub(super) fn admit(store: &Store, sid: &[u8; 16], peer: &Spki) -> Result<(Scope
     if !scope.approved {
         return Err(Error::Denied);
     }
-    let directories = backup_root::acquire(&scope.folder, &record.expected, scope.binding)?;
+    let directories = backup_root::acquire(
+        &scope.folder,
+        &record.expected,
+        scope.binding,
+        scope.peer_folder.as_deref(),
+    )?;
     Ok((scope, directories))
 }
 

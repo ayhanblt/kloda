@@ -9,6 +9,8 @@ mod backup_retention_schema;
 #[cfg(not(target_os = "android"))]
 mod backup_root;
 mod certificate;
+mod device_metadata_schema;
+mod device_name;
 mod error;
 mod file_protocol;
 #[cfg(not(target_os = "android"))]

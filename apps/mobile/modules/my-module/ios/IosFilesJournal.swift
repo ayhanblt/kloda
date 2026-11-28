@@ -42,6 +42,10 @@ extension IosSyncJournal {
     try readFileJobs("SELECT * FROM files_job ORDER BY id")
   }
 
+  func filesJobs(recordId: String) throws -> [IosFilesJob] {
+    try readFileJobs("SELECT * FROM files_job WHERE record_id=? ORDER BY id", values: [recordId])
+  }
+
   func sourceFilesJobs(sourceId: String, reference: String? = nil) throws -> [IosFilesJob] {
     if let reference { return try readFileJobs("SELECT * FROM files_job WHERE source_id=? AND reference=?", values: [sourceId, reference]) }
     return try readFileJobs("SELECT * FROM files_job WHERE source_id=?", values: [sourceId])

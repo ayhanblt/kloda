@@ -70,3 +70,40 @@ fn changed_native_file_identity_and_replaced_root_are_not_adopted() {
         b"original"
     );
 }
+
+#[test]
+fn scope_probe_reports_not_approved_approved_and_revoked_without_admitting_files() {
+    let directory = Directory::new();
+    let mut store = directory.store(key("pc"));
+    let phone = key("phone");
+    store.pc_consume(&[9; 16], &phone, None).unwrap();
+    store.pc_complete(&[9; 16], &phone).unwrap();
+    let mut receiver = Receiver::new();
+
+    match receiver.execute(&mut store, &[9; 16], &phone, Request::Scope).unwrap() {
+        Response::Scope(probe) => assert_eq!(probe.scope_state, "not_approved"),
+        _ => panic!("expected Scope response"),
+    }
+
+    let folder = directory.path().join("media");
+    fs::create_dir(&folder).unwrap();
+    store
+        .approve_backup(&[9; 16], folder.to_str().unwrap(), None)
+        .unwrap();
+    match receiver.execute(&mut store, &[9; 16], &phone, Request::Scope).unwrap() {
+        Response::Scope(probe) => assert_eq!(probe.scope_state, "approved"),
+        _ => panic!("expected Scope response"),
+    }
+
+    store.revoke_backup(&[9; 16]).unwrap();
+    match receiver.execute(&mut store, &[9; 16], &phone, Request::Scope).unwrap() {
+        Response::Scope(probe) => assert_eq!(probe.scope_state, "revoked"),
+        _ => panic!("expected Scope response"),
+    }
+
+    let wrong = key("pc");
+    assert!(matches!(
+        receiver.execute(&mut store, &[9; 16], &wrong, Request::Scope),
+        Err(Error::Denied)
+    ));
+}

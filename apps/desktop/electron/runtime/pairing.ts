@@ -4,10 +4,17 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { confirmDeviceRemoval } from './device-removal.js';
 import { confirmBackupMutation } from './backup-management.js';
+import {
+  backupPermissionText,
+  normalizeConsentLanguage,
+  normalizeConsentTheme,
+} from './consent-dialog-copy.js';
+import { restoreParentFocus, showKlodaConfirmDialog } from './consent-dialog.js';
+import { resolveDesktopDeviceName } from './device-name.js';
 import type { NativePairingOwner } from './native-pairing-owner.js';
+import { deviceScope, scopeSnapshot } from './pairing-scope.js';
 
-
-interface NativeAddon { openPairing(directory: string): Promise<NativePairingOwner> }
+interface NativeAddon { openPairing(directory: string): Promise<NativePairingOwner>; setDeviceName?(name: string): void }
 const require = createRequire(import.meta.url);
 const errorCodes: Record<string, true> = {
   invalid_qr: true, unsupported_version: true, lan_unavailable: true, native_unsupported: true,
@@ -71,6 +78,7 @@ export async function startNativeReceiver(): Promise<void> {
       try { addon = require(fileURLToPath(new URL('../../native/kloda_pairing.node', import.meta.url))) as NativeAddon; }
       catch { throw Object.assign(new Error('native_unsupported'), { code: 'native_unsupported' }); }
       if (typeof addon.openPairing !== 'function') throw Object.assign(new Error('native_unsupported'), { code: 'native_unsupported' });
+      if (typeof addon.setDeviceName === 'function') addon.setDeviceName(resolveDesktopDeviceName());
       const native = await addon.openPairing(join(app.getPath('userData'), 'pairing'));
       resolvedOwner = native;
       return native;
@@ -146,29 +154,13 @@ function code(error: unknown): string {
   return 'outcome_unknown';
 }
 
-function scopeSnapshot(native: unknown, record: string): { fingerprint: string; revision?: string } {
-  if (!native || typeof native !== 'object') throw new Error('candidate_stale');
-  const status = native as { phase?: unknown; recordId?: unknown; peerFingerprint?: unknown; backupScope?: { revision?: unknown } };
-  if (status.phase !== 'complete' || status.recordId !== record ||
-    typeof status.peerFingerprint !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(status.peerFingerprint)) {
-    throw new Error('candidate_stale');
-  }
-  const revision = status.backupScope?.revision;
-  if (revision !== undefined && (typeof revision !== 'string' || !/^[1-9][0-9]{0,18}$/.test(revision))) {
-    throw new Error('candidate_stale');
-  }
-  return { fingerprint: status.peerFingerprint, revision };
-}
-
-async function deviceScope(native: NativePairingOwner, record: string) {
-  const row = JSON.parse(await native.pairedDevice(record)) as { trust?: string; recordId?: string; peerFingerprint?: string; backupScope?: unknown };
-  return scopeSnapshot({ ...row, phase: row.trust }, record);
-}
-
 async function approveBackup(
-  native: NativePairingOwner, event: IpcMainInvokeEvent, window: () => BrowserWindow | null, record: unknown, device = false,
+  native: NativePairingOwner, event: IpcMainInvokeEvent, window: () => BrowserWindow | null,
+  record: unknown, device = false, language?: unknown, theme?: unknown,
 ): Promise<unknown> {
   reference(record);
+  const lang = normalizeConsentLanguage(language);
+  const resolvedTheme = normalizeConsentTheme(theme);
   const binding = renderer;
   const parent = window();
   const generation = binding?.generation;
@@ -184,19 +176,25 @@ async function approveBackup(
   };
   binding.scopeConsent = true;
   try {
+    const copy = backupPermissionText(lang);
     const selected = await dialog.showOpenDialog(parent, {
-      properties: ['openDirectory'], title: 'Select this device’s PC backup folder', buttonLabel: 'Select folder',
+      properties: ['openDirectory'], title: copy.pickTitle, buttonLabel: copy.pickButton,
     });
+    await restoreParentFocus(parent);
     check();
     if (selected.canceled || selected.filePaths.length !== 1) return JSON.parse(await native.status()) as unknown;
     const folder = selected.filePaths[0]!;
-    const consent = await dialog.showMessageBox(parent, {
-      type: 'question', title: 'Kloda — backup permission', message: 'Allow this paired device to back up selected files and photos?',
-      detail: `Device fingerprint: ${observed.fingerprint}\nFolder: ${folder}\n\nUpload selected files and photos, view upload status, finalize uploads, and list or restore only this device’s own backup. No deletion, other-device access or two-way sync.\n\nPermission does not confirm a completed transfer or that the phone can reach this PC.`,
-      buttons: ['Allow backup', 'Cancel'], defaultId: 1, cancelId: 1, noLink: true,
+    const fields = [
+      ...(observed.peerName ? [{ label: copy.deviceLabel, value: observed.peerName }] : []),
+      { label: copy.folderLabel, value: folder, mono: true },
+      { label: copy.fingerprintLabel, value: observed.fingerprint, mono: true },
+    ];
+    const accepted = await showKlodaConfirmDialog(parent, {
+      title: copy.title, message: copy.message, body: copy.body, note: copy.note, fields,
+      confirmLabel: copy.confirmButton, cancelLabel: copy.cancelButton, tone: 'brand', theme: resolvedTheme, fallbackType: 'question',
     });
     check();
-    if (consent.response !== 0) return JSON.parse(await native.status()) as unknown;
+    if (!accepted) return JSON.parse(await native.status()) as unknown;
     const latest = await read();
     check();
     if (latest.fingerprint !== observed.fingerprint || latest.revision !== observed.revision) throw new Error('candidate_stale');
@@ -252,8 +250,8 @@ export function registerPairingHandlers(window: () => BrowserWindow | null): voi
   handle('resume', async (native, record) => {
     reference(record); return JSON.parse(await native.resume(record)) as unknown;
   });
-  for (const device of [false, true]) ipcMain.handle(`kloda:pairing:${device ? 'device-approve' : 'approve-backup'}`, async (event, record: unknown) => {
-    try { return { ok: true, value: await approveBackup(await nativeOwner(event, window), event, window, record, device) }; }
+  for (const device of [false, true]) ipcMain.handle(`kloda:pairing:${device ? 'device-approve' : 'approve-backup'}`, async (event, record: unknown, language?: unknown, theme?: unknown) => {
+    try { return { ok: true, value: await approveBackup(await nativeOwner(event, window), event, window, record, device, language, theme) }; }
     catch (error) { return { ok: false, code: code(error) }; }
   });
   for (const device of [false, true]) ipcMain.handle(`kloda:pairing:${device ? 'device-revoke' : 'revoke-backup'}`, async (event, record: unknown) => {

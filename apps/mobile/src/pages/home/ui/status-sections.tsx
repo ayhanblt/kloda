@@ -11,7 +11,7 @@ export interface StatusTarget {
   id: string;
   label: string;
   kind: DestinationKind;
-  state: HomeState | 'disabled';
+  state: HomeState | 'disabled' | 'folderPending';
   page: 'computer' | 'storage' | 'connections';
 }
 
@@ -164,10 +164,12 @@ export function ConfiguredHomeSection({
   state,
   targets,
   navigate,
+  pcFolderPending = null,
 }: {
   state: HomeState;
   targets: StatusTarget[];
   navigate: NavigateMobile;
+  pcFolderPending?: { name?: string } | null;
 }) {
   const { t } = useTranslation();
   const c = useThemeColors();
@@ -175,16 +177,21 @@ export function ConfiguredHomeSection({
 
   return (
     <View className="gap-2.5">
+      {pcFolderPending && (
+        <Pressable accessibilityRole="button" accessibilityLabel={t('statusUi.folderApprovalTitle')} onPress={() => navigate('computer')}
+          className="min-h-[68px] flex-row items-center gap-3 rounded-2xl border border-brand/40 bg-surface-1 px-4 py-3 active:opacity-80">
+          <IconTile tone="brand"><Laptop size={20} color={c['brand-text']} /></IconTile>
+          <View className="min-w-0 flex-1 gap-0.5">
+            <Text className="text-sm font-inter-semibold text-primary-text">{t('statusUi.folderApprovalTitle')}</Text>
+            <Text className="font-sans text-xs text-secondary-text">{t('statusUi.folderApprovalBody', { name: pcFolderPending.name || t('computer.unnamedPc') })}</Text>
+          </View>
+          <ChevronRight size={18} color={c['text-tertiary']} />
+        </Pressable>
+      )}
       {(state === 'attention' || state === 'error') && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t(`statusUi.states.${state}`)}
-          onPress={() => navigate('activity')}
-          className="min-h-[56px] flex-row items-center gap-3 rounded-2xl border border-border-subtle bg-surface-1 px-4 py-3 active:opacity-80"
-        >
-          {state === 'error'
-            ? <XCircle size={20} color={c['danger-text']} />
-            : <AlertTriangle size={20} color={c['attention-text']} />}
+        <Pressable accessibilityRole="button" accessibilityLabel={t(`statusUi.states.${state}`)} onPress={() => navigate('activity')}
+          className="min-h-[56px] flex-row items-center gap-3 rounded-2xl border border-border-subtle bg-surface-1 px-4 py-3 active:opacity-80">
+          {state === 'error' ? <XCircle size={20} color={c['danger-text']} /> : <AlertTriangle size={20} color={c['attention-text']} />}
           <Text className="min-w-0 flex-1 font-sans text-sm text-primary-text">{t(`statusUi.lines.${state}`)}</Text>
           <ChevronRight size={18} color={c['text-tertiary']} />
         </Pressable>
@@ -202,7 +209,7 @@ export function ConfiguredHomeSection({
       <View className="gap-2.5">
         {targets.length ? targets.map((target) => {
           const TargetIcon = target.kind === 'pc' ? Monitor : target.kind === 'cloud' ? Cloud : Server;
-          const dotClass = target.state === 'error' ? 'bg-danger' : target.state === 'attention' ? 'bg-attention' : target.state === 'safe' || target.state === 'syncing' ? 'bg-brand' : 'bg-tertiary-text';
+          const dotClass = target.state === 'error' ? 'bg-danger' : target.state === 'attention' ? 'bg-attention' : target.state === 'safe' || target.state === 'syncing' || target.state === 'folderPending' ? 'bg-brand' : 'bg-tertiary-text';
           return (
             <Pressable
               key={target.id}
@@ -243,23 +250,14 @@ export function ConfiguredHomeSection({
         )}
       </View>
 
-      <SectionLabel
-        title={t('statusUi.rules')}
-        action={
-          <Pressable className="min-h-10 justify-center px-1" accessibilityRole="button" onPress={() => navigate('schedule')}>
-            <Text className="font-inter-medium text-sm text-brand-text">{t('statusUi.edit')}</Text>
-          </Pressable>
-        }
-      />
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('ui.schedule.title')}
-        onPress={() => navigate('schedule')}
-        className="min-h-[68px] flex-row items-center gap-3 rounded-3xl border border-border-subtle bg-surface-1 px-4 py-3 active:opacity-80"
-      >
-        <IconTile tone="brand">
-          <Zap size={20} color={c['brand-text']} />
-        </IconTile>
+      <SectionLabel title={t('statusUi.rules')} action={
+        <Pressable className="min-h-10 justify-center px-1" accessibilityRole="button" onPress={() => navigate('schedule')}>
+          <Text className="font-inter-medium text-sm text-brand-text">{t('statusUi.edit')}</Text>
+        </Pressable>
+      } />
+      <Pressable accessibilityRole="button" accessibilityLabel={t('ui.schedule.title')} onPress={() => navigate('schedule')}
+        className="min-h-[68px] flex-row items-center gap-3 rounded-3xl border border-border-subtle bg-surface-1 px-4 py-3 active:opacity-80">
+        <IconTile tone="brand"><Zap size={20} color={c['brand-text']} /></IconTile>
         <View className="min-w-0 flex-1 gap-0.5">
           <Text className="text-base font-inter-semibold text-primary-text">{t('ui.schedule.title')}</Text>
           <Text className="font-sans text-xs text-secondary-text">{t('statusUi.explicitTarget')}</Text>

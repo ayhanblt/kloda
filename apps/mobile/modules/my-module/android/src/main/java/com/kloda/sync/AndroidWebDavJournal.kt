@@ -116,6 +116,9 @@ internal class AndroidWebDavJournal(private val database: SQLiteDatabase) {
       database.setTransactionSuccessful()
     } finally { database.endTransaction() }
   }
+  fun exists(kind: String, id: String): Boolean = database.rawQuery(
+    "SELECT 1 FROM backup_destination WHERE kind=? AND id=? LIMIT 1", arrayOf(kind, id)
+  ).use { it.moveToFirst() }
   fun enabled(kind: String, id: String, revision: String? = null): Boolean = database.rawQuery(
     "SELECT enabled,revision FROM backup_destination WHERE kind=? AND id=?", arrayOf(kind, id)
   ).use { it.moveToFirst() && it.getInt(0) == 1 && (revision == null || revision == it.getString(1)) }

@@ -2,6 +2,7 @@ import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Ban, Clock, QrCode, ShieldCheck, Smartphone, Wifi, X } from 'lucide-react';
 
+import { BackupStepCard } from '../../features/pair-device/BackupStepCard';
 import { CandidateApproval } from '../../features/pair-device/CandidateApproval';
 import { InvitationQr } from '../../features/pair-device/InvitationQr';
 import { PairingQuickpanel } from '../../features/pair-device/PairingQuickpanel';
@@ -10,15 +11,16 @@ import { Notice, PageHeader, StatusPill, type StatusTone } from '../../shared/ui
 import './pairing.css';
 
 export function PairingPage({ onProtectedDecisionChange }: { onProtectedDecisionChange?: (protectedDecision: boolean) => void }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const baseLanguage = i18n.resolvedLanguage?.split('-')[0];
+  const consentLanguage = baseLanguage === 'tr' || baseLanguage === 'de' ? baseLanguage : 'en';
+  const consentTheme = typeof document !== 'undefined' && document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
   const controller = useDesktopPairing();
   const { status, busy, uncertain, error, available } = controller;
   const phase = status?.phase;
   const canCreate = phase === 'idle' || phase === 'invalid' || phase === 'revoked' || phase === 'complete';
   const preconsume = phase === 'open' || phase === 'reserved' || phase === 'connecting';
   const committed = phase === 'consumed_pending_ack' || phase === 'complete';
-  const backupScope = status?.backupScope;
-  const backupBlocked = Boolean(busy) || uncertain || !available || !status?.recordId;
   const visibleQr = phase === 'open' && !uncertain && !busy && status?.qr && status.remainingMs !== undefined && status.remainingMs > 0 ? status.qr : null;
   const candidate =
     phase === 'reserved' && status?.operationId && status.candidateGeneration
@@ -78,6 +80,7 @@ export function PairingPage({ onProtectedDecisionChange }: { onProtectedDecision
                 <QrCode aria-hidden="true" size={40} />
               )}
               <h3>{status ? t(`pairing.phases.${status.phase}`) : t(error ? 'pairing.unavailable' : 'pairing.loading')}</h3>
+              {committed && status?.peerName && <p className="text-base font-semibold text-primary-text">{status.peerName}</p>}
               <p>{status ? t(`pairing.phaseDescriptions.${status.phase}`) : t(error ? 'pairing.unavailableDescription' : 'pairing.loadingDescription')}</p>
             </div>
           )}
@@ -138,52 +141,6 @@ export function PairingPage({ onProtectedDecisionChange }: { onProtectedDecision
 
           {committed && <p className="pairing-caption">{t('pairing.revocationDescription')}</p>}
 
-          {phase === 'complete' && (
-            <div className="pairing-recovery mt-4 border-t border-border-subtle pt-4">
-              <h3 className="text-base font-semibold text-primary-text">{t('pairing.backupTitle')}</h3>
-              <Notice>{t('pairing.noFileGrant')}</Notice>
-              <p className="pairing-caption">{t('pairing.backupDescription')}</p>
-              <p className="text-sm text-primary-text" role="status">
-                {t(`pairing.backupStates.${uncertain ? 'unknown' : (backupScope?.state ?? 'not_approved')}`)}
-              </p>
-              {backupScope?.folder && (
-                <p className="pairing-caption">
-                  {t('pairing.backupFolder')} <code>{backupScope.folder}</code>
-                </p>
-              )}
-              {backupScope?.errorCode && (
-                <Notice role="alert" tone="danger">
-                  {t(`pairing.errors.${backupScope.errorCode}`)}
-                </Notice>
-              )}
-              <div className="pairing-card-actions">
-                <button
-                  className="pairing-button pairing-button-primary"
-                  disabled={backupBlocked}
-                  onClick={() => {
-                    if (status?.recordId) void controller.approveBackup(status.recordId);
-                  }}
-                  type="button"
-                >
-                  {t(backupScope?.state === 'approved' || backupScope?.state === 'unavailable' ? 'pairing.reselectBackup' : 'pairing.approveBackup')}
-                </button>
-                {(backupScope?.state === 'approved' || backupScope?.state === 'unavailable') && (
-                  <button
-                    className="pairing-button pairing-button-danger"
-                    disabled={backupBlocked}
-                    onClick={() => {
-                      if (status?.recordId) void controller.revokeBackup(status.recordId);
-                    }}
-                    type="button"
-                  >
-                    {t('pairing.revokeBackup')}
-                  </button>
-                )}
-              </div>
-              <p className="pairing-caption">{t('pairing.backupRevocationDescription')}</p>
-            </div>
-          )}
-
           {phase === 'reserved' && !candidate && (
             <Notice role="alert" tone="danger">
               {t('pairing.candidateUnavailable')}
@@ -191,7 +148,20 @@ export function PairingPage({ onProtectedDecisionChange }: { onProtectedDecision
           )}
         </section>
 
-        <PairingQuickpanel controller={controller} />
+        <div className="space-y-4">
+          {phase === 'complete' && status && (
+            <BackupStepCard
+              available={available}
+              busy={Boolean(busy)}
+              consentLanguage={consentLanguage}
+              consentTheme={consentTheme}
+              controller={controller}
+              status={status}
+              uncertain={uncertain}
+            />
+          )}
+          <PairingQuickpanel controller={controller} />
+        </div>
       </div>
       {candidate && (
         <CandidateApproval

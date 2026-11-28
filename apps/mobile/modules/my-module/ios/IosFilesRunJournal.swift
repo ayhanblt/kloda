@@ -48,7 +48,15 @@ extension IosSyncJournal {
   }
 
   func latestFilesRun() throws -> IosFilesRun? {
-    try statement("SELECT id,record_id,binding,state,error_code,attempts FROM files_run ORDER BY rowid DESC LIMIT 1") { statement in
+    try readLatestFilesRun("SELECT id,record_id,binding,state,error_code,attempts FROM files_run ORDER BY rowid DESC LIMIT 1")
+  }
+
+  func latestFilesRun(recordId: String) throws -> IosFilesRun? {
+    try readLatestFilesRun("SELECT id,record_id,binding,state,error_code,attempts FROM files_run WHERE record_id=? ORDER BY rowid DESC LIMIT 1", values: [recordId])
+  }
+
+  private func readLatestFilesRun(_ sql: String, values: [Any] = []) throws -> IosFilesRun? {
+    try statement(sql, values: values) { statement in
       let result = sqlite3_step(statement)
       if result == SQLITE_DONE { return nil }
       guard result == SQLITE_ROW else { throw journalError("storage_failure") }

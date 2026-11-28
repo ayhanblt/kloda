@@ -22,7 +22,7 @@ internal class AndroidSyncJournal(context: Context, databaseName: String = "klod
   init { setWriteAheadLoggingEnabled(true) }
 
   override fun onConfigure(database: SQLiteDatabase) {
-    database.execSQL("PRAGMA synchronous=FULL")
+    database.execSQL("PRAGMA synchronous=NORMAL")
     if (deviceLocal) database.setForeignKeyConstraintsEnabled(true)
   }
   override fun onCreate(database: SQLiteDatabase) {
@@ -133,6 +133,11 @@ internal class AndroidSyncJournal(context: Context, databaseName: String = "klod
     arrayOf(record, file.reference, tree, file.relativePath.substringAfterLast('/'), hash, size.toString())
   ).use { if (it.moveToFirst()) decode(it) else null }
 
+  fun hasCandidateVersion(record: String, file: QueuedSourceFile, tree: String): Boolean = readableDatabase.rawQuery(
+    "SELECT 1 FROM files_job WHERE record_id=? AND reference=? AND tree_reference=? AND name=? AND size_bytes=? LIMIT 1",
+    arrayOf(record, file.reference, tree, file.relativePath.substringAfterLast('/'), file.size.toString())
+  ).use { it.moveToFirst() }
+
   fun find(id: String): FilesJob? = readableDatabase.rawQuery("SELECT * FROM files_job WHERE id=?", arrayOf(id)).use {
     if (it.moveToFirst()) decode(it) else null
   }
@@ -201,10 +206,26 @@ internal class AndroidSyncJournal(context: Context, databaseName: String = "klod
   fun blockSource(source: String, code: String) {
     writableDatabase.execSQL("UPDATE files_job SET state='blocked',error_code=? WHERE source_id=? AND state!='completed'", arrayOf(code, source))
   }
-  fun status(running: Boolean, errorCode: String?): Map<String, Any> {
+  fun status(running: Boolean, errorCode: String?, recordId: String? = null, filterByRecord: Boolean = false): Map<String, Any> {
+    if (filterByRecord && recordId.isNullOrEmpty()) {
+      return buildMap {
+        put("running", running)
+        put("jobs", emptyList<Map<String, Any>>())
+        put("totalJobs", "0")
+        put("hasMore", false)
+        if (running) errorCode?.let { put("errorCode", it) }
+      }
+    }
     val database = readableDatabase
-    val count = database.rawQuery("SELECT COUNT(*) FROM files_job", null).use { it.moveToFirst(); it.getLong(0) }
-    val jobs = database.rawQuery("SELECT * FROM files_job ORDER BY (state='completed'), CASE WHEN state='completed' THEN -rowid ELSE rowid END LIMIT 100", null).use { cursor ->
+    val countArgs = if (filterByRecord) arrayOf(recordId!!) else null
+    val countSql = if (filterByRecord) "SELECT COUNT(*) FROM files_job WHERE record_id=?" else "SELECT COUNT(*) FROM files_job"
+    val jobsSql = if (filterByRecord) {
+      "SELECT * FROM files_job WHERE record_id=? ORDER BY (state='completed'), CASE WHEN state='completed' THEN -rowid ELSE rowid END LIMIT 100"
+    } else {
+      "SELECT * FROM files_job ORDER BY (state='completed'), CASE WHEN state='completed' THEN -rowid ELSE rowid END LIMIT 100"
+    }
+    val count = database.rawQuery(countSql, countArgs).use { it.moveToFirst(); it.getLong(0) }
+    val jobs = database.rawQuery(jobsSql, countArgs).use { cursor ->
       buildList { while (cursor.moveToNext()) {
         val job = decode(cursor)
         add(buildMap<String, Any> {

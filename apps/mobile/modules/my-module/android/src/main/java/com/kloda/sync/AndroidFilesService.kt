@@ -8,19 +8,53 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 /** Only a visible UI request may start this non-exported, non-restarting service. */
 class AndroidFilesService : Service() {
   @Volatile private var retiring = false
+  private var wakeLock: PowerManager.WakeLock? = null
+  private var wifiLock: WifiManager.WifiLock? = null
   override fun onBind(intent: Intent?): IBinder? = null
 
   override fun onCreate() {
     super.onCreate()
     activate()
+  }
+
+  private fun acquireLocks() {
+    runCatching {
+      if (wakeLock?.isHeld != true) {
+        val power = getSystemService(PowerManager::class.java)
+        wakeLock = power?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "kloda:backup-sync")?.apply {
+          setReferenceCounted(false)
+          acquire(6L * 60L * 60L * 1000L)
+        }
+      }
+    }
+    runCatching {
+      if (wifiLock?.isHeld != true) {
+        val wifi = applicationContext.getSystemService(WifiManager::class.java)
+        val mode = if (Build.VERSION.SDK_INT >= 29) WifiManager.WIFI_MODE_FULL_LOW_LATENCY
+        else @Suppress("DEPRECATION") WifiManager.WIFI_MODE_FULL_HIGH_PERF
+        wifiLock = wifi?.createWifiLock(mode, "kloda:backup-wifi")?.apply {
+          setReferenceCounted(false)
+          acquire()
+        }
+      }
+    }
+  }
+
+  private fun releaseLocks() {
+    runCatching { wakeLock?.let { if (it.isHeld) it.release() } }
+    wakeLock = null
+    runCatching { wifiLock?.let { if (it.isHeld) it.release() } }
+    wifiLock = null
   }
 
   private fun activate() {
@@ -30,7 +64,8 @@ class AndroidFilesService : Service() {
         NotificationChannel(CHANNEL, getString(R.string.kloda_backup_channel), NotificationManager.IMPORTANCE_LOW))
       val builder = if (Build.VERSION.SDK_INT >= 26) Notification.Builder(this, CHANNEL) else Notification.Builder(this)
       val open = packageManager.getLaunchIntentForPackage(packageName)
-      val notification = builder.setSmallIcon(android.R.drawable.stat_sys_upload)
+      val notification = builder.setSmallIcon(R.drawable.ic_stat_kloda)
+        .setColor(0xFF9A6640.toInt())
         .setContentTitle(getString(R.string.kloda_backup_title))
         .setContentText(getString(R.string.kloda_backup_body)).setOngoing(true).setOnlyAlertOnce(true)
         .apply { open?.let { setContentIntent(PendingIntent.getActivity(this@AndroidFilesService, 0, it,
@@ -38,16 +73,19 @@ class AndroidFilesService : Service() {
         .build()
       if (Build.VERSION.SDK_INT >= 29) startForeground(NOTIFICATION, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
       else startForeground(NOTIFICATION, notification)
+      acquireLocks()
       synchronized(gate) {
         val request = current
         if (retiring || request == null || request.stopped) {
           request?.takeIf { it.service == null }?.let { it.stopped = true; it.ready.countDown() }
           retiring = true
+          releaseLocks()
           stopSelf()
         }
         else { request.service = this; request.ready.countDown() }
       }
     } catch (_: Exception) {
+      releaseLocks()
       synchronized(gate) { current?.let { it.stopped = true; it.ready.countDown() } }
       stopSelf()
     }
@@ -65,12 +103,14 @@ class AndroidFilesService : Service() {
 
   override fun onDestroy() {
     interrupt()
+    releaseLocks()
     stopForeground(STOP_FOREGROUND_REMOVE)
     super.onDestroy()
   }
 
   private fun interrupt() = synchronized(gate) {
     retiring = true
+    releaseLocks()
     if (current?.service === this) {
       current?.stopped = true
       current = null

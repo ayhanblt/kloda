@@ -93,7 +93,7 @@ export function useFileTransfer() {
             if (target.phase !== 'complete' || !target.recordId || !target.peerFingerprint) throw new Error('pairing_required');
             if (!job && !await backupDestinations.pcEnabled(target.recordId)) return;
             if (!current()) return;
-            selected = true; setPeer(target.peerFingerprint);
+            selected = true; setPeer(target.peerName || target.peerFingerprint);
             const observed = job ? await fileTransfer.rebackup(target.recordId, job.id) : await fileTransfer.run(target.recordId);
             if (current()) { setQueue(observed); setError(observed.errorCode ?? null); }
           } catch (cause) {
@@ -158,7 +158,7 @@ export function useFileTransfer() {
         setBackups(null); setBackupRecord(null);
         throw new Error('pairing_required');
       }
-      setPeer(target.peerFingerprint);
+      setPeer(target.peerName || target.peerFingerprint);
       if (allPhotos) {
         const observed = await fileTransfer.restorePhotos(target.recordId);
         if (mounted.current && foreground.current && version === epoch.current) setPhotos(observed);

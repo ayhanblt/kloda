@@ -33,6 +33,7 @@ internal class AndroidFilesQueue(private val context: Context, private val onSto
     }
     activeRun = run.id
     stopped.set(false); pauseCode = "paused"; errorCode = null; activeRecord = record
+    if (rebackup == null) runCatching { AndroidBackupScheduler.clearExecutionError(context) }
     val observed = status()
     worker = Thread({ AndroidFilesRunWorker(runs, journal, ::checkPaused, ::failureCode,
       { errorCode = it }, { errorCode }, { stopped.set(true) }) { retained ->
@@ -50,16 +51,25 @@ internal class AndroidFilesQueue(private val context: Context, private val onSto
 
   fun running(): Boolean = worker?.isAlive == true
 
+  fun clearPeerState() = synchronized(lock) {
+    if (worker?.isAlive != true) {
+      activeRecord = null
+      activeRun = null
+      errorCode = null
+    }
+  }
+
   fun status(): Map<String, Any> {
     val binding = FilesRunContext.capture(context).binding
     runs.invalidate(binding)
     val running = worker?.isAlive == true
-    val files = journal.status(running, errorCode)
-    val photos = manifests.status()
+    val currentRecord = activeRecord ?: runCatching { AndroidBackupDestinations.currentPairedRecordId(context) }.getOrNull()
+    val files = journal.status(running, if (currentRecord != null || running) errorCode else null, currentRecord, filterByRecord = true)
+    val photos = manifests.status(currentRecord, filterByRecord = true)
     @Suppress("UNCHECKED_CAST")
     val jobs = (photos + (files["jobs"] as List<Map<String, Any>>)).take(100)
-    val total = (files["totalJobs"] as String).toLong() + manifests.count()
-    val run = runs.latest(activeRecord)?.takeIf { it.visibleFor(binding) }?.view(running)
+    val total = (files["totalJobs"] as String).toLong() + manifests.count(currentRecord, filterByRecord = true)
+    val run = currentRecord?.let { runs.latest(it)?.takeIf { r -> r.visibleFor(binding) }?.view(running) }
     return files + (if (run == null) emptyMap() else mapOf("run" to run)) + mapOf("jobs" to jobs, "totalJobs" to total.toString(), "hasMore" to (total > jobs.size))
   }
 
@@ -186,20 +196,48 @@ internal class AndroidFilesQueue(private val context: Context, private val onSto
           for (file in files) {
             after = file.reference
             var staged: FilesJob? = null
+            var completedResource: FilesJob? = null
+            var knownDigest: FilesDigest? = null
             var suppressed = false
-            synchronized(AndroidSyncJournal.sourceLock) {
+            val hasCandidate = synchronized(AndroidSyncJournal.sourceLock) {
               checkPaused()
               if (sources()[source] != tree) throw FilesFailure("source_permission_lost")
+              journal.hasCandidateVersion(record, file, tree)
+            }
+            if (!hasCandidate) {
+              val snapshot = snapshots.stage(tree, file.reference)
+              knownDigest = snapshot.digest
+              var insertionAttempted = false
+              try {
+                synchronized(AndroidSyncJournal.sourceLock) {
+                  checkPaused()
+                  if (sources()[source] != tree) throw FilesFailure("source_permission_lost")
+                  val existing = journal.version(record, source, file, tree, snapshot.digest.sha256, snapshot.digest.size)
+                  if (existing == null) {
+                    insertionAttempted = true
+                    val job = FilesJob(snapshot.id, record, source, file.reference, tree, file.relativePath.substringAfterLast('/'),
+                      journal.wireSource(record, file, tree), snapshot.digest.sha256, snapshot.digest.size, null, 0, "queued", null)
+                    journal.insert(job)
+                    staged = job
+                  } else {
+                    completedResource = existing.takeIf { it.state == "completed" }
+                    suppressed = journal.deleted(existing.id)
+                  }
+                }
+              } finally { if (!insertionAttempted) snapshots.discard(snapshot) }
+            } else {
               val current = snapshots.currentDigest(tree, file.reference)
+              knownDigest = current
               val prior = if (AndroidPhotosSources.isPhotos(tree)) manifests.completed(record, file, current, transfer) ?:
                 journal.version(record, source, file, tree, current.sha256, current.size)
                 else journal.version(record, source, file, tree, current.sha256, current.size)
               if (prior?.state == "completed") {
-                track(prior)
+                synchronized(AndroidSyncJournal.sourceLock) { track(prior) }
                 checkPaused()
                 try {
                   if (transfer.status(prior).state != "completed") throw FilesFailure("outcome_unknown")
                   journal.clearDeleted(prior.id)
+                  completedResource = prior
                 } catch (error: FilesFailure) {
                   if (error.code != "owner_deleted") throw error
                   journal.markDeleted(prior.id)
@@ -208,24 +246,33 @@ internal class AndroidFilesQueue(private val context: Context, private val onSto
               suppressed = prior != null && journal.deleted(prior.id)
               if (prior == null) {
                 val snapshot = snapshots.stage(tree, file.reference)
+                knownDigest = snapshot.digest
                 var insertionAttempted = false
                 try {
-                  checkPaused()
-                  if (sources()[source] != tree) throw FilesFailure("source_permission_lost")
-                  if (journal.version(record, source, file, tree, snapshot.digest.sha256, snapshot.digest.size) == null) {
-                    insertionAttempted = true
-                    val job = FilesJob(snapshot.id, record, source, file.reference, tree, file.relativePath.substringAfterLast('/'),
-                      journal.wireSource(record, file, tree), snapshot.digest.sha256, snapshot.digest.size, null, 0, "queued", null)
-                    journal.insert(job)
-                    staged = job
+                  synchronized(AndroidSyncJournal.sourceLock) {
+                    checkPaused()
+                    if (sources()[source] != tree) throw FilesFailure("source_permission_lost")
+                    if (journal.version(record, source, file, tree, snapshot.digest.sha256, snapshot.digest.size) == null) {
+                      insertionAttempted = true
+                      val job = FilesJob(snapshot.id, record, source, file.reference, tree, file.relativePath.substringAfterLast('/'),
+                        journal.wireSource(record, file, tree), snapshot.digest.sha256, snapshot.digest.size, null, 0, "queued", null)
+                      journal.insert(job)
+                      staged = job
+                    }
                   }
                 } finally { if (!insertionAttempted) snapshots.discard(snapshot) }
               }
             }
-            staged?.let { sendJob(it, transfer); suppressed = journal.deleted(it.id) }
+            staged?.let {
+              completedResource = sendJob(it, transfer, freshlyStaged = true)
+              suppressed = journal.deleted(it.id)
+            }
             if (suppressed && !AndroidPhotosSources.isPhotos(tree)) continue
-            if (AndroidPhotosSources.isPhotos(tree)) try { manifests.publish(record, source, tree, file, transfer) { resource -> rebackupResource(resource, transfer) } }
-            catch (error: FilesFailure) { if (error.code != "owner_deleted") throw error }
+            if (AndroidPhotosSources.isPhotos(tree)) try {
+              manifests.publish(record, source, tree, file, transfer, knownDigest = knownDigest, knownResource = completedResource) { resource ->
+                rebackupResource(resource, transfer)
+              }
+            } catch (error: FilesFailure) { if (error.code != "owner_deleted") throw error }
           }
         }
       } catch (error: Throwable) {
@@ -241,21 +288,20 @@ internal class AndroidFilesQueue(private val context: Context, private val onSto
     AndroidScheduleJournal.track(journal.writableDatabase, activeRun ?: throw FilesFailure("queue_unavailable"), job.id, job.recordId)
   }
 
-  private fun sendJob(initial: FilesJob, transfer: AndroidFilesTransfer) {
+  private fun sendJob(initial: FilesJob, transfer: AndroidFilesTransfer, freshlyStaged: Boolean = false): FilesJob? {
     try {
     track(initial)
     var job = initial
     snapshots.open(job).use { descriptor ->
+      if (!freshlyStaged) {
+        snapshots.validate(FilesDigest(job.sha256, job.size), descriptor)
+      }
       synchronized(AndroidSyncJournal.sourceLock) {
-        checkSource(job)
-        snapshots.validate(job, descriptor)
         checkSource(job)
       }
       var ack = if (job.operationId == null) transfer.create(job) else transfer.status(job)
       fun retain(value: FilesAck) {
         if (value.state == "completed") synchronized(AndroidSyncJournal.sourceLock) {
-          checkSource(job)
-          snapshots.validateSource(job)
           checkSource(job)
           journal.update(job.id, "completed", operation = value.id, offset = value.offset)
         }
@@ -265,31 +311,32 @@ internal class AndroidFilesQueue(private val context: Context, private val onSto
         if (state == "completed") snapshots.discard(FilesSnapshot(job.id, FilesDigest(job.sha256, job.size)))
       }
       retain(ack)
-      if (ack.state == "completed") return
+      if (ack.state == "completed") return job
       while (ack.state == "receiving" && job.offset < job.size) {
-        checkSource(job)
+        checkPaused()
+        if (sources()[job.sourceId] != job.treeReference) throw FilesFailure("source_permission_lost")
         ack = transfer.chunk(job, descriptor.fd)
         retain(ack)
       }
-      if (ack.state == "completed") return
+      if (ack.state == "completed") return job
       synchronized(AndroidSyncJournal.sourceLock) {
         checkSource(job)
-        snapshots.validateSource(job)
-        checkSource(job)
         journal.update(job.id, "finalizing")
-        val final = transfer.finalize(job)
-        if (final.state != "completed") throw FilesFailure("outcome_unknown")
-        retain(final)
       }
+      val final = transfer.finalize(job)
+      if (final.state != "completed") throw FilesFailure("outcome_unknown")
+      retain(final)
+      return job
     }
     } catch (error: Throwable) {
       val code = failureCode(error)
-      if (code == "owner_deleted") { journal.markDeleted(initial.id); return }
+      if (code == "owner_deleted") { journal.markDeleted(initial.id); return null }
       val blocked = code in setOf("source_changed", "source_permission_lost", "snapshot_unavailable", "denied", "revoked",
         "hash_mismatch", "backup_scope_changed", "backup_path_rejected", "invalid_request", "conflict", "not_found")
       journal.update(initial.id, if (blocked) "blocked" else "paused", code)
       errorCode = code
       if (!blocked) throw FilesFailure(code)
+      return null
     }
   }
 

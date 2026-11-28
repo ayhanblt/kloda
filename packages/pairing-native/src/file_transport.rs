@@ -41,6 +41,7 @@ pub(crate) struct Managed {
     runtime: Option<tokio::runtime::Runtime>,
     incoming: Option<mpsc::Sender<TlsIo>>,
     requests: Option<mpsc::Receiver<Command>>,
+    pending: Option<Command>,
     peers: Vec<Evidence>,
 }
 impl Managed {
@@ -68,6 +69,7 @@ impl Managed {
             runtime: Some(runtime),
             incoming,
             requests,
+            pending: None,
             peers,
         })
     }
@@ -116,8 +118,62 @@ impl Managed {
             }
         });
     }
+    #[cfg(not(target_os = "android"))]
+    fn total_progress(&self) -> u64 {
+        self.peers
+            .iter()
+            .fold(0u64, |acc, peer| acc.wrapping_add(peer.progress_seq()))
+    }
+    #[cfg(not(target_os = "android"))]
+    pub(crate) fn poll_burst(&mut self, max_iters: usize, stop_on_command: bool) -> bool {
+        let start = std::time::Instant::now();
+        let initial = self.total_progress();
+        let mut prev = initial;
+        let mut idle = 0usize;
+        for _ in 0..max_iters {
+            if let Some(runtime) = &self.runtime {
+                runtime.block_on(tokio::task::yield_now());
+            }
+            if stop_on_command {
+                if self.pending.is_none() {
+                    self.pending = self.requests.as_mut().and_then(|r| r.try_recv().ok());
+                }
+                if self.pending.is_some() {
+                    break;
+                }
+            }
+            let current = self.total_progress();
+            if current == prev {
+                idle += 1;
+                if idle >= 2 {
+                    break;
+                }
+            } else {
+                prev = current;
+                idle = 0;
+            }
+            if start.elapsed() >= std::time::Duration::from_millis(4) {
+                break;
+            }
+        }
+        self.peers.retain(|peer| {
+            if peer.check_live().is_ok() {
+                true
+            } else {
+                peer.close();
+                false
+            }
+        });
+        self.total_progress() != initial || self.pending.is_some()
+    }
+    #[cfg(not(target_os = "android"))]
+    pub(crate) fn flush_replies(&mut self) {
+        let _ = self.poll_burst(16, false);
+    }
     pub(crate) fn next(&mut self) -> Option<Command> {
-        self.requests.as_mut()?.try_recv().ok()
+        self.pending
+            .take()
+            .or_else(|| self.requests.as_mut()?.try_recv().ok())
     }
     pub(crate) fn live_count(&self) -> usize {
         self.peers.len()
@@ -126,6 +182,7 @@ impl Managed {
         for peer in self.peers.drain(..) {
             peer.close();
         }
+        self.pending = None;
         while let Some(command) = self.next() {
             let _ = command
                 .reply

@@ -40,7 +40,7 @@ final class IosSyncJournal {
           let mode = sqlite3_column_text(statement, 0), String(cString: mode) == "wal",
           sqlite3_step(statement) == SQLITE_DONE else { throw journalError("storage_failure") }
       }
-      try execute("PRAGMA synchronous=FULL")
+      try execute("PRAGMA synchronous=NORMAL")
       try execute("PRAGMA foreign_keys=ON")
       #if os(iOS)
       for path in [databasePath, databasePath + "-wal", databasePath + "-shm"] where FileManager.default.fileExists(atPath: path) {

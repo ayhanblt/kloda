@@ -9,7 +9,7 @@ enum IosFilesUpload {
     try save(ack, job: &job, journal: journal)
     while ack.offset < job.size {
       try check()
-      let length = min(Int64(65536), job.size - job.acknowledged)
+      let length = min(Int64(1_048_576), job.size - job.acknowledged)
       let offset = job.acknowledged
       ack = try IosFilesTransfer.ack(connection.send(["kind": "chunk", "id": ack.id, "offset": offset, "length": length], descriptor), job: job)
       guard ack.offset == offset + length else { throw IosPairingFailure.native("outcome_unknown") }

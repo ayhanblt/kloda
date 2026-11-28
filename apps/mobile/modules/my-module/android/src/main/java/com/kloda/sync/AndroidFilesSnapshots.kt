@@ -37,7 +37,7 @@ internal class AndroidFilesSnapshots(private val context: Context, val webdav: B
     private fun encode(bytes: ByteArray): String = Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
     fun digest(stream: InputStream, check: () -> Unit = {}, output: FileOutputStream? = null): FilesDigest {
       val hash = MessageDigest.getInstance("SHA-256")
-      val buffer = ByteArray(65536)
+      val buffer = ByteArray(262144)
       var size = 0L
       while (true) {
         check()
@@ -109,9 +109,7 @@ internal class AndroidFilesSnapshots(private val context: Context, val webdav: B
         output.fd.sync()
         value
       }
-      syncDirectory(directory)
       checkAccess(tree, reference)
-      if (currentDigest(tree, reference) != result) throw FilesFailure("source_changed")
       return FilesSnapshot(id, result)
     } catch (error: Throwable) { file.delete(); throw error }
   }

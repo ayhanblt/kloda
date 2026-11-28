@@ -4,6 +4,12 @@ use crate::store::Store;
 
 fn old_schema(directory: &Directory, version: i64) {
     let store = directory.store(key("pc"));
+    if version < 6 {
+        store
+            .conn
+            .execute_batch("DROP TABLE scope_folders; DROP TABLE peer_names; PRAGMA user_version=5;")
+            .unwrap();
+    }
     if version < 5 {
         store
             .conn
@@ -40,7 +46,7 @@ fn version(directory: &Directory) -> i64 {
 
 #[test]
 fn valid_older_installations_upgrade_but_wrong_installation_never_changes_version() {
-    for old in [1, 2, 3, 4] {
+    for old in [1, 2, 3, 4, 5] {
         let directory = Directory::new();
         old_schema(&directory, old);
         assert!(matches!(
@@ -50,7 +56,7 @@ fn valid_older_installations_upgrade_but_wrong_installation_never_changes_versio
         assert_eq!(version(&directory), old);
         let store = directory.store(key("pc"));
         validate(&store.conn).unwrap();
-        assert_eq!(version(&directory), 5);
+        assert_eq!(version(&directory), 6);
     }
 }
 

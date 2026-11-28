@@ -25,6 +25,7 @@ it('smokes actual production activity: acknowledged progress is exact and full u
   jest.mocked(fileTransfer.run).mockResolvedValue({ running: true, jobs: [{ ...job, acknowledgedBytes: job.totalBytes, state: 'finalizing' }], totalJobs: '1', hasMore: false });
   const surface = await render(<ActivityPage onBack={() => undefined} />);
   await waitFor(() => expect(surface.getByRole('progressbar').props.accessibilityValue.now).toBe(99));
+  expect(surface.queryByText(i18n.t('destinations.review.title'))).toBeNull();
   await fireEvent.press(surface.getByText(i18n.t('transfer.syncNow')));
   await waitFor(() => expect(surface.getByText(i18n.t('transfer.states.finalizing'))).toBeTruthy());
   expect(surface.queryByText(i18n.t('transfer.states.completed'))).toBeNull();
@@ -99,8 +100,6 @@ it('requires explicit confirmation and uses current paired authority for an old-
     await surface.unmount();
   } finally { confirmation.mockRestore(); }
 });
-
-
 it('shows an interrupted retained retry as paused, with its budget and no invented completion', async () => {
   jest.mocked(fileTransfer.status).mockResolvedValue({ running: false, jobs: [], totalJobs: '0', hasMore: false,
     run: { id: 'retained-run', recordId: 'AAAAAAAAAAAAAAAAAAAAAA', state: 'paused', attempts: 3,
@@ -145,8 +144,6 @@ it('keeps valid Files controls usable when the independent Photos status query f
     jest.mocked(fileTransfer.photoStatus).mockResolvedValue({ state: 'idle', total: '0', completed: '0', review: '0' });
   }
 });
-
-
 it('retains native uploads across background and page departure, then reads current state on reopen', async () => {
   const listeners: ((state: AppStateStatus) => void)[] = [];
   const change = (state: AppStateStatus) => listeners.forEach((listener) => listener(state));
@@ -174,8 +171,6 @@ it('retains native uploads across background and page departure, then reads curr
     await reopened.unmount();
   } finally { subscription.mockRestore(); }
 });
-
-
 it('pauses automatic backup while idle, preserves that choice across Sync now and reopen, and resumes only explicitly', async () => {
   const paused = { running: false, jobs: [], totalJobs: '0', hasMore: false, automaticPaused: true };
   jest.mocked(fileTransfer.status).mockResolvedValue({ ...paused, automaticPaused: false });
@@ -220,8 +215,6 @@ it('keeps automatic backup paused on failed Continue and shows a scheduling erro
     }
   } finally { await act(async () => { await i18n.changeLanguage('tr'); }); }
 });
-
-
 it('continues Sync now and automatic Continue after notification denial without a fake backup failure', async () => {
   const listeners: ((state: AppStateStatus) => void)[] = [];
   const change = (state: AppStateStatus) => listeners.forEach((listener) => listener(state));

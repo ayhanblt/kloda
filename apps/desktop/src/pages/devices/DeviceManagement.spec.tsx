@@ -25,8 +25,8 @@ it('separates recorded trust, current own-backup permission and folder without i
   render(<DeviceManagement />);
   await screen.findByText('fingerprint-A');
   expect(screen.getByText('/fixture/backup')).toBeInTheDocument();
-  expect(screen.getByText(i18n.t('devices.trust.complete'), { exact: false })).toBeInTheDocument();
-  expect(screen.getByText(i18n.t('devices.permission.approved'), { exact: false })).toBeInTheDocument();
+  expect(screen.getByText(`${i18n.t('devices.trustLabel')} ${i18n.t('devices.trust.complete')}`)).toBeInTheDocument();
+  expect(screen.getByText(`${i18n.t('devices.permissionLabel')} ${i18n.t('devices.permission.approved')}`)).toBeInTheDocument();
   expect(screen.getByText(i18n.t('devices.description'))).toBeInTheDocument();
   const pending = screen.getByText('fingerprint-B').closest('li')!;
   expect(within(pending).getByRole('button', { name: i18n.t('devices.grant') })).toBeDisabled();
@@ -51,7 +51,7 @@ it('replaces old affirmative permissions with unknown after failed reads, recove
   view.unmount();
   update(page([{ ...device, backupScope: { state: 'not_approved' } }]));
   await act(async () => { render(<DeviceManagement />); });
-  expect(screen.getByText(i18n.t('devices.permission.not_approved'), { exact: false })).toBeInTheDocument();
+  expect(screen.getByText(`${i18n.t('devices.permissionLabel')} ${i18n.t('devices.permission.not_approved')}`)).toBeInTheDocument();
 });
 
 it('targets exact selected records and rereads after grant and revoke without optimistic authorization', async () => {
@@ -60,13 +60,13 @@ it('targets exact selected records and rereads after grant and revoke without op
   const row = (await screen.findByText('fingerprint-B')).closest('li')!;
   update(page([{ ...device, recordId: 'record-B', peerFingerprint: 'fingerprint-B' }]));
   await act(async () => { fireEvent.click(within(row).getByRole('button', { name: i18n.t('devices.grant') })); });
-  expect(approveBackup).toHaveBeenCalledExactlyOnceWith('record-B');
+  expect(approveBackup).toHaveBeenCalledExactlyOnceWith('record-B', expect.any(String), expect.any(String));
   expect(list).toHaveBeenCalledTimes(2);
   update(page([{ ...device, recordId: 'record-B', peerFingerprint: 'fingerprint-B', backupScope: { state: 'revoked' } }]));
   await act(async () => { fireEvent.click(screen.getByRole('button', { name: i18n.t('devices.revoke') })); });
   expect(revokeBackup).toHaveBeenCalledExactlyOnceWith('record-B');
   expect(list).toHaveBeenCalledTimes(3);
-  expect(screen.getByText(i18n.t('devices.trust.complete'), { exact: false })).toBeInTheDocument();
+  expect(screen.getByText(`${i18n.t('devices.trustLabel')} ${i18n.t('devices.trust.complete')}`)).toBeInTheDocument();
   expect(screen.getByText(i18n.t('devices.revokeMeaning'))).toBeInTheDocument();
 });
 
@@ -155,15 +155,17 @@ it('keeps device removal separate from access revoke and waits for native durabl
   expect(removeDevice).toHaveBeenCalledExactlyOnceWith('record-A', 'tr');
   expect(revokeBackup).not.toHaveBeenCalled();
   expect(list).toHaveBeenCalledOnce();
-  expect(screen.getByText(i18n.t('devices.trust.complete'), { exact: false })).toBeInTheDocument();
+  expect(screen.getByText(`${i18n.t('devices.trustLabel')} ${i18n.t('devices.trust.complete')}`)).toBeInTheDocument();
   expect(screen.getByRole('button', { name: i18n.t('devices.remove') })).toBeDisabled();
   update(page([{ ...device, trust: 'revoked', backupScope: { state: 'revoked', folder: '/fixture/backup' } }]));
   await act(async () => { finish(); });
   expect(list).toHaveBeenCalledTimes(2);
+  expect(screen.queryByRole('button', { name: i18n.t('devices.grant') })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: i18n.t('devices.showHistory', { count: 1 }) }));
   expect(screen.getByText(`${i18n.t('devices.trustLabel')} ${i18n.t('devices.trust.revoked')}`)).toBeInTheDocument();
   expect(screen.getByText('/fixture/backup')).toBeInTheDocument();
-  expect(screen.getByText(i18n.t('devices.removeMeaning'))).toBeInTheDocument();
-  expect(screen.getByRole('button', { name: i18n.t('devices.remove') })).toBeDisabled();
+  expect(screen.getByText(i18n.t('devices.revokedNote'))).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: i18n.t('devices.grant') })).not.toBeInTheDocument();
 });
 
 it('requeries cancelled removal and shows unknown after removal/read failure instead of claiming device removed', async () => {
@@ -174,7 +176,7 @@ it('requeries cancelled removal and shows unknown after removal/read failure ins
   await act(async () => { fireEvent.click(screen.getByRole('button', { name: i18n.t('devices.remove') })); });
   expect(list).toHaveBeenCalledTimes(2);
   expect(screen.getByRole('alert')).toHaveTextContent(i18n.t('pairing.errors.cancelled'));
-  expect(screen.getByText(i18n.t('devices.trust.complete'), { exact: false })).toBeInTheDocument();
+  expect(screen.getByText(`${i18n.t('devices.trustLabel')} ${i18n.t('devices.trust.complete')}`)).toBeInTheDocument();
   removeDevice.mockRejectedValueOnce({ code: 'storage_failure' });
   list.mockRejectedValueOnce({ code: 'acl_unavailable' });
   await act(async () => { fireEvent.click(screen.getByRole('button', { name: i18n.t('devices.remove') })); });
@@ -196,4 +198,14 @@ it('allows removal of pending pairing trust and disables removal when the bridge
   render(<DeviceManagement />);
   await screen.findByText('fingerprint-A');
   expect(screen.getByRole('button', { name: i18n.t('devices.remove') })).toBeDisabled();
+});
+
+it('shows peerName and readable subfolder with fingerprint inside collapsed security details', async () => {
+  fixture(page([{ ...device, peerName: 'Galaxy S24', backupScope: { state: 'approved', folder: '/Users/ayhan/Downloads', peerFolder: 'Galaxy S24' } }]));
+  render(<DeviceManagement />);
+  await screen.findByRole('heading', { name: 'Galaxy S24' });
+  expect(screen.getByText('/Users/ayhan/Downloads/Galaxy S24')).toBeInTheDocument();
+  expect(screen.getByText(i18n.t('devices.securityDetails'))).toBeInTheDocument();
+  const details = screen.getByText('fingerprint-A').closest('details');
+  expect(details?.open).toBe(false);
 });

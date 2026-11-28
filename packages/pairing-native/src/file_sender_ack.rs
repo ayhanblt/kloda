@@ -1,5 +1,5 @@
 use crate::error::{PairingError, Result};
-use crate::file_protocol::{Error, Operation, OperationState, Upload, CHUNK_LIMIT};
+use crate::file_protocol::{Error, Operation, OperationState, ScopeProbe, Upload, CHUNK_LIMIT};
 use crate::file_sender_command::{validate_id, Command, Reply, Task};
 use axum::http::{HeaderMap, Response};
 use serde::Deserialize;
@@ -99,6 +99,21 @@ pub(crate) fn decode<B: AsRef<[u8]>>(
             reply.bytes = Some(bytes.len() as u64);
             reply.offset = Some(actual);
             reply.size = Some(size);
+        }
+        Command::Scope => {
+            require_type(response.headers(), "application/json")?;
+            let probe: ScopeProbe = serde_json::from_slice(response.body().as_ref())
+                .map_err(|_| PairingError::OutcomeUnknown)?;
+            if !matches!(
+                probe.scope_state.as_str(),
+                "not_approved" | "approved" | "revoked" | "unavailable"
+            ) {
+                return Err(PairingError::OutcomeUnknown);
+            }
+            reply.scope_state = Some(probe.scope_state);
+            reply.peer_name = probe
+                .peer_name
+                .and_then(|name| crate::device_name::sanitize_display(&name));
         }
         command => {
             require_type(response.headers(), "application/json")?;

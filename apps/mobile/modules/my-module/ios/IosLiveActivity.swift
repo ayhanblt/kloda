@@ -85,12 +85,13 @@ final class IosLiveActivity: @unchecked Sendable {
 
   // nil: nothing to show (no destination enabled).
   static func observe() throws -> State? {
-    let pc = try IosWebDavJournal.open().hasEnabledPc()
+    let coordinator = IosAutomaticCoordinator.shared
+    let pc = coordinator.currentPairedPcEnabled()
     // Same WebDAV status the home screen reads (KlodaBackupModule.webDavStatus), including the automatic error.
     var webdav = try IosWebDavQueue.shared.status()
     if let code = IosWebDavAutomaticCoordinator.shared.error() { webdav["automaticError"] = code }
-    var queue = try IosAutomaticCoordinator.shared.files.status()
-    for (key, value) in try IosAutomaticCoordinator.shared.status() { queue[key] = value }
+    var queue = try coordinator.files.status(recordId: coordinator.currentPairedRecordId(), filterByRecord: true)
+    for (key, value) in try coordinator.status() { queue[key] = value }
     return IosLiveActivityStatus.state(pc: pc, queue: queue, webdav: webdav)
   }
 }

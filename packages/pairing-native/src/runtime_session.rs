@@ -112,10 +112,14 @@ impl Actor {
                 let pc = self.pc.as_mut().ok_or(PairingError::TlsRejected)?;
                 let advances = !peer.io.ack_seen;
                 let response = pc.ack(&mut self.installation.store, channel, &frame)?;
+                let peer_name = peer.io.tls.peer_name().map(str::to_owned);
                 peer.io.ack_seen = true;
                 peer.io.queue(response, SentKind::Complete, advances)?;
                 if advances {
                     peer.io.tls.progress(now)?;
+                }
+                if let Some(name) = peer_name {
+                    let _ = self.installation.store.save_peer_name(&sid, &name);
                 }
                 self.refresh(&sid)?;
             }

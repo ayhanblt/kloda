@@ -63,6 +63,7 @@ fn explicit_grant_reopens_bound_to_distinct_native_peer_directories() {
         &reopened.folder,
         &key("phone").fingerprint(),
         reopened.binding,
+        reopened.peer_folder.as_deref(),
     )
     .unwrap();
 }
@@ -134,7 +135,7 @@ fn changed_root_is_not_automatically_adopted_and_missing_acl_is_not_recreated() 
     fs::create_dir(&folder).unwrap();
     backup_root::prepare(&folder, &peer.fingerprint()).unwrap();
     assert_eq!(
-        backup_root::verify(&folder, &peer.fingerprint(), scope.binding),
+        backup_root::verify(&folder, &peer.fingerprint(), scope.binding, None),
         Err(PairingError::BackupScopeChanged)
     );
     store
@@ -253,4 +254,39 @@ fn scope_write_failure_cannot_split_durable_trust_and_acl_revocation() {
         RecordState::Complete
     );
     assert!(store.backup_scope(&[1; 16]).unwrap().unwrap().approved);
+}
+
+#[test]
+fn readable_peer_folder_reuses_same_device_and_disambiguates_collisions() {
+    let directory = Directory::new();
+    let folder = media(&directory);
+    let phone1 = key("phone");
+    let phone2 = key("pc");
+    let mut store = directory.store(key("pc"));
+
+    pair(&mut store, &[1; 16], &phone1);
+    store.save_peer_name(&[1; 16], "Galaxy S24").unwrap();
+    store.approve_backup(&[1; 16], &folder, None).unwrap();
+    let first = store.backup_scope(&[1; 16]).unwrap().unwrap();
+    assert_eq!(first.peer_folder.as_deref(), Some("Galaxy S24"));
+    assert!(std::path::Path::new(&folder).join("Galaxy S24").is_dir());
+
+    // Revoke & re-pair same phone key: reuses "Galaxy S24" cleanly.
+    store.pc_revoke(&[1; 16]).unwrap();
+    store.pc_consume(&[2; 16], &phone1, Some([1; 16])).unwrap();
+    store.pc_complete(&[2; 16], &phone1).unwrap();
+    store.save_peer_name(&[2; 16], "Galaxy S24").unwrap();
+    store.approve_backup(&[2; 16], &folder, None).unwrap();
+    let repaired = store.backup_scope(&[2; 16]).unwrap().unwrap();
+    assert_eq!(repaired.peer_folder.as_deref(), Some("Galaxy S24"));
+    assert_eq!(repaired.binding.peer, first.binding.peer);
+
+    // Different device with identical label gets "Galaxy S24 (2)".
+    pair(&mut store, &[3; 16], &phone2);
+    store.save_peer_name(&[3; 16], "Galaxy S24").unwrap();
+    store.approve_backup(&[3; 16], &folder, None).unwrap();
+    let second = store.backup_scope(&[3; 16]).unwrap().unwrap();
+    assert_eq!(second.peer_folder.as_deref(), Some("Galaxy S24 (2)"));
+    assert_ne!(second.binding.peer, first.binding.peer);
+    assert!(std::path::Path::new(&folder).join("Galaxy S24 (2)").is_dir());
 }

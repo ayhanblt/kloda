@@ -37,7 +37,11 @@ class KlodaPairingModule : Module() {
             AndroidPairingRuntime.attach(uiToken, foreground)
             appContext.reactContext?.applicationContext?.let { runCatching { AndroidOwnRestore.cleanup(it) }; AndroidBackupScheduler.reconcileAsync(it) }
         } }
-        OnActivityEntersForeground { if (!destroyed) { foreground = true; AndroidPairingRuntime.foreground(uiToken, true) } }
+        OnActivityEntersForeground { if (!destroyed) {
+            foreground = true
+            AndroidPairingRuntime.foreground(uiToken, true)
+            appContext.reactContext?.applicationContext?.let { AndroidPairingRuntime.promoteForegroundService(it) }
+        } }
         OnActivityEntersBackground {
             foreground = false; AndroidPairingRuntime.foreground(uiToken, false); restore?.pause(false); photosRestore?.pause()
         }
@@ -127,6 +131,40 @@ class KlodaPairingModule : Module() {
             } finally { synchronized(ownerLock) { if (restore === transfer) restore = null } }
         }
         AsyncFunction("status") { invoke { KlodaPairingJni.status(it) } }
+        AsyncFunction("pcScopeStatus") { guarded {
+            val target = synchronized(ownerLock) {
+                val id = currentOwner()
+                val status = JSONObject(KlodaPairingJni.status(id))
+                val record = status.optString("recordId")
+                if (status.optString("phase") != "complete" || status.optBoolean("repairRequired", true) || record.isEmpty()) {
+                    null
+                } else {
+                    Triple(id, record, status.optString("peerName").takeIf { it.isNotEmpty() })
+                }
+            } ?: return@guarded mapOf("state" to "unpaired")
+            val (id, record, fallbackName) = target
+            val response = runCatching {
+                KlodaPairingJni.transfer(id, record, "{\"kind\":\"scope\"}", -1)
+            }.getOrNull() ?: return@guarded buildMap<String, Any> {
+                put("state", "unreachable")
+                fallbackName?.let { put("peerName", it) }
+            }
+            val json = JSONObject(response)
+            val peerName = json.optString("peerName").takeIf { it.isNotEmpty() } ?: fallbackName
+            val scopeState = json.optString("scopeState").takeIf { it.isNotEmpty() }
+            val errorCode = json.optString("errorCode").takeIf { it.isNotEmpty() }
+            val state = when {
+                scopeState != null -> scopeState
+                errorCode == "revoked" -> "revoked"
+                errorCode == "backup_permission_denied" -> "not_approved"
+                else -> "unreachable"
+            }
+            buildMap<String, Any> {
+                put("state", state)
+                peerName?.let { put("peerName", it) }
+                if (state == "unreachable" && errorCode != null) put("errorCode", errorCode)
+            }
+        } }
         AsyncFunction("scan") { wire: String ->
             if (wire.length > 512 || wire.any { it.code > 127 }) fail("invalid_qr")
             changePeer { KlodaPairingJni.scan(it, wire) }
@@ -149,7 +187,15 @@ class KlodaPairingModule : Module() {
         }
         AsyncFunction("removePairing") { record: String, online: Boolean ->
             reference(record)
-            changePeer { KlodaPairingJni.removePairing(it, record, online) }
+            changePeer { KlodaPairingJni.removePairing(it, record, online) }.also { result ->
+                val unpairState = (result["unpairResult"] as? Map<*, *>)?.get("state") as? String
+                if (result["phase"] == "revoked" || unpairState in setOf("pc_confirmed", "local_only")) {
+                    appContext.reactContext?.applicationContext?.let { appCtx ->
+                        AndroidBackupDestinations.disablePcIfPresent(appCtx, record)
+                    }
+                    files?.clearPeerState()
+                }
+            }
         }
         AsyncFunction("close") { closeOwner() }
         OnDestroy {
@@ -170,6 +216,7 @@ class KlodaPairingModule : Module() {
         if (changed) FilesRunContext.invalidate(appContext.reactContext?.applicationContext ?: fail("native_unsupported"))
         restore?.pause(); photosRestore?.pause(); photosRequests.cancel()
         files?.pause(if (changed) "settings_changed" else "paused")
+        if (changed) files?.clearPeerState()
         AndroidFilesService.stop()
         AndroidPairingRuntime.authorizeUi(uiToken)
         invoke(action).also {
@@ -179,7 +226,15 @@ class KlodaPairingModule : Module() {
 
     private fun invoke(action: (Long) -> String): Map<String, Any> = guarded { synchronized(ownerLock) {
         val value = JSONObject(action(currentOwner()))
-        val fields = setOf("phase", "operationId", "candidateGeneration", "peerFingerprint",
+        if (value.optString("phase") == "complete" && !value.optBoolean("repairRequired", true)) {
+            val rec = value.optString("recordId")
+            if (rec.isNotEmpty()) {
+                appContext.reactContext?.applicationContext?.let { ctx ->
+                    runCatching { AndroidBackupDestinations.enablePcIfUnset(ctx, rec) }
+                }
+            }
+        }
+        val fields = setOf("phase", "operationId", "candidateGeneration", "peerFingerprint", "peerName",
             "remainingMs", "recordId", "repairRequired", "errorCode", "hardwareClass")
         buildMap {
             for (field in fields) if (value.has(field) && !value.isNull(field)) put(field, value.get(field))
@@ -253,9 +308,12 @@ class KlodaPairingModule : Module() {
     private fun startFiles(record: String, id: Long, job: String? = null): Map<String, Any> {
         checkUi()
         val queue = filesQueue()
-        if (queue.running()) return withAutomaticState(queue.start(record, id, job))
-        if (AndroidPairingRuntime.hasScheduledLease()) fail("backup_busy")
         val context = appContext.reactContext?.applicationContext ?: fail("native_unsupported")
+        if (queue.running()) {
+            if (!AndroidFilesService.running()) runCatching { AndroidFilesService.acquire(context) }
+            return withAutomaticState(queue.start(record, id, job))
+        }
+        if (AndroidPairingRuntime.hasScheduledLease()) fail("backup_busy")
         AndroidFilesService.acquire(context)
         try {
             checkUi()
@@ -295,6 +353,7 @@ class KlodaPairingModule : Module() {
 
 internal object KlodaPairingJni {
     init { System.loadLibrary("kloda_pairing_native") }
+    @JvmStatic external fun setDeviceName(name: String)
     @JvmStatic external fun open(platform: KlodaPairingPlatform): Long
     @JvmStatic external fun setForeground(owner: Long, active: Boolean)
     @JvmStatic external fun status(owner: Long): String

@@ -16,6 +16,11 @@ impl Actor {
                 if work.source.is_some() || (work.engine.is_none() && work.io.is_some()) {
                     status.phase = "connecting";
                     status.repair_required = work.repair.is_some();
+                    if let Some(io) = &work.io {
+                        if status.peer_name.is_none() {
+                            status.peer_name = io.tls.peer_name().map(str::to_owned);
+                        }
+                    }
                     if work.repair.is_some() {
                         if let Some(io) = &work.io {
                             status.candidate_generation = Some(io.tls.generation().to_string());
@@ -36,12 +41,17 @@ impl Actor {
                         .as_ref()
                         .filter(|record| record.sid == work.sid)
                         .map(|record| id(&record.expected));
+                    status.peer_name = work
+                        .io
+                        .as_ref()
+                        .and_then(|io| io.tls.peer_name().map(str::to_owned))
+                        .or_else(|| self.installation.store.peer_name(&work.sid).ok().flatten());
                 } else if let Some(record) = self
                     .retained
                     .as_ref()
                     .filter(|record| record.sid == work.sid)
                 {
-                    record_status(&mut status, record);
+                    record_status(&self.installation.store, &mut status, record);
                 } else {
                     status.phase = "invalid";
                 }
@@ -49,7 +59,7 @@ impl Actor {
                 status.operation_id = Some(id(&sid));
                 status.phase = phase(state);
             } else if let Some(record) = &self.retained {
-                record_status(&mut status, record);
+                record_status(&self.installation.store, &mut status, record);
             }
         } else if let Some(pc) = &self.pc {
             status.operation_id = Some(id(pc.sid()));
@@ -60,16 +70,22 @@ impl Actor {
                 status.candidate_generation =
                     pc.generation().map(|generation| generation.to_string());
                 status.peer_fingerprint = pc.peer_fingerprint().map(|fingerprint| id(&fingerprint));
+                status.peer_name = pc.generation().and_then(|generation| {
+                    self.peers
+                        .iter()
+                        .find(|peer| peer.io.tls.generation() == generation)
+                        .and_then(|peer| peer.io.tls.peer_name().map(str::to_owned))
+                });
                 status.repair_required = pc.repair_required();
             } else if let Some(record) = self
                 .retained
                 .as_ref()
                 .filter(|record| &record.sid == pc.sid())
             {
-                record_status(&mut status, record);
+                record_status(&self.installation.store, &mut status, record);
             }
         } else if let Some(record) = &self.retained {
-            record_status(&mut status, record);
+            record_status(&self.installation.store, &mut status, record);
         }
         #[cfg(not(target_os = "android"))]
         if self.context.role == OwnerRole::Pc {
@@ -92,10 +108,11 @@ impl Actor {
     }
 }
 
-fn record_status(status: &mut PairingStatus, record: &Record) {
+fn record_status(store: &crate::store::Store, status: &mut PairingStatus, record: &Record) {
     status.operation_id = Some(id(&record.sid));
     status.record_id = Some(id(&record.sid));
     status.peer_fingerprint = Some(id(&record.expected));
+    status.peer_name = store.peer_name(&record.sid).ok().flatten();
     status.phase = match record.state {
         RecordState::Consumed | RecordState::PinnedPendingAck => "consumed_pending_ack",
         RecordState::Pending => "pending",

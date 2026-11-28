@@ -81,6 +81,9 @@ export function CandidateApproval({ candidate, controller }: Props) {
       <div className="pairing-icon-tile"><ShieldCheck aria-hidden="true" size={28} /></div>
       <h2 id={titleId} ref={heading} tabIndex={-1}>{t(candidate.repairRequired ? 'pairing.repairTitle' : 'pairing.approvalTitle')}</h2>
       <p id={descriptionId}>{t(candidate.repairRequired ? 'pairing.repairDescription' : 'pairing.approvalDescription')}</p>
+      {candidate.peerName && (
+        <p className="text-base font-semibold text-primary-text">{candidate.peerName}</p>
+      )}
       <div className="pairing-fingerprint">
         <span><Fingerprint aria-hidden="true" size={18} />{t('pairing.phoneFingerprint')}</span>
         <code>{candidate.peerFingerprint ?? t('pairing.fingerprintUnavailable')}</code>

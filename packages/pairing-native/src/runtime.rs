@@ -71,6 +71,8 @@ struct Actor {
     error: Option<PairingError>,
     fatal: Option<PairingError>,
     file_transport: crate::file_transport::Managed,
+    #[cfg(not(target_os = "android"))]
+    last_file_activity: u64,
     file_sender: Option<(Route, crate::file_sender::Channel)>,
     #[cfg(not(target_os = "android"))]
     file_receiver: crate::file_receiver::Receiver,

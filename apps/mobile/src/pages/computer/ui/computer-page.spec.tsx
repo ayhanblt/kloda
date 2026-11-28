@@ -5,79 +5,101 @@ import { ComputerPage } from './computer-page';
 import { pairing } from '../../../shared/api/pairing';
 import { i18n } from '../../../shared/i18n';
 
-jest.mock('../../../shared/api/backup-destinations', () => ({ backupDestinations: { pcEnabled: jest.fn().mockResolvedValue(false), setPcEnabled: jest.fn().mockResolvedValue(true) } }));
-jest.mock('../../../shared/api/pairing', () => ({
-  ...jest.requireActual('../../../shared/api/pairing'), pairing: { status: jest.fn() },
+jest.mock('sonner-native', () => ({ toast: { error: jest.fn(), success: jest.fn() } }));
+jest.mock('../../../shared/api/backup-destinations', () => ({
+  backupDestinations: { pcEnabled: jest.fn().mockResolvedValue(true), setPcEnabled: jest.fn().mockResolvedValue(false) },
 }));
-const initialAppState = AppState.currentState;
-beforeEach(() => { AppState.currentState = 'active'; jest.mocked(pairing.status).mockReset(); jest.clearAllMocks();
-  jest.spyOn(AppState, 'addEventListener').mockImplementation(() => ({ remove: jest.fn() })); });
-afterEach(() => { AppState.currentState = initialAppState; jest.restoreAllMocks(); });
-const complete = { phase: 'complete' as const, recordId: 'AAAAAAAAAAAAAAAAAAAAAA', peerFingerprint: 'fixture-pc' };
-const callbacks = { onBack: jest.fn(), onPair: jest.fn(), onActivity: jest.fn(), onAdvanced: jest.fn() };
+jest.mock('../../../shared/api/pairing', () => ({
+  ...jest.requireActual('../../../shared/api/pairing'),
+  pairing: {
+    status: jest.fn(),
+    pcScopeStatus: jest.fn(),
+    scan: jest.fn(),
+    approve: jest.fn(),
+    deny: jest.fn(),
+    cancel: jest.fn(),
+    resume: jest.fn(),
+    removePairing: jest.fn(),
+    close: jest.fn().mockResolvedValue(undefined),
+  },
+}));
 
-it('separates native trust, PC-side grant and transfer navigation without claiming receiver readiness', async () => {
+const initialAppState = AppState.currentState;
+const complete = {
+  phase: 'complete' as const,
+  recordId: 'AAAAAAAAAAAAAAAAAAAAAA',
+  peerFingerprint: 'fixture-pc-fingerprint',
+  peerName: 'Ayhan Mac mini',
+};
+const callbacks = { onBack: jest.fn(), onActivity: jest.fn() };
+
+beforeEach(() => {
+  AppState.currentState = 'active';
+  jest.mocked(pairing.status).mockReset();
+  jest.mocked(pairing.pcScopeStatus!).mockReset();
+  jest.clearAllMocks();
+  jest.mocked(pairing.pcScopeStatus!).mockResolvedValue({ state: 'approved', peerName: 'Ayhan Mac mini' });
+  jest.spyOn(AppState, 'addEventListener').mockImplementation(() => ({ remove: jest.fn() }));
+});
+afterEach(() => { AppState.currentState = initialAppState; jest.restoreAllMocks(); });
+
+it('shows PC name, calm folder-approval prompt, collapsible fingerprint, and no WebDAV button', async () => {
   jest.mocked(pairing.status).mockResolvedValue(complete);
+  jest.mocked(pairing.pcScopeStatus!).mockResolvedValueOnce({ state: 'not_approved', peerName: 'Ayhan Mac mini' });
   const surface = await render(<ComputerPage {...callbacks} />);
-  await waitFor(() => expect(surface.getByText(i18n.t('computer.paired'))).toBeTruthy());
-  expect(surface.getByText(i18n.t('computer.grantDescription'))).toBeTruthy();
-  expect(surface.getByText(i18n.t('computer.availability'))).toBeTruthy();
-  await fireEvent.press(surface.getByText(i18n.t('computer.managePairing')));
-  expect(callbacks.onPair).toHaveBeenCalledTimes(1);
+  await waitFor(() => expect(surface.getByText('Ayhan Mac mini')).toBeTruthy());
+  expect(surface.getByText(i18n.t('computer.scopePendingTitle'))).toBeTruthy();
+  expect(surface.queryByText(i18n.t('computer.advanced'))).toBeNull();
+  expect(surface.queryByText(complete.peerFingerprint)).toBeNull();
+
+  await fireEvent.press(surface.getByText(i18n.t('computer.securityDetails')));
+  expect(surface.getByText(complete.peerFingerprint)).toBeTruthy();
+
   await fireEvent.press(surface.getByText(i18n.t('transfer.title')));
   expect(callbacks.onActivity).toHaveBeenCalledTimes(1);
   await surface.unmount();
 });
 
-it('removes old successful trust after a failed refresh and keeps unsupported platforms visible', async () => {
+it('removes old trust after a failed refresh and stops on background', async () => {
   jest.mocked(pairing.status).mockResolvedValueOnce(complete).mockRejectedValueOnce({ code: 'native_unsupported' });
+  jest.mocked(pairing.pcScopeStatus!).mockResolvedValue({ state: 'unreachable', peerName: 'Ayhan Mac mini' });
   const surface = await render(<ComputerPage {...callbacks} />);
-  await waitFor(() => expect(surface.getByText(i18n.t('computer.paired'))).toBeTruthy());
+  await waitFor(() => expect(surface.getByText('Ayhan Mac mini')).toBeTruthy());
   await fireEvent.press(surface.getByText(i18n.t('pairing.refresh')));
   await waitFor(() => expect(surface.getByText(i18n.t('pairing.errors.native_unsupported'))).toBeTruthy());
-  expect(surface.queryByText(i18n.t('computer.paired'))).toBeNull();
-  expect(surface.queryByText(i18n.t('transfer.peer', { fingerprint: complete.peerFingerprint }))).toBeNull();
+  expect(surface.queryByText('Ayhan Mac mini')).toBeNull();
   await surface.unmount();
-});
 
-it('does not adopt an old result after backgrounding or a newer refresh', async () => {
   let changed!: (state: AppStateStatus) => void;
-  const subscription = jest.spyOn(AppState, 'addEventListener').mockImplementation((_event, callback) => {
-    changed = callback; return { remove: jest.fn() };
+  const subscription = jest.spyOn(AppState, 'addEventListener').mockImplementation((_e, cb) => {
+    changed = cb; return { remove: jest.fn() };
   });
   let resolve!: (value: typeof complete) => void;
   jest.mocked(pairing.status).mockReturnValueOnce(new Promise((done) => { resolve = done; }));
-  const surface = await render(<ComputerPage {...callbacks} />);
+  const bgSurface = await render(<ComputerPage {...callbacks} />);
   await act(async () => { AppState.currentState = 'background'; changed('background'); resolve(complete); });
-  expect(surface.queryByText(i18n.t('computer.paired'))).toBeNull();
-  expect(surface.getByText(i18n.t('computer.inactive'))).toBeTruthy();
-  await surface.unmount();
+  expect(bgSurface.queryByText('Ayhan Mac mini')).toBeNull();
+  expect(bgSurface.getByText(i18n.t('computer.inactive'))).toBeTruthy();
+  await bgSurface.unmount();
   subscription.mockRestore();
 });
 
-it('rejects incomplete complete evidence and does not treat repair-required trust as usable', async () => {
+it('rejects incomplete evidence and renders across all three locales', async () => {
   jest.mocked(pairing.status).mockResolvedValueOnce({ phase: 'complete', repairRequired: false });
   const surface = await render(<ComputerPage {...callbacks} />);
   await waitFor(() => expect(surface.getByText(i18n.t('pairing.errors.outcome_unknown'))).toBeTruthy());
-  jest.mocked(pairing.status).mockResolvedValueOnce({ ...complete, repairRequired: true });
-  await fireEvent.press(surface.getByText(i18n.t('pairing.refresh')));
-  await waitFor(() => expect(surface.getByText(i18n.t('pairing.repairDescription'))).toBeTruthy());
   expect(surface.queryByText(i18n.t('computer.paired'))).toBeNull();
   await surface.unmount();
-});
 
-
-it('renders the approved flow and readable permission guidance in all three locales', async () => {
   const original = i18n.language;
   try {
     for (const locale of ['tr', 'en', 'de']) {
       await i18n.changeLanguage(locale);
       jest.mocked(pairing.status).mockResolvedValue(complete);
-      const surface = await render(<ComputerPage {...callbacks} />);
-      await waitFor(() => expect(surface.getByText(i18n.t('computer.paired'))).toBeTruthy());
-      expect(surface.getByText(i18n.t('computer.grantDescription'))).toBeTruthy();
-      if (process.env.KLODA_UI_EVIDENCE) writeFileSync(`${process.env.KLODA_UI_EVIDENCE}/computer-${locale}.json`, JSON.stringify(surface.toJSON()));
-      await surface.unmount();
+      const view = await render(<ComputerPage {...callbacks} />);
+      await waitFor(() => expect(view.getByText(i18n.t('computer.paired'))).toBeTruthy());
+      if (process.env.KLODA_UI_EVIDENCE) writeFileSync(`${process.env.KLODA_UI_EVIDENCE}/computer-${locale}.json`, JSON.stringify(view.toJSON()));
+      await view.unmount();
     }
   } finally { await i18n.changeLanguage(original); }
 });

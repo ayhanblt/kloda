@@ -131,3 +131,25 @@ fn hostile_correctly_signed_profiles_are_not_accepted() {
     assert!(validate(cert.der().as_ref(), Role::Pc, now).is_ok());
     assert!(validate(cert.der().as_ref(), Role::Phone, now).is_ok());
 }
+
+#[test]
+fn device_name_in_certificate_ou_preserves_spki_and_passes_strict_validation() {
+    let (spki, signer) = hardware();
+    let now = 1_767_225_600u64;
+    let unnamed = create_named(Role::Phone, &spki, now, now + 86_400, signer.clone(), None).unwrap();
+    let named = create_named(
+        Role::Phone,
+        &spki,
+        now,
+        now + 86_400,
+        signer,
+        Some("Galaxy S24 • Ayhan"),
+    )
+    .unwrap();
+    assert_eq!(peer_device_name(&unnamed), None);
+    assert_eq!(
+        peer_device_name(&named).as_deref(),
+        Some("Galaxy S24 • Ayhan")
+    );
+    assert!(validate(&named, Role::Phone, now).unwrap() == spki);
+}

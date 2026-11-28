@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Clock, Fingerprint, RefreshCw, ShieldCheck, Wifi } from 'lucide-react';
+import { Clock, Fingerprint, RefreshCw, ShieldCheck, Smartphone, Wifi } from 'lucide-react';
 
 import { Notice, StatusPill, type StatusTone } from '../../shared/ui/Kit';
 import type { DesktopPairingController } from './useDesktopPairing';
@@ -23,9 +23,6 @@ export function PairingQuickpanel({ controller }: { controller: DesktopPairingCo
 
   return (
     <aside aria-labelledby="pairing-status-title" className="space-y-3">
-      <Notice>{t('pairing.lanOnly')}</Notice>
-      <Notice tone="warn">{t('pairing.noFileGrant')}</Notice>
-
       <div className="pairing-quickpanel space-y-4">
         <div className="pairing-section-heading !mb-0">
           <ShieldCheck aria-hidden="true" size={18} />
@@ -42,6 +39,15 @@ export function PairingQuickpanel({ controller }: { controller: DesktopPairingCo
               </StatusPill>
             </dd>
           </div>
+          {status?.peerName && (
+            <div>
+              <dt>
+                <Smartphone aria-hidden="true" size={14} />
+                {t('pairing.phoneName')}
+              </dt>
+              <dd className="font-medium text-primary-text">{status.peerName}</dd>
+            </div>
+          )}
           <div>
             <dt>
               <Wifi aria-hidden="true" size={14} />
@@ -60,18 +66,20 @@ export function PairingQuickpanel({ controller }: { controller: DesktopPairingCo
               </dd>
             </div>
           )}
-          {status?.peerFingerprint && (
-            <div>
-              <dt>
-                <Fingerprint aria-hidden="true" size={14} />
-                {t('pairing.phoneFingerprint')}
-              </dt>
-              <dd>
-                <code className="block rounded-lg bg-surface-2 px-2 py-1 text-xs">{status.peerFingerprint}</code>
-              </dd>
-            </div>
-          )}
         </dl>
+
+        {status?.peerFingerprint && (
+          <details className="rounded-xl border border-border-subtle bg-surface-2/40 px-3 py-2 text-xs text-secondary-text">
+            <summary className="flex cursor-pointer items-center gap-2 font-medium text-primary-text">
+              <Fingerprint aria-hidden="true" size={14} />
+              {t('pairing.securityDetails')}
+            </summary>
+            <div className="mt-2 space-y-1">
+              <p>{t('pairing.phoneFingerprint')}</p>
+              <code className="block break-all rounded-lg bg-surface-2 px-2 py-1 text-xs text-primary-text">{status.peerFingerprint}</code>
+            </div>
+          </details>
+        )}
 
         {uncertain && (
           <Notice role="status" tone="warn">

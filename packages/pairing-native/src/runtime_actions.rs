@@ -177,8 +177,12 @@ impl Actor {
                 return Err(error);
             }
         };
+        let peer_name = peer.io.tls.peer_name().map(str::to_owned);
         peer.io.queue(frame, SentKind::Commit, true)?;
         peer.io.tls.progress(now)?;
+        if let Some(name) = peer_name {
+            let _ = self.installation.store.save_peer_name(&sid, &name);
+        }
         self.refresh(&sid)?;
         self.error = None;
         Ok(())

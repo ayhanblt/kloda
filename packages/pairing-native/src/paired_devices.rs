@@ -16,6 +16,8 @@ pub(crate) struct Devices {
 pub(crate) struct Device {
     record_id: String,
     peer_fingerprint: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    peer_name: Option<String>,
     trust: &'static str,
     backup_scope: BackupScopeStatus,
 }
@@ -86,6 +88,7 @@ fn read_record(
     Ok(Device {
         record_id: crate::qr_base64::encode(sid),
         peer_fingerprint: crate::qr_base64::encode(&record.expected),
+        peer_name: store.peer_name(sid).ok().flatten(),
         trust,
         backup_scope: scope(&record),
     })
@@ -99,6 +102,7 @@ pub(crate) fn backup_status(
     let mut status = BackupScopeStatus {
         state: "not_approved",
         folder: None,
+        peer_folder: None,
         revision: None,
         error_code: None,
     };
@@ -120,7 +124,12 @@ pub(crate) fn backup_status(
     if !scope.approved {
         status.state = "revoked";
     } else {
-        match crate::backup_root::verify(&scope.folder, &record.expected, scope.binding) {
+        match crate::backup_root::verify(
+            &scope.folder,
+            &record.expected,
+            scope.binding,
+            scope.peer_folder.as_deref(),
+        ) {
             Ok(()) => status.state = "approved",
             Err(error) => {
                 status.state = "unavailable";
@@ -129,6 +138,7 @@ pub(crate) fn backup_status(
         }
     }
     status.folder = Some(scope.folder);
+    status.peer_folder = scope.peer_folder;
     status
 }
 

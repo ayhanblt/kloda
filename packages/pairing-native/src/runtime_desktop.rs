@@ -113,6 +113,7 @@ pub(super) fn request_kind(request: &crate::file_protocol::Request) -> u8 {
         R::List { .. } => 4,
         R::Restore { .. } => 5,
         R::RevokePair => 6,
+        R::Scope => 7,
     }
 }
 

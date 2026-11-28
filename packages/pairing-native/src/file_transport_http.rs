@@ -55,6 +55,9 @@ async fn execute(
     } else if method == Method::POST && path == "/v1/pair/revoke" && query.is_none() {
         empty(body).await?;
         Request::RevokePair
+    } else if method == Method::GET && path == "/v1/scope" && query.is_none() {
+        empty(body).await?;
+        Request::Scope
     } else if let Some(tail) = path.strip_prefix("/v1/operations/") {
         if query.is_some() {
             return Err(Error::InvalidRequest);
@@ -166,6 +169,7 @@ fn encode(response: Response, sid: &[u8; 16]) -> HttpResponse {
     match response {
         Response::Operation(operation) => json(operation, StatusCode::OK),
         Response::List(operations) => json(operations, StatusCode::OK),
+        Response::Scope(probe) => json(probe, StatusCode::OK),
         Response::PairRevoked => {
             let mut response = json(
                 serde_json::json!({

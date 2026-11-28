@@ -46,3 +46,21 @@ test('other destinations count only when enabled and keep the most urgent state'
   expect(otherTargetState({ ...dropbox, run: { state: 'finished', errorCode: 'x' } })).toBe('waiting');
   expect(otherTargetState({ ...dropbox, run: { state: 'exhausted' } })).toBe('error');
 });
+
+test('folder approval pending stays calm waiting instead of surfacing red denied errors', () => {
+  const deniedJob = { ...job, state: 'blocked' as const, errorCode: 'backup_permission_denied' };
+  expect(homeStatus({ ...input, pcScopeState: 'not_approved', pcError: 'denied' }).state).toBe('waiting');
+  expect(homeStatus({ ...input, pcScopeState: 'not_approved', queue: { ...queue, jobs: [deniedJob], errorCode: 'denied' } }).state).toBe('waiting');
+  expect(homeStatus({ ...input, pcScopeState: 'approved', pcError: 'denied' }).state).toBe('error');
+});
+
+test('active queue running takes priority over stale errors so live progress stays visible', () => {
+  const uploading = { ...job, state: 'uploading' as const, acknowledgedBytes: '100', totalBytes: '1000' };
+  const result = homeStatus({
+    ...input,
+    pcError: 'outcome_unknown',
+    queue: { ...queue, running: true, jobs: [uploading], automaticError: 'outcome_unknown' },
+  });
+  expect(result.state).toBe('syncing');
+  expect(result.progress?.percent).toBe(10);
+});

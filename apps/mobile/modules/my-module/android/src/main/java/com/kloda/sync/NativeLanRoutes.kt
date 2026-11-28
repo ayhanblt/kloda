@@ -212,9 +212,6 @@ internal class NativeLanRoutes(context: Context) : AutoCloseable {
             || direct.`interface` != name || direct.destination.prefixLength == 0) continue
           val handle = network.networkHandle
           if (handle == 0L || state.generation <= 0) continue
-          // Requery only outside callbacks; disagreement with security-relevant callback evidence means unknown/change.
-          if (capabilitySignature(manager.getNetworkCapabilities(network)) != capSig
-            || linkSignature(manager.getLinkProperties(network)) != linkSig) continue
           return@synchronized JSONObject().put("network", handle)
             .put("generation", state.generation).put("index", iface.index).put("api", Build.VERSION.SDK_INT)
             .put("interface", name).put("local", local.hostAddress)

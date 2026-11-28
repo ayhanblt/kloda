@@ -70,6 +70,7 @@ pub(crate) fn server_config(key: Arc<CertifiedKey>) -> Result<(Arc<ServerConfig>
     let verifier = Arc::new(Verifier {
         expected_pc: None,
         verified_key: Mutex::new(None),
+        verified_name: Mutex::new(None),
     });
     let mut config = ServerConfig::builder_with_provider(provider())
         .with_protocol_versions(&[&rustls::version::TLS13])
@@ -100,6 +101,7 @@ pub(crate) fn client_config(
     let verifier = Arc::new(Verifier {
         expected_pc: Some(expected),
         verified_key: Mutex::new(None),
+        verified_name: Mutex::new(None),
     });
     let mut config = ClientConfig::builder_with_provider(provider())
         .with_protocol_versions(&[&rustls::version::TLS13])

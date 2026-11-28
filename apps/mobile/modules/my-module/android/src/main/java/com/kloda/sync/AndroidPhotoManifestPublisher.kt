@@ -10,8 +10,8 @@ internal class AndroidPhotoManifestPublisher(context: Context, private val files
   private val photos = AndroidPhotosSources(context)
   private val snapshots = AndroidPhotoManifestSnapshots(context)
 
-  fun status() = journal.status()
-  fun count() = journal.count()
+  fun status(recordId: String? = null, filterByRecord: Boolean = false) = journal.status(recordId, filterByRecord)
+  fun count(recordId: String? = null, filterByRecord: Boolean = false) = journal.count(recordId, filterByRecord)
 
   fun rebackup(record: String, id: String, transfer: AndroidFilesTransfer, recoverResource: (FilesJob) -> FilesJob) {
     check()
@@ -102,40 +102,50 @@ internal class AndroidPhotoManifestPublisher(context: Context, private val files
   }
 
   fun publish(record: String, source: String, tree: String, file: QueuedSourceFile, transfer: AndroidFilesTransfer,
-    recoverResource: (FilesJob) -> FilesJob = { throw FilesFailure("owner_deleted") }) =
-    synchronized(AndroidSyncJournal.sourceLock) {
+    knownDigest: FilesDigest? = null, knownResource: FilesJob? = null,
+    recoverResource: (FilesJob) -> FilesJob = { throw FilesFailure("owner_deleted") }) {
       checkSelection(source, tree)
       val metadata = photos.metadata(tree, file.reference, journal)
-      val digest = resources.currentDigest(tree, file.reference)
+      val digest = knownDigest ?: resources.currentDigest(tree, file.reference)
       if (metadata.name != file.relativePath || digest.size != file.size) throw FilesFailure("source_changed")
       val preferred = journal.preferredOperation(record, metadata.assetId, metadata.name, digest)
-      var resource = completed(record, file, digest, transfer, preferred) ?: throw FilesFailure("outcome_unknown")
+      var resource = if (knownResource != null && knownResource.state == "completed" &&
+        knownResource.operationId != null && !files.deleted(knownResource.id)) {
+        knownResource
+      } else {
+        completed(record, file, digest, transfer, preferred) ?: throw FilesFailure("outcome_unknown")
+      }
       var draft = PhotoManifest(metadata.sourceDeviceId, metadata.assetId, 1,
         listOf(PhotoResource(resource.operationId!!, "original", metadata.name, metadata.mimeType, digest.sha256, digest.size)),
         metadata.albums, metadata.favorite)
-      fun sourceCurrent() {
+      fun sourceMetaCurrent() {
         checkSelection(source, tree)
         if (!files.sourceAvailable(resource.copy(sourceId = source, treeReference = tree)) ||
-          photos.metadata(tree, file.reference, journal) != metadata || resources.currentDigest(tree, file.reference) != digest) {
+          photos.metadata(tree, file.reference, journal) != metadata) {
           throw FilesFailure("source_changed")
         }
         checkSelection(source, tree)
       }
-      sourceCurrent()
+      fun sourceLightCurrent() {
+        checkSelection(source, tree)
+        if (!files.sourceAvailable(resource.copy(sourceId = source, treeReference = tree))) {
+          throw FilesFailure("source_changed")
+        }
+      }
+      sourceMetaCurrent()
       if (files.deleted(resource.id)) {
         if (!journal.metadataChanged(record, draft)) throw FilesFailure("owner_deleted")
         resource = recoverResource(resource)
-        sourceCurrent()
+        sourceMetaCurrent()
         draft = draft.copy(resources = draft.resources.map { it.copy(operationId = resource.operationId!!) })
       }
-      fun current() {
-        sourceCurrent()
+      if (resource !== knownResource) {
+        sourceLightCurrent()
         if (transfer.status(resource).state != "completed") throw FilesFailure("outcome_unknown")
-        sourceCurrent()
+        sourceLightCurrent()
       }
-      current()
       val publication = journal.prepare(record, draft)
-      try { upload(publication, transfer, ::current) }
+      try { upload(publication, transfer, ::sourceLightCurrent, ::sourceMetaCurrent) }
       catch (error: FilesFailure) {
         if (error.code == "owner_deleted") journal.markDeleted(publication.job.id)
         throw error
@@ -147,7 +157,7 @@ internal class AndroidPhotoManifestPublisher(context: Context, private val files
     if (selections()[source] != tree) throw FilesFailure("source_permission_lost")
   }
 
-  internal fun upload(publication: PhotoPublication, transfer: AndroidFilesTransfer, current: () -> Unit) {
+  internal fun upload(publication: PhotoPublication, transfer: AndroidFilesTransfer, current: () -> Unit, verifyBeforeFinalize: () -> Unit = current) {
     var job = publication.job
     current()
     if (job.operationId != null) {
@@ -167,10 +177,10 @@ internal class AndroidPhotoManifestPublisher(context: Context, private val files
         ack = transfer.chunk(job, descriptor.fd)
         job = journal.retain(job, ack)
       }
-      current()
+      verifyBeforeFinalize()
       if (ack.state != "completed") {
         ack = transfer.finalize(job)
-        current()
+        verifyBeforeFinalize()
         if (ack.state != "completed") throw FilesFailure("outcome_unknown")
         job = journal.retain(job, ack)
       }

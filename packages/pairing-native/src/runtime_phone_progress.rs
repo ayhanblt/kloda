@@ -110,25 +110,23 @@ impl Actor {
         }
         io.bind(work.sid, self.installation.store.local())?;
         if work.engine.is_none() {
-            if work.repair.is_some() {
-                return Ok(());
-            }
             let channel = io.channel.as_ref().ok_or(PairingError::TlsRejected)?;
-            if let Some(PhoneSource::Scan(payload)) = &work.source {
-                if let Some(old) =
-                    Phone::repair_required(&self.installation.store, payload, channel)?
-                {
-                    work.repair = Some(old);
-                    return Ok(());
-                }
-            }
             let _authorization = foreground.authorize(work.foreground_epoch)?;
             let (engine, frame) = match work.source.take().ok_or(PairingError::CandidateStale)? {
                 PhoneSource::Scan(payload) => {
-                    Phone::start(&mut self.installation.store, payload, channel)?
+                    if let Some(old) =
+                        Phone::repair_required(&self.installation.store, &payload, channel)?
+                    {
+                        Phone::start_repair(&mut self.installation.store, payload, channel, old)?
+                    } else {
+                        Phone::start(&mut self.installation.store, payload, channel)?
+                    }
                 }
                 PhoneSource::Resume => Phone::resume(&self.installation.store, work.sid, channel)?,
             };
+            if let Some(name) = io.tls.peer_name() {
+                let _ = self.installation.store.save_peer_name(&work.sid, name);
+            }
             work.engine = Some(engine);
             io.queue(frame, SentKind::Request, true)?;
             io.tls.progress(now)?;

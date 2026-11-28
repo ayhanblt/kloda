@@ -61,3 +61,18 @@ export function HeroMosaic({ photos, dimmed }: { photos: HeroPhoto[]; dimmed: bo
     </View>
   );
 }
+
+export function HeroMosaicSkeleton() {
+  return (
+    <View testID="hero-mosaic-skeleton" accessible={false} className="aspect-[1.75] w-full flex-row gap-1 bg-surface-2">
+      <View className="flex-1 bg-surface-1/60" />
+      <View className="flex-1 gap-1">
+        <View className="flex-1 bg-surface-1/60" />
+        <View className="flex-1 flex-row gap-1">
+          <View className="flex-1 bg-surface-1/60" />
+          <View className="flex-1 bg-surface-1/60" />
+        </View>
+      </View>
+    </View>
+  );
+}

@@ -123,15 +123,17 @@ internal class AndroidScheduleJournal(private val journal: AndroidSyncJournal) {
       (c.getString(0) == "finished" && error == null && c.getInt(2) == 1) to error
     }
     // A crash after the linked run settles must not create a new run or reset either retry budget.
-    save(item.copy(phase = "finished", updated = if (terminal.first) 1 else 0,
-      retryAt = null, retryElapsed = null, retryBoot = null, error = terminal.second), item)
+    val ok = terminal.first && terminal.second == null
+    save(item.copy(phase = if (ok) "finished" else "exhausted", updated = if (ok) 1 else 0,
+      retryAt = null, retryElapsed = null, retryBoot = null, error = if (ok) null else terminal.second), item)
     true
   }
 
   fun finish(id: String, verifiedComplete: Boolean, expectedAttempt: Int, error: String? = null) = transaction {
     val item = find(id) ?: return@transaction
-    if (item.phase == "running" && item.osAttempts == expectedAttempt) save(item.copy(phase = "finished", updated = if (verifiedComplete) 1 else 0,
-      retryAt = null, retryElapsed = null, retryBoot = null, error = error), item)
+    val ok = verifiedComplete && error == null
+    if (item.phase == "running" && item.osAttempts == expectedAttempt) save(item.copy(phase = if (ok) "finished" else "exhausted", updated = if (ok) 1 else 0,
+      retryAt = null, retryElapsed = null, retryBoot = null, error = if (ok) null else error), item)
   }
 
   private fun save(item: ScheduledOccurrence, expected: ScheduledOccurrence) {

@@ -32,12 +32,24 @@ impl RemoteKeyPair for HardwareKey {
     }
 }
 
+#[allow(dead_code)]
 pub(crate) fn create(
     role: Role,
     spki: &Spki,
     not_before: u64,
     not_after: u64,
     signer: Arc<dyn CertificateSigner>,
+) -> Result<Vec<u8>> {
+    create_named(role, spki, not_before, not_after, signer, None)
+}
+
+pub(crate) fn create_named(
+    role: Role,
+    spki: &Spki,
+    not_before: u64,
+    not_after: u64,
+    signer: Arc<dyn CertificateSigner>,
+    device_name: Option<&str>,
 ) -> Result<Vec<u8>> {
     if not_after <= not_before {
         return Err(PairingError::IdentityUnavailable);
@@ -55,6 +67,9 @@ pub(crate) fn create(
     .to_datetime();
     let mut name = DistinguishedName::new();
     name.push(DnType::CommonName, "Kloda Pairing");
+    if let Some(label) = device_name.and_then(crate::device_name::sanitize_display) {
+        name.push(DnType::OrganizationalUnitName, label);
+    }
     params.distinguished_name = name;
     // rcgen 0.13.2 pads its named-bit KU to nine bits; emit canonical DER instead.
     let mut usage = CustomExtension::from_oid_content(&[2, 5, 29, 15], vec![3, 2, 7, 0x80]);

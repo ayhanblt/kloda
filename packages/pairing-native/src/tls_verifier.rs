@@ -9,6 +9,7 @@ use std::sync::Mutex;
 pub(super) struct Verifier {
     pub(super) expected_pc: Option<[u8; 32]>,
     pub(super) verified_key: Mutex<Option<Spki>>,
+    pub(super) verified_name: Mutex<Option<String>>,
 }
 
 impl std::fmt::Debug for Verifier {
@@ -50,6 +51,8 @@ impl ServerCertVerifier for Verifier {
             return Err(reject());
         }
         *self.verified_key.lock().map_err(|_| reject())? = Some(key);
+        *self.verified_name.lock().map_err(|_| reject())? =
+            certificate::peer_device_name(cert.as_ref());
         Ok(ServerCertVerified::assertion())
     }
     fn verify_tls12_signature(
@@ -92,6 +95,8 @@ impl ClientCertVerifier for Verifier {
         let key = certificate::validate(cert.as_ref(), Role::Phone, now.as_secs())
             .map_err(|_| reject())?;
         *self.verified_key.lock().map_err(|_| reject())? = Some(key);
+        *self.verified_name.lock().map_err(|_| reject())? =
+            certificate::peer_device_name(cert.as_ref());
         Ok(ClientCertVerified::assertion())
     }
     fn verify_tls12_signature(

@@ -4,7 +4,7 @@ use crate::store_rows::{RecordRole, RecordState};
 
 impl Actor {
     #[cfg(not(target_os = "android"))]
-    pub(super) fn file_step(&mut self) {
+    pub(super) fn file_step(&mut self, now: u64) {
         let route = self
             .listener
             .as_ref()
@@ -14,89 +14,99 @@ impl Actor {
             self.fail_all(error);
             return;
         }
-        self.file_transport.poll();
-        let Some(command) = self.file_transport.next() else {
-            return;
-        };
-        if command.reply.is_closed() {
-            return;
-        }
-        let authorized = self.guard().and_then(|_| {
-            command.evidence.check_live()?;
-            self.listener
-                .as_ref()
-                .ok_or(PairingError::LanUnavailable)?
-                .route
-                .check(command.evidence.ip)
-        });
-        let revoke = matches!(&command.request, crate::file_protocol::Request::RevokePair);
-        let request_kind = super::desktop::request_kind(&command.request);
-        let result = match authorized {
-            Ok(()) => self.file_receiver.execute(
-                &mut self.installation.store,
-                &command.sid,
-                &command.evidence.peer,
-                command.request,
-            ),
-            Err(error) => Err(crate::file_protocol::Error::from(error)),
-        };
-        // A caller-supplied SID cannot grow the error ledger without native durable trust.
-        let known_peer = self
-            .installation
-            .store
-            .record(&command.sid)
-            .is_ok_and(|record| {
-                record.is_some_and(|record| {
-                    record.role == RecordRole::Pc
-                        && record.peer.as_ref() == Some(&command.evidence.peer)
-                })
-            });
-        if known_peer {
-            super::desktop::observe_file_result(
-                &mut self.receiver_errors,
-                command.sid,
-                request_kind,
-                &result,
-            );
-        }
-        if self.retained.as_ref().is_some_and(|record| {
-            record.sid == command.sid && record.peer.as_ref() == Some(&command.evidence.peer)
-        }) {
-            let target_error = result.as_ref().err().and_then(super::desktop::target_error);
-            if let Some(error) = target_error {
-                self.error = Some(error);
-            } else if result.is_ok()
-                && matches!(
-                    self.error,
-                    Some(
-                        PairingError::AclBusy
-                            | PairingError::AclUnavailable
-                            | PairingError::BackupUnavailable
-                            | PairingError::BackupFull
-                            | PairingError::BackupBusy
-                            | PairingError::BackupPermissionDenied
-                            | PairingError::BackupPathRejected
-                            | PairingError::BackupScopeChanged
-                    )
-                )
-            {
-                self.error = None;
+        for _ in 0..8 {
+            let progressed = self.file_transport.poll_burst(64, true);
+            if progressed {
+                self.last_file_activity = now;
             }
-        }
-        if revoke && result.is_ok() {
-            self.receiver_errors
-                .retain(|(sid, _), _| sid != &command.sid);
-            self.file_transport
-                .close_peer(&command.evidence.peer, Some(&command.evidence));
-            self.drop_sid(&command.sid);
-            if self.focuses(&command.sid) {
-                if let Err(error) = self.refresh(&command.sid) {
-                    self.observe(error);
+            let Some(command) = self.file_transport.next() else {
+                break;
+            };
+            self.last_file_activity = now;
+            if command.reply.is_closed() {
+                continue;
+            }
+            let authorized = self.guard().and_then(|_| {
+                command.evidence.check_live()?;
+                self.listener
+                    .as_ref()
+                    .ok_or(PairingError::LanUnavailable)?
+                    .route
+                    .check(command.evidence.ip)
+            });
+            let revoke = matches!(&command.request, crate::file_protocol::Request::RevokePair);
+            let request_kind = super::desktop::request_kind(&command.request);
+            let result = match authorized {
+                Ok(()) => self.file_receiver.execute(
+                    &mut self.installation.store,
+                    &command.sid,
+                    &command.evidence.peer,
+                    command.request,
+                ),
+                Err(error) => Err(crate::file_protocol::Error::from(error)),
+            };
+            // A caller-supplied SID cannot grow the error ledger without native durable trust.
+            let known_peer = self
+                .installation
+                .store
+                .record(&command.sid)
+                .is_ok_and(|record| {
+                    record.is_some_and(|record| {
+                        record.role == RecordRole::Pc
+                            && record.peer.as_ref() == Some(&command.evidence.peer)
+                    })
+                });
+            if known_peer {
+                super::desktop::observe_file_result(
+                    &mut self.receiver_errors,
+                    command.sid,
+                    request_kind,
+                    &result,
+                );
+            }
+            if self.retained.as_ref().is_some_and(|record| {
+                record.sid == command.sid && record.peer.as_ref() == Some(&command.evidence.peer)
+            }) {
+                let target_error = result.as_ref().err().and_then(super::desktop::target_error);
+                if let Some(error) = target_error {
+                    self.error = Some(error);
+                } else if result.is_ok()
+                    && matches!(
+                        self.error,
+                        Some(
+                            PairingError::AclBusy
+                                | PairingError::AclUnavailable
+                                | PairingError::BackupUnavailable
+                                | PairingError::BackupFull
+                                | PairingError::BackupBusy
+                                | PairingError::BackupPermissionDenied
+                                | PairingError::BackupPathRejected
+                                | PairingError::BackupScopeChanged
+                        )
+                    )
+                {
+                    self.error = None;
                 }
             }
+            if revoke && result.is_ok() {
+                self.receiver_errors
+                    .retain(|(sid, _), _| sid != &command.sid);
+                self.file_transport
+                    .close_peer(&command.evidence.peer, Some(&command.evidence));
+                self.drop_sid(&command.sid);
+                if self.focuses(&command.sid) {
+                    if let Err(error) = self.refresh(&command.sid) {
+                        self.observe(error);
+                    }
+                }
+            }
+            let _ = command.reply.send(result);
+            self.file_transport.flush_replies();
+            if revoke {
+                break;
+            }
         }
-        let _ = command.reply.send(result);
-        // The reply is pumped on the next tick, after management commands get their turn.
+        // Replies are flushed above on the same tick; the next tick pumps any remaining work.
     }
 
     pub(super) fn close_file_sid(&mut self, sid: &[u8; 16]) -> Result<()> {
@@ -192,7 +202,7 @@ impl Actor {
         let key = self.installation.certified_key.clone();
         self.file_transport.runtime().block_on(async {
             tokio::time::timeout(
-                Duration::from_secs(10),
+                Duration::from_secs(3),
                 crate::file_transport_client::revoke(socket, key, record, &route),
             )
             .await

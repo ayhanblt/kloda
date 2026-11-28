@@ -30,7 +30,7 @@ contextBridge.exposeInMainWorld('kloda', {
   devices: {
     removeDevice: (record: string, language: string) => pairingInvoke('device-remove', record, language),
     list: (after?: string) => pairingInvoke('devices', after),
-    approveBackup: (record: string) => pairingInvoke('device-approve', record),
+    approveBackup: (record: string, language?: string, theme?: string) => pairingInvoke('device-approve', record, language, theme),
     revokeBackup: (record: string) => pairingInvoke('device-revoke', record),
   },
   pairing: {
@@ -40,7 +40,7 @@ contextBridge.exposeInMainWorld('kloda', {
     deny: (operation: string, generation: string) => pairingInvoke('deny', operation, generation),
     cancel: (operation: string) => pairingInvoke('cancel', operation),
     resume: (record: string) => pairingInvoke('resume', record),
-    approveBackup: (record: string) => pairingInvoke('approve-backup', record),
+    approveBackup: (record: string, language?: string, theme?: string) => pairingInvoke('approve-backup', record, language, theme),
     revokeBackup: (record: string) => pairingInvoke('revoke-backup', record),
     close: () => pairingInvoke('close'),
   },

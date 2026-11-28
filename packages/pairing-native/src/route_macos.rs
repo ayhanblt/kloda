@@ -3,7 +3,10 @@ use socket2::Socket;
 use std::{
     net::IpAddr,
     num::NonZeroU32,
-    sync::atomic::{AtomicBool, Ordering},
+    sync::{
+        atomic::{AtomicBool, AtomicU64, Ordering},
+        Mutex,
+    },
 };
 
 #[path = "route_macos_if.rs"]
@@ -15,6 +18,8 @@ pub(super) struct Route {
     interface: interfaces::Interface,
     monitor: Socket,
     invalid: AtomicBool,
+    last_direct_ms: AtomicU64,
+    last_direct_peer: Mutex<Option<IpAddr>>,
 }
 
 impl Route {
@@ -29,10 +34,12 @@ impl Route {
             interface,
             monitor,
             invalid: AtomicBool::new(false),
+            last_direct_ms: AtomicU64::new(0),
+            last_direct_peer: Mutex::new(None),
         };
         match peer {
-            Some(peer) => route.check(peer)?,
-            None => route.check_local()?,
+            Some(peer) => route.check_uncached(peer)?,
+            None => route.check_local_uncached()?,
         }
         Ok(route)
     }
@@ -75,13 +82,24 @@ impl Route {
         result
     }
 
-    pub(super) fn check_local(&self) -> Result<()> {
+    fn monitor_unchanged(&self) -> Result<()> {
+        if self.invalid.load(Ordering::Acquire) {
+            return Err(PairingError::LanUnavailable);
+        }
+        let result = query::unchanged(&self.monitor);
+        if result.is_err() {
+            self.invalid.store(true, Ordering::Release);
+        }
+        result
+    }
+
+    fn check_local_uncached(&self) -> Result<()> {
         self.check_base()?;
         query::direct(self.interface.prefix.witness()?, self.interface.index)?;
         self.check_base()
     }
 
-    pub(super) fn check(&self, peer: IpAddr) -> Result<()> {
+    fn check_uncached(&self, peer: IpAddr) -> Result<()> {
         // An ineligible contender cannot poison an otherwise valid listener.
         if !self.interface.prefix.accepts(peer) {
             return Err(PairingError::LanUnavailable);
@@ -89,5 +107,51 @@ impl Route {
         self.check_base()?;
         query::direct(peer, self.interface.index)?;
         self.check_base()
+    }
+
+    pub(super) fn check_local(&self) -> Result<()> {
+        let target = self.interface.prefix.witness()?;
+        self.monitor_unchanged()?;
+        let now = super::elapsed_ms()?;
+        let last = self.last_direct_ms.load(Ordering::Acquire);
+        if last != 0
+            && now.saturating_sub(last) < 250
+            && self
+                .last_direct_peer
+                .lock()
+                .is_ok_and(|saved| *saved == Some(target))
+        {
+            return Ok(());
+        }
+        self.check_local_uncached()?;
+        if let Ok(mut saved) = self.last_direct_peer.lock() {
+            *saved = Some(target);
+        }
+        self.last_direct_ms.store(now, Ordering::Release);
+        Ok(())
+    }
+
+    pub(super) fn check(&self, peer: IpAddr) -> Result<()> {
+        if !self.interface.prefix.accepts(peer) {
+            return Err(PairingError::LanUnavailable);
+        }
+        self.monitor_unchanged()?;
+        let now = super::elapsed_ms()?;
+        let last = self.last_direct_ms.load(Ordering::Acquire);
+        if last != 0
+            && now.saturating_sub(last) < 250
+            && self
+                .last_direct_peer
+                .lock()
+                .is_ok_and(|saved| *saved == Some(peer))
+        {
+            return Ok(());
+        }
+        self.check_uncached(peer)?;
+        if let Ok(mut saved) = self.last_direct_peer.lock() {
+            *saved = Some(peer);
+        }
+        self.last_direct_ms.store(now, Ordering::Release);
+        Ok(())
     }
 }

@@ -9,7 +9,10 @@ use std::{
     fmt::Write,
     net::IpAddr,
     os::fd::AsRawFd,
-    sync::atomic::{AtomicBool, Ordering},
+    sync::{
+        atomic::{AtomicBool, AtomicU64, Ordering},
+        Mutex,
+    },
 };
 
 #[path = "route_android_query.rs"]
@@ -147,6 +150,8 @@ pub(super) struct Route {
     evidence: Evidence,
     invalid: AtomicBool,
     lookup: Option<query::Lookup>,
+    last_checked_ms: AtomicU64,
+    last_checked_peer: Mutex<Option<IpAddr>>,
 }
 
 impl Route {
@@ -175,9 +180,11 @@ impl Route {
             evidence,
             invalid: AtomicBool::new(false),
             lookup,
+            last_checked_ms: AtomicU64::new(0),
+            last_checked_peer: Mutex::new(None),
         };
         match peer {
-            Some(peer) => route.check(peer)?,
+            Some(peer) => route.check_uncached(peer)?,
             None => route.check_local()?,
         }
         Ok(route)
@@ -223,18 +230,37 @@ impl Route {
         Ok(())
     }
 
-    pub(super) fn check(&self, peer: IpAddr) -> Result<()> {
+    fn check_uncached(&self, peer: IpAddr) -> Result<()> {
         if !self.evidence.prefix.accepts(peer) {
             return Err(PairingError::LanUnavailable);
         }
-        self.compare(Some(self.evidence.prefix.witness()?))?;
-        let value = snapshot(&self.context, Some(peer))?;
-        if value != self.evidence {
-            return Err(PairingError::LanUnavailable);
-        }
+        self.compare(Some(peer))?;
         if let Some(lookup) = &self.lookup {
             lookup.direct(self.local_ip(), peer, self.evidence.index)?;
         }
+        Ok(())
+    }
+
+    pub(super) fn check(&self, peer: IpAddr) -> Result<()> {
+        if self.invalid.load(Ordering::Acquire) || !self.evidence.prefix.accepts(peer) {
+            return Err(PairingError::LanUnavailable);
+        }
+        let now = super::elapsed_ms()?;
+        let last = self.last_checked_ms.load(Ordering::Acquire);
+        if last != 0
+            && now.saturating_sub(last) < 250
+            && self
+                .last_checked_peer
+                .lock()
+                .is_ok_and(|saved| *saved == Some(peer))
+        {
+            return Ok(());
+        }
+        self.check_uncached(peer)?;
+        if let Ok(mut saved) = self.last_checked_peer.lock() {
+            *saved = Some(peer);
+        }
+        self.last_checked_ms.store(now, Ordering::Release);
         Ok(())
     }
 }

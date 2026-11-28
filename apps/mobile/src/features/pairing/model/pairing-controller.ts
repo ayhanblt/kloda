@@ -103,6 +103,20 @@ export class PairingController {
     await this.perform(() => this.api.removePairing(recordId, online), revision);
   }
 
+  async unpair(recordId: string): Promise<void> {
+    const { status, action, uncertain } = this.snapshot;
+    if (this.closed || action || uncertain || status?.phase !== 'complete' || status.recordId !== recordId) return;
+    const revision = ++this.revision;
+    this.publish({ scanLocked: true, action: 'remove' });
+    await this.perform(async () => {
+      const first = await this.api.removePairing(recordId, true);
+      if (first.phase === 'complete' && first.unpairResult?.state === 'pc_unconfirmed') {
+        return this.api.removePairing(recordId, false);
+      }
+      return first;
+    }, revision);
+  }
+
 
   private async perform(action: () => Promise<PairingStatus>, revision: number): Promise<void> {
     try {

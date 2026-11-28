@@ -66,7 +66,7 @@ final class IosOwnRestore {
               let bytes = try IosFilesTransfer.number(response, "bytes")
               guard try IosFilesTransfer.number(response, "offset") == intent.offset,
                 try IosFilesTransfer.number(response, "size") == intent.size,
-                bytes == min(65536, intent.size - intent.offset) else { throw IosPairingFailure.invalidReply }
+                bytes == min(1_048_576, intent.size - intent.offset) else { throw IosPairingFailure.invalidReply }
               intent.offset += bytes; try journal.saveRestoreIntent(intent)
             }
           }

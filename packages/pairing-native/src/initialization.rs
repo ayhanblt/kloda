@@ -132,6 +132,7 @@ fn certificate_for(
     now: u64,
     owner: &files::OwnerLock,
 ) -> Result<Vec<u8>> {
+    let desired = crate::device_name::local_name();
     let path = directory.join("certificate.der");
     if files::exists(&path)? {
         let der = files::read_certificate(&path)?;
@@ -148,19 +149,22 @@ fn certificate_for(
         if certificate::validate(&der, role, before)? != *identity.spki() {
             return Err(PairingError::ContinuityLost);
         }
-        if reuse_certificate(now, before, after)? {
+        if reuse_certificate(now, before, after)?
+            && (desired.is_none() || certificate::peer_device_name(&der) == desired)
+        {
             return Ok(der);
         }
     }
     let after = now
         .checked_add(365 * 86_400)
         .ok_or(PairingError::TlsRejected)?;
-    let der = certificate::create(
+    let der = certificate::create_named(
         role,
         identity.spki(),
         now,
         after,
         identity.certificate_signer(),
+        desired.as_deref(),
     )?;
     files::replace(&path, &der, owner)?;
     Ok(der)

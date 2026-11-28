@@ -77,6 +77,11 @@ enum IosPairingReply {
       guard let number = value as? NSNumber, CFGetTypeID(number) != CFBooleanGetTypeID(),
         number.doubleValue.isFinite, number.doubleValue >= 0 else { throw IosPairingFailure.invalidReply }
     }
+    if let value = object["peerName"] {
+      guard let text = value as? String, !text.isEmpty, text.utf8.count <= 256, !text.utf8.contains(0) else {
+        throw IosPairingFailure.invalidReply
+      }
+    }
     if let value = object["errorCode"] {
       guard let code = value as? String, errors.contains(code) else { throw IosPairingFailure.invalidReply }
     }
@@ -108,7 +113,7 @@ enum IosPairingReply {
     "idle", "open", "connecting", "reserved", "consumed_pending_ack", "complete", "pending", "invalid", "revoked"
   ]
   private static let statusKeys: Set<String> = [
-    "phase", "operationId", "candidateGeneration", "peerFingerprint", "remainingMs", "recordId",
+    "phase", "operationId", "candidateGeneration", "peerFingerprint", "peerName", "remainingMs", "recordId",
     "repairRequired", "errorCode", "hardwareClass", "unpairResult"
   ]
   private static let errors: Set<String> = [

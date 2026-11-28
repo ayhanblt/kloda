@@ -3,7 +3,7 @@ use crate::file_protocol::{Operation, Upload, CHUNK_LIMIT, METADATA_LIMIT};
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(tag = "kind", rename_all = "camelCase", deny_unknown_fields)]
 pub(crate) enum Command {
     Create {
@@ -27,6 +27,7 @@ pub(crate) enum Command {
         id: String,
         offset: u64,
     },
+    Scope,
 }
 pub(crate) struct Task {
     pub(crate) command: Command,
@@ -48,6 +49,10 @@ pub(crate) struct Reply {
     pub(crate) size: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) error_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) scope_state: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) peer_name: Option<String>,
 }
 impl Task {
     pub(crate) fn parse(json: &str, descriptor: i32) -> Result<Self> {
@@ -85,6 +90,7 @@ impl Task {
                     validate_id(id)?;
                 }
             }
+            Command::Scope => (),
         }
         let needs_file = matches!(command, Command::Chunk { .. } | Command::Restore { .. });
         let file = if needs_file {

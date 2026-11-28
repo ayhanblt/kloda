@@ -9,12 +9,12 @@
       "paused": "Automatic work paused"
     },
     "title": "Backup Activity",
-    "description": "Selected Files and Photos go directly to your paired PC over native encrypted LAN. The PC must separately approve your backup folder.",
+    "description": "Selected files and photos go directly to your computer over local Wi-Fi.",
     "running": "Sending files",
     "waiting": "Waiting for sync",
-    "peer": "Paired PC: {{fingerprint}}",
+    "peer": "Computer: {{fingerprint}}",
     "count": "{{count}} retained jobs",
-    "bytes": "{{acknowledged}} / {{total}} bytes acknowledged by PC",
+    "bytes": "{{acknowledged}} / {{total}} acknowledged by PC",
     "more": "Showing up to 100 jobs; {{count}} remain in the durable journal.",
     "journal": {
       "segments": "Activity view",
@@ -236,126 +236,134 @@
     "brand": "Kloda: Secure Photos & Sync",
     "open": "Pair with your computer",
     "back": "Back to setup",
-    "title": "Pair your phone",
-    "description": "Scan the Kloda invitation on your computer. Both devices must be on the same local network.",
-    "startScan": "Scan computer QR",
-    "scanTitle": "Scan the invitation",
-    "scanDescription": "Point the rear camera at the computer's Kloda QR code. No manual secret entry is available.",
+    "title": "Pair your computer",
+    "description": "Connect both devices to the same Wi-Fi network and scan the QR code on your computer.",
+    "startScan": "Scan QR code",
+    "scanTitle": "Scan QR code",
+    "scanDescription": "Point the camera at the Kloda QR code on your computer.",
     "stopScan": "Stop scanning",
-    "loading": "Reading native pairing status",
+    "loading": "Checking status",
     "loadingCamera": "Checking camera permission",
-    "cameraPermission": "Camera access is used only to scan this pairing invitation.",
-    "cameraDenied": "Camera permission is denied. Allow access to scan; pairing cannot proceed without a QR scan.",
+    "cameraPermission": "Camera access is only used to scan the QR code.",
+    "cameraDenied": "Camera permission is required to scan the QR code.",
     "allowCamera": "Allow camera",
     "openSettings": "Open camera settings",
-    "cameraError": "Camera permission could not be checked or requested.",
-    "cameraUnavailable": "The rear camera could not be opened. It may be unavailable or in use by another app.",
-    "cameraPaused": "The camera is paused while Kloda is in the background.",
+    "cameraError": "Camera permission could not be checked.",
+    "cameraUnavailable": "Could not open the rear camera. Another app may be using it.",
+    "cameraPaused": "Camera pauses while Kloda is in the background.",
     "retryCamera": "Try camera again",
-    "peerFingerprint": "Computer identity fingerprint",
-    "noFileGrant": "Pairing establishes device trust only. It does not grant access to files, folders or photos.",
-    "resume": "Resume the saved pairing",
-    "refresh": "Read native status",
-    "cancel": "Cancel on this phone",
-    "cancelConsequences": "Cancellation affects this phone's attempt or local binding only. The computer may retain a committed record; this is not distributed rollback.",
-    "working": "Native pairing operation in progress",
-    "unknownTitle": "Pairing outcome is unknown",
-    "unknownDescription": "An interrupted operation is not proof of success or rollback. Read native status, or explicitly resume or cancel a saved attempt.",
-    "leave": "Leave pairing view",
-    "leaveConsequences": "Leaving closes this view and its connection. It does not complete pairing or delete saved pending or pinned records.",
+    "peerFingerprint": "Computer fingerprint",
+    "noFileGrant": "Pairing only connects the two devices. File access is granted separately by the backup folder you choose on the computer.",
+    "resume": "Resume pairing",
+    "refresh": "Refresh status",
+    "cancel": "Cancel",
+    "cancelConsequences": "Cancels the current pairing attempt.",
+    "working": "Pairing in progress",
+    "unknownTitle": "Connection status unclear",
+    "unknownDescription": "Refresh status or cancel this attempt to try again.",
+    "leave": "Leave screen",
+    "leaveConsequences": "Closes this screen without removing completed pairings.",
     "repairTitle": "Pair with this computer again?",
-    "repairDescription": "This computer's previous local trust was revoked. Check the authenticated computer fingerprint before explicitly pairing again.",
-    "repairConsequences": "First you explicitly consent on this phone, then the computer must approve. This consent does not complete pairing and grants no file access. The old revoked record and all file-access denies remain unchanged.",
+    "repairDescription": "You are reconnecting to a computer that was previously paired and removed.",
+    "repairConsequences": "After confirming here, accept the pairing on your computer.",
     "repairWorking": {
-      "title": "Sending your decision",
-      "description": "Your decision is being sent. This is not a completed pairing. If you agreed, the computer must still approve, and file access stays separate."
+      "title": "Sending confirmation",
+      "description": "Sending your confirmation. Still accept on your computer to finish."
     },
-    "pairAgain": "Pair again with this computer",
-    "denyRepair": "Do not pair again",
-    "helpTitle": "How local pairing works",
-    "helpComputer": "Open the phone-pairing invitation in Kloda on your computer. After scanning, approve the exact phone candidate there.",
-    "helpLan": "Keep both devices on the same local network. Pairing does not use a remote relay or accept a manually entered secret.",
-    "helpRecovery": "A saved pending record is not a completed pairing. Resume retries the same native-owned identity binding; cancellation does not delete the computer's record.",
-    "closeHelp": "Close pairing guide",
+    "pairAgain": "Pair again",
+    "denyRepair": "Cancel",
+    "helpTitle": "How pairing works",
+    "helpComputer": "Open Kloda on your computer and scan the QR code on the Pair Phone screen.",
+    "helpLan": "Keep both devices on the same local network.",
+    "helpRecovery": "Resume a pending attempt or cancel and scan again.",
+    "closeHelp": "Close",
     "unpair": {
       "button": "Remove pairing",
-      "title": "Remove pairing with this computer?",
-      "description": "When reachable, the PC must confirm durable revocation first. Phone-only removal does not revoke the PC’s permissions. Backed-up photos are not deleted.",
+      "title": "Remove this computer pairing?",
+      "confirmBody": "This disconnects from the computer. Existing backups on your computer are not deleted.",
+      "description": "This disconnects from the computer. Existing backups on your computer are not deleted.",
       "online": "Remove on PC and phone",
       "offline": "Remove only on this phone",
       "cancel": "Keep pairing",
-      "pc_confirmed": "The PC durably revoked device trust and file permissions. Pairing was removed on this phone; backed-up photos were preserved.",
-      "local_only": "Pairing was removed only on this phone. PC revocation was not confirmed; its old permissions may remain. A new QR pairing is required to reconnect.",
-      "pc_unconfirmed": "The PC did not confirm durable revocation. Pairing has not been removed on this phone. Retry, or explicitly remove only on this phone."
+      "pc_confirmed": "Disconnected from this computer. Existing backups were preserved.",
+      "local_only": "Removed on this phone. Scan a new QR code on your computer to reconnect.",
+      "pc_unconfirmed": "Could not reach the computer."
     },
     "phases": {
       "idle": {
-        "title": "Ready to scan",
-        "description": "Create a fresh invitation on the computer, then scan its QR code."
+        "title": "Ready to connect",
+        "description": "Scan the QR code on your computer to pair."
       },
       "open": {
-        "title": "Invitation open",
-        "description": "The invitation is active, but no device trust has been established."
+        "title": "Invitation ready",
+        "description": "Scan the QR code on your computer."
       },
       "connecting": {
-        "title": "Connecting securely",
-        "description": "Native Kloda is checking the computer and local connection. No durable pending record or trust pin is confirmed yet."
+        "title": "Connecting to computer",
+        "description": "Connecting over your local Wi-Fi network."
       },
       "reserved": {
-        "title": "Waiting for computer approval",
-        "description": "The computer has reserved a candidate. Only an explicit decision on the computer can approve normal pairing."
+        "title": "Waiting for approval on computer",
+        "description": "Confirm pairing on your computer screen."
       },
       "pending": {
-        "title": "Pairing pending",
-        "description": "This phone saved a pending binding. The computer's commitment has not yet been confirmed. Check the candidate on your computer."
+        "title": "Waiting for approval on computer",
+        "description": "Confirm pairing on your computer screen."
       },
       "consumed_pending_ack": {
-        "title": "Pinned; completion pending",
-        "description": "The computer's identity is durably pinned on this phone. The completion exchange is not confirmed; resume can recover the same pair."
+        "title": "Finishing pairing",
+        "description": "Tap Resume pairing to finish connecting."
       },
       "complete": {
         "title": "Pairing complete",
-        "description": "This phone saved the computer's trust pin and received the completion exchange. File access still requires separate authorization."
+        "description": "This phone is paired with your computer."
       },
       "invalid": {
-        "title": "Attempt ended",
-        "description": "This invitation is no longer active. A computer-side record may remain; do not assume rollback."
+        "title": "Invitation expired",
+        "description": "Create a new QR code on your computer and scan again."
       },
       "revoked": {
-        "title": "Disabled on this phone",
-        "description": "The local attempt or binding is disabled. Any computer-side trust and file-access denies remain separate."
+        "title": "Pairing removed",
+        "description": "Scan a QR code on your computer to reconnect."
       }
     },
     "errors": {
-      "invalid_qr": "This is not a valid Kloda pairing QR.",
-      "unsupported_version": "This QR uses an unsupported pairing version.",
-      "lan_unavailable": "A permitted local-network route is unavailable.",
-      "native_unsupported": "Secure native pairing is unavailable in this app build. Use a supported Kloda native build; no pairing has been simulated.",
-      "identity_unavailable": "Kloda's hardware-protected device identity is unavailable.",
-      "continuity_lost": "The saved local identity or installation continuity cannot be verified. Automatic trust recovery is blocked.",
-      "tls_rejected": "The computer's authenticated TLS identity was rejected.",
-      "proof_rejected": "The pairing proof was rejected by native Kloda.",
-      "invitation_expired": "The invitation expired. Create a fresh QR on the computer.",
-      "candidate_stale": "This exact candidate is no longer current. Read native status before making another decision.",
-      "already_paired": "This computer already has an active local pairing.",
-      "storage_failure": "The required durable pairing record could not be written or read. Completion is not confirmed.",
-      "connection_closed": "The connection closed. Any saved pending or pinned record remains subject to native status and explicit recovery.",
-      "outcome_unknown": "The pairing outcome cannot be determined. Do not assume completion or rollback.",
-      "cancelled": "The local operation was cancelled. This does not promise deletion of the computer's record.",
-      "revoked": "The local pairing is revoked and cannot be resumed."
+      "invalid_qr": "This is not a valid Kloda QR code.",
+      "unsupported_version": "This QR code uses an unsupported version.",
+      "lan_unavailable": "Both devices do not appear to be on the same local network.",
+      "native_unsupported": "Secure local pairing is unavailable in this build.",
+      "identity_unavailable": "Hardware device identity is unavailable.",
+      "continuity_lost": "Saved device identity could not be verified.",
+      "tls_rejected": "Could not verify the computer's security identity.",
+      "proof_rejected": "Pairing verification was rejected.",
+      "invitation_expired": "The QR code expired. Open a fresh one on your computer.",
+      "candidate_stale": "State changed. Refresh and try again.",
+      "already_paired": "This computer is already paired.",
+      "storage_failure": "Could not read or save pairing record.",
+      "connection_closed": "Connection closed. Make sure Kloda is open on your computer and try again.",
+      "outcome_unknown": "Pairing outcome unclear. Refresh and try again.",
+      "cancelled": "Operation cancelled.",
+      "revoked": "This pairing was removed. Scan a new QR code to reconnect."
     }
   },
   "computer": {
-    "title": "Back up to your computer",
-    "description": "Send selected files and photos to your own computer over your local network.",
-    "paired": "1. Device trust saved",
-    "pairTitle": "1. Pair your computer by QR",
-    "pairDescription": "Open Kloda on your computer and scan its pairing QR with this phone.",
+    "title": "Computer",
+    "description": "Back up your photos and files to your computer over local Wi-Fi.",
+    "unnamedPc": "Your computer",
+    "paired": "Paired · Local network",
+    "pairTitle": "Pair with your computer",
+    "pairDescription": "Open Kloda on your computer and scan the QR code.",
     "managePairing": "Manage pairing",
-    "grantTitle": "2. Approve the backup folder on the computer",
-    "grantDescription": "In Devices and permissions on the computer, select this phone. Choose a separate backup folder and explicitly approve file access. This permission cannot be granted from the phone.",
-    "transferTitle": "3. Start transfers and check results",
-    "availability": "Pairing does not confirm that the computer is currently reachable or its receiver is ready. Keep the computer awake with Kloda running. Backup Activity shows current access and transfer results.",
+    "grantTitle": "Choose a backup folder",
+    "grantDescription": "Select and approve a backup folder in Kloda on your computer.",
+    "scopePendingTitle": "Final step: Folder permission pending",
+    "scopePendingBody": "Open Kloda on {{name}} and choose your backup folder.",
+    "scopeApproved": "Folder approved · Ready to back up",
+    "scopeRevoked": "The computer removed this pairing. Scan a new QR code to reconnect.",
+    "securityDetails": "Security details",
+    "hideSecurityDetails": "Hide security details",
+    "transferTitle": "Backups and status",
+    "availability": "Keep your computer awake on the same Wi-Fi network.",
     "iosBackground": "iOS may run authorized backups when it provides an execution opportunity. Locked protected data may defer work. New pairing, approvals and restore require the app in the foreground.",
     "iosSchedulePreference": "iOS chooses when automatic work can run; exact timing or continuous execution is not guaranteed. Pause stops automatic backups until Continue is selected.",
     "androidBackground": "Authorized backups continue when you leave this screen while Android permits. New pairing, approvals and restore require the app in the foreground. If the system stops the work, reopen the app to continue.",
@@ -785,7 +793,7 @@
     "backupNow": "Back up now",
     "progressLabel": "Acknowledged backup progress",
     "progress": {
-      "bytes": "{{completed}} / {{total}} bytes acknowledged",
+      "bytes": "{{completed}} / {{total}} backed up",
       "operations": "{{completed}} / {{total}} operations completed"
     },
     "targets": "Destinations",
@@ -798,18 +806,22 @@
       "syncing": "Backing up",
       "safe": "Last run completed",
       "waiting": "Waiting",
+      "folderPending": "Waiting for folder approval",
       "attention": "Review needed",
       "error": "Backup stopped",
       "disabled": "Disabled"
     },
     "lines": {
-      "setup": "Choose sources and explicitly enable a backup destination.",
-      "syncing": "Progress reflects acknowledgements received by the device.",
-      "safe": "Showing the last run confirmed by the device.",
-      "waiting": "See Activity for schedule, permission and connection details.",
-      "attention": "Review pending operations in Activity.",
-      "error": "See Activity for the cause and safe retry options."
+      "setup": "Choose your sources and add a backup destination.",
+      "syncing": "Backup is in progress.",
+      "safe": "Your latest backup of selected sources is verified.",
+      "waiting": "Backup will continue at the next opportunity.",
+      "folderPending": "Final step: Choose a backup folder on {{name}}.",
+      "attention": "Check Activity for items needing attention.",
+      "error": "Open Activity to see what stopped the backup."
     },
+    "folderApprovalTitle": "Final step: Choose a folder on your PC",
+    "folderApprovalBody": "Select and approve a backup folder in Kloda on {{name}}.",
     "photos": "Photos",
     "settings": "Settings",
     "appearance": "Appearance",
@@ -848,7 +860,10 @@
     "protoCloud": "Cloud",
     "heroNoPermTitle": "Photo access needed",
     "heroNoPermBody": "Kloda needs gallery permission to back up.",
-    "heroAllow": "Allow access"
+    "heroAllow": "Allow access",
+    "heroNoPhotosTitle": "No photos in selected folders",
+    "heroNoPhotosBody": "Documents are still backed up; only photos are shown here.",
+    "heroAddFolder": "Add folder"
   },
   "recovery": {
     "title": "Your recovery code",

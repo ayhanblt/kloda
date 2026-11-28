@@ -177,4 +177,18 @@ describe('phone pairing consumer boundaries', () => {
     expect(pairingErrorCode({ message: 'raw-qr-secret-or-TLS-internals', code: 'unexpected' })).toBe('outcome_unknown');
     expect(new PairingError(pairingErrorCode({ code: 'tls_rejected', message: 'private-certificate' })).message).toBe('tls_rejected');
   });
+
+  it('unpair tries online revoke first and falls back to local-only when PC is unreachable', async () => {
+    const f = fixture();
+    f.setStatus({ phase: 'complete', recordId: 'current-pc', operationId: 'current-pc' });
+    await f.controller.refresh();
+    const remove = jest.fn()
+      .mockResolvedValueOnce({ phase: 'complete', recordId: 'current-pc', unpairResult: { state: 'pc_unconfirmed' } })
+      .mockResolvedValueOnce({ phase: 'revoked', unpairResult: { state: 'local_only' } });
+    f.api.removePairing = remove;
+    await f.controller.unpair('current-pc');
+    expect(remove).toHaveBeenNthCalledWith(1, 'current-pc', true);
+    expect(remove).toHaveBeenNthCalledWith(2, 'current-pc', false);
+    expect(f.controller.getSnapshot().status?.phase).toBe('revoked');
+  });
 });

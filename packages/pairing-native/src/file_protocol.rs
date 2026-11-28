@@ -2,7 +2,7 @@ use crate::error::PairingError;
 use serde::{Deserialize, Serialize};
 
 pub(crate) const ALPN: &[u8] = b"kloda-file/1";
-pub(crate) const CHUNK_LIMIT: usize = 65_536;
+pub(crate) const CHUNK_LIMIT: usize = 1_048_576;
 pub(crate) const METADATA_LIMIT: usize = 8_192;
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -39,6 +39,15 @@ pub(crate) enum Request {
         offset: u64,
     },
     RevokePair,
+    Scope,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(crate) struct ScopeProbe {
+    pub(crate) scope_state: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) peer_name: Option<String>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -73,6 +82,7 @@ pub(crate) enum Response {
         size: u64,
     },
     PairRevoked,
+    Scope(ScopeProbe),
     // Internal bounded finalize work: the HTTP handler resubmits on a later owner turn.
     Pending,
 }

@@ -213,7 +213,7 @@ describe('desktop pairing behavior', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: i18n.t('pairing.refreshStatus') })).toBeEnabled());
     expect(approve).toBeDisabled();
     expect(bridge.approveBackup).toHaveBeenCalledTimes(1);
-    expect(bridge.approveBackup).toHaveBeenCalledWith('retained-1');
+    expect(bridge.approveBackup).toHaveBeenCalledWith('retained-1', expect.any(String), expect.any(String));
     expect(bridge.status).toHaveBeenCalledTimes(2);
     fireEvent.click(screen.getByRole('button', { name: i18n.t('pairing.refreshStatus') }));
     await waitFor(() => expect(approve).toBeEnabled());
@@ -257,7 +257,7 @@ describe('desktop pairing behavior', () => {
     fireEvent.click(await screen.findByRole('button', { name: i18n.t('pairing.reselectBackup') }));
     await screen.findByRole('button', { name: i18n.t('pairing.revokeBackup') });
     expect(bridge.approveBackup).toHaveBeenCalledTimes(1);
-    expect(bridge.approveBackup).toHaveBeenCalledWith('retained-1');
+    expect(bridge.approveBackup).toHaveBeenCalledWith('retained-1', expect.any(String), expect.any(String));
     expect(bridge.cancel).not.toHaveBeenCalled();
     expect(bridge.createInvitation).not.toHaveBeenCalled();
     expect(bridge.revokeBackup).not.toHaveBeenCalled();

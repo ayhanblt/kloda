@@ -270,6 +270,17 @@ pub extern "system" fn Java_com_kloda_sync_KlodaPairingJni_transfer(
     }
 }
 #[no_mangle]
+pub extern "system" fn Java_com_kloda_sync_KlodaPairingJni_setDeviceName(
+    mut env: JNIEnv<'_>,
+    _: JClass<'_>,
+    name: JString<'_>,
+) {
+    if let Ok(text) = json_text(&mut env, &name, 256) {
+        crate::device_name::set_local_name(&text);
+    }
+}
+
+#[no_mangle]
 pub extern "system" fn Java_com_kloda_sync_KlodaPairingJni_close(
     mut env: JNIEnv<'_>,
     _: JClass<'_>,

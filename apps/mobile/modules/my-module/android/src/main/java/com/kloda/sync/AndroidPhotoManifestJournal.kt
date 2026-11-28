@@ -138,14 +138,31 @@ internal class AndroidPhotoManifestJournal(context: Context) : SQLiteOpenHelper(
   fun deleted(id: String): Boolean = readableDatabase.rawQuery("SELECT 1 FROM owner_deleted WHERE request=?", arrayOf(id)).use { it.moveToFirst() }
   fun clearDeleted(id: String) { writableDatabase.delete("owner_deleted", "request=?", arrayOf(id)) }
   fun markDeleted(id: String) { writableDatabase.execSQL("INSERT OR IGNORE INTO owner_deleted(request) SELECT request FROM publication WHERE request=?", arrayOf(id)) }
-  fun status(): List<Map<String, Any>> = readableDatabase.rawQuery("""SELECT p.* FROM publication p
-    JOIN owner_deleted d ON d.request=p.request ORDER BY p.rowid DESC LIMIT 100""", null).use { cursor -> buildList {
-    while (cursor.moveToNext()) { val job = decode(cursor).job
-      add(mapOf("id" to job.id, "recordId" to job.recordId, "sourceId" to job.sourceId, "name" to job.name,
-        "state" to "owner_deleted", "errorCode" to "owner_deleted", "acknowledgedBytes" to job.offset.toString(), "totalBytes" to job.size.toString()))
+  fun status(recordId: String? = null, filterByRecord: Boolean = false): List<Map<String, Any>> {
+    if (filterByRecord && recordId.isNullOrEmpty()) return emptyList()
+    val sql = if (filterByRecord) {
+      "SELECT p.* FROM publication p JOIN owner_deleted d ON d.request=p.request WHERE p.record=? ORDER BY p.rowid DESC LIMIT 100"
+    } else {
+      "SELECT p.* FROM publication p JOIN owner_deleted d ON d.request=p.request ORDER BY p.rowid DESC LIMIT 100"
     }
-  } }
-  fun count(): Long = readableDatabase.rawQuery("SELECT COUNT(*) FROM owner_deleted", null).use { it.moveToFirst(); it.getLong(0) }
+    val args = if (filterByRecord) arrayOf(recordId!!) else null
+    return readableDatabase.rawQuery(sql, args).use { cursor -> buildList {
+      while (cursor.moveToNext()) { val job = decode(cursor).job
+        add(mapOf("id" to job.id, "recordId" to job.recordId, "sourceId" to job.sourceId, "name" to job.name,
+          "state" to "owner_deleted", "errorCode" to "owner_deleted", "acknowledgedBytes" to job.offset.toString(), "totalBytes" to job.size.toString()))
+      }
+    } }
+  }
+  fun count(recordId: String? = null, filterByRecord: Boolean = false): Long {
+    if (filterByRecord && recordId.isNullOrEmpty()) return 0L
+    val sql = if (filterByRecord) {
+      "SELECT COUNT(*) FROM publication p JOIN owner_deleted d ON d.request=p.request WHERE p.record=?"
+    } else {
+      "SELECT COUNT(*) FROM owner_deleted"
+    }
+    val args = if (filterByRecord) arrayOf(recordId!!) else null
+    return readableDatabase.rawQuery(sql, args).use { it.moveToFirst(); it.getLong(0) }
+  }
   private fun wireSource(record: String, asset: String): String {
     val bindings = readableDatabase.rawQuery("SELECT record,wire_source FROM publication WHERE asset=? ORDER BY (record=?) DESC,rowid",
       arrayOf(asset, record)).use { cursor -> buildList { while (cursor.moveToNext()) add(cursor.getString(0) to cursor.getString(1)) } }

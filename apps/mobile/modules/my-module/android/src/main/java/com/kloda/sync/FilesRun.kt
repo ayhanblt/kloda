@@ -17,11 +17,11 @@ internal data class FilesRun(val id: String, val record: String, val rebackup: S
     (retryBoot != boot || retryElapsed == null || elapsed < retryElapsed)
 
   fun failed(code: String, wall: Long, elapsed: Long, boot: Int?): FilesRun {
-    val accessFailure = code in setOf("lan_unavailable", "connection_closed")
+    val accessFailure = code in setOf("lan_unavailable", "connection_closed", "outcome_unknown")
     val retry = accessFailure && attempts < 5 && boot != null
     val cause = if (accessFailure && attempts < 5 && boot == null) "retry_clock_unavailable" else code
     return copy(state = if (retry) "retry_wait" else "failed", error = cause,
-      retryAt = if (retry) Math.addExact(wall, 60_000L) else null,
-      retryElapsed = if (retry) Math.addExact(elapsed, 60_000L) else null, retryBoot = if (retry) boot else null)
+      retryAt = if (retry) Math.addExact(wall, 10_000L) else null,
+      retryElapsed = if (retry) Math.addExact(elapsed, 10_000L) else null, retryBoot = if (retry) boot else null)
   }
 }

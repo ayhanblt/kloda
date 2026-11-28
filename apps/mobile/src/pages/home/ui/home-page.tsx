@@ -1,18 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { History, Lock, Pause, Play, RefreshCw } from 'lucide-react-native';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { Text } from '../../../shared/ui/text';
 import { RichCard } from '../../../shared/ui/rich';
 import { HeroEmptyVisual } from '../../../shared/ui/hero-empty-visual';
 import { gallery, type GalleryPage } from '../../../shared/api/gallery';
+import { formatBytes } from '../../../shared/lib/format-bytes';
 import { useThemeColors } from '../../../shared/theme/theme-provider';
 import type { NavigateMobile } from '../../../shared/model/mobile-navigation';
 import { homeStatus, otherTargetState, type HomeState, type StatusProgress } from '../model/home-status';
 import { useHomeStatus } from '../model/use-home-status';
-import { HeroMosaic, type HeroPhoto } from './hero-mosaic';
+import { HeroMosaic, HeroMosaicSkeleton, type HeroPhoto } from './hero-mosaic';
 import { ConfiguredHomeSection, SetupHomeSection, type StatusTarget } from './status-sections';
+
+let cachedHeroPhotos: HeroPhoto[] = [];
+let cachedHeroPermission: GalleryPage['permission'] | null = null;
 
 interface StatusViewProps {
   state: HomeState;
@@ -29,6 +34,8 @@ interface StatusViewProps {
   action?: boolean;
   heroPhotos?: HeroPhoto[];
   heroPermission?: GalleryPage['permission'] | null;
+  heroLoading?: boolean;
+  pcFolderPending?: { name?: string } | null;
 }
 
 const styles = StyleSheet.create({
@@ -39,29 +46,40 @@ export function HomePage({ sourceCount, navigate }: { sourceCount: number; navig
   const { t } = useTranslation();
   const model = useHomeStatus(sourceCount);
   const { transfer, webdav, pcSelected, others } = model;
-  const [heroPhotos, setHeroPhotos] = useState<HeroPhoto[]>([]);
-  const [heroPermission, setHeroPermission] = useState<GalleryPage['permission'] | null>(null);
+  const [heroPhotos, setHeroPhotos] = useState<HeroPhoto[]>(() => (sourceCount > 0 ? cachedHeroPhotos : []));
+  const [heroPermission, setHeroPermission] = useState<GalleryPage['permission'] | null>(() => (sourceCount > 0 ? cachedHeroPermission : null));
+  const [heroLoading, setHeroLoading] = useState<boolean>(() => sourceCount > 0 && cachedHeroPhotos.length === 0);
 
   useEffect(() => {
     let alive = true;
+    if (sourceCount === 0) {
+      cachedHeroPhotos = []; cachedHeroPermission = null;
+      setHeroPhotos([]); setHeroPermission(null); setHeroLoading(false);
+      return;
+    }
+    if (cachedHeroPhotos.length === 0) setHeroLoading(true);
     const loadHero = async () => {
       try {
         const sources = await gallery.sources();
         if (!alive) return;
         const first = sources[0];
-        if (!first) { setHeroPhotos([]); setHeroPermission(null); return; }
+        if (!first) { cachedHeroPhotos = []; cachedHeroPermission = null; setHeroPhotos([]); setHeroPermission(null); return; }
         const page = await gallery.page(first.id, 0);
         if (!alive) return;
+        cachedHeroPermission = page.permission;
         setHeroPermission(page.permission);
-        if (page.permission === 'denied' || page.items.length === 0) { setHeroPhotos([]); return; }
+        if (page.permission === 'denied' || page.items.length === 0) { cachedHeroPhotos = []; setHeroPhotos([]); return; }
         const top = page.items.slice(0, 4);
         const previews = await Promise.all(top.map(async (item) => {
           const uri = await gallery.preview(first.id, item.id);
           return uri ? { id: item.id, uri } : null;
         }));
-        if (alive) setHeroPhotos(previews.filter((item): item is HeroPhoto => item !== null));
+        const loaded = previews.filter((item): item is HeroPhoto => item !== null);
+        if (alive) { cachedHeroPhotos = loaded; setHeroPhotos(loaded); }
       } catch {
-        if (alive) setHeroPhotos([]);
+        if (alive && cachedHeroPhotos.length === 0) setHeroPhotos([]);
+      } finally {
+        if (alive) setHeroLoading(false);
       }
     };
     void loadHero();
@@ -72,9 +90,10 @@ export function HomePage({ sourceCount, navigate }: { sourceCount: number; navig
   // Never both at once: the automatic run would then fail with backup_busy.
   const manualPaused = transfer.queue?.automaticPaused !== true && webdav.status?.run?.state === 'paused' && !webdav.status.run.automatic;
   const resume = () => manualPaused ? transfer.run() : transfer.resumeAutomatic();
+  const pcFolderPending = pcSelected && model.pcScope?.state === 'not_approved' ? { name: model.pcName ?? undefined } : null;
   const targets: StatusTarget[] = [];
-  if (pcSelected) targets.push({ id: 'pc', label: t('computer.title'), kind: 'pc', page: 'computer',
-    state: homeStatus({ sourceCount, pcSelected, queue: transfer.queue, webdav: { configured: false, enabled: false, running: false }, pcError: transfer.error }).state });
+  if (pcSelected) targets.push({ id: 'pc', label: model.pcName || t('computer.title'), kind: 'pc', page: 'computer',
+    state: pcFolderPending ? 'folderPending' : homeStatus({ sourceCount, pcSelected, pcScopeState: model.pcScope?.state ?? null, queue: transfer.queue, webdav: { configured: false, enabled: false, running: false }, pcError: transfer.error }).state });
   if (webdav.status?.configured) targets.push({ id: webdav.status.targetId ?? 'webdav', label: webdav.status.config ? new URL(webdav.status.config.endpoint).hostname : t('onboarding.webdavTitle'), kind: 'nas', page: 'storage',
     state: webdav.status.enabled ? homeStatus({ sourceCount, pcSelected: false, queue: null, webdav: webdav.status, webdavError: webdav.error ?? transfer.webdavActionError }).state : 'disabled' });
   for (const target of others) targets.push({ id: target.id, label: target.label, kind: target.kind, page: 'connections', state: target.enabled ? otherTargetState(target) : 'disabled' });
@@ -93,6 +112,8 @@ export function HomePage({ sourceCount, navigate }: { sourceCount: number; navig
       resume={() => { void resume(); }}
       heroPhotos={heroPhotos}
       heroPermission={heroPermission}
+      heroLoading={heroLoading}
+      pcFolderPending={pcFolderPending}
     />
   );
 }
@@ -111,9 +132,12 @@ export function StatusView({
   action = true,
   heroPhotos = [],
   heroPermission = null,
+  heroLoading = false,
+  pcFolderPending = null,
 }: StatusViewProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const c = useThemeColors();
+  const insets = useContext(SafeAreaInsetsContext);
   const primary = state === 'setup';
   const buttonBrand = primary || state === 'safe' || state === 'error' || state === 'attention';
   const button = primary ? () => navigate(sourceCount ? 'computer' : 'sources') : state === 'syncing' ? pause : state === 'attention' ? () => navigate('activity') : paused ? resume : run;
@@ -124,7 +148,11 @@ export function StatusView({
   const filledSegments = progress ? Math.max(1, Math.min(12, Math.round((progress.percent / 100) * 12))) : 0;
 
   return (
-    <ScrollView className="flex-1 bg-background" contentContainerClassName="gap-4 px-4 pb-28 pt-4">
+    <ScrollView
+      className="flex-1 bg-background"
+      contentContainerClassName="gap-4 px-4 pt-4"
+      contentContainerStyle={{ paddingBottom: Math.max((insets?.bottom ?? 0) + 104, 128) }}
+    >
       <View className="min-h-11 flex-row items-center justify-between gap-3 px-1">
         <Text className="text-xl font-inter-semibold text-primary-text">{t('statusUi.title')}</Text>
         {!primary && (
@@ -143,9 +171,17 @@ export function StatusView({
         <View className="relative bg-surface-2">
           {heroPhotos.length > 0 ? (
             <HeroMosaic photos={heroPhotos} dimmed={primary} />
+          ) : heroLoading ? (
+            <HeroMosaicSkeleton />
           ) : (
             <HeroEmptyVisual
-              visual={primary || heroPermission === 'denied' ? { kind: 'reason', reason: 'lock' } : { kind: 'path' }}
+              visual={
+                primary || heroPermission === 'denied'
+                  ? { kind: 'reason', reason: 'lock' }
+                  : state === 'syncing'
+                    ? { kind: 'path' }
+                    : { kind: 'reason', reason: 'folder' }
+              }
               state={state}
               destinations={activeDestinations}
               className="aspect-[1.75] w-full"
@@ -184,25 +220,37 @@ export function StatusView({
             {t(`statusUi.states.${state}`)}
           </Text>
           <Text className="font-sans text-sm leading-5 text-secondary-text">
-            {t(`statusUi.lines.${state}`)}
+            {pcFolderPending && state === 'waiting' && !paused
+              ? t('statusUi.lines.folderPending', { name: pcFolderPending.name || t('computer.unnamedPc') })
+              : t(`statusUi.lines.${state}`)}
           </Text>
 
-          {(heroPermission === 'denied' || (primary && heroPhotos.length === 0)) && (
-            <View className="mt-2 flex-row items-center gap-3 rounded-2xl bg-surface-2 p-3.5">
-              <View className="min-w-0 flex-1 gap-0.5">
-                <Text className="text-sm font-inter-semibold text-primary-text">{t('statusUi.heroNoPermTitle')}</Text>
-                <Text className="font-sans text-xs text-secondary-text">{t('statusUi.heroNoPermBody')}</Text>
+          {(() => {
+            const notice = heroLoading
+              ? null
+              : heroPermission === 'denied' || (primary && heroPhotos.length === 0)
+                ? { title: 'statusUi.heroNoPermTitle', body: 'statusUi.heroNoPermBody', cta: 'statusUi.heroAllow' }
+                : !primary && sourceCount > 0 && heroPhotos.length === 0
+                  ? { title: 'statusUi.heroNoPhotosTitle', body: 'statusUi.heroNoPhotosBody', cta: 'statusUi.heroAddFolder' }
+                  : null;
+            if (!notice) return null;
+            return (
+              <View className="mt-2 flex-row items-center gap-3 rounded-2xl bg-surface-2 p-3.5">
+                <View className="min-w-0 flex-1 gap-0.5">
+                  <Text className="text-sm font-inter-semibold text-primary-text">{t(notice.title)}</Text>
+                  <Text className="font-sans text-xs text-secondary-text">{t(notice.body)}</Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t(notice.cta)}
+                  onPress={() => navigate('sources')}
+                  className="min-h-9 shrink-0 justify-center rounded-full border border-border-strong bg-surface-1 px-3.5 py-1.5 active:opacity-80"
+                >
+                  <Text className="text-xs font-inter-semibold text-primary-text">{t(notice.cta)}</Text>
+                </Pressable>
               </View>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('statusUi.heroAllow')}
-                onPress={() => navigate('sources')}
-                className="min-h-9 shrink-0 justify-center rounded-full border border-border-strong bg-surface-1 px-3.5 py-1.5 active:opacity-80"
-              >
-                <Text className="text-xs font-inter-semibold text-primary-text">{t('statusUi.heroAllow')}</Text>
-              </Pressable>
-            </View>
-          )}
+            );
+          })()}
 
           {progress && (
             <View className="mt-2 gap-2">
@@ -221,7 +269,10 @@ export function StatusView({
                 ))}
               </View>
               <Text className="font-sans text-xs text-tertiary-text">
-                {t(`statusUi.progress.${progress.kind}`, { completed: progress.completed, total: progress.total })}
+                {t(`statusUi.progress.${progress.kind}`, {
+                  completed: progress.kind === 'bytes' ? formatBytes(progress.completed, i18n.language) : progress.completed,
+                  total: progress.kind === 'bytes' ? formatBytes(progress.total, i18n.language) : progress.total,
+                })}
               </Text>
             </View>
           )}
@@ -257,7 +308,7 @@ export function StatusView({
           navigate={navigate}
         />
       ) : (
-        <ConfiguredHomeSection state={state} targets={targets} navigate={navigate} />
+        <ConfiguredHomeSection state={state} targets={targets} navigate={navigate} pcFolderPending={pcFolderPending} />
       )}
     </ScrollView>
   );

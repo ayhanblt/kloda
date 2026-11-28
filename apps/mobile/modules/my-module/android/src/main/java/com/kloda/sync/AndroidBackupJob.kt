@@ -63,13 +63,19 @@ class AndroidBackupJob : JobService() {
     val database = AndroidSyncJournal(context)
     val schedules = AndroidScheduleJournal(database)
     val boot = runCatching { Settings.Global.getInt(contentResolver, Settings.Global.BOOT_COUNT) }.getOrNull()
+    var acquiredService = false
+    if (AndroidPairingRuntime.isUiVisible() && !AndroidFilesService.running() &&
+      !AndroidBackupScheduler.paused(context) && AndroidBackupDestinations.currentPairedPcEnabled(context)) {
+      acquiredService = runCatching { AndroidFilesService.acquire(context); true }.getOrDefault(false)
+    }
+    var startedQueue = false
     try {
       val queue = synchronized(AndroidPairingRuntime.lock) {
         if (execution.stopped.get() || AndroidBackupScheduler.paused(context) ||
           !AndroidBackupScheduler.isCurrent(context, execution.parameters.extras.getString("token")) || FilesRunContext.capture(context).binding != binding) return
         val queue = AndroidPairingRuntime.queue(context)
         if (queue.running() || AndroidPairingRuntime.hasScheduledLease()) {
-          execution.retry = System.currentTimeMillis() + 300_000L
+          execution.retry = System.currentTimeMillis() + 30_000L
           return
         }
         val owner = AndroidPairingRuntime.currentOwner(context)
@@ -97,22 +103,23 @@ class AndroidBackupJob : JobService() {
         if (!AndroidPairingRuntime.beginScheduled(execution)) throw FilesFailure("backup_busy")
         if (execution.stopped.get() || AndroidBackupScheduler.paused(context)) throw FilesFailure("paused")
         val started = queue.start(record, owner, expectedBinding = binding)
+        startedQueue = true
         @Suppress("UNCHECKED_CAST") val run = started["run"] as? Map<String, Any> ?: throw FilesFailure("outcome_unknown")
         schedules.attachRun(claim.id, run["id"] as String, claim.osAttempts)
         queue
       }
-      AndroidBackupNotifications.progress(context)
+      if (!AndroidFilesService.running()) AndroidBackupNotifications.progress(context)
       try { queue.awaitStopped() } finally { AndroidBackupNotifications.clear(context) }
       val claim = retained ?: return
-      if (execution.stopped.get() || AndroidBackupScheduler.paused(context)) {
+      if (!AndroidBackupScheduler.paused(context) && schedules.reconcileLinked(claim.id, claim.osAttempts)) {
+        val result = schedules.find(claim.id)
+        if (result != null && result.error == null) AndroidBackupScheduler.clearExecutionError(context)
+        else result?.error?.let { AndroidBackupScheduler.report(context, it, binding); AndroidBackupNotifications.failure(context) }
+      } else if (execution.stopped.get() || AndroidBackupScheduler.paused(context)) {
         schedules.stop(claim.id, System.currentTimeMillis(), SystemClock.elapsedRealtime(), boot, claim.osAttempts,
           userPause = AndroidBackupScheduler.paused(context), error = if (AndroidBackupScheduler.paused(context)) "paused" else "os_interrupted")
       } else {
-        if (schedules.reconcileLinked(claim.id, claim.osAttempts)) {
-          val result = schedules.find(claim.id)
-          if (result != null && result.error == null) AndroidBackupScheduler.clearExecutionError(context)
-          else result?.error?.let { AndroidBackupScheduler.report(context, it, binding); AndroidBackupNotifications.failure(context) }
-        } else schedules.finish(claim.id, false, claim.osAttempts, "outcome_unknown")
+        schedules.finish(claim.id, false, claim.osAttempts, "outcome_unknown")
       }
     } catch (error: Exception) {
       val code = (error as? FilesFailure)?.code ?: "automatic_unavailable"
@@ -124,6 +131,9 @@ class AndroidBackupJob : JobService() {
       AndroidBackupScheduler.report(context, code, binding)
       if (code !in setOf("pairing_required", "paused", "backup_busy", "candidate_stale")) AndroidBackupNotifications.failure(context)
     } finally {
+      if (acquiredService && !startedQueue && AndroidPairingRuntime.files?.running() != true) {
+        runCatching { AndroidFilesService.stop() }
+      }
       AndroidPairingRuntime.endScheduled(execution)
       retained?.let {
         val result = schedules.find(it.id)

@@ -62,7 +62,7 @@ impl Store {
         conn.busy_timeout(Duration::from_secs(5)).map_err(storage)?;
         conn.execute_batch(
             "PRAGMA foreign_keys=ON; PRAGMA trusted_schema=OFF;
-            PRAGMA synchronous=FULL; PRAGMA fullfsync=ON; PRAGMA checkpoint_fullfsync=ON;",
+            PRAGMA synchronous=NORMAL; PRAGMA fullfsync=OFF; PRAGMA checkpoint_fullfsync=OFF;",
         )
         .map_err(storage)?;
         let journal: String = conn
@@ -72,10 +72,10 @@ impl Store {
             return Err(PairingError::StorageFailure);
         }
         for (name, expected) in [
-            ("synchronous", 2),
+            ("synchronous", 1),
             ("foreign_keys", 1),
-            ("fullfsync", 1),
-            ("checkpoint_fullfsync", 1),
+            ("fullfsync", 0),
+            ("checkpoint_fullfsync", 0),
         ] {
             let actual: i64 = conn
                 .pragma_query_value(None, name, |r| r.get(0))
@@ -88,7 +88,7 @@ impl Store {
             .pragma_query_value(None, "user_version", |r| r.get(0))
             .map_err(storage)?;
         // Reopening an activated generation is not permission to migrate/create.
-        if selected_generation && version != 5 {
+        if selected_generation && !matches!(version, 5 | 6) {
             return Err(PairingError::ContinuityLost);
         }
         if version == 0 && !existed {
@@ -103,7 +103,7 @@ impl Store {
             )
             .map_err(storage)?;
             tx.commit().map_err(|_| PairingError::OutcomeUnknown)?;
-        } else if !matches!(version, 1..=5) {
+        } else if !matches!(version, 1..=6) {
             return Err(PairingError::StorageFailure);
         }
         let mut integrity = conn.prepare("PRAGMA integrity_check").map_err(storage)?;
@@ -121,7 +121,7 @@ impl Store {
         drop(integrity);
         check_installation(&conn, &local, &epoch)?;
         visit(&conn, &local, &epoch, |_| Ok(()))?;
-        if !matches!(version, 2..=5) {
+        if !matches!(version, 2..=6) {
             let tx = conn
                 .transaction_with_behavior(TransactionBehavior::Immediate)
                 .map_err(storage)?;
@@ -132,6 +132,7 @@ impl Store {
         crate::file_schema::migrate(&mut conn, version)?;
         crate::backup_retention_schema::migrate(&mut conn, version)?;
         crate::backup_layout_schema::migrate(&mut conn, version)?;
+        crate::device_metadata_schema::migrate(&mut conn, version)?;
         #[cfg(target_os = "windows")]
         conn.healthy()?;
         Ok(Self {

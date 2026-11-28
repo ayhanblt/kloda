@@ -13,7 +13,7 @@ public final class KlodaPairingModule: Module {
 
   public func definition() -> ModuleDefinition {
     Name("KlodaPairing")
-    OnCreate { DispatchQueue.main.async { self.installObservers() } }
+    OnCreate { DispatchQueue.main.async { self.session.setDeviceName(UIDevice.current.name); self.installObservers() } }
     OnAppBecomesActive { DispatchQueue.main.async { self.refreshVisibility() } }
     OnAppEntersBackground { self.session.updateActive(false); IosAutomaticCoordinator.shared.uiInactive(); self.restore.cancel(); self.photos.cancel() }
     OnDestroy {
@@ -24,6 +24,12 @@ public final class KlodaPairingModule: Module {
 
     AsyncFunction("status") { (promise: Promise) in
       self.request(["kind": "status"], foreground: false, promise: promise)
+    }.runOnQueue(.main)
+    AsyncFunction("pcScopeStatus") { (promise: Promise) in
+      MainActor.assumeIsolated {
+        self.refreshVisibility()
+        self.session.probeScope { promise.resolve($0) }
+      }
     }.runOnQueue(.main)
     AsyncFunction("scan") { (qr: String, promise: Promise) in
       self.request(["kind": "scan", "wire": qr], foreground: true, promise: promise)
@@ -41,7 +47,13 @@ public final class KlodaPairingModule: Module {
       self.request(["kind": "resume", "record": record], foreground: true, promise: promise)
     }.runOnQueue(.main)
     AsyncFunction("removePairing") { (record: String, online: Bool, promise: Promise) in
-      self.request(["kind": "removePairing", "record": record, "online": online], foreground: true, promise: promise)
+      self.request(["kind": "removePairing", "record": record, "online": online], foreground: true, promise: promise) { value in
+        let unpairState = (value?["unpairResult"] as? [String: Any])?["state"] as? String
+        if value?["phase"] as? String == "revoked" || unpairState == "pc_confirmed" || unpairState == "local_only" {
+          _ = try? IosWebDavJournal.open().disablePcIfPresent(record: record)
+          self.files.clearPeerState()
+        }
+      }
     }.runOnQueue(.main)
     AsyncFunction("queueStatus") { () throws -> [String: Any] in try self.queueStatus() }
     AsyncFunction("runFiles") { (record: String, promise: Promise) in
@@ -140,6 +152,7 @@ public final class KlodaPairingModule: Module {
 
   @MainActor private func refreshVisibility() {
     guard !destroyed else { return }
+    session.setDeviceName(UIDevice.current.name)
     let window = appContext?.utilities?.currentViewController()?.viewIfLoaded?.window
     let visible = window?.isKeyWindow == true && window?.isHidden == false
       && window?.windowScene?.activationState == .foregroundActive
@@ -156,18 +169,21 @@ public final class KlodaPairingModule: Module {
   }
 
   private func queueStatus() throws -> [String: Any] {
-    var value = try files.status()
+    var value = try files.status(recordId: IosAutomaticCoordinator.shared.currentPairedRecordId(), filterByRecord: true)
     for (key, state) in try IosAutomaticCoordinator.shared.status() { value[key] = state }
     value["notificationsEnabled"] = IosBackupNotifications.enabled
     return value
   }
 
-  private func request(_ command: [String: Any], foreground: Bool, promise: Promise) {
+  private func request(_ command: [String: Any], foreground: Bool, promise: Promise, onSuccess: (([String: Any]?) -> Void)? = nil) {
     // Expo's main queue is runtime configuration, not a Swift actor annotation.
     MainActor.assumeIsolated {
       refreshVisibility()
       if foreground { IosAutomaticCoordinator.shared.invalidateForTrustChange(); files.pause(); restore.cancel(); photos.cancel() }
-      session.request(command, foreground: foreground) { Self.finish($0, promise: promise) }
+      session.request(command, foreground: foreground) { result in
+        if case .success(let value) = result { onSuccess?(value) }
+        Self.finish(result, promise: promise)
+      }
     }
   }
 

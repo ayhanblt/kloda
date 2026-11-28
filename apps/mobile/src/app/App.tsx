@@ -24,38 +24,56 @@ import { CloudProviderPage, cloudProviderFor } from '../pages/connections/ui/clo
 import { SettingsPage } from '../pages/settings/ui/settings-page';
 import { RecoveryPage } from '../pages/settings/ui/recovery-page';
 import { ComputerPage } from '../pages/computer/ui/computer-page';
-import { PairingPage } from '../pages/pairing/ui/pairing-page';
 import { ActivityPage } from '../pages/activity/ui/activity-page';
+
+const rootTabs = new Set<MobilePage>(['home', 'photos', 'connections', 'settings']);
+const ownedBackPages = new Set<MobilePage>(['intro', 'welcome', 'home', 'photos', 'computer', 'pairing', 'activity', 'backups']);
 
 export function App({ initialIntroSeen }: { initialIntroSeen?: boolean } = {}) {
   const model = useBackupSetup();
   const [introReady, setIntroReady] = useState(initialIntroSeen !== undefined);
-  const [page, setPage] = useState<MobilePage>(initialIntroSeen === false ? 'intro' : 'welcome');
+  const [history, setHistory] = useState<MobilePage[]>([initialIntroSeen === false ? 'intro' : 'welcome']);
+  const page = history[history.length - 1] ?? 'home';
   const [provider, setProvider] = useState<DestinationProviderId>('webdav');
   const [backupTarget, setBackupTarget] = useState<{ id: string; provider: CloudProvider } | undefined>();
-  const navigate = (next: MobilePage) => { if (page === 'storage') model.leaveStorage(); setBackupTarget(undefined); setPage(next); };
+  const navigate = (next: MobilePage) => {
+    const resolved: MobilePage = next === 'pairing' ? 'computer' : next;
+    if (page === 'storage' && resolved !== 'storage') model.leaveStorage();
+    setBackupTarget(undefined);
+    setHistory((prev) => {
+      const current = prev[prev.length - 1] ?? 'home';
+      if (resolved === current) return prev;
+      if (rootTabs.has(resolved) || resolved === 'intro' || resolved === 'welcome' || current === 'intro' || current === 'welcome') {
+        return [resolved];
+      }
+      return [...prev, resolved];
+    });
+  };
+  const goBack = (fallback: MobilePage = 'home') => {
+    if (page === 'storage') model.leaveStorage();
+    setBackupTarget(undefined);
+    setHistory((prev) => (prev.length > 1 ? prev.slice(0, -1) : [fallback]));
+  };
   const openBackups = (id: string, target: CloudProvider) => { navigate('backups'); setBackupTarget({ id, provider: target }); };
   useEffect(() => {
     if (initialIntroSeen !== undefined) return;
     let active = true;
     void loadIntroSeen().then((seen) => {
       if (!active) return;
-      if (!seen) setPage('intro');
+      if (!seen) setHistory(['intro']);
       setIntroReady(true);
     });
     return () => { active = false; };
   }, [initialIntroSeen]);
   useEffect(() => {
-    if (page === 'intro' || page === 'pairing' || page === 'welcome' || page === 'home' || page === 'photos') return;
-    const listener = BackHandler.addEventListener('hardwareBackPress', () => { navigate('home'); return true; });
+    if (ownedBackPages.has(page)) return;
+    const listener = BackHandler.addEventListener('hardwareBackPress', () => { goBack('home'); return true; });
     return () => listener.remove();
   }, [page]);
   if (!introReady) return <View className="flex-1 bg-background" />;
-  if (page === 'intro') return <IntroPage onStart={() => { void saveIntroSeen(); setPage('welcome'); }} />;
+  if (page === 'intro') return <IntroPage onStart={() => { void saveIntroSeen(); navigate('welcome'); }} />;
   if (page === 'welcome') return <WelcomePage onStart={() => navigate('sources')} onSkip={() => navigate('home')} />;
-  // Pairing owns its protected foreground/camera/pending back actions; no global tab can bypass them.
-  if (page === 'pairing') return <PairingPage onBack={() => navigate('computer')} onContinue={() => navigate('activity')} />;
-  const back = () => navigate('home');
+  const back = () => goBack('home');
   const cloudProvider = cloudProviderFor(provider);
   const openProvider = (id: DestinationProviderId) => { setProvider(id); navigate(id === 'webdav' ? 'storage' : 'provider'); };
   // A destination's own Backups view belongs to the Destinations tab it was opened from.
@@ -63,17 +81,17 @@ export function App({ initialIntroSeen }: { initialIntroSeen?: boolean } = {}) {
     {page === 'home' && <HomePage sourceCount={model.sources.length} navigate={navigate} />}
     {page === 'photos' && <PhotosPage navigate={navigate} />}
     {page === 'sources' && <SourcePage model={model} onBack={back} onNext={() => navigate('schedule')} />}
-    {page === 'schedule' && <SchedulePage model={model} onBack={() => navigate('sources')} onSaved={() => navigate('computer')} />}
-    {page === 'storage' && <WebDavPage model={model} onBack={() => navigate('connections')} />}
-    {page === 'computer' && <ComputerPage embedded onBack={() => navigate('connections')} onPair={() => navigate('pairing')} onActivity={() => navigate('activity')} onAdvanced={() => navigate('storage')} />}
+    {page === 'schedule' && <SchedulePage model={model} onBack={() => goBack('sources')} onSaved={() => navigate('computer')} />}
+    {page === 'storage' && <WebDavPage model={model} onBack={() => goBack('connections')} />}
+    {(page === 'computer' || page === 'pairing') && <ComputerPage embedded onBack={() => goBack('connections')} onActivity={() => navigate('activity')} />}
     {page === 'activity' && <ActivityPage embedded onBack={back} />}
-    {page === 'backups' && <ActivityPage embedded view="backups" target={backupTarget?.id} targetLabel={backupTarget && providerLabel(backupTarget.provider)} onBack={backupTarget ? () => navigate('connections') : back} />}
-    {(page === 'connections' || page === 'add-connection') && <ConnectionsPage adding={page === 'add-connection'} navigate={navigate} openProvider={openProvider} openBackups={openBackups} saved={model.savedStorage} />}
-    {page === 'provider' && (provider === 'smb' ? <SmbPage onBack={() => navigate('add-connection')} /> : provider === 'sftp' ? <SftpPage onBack={() => navigate('add-connection')} />
-      : provider === 'ftp' ? <FtpsPage onBack={() => navigate('add-connection')} />
-      : provider === 'amazon-s3' || provider === 's3-compatible' ? <S3Page key={provider} provider={provider} onBack={() => navigate('add-connection')} />
-      : cloudProvider ? <CloudProviderPage provider={cloudProvider} onBack={() => navigate('add-connection')} onSaved={() => navigate('connections')} /> : <ProviderPage provider={provider} onBack={() => navigate('add-connection')} />)}
+    {page === 'backups' && <ActivityPage embedded view="backups" target={backupTarget?.id} targetLabel={backupTarget && providerLabel(backupTarget.provider)} onBack={() => goBack(backupTarget ? 'connections' : 'home')} />}
+    {(page === 'connections' || page === 'add-connection') && <ConnectionsPage adding={page === 'add-connection'} navigate={navigate} onBack={() => goBack(page === 'add-connection' ? 'connections' : 'home')} openProvider={openProvider} openBackups={openBackups} saved={model.savedStorage} />}
+    {page === 'provider' && (provider === 'smb' ? <SmbPage onBack={() => goBack('add-connection')} /> : provider === 'sftp' ? <SftpPage onBack={() => goBack('add-connection')} />
+      : provider === 'ftp' ? <FtpsPage onBack={() => goBack('add-connection')} />
+      : provider === 'amazon-s3' || provider === 's3-compatible' ? <S3Page key={provider} provider={provider} onBack={() => goBack('add-connection')} />
+      : cloudProvider ? <CloudProviderPage provider={cloudProvider} onBack={() => goBack('add-connection')} onSaved={() => navigate('connections')} /> : <ProviderPage provider={provider} onBack={() => goBack('add-connection')} />)}
     {page === 'settings' && <SettingsPage navigate={navigate} />}
-    {page === 'recovery' && <RecoveryPage onBack={() => navigate('settings')} />}
+    {page === 'recovery' && <RecoveryPage onBack={() => goBack('settings')} />}
   </MobileShell>;
 }

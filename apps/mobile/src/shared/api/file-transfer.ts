@@ -125,7 +125,7 @@ function automaticRunFromNative(value: unknown): AutomaticRun {
   const accessAttempts = 'accessAttempts' in value ? value.accessAttempts : undefined;
   if (accessAttempts !== undefined && (typeof accessAttempts !== 'number' || !Number.isInteger(accessAttempts) || accessAttempts < 0 || accessAttempts > 5)) throw new Error('outcome_unknown');
   const errorCode = 'errorCode' in value && value.errorCode != null ? text(value.errorCode) : undefined;
-  const accessRetry = accessAttempts !== undefined && ['lan_unavailable', 'connection_closed'].includes(errorCode ?? '');
+  const accessRetry = accessAttempts !== undefined && ['lan_unavailable', 'connection_closed', 'outcome_unknown'].includes(errorCode ?? '');
   const retryAt = 'retryAt' in value && value.retryAt != null ? decimal(value.retryAt) : undefined;
   if ((value.state === 'finished' && (value.updated !== 1 || errorCode !== undefined))
     || (value.state === 'waiting' && accessAttempts !== undefined && !accessRetry && errorCode !== 'os_interrupted')

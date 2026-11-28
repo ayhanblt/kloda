@@ -97,7 +97,7 @@ final class IosFilesSnapshot {
       let info = try IosFilesSource.metadata(fd)
       guard info.st_uid == geteuid(), info.st_mode & 0o077 == 0, info.st_mode & 0o600 == 0o600,
         info.st_nlink == 1, info.st_size >= offset,
-        info.st_size == offset || (discardUnacknowledgedTail && info.st_size - offset <= 65_536) else {
+        info.st_size == offset || (discardUnacknowledgedTail && info.st_size - offset <= 1_048_576) else {
         throw IosFilesSource.failure("local_path_rejected")
       }
       if info.st_size > offset {

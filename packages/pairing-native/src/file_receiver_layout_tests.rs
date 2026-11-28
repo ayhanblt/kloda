@@ -309,7 +309,9 @@ fn legacy_v4_flat_media_files_continue_working_after_upgrade_to_v5() {
     fs::remove_file(peer.join("Files").join("legacy.txt")).unwrap();
     store
         .conn
-        .execute_batch("DROP TRIGGER retain_backup_path; DROP TABLE backup_paths; PRAGMA user_version=4;")
+        .execute_batch(
+            "DROP TABLE scope_folders; DROP TABLE peer_names; DROP TRIGGER retain_backup_path; DROP TABLE backup_paths; PRAGMA user_version=4;",
+        )
         .unwrap();
     drop(receiver);
     drop(store);
@@ -319,7 +321,7 @@ fn legacy_v4_flat_media_files_continue_working_after_upgrade_to_v5() {
         .conn
         .pragma_query_value(None, "user_version", |r| r.get(0))
         .unwrap();
-    assert_eq!(version, 5);
+    assert_eq!(version, 6);
     let mut receiver = Receiver::new();
     assert!(
         operation(run(&mut receiver, &mut store, Request::Status { id: id.clone() })).state

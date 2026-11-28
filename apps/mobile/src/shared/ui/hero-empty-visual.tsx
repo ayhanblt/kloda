@@ -141,7 +141,7 @@ export function ReasonMark({ reason }: { reason: HeroReason }) {
   const c = useThemeColors();
   const Icon = reasonIcons[reason];
   return (
-    <View style={styles.fill} className="items-center justify-center" accessible={false}>
+    <View testID={`hero-reason-${reason}`} style={styles.fill} className="items-center justify-center" accessible={false}>
       <View className="relative h-16 w-16 items-center justify-center rounded-3xl border border-border-subtle bg-surface-1">
         <View className="absolute -inset-4 rounded-full bg-brand-subtle" />
         <Icon size={28} strokeWidth={1.5} color={c['brand-text']} />
